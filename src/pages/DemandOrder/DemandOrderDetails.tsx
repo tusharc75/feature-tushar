@@ -29,6 +29,8 @@ import {
 import ManageProductionOrder from '../ProductionOrder/ManageProductionOrder';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
+import Step from '../DynamicForm/Step';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
 
 const DemandOrderDetails = () => {
@@ -37,7 +39,8 @@ const DemandOrderDetails = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
   const {
     state: { user, permissions }
   }: any = useData();
@@ -62,6 +65,7 @@ const DemandOrderDetails = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -86,6 +90,21 @@ const DemandOrderDetails = () => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.demandOrder}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -219,6 +238,7 @@ const DemandOrderDetails = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -244,6 +264,22 @@ const DemandOrderDetails = () => {
             />
           )}
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.demandOrder}
+                  data={demandOrderData}
+                  allowedToEdit={permissions?.demandOrder?.isUpdate }
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

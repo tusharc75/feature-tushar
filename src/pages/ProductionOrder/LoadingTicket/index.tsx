@@ -28,7 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords, search } = state;
 
   const [columns, setColumns] = useState(null);

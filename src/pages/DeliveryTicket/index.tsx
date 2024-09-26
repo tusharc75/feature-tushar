@@ -17,7 +17,14 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { DELIVERY_FROM_TO_TYPE, deliveryTicket, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  DELIVERY_FROM_TO_TYPE,
+  deliveryTicket,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -56,7 +63,7 @@ const DeliveryTicket = () => {
     isRead: permissions?.deliveryTicket?.isRead,
     isDelete: permissions?.deliveryTicket?.isDelete
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
@@ -78,7 +85,9 @@ const DeliveryTicket = () => {
       );
       data = response?.data?.data;
     }
-    data = data.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
+    data = data.filter(
+      (e) => !['warehouse', 'customerAccount', 'supplierAccount', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName)
+    );
     const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true);
     const columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
     columns.forEach((column) => {
@@ -88,7 +97,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
-              target='_blank'
+              target="_blank"
               to={
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
@@ -108,7 +117,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
-              target='_blank'
+              target="_blank"
               to={
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
@@ -384,8 +393,9 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${deleteRecord.ticketName || ''
-                } ?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
+                deleteRecord.ticketName || ''
+              } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

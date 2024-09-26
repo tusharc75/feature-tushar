@@ -18,11 +18,12 @@ import routes from './../../components/Helpers/Routes';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.termsAndConditions.title);
+
 const TermsAndCondition = () => {
-  const renderedFrom = camelCase(routes?.termsAndConditions.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -140,7 +141,8 @@ const TermsAndCondition = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, finalObject?.ownerId);
+          finalObject['canDelete'] =
+            permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, finalObject?.ownerId);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.termsAndConditions?.isUpdate;
           return finalObject;

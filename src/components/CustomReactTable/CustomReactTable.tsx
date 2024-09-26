@@ -578,6 +578,7 @@ const CustomReactTable = ({
                 if (!isClientSideGrid || rowCount <= limit || data.length <= limit) return;
                 table.setPageIndex(newPage);
               }}
+              renderedFrom={renderedFrom}
               rowsPerPage={limit}
               onRowsPerPageChange={(event, value) => {
                 dispatch({ type: 'pageSizeChange', limit: value, loading: isClientSideGrid ? false : true });

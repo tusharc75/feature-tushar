@@ -14,14 +14,21 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { DEMAND_ORDER_STATUS, checkIsAllowedToDelete, demandOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  DEMAND_ORDER_STATUS,
+  checkIsAllowedToDelete,
+  demandOrder,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const DemandOrder = () => {
-
   const renderedFrom = camelCase(routes?.demandOrder.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -36,7 +43,7 @@ const DemandOrder = () => {
     }
   ];
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -110,7 +117,7 @@ const DemandOrder = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color={row?.original?.canDelete ? "error" : "disabled"} />
+            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -156,7 +163,9 @@ const DemandOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
+          finalObject['canDelete'] =
+            permissions?.demandOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
             finalObject?.status !== DEMAND_ORDER_STATUS.converted;
           return finalObject;
         });

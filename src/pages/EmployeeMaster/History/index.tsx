@@ -35,13 +35,15 @@ const TECHNICIAN_RESOURCE = [
   }
 ];
 
+const renderedFrom = `${camelCase(routes?.employeeMaster.title)}_History`;
+
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
@@ -85,10 +87,7 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <div>
           {row?.original?.warehouse ? (
-            <a
-              className="link text-truncate"
-              href={`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`}
-              target="_blank">
+            <a className="link text-truncate" href={`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`} target="_blank">
               {row?.original?.warehouse?.optionLabel}
             </a>
           ) : (
@@ -223,7 +222,7 @@ const History = ({ id }) => {
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={`${camelCase(routes?.employeeMaster.title)}_History`}
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
         />

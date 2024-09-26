@@ -11,8 +11,10 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { FiExternalLink } from 'react-icons/fi';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
+const renderedFrom = `product_dispatch_technician`;
+
 const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -112,7 +114,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
             dispatch={dispatch}
             refreshGrid={fetchData}
             hideAction={true}
-            renderedFrom={`product_dispatch_technician`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         )}

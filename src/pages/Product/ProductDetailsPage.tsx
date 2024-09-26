@@ -24,7 +24,7 @@ import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, product, productInventory, serializedAsset } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, product, productInventory, serializedAsset, sidebarResource } from '../../constants/helpers';
 import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import CostDetails from './CostDetails';
 import Digital from './Digital';
@@ -38,6 +38,7 @@ import ServiceMaster from './ServiceMaster';
 import ServicePackage from './ServicePackage';
 import NonSerializedAssetProductInventory from './inventory';
 import LeadTime from 'src/components/LeadTime';
+import Step from 'src/pages/DynamicForm/Step';
 
 const minHeight = '250px';
 
@@ -72,12 +73,27 @@ const ProductDetailsPage = () => {
   const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
   const [productInventoryData, setProductInventoryData] = useState([]);
   const [productInventoryLoading, setProductInventoryLoading] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       getProductFieldsAndData();
+      fetchPolicy();
     }
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.product}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   useEffect(() => {
     if (permissions?.serializedAsset) {
@@ -260,6 +276,9 @@ const ProductDetailsPage = () => {
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
           {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
           {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 10}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -552,6 +571,22 @@ const ProductDetailsPage = () => {
         <TabPanel value={tabValue} index={9}>
           <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 10}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.product}
+                  data={productData}
+                  allowedToEdit={permissions?.product?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

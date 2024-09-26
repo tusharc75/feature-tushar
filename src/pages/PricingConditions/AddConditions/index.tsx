@@ -25,13 +25,13 @@ import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/const
 import { FiExternalLink } from 'react-icons/fi';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
-  const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
+  const renderedFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
   const [condition, setCondition] = useState(null);
@@ -497,7 +497,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={renderFrom}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchCondition}
           />
         ) : (

@@ -23,7 +23,7 @@ const PriceTemplate = () => {
   const renderedFrom = camelCase(routes?.priceTemplate.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions, selectedEntity }

@@ -9,7 +9,15 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import {
+  PRODUCT_SERIAL_NUMBER_STATUS,
+  dateTimeFormat,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  productInventory,
+  sidebarResource
+} from 'src/constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -27,7 +35,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
 
   const {
@@ -40,7 +48,15 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
-  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
+  const [revertQtyDialog, setRevertQtyDialog] = useState({
+    open: false,
+    productName: '',
+    product: '',
+    qty: 0,
+    revertedQty: 0,
+    ledgerId: '',
+    serialNumber: []
+  });
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
@@ -169,7 +185,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Reference',
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) =>
+      Cell: ({ row }) => (
         <div>
           {row?.original?.reference ? (
             row?.original?.referenceType === sidebarResource.purchaseOrder ? (
@@ -271,6 +287,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             <NoDataCell />
           )}
         </div>
+      )
     },
     {
       accessor: 'type',
@@ -686,11 +703,15 @@ const History = ({ product, warehouse, storageLocation }) => {
             dispatch({ type: 'initialize', data: [], count: 0 });
             fetchRecords();
           }}
-          serialNumber={revertQtyDialog.serialNumber?.map(s => {
-            if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
-              return s;
-            }
-          })?.filter(Boolean) || []}
+          serialNumber={
+            revertQtyDialog.serialNumber
+              ?.map((s) => {
+                if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
+                  return s;
+                }
+              })
+              ?.filter(Boolean) || []
+          }
         />
       )}
     </>

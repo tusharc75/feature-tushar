@@ -1,39 +1,77 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
-import { Formik, Form } from 'formik';
-import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import axiosInstance from './../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
+import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { camelCase, isEmpty } from 'lodash';
-import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
-import { AzureLogin } from '../../components/Azure/Azure';
+import { Form, Formik } from 'formik';
+import { isEmpty } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { entity } from '../../constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import { Logo, LoginImage } from 'src/assets/authenticationAssets';
-import AuthSlider from './AuthSlider';
-import FacialLogin from 'src/components/FacialLogin';
+import { Link, useHistory } from 'react-router-dom';
+import { Logo } from 'src/assets/authenticationAssets';
+import axiosInstance from 'src/axios/axiosInstance';
+import { AzureLogin } from 'src/components/Azure/Azure';
+import getAzureAcessToken from 'src/components/Azure/getAzureAccessToken';
+import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import AuthSlider from '../AuthSlider';
+import styles from '../index.module.scss';
 
-import styles from './index.module.scss';
+export type BrandData = {
+  companyName: string;
+  companyLogo: string;
+  subDomain: string;
+};
+
+const MAIN_SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
 const Login = () => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { dispatch }: any = useData();
+
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [brandData, setBrandData] = useState<BrandData>(null);
+  const [brandNotFound, setBrandNotFound] = useState(false);
+
   const history = useHistory();
+
+  function getSubdomain(url = window.location.origin) {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
+    const parts = hostname.split('.');
+
+    // Handle localhost with subdomains (e.g., http://developer.localhost)
+    if (hostname === 'localhost' || parts.includes('localhost')) {
+      if (parts.length > 1) {
+        return parts.slice(0, parts.indexOf('localhost')).join('.');
+      }
+      return null;
+    }
+
+    if (parts.length > 2) {
+      return parts.slice(0, -2).join('.');
+    }
+    return null;
+  }
+
+  useEffect(() => {
+    const subdomain = getSubdomain();
+    if (subdomain && !MAIN_SUB_DOMAIN.includes(subdomain?.toLowerCase())) {
+      axiosInstance()
+        .get(`/brand/check-sub-domain/${subdomain?.toLowerCase()}`)
+        .then(({ data: { data } }) => {
+          setBrandData(data);
+        })
+        .catch((error) => {
+          setBrandNotFound(true);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -68,18 +106,24 @@ const Login = () => {
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
-    const data = {
+    const data: any = {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/auth', data).then(async ({ data: response }) => {
-      const { data } = response;
-      setSubmitting(false);
-      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-    }).catch((error) => {
-      setSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+    if (brandData) {
+      data.subDomain = brandData?.subDomain;
+    }
+    axiosInstance()
+      .post('/user/auth', data)
+      .then(async ({ data: response }) => {
+        const { data } = response;
+        setSubmitting(false);
+        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const validateForm = (values) => {
@@ -93,6 +137,11 @@ const Login = () => {
     return errors;
   };
 
+  // Early return brand not found
+  if (brandNotFound) {
+    return <BrandNotFound />;
+  }
+
   return (
     <>
       <CssBaseline />
@@ -100,9 +149,13 @@ const Login = () => {
         <div className={styles.bg}>
           <div className={styles.contentContainer}>
             <div className={styles.left}>
-              <div className={styles.logo}>
-                <Logo />
+              <div className="mb-[31px] flex items-center justify-between gap-2">
+                <Logo className="max-h-[35px] !max-w-[129px]" />
+                {brandData?.companyLogo && (
+                  <img loading="eager" src={brandData.companyLogo} alt={brandData.companyName} className="max-h-[35px] !max-w-[129px]" />
+                )}
               </div>
+              {brandData?.companyName && <h4 className="mb-4 mt-1 text-center text-[18px] font-semibold">{brandData.companyName}</h4>}
               <Formik
                 initialValues={{
                   email: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'gagan@test.com' : '',
@@ -206,7 +259,7 @@ const Login = () => {
               </Formik>
             </div>
             <div className={styles.rightSlider}>
-              <AuthSlider style={{ minHeight: '100%' }} />
+              <AuthSlider className="relative flex" style={{ minHeight: '100%' }} />
             </div>
           </div>
         </div>

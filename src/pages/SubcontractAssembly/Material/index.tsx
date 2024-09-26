@@ -27,12 +27,13 @@ import {
 } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
+const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
+
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
   const { setWalkmeData } = useSetWalkmeData();
-  const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

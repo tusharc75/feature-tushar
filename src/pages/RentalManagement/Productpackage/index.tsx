@@ -95,7 +95,7 @@ const Productpackage = ({
   const [costFields, setCostFields] = useState([]);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
@@ -344,8 +344,8 @@ const Productpackage = ({
                       : row.original?.status
                         ? rentalManagementMessage.loadingAlreadyCreated
                         : row.original?.invoiceCreated
-                        ? rentalManagementMessage.invoiceCreated
-                        : " "
+                          ? rentalManagementMessage.invoiceCreated
+                          : ' '
                   }
                 >
                   <span>
@@ -460,14 +460,17 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
-      if(parent?.type==MATERIAL_TYPE.manualEntry && invoiceMaterialData.find((e)=>{
-        if(e._id===parent._id){
-          parent.invoiceCreated=true;
+      if (
+        parent?.type == MATERIAL_TYPE.manualEntry &&
+        invoiceMaterialData.find((e) => {
+          if (e._id === parent._id) {
+            parent.invoiceCreated = true;
+          }
+        })
+      )
+        if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+          parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
         }
-      }))
-      if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
-        parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
-      }
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice;
       }
@@ -483,8 +486,8 @@ const Productpackage = ({
             : parent?.status
               ? true
               : parent?.invoiceCreated
-              ? true
-              : false;
+                ? true
+                : false;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
           !parent.serializedProduct &&
@@ -509,17 +512,29 @@ const Productpackage = ({
       }
     });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
-        if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
-          nextStepMessage = rentalManagementMessage.validServicePrice
+    if (rows?.length) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+        if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+          if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+            nextStepMessage = rentalManagementMessage.validServicePrice;
+          }
         }
+        setNextStep(false);
+        setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
+      } else {
+        setNextStep(true);
+        setNextStepToolTip(null);
       }
-      setNextStep(false);
-      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
-    } else {
-      setNextStep(true);
-      setNextStepToolTip(null);
+    }
+    else {
+      if (user?.user?.brandPolicy?.rentalService) {
+        setNextStep(true);
+        setNextStepToolTip(null);
+      }
+      else {
+        setNextStep(false);
+        setNextStepToolTip(rentalManagementMessage.addProductPackage);
+      }
     }
     addWalkmeData(rows);
 

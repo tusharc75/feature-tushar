@@ -50,7 +50,7 @@ const ServiceMaster = (props: Props) => {
   const [frequencyDialog, setFrequencyDialog] = useState({ open: false, data: null });
   const [tabValue, setTabValue] = useState(0);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null, steps: null });
@@ -155,14 +155,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-          {
-            accessor: 'frequency',
-            Header: 'Frequency',
-            width: 150,
-            minWidth: 150,
-            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'frequency',
+              Header: 'Frequency',
+              width: 150,
+              minWidth: 150,
+              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+            }
+          ]
         : []),
       {
         accessor: 'stepName',
@@ -210,19 +210,22 @@ const ServiceMaster = (props: Props) => {
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
-          {permissions?.product?.isUpdate && row?.original?.type === 'Service' && serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
-            <HtmlTooltip title="Edit Frequency">
-              <IconButton
-                size="small"
-                aria-label="Edit"
-                onClick={() => {
-                  setFrequencyDialog({ open: true, data: row?.original });
-                }}
-              >
-                <EditIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          )}
+          {permissions?.product?.isUpdate &&
+            row?.original?.type === 'Service' &&
+            serviceColumns &&
+            serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
+              <HtmlTooltip title="Edit Frequency">
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  onClick={() => {
+                    setFrequencyDialog({ open: true, data: row?.original });
+                  }}
+                >
+                  <EditIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
           {permissions?.product?.isUpdate && row?.original?.type === 'Service' && (
             <HtmlTooltip title="Add Consumables">
               <IconButton
@@ -548,43 +551,43 @@ const ServiceMaster = (props: Props) => {
   return (
     <Fragment>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0} label={'Normal'} primaryColor={true} />
-          <CustomTab value={1} label={'Conditional'} primaryColor={true} />
-        </CustomTabs>
-        <TabPanel value={tabValue} index={0}>
-      {permissions?.product?.isUpdate && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-            rightSideContents={rightSideContents()}
-            hasXpadding={false}
+        <CustomTab value={0} label={'Normal'} primaryColor={true} />
+        <CustomTab value={1} label={'Conditional'} primaryColor={true} />
+      </CustomTabs>
+      <TabPanel value={tabValue} index={0}>
+        {permissions?.product?.isUpdate && (
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={true}
+              addButtonMenuItems={addButtonMenuItems()}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+              rightSideContents={rightSideContents()}
+              hasXpadding={false}
+            />
+          </>
+        )}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 345px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
+            onSaveEdit={onSaveInlineEdit}
+            expander={true}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
           />
-        </>
-      )}
-      {columns ? (
-        <CustomReactTable
-          height={'calc(100vh - 345px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          refreshGrid={fetchData}
-          onSaveEdit={onSaveInlineEdit}
-          expander={true}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
-    </TabPanel>
-    <TabPanel value={tabValue} index={1}>
-      <ServiceCondition renderedFrom={renderedFrom} id={id} />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        <ServiceCondition renderedFrom={renderedFrom} id={id} />
       </TabPanel>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
@@ -665,7 +668,7 @@ const ServiceMaster = (props: Props) => {
             setFrequencyDialog({ open: false, data: null });
           }}
           onSuccess={() => {
-            fetchData()
+            fetchData();
             setFrequencyDialog({ open: false, data: null });
           }}
         />

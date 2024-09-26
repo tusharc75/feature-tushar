@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid} from '@material-ui/core';
+import Step from '../DynamicForm/Step';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -15,6 +16,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageChartOfAccount from './ManageChartOfAccount';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const ChartOfAccountDetail = () => {
   const { id } = useParams();
@@ -27,6 +29,8 @@ const ChartOfAccountDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
   const {
     state: { permissions }
   }: any = useData();
@@ -35,6 +39,7 @@ const ChartOfAccountDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -98,6 +103,21 @@ const ChartOfAccountDetail = () => {
     setTabValue(newValue);
   };
 
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.chartOfAccount}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -120,6 +140,7 @@ const ChartOfAccountDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel index={tabValue} value={0}>
           <Box>
@@ -132,6 +153,22 @@ const ChartOfAccountDetail = () => {
             )}
           </Box>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.chartOfAccount}
+                  data={chartOfAccountData}
+                  allowedToEdit={permissions?.chartOfAccount?.isUpdate }
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

@@ -17,15 +17,16 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.resourceDoaRequest.title);
+
 const ResourceDoaRequest = () => {
-  const renderedFrom = camelCase(routes?.resourceDoaRequest.title);
   const toastConfig = useContext(CustomToastContext);
 
   const {
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
 

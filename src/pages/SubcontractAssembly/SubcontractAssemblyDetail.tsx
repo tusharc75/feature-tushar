@@ -32,10 +32,12 @@ import Receiving from 'src/pages/SubcontractAssembly/Receiving';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import SubcontractAssemblyView from './View';
-
 import queryString from 'query-string';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step'
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -47,6 +49,8 @@ const SubcontractAssemblyDetail = () => {
   const {
     state: { permissions, user }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [subcontractAssemblyData, setSubcontractAssemblyData] = useState(null);
   const [fields, setFields] = useState(null);
@@ -65,8 +69,24 @@ const SubcontractAssemblyDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.subcontractAssembly}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     try {
@@ -89,8 +109,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-          data?.canDelete
+        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+        data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -161,21 +181,6 @@ const SubcontractAssemblyDetail = () => {
       });
   };
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0) {
-      updateProcessStatus(subcontractAssemblySteps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -189,7 +194,7 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   [SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) &&
-                  subcontractAssemblyData?.material?.length>0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
+                  subcontractAssemblyData?.material?.length > 0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
@@ -232,6 +237,7 @@ const SubcontractAssemblyDetail = () => {
               Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -251,6 +257,9 @@ const SubcontractAssemblyDetail = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.subcontractAssembly, subcontractAssemblySteps[step]?.name, id);
+            }}
           />
           <ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && subcontractAssemblyData && (
@@ -284,6 +293,22 @@ const SubcontractAssemblyDetail = () => {
         <TabPanel value={tabValue} index={2}>
           {subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.subcontractAssembly}
+                  data={subcontractAssemblyData}
+                  allowedToEdit={permissions?.subcontractAssembly?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

@@ -18,11 +18,13 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 
+const renderedFrom = 'product_price_history';
+
 const AverageCostHistory = ({ handleClose, product, productName, showPricefilter }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
     state: { user }
   }: any = useData();
@@ -204,10 +206,10 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                     ? 'hsl(120 73% 40% / 1)'
                     : '#90ee90'
                   : row?.original?.type === 'Debit'
-                  ? isDarkTheme
-                    ? 'hsl(1 100% 65% / 1)'
-                    : '#FFCCCB'
-                  : ''
+                    ? isDarkTheme
+                      ? 'hsl(1 100% 65% / 1)'
+                      : '#FFCCCB'
+                    : ''
             }}
           >
             <h5 className="text-truncate" title={row?.original?.qty}>
@@ -249,10 +251,10 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                     ? 'hsl(120 73% 40% / 1)'
                     : '#90ee90'
                   : row?.original?.type === 'Debit'
-                  ? isDarkTheme
-                    ? 'hsl(1 100% 65% / 1)'
-                    : '#FFCCCB'
-                  : ''
+                    ? isDarkTheme
+                      ? 'hsl(1 100% 65% / 1)'
+                      : '#FFCCCB'
+                    : ''
             }}
           >
             <h5 className="text-truncate" title={row?.original?.totalPrice}>
@@ -304,7 +306,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                 columns={columns}
                 state={state}
                 dispatch={dispatch}
-                renderedFrom={'product_price_history'}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 refreshGrid={fetchRecords}
                 hideSelection={true}

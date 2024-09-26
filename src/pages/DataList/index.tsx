@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
-import { Edit } from "@material-ui/icons";
+import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -24,7 +24,7 @@ const DataList = () => {
   const renderedFrom = camelCase(routes?.dataList.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
@@ -116,7 +116,7 @@ const DataList = () => {
     axiosInstance()
       .get(`${routes?.dataList?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        let count = data?.count
+        let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);

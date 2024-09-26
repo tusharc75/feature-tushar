@@ -34,7 +34,8 @@ import {
   rentalManagement,
   rentalManagementSteps,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  tabIndexValue
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Step from '../DynamicForm/Step';
@@ -52,6 +53,7 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -154,11 +156,9 @@ const RentalManagementDetailsPage = () => {
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
       axiosInstance()
-        .get(
-          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-        )
+        .get(`${rentalManagement.api}/show-progressive-billing/${id}`)
         .then(({ data: { data } }) => {
-          if (data.length > 0 && permissions?.invoice?.isRead) {
+          if (data.progressiveBilling && permissions?.invoice?.isRead) {
             setDisplayProgressiveBillingTab(true);
           }
         })
@@ -237,7 +237,6 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
       fetchQuotationData();
-      updateProcessStatus(rentalSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -347,25 +346,10 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-  const updateProcessStatus = async (processStatus) => {
-    if (isOffline) {
-      await updateRentalProcessStatus(id, processStatus);
-    } else {
-      axiosInstance()
-        .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
-    }
-  };
-
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
       .then(({ data: { data } }) => {
-        if (status === RENTAL_STATUS.invoiced || status === RENTAL_STATUS.closed) {
-          updateProcessStatus(rentalSteps[rentalSteps?.length - 1]?.name);
-          setCurrentStep(rentalSteps?.length - 1);
-        }
         fetchRentalManagementData();
         toastConfig.setToastConfig({
           open: true,
@@ -558,9 +542,11 @@ const RentalManagementDetailsPage = () => {
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>Header</CustomTab>
             <CustomTab value={1}>Details</CustomTab>
-            {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={2}>Associations</CustomTab>}
-            {displayProgressiveBillingTab && <CustomTab value={3}>Progressive Billing</CustomTab>}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={4}>Views</CustomTab>}
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+            {displayProgressiveBillingTab && <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 3)}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
@@ -577,22 +563,24 @@ const RentalManagementDetailsPage = () => {
               steps={rentalSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              handlePrev={() => {
-                if (
-                  (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
-                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
-                  rentalSteps[currentStep]?.name === 'Quotation'
-                ) {
-                  setShowCancelConfirmBox({ open: true, isQuote: true });
-                } else {
-                  setCurrentStep((prevStep) => {
-                    const newStep = prevStep - 1;
-                    return newStep;
-                  });
-                }
-              }}
+              handlePrev={
+                rentalSteps[currentStep]?.name === 'Quotation' &&
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                  ? () => {
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
+                  : null
+              }
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
+              updateStatus={(step: number) => {
+                if (isOffline) {
+                  updateRentalProcessStatus(id, rentalSteps[step]?.name);
+                } else {
+                  dynamicFormUpdateProcessStatus(sidebarResource.rentalManagement, rentalSteps[step]?.name, id);
+                }
+              }}
             />
             <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
@@ -712,17 +700,24 @@ const RentalManagementDetailsPage = () => {
               )}
             </ContentFullScreen>
           </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.rentalManagement}
-              data={rentalManagementData}
-              allowedToEdit={allowedToEdit}
-              referenceData={assets ? { assets: assets } : null}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={3}>
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={tabValue} index={i + 2}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.rentalManagement}
+                    data={rentalManagementData}
+                    allowedToEdit={allowedToEdit}
+                    referenceData={assets ? { assets: assets } : null}
+                  />
+                </TabPanel>
+              );
+            })}
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 2)}>
             <ProgressiveBilling
               rentalId={id}
               rentalManagementData={rentalManagementData}
@@ -731,7 +726,7 @@ const RentalManagementDetailsPage = () => {
               }
             />
           </TabPanel>
-          <TabPanel value={tabValue} index={4}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 3)}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>

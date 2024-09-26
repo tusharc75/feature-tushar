@@ -31,17 +31,8 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const SerializedAsset = ({
-  subleaseData,
-  fetchData,
-  currentStep,
-  renderedFrom,
-  allowedToEdit,
-  isProcessor,
-  stepFullScreen
-}) => {
-
-  const { state, dispatch } = useTableReducer();
+const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -89,7 +80,8 @@ const SerializedAsset = ({
   };
 
   const fetchGridColumns = () => {
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         newColumns?.forEach((o) => {
@@ -208,12 +200,12 @@ const SerializedAsset = ({
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-        resource: sidebarResource.sublease,
-        referenceId: subleaseData?._id,
-        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-      }
+          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+          resource: sidebarResource.sublease,
+          referenceId: subleaseData?._id,
+          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+        }
       : null;
 
   const rightSideContents = () => {
@@ -233,7 +225,7 @@ const SerializedAsset = ({
             ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
         )}
-        {allowedToEdit &&
+        {allowedToEdit && (
           <Button
             variant={'contained'}
             color="primary"
@@ -275,7 +267,7 @@ const SerializedAsset = ({
           >
             Send to Supplier
           </Button>
-        }
+        )}
       </>
     );
   };
@@ -285,11 +277,9 @@ const SerializedAsset = ({
     selectedRecords?.forEach((e, i) => {
       if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
-      }
-      else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
+      } else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsIsWithCustomer });
-      }
-      else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+      } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetStatusSendSupplier });
       }
     });
@@ -336,7 +326,7 @@ const SerializedAsset = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
-            fetchData()
+            fetchData();
           }}
         />
       )}

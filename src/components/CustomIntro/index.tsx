@@ -120,7 +120,7 @@ const CustomIntro = () => {
       handleSteps.current.resume();
     }
 
-    if (currentStepData?.willOpenDialog || currentStepData.waitForStepInsertion) {
+    if (currentStepData?.willOpenDialog || currentStepData?.waitForStepInsertion) {
       // check if dialog will open then wait for 500ms to let dialog open properly
       timeout = setTimeout(() => {
         handleSteps.current?.next();
@@ -181,7 +181,7 @@ const CustomIntro = () => {
             {currentStepData?.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-[gray] bg-blend-lighten"
                 onClick={() => {
                   handleNext();
                 }}
@@ -190,6 +190,7 @@ const CustomIntro = () => {
                   height: currentStepData?.positionData?.height + 10,
                   top: currentStepData?.positionData?.top - 5,
                   left: currentStepData?.positionData?.left - 5,
+                  backgroundBlendMode: 'lighten',
                   background: 'gray'
                 }}
               ></div>

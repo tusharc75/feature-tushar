@@ -29,9 +29,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import ReceiveDateDialog from 'src/pages/SubcontractAssembly/LoadingTicket/ReceiveDateDialog';
 
+const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
+
 const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const { setWalkmeData } = useSetWalkmeData();
-  const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -42,7 +43,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 

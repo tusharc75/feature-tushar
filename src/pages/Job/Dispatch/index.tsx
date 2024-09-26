@@ -19,7 +19,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const [columns, setColumns] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

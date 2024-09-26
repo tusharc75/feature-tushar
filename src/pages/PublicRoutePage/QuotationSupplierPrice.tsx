@@ -66,7 +66,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { dataRows } = state;
 
@@ -151,7 +151,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       return row[fieldName] || 0;
     }
     return pricing;
-  }
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -485,13 +485,13 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
               <div id="importExportLinks" className={`${classes.root}`}>
                 <div className={classes.linksContainer}>
                   <>
-                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} cursor-pointer p-1`}>
                       {ImportInput}
                       Import from Excel
                     </label>
                     <Divider orientation="vertical" flexItem className={classes.darkLinks} />
                   </>
-                  <label onClick={exportToExcel} className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                  <label onClick={exportToExcel} className={`${classes.darkLinks} cursor-pointer p-1`}>
                     Export to Excel
                   </label>
                 </div>

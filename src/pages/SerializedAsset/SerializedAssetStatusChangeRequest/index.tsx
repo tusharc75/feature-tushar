@@ -18,11 +18,11 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { Autocomplete } from '@material-ui/lab';
 
-const SerializedAssetStatusChangeRequest = () => {
+const renderedFrom = camelCase(routes?.serializedAssetStatusChangeRequest.title);
 
-  const renderedFrom = camelCase(routes?.serializedAssetStatusChangeRequest.title);
+const SerializedAssetStatusChangeRequest = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -95,7 +95,8 @@ const SerializedAssetStatusChangeRequest = () => {
                 setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
               }}
             >
-              <CancelIcon fontSize="small"
+              <CancelIcon
+                fontSize="small"
                 color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'error'}
               />
             </IconButton>
@@ -134,7 +135,7 @@ const SerializedAssetStatusChangeRequest = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedStatus && selectedStatus!== '') {
+    if (selectedStatus && selectedStatus !== '') {
       deepFilters.push({ field: 'status', term: selectedStatus });
     }
 
@@ -181,10 +182,10 @@ const SerializedAssetStatusChangeRequest = () => {
   };
 
   const statusOptions = [
-      { optionLabel: ASSET_APPROVAL_STATUS.pending, optionValue: ASSET_APPROVAL_STATUS.pending },
-      { optionLabel: ASSET_APPROVAL_STATUS.approved, optionValue: ASSET_APPROVAL_STATUS.approved },
-      { optionLabel: ASSET_APPROVAL_STATUS.rejected, optionValue: ASSET_APPROVAL_STATUS.rejected }
-  ]
+    { optionLabel: ASSET_APPROVAL_STATUS.pending, optionValue: ASSET_APPROVAL_STATUS.pending },
+    { optionLabel: ASSET_APPROVAL_STATUS.approved, optionValue: ASSET_APPROVAL_STATUS.approved },
+    { optionLabel: ASSET_APPROVAL_STATUS.rejected, optionValue: ASSET_APPROVAL_STATUS.rejected }
+  ];
 
   return (
     <section className="main-container-v1">
@@ -203,8 +204,8 @@ const SerializedAssetStatusChangeRequest = () => {
                   setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
                 }}
                 disabled={
-                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length
-                    && permissions?.serializedAsset?.isUpdate
+                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -216,7 +217,8 @@ const SerializedAssetStatusChangeRequest = () => {
                   setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
                 }}
                 disabled={
-                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length && permissions?.serializedAsset?.isUpdate
+                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -227,7 +229,7 @@ const SerializedAssetStatusChangeRequest = () => {
           }
           leftSideContents={
             <Autocomplete
-              className={`lg:w-[230px] w-full`}
+              className={`w-full lg:w-[230px]`}
               options={statusOptions}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
               getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -239,9 +241,7 @@ const SerializedAssetStatusChangeRequest = () => {
               onChange={(e, val) => {
                 setSelectedStatus(val && val.optionValue ? val.optionValue : '');
               }}
-              renderInput={(params) => (
-                <TextField {...params} margin="none" size="small" name="status" label='Status' variant="outlined" fullWidth />
-              )}
+              renderInput={(params) => <TextField {...params} margin="none" size="small" name="status" label="Status" variant="outlined" fullWidth />}
             />
           }
         />

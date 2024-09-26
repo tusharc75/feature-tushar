@@ -1,22 +1,18 @@
-import { Typography } from '@material-ui/core';
 import { kebabCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import styles from './Dashboard.module.scss';
 import './style.scss';
 
-import { HiArrowRight } from 'react-icons/hi';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { DynamicIcon } from 'src/assets/IconGenerator';
-import DashBoardCardShell from 'src/components/DashBoardCardShell';
-import DashboardModal from 'src/components/DashboardModal';
 import routes from 'src/components/Helpers/Routes';
-import { isSectionVisible } from 'src/components/Sidebar/utils';
-import Chart from './Chart';
-import { assignIconAndText, getColors, groupByKey } from './helpers';
+import { cn } from 'src/constants/helpers';
+import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import DisplaySideCard from 'src/pages/Home/DisplaySideCard';
 import FeatureCard from 'src/pages/Home/FeatureCards';
+import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Chart from './Chart';
+import { assignIconAndText, getAllData, groupByKey } from './helpers';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -30,24 +26,9 @@ function Dashboard() {
   const [sections, setSections] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
+
   useEffect(() => {
-    let allData = [];
-
-    let entityData;
-    if (user?.entity && user.entity.length) {
-      entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
-    }
-    if (entityData?.resource) {
-      allData = entityData.resource;
-    }
-
-    allData = allData?.filter((e) => isSectionVisible(e));
-    allData?.forEach((u) => {
-      u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
-      u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
-      u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
-    });
-
+    const allData = getAllData(user, selectedEntity);
     const groupedData = groupByKey(allData, (section) => section.sectionName);
     setObjBySectionName(groupedData);
     const data = assignIconAndText(groupedData, user?.role?.brandSectionMaster || []);
@@ -62,17 +43,19 @@ function Dashboard() {
         return `/${kebabCase(item.name)}`;
     }
   };
+
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
-        <div className={styles.main}>
+        <div className={cn(styles.main, '[--gap:25px]')}>
           <div className={styles.leftContainer}>
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             {!isOffline && <Chart />}
           </div>
           <div className={styles.rightContainer}>
             <FeatureCard />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
+            <UserFavouriteCard />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
           </div>
@@ -83,99 +66,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-
-const DisplayCardGrid = ({ sections, handleRoutes }) => {
-  const [modalContent, setModalContent] = useState(null);
-
-  const handleClose = () => {
-    setModalContent(null);
-  };
-
-  return (
-    <div className={styles.cardSection}>
-      <div className={styles.cardContainer}>
-        {sections.map((section, index) => {
-          if (
-            section.head === 'Setups' ||
-            section.head === 'Setups & Administration' ||
-            section.head === 'Collaboration Tools' ||
-            section.head === 'Activities'
-          ) {
-            return <Fragment key={section.head}></Fragment>;
-          }
-          let icon = section.icon;
-          const iconColors = getColors(index).icon;
-          if (typeof icon === 'string' && icon) {
-            icon = (
-              <span
-                className=" as custom flex aspect-square h-full items-center justify-center rounded-md text-white"
-                style={{
-                  background: `linear-gradient(129deg, ${iconColors[0]} 0%, ${iconColors[1]} 100%)`
-                }}
-              >
-                {DynamicIcon(icon, { size: 28 })}
-              </span>
-            );
-          }
-          return (
-            <DashBoardCardShell
-              key={section.head}
-              id={`dashboard-card-${section.head.split(' ').join('-')}`}
-              role="button"
-              className={styles.singlecard}
-              background={section.color}
-              gradientColors={section.gradient}
-              aria-label={`open ${section.head}`}
-              onClick={() =>
-                section.items.length > 0 &&
-                setModalContent({ items: section.items, title: section.head, icon: <span className="[&_.custom_svg]:!size-[15px]">{icon}</span> })
-              }
-            >
-              <div className={styles.cardContent}>
-                <div className={styles.cardTop}>
-                  <div className={styles.cardIcon}>{icon}</div>
-                  <div className={styles.cardArrow}>
-                    <HiArrowRight />
-                  </div>
-                </div>
-                <Typography component="h2" className={styles.cardHeading}>
-                  {section.head}
-                </Typography>
-                <Typography component="p" className={styles.cardDesc}>
-                  {section.items.length > 0 ? section.text : 'Coming Soon.'}
-                </Typography>
-              </div>
-            </DashBoardCardShell>
-          );
-        })}
-      </div>
-      <DashboardModal
-        modalHead={modalContent}
-        style={{ width: 'min(468px, calc(100vw - 64px))' }}
-        handleClose={handleClose}
-        handleRoutes={handleRoutes}
-      >
-        <ul className={styles.linkList}>
-          {modalContent?.items
-            ?.filter((item) => !item?.isHidden)
-            .map((item) => (
-              <li key={item.name}>
-                <Typography component="span">
-                  <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
-                      <path
-                        d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
-                        fill="currentcolor"
-                        stroke="currentcolor"
-                      ></path>
-                    </svg>
-                    {item.resourceLabel || item.name}
-                  </Link>
-                </Typography>
-              </li>
-            ))}
-        </ul>
-      </DashboardModal>
-    </div>
-  );
-};

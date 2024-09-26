@@ -38,6 +38,8 @@ import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
 import Receiving from 'src/pages/Sublease/Receiving';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import Step from 'src/pages/DynamicForm/Step';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -66,23 +68,11 @@ const SubleaseDetailsPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [resourceData, setResourceData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.replace(`?tab=${newValue}`);
-  };
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 4) {
-      updateProcessStatus(subleaseStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -93,7 +83,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -105,6 +95,7 @@ const SubleaseDetailsPage = () => {
   useEffect(() => {
     getFields();
     fetchData();
+    fetchPolicy();
   }, [id]);
 
   const getFields = () => {
@@ -124,6 +115,19 @@ const SubleaseDetailsPage = () => {
       });
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.sublease}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchData = async () => {
     try {
       const {
@@ -137,7 +141,7 @@ const SubleaseDetailsPage = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
       }
-      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.sublease, data)
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.sublease, data);
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       if (data.status === SUBLEASE_STATUS.closed) {
         isAllowedToEdit = false;
@@ -171,24 +175,23 @@ const SubleaseDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.sublease?.isUpdate && allowedToEdit && subleaseData?.canComplete && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
-            )}
-            {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
-              <>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  onClick={() => setOpenUpdateDialog(true)}
+            {permissions?.sublease?.isUpdate &&
+              allowedToEdit &&
+              subleaseData?.canComplete &&
+              ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
                   className={'btn-outline-v1'}
                 >
+                  Close
+                </ButtonWithPulse>
+              )}
+            {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
+              <>
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
                   {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               </>
@@ -199,18 +202,11 @@ const SubleaseDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          <CustomTab value={2}>
-            {routes.deliveryTicket.title}
-          </CustomTab>
-          <CustomTab value={3}>
-            Invoices
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          <CustomTab value={2}>{routes.deliveryTicket.title}</CustomTab>
+          <CustomTab value={3}>Invoices</CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -244,6 +240,9 @@ const SubleaseDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {subleaseStepsNames[currentStep] === 'Add Products' && subleaseData && (
@@ -352,6 +351,22 @@ const SubleaseDetailsPage = () => {
             )}
           </Grid>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 4}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.sublease}
+                  data={subleaseData}
+                  allowedToEdit={permissions?.sublease?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

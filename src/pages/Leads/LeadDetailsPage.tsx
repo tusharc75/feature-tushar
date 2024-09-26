@@ -391,7 +391,7 @@ const LeadDetailsPage = () => {
           }}
         >
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <>
@@ -421,15 +421,22 @@ const LeadDetailsPage = () => {
             </Box>
           </>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.lead}
-            data={leadData}
-            allowedToEdit={permissions?.lead?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 1}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.lead}
+                  data={leadData}
+                  allowedToEdit={permissions?.lead?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {convertLeadToOpportunityConfirmationDialog.open && (
         <ConfirmationDialog

@@ -31,6 +31,9 @@ import ContentFullScreen from '../../components/ContentFullScreen';
 import LoadingTicket from './LoadingTicket';
 import ManageTransferInventory from './ManageTransferInventory';
 import Products from './Products';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -44,6 +47,8 @@ const TransferInventoryDetailPage = () => {
   const {
     state: { permissions, user }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
@@ -86,12 +91,28 @@ const TransferInventoryDetailPage = () => {
   useEffect(() => {
     if (id) {
       fetchTransferInventoryData();
+      fetchPolicy();
     }
   }, [id]);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferInventory}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = () => {
     axiosInstance()
@@ -127,7 +148,7 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
-        
+
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setTransferInventoryData(data);
       })
@@ -173,17 +194,6 @@ const TransferInventoryDetailPage = () => {
         });
         fetchTransferInventoryData();
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: stepNames[step]
-      })
-      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -238,6 +248,7 @@ const TransferInventoryDetailPage = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -260,7 +271,9 @@ const TransferInventoryDetailPage = () => {
                 isNextStep={false}
                 nextStep={nextStep}
                 nextStepToolTip={nextStepToolTip}
-                updateStatus={updateProcessStatus}
+                updateStatus={(step: number) => {
+                  dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
+                }}
                 isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                 setStepFullScreen={() => setStepFullScreen(true)}
               />
@@ -292,6 +305,22 @@ const TransferInventoryDetailPage = () => {
             </Box>
           )}
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.transferInventory}
+                  data={transferInventoryData}
+                  allowedToEdit={permissions?.transferInventory?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

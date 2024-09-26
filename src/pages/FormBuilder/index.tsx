@@ -17,14 +17,15 @@ import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import SectionMaster from './sectionMaster';
 
+const renderedFrom = 'form-builder';
+
 const FormBuilder = () => {
-  const renderedFrom = 'form-builder';
   const toastConfig = useContext(CustomToastContext);
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [openSectionMaster, setOpenSectionMaster] = useState(false);
   const [resource, setResource] = useState([]);
   const [columns, setColumns] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
 
   const {

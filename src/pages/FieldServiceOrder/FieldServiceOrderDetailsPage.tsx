@@ -41,11 +41,11 @@ import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -107,12 +107,6 @@ const ServiceOrderDetailsPage = () => {
     });
   }, [locationKeys]);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(steps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -144,14 +138,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-        data.canDelete &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
@@ -180,16 +174,6 @@ const ServiceOrderDetailsPage = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const updateProcessStatus = async (processStatus) => {
-    if (isOffline) return;
-    axiosInstance()
-      .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        fetchServiceOrderData();
-      })
-      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -299,12 +283,7 @@ const ServiceOrderDetailsPage = () => {
               Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={3}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" />
-              Associations
-            </CustomTab>
-          )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -326,6 +305,11 @@ const ServiceOrderDetailsPage = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              if (!isOffline) {
+                dynamicFormUpdateProcessStatus(sidebarResource.fieldServiceOrder, steps[step]?.name, id);
+              }
+            }}
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
@@ -400,17 +384,22 @@ const ServiceOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <Box>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.fieldServiceOrder}
-              data={serviceOrderData}
-              allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
-            />
-          </Box>
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.fieldServiceOrder}
+                  data={serviceOrderData}
+                  allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

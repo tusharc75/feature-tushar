@@ -24,7 +24,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
   const renderedFrom = `${routes.employeeMaster.title}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

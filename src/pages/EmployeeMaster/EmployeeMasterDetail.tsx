@@ -20,6 +20,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
+import Step from '../DynamicForm/Step';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -36,6 +38,8 @@ const EmployeeMasterDetail = () => {
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
 
   const {
     state: { permissions, user }
@@ -46,6 +50,7 @@ const EmployeeMasterDetail = () => {
       fetchFields();
       fetchData();
       fetchLoggedInUserRole();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -69,6 +74,21 @@ const EmployeeMasterDetail = () => {
       setEmployeeMasterData(data);
       setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.employeeMaster}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -179,7 +199,6 @@ const EmployeeMasterDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
             <ActivityButton
@@ -194,6 +213,7 @@ const EmployeeMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'History'} />
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -207,6 +227,22 @@ const EmployeeMasterDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <History id={id} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.employeeMaster}
+                  data={employeeMasterData}
+                  allowedToEdit={permissions?.employeeMaster?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

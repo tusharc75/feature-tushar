@@ -92,7 +92,8 @@ export const CreateEmail = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   referenceType = '',
-  isAttachmentLoading = false
+  isAttachmentLoading = false,
+  content = null,
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const {
@@ -219,8 +220,8 @@ export const CreateEmail = ({
       let initialData = {
         subject: subject ?? '',
         file: '',
-        content: RichTextEditor.createEmptyValue(),
-        to: [],
+        content: content ?? RichTextEditor.createEmptyValue(),
+        to: isQuoteBuilder ? [...options] : [],
         cc: isQuoteBuilder ? [...cc] : []
       };
       setInitialValues(initialData);
@@ -274,7 +275,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSendEmail = async (values) => {

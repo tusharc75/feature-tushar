@@ -20,11 +20,10 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ManageTrainAiModel from './ManageTrainAiModel';
 
+let renderedFrom = camelCase(routes.trainAiModel?.title);
+
 const TrainAiModel = () => {
-
-  let renderedFrom = camelCase(routes.trainAiModel?.title);
-
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -48,7 +47,8 @@ const TrainAiModel = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.trainAiModel}`)
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.trainAiModel}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, routes.trainAiModel.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);

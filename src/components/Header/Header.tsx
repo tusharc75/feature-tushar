@@ -4,7 +4,7 @@ import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SyncIcon from '@material-ui/icons/Sync';
 import { isEmpty } from 'lodash';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
@@ -117,12 +117,6 @@ const Header = () => {
     }
   };
 
-  const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
-  const [chatNotificationList, setChatNotificationList] = useState([]);
-
-  // For FullScreen Chat Notification - Start
-  const [fullScreenChatNotificationAnchorEl, setFullScreenChatNotificationAnchorEl] = React.useState(null);
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     const s = io(`${backendApi?.replace('/api', '')}/user`, {
@@ -145,7 +139,6 @@ const Header = () => {
       });
 
       socket.on('data', (data) => {
-        setChatNotificationList(data);
         chatNotification.setCount(chatNotification.count + 1);
       });
       socket.on('new', (data) => {

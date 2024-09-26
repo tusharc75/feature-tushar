@@ -18,11 +18,13 @@ import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = 'userDownloadRequest';
+
 const UserDownloadRequest = () => {
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, sorting } = state;
   const {
     state: { user, permissions }
@@ -58,8 +60,7 @@ const UserDownloadRequest = () => {
         accessor: 'resource',
         Header: 'Resource Label',
         width: 120,
-        Cell: ({ row }) =>
-          row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />
+        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
       },
       {
         accessor: 'status',
@@ -75,8 +76,7 @@ const UserDownloadRequest = () => {
         disableFilters: true,
         disableSortBy: true,
         width: 120,
-        Cell: ({ row }) => <p className="text-truncate">
-          {moment(row?.original?.createdByDate)?.format(dateTimeFormat)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.createdByDate)?.format(dateTimeFormat)}</p>
       },
       ActionsRenderer
     ];
@@ -212,7 +212,7 @@ const UserDownloadRequest = () => {
       <CustomContainer>
         <div className="header-panel">
           {/* xs={12} sm={6} md={4} lg={4} */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[8px]"></div>
+          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3"></div>
         </div>
         {columns ? (
           <CustomReactTable
@@ -220,7 +220,7 @@ const UserDownloadRequest = () => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'userDownloadRequest'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             hideSelection={true}
           />

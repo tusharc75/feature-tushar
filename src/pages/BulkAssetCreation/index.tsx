@@ -18,7 +18,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { bulkAssetCreation, checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  bulkAssetCreation,
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import axios, { CancelTokenSource } from 'axios';
@@ -38,7 +45,7 @@ const BulkAssetCreation = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -125,7 +132,10 @@ const BulkAssetCreation = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.bulkAssetCreation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.bulkAssetCreation, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.bulkAssetCreation?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.bulkAssetCreation, finalObject?.ownerId) &&
+            u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -322,8 +332,9 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.baNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+            deleteRecord?._id ? deleteRecord?.baNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

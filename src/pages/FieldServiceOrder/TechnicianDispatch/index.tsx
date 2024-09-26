@@ -26,7 +26,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
   const [showDispatchMaterial, setShowDispatchMaterial] = useState({ open: false, data: [] });
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   useEffect(() => {

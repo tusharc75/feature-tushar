@@ -1,16 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-
 import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
-import NewStepper from '../../../../components/Helpers/NewStepper';
 import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
@@ -157,18 +153,10 @@ const Steps = (props) => {
       <Steps1
         currentStep={currentStep}
         nextStep={!loading && !globalLoading && nextStep}
-        isPrevStep={
-          currentStep >= 0 && !loading && !globalLoading && isPrevStep
-          // allowedToEdit &&
-          // !versionStatus.includes('Rejected by Customer') &&
-          // !(steps.length === 5 && currentStep > 3) &&
-          // !versionStatus.includes('Sent for DOA') &&
-          // !(steps.length === 6 && currentStep >= 4) &&
-          // !versionStatus.includes('Sent to Customer') &&
-        }
+        isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -179,7 +167,6 @@ const Steps = (props) => {
         handlePrev={handleBack}
         setStepFullScreen={setStepFullScreen}
       />
-      {/* {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>} */}
       {isMobile && !isTablet ? (
         <></>
       ) : (
@@ -234,7 +221,7 @@ const Steps = (props) => {
           onClose={closeManualDiaog}
           aria-labelledby="assign-roles-dialog"
         >
-          <CustomDialogHeader title={`Reason For Ending`} />
+          <CustomDialogHeader title="Reason For Ending" onClose={closeManualDiaog} />
           <CustomDialogContent>
             <>
               <List style={{ padding: 0 }}>

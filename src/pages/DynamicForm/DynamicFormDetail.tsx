@@ -186,7 +186,7 @@ const DynamicFormDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={1}>Associations</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -194,18 +194,30 @@ const DynamicFormDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-              <DetailsPage data={detailData} fields={fields} resource={resourceData?.collaborateTools ? resource : null} referenceId={resourceData?.collaborateTools ? id : null} />
+            <DetailsPage
+              data={detailData}
+              fields={fields}
+              resource={resourceData?.collaborateTools ? resource : null}
+              referenceId={resourceData?.collaborateTools ? id : null}
+            />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={resource}
-            data={detailData}
-            allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 1}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={resource}
+                  data={detailData}
+                  allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

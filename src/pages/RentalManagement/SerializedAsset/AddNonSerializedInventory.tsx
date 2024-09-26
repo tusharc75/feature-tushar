@@ -51,18 +51,21 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
       .get(`${productInventory.api}/product/${selectedProduct?.materialId}`)
       .then(async ({ data: { data } }) => {
         if (!productInventoryData?.find((e) => e._id === selectedProduct._id)) {
-          let nonExistingInventory = data?.map((d) => ({
-            _id: selectedProduct?._id,
-            materialId: selectedProduct?.materialId,
-            warehouse: d?.warehouse?.name,
-            warehouseId: d?.warehouse?._id,
-            qty:
-              type === 'add'
-                ? d?.inventory -
-                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0)
-                : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
-            inventory: 0
-          }));
+          let nonExistingInventory = data
+            ?.filter((d) => d?.warehouse)
+            ?.map((d) => ({
+              _id: selectedProduct?._id,
+              materialId: selectedProduct?.materialId,
+              warehouse: d?.warehouse?.name,
+              warehouseId: d?.warehouse?._id,
+              qty:
+                type === 'add'
+                  ? (d?.inventory || 0) -
+                    (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
+                      0)
+                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
+              inventory: 0
+            }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
         }
       })

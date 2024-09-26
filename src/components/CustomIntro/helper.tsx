@@ -115,20 +115,20 @@ export function createAddItemStepdata(route: { title: string; path: string }, fi
     steps: []
   };
 
-  let fieldsStpes: StepDefination[] = [
+  let fieldsSteps: StepDefination[] = [
     {
       title: `Add`,
       target: '#add-button',
       content: ''
     }
   ];
-  fieldsStpes.push(...generateFormFieldSteps(fields, ignoreField));
-  fieldsStpes.push({
+  fieldsSteps.push(...generateFormFieldSteps(fields, ignoreField));
+  fieldsSteps.push({
     target: '#dialog-save-button',
     title: 'Save',
     content: ''
   });
 
-  walkmeData?.steps?.push(...fieldsStpes);
+  walkmeData?.steps?.push(...fieldsSteps);
   return walkmeData;
 }

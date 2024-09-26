@@ -1,4 +1,3 @@
-
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -21,7 +20,7 @@ import ManageServiceConditional from 'src/pages/Product/ServiceMaster/ServiceCon
 
 export default function ServiceCondition({ renderedFrom, id }) {
   const renderedfrom = `${renderedFrom}_condition`;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
@@ -45,26 +44,22 @@ export default function ServiceCondition({ renderedFrom, id }) {
       {
         accessor: 'description',
         Header: 'Description',
-        Cell: ({ row }) =>
-          row.original?.description ? (
-            <div className="text-truncate">{row.original?.description}</div>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original?.description ? <div className="text-truncate">{row.original?.description}</div> : <NoDataCell />)
       },
       {
         accessor: 'services',
         Header: 'Services',
-        Cell: ({ row }) =>
-      <DropdownCell
-        permissions={permissions}
-        permissionForLinks={{}}
-        field={{
-          fieldName: 'services',
-          lookupResource: sidebarResource.serviceMaster
-        }}
-        original={row?.original}
-      />
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'services',
+              lookupResource: sidebarResource.serviceMaster
+            }}
+            original={row?.original}
+          />
+        )
       },
       ...getStaticFields()
     ];
@@ -97,7 +92,7 @@ export default function ServiceCondition({ renderedFrom, id }) {
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip title={ 'Delete'}>
+        <HtmlTooltip title={'Delete'}>
           <IconButton
             disabled={false}
             size="small"

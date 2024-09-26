@@ -23,12 +23,13 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
+const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
+
 const Steps = ({ serviceId }) => {
   const isMobile = useMediaQuery('(max-width:768px)');
-  const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, dataRows, page, limit, selectedRecords } = state;
   const {
     state: { permissions, user, selectedEntity }
@@ -291,7 +292,7 @@ const Steps = ({ serviceId }) => {
       <>
         {dataRows?.length ? (
           <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} tooltip="Arrange" borderColor="default">
-            <DragIndicatorIcon fontSize="small" className="mr-1 dark:text-white text-[var(--primary)]" /> Arrange
+            <DragIndicatorIcon fontSize="small" className="mr-1 text-[var(--primary)] dark:text-white" /> Arrange
           </ThemeButton>
         ) : null}
         {!isMobile ? (

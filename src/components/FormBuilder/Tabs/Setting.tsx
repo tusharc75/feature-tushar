@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, STEPS_STYLE } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -9,7 +9,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
-
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,14 +24,18 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     setFields(
-      response?.data?.data ? response?.data?.data?.filter(d => d?.fieldData?.primaryField)?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName })) : []
+      response?.data?.data
+        ? response?.data?.data
+            ?.filter((d) => d?.fieldData?.primaryField)
+            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+        : []
     );
   };
 
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`/sa-formbuilder/steps/setting/${resource}`, {
+      .put(`/sa-formbuilder/tabs/setting/${resource}`, {
         ...values,
         collaborateToolsField: values?.collaborateTools ? values?.collaborateToolsField : ''
       })
@@ -53,9 +56,6 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
 
   const validate = (values) => {
     const errors = {};
-    if (!values?.stepsStyle) {
-      errors['stepsStyle'] = 'Please select steps style';
-    }
     if (values.collaborateTools && !values?.collaborateToolsField) {
       errors['collaborateToolsField'] = 'Please Select Collaborate Tools Field';
     }
@@ -77,7 +77,6 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     >
       <Formik
         initialValues={{
-          stepsStyle: resourceData?.stepsStyle || STEPS_STYLE.list,
           collaborateTools: resourceData?.collaborateTools || false,
           collaborateToolsField: resourceData?.collaborateToolsField || ''
         }}
@@ -97,31 +96,6 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
             />
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <Box>
-                  <Autocomplete
-                    id="stepsStyle"
-                    options={[STEPS_STYLE.list, STEPS_STYLE.step, STEPS_STYLE.sideBar]}
-                    getOptionLabel={(option: any) => (option ? option : '')}
-                    getOptionSelected={(option: any, val) => option === val}
-                    value={values['stepsStyle']}
-                    onChange={(e: any, value) => {
-                      setFieldValue('stepsStyle', value);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        variant="outlined"
-                        label="Steps Style"
-                        placeholder="Steps Style"
-                        name="stepsStyle"
-                        required
-                        error={touched['stepsStyle'] && Boolean(errors['stepsStyle'])}
-                        helperText={touched['stepsStyle'] && errors['stepsStyle']}
-                      />
-                    )}
-                  />
-                </Box>
                 <Box>
                   <FormControlLabel
                     control={

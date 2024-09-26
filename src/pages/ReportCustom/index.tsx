@@ -21,11 +21,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
 
-const CustomReport = () => {
+const renderedFrom = 'custom-report';
 
-  const renderedFrom = 'custom-report';
+const CustomReport = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const {
@@ -186,10 +186,10 @@ const CustomReport = () => {
         </div>
         <CustomContainer>
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
-                <div className="flex gap-[8px] flex-wrap items-center">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className={'align-items-center flex w-full justify-between gap-1'}></div>
+              <div className="flex flex-wrap justify-end gap-[8px]">
+                <div className="flex flex-wrap items-center gap-[8px]">
                   <Button
                     variant={'contained'}
                     color="primary"

@@ -21,7 +21,7 @@ import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
-import Steps from 'src/components/FormBuilder/Steps';
+import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -152,8 +152,8 @@ const CreateFormBuilder = () => {
                 s.sectionProperties = f.sectionProperties;
                 delete f.sectionProperties;
               }
-            })
-          })
+            });
+          });
           setSection(data.section);
           setsectionName(data.sectionName || '');
           setResourceLabel(data.resourceLabel);
@@ -168,13 +168,16 @@ const CreateFormBuilder = () => {
   };
 
   const fetchSectionList = async () => {
-    await axiosInstance().get(`section-master`).then(({ data: { data } }) => {
-      const sectionList = data?.map((ele) => ele.sectionName);
-      setSectionNameList(sectionList);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
-  }
+    await axiosInstance()
+      .get(`section-master`)
+      .then(({ data: { data } }) => {
+        const sectionList = data?.map((ele) => ele.sectionName);
+        setSectionNameList(sectionList);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleSave = async () => {
     if (resourceLabel === '') {
@@ -330,7 +333,7 @@ const CreateFormBuilder = () => {
                 History
               </Button>
               <div className={classes.linksContainer} style={{ display: 'none' }}>
-                <label htmlFor="importField" className="cursor-pointer mr-3">
+                <label htmlFor="importField" className="mr-3 cursor-pointer">
                   Import Fields
                   <input
                     onClick={(e: any) => (e.target.value = null)}
@@ -469,7 +472,7 @@ const CreateFormBuilder = () => {
                     Fields
                   </CustomTab>
                   <CustomTab value={1} id="tab-2">
-                    Steps
+                    Tabs
                   </CustomTab>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -486,8 +489,7 @@ const CreateFormBuilder = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  {/* <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} /> */}
-                  <Steps resource={resource} />
+                  <DynamicTabs resource={resource} />
                 </TabPanel>
               </Box>
               {showConfirmDialog ? (
@@ -512,10 +514,7 @@ const CreateFormBuilder = () => {
           )}
         </Box>
       </Box>
-      {openHistoryDialog && <History
-        onClose={() => closeHistoryDialog()}
-        resource={resource}
-      />}
+      {openHistoryDialog && <History onClose={() => closeHistoryDialog()} resource={resource} />}
     </Fragment>
   );
 };

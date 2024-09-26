@@ -28,17 +28,18 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
+const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
+
 const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, allowedToEdit }) => {
-  const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [costDialog, setCostDialog] = useState({ open: false, _id: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewCost, setViewCost] = useState({ open: false, data: null ,title: null });
+  const [viewCost, setViewCost] = useState({ open: false, data: null, title: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null });
 
@@ -176,7 +177,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                       size="small"
                       aria-label="cost"
                       onClick={() => {
-                        setViewCost({ open: true, data: row?.original?.cost ,title: row?.original?.productName});
+                        setViewCost({ open: true, data: row?.original?.cost, title: row?.original?.productName });
                       }}
                     >
                       <Visibility fontSize="small" color={'primary'} />
@@ -225,7 +226,6 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
-
 
   const handelReject = () => {
     setIsSubmitting(true);
@@ -299,9 +299,9 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {viewCost.open && (
         <ViewCost
           data={viewCost.data}
-          title = {viewCost.title}
+          title={viewCost.title}
           onClose={() => {
-            setViewCost({ open: false, data: null ,title : null});
+            setViewCost({ open: false, data: null, title: null });
           }}
           subcontractAssemblyData={subcontractAssemblyData}
         />

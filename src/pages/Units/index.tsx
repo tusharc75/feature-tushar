@@ -62,7 +62,7 @@ const Units = () => {
     state: { permissions, selectedEntity }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [open, setOpen] = useState({ open: false, id: null });
@@ -110,12 +110,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );
@@ -188,20 +188,23 @@ const Units = () => {
     Object.keys(inputField)?.map((_key) => {
       values[_key] = updatedData[_key] ? updatedData[_key] : '';
     });
-    axiosInstance().put(`/dynamic-form/update-selected-field`, values, {
-      headers: {
-        Resource: sidebarResource.units
-      }
-    }).then(({ data }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`/dynamic-form/update-selected-field`, values, {
+        headers: {
+          Resource: sidebarResource.units
+        }
+      })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const getQueryString = (isExport = false) => {

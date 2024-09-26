@@ -19,7 +19,7 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);

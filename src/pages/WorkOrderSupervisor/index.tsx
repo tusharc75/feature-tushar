@@ -1,5 +1,20 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Button, FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  List,
+  Menu,
+  MenuItem,
+  Popover,
+  Select,
+  Switch,
+  TextField,
+  useMediaQuery
+} from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -22,7 +37,10 @@ import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
-import { AddOutlined } from '@material-ui/icons';
+import { KeyboardArrowDown } from '@material-ui/icons';
+import ProductFrequencyDialog from './ProductFrequencyDialog';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 
 const LIMIT = 25;
 
@@ -91,6 +109,9 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
   const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
+  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
+  const [resourceType, setResourceType] = useState('workOrder');
+  const [isOpen, setOpen] = useState({ open: false, id: null });
 
   const ref: any = useRef();
 
@@ -195,7 +216,7 @@ const WorkOrderSupervisor = () => {
 
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
-      let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
       dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
       axiosInstance()
         .get(api)
@@ -373,80 +394,87 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-2">
-              {isMobile ? (
-                <>
-                  <div className="relative mr-auto max-w-fit">
-                    {isFilterPresent ? (
-                      <>
-                        <span
-                          className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
-                        ></span>
-                        <span
-                          className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
-                        ></span>
-                      </>
-                    ) : null}
-                    <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
-                      Filter
-                    </ThemeButton>
-                  </div>
-                  <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    PaperProps={{
-                      style: {
-                        borderRadius: 5
-                      }
-                    }}
-                  >
-                    <div className="grid gap-3 p-5">
-                      {filters}
-                      <div className="flex justify-between gap-2">
-                        {isFilterPresent ? (
-                          <ThemeButton iconForMobile={false} onClick={reset}>
-                            Clear Filters
-                          </ThemeButton>
-                        ) : (
-                          <span />
-                        )}
-                        <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
-                          Close
-                        </ThemeButton>
-                      </div>
+            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
+              {viewType == 1 ? (
+                isMobile ? (
+                  <>
+                    <div className="relative mr-auto max-w-fit">
+                      {isFilterPresent ? (
+                        <>
+                          <span
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                          ></span>
+                          <span
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                          ></span>
+                        </>
+                      ) : null}
+                      <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
+                        Filter
+                      </ThemeButton>
                     </div>
-                  </Popover>
-                </>
+                    <Popover
+                      id={id}
+                      open={open}
+                      anchorEl={anchorEl}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      PaperProps={{
+                        style: {
+                          borderRadius: 5
+                        }
+                      }}
+                    >
+                      <div className="grid gap-3 p-5">
+                        {filters}
+                        <div className="flex justify-between gap-2">
+                          {isFilterPresent ? (
+                            <ThemeButton iconForMobile={false} onClick={reset}>
+                              Clear Filters
+                            </ThemeButton>
+                          ) : (
+                            <span />
+                          )}
+                          <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
+                            Close
+                          </ThemeButton>
+                        </div>
+                      </div>
+                    </Popover>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
+                )
               ) : (
-                <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
+                <Box display="flex">
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
+                    <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
+                      {routes.workOrder.title}
+                    </ToggleButton>
+                    <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
+                      {routes.repairOrder.title}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
               )}
+
               <div className="flex gap-2 max-[600px]:flex-wrap">
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
-                {permissions?.workOrder?.isCreate &&
-                  <div className="pt-[4px]">
-                    <HtmlTooltip title={`Add ${routes.workOrder.title}`}>
-                      <Button
-                        variant={'contained'}
-                        color="primary"
-                        size="small"
-                        className={`no-shadow`}
-                        onClick={() => setShowManageWorkOrder(true)}
-                        startIcon={<AddOutlined />}
-                      >
-                        Add
-                      </Button>
-                    </HtmlTooltip>
-                  </div>}
+                <div className="pt-[4px]">
+                  <RenderActionOptions
+                    permissions={permissions}
+                    setShowProductFreqDialog={setShowProductFreqDialog}
+                    setShowManageWorkOrder={setShowManageWorkOrder}
+                  />
+                </div>
+
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
@@ -484,9 +512,12 @@ const WorkOrderSupervisor = () => {
               dispatch={dispatch}
               passFailStatus={true}
               passFailAccessor="serviceStatus"
+              cardOnClick={(e, data) => {
+                setOpen({ open: true, id: data._id });
+              }}
             />
           )}
-          {viewType === 2 && <WorkOrderCalendar getFilterQuery={getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />}
+          {viewType === 2 && <WorkOrderCalendar getFilterQuery={getQueryString} filterResourceQuery={filterResourceQuery} reference={resourceType} ref={ref} setOpen={setOpen} />}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
@@ -540,6 +571,25 @@ const WorkOrderSupervisor = () => {
             isRedirectToDetailPage={false}
           />
         )}
+        {showProductFreqDialog && (
+          <ProductFrequencyDialog
+            onClose={() => setShowProductFreqDialog(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowProductFreqDialog(false);
+            }}
+          />
+        )}
+        {isOpen.open && (
+          <TechnicianDialog
+            handleClose={() => {
+              setOpen({ open: false, id: null })
+            }}
+            workOrderId={isOpen?.id}
+            uniqueId={null}
+            canPerform={false}
+          />
+        )}
       </Fragment>
     </MuiPickersUtilsProvider>
   );
@@ -591,6 +641,64 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
           )}
         </Menu>
       )}
+    </>
+  );
+};
+
+const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog, permissions }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <span>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          disabled={false}
+          onClick={handleOpenMenu}
+          endIcon={<KeyboardArrowDown fontSize="small" />}
+          className="new-dropdown-v1"
+        >
+          Actions
+        </Button>
+      </span>
+      <Menu
+        anchorEl={anchorEl}
+        keepMounted
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {permissions?.workOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setShowManageWorkOrder(true);
+              handleClose();
+            }}
+          >
+            {`Create ${routes?.workOrder.title}`}
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setShowProductFreqDialog(true);
+            handleClose();
+          }}
+        >
+          Set Product Frequency
+        </MenuItem>
+      </Menu>
     </>
   );
 };

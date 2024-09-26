@@ -1,8 +1,7 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -12,20 +11,35 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, getCompletedByField, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import CustomReactTable, {
+  getCompletedByField,
+  getStaticFields,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  repairOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { createRepairOrderFlow } from 'src/pages/RepairOrder/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
-import { ListingPageHeader } from 'src/components/PageHeaders';
-import axios, { CancelTokenSource } from 'axios';
 
 const RepairOrder = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   let renderedFrom = camelCase(routes.repairOrder?.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -42,7 +56,7 @@ const RepairOrder = () => {
 
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -80,6 +94,7 @@ const RepairOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
+    setWalkmeData([createRepairOrderFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ...getCompletedByField(), ActionsRenderer]);
   };
@@ -181,7 +196,8 @@ const RepairOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -374,8 +390,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

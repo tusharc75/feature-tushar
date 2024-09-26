@@ -61,7 +61,7 @@ const ServiceOrder = () => {
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldServiceOrder));
   const [renderCount, setRenderCount] = useState(0);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -139,7 +139,8 @@ const ServiceOrder = () => {
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const handleDelete = async (ids) => {
-    axiosInstance().put(`${fieldServiceOrder.api}/remove`, { ids })
+    axiosInstance()
+      .put(`${fieldServiceOrder.api}/remove`, { ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -391,7 +392,7 @@ const ServiceOrder = () => {
               setShowDeleteConfirmBox({ open: false, ids: [] });
             }}
             onOk={() => {
-              handleDelete(showDeleteConfirmBox.ids)
+              handleDelete(showDeleteConfirmBox.ids);
             }}
           />
         )}

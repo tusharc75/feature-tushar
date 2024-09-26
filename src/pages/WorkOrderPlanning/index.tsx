@@ -10,18 +10,27 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { ASSET_STATUS, COLOUR_MASTER, INVENTORY_OWNER_TYPE, REPAIR_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import {
+  ASSET_STATUS,
+  COLOUR_MASTER,
+  INVENTORY_OWNER_TYPE,
+  REPAIR_ORDER_TYPE,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  workOrder
+} from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import { Autocomplete } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.workOrderPlanning.title);
 const WorkOrderPlanning = () => {
-  const renderedFrom = camelCase(routes?.workOrderPlanning.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -43,34 +52,31 @@ const WorkOrderPlanning = () => {
     newColumns?.forEach((o) => {
       if (o?.accessor === 'asset') {
         const getBackgroundColor = (row) => {
-          const today = moment()
-          const dueDate = moment(row?.original?.dueDate)
+          const today = moment();
+          const dueDate = moment(row?.original?.dueDate);
           const days = dueDate.diff(today, 'days');
-          let color = ''
+          let color = '';
           if (row?.original?.status === 'Pending') {
             if (days <= 1) {
-              color = COLOUR_MASTER.lostAssets.background;;
-            }
-            else if (days <= 7) {
-              color = COLOUR_MASTER.replaceAssetColor.background;;
+              color = COLOUR_MASTER.lostAssets.background;
+            } else if (days <= 7) {
+              color = COLOUR_MASTER.replaceAssetColor.background;
             }
           }
           return color;
-        }
+        };
         o.cell = ({ row }) => (
-          <div style={{ backgroundColor: getBackgroundColor(row) }}  >
+          <div style={{ backgroundColor: getBackgroundColor(row) }}>
             <Link
               className="link text-truncate"
               title={row?.original?.asset}
-              target='_blank'
+              target="_blank"
               to={`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`}
             >
               {row?.original?.asset}
             </Link>
           </div>
         );
-      } else if (o.accessor === 'assetStatus') {
-        o.disableFilters = true;
       }
     });
 
@@ -124,21 +130,26 @@ const WorkOrderPlanning = () => {
     const queryString = getQueryString();
     axiosInstance()
       .get(`${workOrder.api}/work-order-planning${queryString}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data: { data, count } } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['asset'] = u?.asset?.assetNumber;
-          finalObject['assetId'] = u?.asset?._id;
-          finalObject['warehouse'] = u?.asset?.warehouse;
-          finalObject['warehouseId'] = u?.asset?.warehouseId;
-          finalObject['assetStatus'] = u?.asset?.status;
-          finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
-          finalObject['ownerType'] = u?.asset?.ownerType;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      }
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          let rows = data.map((u) => {
+            let finalObject = prepareDataForGrid(u, user);
+            finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            finalObject['asset'] = u?.asset?.assetNumber;
+            finalObject['assetId'] = u?.asset?._id;
+            finalObject['warehouse'] = u?.asset?.warehouse;
+            finalObject['warehouseId'] = u?.asset?.warehouseId;
+            finalObject['assetStatus'] = u?.asset?.status;
+            finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
+            finalObject['ownerType'] = u?.asset?.ownerType;
+            return finalObject;
+          });
+          dispatch({ type: 'initialize', data: rows, count: count });
+        }
       )
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -151,20 +162,23 @@ const WorkOrderPlanning = () => {
   };
 
   const handleAddAssets = async (repairOrder) => {
-    axiosInstance().post(`${workOrder.api}/work-order-planning/material`, {
-      repairOrderId: repairOrder?._id,
-      _ids: selectedRecords?.map((e) => e?._id)
-    }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .post(`${workOrder.api}/work-order-planning/material`, {
+        repairOrderId: repairOrder?._id,
+        _ids: selectedRecords?.map((e) => e?._id)
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
   };
 
   const handleSearch = (e) => {

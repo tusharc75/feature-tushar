@@ -34,6 +34,10 @@ import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
+
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -45,6 +49,8 @@ const TransferAssetDetailPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [loading, setLoading] = useState(true);
@@ -89,15 +95,23 @@ const TransferAssetDetailPage = () => {
   useEffect(() => {
     if (id) {
       fetchTransferAssetData();
+      fetchPolicy();
     }
   }, [id]);
 
-  const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferAsset}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchFields = (transferType) => {
@@ -298,6 +312,7 @@ const TransferAssetDetailPage = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -320,7 +335,9 @@ const TransferAssetDetailPage = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={isTransferEnded}
               setStepFullScreen={() => setStepFullScreen(true)}
-              updateStatus={updateProcessStatus}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.transferAsset, stepNames[step], id);
+              }}
             />
             <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && transferAssetData && (
@@ -371,6 +388,22 @@ const TransferAssetDetailPage = () => {
             <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
           </Box>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.transferAsset}
+                  data={transferAssetData}
+                  allowedToEdit={permissions?.transferAsset?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {/* Confirm Delete Dialog */}
       {showConfirmBox && (

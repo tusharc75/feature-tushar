@@ -10,7 +10,7 @@ export const isSectionVisible = (item: TResource) => {
   return (
     item.isRead &&
     !item.isHidden &&
-    item.sectionName !== '' &&
+    // item.sectionName !== '' &&
     !staticHiddenResource.includes(item.name) &&
     !(item?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging')
   );

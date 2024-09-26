@@ -39,7 +39,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

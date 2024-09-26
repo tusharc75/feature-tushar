@@ -1,63 +1,63 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, Collapse, IconButton } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import BuildIcon from '@material-ui/icons/Build';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import PolicyIcon from '@material-ui/icons/Policy';
 import SettingIcon from '@material-ui/icons/Settings';
-import axios, { CancelTokenSource } from 'axios';
-import { sortBy } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { MdDragIndicator } from 'react-icons/md';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ManageTabs from 'src/components/FormBuilder/Tabs/ManageTabs';
+import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import Actions from './Actions';
-import ConfigureField from './ConfigureField';
-import ManageSteps from './ManageSteps';
-import Notifications from './Notifications';
-import Setting from './Setting';
-import { resourcePolicy } from './helper';
-import PolicyDialog from './policyDialog';
-
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { sortBy } from 'lodash';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { MdDragIndicator } from 'react-icons/md';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import Steps from './Steps';
+import { resourcePolicy } from 'src/components/FormBuilder/Tabs/helper';
+import Setting from 'src/components/FormBuilder/Tabs/Setting';
+import Actions from 'src/components/FormBuilder/Tabs/Actions';
+import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
+import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
+import { AddOutlined, ExpandLess, ExpandMore } from '@material-ui/icons';
+import routes from 'src/components/Helpers/Routes';
 
-const Steps = ({ resource }) => {
+const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [resourceData, setResourceData] = useState(null);
-  const [steps, setSteps] = useState(null);
-  const [stepsLoading, setStepsLoading] = useState(false);
   const [open, setOpen] = useState({ open: false, data: null });
-  const [resourceId, setResourceId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [tabs, setTabs] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
+  const [openPolicy, setOpenPolicy] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
-  const [openPolicy, setOpenPolicy] = useState(false);
-  const [activeItem, setActiveItem] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
-      setStepsLoading(true);
+      setLoading(true);
+      let api = `/sa-formbuilder/tabs/${resource}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
       axiosInstance()
-        .get(`/sa-formbuilder/steps/${resource}`, { cancelToken: cancelTokenSource?.token })
+        .get(api, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
           setResourceData(data);
-          setResourceId(data?._id);
-          setSteps(sortBy(data?.steps, 'order'));
-          setStepsLoading(false);
+          setTabs(sortBy(data?.tabs, 'order'));
+          setLoading(false);
         })
         .catch((error) => {
-          setStepsLoading(false);
+          setLoading(false);
           toastConfig.setToastConfig(error);
         });
     },
@@ -70,47 +70,12 @@ const Steps = ({ resource }) => {
     return () => cancelTokenSource.cancel();
   }, [resource]);
 
-  const handleSave = (values)=>{
-    setIsSubmitting(true);
-     if (values?.stepId) {
-      axiosInstance()
-        .put(`/sa-formbuilder/steps/${resourceId}`, values)
-        .then(({ data }) => {
-          setIsSubmitting(false);
-          fetchData();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .post(`/sa-formbuilder/steps/${resource}`, values)
-        .then(({ data }) => {
-          setIsSubmitting(false);
-          fetchData();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  }
-
-  const handleDelete = (step) => {
+  const handleDelete = (tab) => {
     setDeleting(true);
+    let api = `/sa-formbuilder/tabs/delete/${resourceData?._id}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/delete/${workflowId}`
     axiosInstance()
-      .put(`/sa-formbuilder/steps/delete/${resourceId}`, { stepId: step?._id })
+      .put(api, { tabId: tab?._id })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -123,11 +88,13 @@ const Steps = ({ resource }) => {
       });
   };
 
-  const handleUpdateOrder = (steps) => {
+  const handleUpdateOrder = (tabs) => {
+    let api = `/sa-formbuilder/tabs/order/${resourceData?._id}`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/order/${workflowId}`;
     axiosInstance()
       .put(
-        `/sa-formbuilder/steps/order/${resourceId}`,
-        steps?.map((step) => ({ stepId: step?._id, order: step?.order }))
+        api,
+        tabs?.map((tab) => ({ tabId: tab?._id, order: tab?.order }))
       )
       .then(() => {
         fetchData();
@@ -145,13 +112,13 @@ const Steps = ({ resource }) => {
     const overIndex = over.data.current?.index;
     const activeIndex = active.data.current?.index;
 
-    const items: any = Array.from(steps);
+    const items: any = Array.from(tabs);
     const [reorderedItem] = items.splice(activeIndex, 1);
     items.splice(overIndex, 0, { ...reorderedItem, order: overIndex });
-    const updatedSteps = items.map((i, index) => ({ ...i, order: index }));
-    setSteps(updatedSteps);
+    const updatedTabs = items.map((i, index) => ({ ...i, order: index }));
+    setTabs(updatedTabs);
 
-    handleUpdateOrder(updatedSteps);
+    handleUpdateOrder(updatedTabs);
   };
 
   const onDragStart = (event: DragStartEvent) => {
@@ -171,11 +138,12 @@ const Steps = ({ resource }) => {
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
+          startIcon={<AddOutlined />}
         >
-          Add Step
+          Add Tab
         </Button>
         <Box>
-          {resourcePolicy.find((e) => e.resource === resource) && (
+          {resourcePolicy.find((e) => e.resource === resource) && !workflowId && (
             <HtmlTooltip title={'Policy'}>
               <IconButton
                 aria-label="Policy"
@@ -187,7 +155,8 @@ const Steps = ({ resource }) => {
               </IconButton>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={'Setting'}>
+          {!workflowId && (
+            <HtmlTooltip title={'Setting'}>
             <IconButton
               aria-label="Setting"
               onClick={() => {
@@ -197,7 +166,9 @@ const Steps = ({ resource }) => {
               <SettingIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          <HtmlTooltip title={'Actions'}>
+        )}
+         {!workflowId &&
+         ( <HtmlTooltip title={'Actions'}>
             <IconButton
               aria-label="Actions"
               onClick={() => {
@@ -206,8 +177,9 @@ const Steps = ({ resource }) => {
             >
               <BuildIcon fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title={'Notifications'}>
+          </HtmlTooltip>)}
+          {!workflowId &&
+          (<HtmlTooltip title={'Notifications'}>
             <IconButton
               aria-label="Notifications"
               onClick={() => {
@@ -217,46 +189,49 @@ const Steps = ({ resource }) => {
               <AddAlertIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
+        )}
         </Box>
       </Box>
+
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-          <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setDeleteData }} />
+          <RenderTabItems {...{ tabs, loading, setOpen, resourceData, setDeleteData, fetchData, workflowId }} />
           <DragOverlay>
             {activeItem && (
               <span className="[&_.drag-handle]:!cursor-grabbing">
-                <SingleStep {...activeItem} />
+                <SingleTab {...activeItem} />
               </span>
             )}
           </DragOverlay>
         </DndContext>
       </Box>
-
       <>
-        {(open?.open || isSubmitting) && (
-          <ManageSteps
-            isSubmitting={isSubmitting}
-            data={open?.data}
-            onSuccess={(data) => {
-              handleSave(data);
-              setOpen({ open: false, data: null });
-            }}
+        {open?.open && (
+          <ManageTabs
             onClose={() => {
               setOpen({ open: false, data: null });
             }}
+            data={open?.data}
+            onSuccess={() => {
+              setOpen({ open: false, data: null });
+              fetchData();
+            }}
             resource={resource}
+            resourceId={resourceData?._id || null}
+            workflowId = {workflowId}
           />
         )}
 
         {deleteData && (
           <ConfirmationDialog
             open={true}
-            message={`Are you sure you want to delete ${deleteData?.stepName}?`}
+            message={`Are you sure you want to delete ${deleteData?.tabName}?`}
             onClose={() => setDeleteData(null)}
             onOk={() => handleDelete(deleteData)}
             okBtnLoading={isDeleting}
           />
         )}
+
         {openPolicy && (
           <PolicyDialog
             onClose={() => {
@@ -284,6 +259,7 @@ const Steps = ({ resource }) => {
             resourceData={resourceData}
           />
         )}
+
         {openAction && (
           <Actions
             onClose={() => {
@@ -297,6 +273,7 @@ const Steps = ({ resource }) => {
             resourceData={resourceData}
           />
         )}
+
         {openNotifications && (
           <Notifications
             onClose={() => {
@@ -315,38 +292,39 @@ const Steps = ({ resource }) => {
   );
 };
 
-export default Steps;
+export default DynamicTabs;
 
-const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData }) => {
+const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, fetchData, workflowId }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
-      {steps && steps?.length ? (
+      {tabs && tabs?.length ? (
         <ul className="grid list-none items-start gap-2">
-          <SortableContext items={steps.map((d) => d._id)}>
-            {steps?.map((step, index) => {
-              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index }} />;
+          <SortableContext items={tabs.map((d) => d._id)}>
+            {tabs?.map((tab, index) => {
+              return <SingleTab key={tab?._id} {...{ tab, setOpen, resourceData, setDeleteData, fetchData, index, workflowId }} />;
             })}
           </SortableContext>
         </ul>
-      ) : stepsLoading ? (
+      ) : loading ? (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (
-        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-          Steps not added yet!
+        <Box minHeight={'200px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          Tabs not added yet!
         </Box>
       )}
     </div>
   );
 };
 
-const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
+const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index, workflowId, isExpanded: defaultExpanded = true }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
-    id: step._id,
+    id: tab._id,
     data: {
       index,
-      props: { step, setOpen, setDeleteData, index }
+      props: { tab, setOpen, setDeleteData, index, isExpanded }
     }
   });
 
@@ -357,24 +335,22 @@ const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
 
   return (
     <>
-      <li ref={setNodeRef} style={style} className={` list-none `}>
-        <div
-          className={` rounded-[5px]  p-3 [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
-        >
-          <div className="flex items-center justify-between">
+      <li ref={setNodeRef} style={style} className={`list-none pb-2`}>
+        <div className={` rounded-[5px] [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`} >
+          <div className="flex items-center justify-between p-3 ">
             <div className="flex items-center gap-2">
               <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
                 <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
-              <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{step?.stepName}</h3>
+              <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{tab?.tabName}</h3>
             </div>
-            <div className="min-w-fit">
+            <div className="flex min-w-fit gap-1">
               <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
                   aria-label="Edit"
                   onClick={() => {
-                    setOpen({ open: true, data: step });
+                    setOpen({ open: true, data: { _id: tab?._id, tabName: tab?.tabName, stepsStyle: tab?.stepsStyle } });
                   }}
                 >
                   <EditIcon fontSize="small" color={'primary'} />
@@ -385,14 +361,22 @@ const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setDeleteData(step);
+                    setDeleteData(tab);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={'error'} />
                 </IconButton>
               </HtmlTooltip>
+              <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
+                {isExpanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+              </IconButton>
             </div>
           </div>
+          <Collapse in={isExpanded}>
+            <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
+              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId}  />
+            </div>
+          </Collapse>
         </div>
       </li>
     </>

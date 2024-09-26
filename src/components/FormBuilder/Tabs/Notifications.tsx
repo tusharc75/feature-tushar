@@ -78,7 +78,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const handleSubmit = async (values) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`/sa-formbuilder/steps/notifications/${resource}`, values?.notifications || [])
+      .put(`/sa-formbuilder/tabs/notifications/${resource}`, values?.notifications || [])
       .then(({ data }) => {
         setSubmitting(false);
         onSuccess();
@@ -275,8 +275,10 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                                     getOptionSelected={(option: any, val) => option?.fieldName === val}
                                     value={
-                                      notificationUserField && notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
-                                        ? notificationUserField && notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
+                                      notificationUserField &&
+                                      notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
+                                        ? notificationUserField &&
+                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
                                         : ''
                                     }
                                     onChange={(e, val) => {

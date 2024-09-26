@@ -12,9 +12,9 @@ import { object, string } from 'yup';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
-import { getLookupResource, getResourceField } from '../helper';
-import ConfigureField from 'src/components/FormBuilder/Steps/ConfigureField';
+import { getLookupResource, getResourceField } from '../../helper';
 import StepActions from './StepActions';
+import ConfigureField from 'src/components/FormBuilder/Tabs/Steps/ConfigureField';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -28,7 +28,6 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
   const [initialValues, setInitialValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [resourceOption, setResourceOption] = useState([]);
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
@@ -62,6 +61,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
     if (data) {
       setInitialValues({
         stepName: data?.stepName,
+        order: data?.order,
         multipleStepData: data?.multipleStepData || false,
         stepDataRequired: data?.stepDataRequired || false,
         showInPdf: data?.showInPdf || false,
@@ -95,22 +95,22 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
   const handleSubmit = (values) => {
     if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
       toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
-      return
+      return;
     }
-    let updatedValues = values
+    let updatedValues = values;
     if (data?._id) {
-      updatedValues = { ...values, stepId: data?._id }
+      updatedValues = { ...values, stepId: data?._id };
     }
     if (updatedValues?.linkWithResource) {
       updatedValues.fields = [];
     }
-    onSuccess(updatedValues)
+    onSuccess(updatedValues);
   };
 
   const validate = (values) => {
     const errors = {};
     if (!values?.stepName) {
-      errors['stepName'] = 'Required field';
+      errors['stepName'] = 'Step Name is required';
     }
     if (values.linkWithResource && !values?.linkResourceName) {
       errors['linkResourceName'] = 'please select Resource';
@@ -373,7 +373,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                     {!values['linkWithMaterial'] && (
                       <>
                         <Button
-                          className='ml-2'
+                          className="ml-2"
                           variant="contained"
                           color="primary"
                           size="small"
@@ -393,7 +393,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
               <Button
                 size="small"
                 color="primary"
-                disabled={submitting}
+                disabled={isSubmitting}
                 onClick={() => {
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
@@ -437,7 +437,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                   setOpenField(false);
                 }}
                 handleSucess={(data) => {
-                  setFieldValue('fields', data)
+                  setFieldValue('fields', data);
                   setOpenField(false);
                 }}
               />
@@ -449,7 +449,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                   setOpenStepActions(false);
                 }}
                 onSuccess={(data) => {
-                  setFieldValue('createActions', data)
+                  setFieldValue('createActions', data);
                   setOpenStepActions(false);
                 }}
                 stepData={values}

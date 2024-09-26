@@ -1,7 +1,7 @@
 import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, isEmpty, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
@@ -13,6 +13,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
+import { GoogleMapProps } from '@react-google-maps/api';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -223,7 +224,7 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const gridPageSizes = [25, 50, 75, 100];
+export const gridPageSizes = [25, 50, 100, 250, 500];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
 
@@ -995,6 +996,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       }
     } else if (key.type === 'signature') {
       obj[key.fieldName] = '';
+    } else if (key.type === 'location') {
+      obj[key.fieldName] = {};
     } else {
       obj[key.fieldName] = value;
     }
@@ -1100,6 +1103,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
+    } else if (key.type === 'location') {
+      const values = dataObj[key.fieldName]
+        ? isString(dataObj[key.fieldName])
+          ? { locationName: dataObj[key.fieldName] }
+          : dataObj[key.fieldName]
+        : {};
+      obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1244,7 +1254,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1276,78 +1286,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+            }
+          )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(urlRegex, 'Enter valid URL').required(message),
-                otherwise: string().matches(urlRegex, 'Enter valid URL')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(urlRegex, 'Enter valid URL').required(message),
+              otherwise: string().matches(urlRegex, 'Enter valid URL')
+            }
+          )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().min(10, 'Mobile number is too short').required(message),
-                otherwise: string().min(10, 'Mobile number is too short')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().min(10, 'Mobile number is too short').required(message),
+              otherwise: string().min(10, 'Mobile number is too short')
+            }
+          )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: array().min(1, message),
-                otherwise: array()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: array().min(1, message),
+              otherwise: array()
+            }
+          )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-                otherwise: number().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+              otherwise: number().nullable()
+            }
+          )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1355,26 +1365,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-                validationFields?.map((f) => f?.fieldName),
-                {
-                  is: validation,
-                  then: string().email().required(message),
-                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-                }
-              )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().email().required(message),
+                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+              }
+            )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: boolean().required(message),
-                otherwise: boolean()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: boolean().required(message),
+              otherwise: boolean()
+            }
+          )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1403,13 +1413,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: dateValidation,
-                otherwise: dateValidation
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: dateValidation,
+              otherwise: dateValidation
+            }
+          )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1424,17 +1434,19 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'location') {
+      schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
     } else {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -1991,6 +2003,9 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
       finalObject[d] = objectValues[d]['optionLabel'];
       finalObject[`${d}Id`] = objectValues[d]['optionValue'];
+    }
+    else if (objectValues[d] && objectValues[d].hasOwnProperty('locationName')) {
+      finalObject[d] = objectValues[d];
     }
   });
 
@@ -3523,7 +3538,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const columnSize = (type) => {
@@ -3573,8 +3588,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3619,3 +3634,126 @@ export const findSimilarRecords = (array, property) => {
   });
   return Object.values(similarRecords).filter((group: any) => group.length > 1);
 };
+
+export function compareVersions(newVersion: number, oldVersion: number): 1 | -1 | 0 {
+  if (newVersion > oldVersion) {
+    return 1;
+  }
+  if (newVersion < oldVersion) {
+    return -1;
+  }
+  return 0;
+}
+
+export async function handleHardReload(url = window.location.href) {
+  await fetch(url, {
+    headers: {
+      Pragma: 'no-cache',
+      Expires: '-1',
+      'Cache-Control': 'no-cache'
+    }
+  });
+  if ('caches' in window) {
+    caches?.keys().then((names) => {
+      names.forEach((name) => {
+        caches.delete(name);
+      });
+    });
+  }
+  window.location.href = url;
+  // This is to ensure reload with url's having '#'
+  window.location.reload();
+}
+
+export const tabIndexValue = (resourceData, index) => {
+  if (resourceData && resourceData?.tabs?.length > 0) {
+    index = resourceData?.tabs?.length + index;
+  }
+  return index;
+};
+export const mapDarkTheme: GoogleMapProps['options']['styles'] = [
+  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#263c3f' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#6b9a76' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#38414e' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#212a37' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9ca5b3' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#746855' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#1f2835' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#f3d19c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#17263c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#515c6d' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#17263c' }]
+  }
+];
+
+export const mapLightTheme: GoogleMapProps['options']['styles'] = [
+  {
+    featureType: 'water',
+    stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+  },
+  { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+  {
+    featureType: 'road',
+    stylers: [{ saturation: -100 }, { lightness: 45 }]
+  },
+  {
+    featureType: 'road.highway',
+    stylers: [{ visibility: 'simplified' }]
+  }
+];

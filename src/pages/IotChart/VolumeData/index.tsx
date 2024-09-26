@@ -18,13 +18,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import ManageVolumeData from './ManageVolumeData';
 import { camelCase } from 'lodash';
 
+const renderedFrom = `${camelCase(routes.iotChart.title)}_VolumeData`;
+
 const VolumeData = ({ assetId }) => {
-
-  const renderedFrom = `${camelCase(routes.iotChart.title)}_VolumeData`;
-
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, selectedRecords } = state;
   const [showManageDialog, setShowManageDialog] = useState({ open: false, data: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -54,11 +53,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {moment(row?.original?.date)?.format(dateTimeFormat)}
-          </div>
-        )
+        Cell: ({ row }) => <div>{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
       },
       {
         accessor: 'TotalVolInBBLs',
@@ -66,11 +61,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.TotalVolInBBLs}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.TotalVolInBBLs}</div>
       },
       {
         accessor: 'TotalVolOutBBLs',
@@ -78,11 +69,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.TotalVolOutBBLs}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.TotalVolOutBBLs}</div>
       },
       {
         accessor: 'TotalMinutesRecycle',
@@ -90,11 +77,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.TotalMinutesRecycle}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.TotalMinutesRecycle}</div>
       },
       {
         accessor: 'TotalMinutesPurge',
@@ -102,11 +85,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.TotalMinutesPurge}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.TotalMinutesPurge}</div>
       },
       {
         accessor: 'TotalMinutesFill',
@@ -114,11 +93,7 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.TotalMinutesFill}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.TotalMinutesFill}</div>
       },
       {
         accessor: 'minid',
@@ -126,12 +101,8 @@ const VolumeData = ({ assetId }) => {
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.minid}
-          </div>
-        )
-      },
+        Cell: ({ row }) => <div>{row?.original?.minid}</div>
+      }
     ];
     setColumns([...columns, ActionsRenderer]);
   };
@@ -182,7 +153,8 @@ const VolumeData = ({ assetId }) => {
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`${routes?.serializedAsset?.path}/iot-volume${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance()
+      .get(`${routes?.serializedAsset?.path}/iot-volume${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -205,7 +177,7 @@ const VolumeData = ({ assetId }) => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    deepFilter = `${deepFilter}&asset=${assetId}`
+    deepFilter = `${deepFilter}&asset=${assetId}`;
     return deepFilter;
   };
 

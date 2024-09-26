@@ -28,7 +28,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
@@ -310,6 +310,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
                 className="new-dropdown-v1"
+                id={'details-page-action-button'}
               >
                 Actions
               </Button>

@@ -33,7 +33,7 @@ const ignoreField = ['qty', 'priceTemplate'];
 const Product = () => {
   const renderedFrom = camelCase(routes?.product.title);
   const { setWalkmeData } = useSetWalkmeData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [open, setOpen] = useState(false);
@@ -357,8 +357,9 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/service-master/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -373,8 +374,9 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/package/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -495,7 +497,7 @@ const LeftSideContent = ({
       {permissions?.productCategory?.isRead ? (
         <div className="w-full md:w-auto">
           <Autocomplete
-            className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+            className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
             size="small"
@@ -516,7 +518,7 @@ const LeftSideContent = ({
       ) : null}
       {isProductTemplate && (
         <Autocomplete
-          className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+          className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTemplateList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
           getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -535,7 +537,7 @@ const LeftSideContent = ({
       )}
       {isProductType && (
         <Autocomplete
-          className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+          className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTypeList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
           getOptionSelected={(option: any, val) => option.optionValue === val}

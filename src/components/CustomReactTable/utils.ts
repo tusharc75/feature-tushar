@@ -342,11 +342,15 @@ export const createFilterModel = (formValues, coloums) => {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
+      case 'lookUpDisplay':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
       case 'multiLine':
       case 'email':
       case 'mobileNumber':
       case 'currency':
-      case 'lookUpDisplay':
       case 'url':
         if (formValues[fieldName]?.trim()) {
           filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
@@ -401,8 +405,8 @@ export const createFilterModel = (formValues, coloums) => {
         }
         break;
       case 'location':
-        if (formValues[fieldName]?.length > 0) {
-          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        if (formValues[fieldName] && formValues[fieldName]?.locationName) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.locationName });
         }
         break;
       default:

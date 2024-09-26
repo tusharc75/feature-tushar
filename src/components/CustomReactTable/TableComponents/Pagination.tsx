@@ -2,6 +2,10 @@ import { FormControl, MenuItem, Select, IconButton } from '@material-ui/core';
 import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 import React, { FC, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDebounce } from 'src/hooks';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from 'src/StateProvider/Provider';
+import { SET_USER } from 'src/StateProvider/actionTypes';
 
 interface PaginationProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   count: number;
@@ -11,6 +15,7 @@ interface PaginationProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   onRowsPerPageChange: (event: React.ChangeEvent<{ value: unknown }>, value: number) => void;
   rowsPerPageOptions: number[];
   disabled: boolean;
+  renderedFrom: string;
 }
 
 const Pagination: FC<PaginationProps> = ({
@@ -22,19 +27,47 @@ const Pagination: FC<PaginationProps> = ({
   onRowsPerPageChange,
   rowsPerPageOptions,
   disabled,
+  renderedFrom,
   ...others
 }) => {
   const [textFieldvalue, setTextFieldValue] = useState(page + 1);
   const debouncedTextValue = useDebounce<number>(textFieldvalue, 800);
   const changedFromInput = useRef(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState<{ value: number; loading: boolean }>(null);
+
+  const {
+    state: { user },
+    dispatch
+  }: any = useData();
 
   const possibleMaxPage = useMemo(() => {
     return Math.ceil(count / rowsPerPage);
   }, [count, rowsPerPage]);
 
+  const handleSaveRowsPerPage = async (value: number) => {
+    setIsConfirmDialogOpen((prev) => (prev ? { ...prev, loading: true } : null));
+    try {
+      await axiosInstance().put('/user/grid-view/grid-rows-per-page', { rowsPerPage: value, resource: renderedFrom });
+      const gridRowsPerPage = [...(user?.gridRowsPerPage || [])];
+      const foundedIndex = gridRowsPerPage.findIndex((d) => d.resource === renderedFrom);
+      if (foundedIndex > -1) {
+        gridRowsPerPage[foundedIndex] = { ...gridRowsPerPage[foundedIndex], rowsPerPage: value };
+      } else {
+        gridRowsPerPage.push({ resource: renderedFrom, rowsPerPage: value, _id: Date.now().toString() });
+      }
+      const newUser = { ...user, gridRowsPerPage: gridRowsPerPage };
+      dispatch({ type: SET_USER, payload: newUser });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsConfirmDialogOpen(null);
+    }
+  };
+
   const handleRowsPerPageChange = (e: React.ChangeEvent<{ value: unknown }>) => {
     const target = e.target as HTMLInputElement;
     const value = parseInt(target.value);
+    setIsConfirmDialogOpen({ value, loading: false });
     if (onRowsPerPageChange) onRowsPerPageChange(e, value);
     setTextFieldValue(1);
   };
@@ -92,8 +125,8 @@ const Pagination: FC<PaginationProps> = ({
 
   return (
     <div className={`${className} pagination py-3 max-[768px]:mt-3`} {...others}>
-      <div className="flex flex-wrap justify-between sm:justify-end items-center sm:gap-3 gap-2">
-        <div className="rows-per-page flex items-center gap-2 justify-center sm:justify-[unset] min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important] max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important]">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end sm:gap-3">
+        <div className="rows-per-page sm:justify-[unset] flex items-center justify-center gap-2 min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important] max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important]">
           <span className="max-[768px]:sr-only">Rows Per Page:</span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
             <Select labelId="label" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
@@ -106,9 +139,9 @@ const Pagination: FC<PaginationProps> = ({
           </FormControl>
         </div>
 
-        <span className="block max-[768px]:text-[13px] text-gray-500 dark:text-gray-300">{visibleDataText}</span>
+        <span className="block text-gray-500 dark:text-gray-300 max-[768px]:text-[13px]">{visibleDataText}</span>
 
-        <div className="flex gap-2 items-center max-[365px]:mx-auto">
+        <div className="flex items-center gap-2 max-[365px]:mx-auto">
           <IconButton disabled={disabled || page <= 0} onClick={(e) => gotToPrevPage(e)} size={'small'}>
             <ChevronLeft />
           </IconButton>
@@ -124,7 +157,7 @@ const Pagination: FC<PaginationProps> = ({
                 const target = e.target as HTMLInputElement;
                 target.select();
               }}
-              className={`bg-transparent appearance-none text-[var(--primary-text)] shadow-none border-none h-[30px] text-center [border:1px_solid_var(--common-border-color)] rounded-md focus-within:outline-[var(--new-theme-color)]`}
+              className={`h-[30px] appearance-none rounded-md border-none bg-transparent text-center text-[var(--primary-text)] shadow-none [border:1px_solid_var(--common-border-color)] focus-within:outline-[var(--new-theme-color)]`}
             />
             &nbsp;
             <span>
@@ -137,6 +170,18 @@ const Pagination: FC<PaginationProps> = ({
           </IconButton>
         </div>
       </div>
+      {Boolean(isConfirmDialogOpen) && (
+        <ConfirmationDialog
+          title={'Set as default'}
+          message={`Would you like to set ${isConfirmDialogOpen.value} as the default "Rows Per Page" for this table?`}
+          onOk={() => {
+            handleSaveRowsPerPage(isConfirmDialogOpen.value as number);
+          }}
+          onClose={() => setIsConfirmDialogOpen(null)}
+          open={Boolean(isConfirmDialogOpen)}
+          okBtnLoading={isConfirmDialogOpen.loading}
+        />
+      )}
     </div>
   );
 };

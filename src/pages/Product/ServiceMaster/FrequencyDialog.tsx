@@ -39,7 +39,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   const handleSave = (values) => {
     setLoading(true);
     axiosInstance()
-      .put(`${routes.product.path}/${productId}/service-master/update-service-data`, { ...values, _id: serviceData?._id })
+      .put(`${routes.product.path}/${productId}/service-master/update-service-data`, [{ ...values, _id: serviceData?._id }])
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

@@ -21,7 +21,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = '' }) {
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
     state: { permissions }

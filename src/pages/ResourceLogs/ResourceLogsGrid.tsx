@@ -12,11 +12,13 @@ import { dateFormat, dateTimeFormat, gridLoadingTimeout } from 'src/constants/he
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 
+const renderedFrom = 'resourceLogs';
+
 const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedAction = '', selectedUser = '', hideResourceField = false }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null, updatedBy: null });
+  const [openDialog, setOpenDialog] = useState({ open: false, data: null });
   const [columns, setColumns] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit } = state;
 
   useEffect(() => {
@@ -92,9 +94,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
       {
         accessor: 'changeString',
         Header: 'Changes',
-        disableFilters: true,
-        disableSortBy: true,
-        width: 120,
+        width: 300,
         Cell: ({ row }) => <div className="text-truncate">{row?.original?.changeString}</div>
       },
       {
@@ -114,9 +114,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                 onClick={() =>
                   setOpenDialog({
                     open: true,
-                    changes: row?.original?.changes || [],
-                    operations: row?.original?.operations || [],
-                    updatedBy: row?.original?.updatedBy?.optionLabel || ''
+                    data: row?.original
                   })
                 }
               >
@@ -227,6 +225,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
         toastConfig.setToastConfig(error);
       });
   };
+
   return (
     <>
       {columns ? (
@@ -235,7 +234,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={'resourceLogs'}
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
         />
@@ -247,10 +246,8 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
       {openDialog?.open && (
         <ChangesDialog
           open={openDialog?.open}
-          onClose={() => setOpenDialog({ open: false, changes: null, operations: null, updatedBy: null })}
-          changes={openDialog?.changes}
-          operations={openDialog.operations}
-          updatedBy={openDialog?.updatedBy}
+          onClose={() => setOpenDialog({ open: false, data: null })}
+          data={openDialog?.data}
         />
       )}
     </>

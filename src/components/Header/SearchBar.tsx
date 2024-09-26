@@ -14,6 +14,7 @@ import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 import { useLocation } from 'react-router-dom';
 
 import { filterReducerInitialState, filterReducer } from './helper';
+import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
 
 export const SearchBar = ({ user, selectedEntity, history }) => {
   // const {
@@ -52,7 +53,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   useEffect(() => {
     let arr = [];
     let allData = [];
-
     let entityData;
     if (user?.entity && user.entity.length) {
       entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
@@ -229,6 +229,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                         <CallMadeIcon style={{ fontSize: 16 }} />
                       </ListItemIcon>
                       <ListItemText primary={<span style={{ fontWeight: 500, fontSize: '15px' }}>{item.resourceLabel}</span>} />
+                      <UserFavoriteIcon item={item} />
                     </ListItem>
                   );
                 })}

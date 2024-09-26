@@ -65,7 +65,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -516,8 +516,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-          selectedRecords.length &&
-          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+        selectedRecords.length &&
+        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {

@@ -33,6 +33,13 @@ import {
   repairOrder,
   sidebarResource
 } from '../../../constants/helpers';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+
+const dataAdded = {
+  completeDataAdded: false,
+  nextButtonAdded: false
+};
 
 const Quotation = ({
   repairOrderData,
@@ -41,10 +48,14 @@ const Quotation = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
+  topAllowedToEdit = false,
   setQuotationVersionData,
   updateOrderStatus,
-  invoiceStep
+  invoiceStep,
+  currentStepName = 'Quotation'
 }) => {
+  const walkmeInstance = useGetWalkmeInstance();
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -69,9 +80,34 @@ const Quotation = ({
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    setWalkmeData([]);
+  }, []);
+
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (walkmeInstance && walkmeInstance.type === 'flow' && rows.length) {
+      if (currentStepName === 'Quotation' && !dataAdded.nextButtonAdded) {
+        dataAdded.nextButtonAdded = true;
+        walkmeInstance.instance.push([nextButtonStep(true)]);
+        walkmeInstance.handleNext();
+      }
+      if (
+        permissions?.repairOrder?.isUpdate &&
+        topAllowedToEdit &&
+        repairOrderData?.canComplete &&
+        !dataAdded.completeDataAdded &&
+        currentStepName === 'Slip'
+      ) {
+        dataAdded.completeDataAdded = true;
+        walkmeInstance.instance.push(generateCompleteStepData().steps);
+        walkmeInstance.handleNext();
+      }
+    }
+  };
 
   useEffect(() => {
     fetchFields();
@@ -328,7 +364,7 @@ const Quotation = ({
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
-
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -338,14 +374,15 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -635,7 +672,7 @@ const Quotation = ({
             <Box display={'flex'} gridGap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                   <Button
                     disabled={material
                       .filter((e) => e.parentId === null)
@@ -665,8 +702,8 @@ const Quotation = ({
                     Accept / Reject
                   </Button>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
-                  quotationData?.versions[currentVersion]?.status
-                ) ? (
+                    quotationData?.versions[currentVersion]?.status
+                  ) ? (
                   <Button
                     onClick={() => {
                       cloneVersion();
@@ -682,19 +719,19 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords?.length === 0}
-                    endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
-                  >
-                    Actions
-                  </Button>
-                )}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords?.length === 0}
+                  endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
+                >
+                  Actions
+                </Button>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted

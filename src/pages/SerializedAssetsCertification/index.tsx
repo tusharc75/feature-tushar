@@ -29,13 +29,14 @@ import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
+
 const SerializedAssetsCertification = () => {
-  const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const toastConfig = useContext(CustomToastContext);
   const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null, certificateExpiryDate: null });
   const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -232,7 +233,7 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <div className="grid gap-x-2 gap-y-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             <Autocomplete
               onChange={(event, value) => {
                 setSelectedAsset(value);
@@ -328,11 +329,7 @@ const SerializedAssetsCertification = () => {
                 }}
               />
             </MuiPickersUtilsProvider>
-            <SearchBox
-              onChange={handleSearch}
-              width={'150px'}
-              value={search}
-            />
+            <SearchBox onChange={handleSearch} width={'150px'} value={search} />
           </div>
         </div>
         {columns ? (

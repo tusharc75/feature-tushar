@@ -81,12 +81,15 @@ function SideBar({ location }) {
         dataList = [...dataList, ...userSidebarData];
       }
       for (const item of dataList) {
-        if (!isSectionVisible(item)) continue;
+        if (!isSectionVisible(item) || item.sectionName === '') continue;
         const isSectionExist = sections.map((s) => s.sectionName).includes(item.sectionName);
         const itemWithLink: TSidebarItem = { ...item, link: handleRoutes(item) };
         if (!isSectionExist) {
           const newSection: TSidebarSection = {
-            name: item.sectionName === 'Activities' || item.sectionName === 'Collaboration Tools' ? 'Collaboration Tools' : item.sectionName,
+            name:
+              item.sectionName === 'Activities' || item.sectionName === 'Collaboration Tools' || item.sectionName === 'Workspace'
+                ? 'Workspace'
+                : item.sectionName,
             sectionName: item.sectionName,
             icon: renderIcon(item.sectionName),
             link: null,

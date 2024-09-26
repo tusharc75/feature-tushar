@@ -23,7 +23,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
 
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -138,25 +138,25 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original?.storageLocation ? (
-                <Link
-                  className="link"
-                  title={row?.original?.storageLocation}
-                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                >
-                  {row?.original?.storageLocation}
-                </Link>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original?.storageLocation ? (
+                  <Link
+                    className="link"
+                    title={row?.original?.storageLocation}
+                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                  >
+                    {row?.original?.storageLocation}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'supplierPartNumber',

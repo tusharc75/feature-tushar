@@ -113,7 +113,7 @@ const ReceivingTicket = ({
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
 
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -954,28 +954,33 @@ const ReceivingTicket = ({
         }
       });
 
-      if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
-        if (productAssets.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
-          setNextStep(true);
+      if (productAssets?.length) {
+        if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
+          if (productAssets.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
+            setNextStep(true);
+          } else {
+            setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
+          }
         } else {
-          setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
+          if (
+            productAssets?.every((e) =>
+              [
+                RENTAL_INTERNAL_ASSET_STATUS.consumed,
+                RENTAL_INTERNAL_ASSET_STATUS.complete,
+                RENTAL_INTERNAL_ASSET_STATUS.return,
+                'Returned',
+                RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+              ].includes(e.rentalAssetStatus)
+            )
+          ) {
+            setNextStep(true);
+          } else {
+            setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered);
+          }
         }
-      } else {
-        if (
-          productAssets?.every((e) =>
-            [
-              RENTAL_INTERNAL_ASSET_STATUS.consumed,
-              RENTAL_INTERNAL_ASSET_STATUS.complete,
-              RENTAL_INTERNAL_ASSET_STATUS.return,
-              'Returned',
-              RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-            ].includes(e.rentalAssetStatus)
-          )
-        ) {
-          setNextStep(true);
-        } else {
-          setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered);
-        }
+      }
+      else {
+        setNextStep(true)
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
@@ -1521,7 +1526,7 @@ const ReceivingTicket = ({
     const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDetailDialog({
-        open: true,
+        open: open,
         statusPolicy: statusPolicy?.statusPolicy,
         _ids: statusPolicy?.assetIds,
         referenceData: data,
@@ -1836,7 +1841,8 @@ const ReceivingTicket = ({
   const handleSubmitChangeDates = (values) => {
     if (!openChangeActualDateDialog.data) return;
     setIsSubmitting(true);
-    let ids = [], asset = [];
+    let ids = [],
+      asset = [];
     if (openChangeActualDateDialog.isBulkUpdate) {
       selectedRecords?.forEach((ele) => {
         ids.push(ele.uniqueId);
@@ -2371,7 +2377,12 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+            if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
+              setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
+            } else {
+              setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            }
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });
@@ -2598,7 +2609,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            if (addSerializedAssetDialog.type === 'ReplaceAsset') {
+            if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
               handleOpenReplaceAssetReason(rows);
             } else {
               handleSwapAssets(rows);
@@ -3187,7 +3198,7 @@ const ActionButtonMenuItems = ({
                   isAllowedStartDate: selectedRecords?.every((e) => e.isAllowedStartDate),
                   isAllowedEndDate: selectedRecords?.every((e) => e.isAllowedEndDate),
                   manualStartDate: minStartDate?.toISOString(),
-                  manualEndDate: maxEndDate?.toISOString(),
+                  manualEndDate: maxEndDate?.toISOString()
                 },
                 records: selectedRecords,
                 isBulkUpdate: true

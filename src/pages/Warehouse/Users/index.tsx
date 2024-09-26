@@ -15,10 +15,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
+let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
+
 const Users = ({ warehouse }) => {
-  let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {

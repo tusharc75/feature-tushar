@@ -6,14 +6,15 @@ import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/hel
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { FormBuilder } from '../../../components/FormBuilder';
+import { FormBuilder } from '../../../../components/FormBuilder';
 import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
 const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
-
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -72,7 +73,6 @@ const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
     handleSucess(data);
   };
 
-
   const handleExportFields = () => {
     var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
@@ -99,7 +99,7 @@ const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
       <CustomDialogContent>
         <Box display="flex" justifyContent="flex-end">
           <Box pb={1}>
-            <label htmlFor="importFieldStepsFormBuilder" className="cursor-pointer mr-3">
+            <label htmlFor="importFieldStepsFormBuilder" className="mr-3 cursor-pointer">
               Import Fields
               <input
                 onClick={(e: any) => (e.target.value = null)}
@@ -114,7 +114,7 @@ const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
                 type="file"
               />
             </label>
-            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+            <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
               Export Fields
             </label>
             <a id="downloadAnchorElem" style={{ display: 'none' }}></a>

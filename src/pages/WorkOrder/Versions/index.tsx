@@ -17,11 +17,12 @@ import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
 
+let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
+
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
-  let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
   const [tabValue, setTabValue] = useState(0);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
@@ -56,6 +57,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'index',
         Header: 'Index',
+        disabled: true,
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
@@ -63,6 +65,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'type',
         Header: 'Type',
+        disabled: true,
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type) || <NoDataCell />}</p>
@@ -70,6 +73,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'detail',
         Header: 'Detail',
+        disabled: true,
         width: 250,
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">

@@ -76,7 +76,12 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     state: { permissions, selectedEntity }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const [selectedResource, setSelectedResource] = useState(null);
+  const renderedFrom = resourceRendered
+    ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
+    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -84,12 +89,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [resourceList, setResourceList] = useState([]);
 
-  const renderedFrom = resourceRendered
-    ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
-    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+  const [resourceList, setResourceList] = useState([]);
 
   useEffect(() => {
     const options: any = [];
@@ -125,7 +126,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
-    let extraColumns = []
+    let extraColumns = [];
     if (selectedResource?.resource === sidebarResource.fieldTicket) {
       extraColumns.push({
         accessor: 'totalAmount',
@@ -133,9 +134,13 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.totalAmount ? <div>
-            <p className="text-truncate">{row.original.totalAmount}</p>
-          </div> : <NoDataCell />;
+          return row.original?.totalAmount ? (
+            <div>
+              <p className="text-truncate">{row.original.totalAmount}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       });
     }

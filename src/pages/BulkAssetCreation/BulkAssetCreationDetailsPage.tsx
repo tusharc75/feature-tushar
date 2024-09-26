@@ -30,6 +30,9 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -40,6 +43,8 @@ const BulkAssetCreationDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [loadingBulkAssetCreation, setLoadingBulkAssetCreation] = useState(false);
   const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
@@ -63,19 +68,6 @@ const BulkAssetCreationDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
-      updateProcessStatus(bulkAssetCreationSteps[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
-  };
-
-  useEffect(() => {
     if (parsed) {
       history.replace(`?tab=${tabValue}`);
     }
@@ -85,8 +77,24 @@ const BulkAssetCreationDetailsPage = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.bulkAssetCreation}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchData = async () => {
     setLoadingBulkAssetCreation(true);
@@ -94,7 +102,7 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);
@@ -186,6 +194,7 @@ const BulkAssetCreationDetailsPage = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -214,6 +223,9 @@ const BulkAssetCreationDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={['Completed']?.includes(bulkAssetCreationData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.bulkAssetCreation, bulkAssetCreationSteps[step]?.name, id)
+                  }}
                 />
                 <ContentFullScreen title={bulkAssetCreationStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && (
@@ -239,6 +251,22 @@ const BulkAssetCreationDetailsPage = () => {
             )}
           </Grid>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.bulkAssetCreation}
+                  data={bulkAssetCreationData}
+                  allowedToEdit={permissions?.bulkAssetCreation?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
 
       {showConfirmBox && (

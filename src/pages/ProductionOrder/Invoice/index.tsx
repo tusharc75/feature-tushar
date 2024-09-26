@@ -19,7 +19,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
 
   const [columns, setColumns] = useState(null);
@@ -108,18 +108,17 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         ) : (
           <NoDataCell />
         )
-    }
+    };
     if (!newColumns?.find((e) => e.accessor === 'workOrderNumber')) {
       coloum.push(workOrderCol);
     }
     newColumns?.forEach((e) => {
       if (e.accessor === 'workOrderNumber') {
-        coloum.push(workOrderCol)
+        coloum.push(workOrderCol);
+      } else {
+        coloum.push(e);
       }
-      else {
-        coloum.push(e)
-      }
-    })
+    });
     coloum.push({
       accessor: 'status',
       Header: 'Status',
@@ -136,42 +135,45 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) =>
-        <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-          row?.original['assignedUsers']?.map((e, i) => {
-            return i === row?.original['assignedUsers'].length - 1 ? (
-              <a
-                className="link text-truncate [flex-grow:0_!important]"
-                target="_blank"
-                href={`${routes.userDetail.path}/${e.optionValue}`}
-                rel="noreferrer"
-              >
-                {e?.optionLabel}
-              </a>
-            ) : (
-              <>
+      Cell: ({ row }) => (
+        <div>
+          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+            row?.original['assignedUsers']?.map((e, i) => {
+              return i === row?.original['assignedUsers'].length - 1 ? (
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
                   target="_blank"
                   href={`${routes.userDetail.path}/${e.optionValue}`}
                   rel="noreferrer"
                 >
-                  {e?.optionLabel},
+                  {e?.optionLabel}
                 </a>
-                &nbsp;
-              </>
-            );
-          })
-        ) : (
-          <NoDataCell />
-        )}</div>
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.userDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )}
+        </div>
+      )
     });
     if (permissions?.workStations) {
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
         width: 200,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <div>
             {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
               row?.original['assignedWorkStations']?.map((e, i) => {
@@ -202,6 +204,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
               <NoDataCell />
             )}
           </div>
+        )
       });
     }
     setColumns(coloum);

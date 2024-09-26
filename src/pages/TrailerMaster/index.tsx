@@ -23,11 +23,12 @@ import ManageTrailerMaster from './ManageTrailerMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.trailerMaster.title);
+
 const TrailerMaster = () => {
-  const renderedFrom = camelCase(routes?.trailerMaster.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

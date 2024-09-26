@@ -38,7 +38,7 @@ const AssignSerialNumbersDialog = ({
   const renderedFrom = `serialNumbers_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {

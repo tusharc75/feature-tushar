@@ -17,7 +17,7 @@ const ProductGridSupplierAskPrice = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { productData, handleAdd, handleReject } = props;
   const renderedFrom = 'quoteSupplierPrice' + productData?._id;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;

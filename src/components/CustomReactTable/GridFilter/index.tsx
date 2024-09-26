@@ -358,6 +358,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                               fieldLabel={field.fieldLabel}
                               required={false}
                               fieldData={field}
+                              allFields={coloums}
                             />
                           ) : (
                             <FormTypes
