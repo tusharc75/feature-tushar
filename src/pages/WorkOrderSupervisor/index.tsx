@@ -40,6 +40,7 @@ import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 import { KeyboardArrowDown } from '@material-ui/icons';
 import ProductFrequencyDialog from './ProductFrequencyDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 
 const LIMIT = 25;
 
@@ -110,6 +111,7 @@ const WorkOrderSupervisor = () => {
   const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
   const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
+  const [isOpen, setOpen] = useState({ open: false, id: null });
 
   const ref: any = useRef();
 
@@ -400,14 +402,12 @@ const WorkOrderSupervisor = () => {
                       {isFilterPresent ? (
                         <>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -452,7 +452,7 @@ const WorkOrderSupervisor = () => {
                 )
               ) : (
                 <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {routes.workOrder.title}
                     </ToggleButton>
@@ -462,7 +462,7 @@ const WorkOrderSupervisor = () => {
                   </ToggleButtonGroup>
                 </Box>
               )}
-        
+
               <div className="flex gap-2 max-[600px]:flex-wrap">
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
@@ -512,9 +512,12 @@ const WorkOrderSupervisor = () => {
               dispatch={dispatch}
               passFailStatus={true}
               passFailAccessor="serviceStatus"
+              cardOnClick={(e, data) => {
+                setOpen({ open: true, id: data._id });
+              }}
             />
           )}
-          {viewType === 2 && <WorkOrderCalendar getFilterQuery={getQueryString} filterResourceQuery={filterResourceQuery} reference={resourceType} ref={ref} />}
+          {viewType === 2 && <WorkOrderCalendar getFilterQuery={getQueryString} filterResourceQuery={filterResourceQuery} reference={resourceType} ref={ref} setOpen={setOpen} />}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
@@ -575,6 +578,16 @@ const WorkOrderSupervisor = () => {
               onClickRefreshIcon();
               setShowProductFreqDialog(false);
             }}
+          />
+        )}
+        {isOpen.open && (
+          <TechnicianDialog
+            handleClose={() => {
+              setOpen({ open: false, id: null })
+            }}
+            workOrderId={isOpen?.id}
+            uniqueId={null}
+            canPerform={false}
           />
         )}
       </Fragment>

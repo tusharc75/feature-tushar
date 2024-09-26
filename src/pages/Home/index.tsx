@@ -1,26 +1,18 @@
-import { Typography } from '@material-ui/core';
 import { kebabCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import styles from './Dashboard.module.scss';
 import './style.scss';
 
-import { HiArrowRight } from 'react-icons/hi';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { DynamicIcon } from 'src/assets/IconGenerator';
-import DashBoardCardShell from 'src/components/DashBoardCardShell';
-import DashboardModal from 'src/components/DashboardModal';
 import routes from 'src/components/Helpers/Routes';
-import { isSectionVisible } from 'src/components/Sidebar/utils';
-import Chart from './Chart';
-import { assignIconAndText, getAllData, getColors, groupByKey } from './helpers';
+import { cn } from 'src/constants/helpers';
+import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import DisplaySideCard from 'src/pages/Home/DisplaySideCard';
 import FeatureCard from 'src/pages/Home/FeatureCards';
-import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
-import { ItemData } from 'src/pages/Home/types';
 import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
-import { cn } from 'src/constants/helpers';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Chart from './Chart';
+import { assignIconAndText, getAllData, groupByKey } from './helpers';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
