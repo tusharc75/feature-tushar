@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from '@material-ui/core';
+import { Box, Button, CircularProgress, ListItem } from '@material-ui/core';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
@@ -222,6 +222,11 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference }, r
                 style
               };
             }}
+            components={{
+              agenda: {
+                event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
+              }
+            }}
             onNavigate={(date) => {
               onNavigate(date);
             }}
@@ -247,6 +252,20 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference }, r
         )}
       </div>
     </>
+  );
+}
+
+function EventAgenda({ event, setOpen }) {
+  return (
+    <ListItem
+      button
+      component={'p'}
+      className="!-mx-[10px] !-my-[5px] !w-[calc(100%+20px)] cursor-pointer hover:bg-[var(--dark-secondary,gray)]"
+      onClick={() => setOpen({ open: true, id: event.id })}
+    >
+      <span>{event.title}</span>
+      <span className="font-normal text-gray-500">{event.desc}</span>
+    </ListItem>
   );
 }
 
