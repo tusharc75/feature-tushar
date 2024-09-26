@@ -616,10 +616,10 @@ const RepairOrderDetails = () => {
           onSuccess={(data) => {
             handleAddAssetToTransferAsset(data);
           }}
-          referenceId={repairOrderData._id}
+          referenceId={repairOrderData?._id}
           referenceType={'Repair Order'}
           referenceData={{
-            transferFromPlant: repairOrderData?.warehouse.optionValue,
+            transferFromPlant: repairOrderData?.warehouse?.optionValue,
             transferType: 'Internal'
           }}
         />
