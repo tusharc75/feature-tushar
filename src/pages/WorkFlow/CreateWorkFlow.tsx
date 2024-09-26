@@ -10,12 +10,12 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import TextField from '@material-ui/core/TextField';
-import Steps from './Steps';
 import ActivationCondition from './ActivationCondition';
 import Notifications from 'src/pages/WorkFlow/Notifications';
 import { RiCloseCircleFill } from 'react-icons/ri';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const CreateWorkFlow = () => {
   const {
@@ -157,7 +157,7 @@ const CreateWorkFlow = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Steps resource={workFlowData?.workflowResoure?.optionValue} loading={loading} id={id} />
+                  <DynamicTabs workflowId = {id} resource = {workFlowData?.workflowResoure?.optionValue} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Notifications resource={workFlowData?.workflowResource?.optionValue} id={id} />

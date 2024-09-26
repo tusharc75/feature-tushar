@@ -2609,7 +2609,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            if (addSerializedAssetDialog.type === 'ReplaceAsset') {
+            if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
               handleOpenReplaceAssetReason(rows);
             } else {
               handleSwapAssets(rows);
