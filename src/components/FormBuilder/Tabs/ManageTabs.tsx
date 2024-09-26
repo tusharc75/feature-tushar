@@ -9,6 +9,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, STEPS_STYLE } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { object, string } from 'yup';
@@ -17,7 +18,7 @@ const tabSchema = object().shape({
   tabName: string().required('Please enter Tab name')
 });
 
-const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId }) => {
+const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -40,9 +41,11 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId }) => {
   }, [data]);
 
   const handleSubmit = (values) => {
-    if (data && resourceId) {
+    if (data && (resourceId || workflowId)) {
+      let api = `/sa-formbuilder/tabs/${resourceId}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
       axiosInstance()
-        .put(`/sa-formbuilder/tabs/${resourceId}`, { ...values, tabId: data?._id })
+        .put(api, { ...values, tabId: data?._id })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({
@@ -57,8 +60,10 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId }) => {
           toastConfig.setToastConfig(error);
         });
     } else {
+      let api = `/sa-formbuilder/tabs/${resource}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
       axiosInstance()
-        .post(`/sa-formbuilder/tabs/${resource}`, values)
+        .post(api, values)
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({

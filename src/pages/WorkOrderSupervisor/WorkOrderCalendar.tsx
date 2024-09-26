@@ -212,7 +212,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
                 events={events}
                 formats={formats}
                 localizer={localizer}
-                popup={!mobileView}
+                popup={!(isMobile || isTablet)}
                 messages={{
                   agenda: 'List'
                 }}

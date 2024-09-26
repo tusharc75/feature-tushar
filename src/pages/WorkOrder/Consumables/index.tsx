@@ -124,6 +124,7 @@ const Consumables = ({
           Header: e?.fieldLabel,
           width: 250,
           primaryField: true,
+          disabled: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">

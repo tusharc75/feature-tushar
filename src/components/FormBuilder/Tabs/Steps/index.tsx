@@ -15,8 +15,9 @@ import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
 import { AddOutlined } from '@material-ui/icons';
+import routes from 'src/components/Helpers/Routes';
 
-const Steps = ({ resourceData, tab, fetchData }) => {
+const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [steps, setSteps] = useState(null);
@@ -32,9 +33,11 @@ const Steps = ({ resourceData, tab, fetchData }) => {
 
   const handleSave = (values) => {
     setIsSubmitting(true);
+    let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
     if (values?.stepId) {
       axiosInstance()
-        .put(`/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`, values)
+        .put(api, values)
         .then(({ data }) => {
           setIsSubmitting(false);
           fetchData();
@@ -51,7 +54,7 @@ const Steps = ({ resourceData, tab, fetchData }) => {
         });
     } else {
       axiosInstance()
-        .post(`/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`, { ...values, order: steps?.length > 0 ? steps?.length : 0 })
+        .post(api, { ...values, order: steps?.length > 0 ? steps?.length : 0 })
         .then(({ data }) => {
           setIsSubmitting(false);
           fetchData();
@@ -71,8 +74,10 @@ const Steps = ({ resourceData, tab, fetchData }) => {
 
   const handleDelete = (step) => {
     setDeleting(true);
+    let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
     axiosInstance()
-      .put(`/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`, { stepId: step?._id })
+      .put(api, { stepId: step?._id })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -86,9 +91,11 @@ const Steps = ({ resourceData, tab, fetchData }) => {
   };
 
   const handleUpdateOrder = (steps) => {
+    let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
     axiosInstance()
       .put(
-        `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`,
+        api,
         steps?.map((step) => ({ stepId: step?._id, order: step?.order }))
       )
       .then(() => {
@@ -162,7 +169,7 @@ const Steps = ({ resourceData, tab, fetchData }) => {
             onClose={() => {
               setOpen({ open: false, data: null });
             }}
-            resource={resourceData?.resource}
+            resource={resourceData?.resource || resourceData?.workflowResource}
           />
         )}
 

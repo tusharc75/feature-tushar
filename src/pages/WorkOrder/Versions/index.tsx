@@ -57,6 +57,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'index',
         Header: 'Index',
+        disabled: true,
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
@@ -64,6 +65,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'type',
         Header: 'Type',
+        disabled: true,
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type) || <NoDataCell />}</p>
@@ -71,6 +73,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'detail',
         Header: 'Detail',
+        disabled: true,
         width: 250,
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
