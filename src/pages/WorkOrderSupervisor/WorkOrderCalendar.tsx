@@ -18,7 +18,7 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference }, ref) {
+function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, setOpen }, ref) {
   const {
     state: { permissions }
   }: any = useData();
@@ -56,7 +56,6 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference }, r
     endDate: moment().add(1, 'months').format('MM/DD/YYYY')
   });
 
-  const [isOpen, setOpen] = useState({ open: false, id: null });
   const [isDataFetching, setIsDataFetching] = useState(false);
 
   useEffect(() => {
@@ -240,16 +239,6 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference }, r
             </span>
           )}
         </div>
-        {isOpen.open && (
-          <TechnicianDialog
-            handleClose={() => {
-              setOpen({ open: false, id: null });
-            }}
-            workOrderId={isOpen?.id}
-            uniqueId={null}
-            canPerform={false}
-          />
-        )}
       </div>
     </>
   );

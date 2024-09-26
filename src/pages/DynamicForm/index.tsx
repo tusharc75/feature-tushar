@@ -1,10 +1,11 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -21,6 +22,7 @@ import ManageDynamicForm from './ManageDynamicForm';
 
 const DynamicForm = () => {
   const { route } = useParams();
+  const history = useHistory();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -95,6 +97,19 @@ const DynamicForm = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {permissions[renderedFrom]?.isRead && (
+          <HtmlTooltip title="View">
+            <IconButton
+              size="small"
+              aria-label="View"
+              onClick={() => {
+                history.push(`${detailPagePath}/${row?.original?._id}`);
+              }}
+            >
+              <VisibilityIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
         {permissions[renderedFrom]?.isCreate ? (
           <HtmlTooltip title="Clone">
             <IconButton

@@ -45,7 +45,7 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => {},
+  onMinimizeMaximize = () => { },
   style = {},
   additionalTitle = null
 }: CustomDialogHeaderProps) {
@@ -75,7 +75,6 @@ function CustomDialogHeader({
           variant="h6"
           className={`${classes.dialogTitle} title-layout text-truncate`}
           style={{ ...style, maxWidth: `calc(100% - ${maxWidth}px)` }}
-          title={title}
         >
           {title}
           {additionalTitle && <span className="text-truncate">{additionalTitle}</span>}

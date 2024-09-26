@@ -126,7 +126,7 @@ const WorkFlowReportDetail = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Associations'} value={0} />
+        {workFlowData && workFlowData?.tabs?.length > 0 && workFlowData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !workFlowReportData || !workFlowData ? (
@@ -134,13 +134,22 @@ const WorkFlowReportDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-            <Step
-              resourceData={workFlowData}
-              resourceId={id}
-              resource={'Workflow Report'}
-              data={workFlowReportData}
-              allowedToEdit={permissions?.repairOrder?.isUpdate}
-            />
+            workFlowData &&
+            workFlowData?.tabs?.length > 0 &&
+            workFlowData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={tabValue} index={i + 1}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={'Workflow Report'}
+                    data={workFlowReportData}
+                    allowedToEdit={permissions?.workflowReport?.isUpdate}
+                  />
+                </TabPanel>
+              );
+            })
           )}
         </TabPanel>
       </Box>
