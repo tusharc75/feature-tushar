@@ -50,7 +50,6 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
     axiosInstance()
       .get(`${productInventory.api}/product/${selectedProduct?.materialId}`)
       .then(async ({ data: { data } }) => {
-        console.log('data', data);
         if (!productInventoryData?.find((e) => e._id === selectedProduct._id)) {
           let nonExistingInventory = data
             ?.filter((d) => d?.warehouse)
