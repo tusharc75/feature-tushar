@@ -24,12 +24,6 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
 
-const useClasses = makeStyles(() => ({
-  tableContainer: {
-    maxHeight: 'calc(100vh - 200px)'
-  }
-}));
-
 const ConsumablesQtyDialog = ({
   referenceId,
   referenceType,
@@ -41,7 +35,6 @@ const ConsumablesQtyDialog = ({
   consumeRequest,
   serialNumberRequired
 }) => {
-  const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -223,22 +216,34 @@ const ConsumablesQtyDialog = ({
                       render={(arrayHelpers) => (
                         <>
                           <div className="max-[768px]:hidden">
-                            <TableContainer className={classes.tableContainer} component={Paper}>
-                              <Table aria-label="customized table">
+                            <div className={'max-h-[calc(100vh-200px)] overflow-auto rounded [border:1px_solid_var(--common-border-color)]'}>
+                              <Table aria-label="customized table" className="min-w-fit">
                                 <TableHead>
-                                  <TableRow>
-                                    <TableCell>Index</TableCell>
-                                    <TableCell align="left">Product</TableCell>
-                                    {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
-                                    <TableCell align="left">{'Qty'}</TableCell>
-                                    <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
-                                    <TableCell align="left">Serial Numbers</TableCell>
+                                  <TableRow className=" sticky top-0 z-10 bg-[var(--dark-primary,white)]">
+                                    <TableCell style={{ minWidth: 70 }}>Index</TableCell>
+                                    <TableCell align="left" style={{ minWidth: 150 }}>
+                                      Product
+                                    </TableCell>
+                                    {user?.user?.brandPolicy?.storageLocation && (
+                                      <TableCell align="left" style={{ minWidth: 250 }}>
+                                        Storage Location
+                                      </TableCell>
+                                    )}
+                                    <TableCell align="left" style={{ minWidth: 200 }}>
+                                      {'Qty'}
+                                    </TableCell>
+                                    <TableCell align="left" style={{ minWidth: 200 }}>
+                                      {consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                    </TableCell>
+                                    <TableCell align="left" style={{ minWidth: 230 }}>
+                                      Serial Numbers
+                                    </TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
                                   {values?.products?.map((value: any, index) => (
                                     <TableRow key={value._id}>
-                                      <TableCell component="th" scope="row">
+                                      <TableCell component="td" scope="row">
                                         {index + 1}
                                       </TableCell>
                                       <TableCell align="left">{value['product']}</TableCell>
@@ -352,7 +357,7 @@ const ConsumablesQtyDialog = ({
                                   ))}
                                 </TableBody>
                               </Table>
-                            </TableContainer>
+                            </div>
                           </div>
                           <div className="min-[769px]:hidden">
                             {values?.products?.map((value: any, index) => (
