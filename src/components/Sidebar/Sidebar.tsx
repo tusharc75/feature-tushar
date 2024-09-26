@@ -81,12 +81,15 @@ function SideBar({ location }) {
         dataList = [...dataList, ...userSidebarData];
       }
       for (const item of dataList) {
-        if (!isSectionVisible(item)) continue;
+        if (!isSectionVisible(item) || item.sectionName === '') continue;
         const isSectionExist = sections.map((s) => s.sectionName).includes(item.sectionName);
         const itemWithLink: TSidebarItem = { ...item, link: handleRoutes(item) };
         if (!isSectionExist) {
           const newSection: TSidebarSection = {
-            name: item.sectionName === 'Activities' || item.sectionName === 'Collaboration Tools' || item.sectionName === 'Workspace' ? 'Workspace' : item.sectionName,
+            name:
+              item.sectionName === 'Activities' || item.sectionName === 'Collaboration Tools' || item.sectionName === 'Workspace'
+                ? 'Workspace'
+                : item.sectionName,
             sectionName: item.sectionName,
             icon: renderIcon(item.sectionName),
             link: null,
@@ -144,16 +147,16 @@ function SideBar({ location }) {
           if (sidebarOpenedByButton) return;
           toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
         }}
-        onMouseLeave={() => {
-          if (sidebarOpenedByButton) return;
-          if (toggleTimeout) {
-            clearTimeout(toggleTimeout);
-          }
-          if (isSidebarOpen)
-            setTimeout(() => {
-              setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
-            }, 500);
-        }}
+        // onMouseLeave={() => {
+        //   if (sidebarOpenedByButton) return;
+        //   if (toggleTimeout) {
+        //     clearTimeout(toggleTimeout);
+        //   }
+        //   if (isSidebarOpen)
+        //     setTimeout(() => {
+        //       setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+        //     }, 500);
+        // }}
       >
         <Toolbar />
         <div id="sidebarOrDrawer" className={styles.innerContainer}>
@@ -181,8 +184,9 @@ function SideBar({ location }) {
             </div>
           </div>
           <List
-            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
-              } overflow-x-hidden`}
+            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${
+              isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
+            } overflow-x-hidden`}
           >
             {getListItem()?.map((listItem, i) => {
               const hasChild = Boolean(listItem.items);
@@ -232,8 +236,9 @@ function SideBar({ location }) {
                       <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
                         {listItem.items.map((item, j) => (
                           <Link
-                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
-                              }`}
+                            className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
+                              itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
+                            }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);
