@@ -114,7 +114,9 @@ const UserFavouriteCard = () => {
                           stroke="currentcolor"
                         ></path>
                       </svg>
-                      {item.resourceLabel || item.name}
+                      <span className="line-clamp-1" title={item.resourceLabel || item.name}>
+                        {item.resourceLabel || item.name}
+                      </span>
                     </Link>
                     <UserFavoriteIcon item={item} />
                   </div>
