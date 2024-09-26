@@ -95,7 +95,7 @@ export const MultiFileCell = ({ data }: { data: { fileName: string; size: string
             <div className=" max-h-[200px] min-w-[100px] space-y-1 overflow-y-auto overflow-x-hidden [&>span.single-row]:min-h-[30px]">
               {fileIcons}
             </div>
-            <div className="filler absolute -bottom-[26px] -left-[10px] -right-[10px] h-[28px] "></div>
+            <div className="filler absolute -bottom-[42px] -left-[10px] -right-[10px] h-[34px] "></div>
             <IoCaretDown size={24} className="absolute -bottom-[26px] left-0 right-0 z-10 mx-auto text-[var(--dark-primary,white)]" />
           </div>
         </Popover>
