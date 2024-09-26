@@ -122,9 +122,9 @@ const Consumables = ({
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
-          disabled: true,
           width: 250,
           primaryField: true,
+          disabled: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="flex items-center gap-2">
