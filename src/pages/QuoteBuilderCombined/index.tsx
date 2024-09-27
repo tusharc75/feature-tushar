@@ -36,6 +36,7 @@ import routes from './../../components/Helpers/Routes';
 import AllVersionStatus from './AllVersionStatus';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
 import axios, { CancelTokenSource } from 'axios';
+import './style.scss';
 
 const QuoteBuilders = () => {
 

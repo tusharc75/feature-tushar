@@ -1,13 +1,16 @@
 .MuiStepLabel-label {
   font-size: 12px !important;
 }
+
 .nameLink {
   color: #0645ad;
   cursor: pointer;
 }
+
 .nameLink:hover {
   text-decoration: underline;
 }
+
 .MuiStepper-horizontal {
   border-radius: 2px;
   border-left: none !important;
@@ -20,11 +23,13 @@
   top: 2px;
   right: 14px;
 }
+
 .currentStepColor {
   & .MuiStepLabel-iconContainer {
     color: #378280 !important;
     opacity: 1;
     font-size: 12px;
+
     .MuiStepIcon-root.MuiStepIcon-active {
       font-size: 18px !important;
       color: var(--new_theme_color) !important;
@@ -34,16 +39,20 @@
       color: #378280 !important;
     }
   }
+
   & .MuiStepLabel-label {
     color: #378280 !important;
     font-size: 12px;
+
     [data-mode='dark'] & {
       color: white !important;
     }
   }
 }
+
 .MuiStepLabel-label.MuiStepLabel-completed {
   color: var(--secondary) !important;
+
   [data-mode='dark'] & {
     color: var(--new_theme_color) !important;
   }
@@ -60,33 +69,41 @@
   //border-top-right-radius: 12px;
   //border-top-left-radius: 12px;
 }
+
 .MuiTab-textColorPrimary {
   border: 1px solid grey !important;
   border-radius: 0px !important;
 }
+
 .tab-font {
   font-size: 14px;
 }
+
 .stepperButton {
   padding: 0px !important;
   margin-left: 20px !important;
   color: #418887 !important;
 }
+
 .stepperButtonNext {
   padding: 0px !important;
   margin-right: 20px !important;
   color: #418887 !important;
 }
+
 .MuiButtonBase-root.Mui-disabled {
   color: grey !important;
 }
+
 .MuiButtonBase-root.Mui-disabled.MuiButton-containedPrimary:not(.btn-outline-red-v1) {
   color: white !important;
   opacity: 0.5 !important;
 }
+
 .buttonIconMobile {
   min-width: 40px !important;
 }
+
 .setIconForMobile {
   min-width: 40px !important;
 }
@@ -95,9 +112,11 @@
   color: var(--secondary) !important;
   font-size: 18px !important;
 }
+
 .MuiStepIcon-root {
   font-size: 18px !important;
 }
+
 @media (max-width: 760px) {
   .MuiStepLabel-label {
     font-size: 10px !important;
