@@ -28,7 +28,7 @@ export default function HistoryDialog({ onClose, open, resourceId, resource, res
       <CustomDialogHeader title={<>History - {resourceLabel}</>} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ResourceLogsGrid
-          selectedResource={sidebarResource[resource]}
+          selectedResource={resource === 'quote' ? sidebarResource.quoteBuilder : sidebarResource[resource] || resource}
           selectedOption={resourceId}
           hideResourceField={true}
         />
