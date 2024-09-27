@@ -253,7 +253,7 @@ const DOAApproval = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <div className="flex items-center flex-wrap gap-1 quotePanel mb-4">
+        <div className="quotePanel mb-4 flex flex-wrap items-center gap-1">
           {QData && (
             <>
               <div className="quoteBox">
@@ -284,7 +284,7 @@ const DOAApproval = () => {
               fromQuote={true}
               permissions={permissions[quoteBuilder.qbResource]}
               hasPermission={false}
-              currency={quoteData?.currency.toLowerCase()}
+              currency={quoteData?.currency}
               productBuilderId={productBuilderId}
               isAddNewProduct={isAddNewProduct}
               setIsAddNewProduct={setIsAddNewProduct}
