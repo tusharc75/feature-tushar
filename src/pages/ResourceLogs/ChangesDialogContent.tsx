@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
-import { camelCase, capitalize } from 'lodash';
+import { camelCase, capitalize, isString } from 'lodash';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -39,6 +39,8 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                         {data?.oldValue ? (
                           data?.type === 'date' ? (
                             moment(data?.oldValue).format(dateFormat)
+                          ) : data?.type === 'location' ? (
+                            data?.oldValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
                             <p
                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''}text-truncate`}
@@ -66,7 +68,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               );
                             })
                           ) : (
-                            data?.oldValue
+                            isString(data?.oldValue) ? data?.oldValue : <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -76,6 +78,8 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                         {data?.newValue ? (
                           data?.type === 'date' ? (
                             moment(data?.newValue).format(dateFormat)
+                          ) : data?.type === 'location' ? (
+                            data?.newValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
                             <p
                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
@@ -98,6 +102,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                       window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`);
                                   }}
                                 >
+
                                   {newValue?.label}
                                 </p>
                               );
@@ -117,7 +122,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               );
                             })
                           ) : (
-                            data?.newValue
+                            isString(data?.newValue) ? data?.newValue : <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />

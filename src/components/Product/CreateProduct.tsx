@@ -95,7 +95,6 @@ const CreateProduct = (props) => {
             _isProductTemplate = true;
           }
         });
-        //setMasterFields(data.map((_f) => _f.fieldData))
         setMasterFields(_productField);
         const _fields = [];
         _productField.map((_f) => _fields.push(_f));
@@ -143,9 +142,6 @@ const CreateProduct = (props) => {
               return true;
             }
           });
-          if (selectedEntity && fromQuote) {
-            values['entity'] = [selectedEntity];
-          }
           setInitialData({
             fields: _fields,
             values: values
@@ -536,9 +532,8 @@ const CreateProduct = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`${
-                  productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
-                }`}
+                title={`${productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -877,8 +872,8 @@ const CreateProduct = (props) => {
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                             />
