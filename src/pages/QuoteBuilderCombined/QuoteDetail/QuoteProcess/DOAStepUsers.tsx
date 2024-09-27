@@ -136,7 +136,7 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
   const userFullName = `${user?.firstName} ${user?.lastName}`;
 
   return (
-    <div key={user.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
+    <div key={user?.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
       <div
         style={{ borderWidth: '1px', borderStyle: 'solid' }}
         className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative transition-colors ${icon.colorClasses} `}
@@ -147,15 +147,17 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
         </HtmlTooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
-      <Link
-        title={userFullName}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="link text-[12px] font-normal max-w-[85px] line-clamp-1"
-        to={`${routes.userDetail.path}/${user?.id}`}
-      >
-        {userFullName}
-      </Link>
+      {user?.id ?
+        <Link
+          title={userFullName}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link text-[12px] font-normal max-w-[85px] line-clamp-1"
+          to={`${routes.userDetail.path}/${user?.id}`}
+        >
+          {userFullName}
+        </Link>
+        : <span className="text-[12px] font-normal max-w-[85px] line-clamp-1" >{userFullName}</span>}
     </div>
   );
 };
