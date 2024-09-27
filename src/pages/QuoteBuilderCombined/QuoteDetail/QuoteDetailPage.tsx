@@ -1,36 +1,17 @@
-import { Box, Button, makeStyles } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useMemo, useState, useContext, useEffect } from 'react';
-import { formatAmountWithCurrency, processFieldName, stepsToIgnoreManualCompleteForOpportunity } from '../../../constants/helpers';
-import { BiLayerPlus } from 'react-icons/bi';
-import { HiPencil } from 'react-icons/hi';
+import { formatAmountWithCurrency } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const useStyles = makeStyles(() => ({
-  detailBox: {
-    // border: "1px solid #163340",
-    borderTop: '0px'
-  },
-  btnHeader: {
-    position: 'absolute',
-    top: '13px',
-    right: '36px'
-  }
-}));
 
 export default function QuoteDetailPage({
   quoteData,
-  quotePermissions,
   selectedEntity,
-  ifQuoteApprovedAapproved,
-  allowedToEdit,
-  handleOpenUpdateDialog,
-  handleOpenCloneDialog,
-  handleSetSteps
+  ifQuoteApprovedAapproved
 }) {
-  const classes = useStyles();
   const [loadingFields, setLoadingFields] = useState(false);
   const [quoteFields, setQuoteFields] = useState([]);
   const toastConfig = useContext(CustomToastContext);
@@ -59,17 +40,6 @@ export default function QuoteDetailPage({
         .get(`/field?resource=Quotes&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setQuoteFields(data);
-          const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-          if (processSteps && processSteps.isRead) {
-            let tempSteps = processSteps.fieldData.option.map((m) => {
-              return {
-                text: m.optionLabel,
-                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
-              };
-            });
-
-            handleSetSteps(tempSteps);
-          }
           setLoadingFields(false);
         })
         .catch((error) => {
@@ -80,7 +50,7 @@ export default function QuoteDetailPage({
   };
 
   return (
-    <div className={`position-relative ${classes.detailBox}`}>
+    <div className={`position-relative`}>
       {quoteData && (
         <>
           {!loadingFields && quoteFields ? (
