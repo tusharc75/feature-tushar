@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
-import { WORKORDER_SERVICE_STATUS, getChipColor, sidebarResource } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, cn, getChipColor, sidebarResource } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
@@ -87,7 +87,7 @@ const RenderService = ({
 
   return (
     <>
-      <div className={`${isMobile ? 'p-3' : 'container-with-border p-[20px]'}`}>
+      <div className={`${isMobile ? 'p-3' : 'container-with-border p-[20px]'} relative isolate`}>
         {isMobile ? (
           <>
             {isAnyButtonVisible && (
@@ -119,31 +119,25 @@ const RenderService = ({
                 <ArrowBackIos />
               </IconButton>
               <div className={`flex gap-[8px] overflow-x-auto overflow-y-hidden`} ref={containerRef}>
-                {serviceSteps?.map((data, index) => {
-                  return (
-                    <RenderSingleService
-                      key={data.uniqueId}
-                      {...{
-                        isColapsed,
-                        stylesForEveryTab,
-                        selectedService,
-                        stepSubmitedData,
-                        setSelectedService,
-                        user,
-                        handleOpenMenu,
-                        resource,
-                        quotationData,
-                        allowedToEdit,
-                        setShowConfirmBox,
-                        getFieldsWithOtherDetails,
-                        data,
-                        index,
-                        isMobile,
-                        completed
-                      }}
-                    />
-                  );
-                })}
+                <RenderServices
+                  {...{
+                    serviceSteps,
+                    isColapsed,
+                    stylesForEveryTab,
+                    selectedService,
+                    stepSubmitedData,
+                    setSelectedService,
+                    user,
+                    handleOpenMenu,
+                    resource,
+                    quotationData,
+                    allowedToEdit,
+                    setShowConfirmBox,
+                    getFieldsWithOtherDetails,
+                    isMobile,
+                    completed
+                  }}
+                />
               </div>
               <IconButton disabled={!hasNextTab} className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`} onClick={handleNextClick} size="small">
                 <ArrowForwardIos />
@@ -167,31 +161,25 @@ const RenderService = ({
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
-              {serviceSteps?.map((data, index) => {
-                return (
-                  <RenderSingleService
-                    key={data.uniqueId}
-                    {...{
-                      isColapsed,
-                      stylesForEveryTab,
-                      selectedService,
-                      stepSubmitedData,
-                      setSelectedService,
-                      user,
-                      handleOpenMenu,
-                      resource,
-                      quotationData,
-                      allowedToEdit,
-                      setShowConfirmBox,
-                      getFieldsWithOtherDetails,
-                      data,
-                      index,
-                      isMobile,
-                      completed
-                    }}
-                  />
-                );
-              })}
+              <RenderServices
+                {...{
+                  serviceSteps,
+                  isColapsed,
+                  stylesForEveryTab,
+                  selectedService,
+                  stepSubmitedData,
+                  setSelectedService,
+                  user,
+                  handleOpenMenu,
+                  resource,
+                  quotationData,
+                  allowedToEdit,
+                  setShowConfirmBox,
+                  getFieldsWithOtherDetails,
+                  isMobile,
+                  completed
+                }}
+              />
             </div>
           </>
         )}
@@ -202,7 +190,8 @@ const RenderService = ({
 
 export default RenderService;
 
-const RenderSingleService = ({
+const RenderServices = ({
+  serviceSteps,
   isColapsed,
   stylesForEveryTab,
   selectedService,
@@ -215,161 +204,186 @@ const RenderSingleService = ({
   allowedToEdit,
   setShowConfirmBox,
   getFieldsWithOtherDetails,
-  data,
-  index,
   isMobile,
   completed
 }) => {
-  const style = stylesForEveryTab(selectedService, data, index);
-  const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
-
+  if (!serviceSteps || serviceSteps?.length === 0) {
+    return (
+      <div
+        className={cn(
+          'absolute inset-0 bottom-0 left-0 right-0 top-0 -z-[1] flex h-full items-center justify-center',
+          isColapsed && 'opacity-0',
+          isMobile ? 'w-full' : 'flex-grow'
+        )}
+      >
+        <p className="select-none text-[18px] text-gray-500">No services added yet</p>
+      </div>
+    );
+  }
   return (
-    <div
-      key={data.uniqueId}
-      className={`transition-all duration-300 ${
-        isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-      } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
-      style={{
-        ...style
-      }}
-      onClick={() => {
-        if (data?.type === 'service') {
-          setSelectedService(data);
-        }
-      }}
-    >
-      <div className="mb-1 flex items-center gap-2">
-        <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
-          {data?.type === 'service' ? (
-            <div
-              className={`${
-                isColapsed ? 'mx-auto' : ''
-              }  flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
-            >
-              <span>{data?.order}</span>
-            </div>
-          ) : (
-            data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
-          )}
-        </HtmlTooltip>
+    <>
+      {serviceSteps?.map((data, index) => {
+        const style = stylesForEveryTab(selectedService, data, index);
+        const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
 
-        <div className={`relative flex items-center gap-2 ${isColapsed ? 'hidden' : ''}`}>
-          <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
-            <h6 className="line-clamp-1 min-w-0 text-[16px] font-semibold">{data?.serviceName}</h6>
-          </HtmlTooltip>
-          {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
-            <>
-              {data?.preWork ? (
-                <HtmlTooltip enterTouchDelay={0} title="Pre Work Service" arrow placement="top">
-                  <span>
-                    <PreWorkIcon style={{ verticalAlign: 'middle' }} />
-                  </span>
-                </HtmlTooltip>
-              ) : (
-                <HtmlTooltip enterTouchDelay={0} title="Post Work Service" arrow>
-                  <span>
-                    <PostWorkIcon style={{ verticalAlign: 'middle' }} />
-                  </span>
-                </HtmlTooltip>
-              )}
-            </>
-          )}
-          {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-            <HtmlTooltip arrow enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-              <span>
-                <People style={{ fontSize: 20 }} />
-              </span>
-            </HtmlTooltip>
-          )}
-          {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
-            <HtmlTooltip arrow enterTouchDelay={0} title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
-              <span>
-                <WorkStations className="align-text-top" size={15} />
-              </span>
-            </HtmlTooltip>
-          )}
-          {data?.comment && (
-            <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
-              <span>
-                <Message style={{ fontSize: 18 }} />
-              </span>
-            </HtmlTooltip>
-          )}
-        </div>
+        return (
+          <div
+            key={data.uniqueId}
+            className={`transition-all duration-300 ${
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            style={{
+              ...style
+            }}
+            onClick={() => {
+              if (data?.type === 'service') {
+                setSelectedService(data);
+              }
+            }}
+          >
+            <div className="mb-1 flex items-center gap-2">
+              <HtmlTooltip
+                enterTouchDelay={0}
+                placement="top"
+                className={isColapsed ? 'mx-auto' : ''}
+                arrow
+                title={isMobile ? data?.serviceName : ''}
+              >
+                {data?.type === 'service' ? (
+                  <div
+                    className={`flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
+                  >
+                    <span>{data?.order}</span>
+                  </div>
+                ) : (
+                  data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
+                )}
+              </HtmlTooltip>
 
-        {!isColapsed && (
-          <>
-            {data?.type === 'service' && (
-              <div className="flex flex-grow items-center justify-end gap-1">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  aria-label="menu"
-                  onClick={(event) => {
-                    handleOpenMenu(event);
-                    setSelectedService(data);
-                  }}
-                >
-                  <MoreHoriz />
-                </IconButton>
-                {resource === sidebarResource.workOrder && (
-                  <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
-                    <IconButton
-                      size="small"
-                      color="inherit"
-                      style={{ color: 'red', marginTop: '3px' }}
-                      aria-label="delete"
-                      disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                      }}
-                    >
-                      <DeleteOutline style={{ fontSize: '18px' }} />
-                    </IconButton>
+              <div className={`relative flex items-center gap-2 ${isColapsed ? 'hidden' : ''}`}>
+                <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
+                  <h6 className="line-clamp-1 min-w-0 text-[16px] font-semibold">{data?.serviceName}</h6>
+                </HtmlTooltip>
+                {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
+                  <>
+                    {data?.preWork ? (
+                      <HtmlTooltip enterTouchDelay={0} title="Pre Work Service" arrow placement="top">
+                        <span>
+                          <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                        </span>
+                      </HtmlTooltip>
+                    ) : (
+                      <HtmlTooltip enterTouchDelay={0} title="Post Work Service" arrow>
+                        <span>
+                          <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                        </span>
+                      </HtmlTooltip>
+                    )}
+                  </>
+                )}
+                {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                    <span>
+                      <People style={{ fontSize: 20 }} />
+                    </span>
+                  </HtmlTooltip>
+                )}
+                {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
+                  <HtmlTooltip
+                    arrow
+                    enterTouchDelay={0}
+                    title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                  >
+                    <span>
+                      <WorkStations className="align-text-top" size={15} />
+                    </span>
+                  </HtmlTooltip>
+                )}
+                {data?.comment && (
+                  <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
+                    <span>
+                      <Message style={{ fontSize: 18 }} />
+                    </span>
                   </HtmlTooltip>
                 )}
               </div>
-            )}
-          </>
-        )}
-      </div>
-      {/* Chips */}
-      <div className={`flex w-full basis-full flex-wrap items-center gap-2 pl-[20px] ${isColapsed ? 'hidden' : ''}`}>
-        {data?.type === 'service' && (
-          <div className="ml-1">
-            <Chip
-              label={data?.status}
-              variant="outlined"
-              style={{
-                ...getChipColor(data?.status),
-                fontWeight: 700
-              }}
-            />
-          </div>
-        )}
-        {data?.type === 'quotation' && quotationData && (
-          <div className="ml-1">
-            <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
-          </div>
-        )}
 
-        {user?.brandPolicy?.workOrderTimer && <RenderTotalTime stepTimes={stepTimes} />}
-        {/* PassFail */}
-        <div className="ml-auto max-w-fit">
-          {data?.type === 'service' && data?.serviceStatus && (
-            <RenderStatusIcon
-              className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
-              stepStatus={data?.serviceStatus}
-            />
-          )}
-          {data?.type === 'quotation' && quotationData && (
-            <RenderStatusIcon
-              className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
-              stepStatus={quotationData?.status}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+              {!isColapsed && (
+                <>
+                  {data?.type === 'service' && (
+                    <div className="flex flex-grow items-center justify-end gap-1">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        aria-label="menu"
+                        onClick={(event) => {
+                          handleOpenMenu(event);
+                          setSelectedService(data);
+                        }}
+                      >
+                        <MoreHoriz />
+                      </IconButton>
+                      {resource === sidebarResource.workOrder && (
+                        <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
+                          <IconButton
+                            size="small"
+                            color="inherit"
+                            style={{ color: 'red', marginTop: '3px' }}
+                            aria-label="delete"
+                            disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
+                            onClick={() => {
+                              setShowConfirmBox(true);
+                            }}
+                          >
+                            <DeleteOutline style={{ fontSize: '18px' }} />
+                          </IconButton>
+                        </HtmlTooltip>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Chips */}
+            <div className={`flex w-full basis-full flex-wrap items-center gap-2 pl-[20px] ${isColapsed ? 'hidden' : ''}`}>
+              {data?.type === 'service' && (
+                <div className="ml-1">
+                  <Chip
+                    label={data?.status}
+                    variant="outlined"
+                    style={{
+                      ...getChipColor(data?.status),
+                      fontWeight: 700
+                    }}
+                  />
+                </div>
+              )}
+              {data?.type === 'quotation' && quotationData && (
+                <div className="ml-1">
+                  <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                </div>
+              )}
+
+              {user?.brandPolicy?.workOrderTimer && <RenderTotalTime stepTimes={stepTimes} />}
+              {/* PassFail */}
+              <div className="ml-auto max-w-fit">
+                {data?.type === 'service' && data?.serviceStatus && (
+                  <RenderStatusIcon
+                    className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                    stepStatus={data?.serviceStatus}
+                  />
+                )}
+                {data?.type === 'quotation' && quotationData && (
+                  <RenderStatusIcon
+                    className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                    stepStatus={quotationData?.status}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </>
   );
 };
