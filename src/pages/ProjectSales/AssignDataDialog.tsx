@@ -214,7 +214,7 @@ const AssignDataDialog = (props) => {
 
   return (
     <Dialog fullWidth maxWidth="xs" open={dialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-dialog">
-      <CustomDialogHeader title={`Assign ${startCase(type)}`} />
+      <CustomDialogHeader onClose={handleCloseDialog} title={`Assign ${startCase(type)}`} />
       <CustomDialogContent>
         {loading ? (
           <Loader text={`Loading ${startCase(type)}`} />
