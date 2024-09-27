@@ -305,10 +305,10 @@ const Details = (props: DetailProps) => {
         const Icon = getFileIconSrc(value || '');
         if (value === '-' || Array.isArray(value)) return value;
         return (
-          <div className="flex items-center gap-2 p-[8.6px_10px] pt-0">
-            <Icon />
-            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
-              <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{value}</span>
+          <div className="flex w-full min-w-0 items-center p-[8.6px_10px] pt-0">
+            <Icon className="flex-shrink-0" />
+            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={`${classes.fieldText} flex-grow`} variant="body2">
+              <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
             <PreviewFile fileName={value} showDownload />
           </div>
@@ -318,14 +318,14 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length > 0) {
           return (
-            <div className="space-y-2 p-[8.6px_10px] pt-0">
+            <div className="w-full min-w-0 space-y-2 p-[8.6px_10px] pt-0">
               {files.map((d) => {
                 const Icon = getFileIconSrc(d.fileName || '');
                 return (
-                  <div className="flex gap-2" key={d.fileName}>
-                    <Icon />
-                    <Typography className={classes.fieldText} variant="body2">
-                      <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
+                  <div className="flex min-w-0 items-center" key={d.fileName}>
+                    <Icon className="flex-shrink-0" />
+                    <Typography className={`${classes.fieldText} flex-grow`} variant="body2">
+                      <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
                     <PreviewFile fileName={d.fileName} showDownload />
                   </div>
@@ -335,7 +335,7 @@ const Details = (props: DetailProps) => {
           );
         }
         return (
-          <Typography className={classes.fieldText} variant="body2">
+          <Typography className={classes.fieldText} variant="body2" component={'span'}>
             -
           </Typography>
         );
@@ -406,17 +406,13 @@ const Details = (props: DetailProps) => {
       if (fieldData.type === 'location') {
         return (
           <>
-            {value?.locationName ?
+            {value?.locationName ? (
               <Box display="flex" alignItems="center">
-                <Typography
-                  title={value?.locationName || value}
-                  className={cn(classes.fieldText, ' flex items-center')}
-                  variant="body2"
-                >
+                <Typography title={value?.locationName || value} className={cn(classes.fieldText, ' flex items-center')} variant="body2">
                   <span className={`text-truncate line-clamp-1 block`}>{value?.locationName || value}</span>
                 </Typography>
                 {value?.longitude && value?.latitude ? (
-                  <Box >
+                  <Box>
                     <HtmlTooltip title="View in Map">
                       <IconButton
                         size="small"
@@ -428,16 +424,19 @@ const Details = (props: DetailProps) => {
                             longitude: value.longitude,
                             latitude: value.latitude
                           });
-                        }}>
-                        <LocationOnIcon fontSize='small' color='primary' />
+                        }}
+                      >
+                        <LocationOnIcon fontSize="small" color="primary" />
                       </IconButton>
                     </HtmlTooltip>
                   </Box>
                 ) : null}
               </Box>
-              : <Typography component={'span'} style={{ padding: '7px 10px' }}>
+            ) : (
+              <Typography component={'span'} style={{ padding: '7px 10px' }}>
                 -
-              </Typography>}
+              </Typography>
+            )}
           </>
         );
       }
@@ -604,7 +603,11 @@ const Details = (props: DetailProps) => {
                                 </Box>
                               ) : (
                                 <Box display="flex" alignItems="center" className="formdata-text-v1">
-                                  {renderData(initialVals, field.fieldData)}
+                                  {renderData(initialVals, field.fieldData) === '-' ? (
+                                    <span>{renderData(initialVals, field.fieldData)}</span>
+                                  ) : (
+                                    renderData(initialVals, field.fieldData)
+                                  )}
                                 </Box>
                               )}
                               {field.followUpData?.length > 0 && (

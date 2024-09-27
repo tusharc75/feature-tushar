@@ -195,9 +195,18 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       {allowCreateInvoice && permissions?.invoice?.isCreate && (
         <Box display="flex" justifyContent="flex-end">
           <Box display="flex" alignItems="center" pt={2} pr={2}>
-            <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
-              Create Billing
-            </Button>
+            <HtmlTooltip title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => setCreateBillDialog({ open: true })}
+                aria-controls="action-menu"
+                disabled={!rentalManagementData?.allowToCreateBill}
+              >
+                Create Billing
+              </Button>
+            </HtmlTooltip>
           </Box>
         </Box>
       )}
