@@ -3486,6 +3486,10 @@ body {
       font-size: 0.8rem;
     }
   }
+  span.html-custom-tooltip,
+  span.ling {
+    padding: 0;
+  }
 
   & a > * {
     color: var(--link) !important;
