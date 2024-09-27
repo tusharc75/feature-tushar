@@ -216,7 +216,7 @@ const RenderServices = ({
           isMobile ? 'w-full' : 'flex-grow'
         )}
       >
-        <p className="select-none text-[18px] text-gray-500">No services found</p>
+        <p className="select-none text-[18px] text-gray-500">No services added yet</p>
       </div>
     );
   }

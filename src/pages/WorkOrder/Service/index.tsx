@@ -616,7 +616,7 @@ const Service = ({
                       'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
                     )}
                   >
-                    <p className="select-none text-[18px] text-gray-500">No steps found</p>
+                    <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
                   </div>
                 )}
               </Box>
