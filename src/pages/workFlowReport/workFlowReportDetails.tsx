@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from 'src/pages/DynamicForm/Step';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
@@ -69,6 +69,8 @@ const WorkFlowReportDetail = () => {
     axiosInstance()
       .get(`${routes.workflow.path}/${workFlowReportData?.workflow}`)
       .then(({ data: { data } }) => {
+        let tabs = sortBy(data?.tabs, 'order');
+        data.tabs = tabs;
         setWorkFlowData(data);
       })
       .catch((err) => {
@@ -104,17 +106,18 @@ const WorkFlowReportDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-          {workFlowReportData?.status !== WORK_FLOW_STATUS.completed && (
+            {workFlowReportData?.status !== WORK_FLOW_STATUS.completed && (
               <Button
                 variant={'contained'}
                 onClick={() => {
-                  setShowCloseConfirmation(true)
+                  setShowCloseConfirmation(true);
                 }}
-                className={'btn-outline-v1'}>
+                className={'btn-outline-v1'}
+              >
                 {'Close'}
               </Button>
             )}
-          { resourceData?.collaborateTools && workFlowReportData && (
+            {resourceData?.collaborateTools && workFlowReportData && (
               <ActivityButton
                 referenceId={workFlowReportData?.reference?.optionValue}
                 resource={camelCase(workFlowReportData?.resource)}
@@ -126,32 +129,28 @@ const WorkFlowReportDetail = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        {workFlowData && workFlowData?.tabs?.length > 0 && workFlowData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {workFlowData && workFlowData?.tabs?.length > 0 && workFlowData?.tabs?.map((tab, i) => <CustomTab value={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
-        <TabPanel value={tabValue} index={0}>
-          {loading || !workFlowReportData || !workFlowData ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          ) : (
-            workFlowData &&
-            workFlowData?.tabs?.length > 0 &&
-            workFlowData?.tabs?.map((tab, i) => {
-              return (
-                <TabPanel value={tabValue} index={i + 1}>
-                  <Step
-                    tab={tab}
-                    resourcePolicyId={resourceData?._id}
-                    resourceId={id}
-                    resource={'Workflow Report'}
-                    data={workFlowReportData}
-                    allowedToEdit={permissions?.workflowReport?.isUpdate}
-                  />
-                </TabPanel>
-              );
-            })
-          )}
-        </TabPanel>
+        {loading || !workFlowReportData || !workFlowData ? (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        ) : (
+          workFlowData &&
+          workFlowData?.tabs?.length > 0 &&
+          workFlowData?.tabs?.map((tab, i) => (
+            <TabPanel key={i} value={tabValue} index={i}>
+              <Step
+                tab={tab}
+                workflowId={workFlowData?._id}
+                resourceId={id}
+                resource={'Workflow Report'}
+                data={workFlowReportData}
+                allowedToEdit={permissions?.workflowReport?.isUpdate}
+              />
+            </TabPanel>
+          ))
+        )}
       </Box>
       {showCloseConfirmation && (
         <ConfirmationDialog
