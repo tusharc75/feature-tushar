@@ -30,7 +30,7 @@ export const MultiFileCell = ({ data }: { data: { fileName: string; size: string
           </span>
           <span className=" truncate">{d.fileName}</span>
           <span className="button-span flex-shrink-0">
-            <PreviewFile fileName={d.fileName} />
+            <PreviewFile fileName={d.fileName} imagePreview={false} />
           </span>
         </span>
       );
