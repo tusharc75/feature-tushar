@@ -480,6 +480,9 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
   &:hover {
     background-color: rgb(15, 35, 44) !important;
   }
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 .MuiOutlinedInput-adornedStart {
   padding-left: 11px !important;
