@@ -20,9 +20,9 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
+  checkIsAllowedToDelete,
   customerAccount,
   customerContact,
-  formatAmountWithCurrency,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -35,24 +35,23 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import AllVersionStatus from './AllVersionStatus';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
-import './style.scss';
 import axios, { CancelTokenSource } from 'axios';
 
-const types = [
-  {
-    key: 'My Quotes',
-    value: 1
-  },
-  {
-    key: 'All Quotes',
-    value: 2
-  }
-];
-const arr = [...Array(9).keys()];
-
-const renderedFrom = camelCase(routes?.quoteBuilder.title);
-
 const QuoteBuilders = () => {
+
+  const types = [
+    {
+      key: `My ${routes.quote.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.quote.title}`,
+      value: 2
+    }
+  ];
+
+  const renderedFrom = camelCase(routes?.quoteBuilder.title);
+
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const history = useHistory();
@@ -89,12 +88,10 @@ const QuoteBuilders = () => {
   const [clonedData, setClonedData] = useState([]);
   const [clonedId, setClonedId] = useState(null);
 
-  const [versionStatusData, setVersionStatusData] = useState([]);
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
 
   const { qbApi } = quoteBuilder;
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -222,29 +219,6 @@ const QuoteBuilders = () => {
     showFilteredRecordsOnly
   ]);
 
-  const getVersionStatus = (id, currency) => {
-    axiosInstance()
-      .get(`/quote-builder/quote-hierarchy/${id}`)
-      .then(({ data: { data } }) => {
-        const newData = data.versions.map((d, index) => {
-          return {
-            ...d,
-            id: index + 1,
-            versionNumber: index + 1,
-            quoteId: id,
-            totalCost: formatAmountWithCurrency(currency, d?.productData?.totalCost).fullFormatAmount,
-            totalSalesPrice: formatAmountWithCurrency(currency, d?.productData?.totalSalesPrice).fullFormatAmount,
-            comment: d.comment || ''
-          };
-        });
-
-        setVersionStatusData(newData);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleShowCloneQuoteDialog = () => {
     setIsClone(true);
     setshowCreateQuoteDialog(true);
@@ -331,52 +305,40 @@ const QuoteBuilders = () => {
     if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
-
-      axiosInstance()
-        .get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
-        .then(({ data: { data, count } }) => {
-          let clonedData = {};
-          let rows = data.map((u) => {
-            clonedData = {
-              ...clonedData,
-              [u.quoteName]: u
-            };
-
-            let versionCount = Object.keys(u.versions).length;
-            let tempStatus = 'Building Quote';
-            let versionArray = [];
-            Object.keys(u.versions).forEach((key) => {
-              versionArray.push(u.versions[key]);
-            });
-
-            const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
-            if (updatedVersion) {
-              tempStatus = updatedVersion.status;
-            }
-            let finalObject = prepareDataForGrid(u, user);
-            finalObject['relatedOpportunity'] = u.opportunity?.optionLabel;
-            finalObject['relatedOpportunityId'] = u.opportunity?.optionValue;
-            finalObject['id'] = u._id;
-            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
-            finalObject['createdBy'] = u.createdBy?.user?.concatedName;
-            finalObject['createdByDate'] = u.createdBy?.date;
-            finalObject['updatedBy'] = u.updatedBy?.user?.concatedName;
-            finalObject['updatedByDate'] = u.updatedBy?.date;
-            finalObject['status'] = tempStatus;
-            finalObject['versionCount'] = versionCount;
-            finalObject['versionData'] = versionArray;
-
-            finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-
-            return finalObject;
+      axiosInstance().get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
+        let clonedData = {};
+        let rows = data.map((u) => {
+          clonedData = {
+            ...clonedData,
+            [u.quoteName]: u
+          };
+          let versionCount = Object.keys(u.versions).length;
+          let tempStatus = 'Building Quote';
+          let versionArray = [];
+          Object.keys(u.versions).forEach((key) => {
+            versionArray.push(u.versions[key]);
           });
-          setClonedData(data);
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
+
+          const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
+          if (updatedVersion) {
+            tempStatus = updatedVersion.status;
+          }
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['relatedOpportunity'] = u.opportunity?.optionLabel;
+          finalObject['relatedOpportunityId'] = u.opportunity?.optionValue;
+          finalObject['status'] = tempStatus;
+          finalObject['versionCount'] = versionCount;
+          finalObject['versionData'] = versionArray;
+          finalObject['canDelete'] = checkIsAllowedToDelete(user, sidebarResource.quoteBuilder, u?.owner?.optionValue);
+          return finalObject;
+        });
+        setClonedData(data);
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
         .catch((error) => {
           dispatch({ type: 'loading', loading: false });
           toastConfig.setToastConfig(error);
@@ -442,14 +404,6 @@ const QuoteBuilders = () => {
     if (newFilter != null) {
       handleQuoteBuilderTypeSel(types.find((d) => d.key === newFilter).value);
     }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const LeftSideContents = () => {
@@ -563,11 +517,9 @@ const QuoteBuilders = () => {
           leftSideContents={LeftSideContents}
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setshowCreateQuoteDialog(true);
           }}
@@ -577,7 +529,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -599,7 +551,6 @@ const QuoteBuilders = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -658,7 +609,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => {}}
+          fetchQuoteData={() => { }}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,
