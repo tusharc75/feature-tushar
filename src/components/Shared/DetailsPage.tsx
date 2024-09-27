@@ -305,9 +305,9 @@ const Details = (props: DetailProps) => {
         const Icon = getFileIconSrc(value || '');
         if (value === '-' || Array.isArray(value)) return value;
         return (
-          <div className="flex min-w-0 items-center p-[8.6px_10px] pt-0">
+          <div className="flex w-full min-w-0 items-center p-[8.6px_10px] pt-0">
             <Icon className="flex-shrink-0" />
-            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
+            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={`${classes.fieldText} flex-grow`} variant="body2">
               <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
             <PreviewFile fileName={value} showDownload />
@@ -318,13 +318,13 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length > 0) {
           return (
-            <div className="min-w-0 space-y-2 p-[8.6px_10px] pt-0">
+            <div className="w-full min-w-0 space-y-2 p-[8.6px_10px] pt-0">
               {files.map((d) => {
                 const Icon = getFileIconSrc(d.fileName || '');
                 return (
                   <div className="flex min-w-0 items-center" key={d.fileName}>
                     <Icon className="flex-shrink-0" />
-                    <Typography className={classes.fieldText} variant="body2">
+                    <Typography className={`${classes.fieldText} flex-grow`} variant="body2">
                       <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
                     <PreviewFile fileName={d.fileName} showDownload />
