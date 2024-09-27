@@ -95,7 +95,6 @@ const RentalManagementDetailsPage = () => {
   const [isDisableCustomerAccount, setIsDisableCustomerAccount] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
-  const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState([]);
@@ -145,28 +144,12 @@ const RentalManagementDetailsPage = () => {
       fetchAssetStatusRights();
       checkDeliveryTicketFields();
     }
-    checkProgressiveBilling();
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
       // immediately start next step
       walkmeInstance.handleNext();
     }
   }, [id]);
-
-  const checkProgressiveBilling = () => {
-    if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
-      axiosInstance()
-        .get(`${rentalManagement.api}/show-progressive-billing/${id}`)
-        .then(({ data: { data } }) => {
-          if (data.progressiveBilling && permissions?.invoice?.isRead) {
-            setDisplayProgressiveBillingTab(true);
-          }
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
-  };
 
   const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
     axiosInstance()
@@ -545,7 +528,7 @@ const RentalManagementDetailsPage = () => {
             {resourceData &&
               resourceData?.tabs?.length > 0 &&
               resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
-            {displayProgressiveBillingTab && <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>}
+            <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>
             {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 3)}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
@@ -651,7 +634,6 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Loading Ticket' && rentalManagementData && (
@@ -666,7 +648,6 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
-                  checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
                   hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
@@ -683,7 +664,6 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
-                  checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
                   hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
