@@ -11,8 +11,9 @@ import { STEPS_STYLE } from 'src/constants/helpers';
 import { KeyboardArrowLeft } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
 
-const Step = ({ tab, resourcePolicyId, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
+const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
   const [steps, setSteps] = useState(null);
   const [stepLoading, setStepLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -24,8 +25,10 @@ const Step = ({ tab, resourcePolicyId, resourceId, resource, data, allowedToEdit
 
   const findSteps = () => {
     setStepLoading(true);
+    let api = `/dynamic-form/steps?resourcePolicyId=${resourcePolicyId}&tabId=${tab?._id}`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}` 
     axiosInstance()
-      .get(`/dynamic-form/steps?resourcePolicyId=${resourcePolicyId}&tabId=${tab?._id}`)
+      .get(api)
       .then((res) => {
         const steps = res?.data?.data;
         steps?.forEach((step) => {
@@ -40,10 +43,10 @@ const Step = ({ tab, resourcePolicyId, resourceId, resource, data, allowedToEdit
   };
 
   useEffect(() => {
-    if ((tab?._id, resourcePolicyId)) {
+    if ((tab?._id && (resourcePolicyId || workflowId))) {
       findSteps();
     }
-  }, [tab, resourcePolicyId]);
+  }, [tab, resourcePolicyId, workflowId]);
 
   useEffect(() => {
     if (steps?.length && tab?.stepsStyle === STEPS_STYLE.sideBar) setIndex(steps[0]);
