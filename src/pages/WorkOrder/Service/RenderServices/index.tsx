@@ -242,12 +242,16 @@ const RenderServices = ({
             }}
           >
             <div className="mb-1 flex items-center gap-2">
-              <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
+              <HtmlTooltip
+                enterTouchDelay={0}
+                placement="top"
+                className={isColapsed ? 'mx-auto' : ''}
+                arrow
+                title={isMobile ? data?.serviceName : ''}
+              >
                 {data?.type === 'service' ? (
                   <div
-                    className={`${
-                      isColapsed ? 'mx-auto' : ''
-                    }  flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
+                    className={`flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
                   >
                     <span>{data?.order}</span>
                   </div>
