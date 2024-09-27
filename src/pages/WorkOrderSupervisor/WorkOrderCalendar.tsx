@@ -1,7 +1,4 @@
-import {
-  Box,
-  CircularProgress,
-} from '@material-ui/core';
+import { Box, Button, CircularProgress, ListItem } from '@material-ui/core';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
@@ -21,7 +18,7 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, setOpen}, ref) {
+function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, setOpen }, ref) {
   const {
     state: { permissions }
   }: any = useData();
@@ -86,7 +83,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
   }, [dateRange]);
 
   useEffect(() => {
-      fetchData();
+    fetchData();
   }, [filterResourceQuery, dateRange, reference]);
 
   const childFunction = () => {
@@ -105,7 +102,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
       .get(`${workOrderSupervisor.api}/${kebabCase(reference)}?${query}`)
       .then(({ data: { data } }) => {
         const rows = data?.map((d: any) => {
-          if(reference==='repairOrder'){
+          if (reference === 'repairOrder') {
             return {
               id: d._id,
               title: d?.repairOrderNumber,
@@ -115,7 +112,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
               startDraggable: false,
               endDraggable: false
             };
-          }else {
+          } else {
             return {
               id: d._id,
               title: d?.workOrderNumber,
@@ -202,36 +199,40 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
   return (
     <>
       <div>
-        <Box display="flex" flexDirection="column">
-        </Box>
+        <Box display="flex" flexDirection="column"></Box>
         <div className={cn('relative')}>
-            <Calendar
-                defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
-                events={events}
-                formats={formats}
-                localizer={localizer}
-                popup={!(isMobile || isTablet)}
-                messages={{
-                  agenda: 'List'
-                }}
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
-                onView={setView}
-                view={view}
-                eventPropGetter={(obj: any) => {
-                  const style = setEventStyle();
-                  return {
-                    style
-                  };
-                }}
-                onNavigate={(date) => {
-                  onNavigate(date);
-                }}
-                onSelectEvent={(data: any, event: any) => {
-                  setOpen({ open: true, id: data.id });
-                }}
-              />
+          <Calendar
+            defaultDate={defaultDate}
+            key={mobileView ? 'mobile' : 'desktop'}
+            defaultView={mobileView ? 'day' : 'month'}
+            events={events}
+            formats={formats}
+            localizer={localizer}
+            popup={!(isMobile || isTablet)}
+            messages={{
+              agenda: 'List'
+            }}
+            views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+            onView={setView}
+            view={view}
+            eventPropGetter={(obj: any) => {
+              const style = setEventStyle();
+              return {
+                style
+              };
+            }}
+            components={{
+              agenda: {
+                event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
+              }
+            }}
+            onNavigate={(date) => {
+              onNavigate(date);
+            }}
+            onSelectEvent={(data: any, event: any) => {
+              setOpen({ open: true, id: data.id });
+            }}
+          />
           {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />
@@ -243,5 +244,18 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference, set
   );
 }
 
-export default forwardRef(WorkOrderCalendar);
+function EventAgenda({ event, setOpen }) {
+  return (
+    <ListItem
+      button
+      component={'p'}
+      className="!-mx-[10px] !-my-[5px] !w-[calc(100%+20px)] cursor-pointer hover:bg-[var(--dark-secondary,gray)]"
+      onClick={() => setOpen({ open: true, id: event.id })}
+    >
+      <span>{event.title}</span>
+      <span className="font-normal text-gray-500">{event.desc}</span>
+    </ListItem>
+  );
+}
 
+export default forwardRef(WorkOrderCalendar);
