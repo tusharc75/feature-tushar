@@ -24,7 +24,7 @@ export type BrandData = {
   subDomain: string;
 };
 
-const MAIN_SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
+const MAIN_SUB_DOMAIN = ['portal', 'am-portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
 const Login = () => {
   const toastConfig = useContext(CustomToastContext);
