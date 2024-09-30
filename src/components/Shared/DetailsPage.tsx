@@ -408,7 +408,7 @@ const Details = (props: DetailProps) => {
           </span>
         );
       }
-      if (fieldData.type === 'location') {
+      if (fieldData.type === 'gpsLocation') {
         return (
           <>
             {value?.locationName ? (
