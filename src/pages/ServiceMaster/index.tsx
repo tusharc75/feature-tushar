@@ -56,7 +56,7 @@ const ServiceMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
-    setWalkmeData([createResourceFlow(sidebarResource.serviceMaster, data)]);
+    setWalkmeData([createResourceFlow(sidebarResource.serviceMaster, data, false, false)]);
     let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

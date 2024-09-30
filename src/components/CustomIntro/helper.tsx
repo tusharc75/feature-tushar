@@ -72,34 +72,50 @@ export const injectFormFields = (data, fields) => {
   }
 };
 
-export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
+export function generateFormFieldSteps(fields: any[], ignoreField?: string[], includeFields?: string[]) {
   let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
-    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
+    const isFieldIncluded = includeFields?.includes(e?.fieldData?.fieldName);
+    if (
+      (e?.fieldData?.required &&
+        !ignoreField?.includes(e?.fieldData?.fieldName) &&
+        // !e?.fieldData?.isDefaultValue &&
+        !e?.fieldData?.isUneditable) ||
+      isFieldIncluded
+    ) {
       fieldsSteps.push({
         title: `Select ${e?.fieldData?.fieldLabel}`,
         target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
         skipIfValueExist: true,
-        fieldType: e?.fieldData?.type
+        fieldType: e?.fieldData?.type,
+        checkForRequired: isFieldIncluded
       });
     }
   });
   return fieldsSteps;
 }
 
-export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]) {
+export function generateStepsFormfieldData(fields: any[], ignoreField?: string[], includeFields?: string[]) {
   let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
-    if (e?.required && !ignoreField?.includes(e?.fieldName) && !e?.isDefaultValue && !e?.isUneditable) {
+    const isFieldIncluded = includeFields?.includes(e?.fieldData?.fieldName);
+    if (
+      (e?.required &&
+        !ignoreField?.includes(e?.fieldName) &&
+        //  !e?.isDefaultValue &&
+        !e?.isUneditable) ||
+      isFieldIncluded
+    ) {
       fieldsSteps.push({
         title: `Select ${e?.fieldLabel}`,
         target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
         skipIfValueExist: true,
-        fieldType: e?.type
+        fieldType: e?.type,
+        checkForRequired: isFieldIncluded
       });
     }
   });

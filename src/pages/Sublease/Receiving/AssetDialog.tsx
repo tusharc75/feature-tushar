@@ -305,7 +305,14 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <CustomButton onClick={submitForm} variant="contained" color="primary" disabled={loading} loading={loading}>
+                <CustomButton
+                  id="receive-dialog-submit-button"
+                  onClick={submitForm}
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  loading={loading}
+                >
                   Submit
                 </CustomButton>
               </CustomDialogFooter>
