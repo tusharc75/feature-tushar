@@ -493,11 +493,11 @@ export default function ManageQuoteDialog({
             innerRef={ref}
             onSubmit={onSubmit}
           >
-            {({ submitForm, values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+            {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Fragment>
                 <CustomDialogHeader
                   title={isNew ? 'Create Quote' : isClone ? `Clone - ${dataToUpdate.quoteName}` : `Editing ${dataToUpdate.quoteName}`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
@@ -518,7 +518,6 @@ export default function ManageQuoteDialog({
                                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
                               </div>
-
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
@@ -543,11 +542,11 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          // doNotShowInfoTooltip={true}
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                          //   setFieldValue("customerContactName", [])
-                                          // }}
+                                        // doNotShowInfoTooltip={true}
+                                        // onChange={(e, value) => {
+                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                        //   setFieldValue("customerContactName", [])
+                                        // }}
                                         />
                                       ) : field.fieldName === 'opportunity' ? (
                                         <Grid container spacing={1}>
@@ -788,8 +787,8 @@ export default function ManageQuoteDialog({
                                           size="small"
                                         />
                                       ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
-                                          field?.fieldName
-                                        ) >= 0 ? (
+                                        field?.fieldName
+                                      ) >= 0 ? (
                                         <FormTypes
                                           {...field}
                                           // {...rest}
@@ -813,8 +812,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                           customError={customError}
@@ -903,8 +902,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                           fieldData={field}
@@ -940,7 +939,7 @@ export default function ManageQuoteDialog({
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={!isClone && (loading || uploadingImageOrFileProgress > 0)}
+                    disabled={loading || uploadingImageOrFileProgress > 0}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll({ ...errors, ...customError });

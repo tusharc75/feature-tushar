@@ -71,9 +71,8 @@ const ShowDoaData: React.FC<doaDataInterface> = ({ status, doaData, className, .
                       className="link"
                       to={`${routes.userDetail.path}/${label?.users.find((d) => d?.status === label?.status)?.id}`}
                     >
-                      {`${label?.users.find((d) => d?.status === label?.status)?.firstName} ${
-                        label?.users.find((d) => d.status === label?.status)?.lastName
-                      }`}
+                      {`${label?.users.find((d) => d?.status === label?.status)?.firstName} ${label?.users.find((d) => d.status === label?.status)?.lastName
+                        }`}
                     </Link>
                   </div>
                 )}

@@ -156,7 +156,7 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => { }}
+        setCurrentStep={() => {}}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -181,7 +181,7 @@ const Steps = (props) => {
             )}
             <>
               {versionStatus === 'Sent for DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Sent for DOA'} />}
-              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
+              {versionStatus.split(' (')[0] === 'Accepted by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
               {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
                 <div
