@@ -351,6 +351,7 @@ export const createFilterModel = (formValues, coloums) => {
       case 'email':
       case 'mobileNumber':
       case 'currency':
+      case 'location':
       case 'url':
         if (formValues[fieldName]?.trim()) {
           filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
@@ -404,7 +405,7 @@ export const createFilterModel = (formValues, coloums) => {
           filterModel.set(fieldName, { filter: formValues[fieldName] === true || formValues[fieldName] === 'true' ? 'Yes' : 'No' });
         }
         break;
-      case 'location':
+      case 'gpsLocation':
         if (formValues[fieldName] && formValues[fieldName]?.locationName) {
           filterModel.set(fieldName, { filter: formValues[fieldName]?.locationName });
         }
