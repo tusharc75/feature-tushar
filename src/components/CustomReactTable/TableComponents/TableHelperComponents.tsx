@@ -483,7 +483,7 @@ export const CellRenderer = ({
         }}
         onClick={() => {
           if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
-            if (cellId != cell.id) {
+            if (cellId !== cell.id) {
               handleCellClick({ cell, dispatch, row, setCellValue });
             }
           } else {
@@ -516,6 +516,7 @@ export const CellRenderer = ({
             {columnDef?.type === 'singleLine' ? (
               <input
                 autoFocus
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 type="text"
                 onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
                 value={cellValue}
@@ -577,6 +578,7 @@ export const CellRenderer = ({
                   <TextField
                     {...params}
                     variant="standard"
+                    id={`${cell.column.id}-input-${row.index || 0}`}
                     autoFocus
                     onBlur={() => {
                       if (getCellValue(cell) !== cellValue) {
@@ -618,6 +620,7 @@ export const CellRenderer = ({
                   <TextField
                     {...params}
                     variant="standard"
+                    id={`${cell.column.id}-input-${row.index || 0}`}
                     autoFocus
                     onBlur={() => {
                       if (!isEqual(getCellValue(cell), cellValue)) {
@@ -633,6 +636,7 @@ export const CellRenderer = ({
             ) : columnDef?.type === 'date' ? (
               <input
                 type="date"
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
                 value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
                 onKeyDown={(e) => {
@@ -662,6 +666,7 @@ export const CellRenderer = ({
               <input
                 autoFocus
                 type="number"
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 min="0"
                 onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
                 value={cellValue}
@@ -684,6 +689,7 @@ export const CellRenderer = ({
           </div>
         </CellShell>
       );
+
     case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
         <CellShell>
@@ -698,7 +704,7 @@ export const CellRenderer = ({
       );
     case columnDef?.editable:
       return (
-        <CellShell>
+        <CellShell id={`${cell?.column.id}-${row.index}`} value={row.original[cell?.column.id]}>
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
               <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
