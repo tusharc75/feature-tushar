@@ -22,7 +22,8 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
     },
     {
       target: `#${sidebarResource.product}-table-checkbox-0`,
-      title: 'Add a Product'
+      title: 'Add a Product',
+      isPreviousButtonDisabled: true
     },
     {
       target: '#dialog-add-button',
@@ -44,7 +45,8 @@ export const generateDeleteAddedProductSteps = (index: number, waitForStepInsert
   steps: [
     {
       target: `#rentalJobs_grid-1-table-checkbox-${index}`,
-      title: 'Select a product'
+      title: 'Select a product',
+      isPreviousButtonDisabled: true
     },
     { target: '#details-page-action-button', title: 'Actions' },
     { target: '#delete-menu-item', title: 'Delete' },
@@ -58,7 +60,8 @@ export const generateAddChildProduct = (index: number, waitForStepInsertion = fa
   steps: [
     {
       target: `#add-child-product-button-${index}`,
-      title: 'Add Child Product'
+      title: 'Add Child Product',
+      isPreviousButtonDisabled: true
     },
     {
       target: '#add-existing-child-product-menu-item',
@@ -82,9 +85,10 @@ export const generateAddStepEditProduct = (index: number, waitForStepInsertion =
   steps: [
     {
       target: `#edit-product-button-${index}`,
-      title: 'Edit'
+      title: 'Edit',
+      isPreviousButtonDisabled: true
     },
-    { target: '#field-unit', title: 'Select Unit', nextOnValueChange: true, skipIfValueExist: true },
+    { target: '#field-unit', title: 'Select Unit', nextOnValueChange: true, skipIfValueExist: true, isPreviousButtonDisabled: true },
     { target: '#field-pricing-method', title: 'Select Pricing Method', nextOnValueChange: true, skipIfValueExist: true },
     { target: '#field-price', title: 'Change Price', nextOnValueChange: true },
     {
@@ -102,17 +106,20 @@ export const generateAssignStepAssignSerializedAsset = (index: number, waitForSt
   steps: [
     {
       target: `#rental_management_serialized_asset-table-checkbox-${index}`,
-      title: 'Select Product'
+      title: 'Select Product',
+      isPreviousButtonDisabled: true
     },
     {
       target: '#assign-serialized-asset-button',
       title: 'Assign',
       nextButtonName: 'Assign',
-      willOpenDialog: true
+      willOpenDialog: true,
+      isPreviousButtonDisabled: true
     },
     {
       target: '#serialized-products-0',
-      title: 'Select Product'
+      title: 'Select Product',
+      isPreviousButtonDisabled: true
     },
     {
       target: '#serializedAssets_assign-table-checkbox-0',
@@ -138,14 +145,16 @@ export const generateLoadingStepCreateTicketSteps = (index: number, insertMTRCon
     steps: [
       {
         target: `#rentalJobs_grid-3-table-checkbox-${index}`,
-        title: 'Select a product'
+        title: 'Select a product',
+        isPreviousButtonDisabled: true
       },
       { target: '#details-page-action-button', title: 'Actions' },
       {
         target: '#create-loding-ticket-menu-item',
         title: 'Create Ticket',
         willOpenDialog: true,
-        waitForStepInsertion: !insertMTRConfirmation && waitForStepInsertion
+        waitForStepInsertion: !insertMTRConfirmation && waitForStepInsertion,
+        isPreviousButtonDisabled: true
       }
     ]
   };
@@ -166,7 +175,8 @@ export const generateDeliveredToCustomer = (index: number, waitForStepInsertion 
     steps: [
       {
         target: `#rentalJobs_grid-3-table-checkbox-${index}`,
-        title: 'Select a product'
+        title: 'Select a product',
+        isPreviousButtonDisabled: true
       },
       { target: '#details-page-action-button', title: 'Actions' },
       { target: '#delivered-to-customer-menu-item', title: 'Create Ticket', waitForStepInsertion }
@@ -182,7 +192,8 @@ export const generateCreateReceivingTicket = (renderedFrom: string, showAssetDat
     steps: [
       {
         target: `#${renderedFrom.split(' ').join('-')}-table-select-all-checkbox`,
-        title: 'Select a product'
+        title: 'Select a product',
+        isPreviousButtonDisabled: true
       },
       { target: '#details-page-action-button', title: 'Actions' },
       { target: '#create-receiving-ticket-chargaeble-menu-item', title: 'Create Receiving Ticket', waitForStepInsertion: !showAssetDataDialog }
@@ -202,7 +213,8 @@ export const generateReceiveItem = (renderedFrom: string): WalkmeData => {
     steps: [
       {
         target: `#${renderedFrom.split(' ').join('-')}-table-select-all-checkbox`,
-        title: 'Select a product'
+        title: 'Select a product',
+        isPreviousButtonDisabled: true
       },
       { target: '#details-page-action-button', title: 'Actions' },
       { target: '#received-items-menu-item', title: 'Create Receiving Ticket' }
@@ -216,9 +228,15 @@ export const createSendEmailStep = () => {
     name: 'Send Email',
     url: '/rental-management/detail/:id',
     steps: [
-      { target: '#details-page-send-email-button', title: 'Select View', willOpenDialog: true },
-      { target: '#show-column-dialog-send-email-button', title: 'Send Email', waitForStepInsertion: true, willOpenDialog: true },
-      { target: '#send-email-dialog-send-button', title: 'Send' }
+      { target: '#details-page-send-email-button', title: 'Select View', willOpenDialog: true, isPreviousButtonDisabled: true },
+      {
+        target: '#show-column-dialog-send-email-button',
+        title: 'Send Email',
+        waitForStepInsertion: true,
+        willOpenDialog: true,
+        isPreviousButtonDisabled: true
+      },
+      { target: '#send-email-dialog-send-button', title: 'Send', isPreviousButtonDisabled: true }
     ]
   };
   return data;
