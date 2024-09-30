@@ -24,8 +24,11 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, su
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
 
   const { generateColumns } = useColumns();
@@ -160,6 +163,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               onClick={() => {
                 openMaterial(row.original);
               }}
+              id={`edit-product-button-${row.index || 0}`}
             >
               <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
             </IconButton>
@@ -169,6 +173,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             size="small"
             aria-label="Details"
             disabled={row.original.canDelete ? false : true}
+            id={`delete-product-button-${row.index || 0}`}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -185,6 +190,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       )
     });
     setColumns(coloum);
+  };
+
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (allowedToEdit && rows.length > 0) {
+      setWalkmeData([generateAddStepEditProduct(0)]);
+    }
   };
 
   const fetchMaterial = async () => {
@@ -241,7 +252,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     } else {
       setNextStep(true);
     }
-
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -399,6 +410,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     return (
       <>
         <MenuItem
+          id="add-existing-products-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
           }}
@@ -406,6 +418,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           Add Existing Products
         </MenuItem>
         <MenuItem
+          id="add-existing-package-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
           }}

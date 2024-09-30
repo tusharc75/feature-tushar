@@ -41,18 +41,15 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
   const handleReceive = (material, receiveDate) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(
-        `${sublease.api}/${subleaseId}/receive-sublease`,
-        {
-          material: material?.map((m) => ({
-            _id: m?._id,
-            product: m?.product,
-            assetNumber: m?.assetNumber,
-            assetNumberType: m?.assetNumberType
-          })),
-          receiveDate: receiveDate
-        }
-      )
+      .put(`${sublease.api}/${subleaseId}/receive-sublease`, {
+        material: material?.map((m) => ({
+          _id: m?._id,
+          product: m?.product,
+          assetNumber: m?.assetNumber,
+          assetNumberType: m?.assetNumberType
+        })),
+        receiveDate: receiveDate
+      })
       .then(({ data }) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig({
@@ -123,7 +120,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
               }))
             }}
             enableReinitialize={true}
-            onSubmit={() => { }}
+            onSubmit={() => {}}
           >
             {({ values, setFieldValue }) => (
               <>
@@ -227,18 +224,22 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                   )}
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button variant="outlined" size="small" color="primary" onClick={onClose}>
+                  <Button variant="outlined" size="small" color="primary" onClick={onClose} id="receive-dialog-cancel-button">
                     Cancel
                   </Button>
                   <Button
                     onClick={() => {
-                      if (!validate(values.material).qty && (subleaseData.type === SUBLEASE_TYPE.vendor ? !validateDate(values)?.receiveDate : true)) {
+                      if (
+                        !validate(values.material).qty &&
+                        (subleaseData.type === SUBLEASE_TYPE.vendor ? !validateDate(values)?.receiveDate : true)
+                      ) {
                         handleSubmit(values);
                       }
                     }}
                     size="small"
                     variant="contained"
                     color="primary"
+                    id="receive-dialog-save-button"
                   >
                     Save
                   </Button>

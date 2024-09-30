@@ -1,4 +1,4 @@
-import { Avatar, Box, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
+import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
 import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -9,6 +9,7 @@ import {
   cn,
   colSpans,
   columnSize,
+  CustomDialogTransition,
   dateFormat,
   displayDate,
   displayDateTime,
@@ -32,6 +33,8 @@ import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import GoogleMaps from 'src/components/GoogleMap';
+import { CreateTask } from 'src/components/Activity/Task/CreateTask';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -113,6 +116,8 @@ const Details = (props: DetailProps) => {
   const [taskData, setTaskdata] = useState(null);
   const fieldsData = useMemo(() => fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData), [fields]);
   const [viewMap, setViewMap] = useState({ open: false, locationName: null, longitude: null, latitude: null });
+  const [openTask, setOpenTask] = useState({ open: false, _id: null });
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     sortArray();
@@ -614,6 +619,7 @@ const Details = (props: DetailProps) => {
                                 <RenderFollowUP
                                   data={field.followUpData}
                                   columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                                  setOpenTask={setOpenTask}
                                 />
                               )}
                             </div>
@@ -643,6 +649,36 @@ const Details = (props: DetailProps) => {
             resource={resource}
             referenceId={referenceId}
           />
+        )}
+
+        {openTask?.open && (
+          <Dialog
+            open={true}
+            fullScreen={fullScreen}
+            TransitionComponent={CustomDialogTransition}
+            fullWidth
+            maxWidth="md"
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                setOpenTask({ open: false, _id: null });
+                setFullScreen(false);
+              }
+            }}
+          >
+            <CreateTask
+              taskId={openTask?._id}
+              relatedTo={[{ type: resource, referenceId: referenceId, access: true }]}
+              handleClose={() => {
+                setOpenTask({ open: false, _id: null });
+                setFullScreen(false);
+              }}
+              isMinimized={true}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          </Dialog>
         )}
       </div>
       {viewMap?.open && (
@@ -699,7 +735,15 @@ export type RelatedTo = {
   name: string;
 };
 
-const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 | 12 }) => {
+const RenderFollowUP = ({
+  data,
+  columnSize,
+  setOpenTask
+}: {
+  data: FollowUP[];
+  columnSize: 6 | 12;
+  setOpenTask: React.Dispatch<React.SetStateAction<any>>;
+}) => {
   return (
     <div className="my-2">
       <p className="mx-[10px] pb-1 text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
@@ -716,7 +760,14 @@ const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 
               d.description && 'mb-1 pb-1 [border-bottom:1px_solid_var(--common-border-color)]'
             )}
           >
-            <p className={cn('text-[14px] font-semibold')}>{d.name}</p>
+            <p
+              className={cn('cursor-pointer text-[14px] font-semibold')}
+              onClick={() => {
+                setOpenTask({ open: true, _id: d?._id });
+              }}
+            >
+              {d.name}
+            </p>
             <span className="block flex-shrink-0 rounded-md bg-[var(--new-theme-color)] px-2 py-1 text-white">{d.status}</span>
           </div>
           {d.description && <p className="py-2 text-gray-600 dark:text-gray-400">{d.description}</p>}
