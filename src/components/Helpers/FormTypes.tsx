@@ -411,21 +411,34 @@ const FormTypes = (props) => {
 
   React.useEffect(() => {
     let active = true;
-    if (type === 'location') {
+    if (type === 'location' || type === 'gpsLocation') {
       if (!autocompleteService.current && window.google) {
         autocompleteService.current = new window.google.maps.places.AutocompleteService();
       }
       if (!autocompleteService.current) {
         return undefined;
       }
-      if (!values[name] || values[name]?.locationName === '') {
-        return undefined;
-      }
-      fetch({ input: values[name]?.locationName }, (results) => {
-        if (active) {
-          setOptions(results);
+      if (type === 'gpsLocation') {
+        if (!values[name] || values[name]?.locationName === '') {
+          return undefined;
         }
-      });
+        fetch({ input: values[name]?.locationName }, (results) => {
+          if (active) {
+            setOptions(results);
+          }
+        });
+      }
+      else {
+        if (values[name] === '') {
+          return undefined;
+        }
+        fetch({ input: values[name] }, (results) => {
+          if (active) {
+            setOptions(results);
+          }
+        });
+      }
+
     }
     return () => {
       active = false;
@@ -2203,6 +2216,77 @@ const FormTypes = (props) => {
         </FormControl>
       </InfoLabel>
     ) : type === 'location' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Autocomplete
+          {...rest}
+          limitTags={2}
+          getOptionLabel={(option: any) => (typeof option === 'string' ? option : option.description)}
+          filterOptions={(x) => x}
+          options={optionsList}
+          autoComplete
+          includeInputInList
+          filterSelectedOptions
+          value={values[name]}
+          onChange={
+            onChange
+              ? onChange
+              : (event, newValue) => {
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
+          }
+          onInputChange={(event, newInputValue) => {
+            handleChange(name, newInputValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              name={name}
+              label={getLabel(label)}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          renderOption={(option: any) => {
+            const matches = option?.structured_formatting?.main_text_matched_substrings || [];
+            const parts = parse(
+              option?.structured_formatting.main_text,
+              matches?.map((match) => [match?.offset, match?.offset + match?.length])
+            );
+            return (
+              <Grid container alignItems="center">
+                <Grid item>
+                  <LocationOnIcon
+                    style={{
+                      color: theme.palette.text.secondary,
+                      marginRight: theme.spacing(2)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  {parts?.map((part, index) => (
+                    <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                      {part.text}
+                    </span>
+                  ))}
+
+                  <Typography variant="body2" color="textSecondary">
+                    {option.structured_formatting.secondary_text}
+                  </Typography>
+                </Grid>
+              </Grid>
+            );
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'gpsLocation' ? (
       <InfoLabel
         info={tooltipMessage}
         isTooltip={isTooltip}
