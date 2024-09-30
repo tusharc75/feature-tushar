@@ -152,7 +152,15 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess, transferInv
                 <Button color="primary" size="small" onClick={handleClose}>
                   Cancel
                 </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                <CustomButton
+                  id={`receive-dialog-receive-button`}
+                  loading={loading}
+                  disabled={loading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={submitForm}
+                >
                   {'Receive'}
                 </CustomButton>
               </CustomDialogFooter>

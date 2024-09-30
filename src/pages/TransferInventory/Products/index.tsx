@@ -29,6 +29,8 @@ import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSe
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingProduct } from 'src/pages/TransferInventory/walkmeSteps';
 
 const Products = ({
   transferInventoryData,
@@ -40,6 +42,7 @@ const Products = ({
   updateStatus,
   stepFullScreen
 }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -207,6 +210,14 @@ const Products = ({
     fetchData();
   }, [transferInventoryData]);
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (allowedToEdit) {
+      setWalkmeData([generateAddExistingProduct()]);
+    } else {
+      setWalkmeData([]);
+    }
+  };
+
   const fetchData = async () => {
     setNextStep(false);
     setNextStepToolTip(null);
@@ -281,6 +292,7 @@ const Products = ({
           setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
         }
         setProductSerialNumbers(data?.serialNumber);
+        handleAddWalkmeData(rows);
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -296,7 +308,8 @@ const Products = ({
     axiosInstance()
       .post(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`, {
         products
-      }).then(() => {
+      })
+      .then(() => {
         fetchData();
         fetchTransferInventoryData();
         toastConfig.setToastConfig({
@@ -476,6 +489,7 @@ const Products = ({
           onClick={() => {
             setAddInventoryDialog(true);
           }}
+          id="add-existing-products-menu-item"
         >
           {`Add Existing Products`}
         </MenuItem>

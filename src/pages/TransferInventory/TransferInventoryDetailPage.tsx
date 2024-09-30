@@ -34,8 +34,18 @@ import Products from './Products';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import {
+  createTransferInventoryFlow,
+  generateAddExistingProduct,
+  generateCompleteButtonStep,
+  generateLoadingStepCreateLoadingTicket,
+  generateLoadingStepReceive,
+  nextButtonStep
+} from 'src/pages/TransferInventory/walkmeSteps';
 
 const TransferInventoryDetailPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -98,6 +108,19 @@ const TransferInventoryDetailPage = () => {
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.insertAtCurrentIndex([
+        ...generateAddExistingProduct(false).steps,
+        nextButtonStep(false),
+        ...generateLoadingStepCreateLoadingTicket(0).steps,
+        ...generateLoadingStepReceive(0).steps,
+        ...generateCompleteButtonStep().steps
+      ]);
+      walkmeInstance.handleNext();
+    }
+  }, [walkmeInstance]);
 
   const fetchPolicy = async () => {
     try {
@@ -215,6 +238,7 @@ const TransferInventoryDetailPage = () => {
                     variant={'outlined'}
                     color="default"
                     size="small"
+                    id={`transfer-inventory-complete-button`}
                     onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
                     className={'btn-outline-v1'}
                   >
