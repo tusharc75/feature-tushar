@@ -1,4 +1,18 @@
-import { Box, Button, CircularProgress, ListItem } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  ListItem,
+  Popover,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField
+} from '@material-ui/core';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
@@ -12,6 +26,10 @@ import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import { kebabCase } from 'lodash';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { ExpandMore } from '@material-ui/icons';
+import routes from 'src/components/Helpers/Routes';
+import { FiExternalLink } from 'react-icons/fi';
 
 const localizer = momentLocalizer(moment);
 const formats = {
@@ -57,6 +75,8 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
   });
 
   const [isDataFetching, setIsDataFetching] = useState(false);
+  const [openRepairPopup, setOpenRepairPopup] = useState({ open: false, data: null });
+  const [anchor, setAnchor] = useState(null);
 
   useEffect(() => {
     if (view === 'month') {
@@ -93,6 +113,19 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
   useImperativeHandle(ref, () => ({
     childFunction
   }));
+
+  const fetchRepairOrderCompetencies = (id: string) => {
+    setIsDataFetching(true);
+    axiosInstance()
+      .get(`${workOrderSupervisor.api}/repair-order-service-competencies/${id}`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          setOpenRepairPopup({ open: true, data: data });
+        }
+      })
+      .catch((err) => {})
+      .finally(() => setIsDataFetching(false));
+  };
 
   const fetchData = () => {
     setIsDataFetching(true);
@@ -230,7 +263,13 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
               onNavigate(date);
             }}
             onSelectEvent={(data: any, event: any) => {
-              setOpen({ open: true, id: data.id });
+              if (reference === 'repairOrder') {
+                console.log(data);
+                fetchRepairOrderCompetencies(data.id);
+                setAnchor(event.nativeEvent.target);
+              } else {
+                setOpen({ open: true, id: data.id });
+              }
             }}
           />
           {isDataFetching && (
@@ -240,6 +279,43 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
           )}
         </div>
       </div>
+      {openRepairPopup.open && (
+        <Popover
+          open={openRepairPopup.open}
+          anchorEl={anchor}
+          onClose={() => {
+            setOpenRepairPopup({ open: false, data: null });
+          }}
+          style={{ minWidth: '300px' }}
+        >
+          <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
+            {openRepairPopup.data?.length
+              ? openRepairPopup.data?.map((d) => (
+                  <Accordion key={d.workOrderNumber} defaultExpanded>
+                    <AccordionSummary expandIcon={<ExpandMore />}>
+                      <div className="flex items-center gap-2">
+                        <p className="text-truncate" title={d.workOrderNumber}>
+                          {d.workOrderNumber}
+                        </p>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes.workOrderDetail.path}/${d?._id}`);
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                        </IconButton>
+                      </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <RenderTable data={d.competencies} />
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              : null}
+          </Box>
+        </Popover>
+      )}
     </>
   );
 }
@@ -259,3 +335,42 @@ function EventAgenda({ event, setOpen }) {
 }
 
 export default forwardRef(WorkOrderCalendar);
+
+const RenderTable = ({ data }) => {
+  return (
+    <TableContainer>
+      <Table className="min-w-[530px]" aria-label="simple table" size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>{routes.competencies.title}</TableCell>
+            <TableCell>Count</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.referenceId}>
+              <TableCell component="th" scope="row">
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row?.competency?.optionLabel}>
+                    {row.competency?.optionLabel}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.competenciesDetail.path}/${row?.competency?.optionValue}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row.count}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
