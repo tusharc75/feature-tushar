@@ -450,7 +450,6 @@ const ManageSublease = ({
                     e.preventDefault();
                     handleScroll(errors);
                     submitForm();
-                    console.log(errors);
                   }}
                   disabled={loading}
                 >

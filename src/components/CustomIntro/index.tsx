@@ -137,7 +137,6 @@ const CustomIntro = () => {
         checkForStepInsertion ? 100 : 500
       );
     }
-    console.log(handleSteps.current);
   };
 
   const handleStart = (intro: WalkmeData) => {

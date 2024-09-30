@@ -80,10 +80,6 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
-    console.log(
-      createSubleaseFlow(data),
-      data.map((d) => d.fieldData).filter((d) => d.required)
-    );
     setWalkmeData([createSubleaseFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);

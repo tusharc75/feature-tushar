@@ -41,7 +41,13 @@ import Receiving from 'src/pages/Sublease/Receiving';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import { generateAddExistingProduct } from 'src/pages/Sublease/walkmeSteps';
+import {
+  generateAddExistingProduct,
+  generateAddStepEditProduct,
+  generateReceiveStepReceive,
+  generateStepSendToSupplier,
+  nextButtonStep
+} from 'src/pages/Sublease/walkmeSteps';
 
 const SubleaseDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -91,7 +97,14 @@ const SubleaseDetailsPage = () => {
 
   useEffect(() => {
     if (walkmeInstance && walkmeInstance.type === 'flow') {
-      walkmeInstance.instance.insertAtCurrentIndex([...generateAddExistingProduct(true).steps]);
+      walkmeInstance.instance.insertAtCurrentIndex([
+        ...generateAddExistingProduct(false).steps,
+        ...generateAddStepEditProduct(0, false).steps,
+        nextButtonStep(false),
+        ...generateReceiveStepReceive(0, false).steps,
+        nextButtonStep(false),
+        ...generateStepSendToSupplier(0).steps
+      ]);
       walkmeInstance.handleNext();
     }
   }, [walkmeInstance]);
