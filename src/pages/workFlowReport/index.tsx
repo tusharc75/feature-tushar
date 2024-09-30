@@ -1,4 +1,4 @@
-import { Box, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import { camelCase, kebabCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete } from '@material-ui/lab';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 const renderedFrom = camelCase(routes?.workflowReport.title);
 
@@ -32,7 +33,7 @@ const WorkFlowReport = () => {
   const [columns, setColumns] = useState(null);
   const [workFlowOptions, setWorkFlowOptions] = useState(null);
   const [selectedWorkFlow, setSelectedWorkFlow] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState([WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -56,10 +57,18 @@ const WorkFlowReport = () => {
         Header: 'Workflow Number',
         width: 150,
         Cell: ({ row }) => (
-          <div>
-            <Link className="link" to={`${routes.workflowReportDetail.path}/${row?.original?._id}`}>
+          <div className="flex items-center gap-2">
+            <p className="text-truncate" title={row?.original?.workflowNumber}>
               {row?.original?.workflowNumber}
-            </Link>
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workflowReportDetail.path}/${row?.original?._id}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -68,14 +77,20 @@ const WorkFlowReport = () => {
         Header: 'Reference',
         width: 150,
         Cell: ({ row }) => (
-          <div>
-            <Link
-              className="link"
-              to={`${routes[`${camelCase(row?.original?.resource)}`]?.path || kebabCase(row?.original?.resource)}/detail/${row?.original?.referenceId}`}
-              target={'_blank'}
-            >
+          <div className="flex items-center gap-2">
+            <p className="text-truncate" title={row?.original?.reference}>
               {row?.original?.reference}
-            </Link>
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(
+                  `${routes[`${camelCase(row?.original?.resource)}`]?.path || kebabCase(row?.original?.resource)}/detail/${row?.original?.referenceId}`
+                );
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -90,10 +105,18 @@ const WorkFlowReport = () => {
         Header: 'Workflow',
         width: 150,
         Cell: ({ row }) => (
-          <div>
-            <Link className="link" to={`${routes.workflow.path}/${row?.original?.workflowId}`} target={'_blank'}>
+          <div className="flex items-center gap-2">
+            <p className="text-truncate" title={row?.original?.workflow}>
               {row?.original?.workflow}
-            </Link>
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workflow.path}/${row?.original?.workflowId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -120,8 +143,8 @@ const WorkFlowReport = () => {
     if (selectedWorkFlow) {
       deepFilter = `${deepFilter}&workflowId=${selectedWorkFlow}`;
     }
-    if (selectedStatus) {
-      deepFilter = `${deepFilter}&status=${selectedStatus}`;
+    if (selectedStatus.length) {
+      deepFilter = `${deepFilter}&status=${JSON.stringify(selectedStatus)}`;
     }
     return deepFilter;
   };
@@ -177,10 +200,12 @@ const WorkFlowReport = () => {
           options={[WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress, WORK_FLOW_STATUS.completed]}
           getOptionLabel={(option) => option || ''}
           size="small"
+          multiple={true}
           renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Status" variant="outlined" />}
-          value={selectedStatus || ''}
+          value={selectedStatus || []}
+          disableCloseOnSelect
           onChange={(event: any, val: any) => {
-            setSelectedStatus(val ?? '');
+            setSelectedStatus(val ?? []);
           }}
         />
       </>
