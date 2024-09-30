@@ -25,117 +25,118 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
   if (Boolean(tooltip)) paddingRight += 29;
 
   return (
-    <Box
-      className={styles.singleCard}
-      style={{ cursor: cardOnClick ? 'pointer' : 'default' }}
-      onClick={(e) => {
-        if (cardOnClick) {
-          cardOnClick(e, data);
-        }
-      }}
-    >
-      {rowDef.map((item, index) => {
-        if (item.type === 'tooltip') return null;
-        if (item.type === 'title') {
-          if (item.renderer)
+    <Box className={styles.singleCard}>
+      <div
+        onClick={(e) => {
+          if (cardOnClick) {
+            cardOnClick(e, data);
+          }
+        }}
+        style={{ cursor: cardOnClick ? 'pointer' : 'default' }}
+      >
+        {rowDef.map((item, index) => {
+          if (item.type === 'tooltip') return null;
+          if (item.type === 'title') {
+            if (item.renderer)
+              return (
+                <div style={{ borderStyle: 'solid' }} className="mb-[12px] border-b border-[var(--common-border-color)] pb-[12px]">
+                  {item.renderer(data)}
+                </div>
+              );
             return (
-              <div style={{ borderStyle: 'solid' }} className="pb-[12px] mb-[12px] border-b border-[var(--common-border-color)]">
-                {item.renderer(data)}
+              <div className={`${styles.cardTitle}`}>
+                <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight }} title={data[item.accessor] || '--'}>
+                  {data[item.accessor] || '--'}
+                </h5>
               </div>
             );
-          return (
-            <div className={`${styles.cardTitle}`}>
-              <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight }} title={data[item.accessor] || '--'}>
-                {data[item.accessor] || '--'}
-              </h5>
-            </div>
-          );
-        }
-        if (item.renderer) {
-          return (
-            <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
-              {item.renderer(data)}
-            </Typography>
-          );
-        }
-        if (item.type === 'linkTitle') {
-          if (!data[item.accessor]) return null;
-          return (
-            <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
-              <Link target="_blank" className={styles.cardDetailsLink} to={() => item.link(data)}>
-                {data[item.accessor] || '--'}
-              </Link>
-            </Typography>
-          );
-        }
-        if (item.type === 'text') {
-          if (!data[item.accessor]) return null;
-          return (
-            <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
-              <span>{item.title}: </span>
-              {data[item.accessor] || '--'}
-            </Typography>
-          );
-        }
-        if (item.type === 'link') {
-          if (!data[item.accessor]) return null;
-          let linkText = data[item.accessor] || '--';
-          let outsideText = null;
-          if (item.target === '_blank') {
-            linkText = <FiExternalLink size={16} />;
-            outsideText = data[item.accessor] || '--';
           }
-          return (
-            <Typography key={index} className={styles.cardDetails}>
-              <span>{item.title}: </span>
-              <span className="flex gap-1 text-ellipsis min-w-0 [font-weight:400_!important]">
-                {outsideText}
-                <Link
-                  className={`${styles.cardDetailsLink} min-w-0 `}
-                  onClick={(e) => e.stopPropagation()}
-                  target={item.target}
-                  to={() => item.link(data)}
-                  title={data[item.accessor] || '--'}
-                >
-                  {linkText}
+          if (item.renderer) {
+            return (
+              <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
+                {item.renderer(data)}
+              </Typography>
+            );
+          }
+          if (item.type === 'linkTitle') {
+            if (!data[item.accessor]) return null;
+            return (
+              <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
+                <Link target="_blank" className={styles.cardDetailsLink} to={() => item.link(data)}>
+                  {data[item.accessor] || '--'}
                 </Link>
-              </span>
-            </Typography>
-          );
-        }
-        if (item.type === 'date') {
-          if (!data[item.accessor]) return null;
-          return (
-            <Typography key={index} className={styles.cardDetails}>
-              <span>{item.title}: </span>
-              {data[item.accessor] ? moment(data[item.accessor]).format(dateFormat) : '--'}
-            </Typography>
-          );
-        }
-        if (item.type === 'dateTime') {
-          if (!data[item.accessor]) return null;
-          return (
-            <Typography key={index} className={styles.cardDetails}>
-              <span>{item.title}: </span>
-              {data[item.accessor] ? moment(data[item.accessor]).format(dateTimeFormat) : '--'}
-            </Typography>
-          );
-        }
-        if (item.type === 'timer') {
-          const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
-          if (!stepTimes.length) return null;
-          if (stepTimes.length > 0)
+              </Typography>
+            );
+          }
+          if (item.type === 'text') {
+            if (!data[item.accessor]) return null;
+            return (
+              <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
+                <span>{item.title}: </span>
+                {data[item.accessor] || '--'}
+              </Typography>
+            );
+          }
+          if (item.type === 'link') {
+            if (!data[item.accessor]) return null;
+            let linkText = data[item.accessor] || '--';
+            let outsideText = null;
+            if (item.target === '_blank') {
+              linkText = <FiExternalLink size={16} />;
+              outsideText = data[item.accessor] || '--';
+            }
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                <TimerComponent stepTimes={stepTimes} />
+                <span className="flex min-w-0 gap-1 text-ellipsis [font-weight:400_!important]">
+                  {outsideText}
+                  <Link
+                    className={`${styles.cardDetailsLink} min-w-0 `}
+                    onClick={(e) => e.stopPropagation()}
+                    target={item.target}
+                    to={() => item.link(data)}
+                    title={data[item.accessor] || '--'}
+                  >
+                    {linkText}
+                  </Link>
+                </span>
               </Typography>
             );
-        }
-        return null;
-      })}
+          }
+          if (item.type === 'date') {
+            if (!data[item.accessor]) return null;
+            return (
+              <Typography key={index} className={styles.cardDetails}>
+                <span>{item.title}: </span>
+                {data[item.accessor] ? moment(data[item.accessor]).format(dateFormat) : '--'}
+              </Typography>
+            );
+          }
+          if (item.type === 'dateTime') {
+            if (!data[item.accessor]) return null;
+            return (
+              <Typography key={index} className={styles.cardDetails}>
+                <span>{item.title}: </span>
+                {data[item.accessor] ? moment(data[item.accessor]).format(dateTimeFormat) : '--'}
+              </Typography>
+            );
+          }
+          if (item.type === 'timer') {
+            const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
+            if (!stepTimes.length) return null;
+            if (stepTimes.length > 0)
+              return (
+                <Typography key={index} className={styles.cardDetails}>
+                  <span>{item.title}: </span>
+                  <TimerComponent stepTimes={stepTimes} />
+                </Typography>
+              );
+          }
+          return null;
+        })}
+      </div>
 
-      <Box className={`${styles.passFail} flex gap-2 items-center`}>
+      <Box className={`${styles.passFail} flex items-center gap-2`}>
         {tooltip ? tooltip.renderer(data) : null}
         {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
       </Box>
