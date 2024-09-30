@@ -1136,7 +1136,7 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
-          referenceData={{ packageType: 'Product', customerAccount: [rentalManagementData?.customerAccount?.optionValue] }}
+          referenceData={{ packageType: 'Product', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           isClone={false}
           open={addExistingProductDialog.open}
           packageId={null}
