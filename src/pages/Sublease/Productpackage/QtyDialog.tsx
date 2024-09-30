@@ -244,8 +244,8 @@ const QtyDialog: FC<EditDialogProps> = ({
       }
       const updatedRows: any = [];
       rows?.forEach((ele) => {
-        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) })
-      })
+        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) });
+      });
       handleSaveData(updatedRows);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
@@ -270,9 +270,9 @@ const QtyDialog: FC<EditDialogProps> = ({
         }
       ]);
       setPriceConditionListConst(priceData || []);
-      updateRateChangeState(values, priceData, pricingMethodOptions)
+      updateRateChangeState(values, priceData, pricingMethodOptions);
     }
-  };
+  }
 
   const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
     var tempPriceCondition = [...priceData];
@@ -290,24 +290,26 @@ const QtyDialog: FC<EditDialogProps> = ({
         };
       }),
       'optionValue'
-    )
+    );
     setPriceConditionList(tempPriceCondition);
     var tempPricingMethod = pricingMethodOptions;
     if (values['pricingCondition'] && values['pricingCondition'] !== '') {
       tempPricingMethod = uniqBy(
-        priceData?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)?.map((d) => {
-          return {
-            optionLabel: d?.pricingMethod,
-            optionValue: d?.pricingMethod
-          };
-        }),
+        priceData
+          ?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)
+          ?.map((d) => {
+            return {
+              optionLabel: d?.pricingMethod,
+              optionValue: d?.pricingMethod
+            };
+          }),
         'optionValue'
-      )
+      );
     }
-    setPricingMethodList(tempPricingMethod)
+    setPricingMethodList(tempPricingMethod);
 
-    return { tempPriceCondition, tempPricingMethod }
-  }
+    return { tempPriceCondition, tempPricingMethod };
+  };
 
   function validate(values) {
     const errors = {};
@@ -423,14 +425,23 @@ const QtyDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? pricingMethodList
+                                                : field.option
+                                          }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -442,13 +453,26 @@ const QtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
+                                              );
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === value &&
+                                                  d.unit === values['unit']
+                                              );
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                              );
                                             }
                                             let priceFieldName = 'price_' + subleaseData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
@@ -546,6 +570,7 @@ const QtyDialog: FC<EditDialogProps> = ({
                       onClose();
                     }
                   }}
+                  id={`sublease-qty-dialog-close-button`}
                 >
                   {'Close'}
                 </Button>
@@ -556,6 +581,7 @@ const QtyDialog: FC<EditDialogProps> = ({
                   color="primary"
                   type="submit"
                   onClick={submitForm}
+                  id={`sublease-qty-dialog-save-button`}
                 >
                   {' '}
                   Save

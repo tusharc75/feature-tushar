@@ -39,7 +39,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                         {data?.oldValue ? (
                           data?.type === 'date' ? (
                             moment(data?.oldValue).format(dateFormat)
-                          ) : data?.type === 'location' ? (
+                          ) : data?.type === 'gpsLocation' ? (
                             data?.oldValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
                             <p
@@ -78,7 +78,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                         {data?.newValue ? (
                           data?.type === 'date' ? (
                             moment(data?.newValue).format(dateFormat)
-                          ) : data?.type === 'location' ? (
+                          ) : data?.type === 'gpsLocation' ? (
                             data?.newValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
                             <p

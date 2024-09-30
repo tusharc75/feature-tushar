@@ -197,7 +197,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
       }
 
       if (
-        ['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay', 'decimal', 'number']?.includes(col.type) &&
+        ['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay', 'decimal', 'number', 'location']?.includes(col.type) &&
         formValues[fieldName]
       ) {
         filterModel[fieldName] = {
@@ -263,7 +263,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             filter: formValues[fieldName] === true ? 'Yes' : 'No'
           };
         }
-      } else if (col.type === 'location') {
+      } else if (col.type === 'gpsLocation') {
         if (formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
             filterType: 'text',

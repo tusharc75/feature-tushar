@@ -40,8 +40,17 @@ import Tickets from './Tickets';
 import Receiving from 'src/pages/Sublease/Receiving';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import {
+  generateAddExistingProduct,
+  generateAddStepEditProduct,
+  generateReceiveStepReceive,
+  generateStepSendToSupplier,
+  nextButtonStep
+} from 'src/pages/Sublease/walkmeSteps';
 
 const SubleaseDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.sublease.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -85,6 +94,20 @@ const SubleaseDetailsPage = () => {
       })
       .catch((error) => {});
   };
+
+  useEffect(() => {
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.insertAtCurrentIndex([
+        ...generateAddExistingProduct(false).steps,
+        ...generateAddStepEditProduct(0, false).steps,
+        nextButtonStep(false),
+        ...generateReceiveStepReceive(0, false).steps,
+        nextButtonStep(false),
+        ...generateStepSendToSupplier(0).steps
+      ]);
+      walkmeInstance.handleNext();
+    }
+  }, [walkmeInstance]);
 
   useEffect(() => {
     if (parsed) {
