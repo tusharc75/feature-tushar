@@ -47,6 +47,7 @@ export type StepDefination = {
   waitForStepInsertion?: boolean;
   fieldType?: string;
   checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 
 export type NormalStep = {
@@ -62,6 +63,7 @@ export type NormalStep = {
   fieldType?: string;
   index: number;
   checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 export type HiddenStep = {
   target: string;
@@ -78,6 +80,7 @@ export type HiddenStep = {
   fieldType?: string;
   index: number;
   checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 
 let timeout: NodeJS.Timeout;
@@ -228,7 +231,7 @@ const CustomIntro = () => {
                 {!isFirstStep ? (
                   <ThemeButton
                     color="secondary"
-                    disabled={isWaiting}
+                    disabled={isWaiting || currentStepData.isPreviousButtonDisabled}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
                     startIcon={<FaArrowLeft size={16} />}

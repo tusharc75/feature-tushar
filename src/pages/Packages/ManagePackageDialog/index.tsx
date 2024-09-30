@@ -24,7 +24,7 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
@@ -67,7 +67,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             setPackageName(packageName);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
           } else {
             setInitialData({
@@ -82,8 +82,14 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
         let initialData = getObjKeys('', fieldsDataForCreate);
         if (referenceData) {
           for (const key in referenceData) {
-            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-              initialData[key] = referenceData[key];
+            const foundField = fieldsDataForCreate?.find((e) => e.fieldName === key);
+            if (referenceData[key] && foundField) {
+              if (foundField?.type === "multiSelect" && isString(referenceData[key])) {
+                initialData[key] = [referenceData[key]];
+              }
+              else {
+                initialData[key] = referenceData[key];
+              }
             }
           }
         }
@@ -183,7 +189,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             <Fragment>
               <CustomDialogHeader
                 title={!packageId ? 'Create Package' : `${isClone ? `Clone - ${packageName}` : 'Edit'}`}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}

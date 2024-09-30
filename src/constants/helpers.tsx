@@ -996,7 +996,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       }
     } else if (key.type === 'signature') {
       obj[key.fieldName] = '';
-    } else if (key.type === 'location') {
+    } else if (key.type === 'gpsLocation') {
       obj[key.fieldName] = {};
     } else {
       obj[key.fieldName] = value;
@@ -1103,7 +1103,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
-    } else if (key.type === 'location') {
+    } else if (key.type === 'gpsLocation') {
       const values = dataObj[key.fieldName]
         ? isString(dataObj[key.fieldName])
           ? { locationName: dataObj[key.fieldName] }
@@ -1434,7 +1434,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'location') {
+    } else if (input.type === 'gpsLocation') {
       schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
     } else {
       schema[input.fieldName] = input.required

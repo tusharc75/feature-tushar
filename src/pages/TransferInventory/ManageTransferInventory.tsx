@@ -10,7 +10,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, GenerateResourceLineNumber, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  transferInventory,
+  setFieldsInAscendingOrder,
+  GenerateResourceLineNumber,
+  TRANSFER_INVENTORY_STATUS
+} from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -242,6 +248,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 <Button
                   size="small"
                   color="primary"
+                  id="dialog-cancel-button"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -250,7 +257,15 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 >
                   Cancel
                 </Button>
-                <CustomButton loading={isSubmitting} disabled={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                <CustomButton
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  id="dialog-save-button"
+                  onClick={submitForm}
+                >
                   {' '}
                   Save
                 </CustomButton>
