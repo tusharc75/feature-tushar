@@ -142,6 +142,11 @@ const FieldList = {
     type: 'location',
     icon: 'far fa-calendar-check'
   },
+  GPSLOCATION: {
+    label: 'GPS Location',
+    type: 'gpsLocation',
+    icon: 'far fa-calendar-check'
+  },
   PROCESS: {
     label: 'Process',
     type: 'process',

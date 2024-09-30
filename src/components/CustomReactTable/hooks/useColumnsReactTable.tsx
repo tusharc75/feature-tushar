@@ -567,7 +567,7 @@ export default function useColumns() {
           accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
           cell: ({ row }) => <SwitchCell field={field} original={row?.original} />
         });
-      } else if (field.type === 'location') {
+      } else if (field.type === 'gpsLocation') {
         column.push({
           ...commonFieldData,
           editable: false,
