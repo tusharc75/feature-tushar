@@ -1,6 +1,7 @@
 import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -25,11 +27,12 @@ import {
   sublease
 } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { createSubleaseFlow } from 'src/pages/Sublease/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSublease from './ManageSublease';
-import axios, { CancelTokenSource } from 'axios';
 
 const Sublease = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   let renderedFrom = camelCase(routes.sublease?.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -77,6 +80,11 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
+    console.log(
+      createSubleaseFlow(data),
+      data.map((d) => d.fieldData).filter((d) => d.required)
+    );
+    setWalkmeData([createSubleaseFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

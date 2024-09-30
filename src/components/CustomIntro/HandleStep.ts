@@ -1,6 +1,7 @@
 import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { CheckForRequiredFields } from 'src/components/CustomIntro/Observers/CheckForRequiredFields';
 import { DisableObserver } from 'src/components/CustomIntro/Observers/DisableObserver';
 import { MultiSelectAutoCompleteObserver } from 'src/components/CustomIntro/Observers/MultiSelectAutoCompleteObserver';
 import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
@@ -44,6 +45,7 @@ export class HandleSteps {
   clicked: boolean;
   waiting: boolean;
   tempIndex: number;
+  checkForRequiredFields: CheckForRequiredFields;
   constructor({
     setUpdateSignal,
     steps,
@@ -85,6 +87,7 @@ export class HandleSteps {
     this.loop();
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
+    this.checkForRequiredFields = new CheckForRequiredFields(this);
   }
 
   private addEventListeners() {
@@ -101,6 +104,8 @@ export class HandleSteps {
     window.requestAnimationFrame(() => {
       this.checkPreviousObservers();
       this.loop();
+      this.checkForRequiredFields.update();
+      this.checkForRequiredFields.render();
     });
   }
 
@@ -136,6 +141,7 @@ export class HandleSteps {
   attachObservers() {
     this.attachedOvservers.map((o) => o.cleanup());
     const currStepData = this.currentStepData;
+
     if (!currStepData) return;
     const isObserverPresent = this.attachedOvservers.find((o) => o.actualIndex === this.currentIndex);
     if (isObserverPresent) return;
@@ -370,15 +376,18 @@ export class HandleSteps {
 
   push(steps: StepDefination[]) {
     this.steps.push(...this.initializeStepData(steps, false, 'push'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   insert(steps: StepDefination[], index: number) {
     if (!steps || steps.length === 0 || !index) return;
     this.originalSteps.splice(index, 0, ...steps);
     this.steps = this.initializeStepData(this.originalSteps, false, 'insert');
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
     if (!steps || steps.length === 0) return;
     this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps, false, 'insertAtCurrentIndex'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   pop() {
     this.steps.pop();
@@ -388,9 +397,11 @@ export class HandleSteps {
   }
   unshift(steps: StepDefination[]) {
     this.steps.unshift(...this.initializeStepData(steps, false, 'unshift'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   splice(start: number, deleteCount: number, steps: StepDefination[]) {
     this.steps.splice(start, deleteCount, ...this.initializeStepData(steps, false, 'splice'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   sort(compareFn?: (a: Step, b: Step) => number) {
     this.steps.sort(compareFn);
@@ -398,6 +409,7 @@ export class HandleSteps {
   remove(index: number) {
     this.originalSteps.splice(index, 1);
     this.steps = this.initializeStepData(this.originalSteps, false, 'remove');
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   reverse() {
     this.steps.reverse();

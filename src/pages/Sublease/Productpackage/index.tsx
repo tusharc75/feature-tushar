@@ -399,6 +399,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     return (
       <>
         <MenuItem
+          id="add-existing-products-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
           }}
@@ -406,6 +407,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           Add Existing Products
         </MenuItem>
         <MenuItem
+          id="add-existing-package-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
           }}

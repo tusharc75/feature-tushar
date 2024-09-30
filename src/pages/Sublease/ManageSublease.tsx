@@ -87,14 +87,14 @@ const ManageSublease = ({
                     if (['type', 'supplierAccount', 'warehouse', 'fromWarehouse']?.includes(e?.fieldName)) {
                       e.isUneditable = true;
                     }
-                  })
+                  });
                 }
                 if (data?.ticketCreated) {
                   fieldsDataForUpdate?.forEach((e) => {
                     if (['toWarehouse']?.includes(e?.fieldName)) {
                       e.isUneditable = true;
                     }
-                  })
+                  });
                 }
                 setInitialData({
                   fields: fieldsDataForUpdate,
@@ -238,11 +238,11 @@ const ManageSublease = ({
     }
 
     if (values?.type === SUBLEASE_TYPE.interCompany) {
-      const fromWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'fromWarehouse')
+      const fromWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'fromWarehouse');
       if (!values?.fromWarehouse && fromWarehouseField) {
         errors['fromWarehouse'] = `${fromWarehouseField?.fieldLabel} is required`;
       }
-      const toWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'toWarehouse')
+      const toWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'toWarehouse');
       if (!values?.toWarehouse && toWarehouseField) {
         errors['toWarehouse'] = `${toWarehouseField?.fieldLabel} is required`;
       }
@@ -252,9 +252,8 @@ const ManageSublease = ({
           errors['toWarehouse'] = `${fromWarehouseField?.fieldLabel} and ${toWarehouseField?.fieldLabel} should not be same`;
         }
       }
-    }
-    else {
-      const warehouseField = initialData?.fields?.find((e) => e.fieldName === 'warehouse')
+    } else {
+      const warehouseField = initialData?.fields?.find((e) => e.fieldName === 'warehouse');
       if (!values?.warehouse) {
         errors['warehouse'] = `${warehouseField?.fieldLabel} is required`;
       }
@@ -265,9 +264,8 @@ const ManageSublease = ({
   const handleTypeChange = (type) => {
     if (type === SUBLEASE_TYPE.interCompany) {
       setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((e) => e.fieldName !== 'warehouse')));
-    }
-    else {
-      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['fromWarehouse', 'toWarehouse']?.includes(d.fieldName))))
+    } else {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['fromWarehouse', 'toWarehouse']?.includes(d.fieldName))));
     }
   };
 
@@ -403,11 +401,16 @@ const ManageSublease = ({
                                           if (initialData.fields?.find((ele) => ele.fieldName === fieldName)) {
                                             setFieldValue(fieldName, '');
                                           }
-                                        })
+                                        });
                                       }
                                     }}
-                                    required={['fromWarehouse', 'toWarehouse']?.includes(field.fieldName) && values.type === SUBLEASE_TYPE.interCompany ?
-                                      true : values.type === SUBLEASE_TYPE.vendor && field.fieldName === 'warehouse' ? true : field.required}
+                                    required={
+                                      ['fromWarehouse', 'toWarehouse']?.includes(field.fieldName) && values.type === SUBLEASE_TYPE.interCompany
+                                        ? true
+                                        : values.type === SUBLEASE_TYPE.vendor && field.fieldName === 'warehouse'
+                                          ? true
+                                          : field.required
+                                    }
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
@@ -426,6 +429,7 @@ const ManageSublease = ({
                 <Button
                   size="small"
                   color="primary"
+                  id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -439,12 +443,14 @@ const ManageSublease = ({
                 <CustomButton
                   loading={loading}
                   variant="contained"
+                  id="dialog-save-button"
                   color="primary"
                   type="submit"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
                     submitForm();
+                    console.log(errors);
                   }}
                   disabled={loading}
                 >
