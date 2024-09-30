@@ -90,7 +90,8 @@ export function generateFormFieldSteps(fields: any[], ignoreField?: string[], in
         nextOnValueChange: true,
         skipIfValueExist: true,
         fieldType: e?.fieldData?.type,
-        checkForRequired: isFieldIncluded
+        checkForRequired: isFieldIncluded,
+        isPreviousButtonDisabled: true
       });
     }
   });
@@ -115,7 +116,8 @@ export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]
         nextOnValueChange: true,
         skipIfValueExist: true,
         fieldType: e?.type,
-        checkForRequired: isFieldIncluded
+        checkForRequired: isFieldIncluded,
+        isPreviousButtonDisabled: true
       });
     }
   });

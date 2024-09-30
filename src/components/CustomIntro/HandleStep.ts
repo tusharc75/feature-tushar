@@ -353,7 +353,8 @@ export class HandleSteps {
         nextButtonName: data.nextButtonName,
         willOpenDialog: data.willOpenDialog,
         waitForStepInsertion: data.waitForStepInsertion,
-        fieldType: data.fieldType
+        fieldType: data.fieldType,
+        isPreviousButtonDisabled: data.isPreviousButtonDisabled
       };
       if (data.skipIfValueExist) {
         normalStep.skipIfValueExist = data.skipIfValueExist;
