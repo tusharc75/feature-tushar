@@ -106,7 +106,7 @@ const DynamicForm = () => {
                 history.push(`${detailPagePath}/${row?.original?._id}`);
               }}
             >
-              <VisibilityIcon color="primary" />
+              <VisibilityIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -139,7 +139,7 @@ const DynamicForm = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize="small" color="error" />
             </IconButton>
           </HtmlTooltip>
         )}

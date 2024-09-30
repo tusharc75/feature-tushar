@@ -56,8 +56,8 @@ const ManageDeliveryTicket = ({
   const {
     state: { user }
   }: any = useData();
-  const toastConfig = useContext(CustomToastContext);
   const walkmeInstance = useGetWalkmeInstance();
+  const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -102,13 +102,15 @@ const ManageDeliveryTicket = ({
   }, [initialData, assets]);
 
   const findValidationDate = async () => {
-    if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset
-      && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading
+    if (
+      initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset &&
+      initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading
     ) {
       const {
         data: { data }
       } = await axiosInstance().put(`${routes.serializedAsset.path}/asset-last-history-date-before-adding`, {
-        assets: assets?.map((e) => e._id), referenceId: initialData?.values?.transferAsset
+        assets: assets?.map((e) => e._id),
+        referenceId: initialData?.values?.transferAsset
       });
       var lastDate: any = new Date();
       if (data?.date) {
@@ -116,10 +118,12 @@ const ManageDeliveryTicket = ({
         lastDate.setHours(0, 0, 0);
       }
       setCreateDateMin(lastDate);
-    }
-    else {
+    } else {
       let last = 1;
-      if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+      if (
+        initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
+        initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading
+      ) {
         last = 2;
       }
       const {
@@ -132,7 +136,6 @@ const ManageDeliveryTicket = ({
       }
       setCreateDateMin(lastDate);
     }
-
   };
 
   useEffect(() => {
@@ -314,10 +317,11 @@ const ManageDeliveryTicket = ({
 
         if ((assets || products) && referenceType && referenceData) {
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          }
-          else if (user?.user?.brandPolicy?.storageLocation
-            && ((referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit)
-              || referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly)) {
+          } else if (
+            user?.user?.brandPolicy?.storageLocation &&
+            ((referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit) ||
+              referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly)
+          ) {
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
               fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['deliveryToStorageLocation']?.includes(e.fieldName));
               fieldsDataForCreate?.forEach((element) => {
@@ -549,8 +553,7 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate')
-      && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
+    if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate') && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
       let pickUpDate = moment(values?.pickUpDate);
       let deliveryDate = moment(values?.deliveryDate);
       if (deliveryDate.diff(pickUpDate, 'days') < 0) {
@@ -657,10 +660,11 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${deliveryTicketId
-                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                  : `Create Transaction Ticket`
-                  }`}
+                title={`${
+                  deliveryTicketId
+                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                    : `Create Transaction Ticket`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

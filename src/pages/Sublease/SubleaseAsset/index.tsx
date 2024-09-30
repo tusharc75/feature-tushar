@@ -30,8 +30,11 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { generateStepSendToSupplier } from 'src/pages/Sublease/walkmeSteps';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 
 const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -151,6 +154,14 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       });
   };
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (rows.length > 0 && !validateAction([rows[0]])) {
+      setWalkmeData([generateStepSendToSupplier(0)]);
+    } else {
+      setWalkmeData([]);
+    }
+  };
+
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -163,6 +174,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       res['isChecked'] = false;
       return res;
     });
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -230,6 +242,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
             variant={'contained'}
             color="primary"
             size="small"
+            id="send-to-supplier-button"
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
             onClick={() => {
               if (!validateAction()) {
@@ -272,9 +285,9 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
     );
   };
 
-  const validateAction = () => {
+  const validateAction = (internalSelectedRecords = selectedRecords) => {
     const errorMessages = [];
-    selectedRecords?.forEach((e, i) => {
+    internalSelectedRecords?.forEach((e, i) => {
       if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
       } else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {

@@ -6,6 +6,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -15,8 +16,10 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, MATERIAL_TYPE, serializedAsset, sidebarResource, sublease, treeToFlatArray } from 'src/constants/helpers';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import ReceiveProduct from 'src/pages/Sublease/Receiving/ReceiveProduct';
+import { generateReceiveStepReceive } from 'src/pages/Sublease/walkmeSteps';
 
 const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -41,6 +44,14 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setPdfColumns(newColumns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field)));
       });
+  };
+
+  const handleWalkmeStep = (rows: any[]) => {
+    if (rows?.length > 0 && rows[0]?.type === MATERIAL_TYPE.product && rows[0]?.qty - rows[0]?.assetQty > 0) {
+      setWalkmeData([generateReceiveStepReceive(0)]);
+    } else {
+      setWalkmeData([]);
+    }
   };
 
   const fetchFields = async () => {
@@ -156,7 +167,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.receiveAssets);
     }
-
+    handleWalkmeStep(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -231,6 +242,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
             color="primary"
             size="small"
             disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.qty - e?.assetQty > 0).length ? false : true}
+            id="receive-product"
             onClick={() => {
               setReceiveDialog(true);
             }}
