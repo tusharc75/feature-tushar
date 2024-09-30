@@ -75,7 +75,12 @@ export const injectFormFields = (data, fields) => {
 export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
   let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
-    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
+    if (
+      e?.fieldData?.required &&
+      !ignoreField?.includes(e?.fieldData?.fieldName) &&
+      // !e?.fieldData?.isDefaultValue &&
+      !e?.fieldData?.isUneditable
+    ) {
       fieldsSteps.push({
         title: `Select ${e?.fieldData?.fieldLabel}`,
         target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
@@ -92,7 +97,12 @@ export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
 export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]) {
   let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
-    if (e?.required && !ignoreField?.includes(e?.fieldName) && !e?.isDefaultValue && !e?.isUneditable) {
+    if (
+      e?.required &&
+      !ignoreField?.includes(e?.fieldName) &&
+      //  !e?.isDefaultValue &&
+      !e?.isUneditable
+    ) {
       fieldsSteps.push({
         title: `Select ${e?.fieldLabel}`,
         target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,

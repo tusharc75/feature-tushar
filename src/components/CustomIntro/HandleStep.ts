@@ -16,19 +16,19 @@ export class HandleSteps {
   boundMousedown!: (e: MouseEvent) => void;
   currentStepData:
     | ({
-      positionData: {
-        bottom: number;
-        height: number;
-        left: number;
-        right: number;
-        top: number;
-        width: number;
-        x: number;
-        y: number;
-      };
-      element: HTMLElement;
-      index: number;
-    } & Step)
+        positionData: {
+          bottom: number;
+          height: number;
+          left: number;
+          right: number;
+          top: number;
+          width: number;
+          x: number;
+          y: number;
+        };
+        element: HTMLElement;
+        index: number;
+      } & Step)
     | null;
   interval: NodeJS.Timeout;
   retry: number;
@@ -329,8 +329,8 @@ export class HandleSteps {
     }
   }
 
-  private initializeStepData(steps: StepDefination[], first = true) {
-    if (first) {
+  private initializeStepData(steps: StepDefination[], firstTimeInitialization = true, from = '') {
+    if (firstTimeInitialization) {
       this.originalSteps = steps;
     } else {
       this.originalSteps = [...this.originalSteps, ...steps];
@@ -369,16 +369,16 @@ export class HandleSteps {
   }
 
   push(steps: StepDefination[]) {
-    this.steps.push(...this.initializeStepData(steps, false));
+    this.steps.push(...this.initializeStepData(steps, false, 'push'));
   }
   insert(steps: StepDefination[], index: number) {
     if (!steps || steps.length === 0 || !index) return;
     this.originalSteps.splice(index, 0, ...steps);
-    this.steps = this.initializeStepData(this.originalSteps);
+    this.steps = this.initializeStepData(this.originalSteps, false, 'insert');
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
     if (!steps || steps.length === 0) return;
-    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps, false));
+    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps, false, 'insertAtCurrentIndex'));
   }
   pop() {
     this.steps.pop();
@@ -387,17 +387,17 @@ export class HandleSteps {
     this.steps.shift();
   }
   unshift(steps: StepDefination[]) {
-    this.steps.unshift(...this.initializeStepData(steps, false));
+    this.steps.unshift(...this.initializeStepData(steps, false, 'unshift'));
   }
   splice(start: number, deleteCount: number, steps: StepDefination[]) {
-    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps, false));
+    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps, false, 'splice'));
   }
   sort(compareFn?: (a: Step, b: Step) => number) {
     this.steps.sort(compareFn);
   }
   remove(index: number) {
     this.originalSteps.splice(index, 1);
-    this.steps = this.initializeStepData(this.originalSteps);
+    this.steps = this.initializeStepData(this.originalSteps, false, 'remove');
   }
   reverse() {
     this.steps.reverse();
