@@ -29,8 +29,11 @@ import {
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeSteps';
 
 const TransferInventory = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   const types = [
     {
       key: `My ${routes.transferInventory.title}`,
@@ -73,6 +76,7 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
+        setWalkmeData([createTransferInventoryFlow(data)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });

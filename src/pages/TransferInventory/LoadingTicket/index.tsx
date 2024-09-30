@@ -25,8 +25,11 @@ import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateLoadingStepCreateLoadingTicket, generateLoadingStepReceive } from 'src/pages/TransferInventory/walkmeSteps';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen, fetchTransferInventoryData }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -168,6 +171,23 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     setColumns([...column, ...extracolumns]);
   };
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (rows.length === 0) {
+      setWalkmeData([]);
+      return;
+    }
+    for (let i = 0; i < rows.length; i++) {
+      if (interPlantTransfer) return;
+      if (rows.length > 0 && !rows[i]?.loadingTicketId) {
+        setWalkmeData([generateLoadingStepCreateLoadingTicket(i)]);
+      } else if (rows[i]?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) {
+        setWalkmeData([generateLoadingStepReceive(i)]);
+      } else {
+        setWalkmeData([]);
+      }
+    }
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
@@ -230,7 +250,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           }
         });
       });
-
+      handleAddWalkmeData(rows);
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       dispatch({ type: 'loading', loading: false });
     } catch (err) {
@@ -344,6 +364,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
               onClick={() => {
                 setShowConfirmInterPlantTransfer(true);
               }}
+              id="receive-interplant-menu-item"
             >
               {`Receive`}
             </MenuItem>
@@ -356,6 +377,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                 onClick={() => {
                   handleLoadingTicketDialog();
                 }}
+                id="create-loading-ticket-menu-item"
               >
                 {`Create Loading Ticket`}
               </MenuItem>
@@ -370,6 +392,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                     selectedRecords.length === 0 ||
                     selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
                   }
+                  id="receive-menu-item"
                 >
                   {`Receive`}
                 </MenuItem>
@@ -383,6 +406,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                       ? false
                       : true
                   }
+                  id="cancel-delivered-loading-ticket-menu-item"
                 >
                   Cancel Delivered Loading Ticket(s)
                 </MenuItem>
