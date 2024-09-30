@@ -5,13 +5,14 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import SingleLine from 'src/components/CustomReactTable/GridFilter/SingleLine';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
+import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import { CustomDialogTransition, dateFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
@@ -20,8 +21,7 @@ import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
-import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
-import SingleLine from 'src/components/CustomReactTable/GridFilter/SingleLine';
+import SaveFilterDialog from './SaveFilterDialog';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');

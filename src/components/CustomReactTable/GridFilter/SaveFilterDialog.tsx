@@ -1,16 +1,16 @@
 import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
+import { startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { array, boolean, object, string } from 'yup';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomButton from '../Helpers/CustomButton';
-import { startCase } from 'lodash';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { boolean, object, string } from 'yup';
 
 const schema = object().shape({
   title: string().required('Please enter title'),
