@@ -628,7 +628,6 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                 />
               )}
-              {console.log(rentalSteps[currentStep]?.name)}
               {rentalSteps[currentStep]?.name === 'Serialized Asset' && rentalManagementData && (
                 <SerializedAsset
                   rentalManagementData={rentalManagementData}
