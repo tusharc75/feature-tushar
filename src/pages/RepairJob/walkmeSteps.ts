@@ -44,7 +44,7 @@ export const generateAddExistingSerialisedAsset = (waitForStepInsertion: boolean
         content: 'Click here to add existing SerialisedAsset.',
       },
       {
-        target: `#Service-Master-table-checkbox-0`,
+        target: `#Serialised-Asset-table-checkbox-0`,
         title: 'Select a SerialisedAsset'
       },
       {
