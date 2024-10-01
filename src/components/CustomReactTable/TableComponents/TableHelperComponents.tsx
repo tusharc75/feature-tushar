@@ -255,7 +255,7 @@ export const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, st
       {...rest}
       color="primary"
       style={{ ...style, color: from === 'Header' ? 'white' : 'inherit', padding: 0 }}
-      inputProps={{ 'aria-label': 'secondary checkbox' }}
+      inputProps={{ 'aria-label': 'table-checkbox' }}
     />
   );
 });

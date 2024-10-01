@@ -269,8 +269,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     data['pickupFromAddress'] = transferInventoryData?.transferFromPlant.address;
 
     data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-    data['deliveryTo'] = transferInventoryData?.transfertoPlant.optionValue;
-    data['deliveryToAddress'] = transferInventoryData?.transfertoPlant.address;
+    data['deliveryTo'] = transferInventoryData?.transfertoPlant?.optionValue;
+    data['deliveryToAddress'] = transferInventoryData?.transfertoPlant?.address;
 
     data['startDate'] = transferInventoryData?.estimateStartDate;
     data['endDate'] = transferInventoryData?.estimateStartDate;

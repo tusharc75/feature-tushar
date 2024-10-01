@@ -10,8 +10,12 @@ export class Observer {
   actualIndex: number;
   stepIndex: number;
   parent: HTMLElement;
-  validator: (value: string | string[]) => boolean;
-  constructor(handleSteps: HandleSteps, element: HTMLElement, validator: (value: string | string[]) => boolean = (value) => value.length > 0) {
+  validator: (value: string | string[] | boolean) => boolean;
+  constructor(
+    handleSteps: HandleSteps,
+    element: HTMLElement,
+    validator: (value: string | string[] | boolean) => boolean = (value) => (typeof value === 'boolean' ? value : value.length > 0)
+  ) {
     this.handleSteps = handleSteps;
     this.validator = validator;
     this.target = element;
@@ -55,10 +59,10 @@ export class Observer {
 
   callBack(mutations: MutationRecord[]) {}
 
-  observe() {
+  observe(target = this.target) {
     this.checkIfValueExist();
     this.observer = new MutationObserver(this.callBack.bind(this));
-    this.observer.observe(this.target, this.options);
+    this.observer.observe(target, this.options);
   }
   disconnect() {
     this.observer?.disconnect();
