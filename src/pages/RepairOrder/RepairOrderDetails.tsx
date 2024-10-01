@@ -193,9 +193,8 @@ const RepairOrderDetails = () => {
         if ([REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(data?.status)) {
           setCurrentStep(steps?.length - 1);
         } else {
-          setCurrentStep(
-            steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
-          );
+          const index = steps?.map((item) => item.name)?.indexOf(data?.processStatus);
+          setCurrentStep(index !== -1 ? index : 0);
         }
 
         setAllowedToDelete(
@@ -443,13 +442,14 @@ const RepairOrderDetails = () => {
             isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
             handlePrev={
-              stepNames[currentStep] === 'Quotation' && allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+              stepNames[currentStep] === 'Quotation' &&
+              allowedToEdit &&
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationVersionData?.status
+              )
                 ? () => {
-                  setShowQuotationConfirmBox(true);
-                }
+                    setShowQuotationConfirmBox(true);
+                  }
                 : null
             }
             updateStatus={(step: number) => {
@@ -483,12 +483,13 @@ const RepairOrderDetails = () => {
                 setNextStep={setNextStep}
                 currentStepName={stepNames[currentStep]}
                 stepFullScreen={stepFullScreen}
+                stepNames={stepNames}
                 allowedToEdit={
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }
