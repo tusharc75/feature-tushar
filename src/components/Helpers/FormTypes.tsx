@@ -997,7 +997,6 @@ const FormTypes = (props) => {
               },
               selectedCurrencyCode: selectedCurrencyCode
             },
-            startAdornment: startAdornment
           }}
         />
       </InfoLabel>
@@ -1028,7 +1027,7 @@ const FormTypes = (props) => {
               },
               selectedCurrencyCode: selectedCurrencyCode
             },
-            startAdornment: (
+            startAdornment: (startAdornment ? startAdornment :
               <InputAdornment position="start">
                 {result(
                   find(getUniqueCurrencies(), function (obj) {
