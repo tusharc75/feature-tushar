@@ -150,7 +150,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
         showManimizeMaximize={false}
         showRequiredLabel={false}
       />
-      <CustomDialogContent className="px-0">
+      <CustomDialogContent className="px-[15px]">
         {usePad ? (
           <div className="flex min-h-full items-center justify-center dark:[filter:invert(1)]">
             <SignaturePad
