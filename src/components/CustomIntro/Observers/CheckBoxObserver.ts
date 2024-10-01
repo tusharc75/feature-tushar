@@ -24,14 +24,14 @@ export class CheckBoxObserver extends Observer {
 
   private init() {
     const target = this.isCheckBoxInsideTable
-      ? this.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement
-      : this.target;
+      ? this.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement // table body
+      : this.target; // input element
     this.observe(target);
   }
 
   checkIfValueExist(): void {
     const target = this.target as HTMLInputElement;
-    if (this.validator(target.checked)) {
+    if (this.validator(target?.checked)) {
       this.success = true;
       this.handleSteps.next();
     } else {
@@ -40,7 +40,7 @@ export class CheckBoxObserver extends Observer {
   }
 
   validate(target: HTMLInputElement) {
-    if (this.validator(target.checked)) {
+    if (this.validator(target?.checked)) {
       this.success = true;
       this.handleSteps.next();
     } else {
@@ -52,6 +52,7 @@ export class CheckBoxObserver extends Observer {
     for (const mutation of mutations) {
       if (this.isCheckBoxInsideTable && mutation.type === 'childList') {
         const target = document.querySelector(this.handleSteps.currentStepData.target) as HTMLInputElement;
+        if (!target) return;
         this.target = target;
         this.handleSteps.currentStepData.element = this.target;
         this.validate(target);
