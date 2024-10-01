@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, IconButton, Popover, TextField } from '@material-ui/core';
+import { Box, Button, IconButton, Popover, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
@@ -9,9 +9,9 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import routes from 'src/components/Helpers/Routes';
 import SaveFilterDialog from './SaveFilterDialog';
-import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number }[];
   anchorEl: any;
@@ -44,7 +44,6 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       }));
     });
   }, [filters]);
-
 
   React.useEffect(() => {
     setSelectedKpiFilter(kpiFilters?.find((f) => f?.default) || null);
@@ -143,8 +142,8 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select a Filter Set" variant="outlined" />}
           getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
         />
-        <div className="[border-top:1px_dashed_var(--common-border-color)] mt-2" />
-        <div className=" space-y-3 my-5">
+        <div className="mt-2 [border-top:1px_dashed_var(--common-border-color)]" />
+        <div className=" my-5 space-y-3">
           {filters?.map((filter: any, index) => (
             <div key={index}>
               {filter?.resource ? (
@@ -206,7 +205,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             </div>
           ))}
         </div>
-        <div className="text-right [border-top:1px_solid_var(--common-border-color)] mt-4 pt-2">
+        <div className="mt-4 pt-2 text-right [border-top:1px_solid_var(--common-border-color)]">
           <Button
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedKpiFilter });

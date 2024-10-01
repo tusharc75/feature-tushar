@@ -1,6 +1,7 @@
 import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { CheckBoxObserver } from 'src/components/CustomIntro/Observers/CheckBoxObserver';
 import { CheckForRequiredFields } from 'src/components/CustomIntro/Observers/CheckForRequiredFields';
 import { DisableObserver } from 'src/components/CustomIntro/Observers/DisableObserver';
 import { MultiSelectAutoCompleteObserver } from 'src/components/CustomIntro/Observers/MultiSelectAutoCompleteObserver';
@@ -170,6 +171,7 @@ export class HandleSteps {
       const isMultiInputAutoComplete = parent === 'multiSelect';
 
       const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
+      const isCheckBox = this.currentStepData.fieldType === 'checkbox';
 
       if (isMultiInputAutoComplete) {
         // Track multiselect autocomplete via MultiSelectAutoComplete observer
@@ -186,6 +188,13 @@ export class HandleSteps {
           validator = this.currentStepData.nextOnValueChange;
         }
         const observer = new AutocompleteObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
+      } else if (isCheckBox) {
+        let validator = (value: boolean) => value === true;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new CheckBoxObserver(this, this.currentStepData.element, validator);
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via observer
@@ -360,7 +369,7 @@ export class HandleSteps {
         normalStep.skipIfValueExist = data.skipIfValueExist;
       }
 
-      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
+      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data) || data.fieldType === 'checkbox') {
         newSteps.push(normalStep);
         newSteps.push({
           ...data,

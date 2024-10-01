@@ -5,11 +5,8 @@ import { useState } from 'react';
 import GoogleMaps from 'src/components/GoogleMap';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const LocationCell = ({ field, original }) => {
+const GpsLocationCell = ({ value }) => {
   const [viewMap, setViewMap] = useState({ open: false, locationName: null, longitude: null, latitude: null });
-
-  const key = field.fieldName;
-  const value = original[key] || original;
 
   return (
     <div>
@@ -47,4 +44,4 @@ const LocationCell = ({ field, original }) => {
   );
 };
 
-export default LocationCell;
+export default GpsLocationCell;

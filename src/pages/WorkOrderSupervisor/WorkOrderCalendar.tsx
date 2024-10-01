@@ -264,7 +264,6 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
             }}
             onSelectEvent={(data: any, event: any) => {
               if (reference === 'repairOrder') {
-                console.log(data);
                 fetchRepairOrderCompetencies(data.id);
                 setAnchor(event.nativeEvent.target);
               } else {
@@ -291,7 +290,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
           <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
             {openRepairPopup.data?.length
               ? openRepairPopup.data?.map((d) => (
-                  <Accordion key={d.workOrderNumber} defaultExpanded>
+                  <Accordion key={d._id} defaultExpanded >
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <div className="flex items-center gap-2">
                         <p className="text-truncate" title={d.workOrderNumber}>
@@ -348,7 +347,7 @@ const RenderTable = ({ data }) => {
         </TableHead>
         <TableBody>
           {data.map((row) => (
-            <TableRow key={row.referenceId}>
+            <TableRow key={row?.competency?.optionValue}>
               <TableCell component="th" scope="row">
                 <div className="flex items-center gap-2">
                   <p className="text-truncate" title={row?.competency?.optionLabel}>
