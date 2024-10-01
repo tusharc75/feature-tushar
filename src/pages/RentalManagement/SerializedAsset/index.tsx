@@ -543,6 +543,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             walkmeInstance.instance.push(steps);
             walkmeInstance.handleNext();
           }
+        } else {
+          setWalkmeData([]);
         }
       }
     }

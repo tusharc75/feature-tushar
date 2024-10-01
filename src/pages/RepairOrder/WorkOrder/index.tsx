@@ -7,17 +7,23 @@ import { capitalize, map, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
+import { useParams } from 'react-router-dom';
 import { AutoCompleteWorkOrder, PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import { generateAutoCompleteSteps, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -42,10 +48,7 @@ import {
   workOrder
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
-import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
-import { generateAutoCompleteSteps, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const dataAdded = {
@@ -55,6 +58,7 @@ const dataAdded = {
 
 const WorkOrder = ({
   fetchRepairOrderData,
+  stepNames,
   repairOrderData,
   setNextStep,
   stepFullScreen,
@@ -69,6 +73,7 @@ const WorkOrder = ({
   const toastConfig = useContext(CustomToastContext);
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
+  const { id } = useParams();
 
   const {
     state: { user, permissions }
@@ -509,8 +514,10 @@ const WorkOrder = ({
         setShowConfirmBox(false);
         setCurrentStep((prevStep) => {
           const newStep = prevStep - 1;
+          dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[newStep], id);
           return newStep;
         });
+
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
