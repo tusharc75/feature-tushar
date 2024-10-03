@@ -1,7 +1,7 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { Edit } from '@material-ui/icons';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -21,6 +21,9 @@ import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAss
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingSerialisedAsset,generateAddNewSerialisedAsset , generateEditSerialisedAsset } from '../walkmeSteps';
+
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,6 +36,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   const [columns, setColumns] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const {
     state: { user, permissions }
   }: any = useData();
@@ -59,6 +64,21 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   useEffect(() => {
     fetchRecords();
   }, [columns]);
+
+  useEffect(() => {
+    let stepData = [
+      generateAddExistingSerialisedAsset(),
+      generateAddNewSerialisedAsset()
+    ];
+    if (dataRows?.length) {
+      if(permissions?.repairJob?.isUpdate){
+        stepData.push(generateEditSerialisedAsset(false,0));
+
+      }
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
+
 
   const fetchFields = async () => {
     setColumns(null);
@@ -219,6 +239,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 onClick={() => {
                   setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
                 }}
+                id={`edit-button-${row.index || 0}`}
               >
                 <Edit />
               </IconButton>
@@ -368,6 +389,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           onClick={() => {
             setAddSerializedAssetDialog(true);
           }}
+          id={'add-existing-serialised-asset-menu-item'}
         >
           Add Existing {routes.serializedAsset.title}
         </MenuItem>
@@ -376,6 +398,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             onClick={() => {
               setAddNewSerializedAssetDialog(true);
             }}
+            id={'add-new-serialised-asset-menu-item'}
           >
             Add New {routes.serializedAsset.title}
           </MenuItem>
