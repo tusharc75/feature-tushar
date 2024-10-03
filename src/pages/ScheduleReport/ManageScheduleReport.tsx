@@ -143,7 +143,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         const filterData = newData.filters.reduce(
           (acc, val) => ({
             ...acc,
-            [val.term]: val.value
+            [val.term]: val.value ?? []
           }),
           {}
         );
@@ -154,7 +154,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             [val.fieldName]: {
               type: val.type,
               // lookup: val.lookup,
-              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))?.map((v) => v?.optionValue)
+              value: val.option?.filter((option) => filterData[val.fieldName]?.includes(option.optionValue))?.map((v) => v?.optionValue)
             }
           }),
           {}
@@ -312,8 +312,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     const filters = [];
     const data = {};
     values?.filters?.forEach((v) => {
-      if (Object.keys(selectedData).includes(v?.fieldName)) {
+      if (selectedData && Object.keys(selectedData)?.includes(v?.fieldName)) {
         data[v?.fieldName] = selectedData[v?.fieldName];
+      }else {
+        data[v?.fieldName] = [];
       }
     });
 
@@ -331,6 +333,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             let obj = {
               term: key,
               value: data[key]?.value.map((item) => item)
+            };
+            filters.push(obj);
+          } else {
+            let obj = {
+              term: key,
+              value: []
             };
             filters.push(obj);
           }
