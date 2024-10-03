@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState,useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -31,6 +31,7 @@ import {
   yupSchema
 } from '../../constants/helpers';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManageSerializedAsset = ({
   isClone = false,
@@ -56,10 +57,21 @@ const ManageSerializedAsset = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [productCategoryID, setProductCategoryID] = useState(null);
   const [productCategoryName, setProductCategoryName] = useState(null);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   const {
     state: { user, permissions }
   }: any = useData();
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && allFields?.length > 0) {
+      isStepDataSet.current = true;
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(allFields, ignoreField)]);
+      walkmeInstance.handleNext();
+    }
+  }, [allFields]);
 
   useEffect(() => {
     axiosInstance()
@@ -595,7 +607,7 @@ const ManageSerializedAsset = ({
                   >
                     Cancel
                   </Button>
-                  <CustomButton disabled={isSubmitting} loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  <CustomButton disabled={isSubmitting} loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm} id="dialog-save-button">
                     {' '}
                     Save
                   </CustomButton>
