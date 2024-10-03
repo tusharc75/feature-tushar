@@ -13,7 +13,7 @@ import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-export default function ChangeProductNameDialog({ onClose, onSuccess, fields, serializedAssetData, productInventoryId }) {
+export default function ChangeProductNameDialog({ onClose, onSuccess, fields, currentProduct, productInventoryId }) {
   const toastConfig = useContext(CustomToastContext);
   const [submitting, setSubmitting] = useState(false);
   const [productOptions, setProductOptions] = useState([]);
@@ -26,7 +26,7 @@ export default function ChangeProductNameDialog({ onClose, onSuccess, fields, se
   const handleSubmit = (values) => {
     setSubmitting(true);
     const data = {
-      prevProductName: serializedAssetData.product.optionLabel,
+      prevProductName: currentProduct.optionLabel,
       productName: values.product.optionLabel,
       productId: values.product.optionValue,
       productCategoryId: values.product.productCategory,
@@ -49,7 +49,7 @@ export default function ChangeProductNameDialog({ onClose, onSuccess, fields, se
     const errors = {};
     if (!values['product']) {
       errors['product'] = 'Select the product';
-    } else if (values['product']?.optionValue == serializedAssetData.product.optionValue) {
+    } else if (values['product']?.optionValue == currentProduct.optionValue) {
       errors['product'] = 'Select a different product';
     }
     return errors;
@@ -68,7 +68,7 @@ export default function ChangeProductNameDialog({ onClose, onSuccess, fields, se
       }}
     >
       {productOptions?.length ? (
-        <Formik initialValues={{ product: serializedAssetData.product }} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
+        <Formik initialValues={{ product: currentProduct }} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader

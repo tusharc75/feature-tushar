@@ -701,7 +701,7 @@ const SerializedAssetDetailsPage = () => {
       {isChangeProductName && (
         <ChangeProductNameDialog
         fields={fields}
-        serializedAssetData={assetDetails}
+        currentProduct={assetDetails.product}
         productInventoryId={id}
         onClose={() => setIsChangeProductName(false)}
         onSuccess={() => {
