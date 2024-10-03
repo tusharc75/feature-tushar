@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autorenew } from '@material-ui/icons';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
-function ProcessLogs({ onClose, logsData, productName, product, referenceType = "workOrder" }) {
+function ProcessLogs({ onClose, logsData, productName, product, referenceType }) {
   const renderedFrom = 'workOrder_consumables_request_process_logs';
 
   const [fullScreen, setFullScreen] = useState(true);
