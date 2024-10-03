@@ -28,7 +28,7 @@ import DataListCell from '../Cells/DataListCell';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
 import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
-import LocationCell from 'src/components/CustomReactTable/Cells/LocationCell';
+import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -571,7 +571,7 @@ export default function useColumns() {
         column.push({
           ...commonFieldData,
           editable: false,
-          cell: ({ row }) => <LocationCell field={field} original={row?.original} />
+          cell: ({ row }) => <GpsLocationCell value={row?.original?.[field?.fieldName]} />
         });
       } else {
         column.push({

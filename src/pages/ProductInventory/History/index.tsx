@@ -689,7 +689,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       )}
       {revertQtyDialog.open && (
         <RevertQtyDialog
-          referenceType="productInventory"
+          referenceType={sidebarResource.productInventory}
           productName={revertQtyDialog.productName}
           product={revertQtyDialog.product}
           qty={revertQtyDialog.qty}

@@ -91,7 +91,7 @@ const InputField = (props) => {
                           <FormTypes
                             {...rest}
                             {...field}
-                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
+                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : null}
                             values={values}
                             errors={errors}
                             touched={touched}

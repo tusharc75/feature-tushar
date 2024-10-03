@@ -12,7 +12,6 @@ import { ExpandMore } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
-
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
 const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
@@ -294,7 +293,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -308,7 +307,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -389,6 +388,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
           product={openProcessLogs.product}
+          referenceType={referenceType}
         />
       )}
     </>

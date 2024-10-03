@@ -6,7 +6,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, isObjectEmpty, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
@@ -14,10 +14,11 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
 const AssetHistory = ({ id, status, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
+
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [duration, setDuration] = useState({
@@ -43,9 +44,9 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -322,7 +323,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { deepFilters } = gridFilterParser(filters);
 
-    if (duration) {
+    if (duration && duration?.from && duration?.to) {
       deepFilters.push({
         field: 'date',
         term: {
@@ -369,14 +370,20 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     <Box>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
-          <DurationFilter label={''} defaultTimeFrame="current-year" duration={duration} setDuration={setDuration} />
+          <DurationFilter
+            label={''}
+            defaultTimeFrame="all"
+            duration={duration}
+            setDuration={setDuration}
+            showAll={true}
+          />
         </Box>
         <ImportExportLinks
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

@@ -23,7 +23,10 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
     {
       target: `#${sidebarResource.product}-table-checkbox-0`,
       title: 'Add a Product',
-      isPreviousButtonDisabled: true
+      isPreviousButtonDisabled: true,
+      fieldType: 'checkbox',
+      skipIfValueExist: true,
+      nextOnValueChange: (value) => value as boolean
     },
     {
       target: '#dialog-add-button',
@@ -46,7 +49,10 @@ export const generateDeleteAddedProductSteps = (index: number, waitForStepInsert
     {
       target: `#rentalJobs_grid-1-table-checkbox-${index}`,
       title: 'Select a product',
-      isPreviousButtonDisabled: true
+      isPreviousButtonDisabled: true,
+      fieldType: 'checkbox',
+      skipIfValueExist: true,
+      nextOnValueChange: (value) => value as boolean
     },
     { target: '#details-page-action-button', title: 'Actions' },
     { target: '#delete-menu-item', title: 'Delete' },
@@ -123,7 +129,10 @@ export const generateAssignStepAssignSerializedAsset = (index: number, waitForSt
     },
     {
       target: '#serializedAssets_assign-table-checkbox-0',
-      title: 'Select Asset'
+      title: 'Select Asset',
+      fieldType: 'checkbox',
+      nextOnValueChange: (value) => value as boolean,
+      isPreviousButtonDisabled: true
     },
     {
       target: '#add-to-job-button',

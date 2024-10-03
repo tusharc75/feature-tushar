@@ -38,14 +38,14 @@ export type StepDefination = {
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   formFields?: boolean;
-  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[] | boolean) => boolean);
   nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
-  fieldType?: string;
+  fieldType?: 'checkbox' | string;
   checkForRequired?: boolean;
   isPreviousButtonDisabled?: boolean;
 };
@@ -70,7 +70,7 @@ export type HiddenStep = {
   isHiddenStep: true;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[] | boolean) => boolean);
   nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
@@ -115,7 +115,7 @@ const CustomIntro = () => {
         const frame = currentStepData?.element as HTMLIFrameElement;
         frame.contentDocument.body.focus();
         frame.contentDocument.body.click();
-      } else {
+      } else if (currentStepData.fieldType !== 'checkbox') {
         currentStepData?.element.click();
       }
       if (currentStepData?.waitForStepInsertion) {

@@ -96,25 +96,25 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original['storageLocation'] ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                  target="_blank"
+                >
+                  {row?.original['storageLocation']}
+                </a>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'processBy',
@@ -288,10 +288,12 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           <ProcessLogs
             onClose={() => {
               setOpenProcessLogs({ open: false, logs: [] });
+              fetchData()
             }}
             logsData={openProcessLogs.logs}
             productName={productName}
             product={product}
+            referenceType={referenceType}
           />
         )}
       </Dialog>
