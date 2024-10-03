@@ -455,7 +455,7 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
-                      {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && (
+                      {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && fields?.length ? (
                         <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
@@ -465,7 +465,7 @@ const SerializedAssetDetailsPage = () => {
                       >
                         {'Change Product Name'}
                       </Button>
-                      )}
+                      ): null}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button

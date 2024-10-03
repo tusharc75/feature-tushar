@@ -34,7 +34,12 @@ export default function ChangeProductNameDialog({ onClose, onSuccess, fields, cu
     };
     axiosInstance()
       .put(`${serializedAsset.api}/change-product`, data)
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         onSuccess();
       })
       .catch((error) => {
