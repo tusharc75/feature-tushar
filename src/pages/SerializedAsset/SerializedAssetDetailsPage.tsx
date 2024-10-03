@@ -47,7 +47,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
-import ChangeProductNumberDialog from 'src/pages/SerializedAsset/ChangeProductNumberDialog';
+import ChangeProductNameDialog from 'src/pages/SerializedAsset/ChangeProductNameDialog';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -86,7 +86,7 @@ const SerializedAssetDetailsPage = () => {
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
-  const [isChangeProductNumber, setIsChangeProductNumber] = useState(false);
+  const [isChangeProductName, setIsChangeProductName] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -461,7 +461,7 @@ const SerializedAssetDetailsPage = () => {
                         color="default"
                         className="btn-outline-v1"
                         size="small"
-                        onClick={() => setIsChangeProductNumber(true)}
+                        onClick={() => setIsChangeProductName(true)}
                       >
                         {'Change Product Name'}
                       </Button>
@@ -698,14 +698,14 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-      {isChangeProductNumber && (
-        <ChangeProductNumberDialog
+      {isChangeProductName && (
+        <ChangeProductNameDialog
         fields={fields}
         serializedAssetData={assetDetails}
         productInventoryId={id}
-        onClose={() => setIsChangeProductNumber(false)}
+        onClose={() => setIsChangeProductName(false)}
         onSuccess={() => {
-          setIsChangeProductNumber(false);
+          setIsChangeProductName(false);
           fetchData();
         }}
         />

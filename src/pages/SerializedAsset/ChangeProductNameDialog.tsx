@@ -13,7 +13,7 @@ import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-export default function ChangeProductNumberDialog({ onClose, onSuccess, fields, serializedAssetData, productInventoryId }) {
+export default function ChangeProductNameDialog({ onClose, onSuccess, fields, serializedAssetData, productInventoryId }) {
   const toastConfig = useContext(CustomToastContext);
   const [submitting, setSubmitting] = useState(false);
   const [productOptions, setProductOptions] = useState([]);
@@ -24,7 +24,7 @@ export default function ChangeProductNumberDialog({ onClose, onSuccess, fields, 
   }, []);
 
   const handleSubmit = (values) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const data = {
       prevProductName: serializedAssetData.product.optionLabel,
       productName: values.product.optionLabel,
@@ -79,28 +79,30 @@ export default function ChangeProductNumberDialog({ onClose, onSuccess, fields, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Autocomplete
-                    size="small"
-                    options={productOptions}
-                    value={values['product']}
-                    onChange={(_, val) => {
-                      setFieldValue('product', val);
-                    }}
-                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
-                    getOptionLabel={(option) => option.optionLabel}
-                    renderInput={(props) => (
-                      <TextField
-                        {...props}
-                        required
-                        variant="outlined"
-                        label={`Select Product`}
-                        name="product"
-                        size="small"
-                        error={touched?.product && Boolean(errors[`product`])}
-                        helperText={touched?.product && errors[`product`]}
-                      />
-                    )}
-                  />
+                  <div className="py-2">
+                    <Autocomplete
+                      size="small"
+                      options={productOptions}
+                      value={values['product']}
+                      onChange={(_, val) => {
+                        setFieldValue('product', val);
+                      }}
+                      getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                      getOptionLabel={(option) => option.optionLabel}
+                      renderInput={(props) => (
+                        <TextField
+                          {...props}
+                          required
+                          variant="outlined"
+                          label={`Select Product`}
+                          name="product"
+                          size="small"
+                          error={touched?.product && Boolean(errors[`product`])}
+                          helperText={touched?.product && errors[`product`]}
+                        />
+                      )}
+                    />
+                  </div>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
