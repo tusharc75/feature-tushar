@@ -16,6 +16,7 @@ import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
+import { camelCase } from 'lodash';
 
 const renderedFrom = 'workOrder_consumables_request';
 
@@ -292,6 +293,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
             logsData={openProcessLogs.logs}
             productName={productName}
             product={product}
+            referenceType={camelCase(referenceType)}
           />
         )}
       </Dialog>
