@@ -47,6 +47,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
+import ChangeProductNumberDialog from 'src/pages/SerializedAsset/ChangeProductNumberDialog';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -85,6 +86,7 @@ const SerializedAssetDetailsPage = () => {
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
+  const [isChangeProductNumber, setIsChangeProductNumber] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -453,6 +455,17 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
+                      {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && (
+                        <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        className="btn-outline-v1"
+                        size="small"
+                        onClick={() => setIsChangeProductNumber(true)}
+                      >
+                        {'Change Product Name'}
+                      </Button>
+                      )}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
@@ -683,6 +696,18 @@ const SerializedAssetDetailsPage = () => {
             handleStatusUpdate({ status: status, assetData: values });
             setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null });
           }}
+        />
+      )}
+      {isChangeProductNumber && (
+        <ChangeProductNumberDialog
+        fields={fields}
+        serializedAssetData={assetDetails}
+        productInventoryId={id}
+        onClose={() => setIsChangeProductNumber(false)}
+        onSuccess={() => {
+          setIsChangeProductNumber(false);
+          fetchData();
+        }}
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
