@@ -32,8 +32,8 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
   const handleSubmit = (values) => {
     setLoading(true);
     let data = { revertQty: parseInt(values.revertQty), comment: values.comment, ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {}) };
-    if (referenceType === "workOrder") {
-      axiosInstance().put(`/material-handling/revert/${ledgerId}`, { ...data, referenceType: sidebarResource.workOrder })
+    if (referenceType === "workOrder" || referenceType === "fieldTicket") {
+      axiosInstance().put(`/material-handling/revert/${ledgerId}`, { ...data, referenceType: referenceType === "workOrder" ? sidebarResource.workOrder : sidebarResource.fieldTicket })
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();
