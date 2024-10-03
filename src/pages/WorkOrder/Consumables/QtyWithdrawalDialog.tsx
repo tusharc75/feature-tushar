@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, RESOURCE_LABEL, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSuccess }) {
 
