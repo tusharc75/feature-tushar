@@ -14,6 +14,7 @@ import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
 import { GoogleMapProps } from '@react-google-maps/api';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -926,11 +927,11 @@ export const profileMenuItems = {
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
+export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
   let user = JSON.parse(localStorage.getItem('userData'));
 
   const obj = {};
-  for (const key of arr) {
+  for (const key of fields) {
     let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
@@ -1002,6 +1003,14 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value;
     }
   }
+
+  fields?.forEach((ele) => {
+    if (ele?.isDefaultValue && fields?.find((e) => e?.inputFields?.includes(ele?.fieldName))) {
+      const calValues = autoCalculateSpecificFields({ [ele?.fieldName]: obj[ele?.fieldName] }, obj, fields);
+      Object.assign(obj, calValues);
+    }
+  })
+
   return obj;
 };
 
