@@ -577,10 +577,10 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
     if (rowData?.type === MATERIAL_TYPE.manualEntry) {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, invoiceData?.currency);
       handleSaveCostData(rows[0]);
     } else {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, invoiceData?.currency);
       handleSaveData(rows);
     }
   };

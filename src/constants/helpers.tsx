@@ -2598,6 +2598,12 @@ export const REPORT_LIST = [
     type: 'invoiceBacklog'
   },
   {
+    title: 'Syteline Invoice Integration',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'sytelineInvoiceIntegration'
+  },
+  {
     title: 'Revenue By Customer',
     permission: 'invoice',
     key: 'standardReport',
