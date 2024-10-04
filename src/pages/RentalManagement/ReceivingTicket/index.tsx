@@ -78,6 +78,7 @@ import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/componen
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const useStyles = makeStyles((theme) => ({
   root: {
