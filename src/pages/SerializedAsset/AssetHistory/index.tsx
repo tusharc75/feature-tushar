@@ -22,8 +22,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [duration, setDuration] = useState({
-    from: new Date(moment().startOf('year').calendar()),
-    to: new Date(moment().endOf('year').calendar())
+    from: null,
+    to: null
   });
   const [column, setColumn] = useState([]);
 

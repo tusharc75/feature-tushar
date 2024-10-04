@@ -47,7 +47,6 @@ const ProjectSalesDetails = () => {
   const [quotes, setQuotes] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState('');
-  const [headingLbl, setHeadingLbl] = useState('');
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [removeUserRec, setRemoveUserRec] = useState(null);
@@ -127,8 +126,6 @@ const ProjectSalesDetails = () => {
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
-
-      setHeadingLbl(name);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);

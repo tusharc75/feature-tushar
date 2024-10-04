@@ -23,7 +23,6 @@ const IrtTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.irtTicket]);
   const [irtTicketData, setIrtTicketData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -62,10 +61,9 @@ const IrtTicketDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.irtTicket.path}/${id}`);
-  
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
       setAllowedToDelete(permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, data.owner.optionValue));
-      setHeadingLbl(data.irtTicketNumber);
       setIrtTicketData(data);
       setCustomizedRoutes([routes.irtTicket, { title: data?.irtTicketNumber }]);
       setLoading(false);

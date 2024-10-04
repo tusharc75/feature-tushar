@@ -25,7 +25,6 @@ const SurveysDetail = () => {
   const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.surveys]);
   const [SurveyData, setSurveyData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -64,10 +63,9 @@ const SurveysDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/surveys/${id}`);
-      
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
       setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
-      setHeadingLbl(data.surveyName);
       setSurveyData(data);
       setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
       setLoading(false);
