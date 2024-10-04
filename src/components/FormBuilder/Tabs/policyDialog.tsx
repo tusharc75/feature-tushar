@@ -82,15 +82,17 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
     if (resource === sidebarResource.serializedAsset) {
       const validationFields = initialValues[`data`]?.[0]?.fields?.filter((e) => e.required);
       values.data.forEach((value, index) => {
-        value?.data?.forEach((ele, idx) => {
-          validationFields?.forEach((e) => {
-            if (!ele[e?.fieldName]) {
-              errors[`data.${index}.data.${idx}.status`] = `${e?.fieldLabel} is required`;
-            } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
-              errors[`data.${index}.data.${idx}.fields`] = `${e?.fieldLabel} is required`;
-            }
+        if(value.fieldName==='statusChangeFields'){
+          value?.data?.forEach((ele, idx) => {
+            validationFields?.forEach((e) => {
+              if (!ele[e?.fieldName]) {
+                errors[`data.${index}.data.${idx}.status`] = `${e?.fieldLabel} is required`;
+              } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
+                errors[`data.${index}.data.${idx}.fields`] = `${e?.fieldLabel} is required`;
+              }
+            });
           });
-        });
+        }
       });
     }
     return errors;

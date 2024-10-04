@@ -47,7 +47,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
-import ChangeProductNameDialog from 'src/pages/SerializedAsset/ChangeProductNameDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -66,7 +66,7 @@ const SerializedAssetDetailsPage = () => {
   const [fields, setFields] = useState([]);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null });
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [manualStatus, setManualStatus] = useState([]);
@@ -86,7 +86,7 @@ const SerializedAssetDetailsPage = () => {
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
-  const [isChangeProductName, setIsChangeProductName] = useState(false);
+  const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -193,6 +193,7 @@ const SerializedAssetDetailsPage = () => {
         });
       }
       setLoading(false);
+      setRefreshAssetHistory(!refreshAssetHistory)
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -237,7 +238,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog(true);
+    setOpenUpdateDialog({ open: true, assetLogFields: null });
   };
 
   const handleDelete = () => {
@@ -287,7 +288,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -455,17 +456,20 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
-                      {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && fields?.length ? (
+                    {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status)
+                      && resourceData?.policy?.dataChangeAssetLogFields?.length > 0 ? (
+                      <HtmlTooltip title={'If you update data from this button it will add log in history'}>
                         <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        className="btn-outline-v1"
-                        size="small"
-                        onClick={() => setIsChangeProductName(true)}
-                      >
-                        {'Change Product Name'}
-                      </Button>
-                      ): null}
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          color="default"
+                          className="btn-outline-v1"
+                          size="small"
+                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields })}
+                        >
+                          {'Edit Data'}
+                        </Button>
+                      </HtmlTooltip>
+                    ) : null}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
@@ -616,7 +620,12 @@ const SerializedAssetDetailsPage = () => {
             );
           })}
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 6)}>
-          <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
+          <AssetHistory
+            id={id}
+            refresh={refreshAssetHistory}
+            resourceData={resourceData}
+            fields={fields}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
           <CertificationHistory
@@ -653,15 +662,16 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-      {openUpdateDialog && (
+      {openUpdateDialog.open && (
         <ManageSerializedAsset
           isClone={false}
           productInventoryId={id}
-          onClose={() => setOpenUpdateDialog(false)}
+          onClose={() => setOpenUpdateDialog({ open: false, assetLogFields: null })}
           onSuccess={() => {
-            setOpenUpdateDialog(false);
+            setOpenUpdateDialog({ open: false, assetLogFields: null })
             fetchData();
           }}
+          assetLogFields={openUpdateDialog.assetLogFields}
         />
       )}
       {showReasonDialog && (
@@ -696,18 +706,6 @@ const SerializedAssetDetailsPage = () => {
             handleStatusUpdate({ status: status, assetData: values });
             setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null });
           }}
-        />
-      )}
-      {isChangeProductName && (
-        <ChangeProductNameDialog
-        fields={fields}
-        currentProduct={assetDetails.product}
-        productInventoryId={id}
-        onClose={() => setIsChangeProductName(false)}
-        onSuccess={() => {
-          setIsChangeProductName(false);
-          fetchData();
-        }}
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
