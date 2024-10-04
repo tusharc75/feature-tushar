@@ -20,7 +20,6 @@ const BudgetDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.budget]);
   const [budgetData, setBudgetData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +54,6 @@ const BudgetDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes?.budget?.path}/${id}`);
-      setHeadingLbl(data.name);
       setBudgetData(data);
       setCustomizedRoutes([routes.budget, { title: data?.name }]);
       setLoading(false);
