@@ -128,8 +128,8 @@ export const resourcePolicy = [
         defaultValue: []
       },
       {
-        fieldName: 'dataChangeAssetLog',
-        fieldLabel: 'Data Change Asset Log',
+        fieldName: 'dataChangeAssetLogFields',
+        fieldLabel: 'Data Change Asset Log Fields',
         type: 'multiSelect',
         defaultValue: [],
         required: false
