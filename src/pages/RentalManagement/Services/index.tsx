@@ -564,7 +564,7 @@ const Services = ({
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
     handleSaveData(rows);
   };
 

@@ -251,7 +251,7 @@ const QtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData, subleaseData?.currency);
         handleSaveData(rows);
         setShowConfirmationDialog(false);
       }

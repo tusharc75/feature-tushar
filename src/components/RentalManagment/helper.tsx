@@ -202,32 +202,36 @@ export const resetValueZero = (material, fields, parentId, bulkUpdateValues = nu
     return result;
 }
 
-const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent) => {
+const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent: any, currency: any) => {
     let tempParent: any = material.filter((e) => e._id === rowData.parentId)
     const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
-    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields, "USD")
+    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields, currency)
     parent.push(tempParent[0])
     if (tempParent[0].parentId) {
-        calculateParentRows(material, tempParent, fields, tempParent[0], parent)
+        calculateParentRows(material, tempParent, fields, tempParent[0], parent, currency)
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any) => {
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any) => {
+    currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
+    let childs: any = []
+
     const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
     rows.push({ ...rowData, ...calValues })
-    if (rowData.parentId) {
-        let parent: any = []
-        await calculateParentRows(material, rows, fields, rowData, parent)
-        rows = [...rows, ...parent]
-    }
-    const child = resetValueZero(material, fields, rowData._id)
 
+    if (values[`finalPrice_${currency}`] !== rowData[`finalPrice_${currency}`]) {
+        if (rowData.parentId) {
+            let parent: any = []
+            await calculateParentRows(material, rows, fields, rowData, parent, currency)
+            rows = [...rows, ...parent]
+        }
+        childs = resetValueZero(material, fields, rowData._id)
+    }
     const result: any = [];
-    [...rows, ...child]?.forEach((e: any) => {
+    [...rows, ...childs]?.forEach((e: any) => {
         result.push({ _id: e._id, ...getObjKeysWithValues(e, fields) })
     })
-
     return result;
 };
 

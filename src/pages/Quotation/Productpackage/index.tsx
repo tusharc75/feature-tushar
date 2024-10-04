@@ -188,14 +188,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -307,17 +306,16 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent.type === MATERIAL_TYPE.package
-                ? parent.packageDetail?.packageName
-                : parent.detail
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -347,15 +345,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -688,10 +685,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     let rows: any = [{ ...rowData, ...updatedData }];
 
     if (rowData?.type === MATERIAL_TYPE.manualEntry) {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, quotationData?.currency);
       handleSaveCostData(rows);
     } else {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, quotationData?.currency);
       handleSaveData(rows);
     }
   };
@@ -814,8 +811,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           disabled={
             !Boolean(
               selectedRecords &&
-                selectedRecords.filter((e) => !e.hideSelection).length &&
-                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+              selectedRecords.filter((e) => !e.hideSelection).length &&
+              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
             )
           }
           onClick={() => {

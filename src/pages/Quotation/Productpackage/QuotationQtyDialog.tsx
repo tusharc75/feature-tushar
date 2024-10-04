@@ -300,7 +300,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData, quotationData?.currency);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

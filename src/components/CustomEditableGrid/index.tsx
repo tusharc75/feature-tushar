@@ -160,7 +160,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
     let tempIndex = temflatRows.findIndex((obj) => obj._id === row._id);
     flatRows[tempIndex][inputField] = value;
     const values = { [inputField]: value };
-    const calValues = await calculateRowsField(flattenArray(temflatRows), values, fields, temflatRows[tempIndex]);
+    const calValues = await calculateRowsField(flattenArray(temflatRows), values, fields, temflatRows[tempIndex], currency);
     temflatRows = flatRows.map((d) => {
       let calculateTempIndex = calValues.findIndex((obj) => obj._id === d._id);
       if (calculateTempIndex > -1) {

@@ -222,7 +222,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData, invoiceData?.currency);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
@@ -478,7 +478,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                       </Box>
                                     </Box>
                                   </Grid>
-                                ): (
+                                ) : (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>

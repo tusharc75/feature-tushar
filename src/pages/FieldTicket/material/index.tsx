@@ -729,10 +729,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     if (updatedData?.type === MATERIAL_TYPE.manualEntry) {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, fieldTicketData?.currency);
       await handleUpdateCost(rows);
     } else {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, fieldTicketData?.currency);
       handleSaveData(rows);
     }
   };
