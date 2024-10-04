@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -12,8 +12,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { orderBy, uniq, map, uniqBy } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { calculatePrice, calculateRowsField, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition'];
@@ -47,23 +46,23 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
     } else {
       setAllFields(JSON.parse(JSON.stringify(data)));
       let pricingMethodOptions: any = [];
-      let pricingMethodData = technicianData.pricingMethodData?.find((ele)=> ele._id===technicianData.competenceId)?.pricingMethod || []
+      let pricingMethodData = technicianData.pricingMethodData?.find((ele) => ele._id === technicianData.competenceId)?.pricingMethod || []
 
-      if (pricingMethodData?.length){
+      if (pricingMethodData?.length) {
         pricingMethodOptions = arrayToDropwdownOption(pricingMethodData);
       }
-    
+
       setPriceMethodListConst(pricingMethodOptions);
-      if(data.some((ele)=> ele.fieldName==='pricingCondition')){
+      if (data.some((ele) => ele.fieldName === 'pricingCondition')) {
         await getAllPricingCondition(technicianData, pricingMethodOptions);
-      }else{
+      } else {
         setPriceMethodList(pricingMethodOptions);
-      } 
+      }
       data.forEach((element) => {
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
-        if(element.fieldName=== 'competence'){
+        if (element.fieldName === 'competence') {
           element.option = technicianData.competenciesWithIds;
         }
       });
@@ -94,7 +93,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
           pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
         }
       ]);
-      
+
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
@@ -254,11 +253,11 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                               }
                                               let priceValue
                                               if (field.fieldName === 'pricingCondition') {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.materialId === values['competence'] );
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.materialId === values['competence']);
                                               } else if (field.fieldName === 'pricingMethod') {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.materialId === values['competence'] );
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.materialId === values['competence']);
                                               }
-                                              
+
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
                                               const result = autoCalculateSpecificFields(
                                                 { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
@@ -280,62 +279,62 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                         </Box>
                                       </Box>
                                     </Grid>
-                                  ) : field.fieldName==='competence' ? (
+                                  ) : field.fieldName === 'competence' ? (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={async (name, value) => {
-                                            setFieldValue(name, value);
-                                            setFieldValue('pricingMethod', '');
-                                            const isPricingConditionField = initialData?.fields?.some((ele)=> ele.fieldName==='pricingCondition')
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
+                                          <FormTypes
+                                            {...field}
+                                            fieldData={field}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={async (name, value) => {
+                                              setFieldValue(name, value);
+                                              setFieldValue('pricingMethod', '');
+                                              const isPricingConditionField = initialData?.fields?.some((ele) => ele.fieldName === 'pricingCondition')
 
-                                            const pricingMethodData = technicianData?.pricingMethodData?.find((ele)=> ele._id===value)?.pricingMethod || []
-                                            const newMethodOptions = arrayToDropwdownOption(pricingMethodData);
-                                    
-                                            setPriceMethodListConst(newMethodOptions);
-                                            if(isPricingConditionField){
-                                              setFieldValue('pricingCondition', '');
-                                              if(value!==''){
-                                                await getAllPricingCondition({...values,competence:value,pricingCondition:'', pricingMethod:''}, newMethodOptions)
+                                              const pricingMethodData = technicianData?.pricingMethodData?.find((ele) => ele._id === value)?.pricingMethod || []
+                                              const newMethodOptions = arrayToDropwdownOption(pricingMethodData);
+
+                                              setPriceMethodListConst(newMethodOptions);
+                                              if (isPricingConditionField) {
+                                                setFieldValue('pricingCondition', '');
+                                                if (value !== '') {
+                                                  await getAllPricingCondition({ ...values, competence: value, pricingCondition: '', pricingMethod: '' }, newMethodOptions)
+                                                }
+                                              } else {
+                                                setPriceMethodList(newMethodOptions)
                                               }
-                                            }else{
-                                              setPriceMethodList(newMethodOptions)
-                                            }
-                                            
-                                            let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              
+
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+
                                               const result = autoCalculateSpecificFields(
                                                 { [priceFieldName]: 0 },
                                                 values,
                                                 initialData.fields
                                               );
-                                              
+
                                               if (Object.keys(result).length >= 1) {
                                                 for (var x in result) {
                                                   setFieldValue(x, result[x]);
                                                 }
                                               }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                          fields={initialData.fields}
-                                        />
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field.isTooltip}
+                                            tooltipMessage={field.tooltipMessage}
+                                            size="small"
+                                            fields={initialData.fields}
+                                          />
+                                        </Box>
                                       </Box>
-                                    </Box>
-                                  </Grid>
+                                    </Grid>
                                   ) : (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                       <Box display="flex">
