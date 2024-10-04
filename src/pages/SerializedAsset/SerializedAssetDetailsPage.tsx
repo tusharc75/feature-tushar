@@ -48,6 +48,7 @@ import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import WarningIcon from '@material-ui/icons/Warning';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -559,11 +560,13 @@ const SerializedAssetDetailsPage = () => {
           {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 8)}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {assetDetails &&
-            <DetailsPageHeader
-              mainPoints={mainPoints}
-            />
+          {assetDetails?.currentLocationNotMatchWithGps &&
+            <Box className='flex items-center'>
+              <WarningIcon className='mr-3' fontSize="small" color="error" />
+              <h4>Asset location needs to be update in Equipt</h4>
+            </Box>
           }
+          {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>

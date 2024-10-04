@@ -157,9 +157,6 @@ const ZoneDetailPage = () => {
         <CreateZone
           open={openUpdateDialog}
           onClose={closeUpdateDialog}
-          // fetchData={() => {
-          //   fetchZoneData();
-          // }}
           zoneId={id}
           isUpdateDisabled={false}
           isClone={false}
