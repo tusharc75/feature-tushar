@@ -15,7 +15,7 @@ import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 
-const AssetHistory = ({ id, status, resourceData, fields }) => {
+const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
@@ -231,7 +231,9 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     {
       accessor: 'comments',
       Header: 'Comment',
-      Cell: ({ row }) => (row.original?.comments ? <div>{row.original?.comments}</div> : <NoDataCell />)
+      Cell: ({ row }) => (row.original?.comments ? <div>
+        <p title={row.original?.comments}>{row.original?.comments}</p>
+      </div> : <NoDataCell />)
     },
     {
       accessor: 'warehouse',
@@ -317,7 +319,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     if (id) {
       fetchData();
     }
-  }, [id, status, page, limit, filters, sorting, duration]);
+  }, [id, refresh, page, limit, filters, sorting, duration]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;

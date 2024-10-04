@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useState,useRef } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -45,7 +45,6 @@ const ManageSerializedAsset = ({
   assetLogFields = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [loading, setLoading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -80,9 +79,9 @@ const ManageSerializedAsset = ({
       .then(({ data: { data } }) => {
         data = data.filter((d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName));
 
-        if(assetLogFields && assetLogFields?.length){
+        if (assetLogFields && assetLogFields?.length) {
           data = data.filter((d) => [...assetLogFields].includes(d.fieldData.fieldName));
-          data.forEach((d)=>{
+          data.forEach((d) => {
             d.fieldData.disableOnEdit = false;
           })
         }
@@ -127,7 +126,6 @@ const ManageSerializedAsset = ({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
-                setLoading(false);
               } else {
                 fieldsDataForUpdate?.forEach((e: any) => {
                   if (e?.fieldName === 'warehouse') {
@@ -204,28 +202,24 @@ const ManageSerializedAsset = ({
     delete values?.productDescription;
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
-      if(assetLogFields){
-        axiosInstance()
-        .put(`${serializedAsset.api}/asset-update-with-log`, values)
-        .then(({ data: { data } }) => {
+      if (assetLogFields) {
+        axiosInstance().put(`${serializedAsset.api}/update-with-log`, values).then(({ data: { data } }) => {
           setSubmitting(false);
           onSuccess();
         })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-      }else {
-        axiosInstance()
-        .put(`${serializedAsset.api}`, values)
-        .then(({ data: { data } }) => {
+          .catch((error) => {
+            setSubmitting(false);
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        axiosInstance().put(`${serializedAsset.api}`, values).then(({ data: { data } }) => {
           setSubmitting(false);
           onSuccess();
         })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+          .catch((error) => {
+            setSubmitting(false);
+            toastConfig.setToastConfig(error);
+          });
       }
     } else {
       axiosInstance()
@@ -628,7 +622,14 @@ const ManageSerializedAsset = ({
                   >
                     Cancel
                   </Button>
-                  <CustomButton disabled={isSubmitting} loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm} id="dialog-save-button">
+                  <CustomButton
+                    disabled={isSubmitting || (!isClone && isEqual(initialData.values, values))}
+                    loading={isSubmitting}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}
+                    id="dialog-save-button">
                     {' '}
                     Save
                   </CustomButton>

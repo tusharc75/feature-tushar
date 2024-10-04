@@ -66,7 +66,7 @@ const SerializedAssetDetailsPage = () => {
   const [fields, setFields] = useState([]);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState({open: false, assetLogFields: null});
+  const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null });
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [manualStatus, setManualStatus] = useState([]);
@@ -86,6 +86,7 @@ const SerializedAssetDetailsPage = () => {
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
+  const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -192,6 +193,7 @@ const SerializedAssetDetailsPage = () => {
         });
       }
       setLoading(false);
+      setRefreshAssetHistory(!refreshAssetHistory)
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -236,7 +238,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog({open: true, assetLogFields: null});
+    setOpenUpdateDialog({ open: true, assetLogFields: null });
   };
 
   const handleDelete = () => {
@@ -286,7 +288,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -454,19 +456,20 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
-                      {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLog?.length>0 ? (
-                       <HtmlTooltip title={'If you update data from this button it will add log in asset history'}>
-                       <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        className="btn-outline-v1"
-                        size="small"
-                        onClick={() => setOpenUpdateDialog({open: true, assetLogFields: resourceData.policy.dataChangeAssetLog})}
-                      >
-                        {'Edit Data'}
-                      </Button>
+                    {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status)
+                      && resourceData?.policy?.dataChangeAssetLogFields?.length > 0 ? (
+                      <HtmlTooltip title={'If you update data from this button it will add log in history'}>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          color="default"
+                          className="btn-outline-v1"
+                          size="small"
+                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields })}
+                        >
+                          {'Edit Data'}
+                        </Button>
                       </HtmlTooltip>
-                      ): null}
+                    ) : null}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
@@ -617,7 +620,12 @@ const SerializedAssetDetailsPage = () => {
             );
           })}
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 6)}>
-          <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
+          <AssetHistory
+            id={id}
+            refresh={refreshAssetHistory}
+            resourceData={resourceData}
+            fields={fields}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
           <CertificationHistory
@@ -658,9 +666,9 @@ const SerializedAssetDetailsPage = () => {
         <ManageSerializedAsset
           isClone={false}
           productInventoryId={id}
-          onClose={() => setOpenUpdateDialog({open: false, assetLogFields: null})}
+          onClose={() => setOpenUpdateDialog({ open: false, assetLogFields: null })}
           onSuccess={() => {
-            setOpenUpdateDialog({open: false, assetLogFields: null})
+            setOpenUpdateDialog({ open: false, assetLogFields: null })
             fetchData();
           }}
           assetLogFields={openUpdateDialog.assetLogFields}
