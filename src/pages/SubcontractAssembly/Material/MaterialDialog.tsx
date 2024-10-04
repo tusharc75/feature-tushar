@@ -48,7 +48,7 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
   };
 
   const handleSubmit = async (values) => {
-    const rows = await calculateRowsField(material, values, allFields, rowData);
+    const rows = await calculateRowsField(material, values, allFields, rowData, subcontractAssemblyData?.currency);
     handleSaveData(rows);
   };
 
