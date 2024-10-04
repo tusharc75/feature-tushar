@@ -58,7 +58,6 @@ const SerializedAssetDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
 
@@ -155,19 +154,11 @@ const SerializedAssetDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
-      setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([
-          routes.serializedAsset,
-          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-        ]);
+        setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''}` }]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
-        setCustomizedRoutes([
-          routes.iotChart,
-          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-        ]);
+        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }])
       }
-
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
       }
@@ -568,7 +559,11 @@ const SerializedAssetDetailsPage = () => {
           {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 8)}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
+          {assetDetails &&
+            <DetailsPageHeader
+              mainPoints={mainPoints}
+            />
+          }
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>

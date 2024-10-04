@@ -545,6 +545,7 @@ const ReceivingTicket = ({
               wellNumber: d?.inventory?.wellNumber,
               position: d?.inventory?.position,
               currentGpsLocation: d?.inventory?.currentGpsLocation,
+              currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps,
             };
           })
           .map((u) => ({
@@ -1094,6 +1095,11 @@ const ReceivingTicket = ({
                 <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
+            {(row?.original?.currentLocationNotMatchWithGps && (
+              <HtmlTooltip title="Asset location needs to be update in Equipt">
+                <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+              </HtmlTooltip>
+            ))}
           </div>
         )
       },
