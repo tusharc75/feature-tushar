@@ -126,6 +126,13 @@ export const resourcePolicy = [
           }
         ],
         defaultValue: []
+      },
+      {
+        fieldName: 'dataChangeAssetLog',
+        fieldLabel: 'Data Change Asset Log',
+        type: 'multiSelect',
+        defaultValue: [],
+        required: false
       }
     ]
   },

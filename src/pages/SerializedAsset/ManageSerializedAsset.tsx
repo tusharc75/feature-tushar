@@ -41,7 +41,8 @@ const ManageSerializedAsset = ({
   productId = null,
   productCategory = null,
   referenceType = null,
-  referenceData = null
+  referenceData = null,
+  assetLogFields = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -78,6 +79,13 @@ const ManageSerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data = data.filter((d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName));
+
+        if(assetLogFields && assetLogFields?.length){
+          data = data.filter((d) => [...assetLogFields].includes(d.fieldData.fieldName));
+          data.forEach((d)=>{
+            d.fieldData.disableOnEdit = false;
+          })
+        }
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -196,7 +204,19 @@ const ManageSerializedAsset = ({
     delete values?.productDescription;
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
-      axiosInstance()
+      if(assetLogFields){
+        axiosInstance()
+        .put(`${serializedAsset.api}/asset-update-with-log`, values)
+        .then(({ data: { data } }) => {
+          setSubmitting(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+      }else {
+        axiosInstance()
         .put(`${serializedAsset.api}`, values)
         .then(({ data: { data } }) => {
           setSubmitting(false);
@@ -206,6 +226,7 @@ const ManageSerializedAsset = ({
           setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
+      }
     } else {
       axiosInstance()
         .post(`${serializedAsset.api}`, values)
