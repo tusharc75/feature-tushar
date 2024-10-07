@@ -95,11 +95,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   errors={errors}
                 />
               ) : fieldData.type === 'checkBox' || fieldData.type === 'switch' ? (
-                <CheckboxDropdown
-                  value={values['defaultValue']}
-                  setFieldValue={setFieldValue}
-                  touched={touched}
-                  errors={errors} />
+                <CheckboxDropdown value={values['defaultValue']} setFieldValue={setFieldValue} touched={touched} errors={errors} />
               ) : (
                 <Box display="block">
                   <TextField
@@ -327,7 +323,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {fieldData?.type === 'singleLine' && (
+            {['singleLine', 'location']?.includes(fieldData?.type) && (
               <FormControlLabel
                 control={
                   <Checkbox
