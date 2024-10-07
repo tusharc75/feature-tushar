@@ -20,7 +20,6 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
-  SUBLEASE_STATUS,
   prepareDataForGrid,
   serializedAsset,
   sidebarResource,
@@ -155,7 +154,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   };
 
   const handleAddWalkmeData = (rows: any[]) => {
-    if (rows.length > 0 && !validateAction([rows[0]])) {
+    if (rows.length > 0) {
       setWalkmeData([generateStepSendToSupplier(0)]);
     } else {
       setWalkmeData([]);
@@ -212,12 +211,12 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -285,9 +284,9 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
     );
   };
 
-  const validateAction = (internalSelectedRecords = selectedRecords) => {
+  const validateAction = () => {
     const errorMessages = [];
-    internalSelectedRecords?.forEach((e, i) => {
+    selectedRecords?.forEach((e, i) => {
       if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
       } else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
