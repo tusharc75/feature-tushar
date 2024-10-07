@@ -354,7 +354,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, productionOrderData?.currency);
     handleSaveData(rows);
   };
 

@@ -565,7 +565,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, fieldTicketData?.currency);
     handleSaveData(rows);
   };
 

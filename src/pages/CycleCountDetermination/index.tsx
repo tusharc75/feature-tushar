@@ -219,7 +219,7 @@ const CycleCountDetermination = () => {
             }}
             data={editData}
             warehouse={warehouse}
-            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.optionLabel}
+            warehouseName={warehouseOption?.find((e) => e?.optionValue === warehouse)?.optionLabel}
           />
         )}
       </CustomContainer>

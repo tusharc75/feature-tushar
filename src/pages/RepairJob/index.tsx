@@ -31,6 +31,8 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createRepairJobFlow } from './walkmeSteps';
 
 let repairJobTimeout;
 
@@ -76,11 +78,13 @@ const RepairJob = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
+  const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData([createRepairJobFlow()]);
   }, []);
 
   const fetchGridColumns = async () => {

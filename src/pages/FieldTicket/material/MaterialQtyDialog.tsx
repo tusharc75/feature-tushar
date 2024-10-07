@@ -267,7 +267,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
       handleSaveData(rows);
     } else {
-      const rows = await calculateRowsField(material, values, allFields, rowData);
+      const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
     }

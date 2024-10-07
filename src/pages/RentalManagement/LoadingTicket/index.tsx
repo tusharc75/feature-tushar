@@ -59,6 +59,7 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -176,6 +177,7 @@ const LoadingTicket = ({
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
           currentGpsLocation: u?.currentGpsLocation,
+          currentLocationNotMatchWithGps: u?.currentLocationNotMatchWithGps,
           rentalAssetStatus: u?.status
         }));
 
@@ -200,6 +202,7 @@ const LoadingTicket = ({
             wellNumber: d?.inventory?.wellNumber,
             position: d?.inventory?.position,
             currentGpsLocation: d?.inventory?.currentGpsLocation,
+            currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps,
           }))
           .map((u) => ({
             ...u,
@@ -621,6 +624,11 @@ const LoadingTicket = ({
               <InfoIcon fontSize="small" color={'primary'} />
             </HtmlTooltip>
           )}
+          {(row?.original?.currentLocationNotMatchWithGps && (
+            <HtmlTooltip title="Asset location needs to be update in Equipt">
+              <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+            </HtmlTooltip>
+          ))}
         </div>
       )
     },

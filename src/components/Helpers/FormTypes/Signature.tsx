@@ -57,7 +57,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => 
   return (
     <div>
       {cameraPermission === 'denied' ? (
-        <Box p={2} style={{ width: isFullScreen ? window.innerWidth : 500, height: 400 }}>
+        <Box p={2} style={{ width: isFullScreen ? window.innerWidth - 30 : 500, height: 400 }}>
           <p>Please allow camera permissions to use this feature.</p>
         </Box>
       ) : cameraPermission === 'granted' ? (
@@ -76,10 +76,10 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => 
             {picture === '' ? (
               <Webcam
                 audio={false}
-                width={isFullScreen ? window.innerWidth : 500}
+                width={isFullScreen ? window.innerWidth - 30 : 500}
                 height={400}
                 ref={webcamRef}
-                minScreenshotWidth={isFullScreen ? window.innerWidth : 500}
+                minScreenshotWidth={isFullScreen ? window.innerWidth - 30 : 500}
                 screenshotFormat="image/jpeg"
                 videoConstraints={{ facingMode: facingMode }}
               />
@@ -121,7 +121,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => 
           </div>
         </>
       ) : (
-        <Box p={2} width={isFullScreen ? window.innerWidth : 500} height={400}>
+        <Box p={2} width={isFullScreen ? window.innerWidth - 30 : 500} height={400}>
           <CommonSkeleton lenArray={[...Array(3).keys()]} />
         </Box>
       )}
@@ -150,12 +150,12 @@ const SignatureDialog = ({ onSave, open, close }) => {
         showManimizeMaximize={false}
         showRequiredLabel={false}
       />
-      <CustomDialogContent className="px-0">
+      <CustomDialogContent className="px-[15px]">
         {usePad ? (
           <div className="flex min-h-full items-center justify-center dark:[filter:invert(1)]">
             <SignaturePad
               ref={signCanvas}
-              canvasProps={{ width: fullScreen ? window.innerWidth : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
+              canvasProps={{ width: fullScreen ? window.innerWidth - 30 : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
             />
           </div>
         ) : (

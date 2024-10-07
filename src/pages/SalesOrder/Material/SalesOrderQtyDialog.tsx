@@ -14,7 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -167,7 +167,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData, salesOrderData?.currency);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
@@ -333,7 +333,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                           }}
                                           options={field.fieldName === 'pricingCondition' ? priceConditionList :
                                             field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
-                                          
+
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
                                             const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
