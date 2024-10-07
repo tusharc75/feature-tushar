@@ -91,7 +91,7 @@ const LeadDetailsPage = () => {
         const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === leadData[processFieldName]);
         setActiveStep(currentStepToShow);
 
-        if (currentStepToShow + 1 >= steps.length - 1) {
+        if (currentStepToShow + 1 >= steps.length) {
           const isAtLastStep = currentStepToShow === steps.length - 1;
           setShowAtLast(isAtLastStep);
           let dontHavePermissions = [];
@@ -109,7 +109,7 @@ const LeadDetailsPage = () => {
               user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
               allowedToEdit &&
               leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length - 1
+              currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
