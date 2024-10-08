@@ -156,13 +156,6 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
         editable: allowedToEdit,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
-        primaryField: true,
-        width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       }
     ];
     extracolumns.push({
@@ -176,9 +169,9 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
-          {allowedToEdit && row?.original?.type != MATERIAL_TYPE.serializedAsset && (
+          {allowedToEdit && (
             <>
-              {hasChildFields && (
+              {hasChildFields && row?.original?.type != MATERIAL_TYPE.serializedAsset && (
                 <HtmlTooltip title="Edit">
                   <IconButton
                     size="small"
@@ -198,12 +191,12 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={row?.original?.consumedQty ? true : false}
+                  disabled={row?.original?.assignedAssetQty ? true : false}
                   onClick={() => {
                     setDeleteData([row.original]);
                   }}
                 >
-                  <DeleteIcon color={row?.original?.consumedQty ? 'disabled' : 'error'} fontSize="small" />
+                  <DeleteIcon color={row?.original?.assignedAssetQty ? 'disabled' : 'error'} fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             </>
@@ -230,6 +223,7 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
             res.productName = u?.product?.optionLabel;
             res.productDescription = u?.product?.productDescription;
             res.productNumber = u?.product?.productNumber;
+            res.assignedAssetQty = data?.filter((d) => d?.parentId === u?._id && d?.type === MATERIAL_TYPE.serializedAsset)?.length || 0;
             res.subRows = generateNestedData(data, u);
             return res;
           });
@@ -261,11 +255,11 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
     if (updatedData?.type === MATERIAL_TYPE.serializedAsset) {
       return;
     }
-    if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0)) {
+    if (parseInt(inputField.qty) < (updatedData?.assignedAssetQty || 0)) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'Quantity can not be less than consumed quantity'
+        message: 'Quantity can not be less than assigned asset qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
@@ -404,17 +398,10 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
               onClose={handleCloseAction}
             >
               <MenuItem
-                disabled={selectedRecords?.find((s) => s?.consumedQty) ? true : false}
-                onClick={() => {
-                  setDeleteData(selectedRecords?.filter((s) => !s?.consumedQty));
-                  handleCloseAction();
-                }}
-              >
-                Delete
-              </MenuItem>
-              <MenuItem
                 disabled={
-                  selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.qty - (r?.consumedQty || 0) > 0)?.length > 0 ? false : true
+                  selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.qty - (r?.assignedAssetQty || 0) > 0)?.length > 0
+                    ? false
+                    : true
                 }
                 onClick={() => {
                   setAssignAssetDialog(true);
@@ -422,6 +409,15 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
                 }}
               >
                 Assign {routes.serializedAsset.title}
+              </MenuItem>
+              <MenuItem
+                disabled={selectedRecords?.find((s) => s?.assignedAssetQty) ? true : false}
+                onClick={() => {
+                  setDeleteData(selectedRecords?.filter((s) => !s?.assignedAssetQty));
+                  handleCloseAction();
+                }}
+              >
+                Delete
               </MenuItem>
             </Menu>
           </Box>
@@ -512,11 +508,11 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
           }}
           isAssigning={isSubmitting}
           selectedProducts={selectedRecords
-            ?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.qty - r?.consumedQty > 0)
+            ?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.qty - r?.assignedAssetQty > 0)
             ?.map((r) => ({
               _id: r?._id,
               product: r.productId,
-              qty: r?.qty - (r?.consumedQty || 0),
+              qty: r?.qty - (r?.assignedAssetQty || 0),
               productName: r.productName
             }))}
         />
