@@ -347,6 +347,12 @@ export const createFilterModel = (formValues, coloums) => {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
+      case 'number':
+      case 'decimal':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
       case 'multiLine':
       case 'email':
       case 'mobileNumber':
@@ -355,12 +361,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'url':
         if (formValues[fieldName]?.trim()) {
           filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
-        }
-        break;
-      case 'number':
-      case 'decimal':
-        if (formValues[fieldName]) {
-          filterModel.set(fieldName, { filter: formValues[fieldName]?.toString() });
         }
         break;
       case 'year':
