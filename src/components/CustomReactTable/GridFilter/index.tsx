@@ -22,6 +22,7 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 import SaveFilterDialog from './SaveFilterDialog';
+import NumberInput from 'src/components/CustomReactTable/GridFilter/NumberInput';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -359,6 +360,19 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                               required={false}
                               fieldData={field}
                               allFields={coloums}
+                            />
+                          ) : field?.type === 'decimal' || field?.type === 'number' ? (
+                            <NumberInput
+                              key={field?._id}
+                              errors={{}}
+                              touched={{}}
+                              value={formValues[field.fieldName] ?? []}
+                              onChange={(_, value) => {
+                                handleSelectFilter(field?.fieldName, value);
+                              }}
+                              fieldName={field.fieldName}
+                              fieldLabel={field.fieldLabel}
+                              required={false}
                             />
                           ) : (
                             <FormTypes
