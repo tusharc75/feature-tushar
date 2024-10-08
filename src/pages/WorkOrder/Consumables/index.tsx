@@ -334,7 +334,7 @@ const Consumables = ({
         if (materialSubType === MATERIAL_SUB_TYPE.bom) {
           data = data?.filter((e) => e?.subType === materialSubType);
         } else {
-          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom);
+          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom && e?.subType === MATERIAL_SUB_TYPE.consumable);
         }
         let rows = data?.map((u) => {
           let res: any = {
