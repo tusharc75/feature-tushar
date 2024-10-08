@@ -78,11 +78,39 @@ const SerializedAsset = () => {
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
   const [status, setStatus] = useState('');
+  const [statusColors, setStatusColors] = useState({});
+
+useEffect(() => {
+  if (resourceData) {
+    const colors = {};
+    for (const item of resourceData.policy.statusColor) {
+      if (Array.isArray(item.status)) {
+        item.status.forEach(status => {
+          colors[status] = item.color;
+        });
+      } else {
+        colors[item.status] = item.color;
+      }
+    }
+    setStatusColors(colors);
+  }
+}, [resourceData]);
+
+const getColorByStatus = (currentStatus) => {
+  return statusColors[currentStatus] || "defaultColor";
+};
+
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchPolicy();
+  }, [permissions, selectedEntity]);
+  
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -139,7 +167,22 @@ const SerializedAsset = () => {
     }
   }, [productCategory]);
 
-  const fetchGridColumns = () => {
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  
+  const fetchGridColumns = async () => {
+    await fetchPolicy();
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
@@ -155,14 +198,19 @@ const SerializedAsset = () => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) => (
               <div
-                style={{
-                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                    row?.original?.status
-                  )
+              style={{
+                backgroundColor: (() => {
+                  const statusColor = getColorByStatus(row?.original?.status);
+                  return statusColor !== "defaultColor"
+                    ? statusColor
+                    : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
+                        row?.original?.status
+                      )
                     ? COLOUR_MASTER.lostAssets.background
-                    : ''
-                }}
-              >
+                    : '';
+                })()
+              }}
+            >
                 <Link
                   className="link text-truncate"
                   title={row?.original?.assetNumber}
