@@ -102,13 +102,12 @@ const getColorByStatus = (currentStatus) => {
   return statusColors[currentStatus] || "defaultColor";
 };
 
-
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    fetchPolicy();
+    fetchGridColumns();
   }, [permissions, selectedEntity]);
   
 
@@ -180,7 +179,7 @@ const getColorByStatus = (currentStatus) => {
     }
   };
 
-  
+
   const fetchGridColumns = async () => {
     await fetchPolicy();
     axiosInstance()
