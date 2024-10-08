@@ -14,6 +14,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { REPORT_LIST } from './../../constants/helpers';
 import styles from './index.module.scss';
+import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 
 type TReportFromHelper = {
   title: string;
@@ -32,6 +33,7 @@ const ReportMaster = () => {
   const {
     state: { permissions }
   } = useData();
+  const [searchQuery] = useStore((store) => store[SEARCH]);
   const [customReports, setCustomReports] = useState<TReportsFromAPI[]>([]);
   const [filteredCustomReports, setFilteredCustomReports] = useState<TReportsFromAPI[]>([]);
 
@@ -49,7 +51,7 @@ const ReportMaster = () => {
   }, []);
 
   const filterValues = useCallback(
-    debounce((searchedValue: string) => {
+    (searchedValue: string) => {
       const searchedFor = searchedValue.toLowerCase().trim();
       if (!searchedFor && searchedFor === '') {
         setReportList(REPORT_LIST);
@@ -58,14 +60,13 @@ const ReportMaster = () => {
       }
       setReportList(() => REPORT_LIST.filter((f) => f.title.toLowerCase().includes(searchedFor)));
       setFilteredCustomReports((prev) => prev.filter((f) => f.customReportName.toLowerCase().includes(searchedFor)));
-      return;
-    }, 400),
-    []
+    },
+    [customReports]
   );
 
   useEffect(() => {
-    filterValues(searchedValue);
-  }, [searchedValue, filterValues]);
+    filterValues(searchQuery);
+  }, [searchQuery, filterValues]);
 
   return (
     <div className="main-container-v1">
@@ -91,8 +92,15 @@ const ReportMaster = () => {
         </Box>
       </Box>
       <div className="detail-container-v1">
-        <div className="flex justify-end mb-4">
-          <SearchBox onChange={(e) => setSearchedValue(e.target.value)} value={searchedValue} />
+        <div className="mb-4 flex justify-end">
+          <SearchBox
+            onChange={(e) => {
+              const value = e.target.value;
+              filterValues(value);
+              setSearchedValue(value);
+            }}
+            value={searchedValue}
+          />
         </div>
         {reportList.length ? (
           <Box className={styles.reportGrid}>
@@ -131,7 +139,7 @@ const ReportMaster = () => {
             </>
           </Box>
         ) : (
-          <div className="text-[16px] font-semibold text-gray-400 dark:text-gray-300 p-12  text-center">No Reports Found</div>
+          <div className="p-12 text-center text-[16px] font-semibold text-gray-400  dark:text-gray-300">No Reports Found</div>
         )}
 
         <Box mt={3}>
@@ -168,7 +176,7 @@ const ReportMaster = () => {
                 })}
               </Box>
             ) : (
-              <div className="text-[16px] font-semibold text-gray-400 dark:text-gray-300 p-12 border-t border-dashed border-r-0 border-l-0 border-b-0 text-center">
+              <div className="border-b-0 border-l-0 border-r-0 border-t border-dashed p-12 text-center text-[16px] font-semibold text-gray-400 dark:text-gray-300">
                 No Custom Reports Found
               </div>
             )}
