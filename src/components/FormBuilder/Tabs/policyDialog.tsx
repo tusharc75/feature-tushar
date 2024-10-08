@@ -14,7 +14,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Text } from '@aws-amplify/ui-react';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -113,7 +112,6 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
         }
       }}
     >
-      {console.log(initialValues)}
       {initialValues?.data?.length ? (
         <Formik initialValues={initialValues} onSubmit={updateData} validate={validate}>
           {({ values, submitForm, setFieldValue, errors, touched }) => (
