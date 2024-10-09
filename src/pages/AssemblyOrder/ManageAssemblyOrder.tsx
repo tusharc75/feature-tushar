@@ -1,32 +1,30 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Formik, Form } from 'formik';
-import { Box, Button, Grid } from '@material-ui/core';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import InputField from 'src/components/Helpers/InputField';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
+import { Box, Button, Dialog } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   CustomDialogTransition,
+  GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
-  yupSchema,
-  productionOrder,
-  GenerateResourceLineNumber,
-  sidebarResource
-} from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { useHistory } from 'react-router-dom';
-import routes from '../../../components/Helpers/Routes';
+  sidebarResource,
+  yupSchema
+} from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import InputField from 'src/components/Helpers/InputField';
 
-const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null }) => {
+const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose, onSuccess, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -37,33 +35,33 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [productionOrderData, setProductionOrderData] = useState(null);
+  const [assemblyOrderData, setAssemblyOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     setLoading(true);
     fetchFields();
-  }, [productionOrderId]);
+  }, [assemblyOrderId]);
 
   const fetchFields = async () => {
     try {
       let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Production Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.assemblyOrder}`);
       fieldData = response?.data?.data;
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      if (productionOrderId) {
+      if (assemblyOrderId) {
         try {
           let data;
-          const response: any = await axiosInstance().get(`${productionOrder.api}/` + productionOrderId);
+          const response: any = await axiosInstance().get(`${routes.assemblyOrder.path}/${assemblyOrderId}`);
           data = response?.data?.data;
-          setProductionOrderData(data);
+          setAssemblyOrderData(data);
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
+            const { _id, brand, createdBy, entity, history, products, status, assemblyOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
             rest.productionOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-            setCloneHeading(productionOrderNumber);
+            setCloneHeading(assemblyOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -81,7 +79,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        initialData['productionOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        initialData['assemblyOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
 
         if (referenceData) {
           Object.keys(referenceData)?.forEach((key) => {
@@ -108,10 +106,10 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (productionOrderId && isClone === false) {
-      values._id = productionOrderId;
+    if (assemblyOrderId && isClone === false) {
+      values._id = assemblyOrderId;
       axiosInstance()
-        .put(`${productionOrder.api}`, values)
+        .put(`${routes.assemblyOrder.path}`, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -127,14 +125,14 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
         });
     } else {
       axiosInstance()
-        .post(`${productionOrder.api}`, values)
+        .post(`${routes.assemblyOrder.path}`, values)
         .then(({ data: { data, message } }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
-          history.push(`${routes.productionOrderDetail.path}/${data?._id}`);
+          history.push(`${routes.assemblyOrderDetail.path}/${data?._id}`);
           onSuccess(data);
           setLoading(false);
         })
@@ -166,7 +164,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
     <Dialog
       maxWidth="md"
       fullWidth
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
@@ -185,12 +183,12 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
-            <Fragment>
+            <>
               <CustomDialogHeader
                 title={
-                  !productionOrderId
-                    ? `Create ${routes.productionOrder.title}`
-                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${productionOrderData?.productionOrderNumber || ''}`}`
+                  !assemblyOrderId
+                    ? `Create ${routes.assemblyOrder.title}`
+                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${assemblyOrderData?.assemblyOrderNumber || ''}`}`
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) {
@@ -215,8 +213,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.productionOrder}
-                    referenceId={productionOrderId || null}
+                    resource={sidebarResource.assemblyOrder}
+                    referenceId={assemblyOrderId || null}
                     collaborateTools={true}
                   />
                 </Form>
@@ -265,7 +263,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                   }}
                 />
               ) : null}
-            </Fragment>
+            </>
           )}
         </Formik>
       ) : (
@@ -277,4 +275,4 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
   );
 };
 
-export default ManageProductionOrder;
+export default ManageAssemblyOrder;

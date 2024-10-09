@@ -265,6 +265,8 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
+import AssemblyOrder from 'src/pages/AssemblyOrder';
+import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 
 var notificationInterval: any = null;
 
@@ -1194,6 +1196,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workflowReportDetail.path}/:id`}>
               <WorkFlowReportDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assemblyOrder.path}`}>
+              <AssemblyOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assemblyOrderDetail.path}/:id`}>
+              <AssemblyOrderDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
