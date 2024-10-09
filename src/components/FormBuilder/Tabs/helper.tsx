@@ -133,7 +133,27 @@ export const resourcePolicy = [
         type: 'multiSelect',
         defaultValue: [],
         required: false
-      }
+      },
+      {
+        fieldName: 'statusColor',
+        fieldLabel: 'Status Color',
+        type: 'multipleFields',
+        fields: [
+          {
+            fieldName: 'status',
+            fieldLabel: 'Status',
+            type: 'multiSelect',
+            required: true,
+          },
+          {
+            fieldName: 'colorCode',
+            fieldLabel: 'Color Code',
+            type: 'colorPicker',
+            required: true,
+          },
+        ],
+        defaultValue: []
+      },
     ]
   },
   {

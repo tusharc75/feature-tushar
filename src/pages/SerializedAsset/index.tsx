@@ -81,8 +81,11 @@ const SerializedAsset = () => {
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    fetchGridColumns();
-  }, []);
+    const fetch = async () => {
+      await fetchGridColumns();
+    };
+    fetch();
+  }, [permissions, selectedEntity]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -139,9 +142,23 @@ const SerializedAsset = () => {
     }
   }, [productCategory]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
+  const fetchGridColumns = async () => {
+
+    const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+    const resourceData = resourceDataResponce?.data?.data
+
+    const statusColors = {};
+    for (const item of resourceData?.policy?.statusColor) {
+      if (Array.isArray(item.status)) {
+        item.status.forEach(status => {
+          statusColors[status] = item.colorCode;
+        });
+      } else {
+        statusColors[item.status] = item.colorCode;
+      }
+    }
+
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
@@ -150,17 +167,17 @@ const SerializedAsset = () => {
           }
         });
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) => (
               <div
                 style={{
-                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                    row?.original?.status
-                  )
-                    ? COLOUR_MASTER.lostAssets.background
-                    : ''
+                  backgroundColor: (() => {
+                    return statusColors[row?.original?.status] ? statusColors[row?.original?.status] :
+                      [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                        ? COLOUR_MASTER.lostAssets.background
+                        : '';
+                  })()
                 }}
               >
                 <Link
