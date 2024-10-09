@@ -91,7 +91,9 @@ const AssemblyOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip
+          title={row?.original?.canDelete ? 'Delete' : row?.original?.status === 'New' ? deleteDisable : 'You can not delete because its in progress'}
+        >
           <span>
             <IconButton
               size="small"
