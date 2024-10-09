@@ -420,7 +420,6 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                           <input type="color" name={field.fieldName} value={value[field.fieldName]}
                              onChange={(e) => {
                               const updatedVal = e.target.value;
-                              console.log(updatedVal);
                               setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
                               let updatedData = [...initialData?.fieldsData];
                               updatedData[index][field.fieldName] = updatedVal;
