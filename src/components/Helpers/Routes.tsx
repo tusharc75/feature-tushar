@@ -1265,34 +1265,50 @@ const routes = {
     path: '/equipt-ai'
   },
   trainAiModel: {
-    title: storedRoutes && storedRoutes.trainAiModel && storedRoutes.trainAiModel?.title ? storedRoutes.trainAiModel?.title : RESOURCE_LABEL.trainAiModel,
+    title:
+      storedRoutes && storedRoutes.trainAiModel && storedRoutes.trainAiModel?.title ? storedRoutes.trainAiModel?.title : RESOURCE_LABEL.trainAiModel,
     path: '/train-ai-model'
   },
   workSpace: {
-    title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
-      : RESOURCE_LABEL.workSpace,
+    title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title : RESOURCE_LABEL.workSpace,
     path: '/work-space'
   },
   workflow: {
-    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title
-      : RESOURCE_LABEL.workflow,
+    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title : RESOURCE_LABEL.workflow,
     path: '/workflow'
   },
   workflowDetail: {
-    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title
-      : RESOURCE_LABEL.workflow,
+    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title : RESOURCE_LABEL.workflow,
     path: '/workflow/:id'
   },
   workflowReport: {
-    title: storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title ? storedRoutes.workflowReport?.title
-      : RESOURCE_LABEL.workflowReport,
+    title:
+      storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title
+        ? storedRoutes.workflowReport?.title
+        : RESOURCE_LABEL.workflowReport,
     path: '/workflow-report'
   },
   workflowReportDetail: {
-    title: storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title ? storedRoutes.workflowReport?.title
-      : RESOURCE_LABEL.workflowReport,
+    title:
+      storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title
+        ? storedRoutes.workflowReport?.title
+        : RESOURCE_LABEL.workflowReport,
     path: '/workflow-report/detail'
   },
+  assemblyOrder: {
+    title:
+      storedRoutes && storedRoutes.assemblyOrder && storedRoutes.assemblyOrder.title
+        ? storedRoutes.assemblyOrder?.title
+        : RESOURCE_LABEL.assemblyOrder,
+    path: '/assembly-order'
+  },
+  assemblyOrderDetail: {
+    title:
+      storedRoutes && storedRoutes.assemblyOrder && storedRoutes.assemblyOrder.title
+        ? storedRoutes.assemblyOrder?.title
+        : RESOURCE_LABEL.assemblyOrder,
+    path: '/assembly-order/detail'
+  }
 };
 
 export default routes;
