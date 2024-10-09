@@ -102,13 +102,16 @@ const getColorByStatus = (currentStatus) => {
   return statusColors[currentStatus] || "defaultColor";
 };
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
+  // useEffect(() => {
+  //   fetchGridColumns();
+  // }, []);
 
   useEffect(() => {
-    fetchGridColumns();
-  }, [permissions, selectedEntity]);
+    const fetch = async () => {
+      await fetchGridColumns(); 
+    };
+    fetch();
+  }, [permissions, selectedEntity]); 
   
 
   useEffect(() => {
