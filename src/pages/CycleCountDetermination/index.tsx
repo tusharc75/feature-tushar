@@ -181,7 +181,7 @@ const CycleCountDetermination = () => {
             fetchData();
           }}
           isDownloadExcel={false}
-          additionalParams={`warehouse=${warehouse}`}
+          additionalParams={`&warehouse=${warehouse}`}
           onlyExport={false}
         />
       </div>
