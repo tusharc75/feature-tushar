@@ -82,7 +82,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
     if (resource === sidebarResource.serializedAsset) {
       const validationFields = initialValues[`data`]?.[0]?.fields?.filter((e) => e.required);
       values.data.forEach((value, index) => {
-        if(value.fieldName==='statusChangeFields'){
+        if (value.fieldName === 'statusChangeFields') {
           value?.data?.forEach((ele, idx) => {
             validationFields?.forEach((e) => {
               if (!ele[e?.fieldName]) {
@@ -412,39 +412,60 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                       }
                       label={field?.fieldLabel}
                     />
-                  ) : (
-                    <DropDownField
-                      key={field.fieldName}
-                      options={
-                        field?.lookupResource
-                          ? field.option
-                          : field?.fieldName === 'status'
-                            ? getStatusOptions(initialData?.fieldsData)
-                            : fieldOptions
-                      }
-                      error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
-                      touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
-                      onChange={(e, val) => {
-                        const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
-                        setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
-                        let updatedData = [...initialData?.fieldsData];
-                        updatedData[index][field.fieldName] = updatedVal;
-                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
-                        onChange(null, updatedData);
-                      }}
-                      value={
-                        field?.type === 'multiSelect'
-                          ? field?.lookupResource
-                            ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                            : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                          : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                      }
-                      multiple={field?.type === 'multiSelect'}
-                      fieldLabel={field?.fieldLabel}
-                      fieldName={field?.fieldLabel}
-                      required={field?.required}
-                    />
+                  ) : field?.type === 'singleLine' ? (
+                      <TextField
+                        size="small"
+                        margin="dense"
+                        variant="outlined"
+                        required={true}
+                        label={field.fieldLabel}
+                        name={field.fieldName}
+                        value={value[field.fieldName]}
+                        onChange={(e) => {
+                          const updatedVal = e.target.value;
+                          setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                          let updatedData = [...initialData?.fieldsData];
+                          updatedData[index][field.fieldName] = updatedVal;
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }}
+                      />
                   )
+                    : (
+                      <DropDownField
+                        key={field.fieldName}
+                        options={
+                          field?.lookupResource
+                            ? field.option
+                            : field?.fieldName === 'status'
+                              ? getStatusOptions(initialData?.fieldsData)
+                              : fieldOptions
+                        }
+                        error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
+                        touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
+                        onChange={(e, val) => {
+                          const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
+                          setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                          let updatedData = [...initialData?.fieldsData];
+                          updatedData[index][field.fieldName] = updatedVal;
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }}
+                        value={
+                          field?.type === 'multiSelect'
+                            ? field?.lookupResource
+                              ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                              : field?.fieldName === 'status' ?
+                                statusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
+                                : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                            : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                        }
+                        multiple={field?.type === 'multiSelect'}
+                        fieldLabel={field?.fieldLabel}
+                        fieldName={field?.fieldLabel}
+                        required={field?.required}
+                      />
+                    )
                 )}
               </div>
               <HtmlTooltip title="Remove">
