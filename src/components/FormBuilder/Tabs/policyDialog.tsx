@@ -412,24 +412,24 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                       }
                       label={field?.fieldLabel}
                     />
-                  ) : field?.type === 'singleLine' ? (
-                      <TextField
-                        size="small"
-                        margin="dense"
-                        variant="outlined"
-                        required={true}
-                        label={field.fieldLabel}
-                        name={field.fieldName}
-                        value={value[field.fieldName]}
-                        onChange={(e) => {
-                          const updatedVal = e.target.value;
-                          setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
-                          let updatedData = [...initialData?.fieldsData];
-                          updatedData[index][field.fieldName] = updatedVal;
-                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
-                          onChange(null, updatedData);
-                        }}
-                      />
+                  ) : field?.type === 'colorPicker' ? (
+                    <>
+                      <Box display="flex" alignItems="center">
+                        <Typography color="textSecondary">{field.fieldLabel}</Typography>
+                        <Box ml={2} display="flex" alignContent="center">
+                          <input type="color" name={field.fieldName} value={value[field.fieldName]}
+                             onChange={(e) => {
+                              const updatedVal = e.target.value;
+                              console.log(updatedVal);
+                              setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                              let updatedData = [...initialData?.fieldsData];
+                              updatedData[index][field.fieldName] = updatedVal;
+                              setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                              onChange(null, updatedData);
+                            }} />
+                        </Box>
+                      </Box>
+                    </>
                   )
                     : (
                       <DropDownField
