@@ -256,9 +256,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
   const fetchSharepointSiteData = ()=>{
     axiosInstance()
-      .get(`/sharepoint-configuration/${user?.user?.brand}`)
+      .get(`/sharepoint-configuration/share-point-site`)
       .then(({ data: { data } }) => {
-        if(data && data?.sharepointSites?.length){
+        if(data?.sharepointConfiguration){
           setSharepointOptions(data?.sharepointSites)
         }
       })
