@@ -212,7 +212,8 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any) => {
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any, resetChild: any = true) => {
+    console.log(resetChild)
     currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
     let childs: any = []
@@ -226,7 +227,9 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
             await calculateParentRows(material, rows, fields, rowData, parent, currency)
             rows = [...rows, ...parent]
         }
-        childs = resetValueZero(material, fields, rowData._id)
+        if (resetChild) {
+            childs = resetValueZero(material, fields, rowData._id)
+        }
     }
     const result: any = [];
     [...rows, ...childs]?.forEach((e: any) => {

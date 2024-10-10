@@ -349,7 +349,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData, rentalManagementData?.currency);
+        const rows = await calculateRowsField(material, values, allFields, rowData, rentalManagementData?.currency, user?.user?.brandPolicy?.packagePriceComponentWise ? false : true);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
