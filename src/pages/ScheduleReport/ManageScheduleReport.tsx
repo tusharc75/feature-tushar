@@ -58,6 +58,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
   const [loadingColumns, setLoadingColumns] = useState(false);
+  const [sharepointOptions, setSharepointOptions] = useState(null);
 
   useEffect(() => {
     const options = [];
@@ -68,6 +69,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     });
     setResourceOption(options);
   }, []);
+
+  useEffect(()=>{
+    fetchSharepointSiteData();
+  },[])
 
   useEffect(() => {
     if (id) {
@@ -98,10 +103,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             column: data?.column,
             subscribeUsers: data?.subscribeUsers,
             reportAction: data?.reportAction,
-            sharepointTenantId: data?.sharepointTenantId,
             sharepointSite: data?.sharepointSite,
-            sharepointclientId: data?.sharepointclientId,
-            sharepointclientSecret: data?.sharepointclientSecret,
           };
           setScheduleData(newData);
         } catch (err) {
@@ -116,10 +118,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         column: [],
         subscribeUsers: [],
         reportAction: 'Email',
-        sharepointTenantId: '',
         sharepointSite: '',
-        sharepointclientId: '',
-        sharepointclientSecret: '',
         frequency: 'Daily',
         time: '',
         week: '',
@@ -255,6 +254,19 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const fetchSharepointSiteData = ()=>{
+    axiosInstance()
+      .get(`/sharepoint-configuration/share-point-site`)
+      .then(({ data: { data } }) => {
+        if(data?.sharepointConfiguration){
+          setSharepointOptions(data?.sharepointSites)
+        }
+      })
+      .catch((err) => {
+        setToastConfig(err);
+      });
+  }
+
   const validate = (values: ValueTypes) => {
     let errors = {};
     if (!values.scheduleName || values.scheduleName === '') {
@@ -274,17 +286,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       }
 
       if(values.reportAction==='Sharepoint Upload'){
-         if(!values.sharepointSite){
+         if(!values.sharepointSite || values.sharepointSite===''){
           errors['sharepointSite'] = 'Sharepoint Site is required';
-         }
-         if(!values.sharepointTenantId){
-          errors['sharepointTenantId'] = 'Sharepoint Tenant Id is required';
-         }
-         if(!values.sharepointclientId){
-          errors['sharepointclientId'] = 'Sharepoint Client Id is required';
-         }
-         if(!values.sharepointclientSecret){
-          errors['sharepointclientSecret'] = 'Sharepoint Client Secret is required';
          }
       }
     }
@@ -602,7 +605,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                       <Autocomplete
-                          options={['Email', 'Sharepoint Upload']}
+                          options={sharepointOptions ? ['Email', 'Sharepoint Upload'] : ['Email']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
@@ -651,77 +654,30 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         />
                       </Grid>
                     )}
-                    {values?.reportAction==='Sharepoint Upload' && (
-                    <>
-                     <Grid item xs={12} sm={6}>  
-                      <TextField
-                      variant="outlined"
-                      type="text"
-                      label="Sharepoint Tenant Id "
-                      required={true}
-                      name="sharepointTenantId"
-                      fullWidth
-                      margin="dense"
-                      value={values['sharepointTenantId']}
-                      error={touched['sharepointTenantId'] && Boolean(errors['sharepointTenantId'])}
-                      helperText={touched['sharepointTenantId'] && errors['sharepointTenantId']}
-                      onChange={(e) => {
-                        setFieldValue('sharepointTenantId', e.target.value.trimStart());
-                      }}
-                    />
-                    </Grid>
+                    {values?.reportAction==='Sharepoint Upload' && sharepointOptions && (
                     <Grid item xs={12} sm={6}>  
-                    <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Sharepoint Site"
-                    required={true}
-                    name="sharepointSite"
-                    fullWidth
-                    margin="dense"
-                    value={values['sharepointSite']}
-                    error={touched['sharepointSite'] && Boolean(errors['sharepointSite'])}
-                    helperText={touched['sharepointSite'] && errors['sharepointSite']}
-                    onChange={(e) => {
-                      setFieldValue('sharepointSite', e.target.value.trimStart());
-                    }}
-                  />
+                     <Autocomplete
+                          options={sharepointOptions}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => option.optionLabel}
+                          getOptionSelected={(option, value) => option.optionValue == value}
+                          value={sharepointOptions?.find((ops)=> ops?.optionValue===values?.sharepointSite) || {}}
+                          onChange={(_, newVal) => 
+                            setFieldValue('sharepointSite', newVal?.optionValue || '')}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['sharepointSite'] && Boolean(errors['sharepointSite'])}
+                              helperText={touched['sharepointSite'] && errors['sharepointSite']}
+                              label="Sharepoint Site"
+                              name="sharepointSite"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
                   </Grid>
-                  <Grid item xs={12} sm={6}>  
-                  <TextField
-                  variant="outlined"
-                  type="text"
-                  label="Sharepoint Client Id"
-                  required={true}
-                  name="sharepointclientId"
-                  fullWidth
-                  margin="dense"
-                  value={values['sharepointclientId']}
-                  error={touched['sharepointclientId'] && Boolean(errors['sharepointclientId'])}
-                  helperText={touched['sharepointclientId'] && errors['sharepointclientId']}
-                  onChange={(e) => {
-                    setFieldValue('sharepointclientId', e.target.value.trimStart());
-                  }}
-                />
-                </Grid>
-                <Grid item xs={12} sm={6}>  
-                  <TextField
-                  variant="outlined"
-                  type="text"
-                  label="Sharepoint Client Secret"
-                  required={true}
-                  name="sharepointclientSecret"
-                  fullWidth
-                  margin="dense"
-                  value={values['sharepointclientSecret']}
-                  error={touched['sharepointclientSecret'] && Boolean(errors['sharepointclientSecret'])}
-                  helperText={touched['sharepointclientSecret'] && errors['sharepointclientSecret']}
-                  onChange={(e) => {
-                    setFieldValue('sharepointclientSecret', e.target.value.trimStart());
-                  }}
-                />
-                </Grid>
-                </>
                   )}
                   </Grid>
                   </Box>

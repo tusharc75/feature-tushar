@@ -333,44 +333,44 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit || !quotationApproved ? (
-              row.original.hideSelection ? (
-                <HtmlTooltip
-                  title={
-                    row.original?.assetQty
-                      ? row?.original?.productDetail?.serializedProduct
-                        ? 'Assets/Serial Numbers is already assigned'
-                        : 'Inventory/Serial Numbers is already assigned'
-                      : row.original?.status
-                        ? rentalManagementMessage.loadingAlreadyCreated
-                        : row.original?.invoiceCreated
-                          ? rentalManagementMessage.invoiceCreated
-                          : ' '
-                  }
-                >
-                  <span>
-                    <IconButton size="small" aria-label="Details" disabled={true}>
-                      <DeleteIcon fontSize="small" color={'disabled'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              ) : (
-                <HtmlTooltip title={'Delete'}>
-                  <span>
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                        getNestedSubRows(obj, row.original);
-                        setDeleteData(obj);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" color={'error'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              )
+            {allowedToEdit || !quotationApproved ? (row.original.hideSelection ? (
+              <HtmlTooltip
+                title={
+                  row.original?.assetQty
+                    ? row?.original?.productDetail?.serializedProduct
+                      ? 'Assets/Serial Numbers is already assigned'
+                      : 'Inventory/Serial Numbers is already assigned'
+                    : row.original?.status
+                      ? rentalManagementMessage.loadingAlreadyCreated
+                      : row.original?.invoiceCreated
+                        ? rentalManagementMessage.invoiceCreated
+                        : row.original.type === MATERIAL_TYPE.service && row.original?.serviceLog?.length
+                          ? rentalManagementMessage.serviceAlreadyStarted : ''
+                }
+              >
+                <span>
+                  <IconButton size="small" aria-label="Details" disabled={true}>
+                    <DeleteIcon fontSize="small" color={'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : (
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )
             ) : (
               ''
             )}
@@ -1190,11 +1190,9 @@ const Productpackage = ({
           isSubmitting={isSubmitting}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+      {addExistingProductDialog.open && addExistingProductDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
-          onSuccess={(services) => {
-            handleAdd(services);
-          }}
+          onSuccess={handleAdd}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}

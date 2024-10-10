@@ -154,6 +154,12 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       }
     }
 
+    if (reference === 'workOrder_assign_asset') {
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+    }
+
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }

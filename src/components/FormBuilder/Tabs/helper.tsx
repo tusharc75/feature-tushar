@@ -128,12 +128,39 @@ export const resourcePolicy = [
         defaultValue: []
       },
       {
+        fieldName: 'dataChangeStatus',
+        fieldLabel: 'Data Change Status',
+        type: 'dropDown',
+        fieldOption: 'status',
+        required: false
+      },
+      {
         fieldName: 'dataChangeAssetLogFields',
         fieldLabel: 'Data Change Asset Log Fields',
         type: 'multiSelect',
         defaultValue: [],
         required: false
-      }
+      },
+      {
+        fieldName: 'statusColor',
+        fieldLabel: 'Status Color',
+        type: 'multipleFields',
+        fields: [
+          {
+            fieldName: 'status',
+            fieldLabel: 'Status',
+            type: 'multiSelect',
+            required: true,
+          },
+          {
+            fieldName: 'colorCode',
+            fieldLabel: 'Color Code',
+            type: 'colorPicker',
+            required: true,
+          },
+        ],
+        defaultValue: []
+      },
     ]
   },
   {
