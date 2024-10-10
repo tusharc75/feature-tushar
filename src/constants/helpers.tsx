@@ -3562,7 +3562,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3612,8 +3612,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3781,3 +3781,22 @@ export const mapLightTheme: GoogleMapProps['options']['styles'] = [
     stylers: [{ visibility: 'simplified' }]
   }
 ];
+
+export function getSubdomain(url = window.location.origin) {
+  const parsedUrl = new URL(url);
+  const hostname = parsedUrl.hostname;
+  const parts = hostname.split('.');
+
+  // Handle localhost with subdomains (e.g., http://developer.localhost)
+  if (hostname === 'localhost' || parts.includes('localhost')) {
+    if (parts.length > 1) {
+      return parts.slice(0, parts.indexOf('localhost')).join('.');
+    }
+    return null;
+  }
+
+  if (parts.length > 2) {
+    return parts.slice(0, -2).join('.');
+  }
+  return null;
+}

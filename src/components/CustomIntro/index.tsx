@@ -10,7 +10,7 @@ import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { IS_AI_PRESENT, useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
@@ -181,7 +181,7 @@ const CustomIntro = () => {
       {handleSteps.current?.started && currentStepData && !isHiddenStep && (
         <div className="">
           <div
-            className="backdrop absolute left-0 right-0 top-0 z-[1301] bg-black/50 mix-blend-hard-light"
+            className={'backdrop absolute left-0 right-0 top-0 z-[1301] bg-black/50 mix-blend-hard-light'}
             style={{ height: handleSteps.current?.documentHeight, minHeight: '100vh' }}
           >
             {currentStepData?.element && !isFindingElement && (
@@ -283,6 +283,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
   const isMobile = useMediaQuery('(max-width:768px)');
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
+  const [isAIPresent] = useStore((store) => store[IS_AI_PRESENT]);
   const [stepsForThisPage, setStepsForThisPage] = useState<WalkmeData[]>([]);
   const [filteredSteps, setFilteredSteps] = useState<WalkmeData[]>([]);
   const [search, setSearch] = useState('');
@@ -309,18 +310,21 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   return (
     <>
-      <div className={cn('floating-card fixed bottom-2 right-3 z-[1300]')}>
-        <button
-          type="button"
-          className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-14 hover:w-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
-          onClick={() => setOpen(true)}
-        >
-          <span className="sr-only">Walk me</span>
-          <span className="absolute  inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
-          <HtmlTooltip title={'Walk me'}>
+      <div className={cn('floating-card fixed bottom-2  z-[50]', isAIPresent ? 'right-[60px]' : 'right-3')}>
+        <HtmlTooltip className="block" title={'Walk me'}>
+          <button
+            type="button"
+            className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-10 hover:w-10 dark:bg-[var(--dark-primary)] dark:text-gray-200"
+            onClick={() => setOpen(true)}
+          >
+            <span className="sr-only">Walk me</span>
+            {!isAIPresent && (
+              <span className="pointer-events-none absolute inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
+            )}
+
             <FaQuestion className=" block h-5 w-5 text-gray-600 transition-all duration-300 group-hover:h-7 group-hover:w-7 dark:text-gray-200" />
-          </HtmlTooltip>
-        </button>
+          </button>
+        </HtmlTooltip>
       </div>
       <Dialog
         open={open}
