@@ -1,30 +1,5 @@
 import { useReducer } from 'react';
 
-const testMessages = [
-  {
-    _id: '1728549256611',
-    content: 'test',
-    role: 'user'
-  },
-  {
-    _id: '1728549261647',
-    content:
-      'Your query "test" is unclear. Please specify what you would like to do from the following actions:\n1. Create Rental Job\n2. Create Rental Job Material\n\nYou can provide the option number or describe further what you need assistance with.',
-    role: 'assistant'
-  },
-  {
-    _id: '1728549270212',
-    content: 'test 2',
-    role: 'user'
-  },
-  {
-    _id: '1728549277007',
-    content:
-      "Please provide the following information to proceed with **Create Rental Job Material**:\n1. **Customer account**\n2. **Warehouse** \n\nLet's start with the first requirement:\nPlease provide the **customer account**.",
-    role: 'assistant'
-  }
-];
-
 const intialState = {
   sessionId: null,
   loading: false,
