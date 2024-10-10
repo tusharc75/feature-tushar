@@ -7,7 +7,7 @@ import { removeMongoDBObjectIdFromPath } from 'src/components/AgentChat/utils';
 import routes from 'src/components/Helpers/Routes';
 
 const isAgentVisible = (pathName: string) => {
-  const visiblePaths = [routes.rentalManagement.path, routes.rentalManagementDetail.path];
+  const visiblePaths = [];
   return visiblePaths.some((path) => removeMongoDBObjectIdFromPath(pathName) === path);
 };
 
