@@ -576,7 +576,8 @@ export const CHILD_RESOURCE = {
   dealsMaterial: 'Deals Material',
   rentalManagementTechnician: 'Rental Management Technician',
   subcontractAssemblyMaterial: 'Subcontract Assembly Material',
-  subcontractAssemblyCost: 'Subcontract Assembly Cost'
+  subcontractAssemblyCost: 'Subcontract Assembly Cost',
+  assemblyOrderMaterial: 'Assembly Order Material'
 };
 
 export const sidebarResourceObjectFromValues = () => {
