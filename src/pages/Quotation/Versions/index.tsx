@@ -72,15 +72,6 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         width: 200,
         Cell: ({ row }) => {
           return row?.original?.quotationNumber ? (
-            // <Link
-            //   className="link text-truncate"
-            //   title={row?.original?.quotationNumber}
-            //   to={`${routes.quotationDetail.path}/${row?.original?.quotationId}`}
-            //   target="_blank"
-            //   rel="noopener noreferrer"
-            // >
-            //   {row?.original?.quotationNumber}
-            // </Link>
               <div className="flex items-center gap-1">
               <p> {row?.original?.quotationNumber}</p>
                 <IconButton
