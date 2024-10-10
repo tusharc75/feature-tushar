@@ -2889,7 +2889,8 @@ export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
   repairOrder: 'Repair Order',
-  fieldJob: 'Field Job'
+  fieldJob: 'Field Job',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
