@@ -148,13 +148,15 @@ const SerializedAsset = () => {
     const resourceData = resourceDataResponce?.data?.data
 
     const statusColors = {};
-    for (const item of resourceData?.policy?.statusColor) {
-      if (Array.isArray(item.status)) {
-        item.status.forEach(status => {
-          statusColors[status] = item.colorCode;
-        });
-      } else {
-        statusColors[item.status] = item.colorCode;
+    if (resourceData?.policy?.statusColor) {
+      for (const item of resourceData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach(status => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
       }
     }
 
