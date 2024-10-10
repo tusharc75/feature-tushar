@@ -314,7 +314,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
         <HtmlTooltip className="block" title={'Walk me'}>
           <button
             type="button"
-            className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-10 hover:w-10 dark:bg-[var(--dark-primary)] dark:text-gray-200"
+            className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-14 hover:w-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
             onClick={() => setOpen(true)}
           >
             <span className="sr-only">Walk me</span>

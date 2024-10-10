@@ -41,7 +41,6 @@ const AgentChat = () => {
             onClick={toggleChatbox}
             variant="contained"
             color="primary"
-            // className="!transition-all [transform-origin:bottom_right] hover:[transform:scale(150%)_!important]"
             style={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: 8 }}
           >
             {isChatboxOpen ? <Close /> : <RiBrainLine size={50} />}
