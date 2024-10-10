@@ -1,0 +1,216 @@
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
+import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CHILD_RESOURCE, MATERIAL_TYPE } from 'src/constants/helpers';
+import ExistingRentalJob from 'src/pages/AssemblyOrder/Loading/ExistingRentalJob';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
+const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { selectedRecords } = state;
+
+  const { generateColumns } = useColumns();
+
+  const [columns, setColumns] = useState(null);
+  const [existingRentalJobDialog, setExistingRentalJobDialog] = useState(false);
+
+  useEffect(() => {
+    fetchFields();
+  }, [assemblyOrderData]);
+
+  const fetchFields = async () => {
+    const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
+    const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
+
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 100,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        disabled: true,
+        minWidth: 200,
+        width: 200,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row.original?.detail}</h5>{' '}
+            <Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </Box>
+          </div>
+        )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        show: false,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'managedPackageName',
+        Header: 'Managed Package Name',
+        width: 200,
+        show: false,
+        Cell: ({ row }) => {
+          return row.original['managedPackageName'] ? <h5 className="text-truncate">{row.original.managedPackageName}</h5> : <NoDataCell />;
+        }
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      Cell: ({ row, table }) => <></>
+    });
+    setColumns(coloum);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    setNextStep(false);
+    const {
+      data: { data, count }
+    } = await axiosInstance().get(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`);
+
+    let rows = data?.material?.filter((e) => e.parentId === null);
+
+    rows.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.detail = parent.packageDetail?.packageName || '';
+      parent.description = parent?.packageDetail?.packageDescription || '';
+      parent.qtyDisplay = parent.qty;
+      parent.managedPackageId = parent?.managedPackageDetail?._id;
+      parent.managedPackageName = parent?.managedPackageDetail?.managedPackageName;
+      parent.subRows = generateNestedData(data.material, parent);
+    });
+
+    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'loading', loading: false });
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
+      _subRow.qty = _subRow.qty;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setExistingRentalJobDialog(true);
+          }}
+        >
+          Add In Rental Job
+        </MenuItem>
+      </>
+    );
+  };
+
+  return (
+    <>
+      {allowedToEdit && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            hasXpadding
+          />
+        </>
+      )}
+      {columns ? (
+        <>
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              isClientSideGrid={true}
+              expander={true}
+            />
+          </Box>
+        </>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+
+      {existingRentalJobDialog && (
+        <ExistingRentalJob
+          onClose={() => {
+            setExistingRentalJobDialog(false);
+          }}
+          referenceData={assemblyOrderData}
+          managedPackages={selectedRecords?.filter((r) => r?.managedPackageId)}
+        />
+      )}
+    </>
+  );
+};
+
+export default Loading;

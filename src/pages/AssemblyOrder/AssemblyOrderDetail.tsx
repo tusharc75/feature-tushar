@@ -9,7 +9,14 @@ import queryString from 'query-string';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ACTIVITY_RESOURCE, assemblyOrderSteps, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  assemblyOrderSteps,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  MATERIAL_TYPE,
+  sidebarResource
+} from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Edit } from '@material-ui/icons';
@@ -27,6 +34,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
+import Loading from 'src/pages/AssemblyOrder/Loading';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -127,8 +135,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -218,10 +226,11 @@ const AssemblyOrderDetail = () => {
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
             handleNext={
-              assemblyOrderProcessStepsNames[currentStep] === 'Work Order'
+              assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
+              !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                 ? () => {
-                  setOpenManagedPackageDialog(true);
-                }
+                    setOpenManagedPackageDialog(true);
+                  }
                 : null
             }
             updateStatus={(step: number) => {
@@ -248,23 +257,34 @@ const AssemblyOrderDetail = () => {
                 setCurrentStep={setCurrentStep}
               />
             )}
+            {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
+              <Loading
+                renderedFrom={`${renderedFrom}_grid-3`}
+                assemblyOrderData={assemblyOrderData}
+                setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
             {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && <></>}
           </ContentFullScreen>
         </TabPanel>
-        {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => {
-          return (
-            <TabPanel value={tabValue} index={i + 2}>
-              <Step
-                tab={tab}
-                resourcePolicyId={resourceData?._id}
-                resourceId={id}
-                resource={sidebarResource.assemblyOrder}
-                data={assemblyOrderData}
-                allowedToEdit={permissions?.assemblyOrder?.isUpdate}
-              />
-            </TabPanel>
-          );
-        })}
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.assemblyOrder}
+                  data={assemblyOrderData}
+                  allowedToEdit={permissions?.assemblyOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
