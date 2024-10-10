@@ -9,11 +9,11 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
 import { IS_AI_PRESENT, useStore } from 'src/StateProvider/fastContext';
 
-const VISIBLE_PATHS = [routes.rentalManagement.path, routes.rentalManagementDetail.path];
-// const VISIBLE_PATHS = [];
+// const VISIBLE_PATHS = [routes.rentalManagement.path, routes.rentalManagementDetail.path];
+const VISIBLE_PATHS = [];
 
 const isAgentVisible = (pathName: string) => {
-  let isCorrectDomain = checkDomain() || window.location.hostname === 'localhost';
+  let isCorrectDomain = checkDomain();
   return VISIBLE_PATHS.some((path) => removeMongoDBObjectIdFromPath(pathName) === path) && isCorrectDomain;
 };
 
