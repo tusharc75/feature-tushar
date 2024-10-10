@@ -24,6 +24,8 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import Material from 'src/pages/AssemblyOrder/Material';
+import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -218,8 +220,25 @@ const AssemblyOrderDetail = () => {
             }}
           />
           <ContentFullScreen title={assemblyOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {assemblyOrderProcessStepsNames[currentStep] === 'Add' && assemblyOrderData && <></>}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Work Order' && assemblyOrderData && <></>}
+            {assemblyOrderProcessStepsNames[currentStep] === 'Add' && assemblyOrderData && (
+              <Material
+                assemblyOrderData={assemblyOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+            {assemblyOrderProcessStepsNames[currentStep] === 'Work Order' && assemblyOrderData && (
+              <WorkOrder
+                renderedFrom={`${renderedFrom}_grid-2`}
+                assemblyOrderData={assemblyOrderData}
+                setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit}
+                setCurrentStep={setCurrentStep}
+              />
+            )}
             {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && <></>}
           </ContentFullScreen>
         </TabPanel>

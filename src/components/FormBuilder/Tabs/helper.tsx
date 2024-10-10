@@ -146,9 +146,9 @@ export const resourcePolicy = [
             required: true,
           },
           {
-            fieldName: 'color',
-            fieldLabel: 'Color',
-            type: 'singleLine',
+            fieldName: 'colorCode',
+            fieldLabel: 'Color Code',
+            type: 'colorPicker',
             required: true,
           },
         ],

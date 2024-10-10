@@ -78,37 +78,14 @@ const SerializedAsset = () => {
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
   const [status, setStatus] = useState('');
-  const [statusColors, setStatusColors] = useState({});
-
-useEffect(() => {
-  if (resourceData) {
-    const colors = {};
-    for (const item of resourceData.policy.statusColor) {
-      if (Array.isArray(item.status)) {
-        item.status.forEach(status => {
-          colors[status] = item.color;
-        });
-      } else {
-        colors[item.status] = item.color;
-      }
-    }
-    setStatusColors(colors);
-  }
-}, [resourceData]);
-
-const getColorByStatus = (currentStatus) => {
-  return statusColors[currentStatus] || "defaultColor";
-};
 
   useEffect(() => {
     const fetch = async () => {
-      await fetchGridColumns(); 
+      await fetchGridColumns();
     };
     fetch();
-  }, [permissions, selectedEntity]); 
-  
+  }, [permissions, selectedEntity]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -165,24 +142,23 @@ const getColorByStatus = (currentStatus) => {
     }
   }, [productCategory]);
 
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-
   const fetchGridColumns = async () => {
-    await fetchPolicy();
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
+
+    const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+    const resourceData = resourceDataResponce?.data?.data
+
+    const statusColors = {};
+    for (const item of resourceData?.policy?.statusColor) {
+      if (Array.isArray(item.status)) {
+        item.status.forEach(status => {
+          statusColors[status] = item.colorCode;
+        });
+      } else {
+        statusColors[item.status] = item.colorCode;
+      }
+    }
+
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
@@ -191,24 +167,19 @@ const getColorByStatus = (currentStatus) => {
           }
         });
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) => (
               <div
-              style={{
-                backgroundColor: (() => {
-                  const statusColor = getColorByStatus(row?.original?.status);
-                  return statusColor !== "defaultColor"
-                    ? statusColor
-                    : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                        row?.original?.status
-                      )
-                    ? COLOUR_MASTER.lostAssets.background
-                    : '';
-                })()
-              }}
-            >
+                style={{
+                  backgroundColor: (() => {
+                    return statusColors[row?.original?.status] ? statusColors[row?.original?.status] :
+                      [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                        ? COLOUR_MASTER.lostAssets.background
+                        : '';
+                  })()
+                }}
+              >
                 <Link
                   className="link text-truncate"
                   title={row?.original?.assetNumber}
