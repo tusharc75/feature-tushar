@@ -26,6 +26,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
+import ManagedPackageDialog from 'src/pages/AssemblyOrder/ManagedPackageDialog';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -52,6 +53,7 @@ const AssemblyOrderDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -215,6 +217,13 @@ const AssemblyOrderDetail = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
+            handleNext={
+              assemblyOrderProcessStepsNames[currentStep] === 'Work Order'
+                ? () => {
+                    setOpenManagedPackageDialog(true);
+                  }
+                : null
+            }
             updateStatus={(step: number) => {
               dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblyOrderProcessStepsNames[step], id);
             }}
@@ -280,6 +289,22 @@ const AssemblyOrderDetail = () => {
           onSuccess={() => {
             fetchData();
             setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+
+      {openManagedPackageDialog && (
+        <ManagedPackageDialog
+          onClose={() => {
+            setOpenManagedPackageDialog(false);
+          }}
+          assemblyOrderId={id}
+          onSuccess={() => {
+            setOpenManagedPackageDialog(false);
+            setCurrentStep((prevStep) => {
+              const newStep = prevStep + 1;
+              return newStep;
+            });
           }}
         />
       )}
