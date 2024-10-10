@@ -201,8 +201,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.canDelete = parent.workOrder ? false : true;
+      parent.canDelete = true;
       parent.subRows = generateNestedData(data.material, parent);
+      if (parent.subRows?.find((r) => !r?.canDelete)) {
+        parent.canDelete = false;
+      }
     });
 
     if (rows.length !== 0) {
