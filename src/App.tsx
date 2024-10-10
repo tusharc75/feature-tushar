@@ -267,6 +267,7 @@ import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineCont
 import { useData } from './StateProvider/Provider';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
+import AgentChat from 'src/components/AgentChat';
 
 var notificationInterval: any = null;
 
@@ -1216,6 +1217,7 @@ function App() {
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
+          <AgentChat />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}

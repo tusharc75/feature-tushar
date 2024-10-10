@@ -246,7 +246,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrderId = _subRow.subType === MATERIAL_SUB_TYPE.bom ? parent?.workOrderId : _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = parent?.type === MATERIAL_SUB_TYPE.bom ? parent?.workOrderNumber : _subRow?.workOrder?.workOrderNumber;
+      _subRow.workOrderNumber = _subRow?.subType === MATERIAL_SUB_TYPE.bom ? parent?.workOrderNumber : _subRow?.workOrder?.workOrderNumber;
       _subRow.workOrderStatus = _subRow?.workOrder?.status || '';
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
         _subRow.canAutoCompleteWorkOrder = true;
