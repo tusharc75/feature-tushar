@@ -66,7 +66,7 @@ const SerializedAssetDetailsPage = () => {
   const [fields, setFields] = useState([]);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null });
+  const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null, updateStatus: null });
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [manualStatus, setManualStatus] = useState([]);
@@ -230,7 +230,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog({ open: true, assetLogFields: null });
+    setOpenUpdateDialog({ open: true, assetLogFields: null, updateStatus: null });
   };
 
   const handleDelete = () => {
@@ -399,6 +399,10 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [assetDetails, statusOptions]);
 
+  const openDataChange = ()=>{
+    return [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLogFields?.length; 
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -448,15 +452,14 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
-                    {[ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status)
-                      && resourceData?.policy?.dataChangeAssetLogFields?.length > 0 ? (
+                    {openDataChange() && !resourceData?.policy?.dataChangeStatus ? (
                       <HtmlTooltip title={'If you update data from this button it will add log in history'}>
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
                           color="default"
                           className="btn-outline-v1"
                           size="small"
-                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields })}
+                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })}
                         >
                           {'Edit Data'}
                         </Button>
@@ -518,7 +521,12 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              handleStatusChange(o);
+                              const {policy} = resourceData;
+                              if(policy?.dataChangeStatus===o.optionValue && openDataChange()){
+                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o }) 
+                                 } else{
+                                  handleStatusChange(o);
+                                 }
                             }}
                             value={o}
                           >
@@ -664,9 +672,17 @@ const SerializedAssetDetailsPage = () => {
         <ManageSerializedAsset
           isClone={false}
           productInventoryId={id}
-          onClose={() => setOpenUpdateDialog({ open: false, assetLogFields: null })}
+          onClose={() => {
+            if(openUpdateDialog.updateStatus){
+              handleStatusChange(openUpdateDialog.updateStatus)
+            }
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
+          }}
           onSuccess={() => {
-            setOpenUpdateDialog({ open: false, assetLogFields: null })
+            if(openUpdateDialog.updateStatus){
+              handleStatusChange(openUpdateDialog.updateStatus)
+            }
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
             fetchData();
           }}
           assetLogFields={openUpdateDialog.assetLogFields}
