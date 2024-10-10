@@ -220,7 +220,8 @@ const Activity = (props) => {
                           </span>
                         </h6>
                         <p className="text-[14px] font-medium leading-[17px] text-[#767676]">
-                          {totalCount[data]} {data}s
+                          {totalCount[data]} {data}
+                          {totalCount[data] > 1 ? 's' : ''}
                         </p>
                       </div>
                       {data === 'Event' || permissions[data?.toLowerCase()]?.isCreate ? (
