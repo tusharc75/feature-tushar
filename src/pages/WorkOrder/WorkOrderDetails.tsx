@@ -382,10 +382,10 @@ const WorkOrderDetails = () => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${routes?.repairJob.title}`,
@@ -475,10 +475,10 @@ const WorkOrderDetails = () => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -491,10 +491,10 @@ const WorkOrderDetails = () => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -575,8 +575,10 @@ const WorkOrderDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
-          <CustomTab value={3}>Assign</CustomTab>
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && resourceData?.policy?.showBom && <CustomTab value={4}>BOM</CustomTab>}
+          {[WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
+            && <CustomTab value={3}>Assign</CustomTab>}
+          {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
+            && resourceData?.policy?.showBom && <CustomTab value={4}>BOM</CustomTab>}
           <CustomTab value={5}>Drawings</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={6}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 7}>{tab?.tabName}</CustomTab>)}

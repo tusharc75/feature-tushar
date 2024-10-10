@@ -21,6 +21,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Assign = ({ allowedToEdit, workOrderData }) => {
+
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -211,43 +212,34 @@ const Assign = ({ allowedToEdit, workOrderData }) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    axiosInstance()
-      .get(`${workOrder.api}/${workOrderId}/consumable`)
-      .then(({ data: { data } }) => {
-        const rows = data
-          ?.filter((d) => !d?.parentId && (d?.subType === '' || !d?.subType))
-          ?.map((u) => {
-            const res: any = {
-              ...prepareDataForGrid(u)
-            };
-            res.productName = u?.product?.optionLabel;
-            res.productDescription = u?.product?.productDescription;
-            res.productNumber = u?.product?.productNumber;
-            res.assignedAssetQty = data?.filter((d) => d?.parentId === u?._id && d?.type === MATERIAL_TYPE.serializedAsset)?.length || 0;
-            res.subRows = generateNestedData(data, u);
-            return res;
-          });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const generateNestedData = (material, parent) => {
-    const subRows: any = material
-      .filter((e) => e.parentId === parent._id)
-      ?.map((u) => {
+    axiosInstance().get(`${workOrder.api}/${workOrderId}/consumable`).then(({ data: { data } }) => {
+      const rows = data?.filter((d) => d?.type === MATERIAL_TYPE.product && d?.product?.serializedProduct)?.map((u) => {
         const res: any = {
           ...prepareDataForGrid(u)
         };
-        res.productName = u?.serializedAssetDetail?.optionLabel;
-        res.serializedAssetId = u?.serializedAssetDetail?.optionValue;
-        res.productDescription = '';
-        res.productNumber = '';
+        res.productName = u?.product?.optionLabel;
+        res.productDescription = u?.product?.productDescription;
+        res.productNumber = u?.product?.productNumber;
+        res.assignedAssetQty = data?.filter((d) => d?.parentId === u?._id && d?.type === MATERIAL_TYPE.serializedAsset)?.length || 0;
+        res.subRows = generateNestedData(data, u);
         return res;
       });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e?.type === MATERIAL_TYPE.serializedAsset && e.parentId === parent._id)?.map((u) => {
+      const res: any = {
+        ...prepareDataForGrid(u)
+      };
+      res.productName = u?.serializedAssetDetail?.optionLabel;
+      res.serializedAssetId = u?.serializedAssetDetail?.optionValue;
+      return res;
+    });
     return subRows;
   };
 
