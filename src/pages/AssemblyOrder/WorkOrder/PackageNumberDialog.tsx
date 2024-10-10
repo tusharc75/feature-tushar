@@ -32,7 +32,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
             ?.map((m) => ({ package: m?.materialId, managedPackageName: '' }))
         });
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [assemblyOrderId]);
 
   const validate = (values) => {
@@ -62,7 +62,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   return (
@@ -84,7 +84,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
             <>
               <CustomDialogHeader
                 onClose={onClose}
-                title={'Managed Packages'}
+                title={'Packages Number'}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -104,12 +104,12 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
                               <Grid item md={6} lg={6} sm={6} xs={12}>
                                 <TextField
                                   fullWidth
-                                  label="Managed Package Name"
+                                  label="Package Number"
                                   variant="outlined"
                                   type="text"
                                   size="small"
                                   name="managedPackageName"
-                                  placeholder="Managed Package Name"
+                                  placeholder="Package Number"
                                   margin="dense"
                                   value={data.message}
                                   required
@@ -195,7 +195,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
                   size="small"
                   type="submit"
                   onClick={submitForm}
-                  // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Save
                 </Button>

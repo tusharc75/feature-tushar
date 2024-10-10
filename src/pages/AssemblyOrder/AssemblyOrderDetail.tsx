@@ -26,7 +26,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
-import ManagedPackageDialog from 'src/pages/AssemblyOrder/ManagedPackageDialog';
+import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -127,8 +127,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -220,8 +220,8 @@ const AssemblyOrderDetail = () => {
             handleNext={
               assemblyOrderProcessStepsNames[currentStep] === 'Work Order'
                 ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
+                  setOpenManagedPackageDialog(true);
+                }
                 : null
             }
             updateStatus={(step: number) => {
@@ -251,22 +251,20 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && <></>}
           </ContentFullScreen>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
-            return (
-              <TabPanel value={tabValue} index={i + 2}>
-                <Step
-                  tab={tab}
-                  resourcePolicyId={resourceData?._id}
-                  resourceId={id}
-                  resource={sidebarResource.assemblyOrder}
-                  data={assemblyOrderData}
-                  allowedToEdit={permissions?.assemblyOrder?.isUpdate}
-                />
-              </TabPanel>
-            );
-          })}
+        {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => {
+          return (
+            <TabPanel value={tabValue} index={i + 2}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourceData?._id}
+                resourceId={id}
+                resource={sidebarResource.assemblyOrder}
+                data={assemblyOrderData}
+                allowedToEdit={permissions?.assemblyOrder?.isUpdate}
+              />
+            </TabPanel>
+          );
+        })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -292,9 +290,8 @@ const AssemblyOrderDetail = () => {
           }}
         />
       )}
-
       {openManagedPackageDialog && (
-        <ManagedPackageDialog
+        <PackageNumberDialog
           onClose={() => {
             setOpenManagedPackageDialog(false);
           }}

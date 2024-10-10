@@ -54,7 +54,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}`);
       data = response?.data?.data;
 
-      data = data?.filter((e) => !['productionOrder', 'repairOrder', 'repairJob', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName));
+      data = data?.filter((e) => !['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName));
 
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
