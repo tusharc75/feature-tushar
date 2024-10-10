@@ -183,11 +183,11 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   //       toastConfig.setToastConfig(err);
   //     });
   // };
-
+  const Column = JSON.stringify(columns.map(col => ({ name: col.accessor })));
   const handleViewPdf = (type, PDFType) => {
     setPdfLoading(type);
     axiosInstance()
-      .get(`/pdf/${jobData._id}?resource=Job`, { responseType: 'blob' })
+      .get(`/pdf/${jobData._id}?resource=Job&columns=${encodeURIComponent(Column)}`, { responseType: 'blob' })
       .then(({ data }) => {
         setPdfLoading(null);
         if (type === 'download') {
