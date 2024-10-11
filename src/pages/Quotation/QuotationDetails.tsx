@@ -127,16 +127,19 @@ const QuotationDetails = () => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
+      }
+      if (quotationData['type'] === QUOTATION_TYPE.assemblyOrder) {
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob','salesOrder']?.includes(d?.fieldData?.fieldName));
       }
     }
     return tempQuotationFields;
@@ -196,6 +199,12 @@ const QuotationDetails = () => {
           }
         } else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
           if (!quotationData?.fieldJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
+          }
+        } else if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
+          if (!quotationData?.assemblyOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
@@ -347,6 +356,9 @@ const QuotationDetails = () => {
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
           window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+        }
+        if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
+          window.open(`${routes.assemblyOrderDetail.path}/${data?._id}`);
         }
       })
       .catch((error) => {
