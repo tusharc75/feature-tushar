@@ -67,7 +67,10 @@ const IrtTicketView = ({ salesOrderData }) => {
   const fetchData = async () => {
     setLoading(true);
     const res: any = await axiosInstance().get(`${routes?.salesOrder?.path}/material/${salesOrderData?._id}`);
-    const materials = res?.data?.data?.material;
+    const result: any = await axiosInstance().get(`${routes?.salesOrder?.path}/additionalcost/${salesOrderData?._id}`);
+    let materials = res?.data?.data?.material;
+    materials = [...materials, ...result?.data?.data];
+    
 
     var xPosition = 0;
     var flow: any = [
@@ -136,7 +139,7 @@ const IrtTicketView = ({ salesOrderData }) => {
                   {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
                 </Typography>
                 <Typography variant="subtitle2">
-                  {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName}
+                  {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName || material?.description}
                 </Typography>
               </div>
             </HtmlTooltip>
