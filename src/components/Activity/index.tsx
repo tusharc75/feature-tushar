@@ -52,7 +52,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -192,7 +192,7 @@ const Activity = (props) => {
               <CollaborateIcon />
             </div>
             <div>
-              <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Collaborate</span>
+              <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Workspace</span>
               <h2 className=" truncate text-sm text-[var(--dark-primary-text,#2A3042)] md:text-[15px]">{resourceLabel}</h2>
             </div>
           </div>
