@@ -17,6 +17,7 @@ import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
+import { getSubdomain } from 'src/constants/helpers';
 
 export type BrandData = {
   companyName: string;
@@ -39,25 +40,6 @@ const Login = () => {
   const [brandNotFound, setBrandNotFound] = useState(false);
 
   const history = useHistory();
-
-  function getSubdomain(url = window.location.origin) {
-    const parsedUrl = new URL(url);
-    const hostname = parsedUrl.hostname;
-    const parts = hostname.split('.');
-
-    // Handle localhost with subdomains (e.g., http://developer.localhost)
-    if (hostname === 'localhost' || parts.includes('localhost')) {
-      if (parts.length > 1) {
-        return parts.slice(0, parts.indexOf('localhost')).join('.');
-      }
-      return null;
-    }
-
-    if (parts.length > 2) {
-      return parts.slice(0, -2).join('.');
-    }
-    return null;
-  }
 
   useEffect(() => {
     const subdomain = getSubdomain();

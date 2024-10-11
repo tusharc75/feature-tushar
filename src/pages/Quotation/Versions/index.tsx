@@ -18,6 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { FiExternalLink } from 'react-icons/fi';
 
 export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = '' }) {
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
@@ -71,13 +72,17 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         width: 200,
         Cell: ({ row }) => {
           return row?.original?.quotationNumber ? (
-            <Link
-              className="link text-truncate"
-              title={row?.original?.quotationNumber}
-              to={`${routes.quotationDetail.path}/${row?.original?.quotationId}`}
-            >
-              {row?.original?.quotationNumber}
-            </Link>
+              <div className="flex items-center gap-1">
+              <p> {row?.original?.quotationNumber}</p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.quotationDetail.path}/${row?.original?.quotationId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           );
