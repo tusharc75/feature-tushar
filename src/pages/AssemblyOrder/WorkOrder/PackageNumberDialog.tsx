@@ -20,19 +20,14 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/material/${assemblyOrderId}`)
       .then(({ data: { data } }) => {
-        setPackageOptions(
-          data?.material
-            ?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)
-            ?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName }))
-        );
+        const material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId && !m?.managedPackage);
+        setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
 
         setInitialValues({
-          managedPackages: data?.material
-            ?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)
-            ?.map((m) => ({ package: m?.materialId, managedPackageName: '' }))
+          managedPackages: material?.map((m) => ({ package: m?.materialId, managedPackageName: '', uniqueId: m?._id }))
         });
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [assemblyOrderId]);
 
   const validate = (values) => {
@@ -58,11 +53,11 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
 
   const handleSubmit = (values) => {
     axiosInstance()
-      .post(`${routes.assemblyOrder.path}/managed-package`, { assemblyOrderId: assemblyOrderId, managedPackages: values?.managedPackages })
+      .post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderId}/managed-package`, { managedPackages: values?.managedPackages })
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   return (
@@ -195,7 +190,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
                   size="small"
                   type="submit"
                   onClick={submitForm}
-                // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Save
                 </Button>
