@@ -673,9 +673,6 @@ const SerializedAssetDetailsPage = () => {
           isClone={false}
           productInventoryId={id}
           onClose={() => {
-            if(openUpdateDialog.updateStatus){
-              handleStatusChange(openUpdateDialog.updateStatus)
-            }
             setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
           }}
           onSuccess={() => {
