@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
-import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
+import { fetch_rental_cost_fields, fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
@@ -19,7 +19,8 @@ import {
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS,
-  sidebarResource
+  sidebarResource,
+  getObjKeysWithValues
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -32,7 +33,7 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, isEqual, startCase } from 'lodash';
+import { camelCase, isEqual, isObject, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -83,7 +84,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [orginalMaterial, setOrginalMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [allFields, setAllFields] = useState([]);
+  const [materialFields, setMaterialFields] = useState([]);
+  const [costFields, setCostFields] = useState([]);
+
   const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
@@ -131,7 +134,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    setAllFields(JSON.parse(JSON.stringify(data)));
+    setMaterialFields(JSON.parse(JSON.stringify(data)));
+
+    var costFields = await fetch_rental_cost_fields(rentalManagementData?.currency, false);
+    setCostFields(costFields)
 
     let newColumns = generateColumns(
       renderedFrom,
@@ -335,7 +341,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       if (returnTicketProducts[d?.materialId] > 0) {
         let values = { qty: d?.qty - returnTicketProducts[d?.materialId] };
         returnTicketProducts[d?.materialId] = returnTicketProducts[d?.materialId] - d?.qty;
-        const calValues = autoCalculateSpecificFields(values, { ...d, ...values }, allFields);
+        const calValues = autoCalculateSpecificFields(values, { ...d, ...values }, materialFields);
         Object.assign(d, calValues);
       }
     });
@@ -355,7 +361,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             values['actualStartDate'] = ele?.manualStartDate;
             values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
             values['manualEndDate'] = ele?.manualEndDate;
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
             const { materialId, qty, type, _id, ...rest } = element;
             newMaterial.push({ ...rest, ...ele, ...calValues });
           });
@@ -371,7 +377,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           }
           values['manualEndDate'] = element?.actualEndDate;
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
           newMaterial.push({ ...element, ...calValues });
 
           if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
@@ -386,7 +392,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 let values = { qty: 1 };
                 values['actualStartDate'] = ele?.manualStartDate;
                 values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
                 const { materialId, qty, type, _id, ...rest } = element;
                 newMaterial.push({ ...rest, ...ele, ...calValues });
               });
@@ -423,7 +429,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
             tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
             let values = { qty: materialData.qty - tempTotalPrevQty };
-            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, materialFields);
             materialData = { ...materialData, ...calValues };
           }
 
@@ -490,8 +496,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-        parent.type === MATERIAL_TYPE.serializedAsset ||
-        parent.type === MATERIAL_TYPE.manualEntry
+          parent.type === MATERIAL_TYPE.serializedAsset ||
+          parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -632,7 +638,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
         const extraRows: any = [];
-        const priceField = allFields?.find((e) => e.fieldName === 'price');
+        const priceField = materialFields?.find((e) => e.fieldName === 'price');
         let calValues: any;
 
         if (inUseStandByDays?.length) {
@@ -652,7 +658,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               );
             }
           }
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
           calValues['pricingMethod'] = 'Per Week';
         } else if (element.pricingMethod === 'Per Month') {
           if (proRata) {
@@ -663,7 +669,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               );
             }
           }
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
           calValues['pricingMethod'] = 'Per Month';
         } else if (element.pricingMethod === 'Per Barrel') {
           const totalBBLs = rentalUnitVolume?.data?.data
@@ -677,7 +683,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             );
           }
 
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
           childRows.push(
             ...rentalUnitVolume?.data?.data
               ?.find((r) => r?.asset === element?._id)
@@ -704,7 +710,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   tempValue['actualStartDate'] = e?.startDate;
                   tempValue['actualEndDate'] = e?.endDate;
                   tempValue['actualJobDuration'] = e?.actualJobDuration;
-                  const tempCalValues = autoCalculateSpecificFields(tempValue, { ...row, ...tempValue }, allFields);
+                  const tempCalValues = autoCalculateSpecificFields(tempValue, { ...row, ...tempValue }, materialFields);
                   row.isAppliedBill = true;
                   row.hideSelection = true;
                   extraRows.push({ ...row, ...tempCalValues });
@@ -717,7 +723,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               }
             }
           }
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
@@ -763,8 +769,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       });
       let updatedParent = parent;
       if (childData?.length > 0) {
-        updatedParent = sumOnParent(parent, childData, allFields, rentalManagementData.currency);
-        let calValues = autoCalculateSpecificFields({ ['actualEndDate']: updatedParent['actualEndDate'] }, updatedParent, allFields);
+        updatedParent = sumOnParent(parent, childData, materialFields, rentalManagementData.currency);
+        let calValues = autoCalculateSpecificFields({ ['actualEndDate']: updatedParent['actualEndDate'] }, updatedParent, materialFields);
 
         if (calValues['actualJobDuration']) {
           updatedParent['actualJobDuration'] = calValues['actualJobDuration'];
@@ -880,46 +886,44 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const handleCreateBill = (invoiceData = null) => {
-    rowsApplied?.forEach((element) => {
-      delete element?.index;
-      if (![MATERIAL_TYPE.other, MATERIAL_TYPE.manualEntry]?.includes(element.type)) {
-        delete element?.detail;
-      }
-      if (element.type !== MATERIAL_TYPE.manualEntry) {
-        delete element?.description;
-      }
-      delete element?.qtyDisplay;
-      delete element?.hideSelection;
-      delete element?.productDetail;
-      delete element?.packageDetail;
-      delete element?.serviceDetail;
-      delete element?.inventoryDetail;
-      delete element?.subRows;
-      delete element?.manualEndDate;
-      delete element?.isAppliedBill;
-      delete element?.serviceLog;
+    setIsSubmitting(true);
+    const material = []
+    const additionalCost = []
+    rowsApplied?.forEach((element: any) => {
       if (element.type === MATERIAL_TYPE.service && element?.parentId) {
         if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
           element.parentId = null;
         }
       }
+      if ([MATERIAL_TYPE.manualEntry]?.includes(element?.type)) {
+        additionalCost.push({
+          _id: element._id,
+          type: element.type,
+          ...getObjKeysWithValues(element, costFields)
+        });
+      }
+      else {
+        material.push({
+          _id: element._id,
+          type: element.type,
+          parentId: element.parentId,
+          materialId: element.materialId,
+          ...getObjKeysWithValues(element, materialFields)
+        });
+      }
     });
-
-    setIsSubmitting(true);
-    axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
-        material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
-        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry),
-        invoiceData: invoiceData
-      })
-      .then(() => {
-        setIsSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
+      material: material,
+      additionalCost: additionalCost,
+      invoiceData: invoiceData
+    }).then(() => {
+      setIsSubmitting(false);
+      setOpenInvoiceDataDialog(false);
+      onSuccess();
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (
@@ -987,7 +991,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords?.length &&
-                                    ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                  ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"
@@ -1099,7 +1103,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
           onSuccess={(data) => {
             handleCreateBill(data);
-            setOpenInvoiceDataDialog(false);
           }}
         />
       )}
