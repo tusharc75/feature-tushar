@@ -402,6 +402,10 @@ const ReportFilters = (props: FiltersProps) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
             } else {
+              const addedField = val?.find((v)=> selectedResources?.some((s)=> s.fieldName!==v.fieldName));
+              if(addedField.fieldName==='dayWise'){
+                handleSelectFilter('checkBox','dayWise',true);
+              }
               setDefaultResource(val);
             }
             if (reason === 'remove-option' && selectedData) {
