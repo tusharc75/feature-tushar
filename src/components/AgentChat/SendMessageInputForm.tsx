@@ -14,6 +14,7 @@ const SendMessageForm = ({ sendMessage, loading }: SendMessageFormProps) => {
     sendMessage(message);
     setMessage('');
   };
+
   return (
     <form onSubmit={handleSendMessage} className="flex items-center">
       <InputBase value={message} onChange={(e) => setMessage(e.target.value)} fullWidth placeholder="Write a message..." />
