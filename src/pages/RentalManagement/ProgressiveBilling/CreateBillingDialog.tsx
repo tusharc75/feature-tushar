@@ -903,13 +903,17 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         });
       }
       else {
-        material.push({
+        const obj: any = {
           _id: element._id,
           type: element.type,
           parentId: element.parentId,
           materialId: element.materialId,
           ...getObjKeysWithValues(element, materialFields)
-        });
+        }
+        if (element?.type === MATERIAL_TYPE.other) {
+          obj.detail = element.detail;
+        }
+        material.push(obj);
       }
     });
     axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
