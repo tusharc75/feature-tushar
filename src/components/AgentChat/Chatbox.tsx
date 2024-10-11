@@ -1,13 +1,15 @@
 import { Grow, IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
+import { Skeleton } from '@material-ui/lab';
 import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } from 'react';
+import { BsStars } from 'react-icons/bs';
 import { RiChatNewLine } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
 import SendMessageForm from 'src/components/AgentChat/SendMessageInputForm';
 import Suggestions from 'src/components/AgentChat/Suggestions';
-import { scrollToBottom } from 'src/components/AgentChat/utils';
+import { getRandomNumber, scrollToBottom } from 'src/components/AgentChat/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -55,6 +57,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
 
   useEffect(() => {
     setState({ type: 'reset' });
+    setIsChatboxOpen(false);
   }, [pathname, setState]);
 
   return (
@@ -70,7 +73,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
         </HtmlTooltip>
         <div className="flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)]">
           <div className="head flex items-center justify-between p-3 [border-bottom:1px_solid_var(--common-border-color)]">
-            <h5 className="text-[16px] font-semibold">Assistant</h5>
+            <h5 className="text-[16px] font-semibold">Equipt Intelligence</h5>
             <IconButton size="small" onClick={() => setIsChatboxOpen(false)}>
               <Close />
             </IconButton>
@@ -83,6 +86,8 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
               messages?.map((message) => {
                 return <RenderSingleChat message={message} />;
               })}
+            {loading && <RenderSingleChat loading={true} />}
+
             {messages.length === 0 && <Suggestions pathname={pathname} sendMessage={sendMessage} />}
           </div>
           <div className="footer p-3 [border-top:1px_solid_var(--common-border-color)]">
@@ -96,19 +101,38 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
 
 export default Chatbox;
 
-const RenderSingleChat = ({ message }: { message: TMessage }) => {
+const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; loading?: boolean }) => {
+  const isUserMessage = message?.role === 'user' || false;
+
   return (
-    <div className={cn('w-fit max-w-[60%]', message.role === 'user' ? ' ml-auto text-right' : '')}>
-      <h6 className="user mb-[6px] text-[14px] font-medium">{message.role === 'user' ? 'You' : 'Assistant'}</h6>
+    <div className={cn('w-fit max-w-[60%]', isUserMessage ? ' ml-auto text-right' : '', loading ? 'w-full' : '')}>
+      <h6 className="user mb-[6px] text-[14px] font-medium">
+        {isUserMessage ? (
+          ''
+        ) : (
+          <span>
+            <BsStars className="text-[var(--new-theme-color)]" />
+          </span>
+        )}
+      </h6>
       <p
         className={cn(
           'rounded-lg px-[20px] py-[9px]',
-          message.role === 'user'
+          isUserMessage
             ? 'bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
             : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
         )}
       >
-        {message.content}
+        {loading ? (
+          <div className="">
+            <Skeleton animation="wave" />
+            <Skeleton />
+            <Skeleton animation="wave" />
+            <Skeleton width={`${getRandomNumber(30, 80)}%`} />
+          </div>
+        ) : (
+          message.content
+        )}
       </p>
     </div>
   );

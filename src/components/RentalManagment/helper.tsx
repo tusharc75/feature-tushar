@@ -213,7 +213,6 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
 };
 
 export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any, currency: any, resetChild: any = true) => {
-    console.log(resetChild)
     currency = (currency || 'USD')?.toLowerCase()
     let rows: any = []
     let childs: any = []
