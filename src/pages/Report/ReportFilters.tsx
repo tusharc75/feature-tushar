@@ -383,7 +383,6 @@ const ReportFilters = (props: FiltersProps) => {
   };
 
   const handleUpdateCheckBoxes = (updateCheckBoxFields)=>{
-        if(updateCheckBoxFields?.length){
                 const updateData = updateCheckBoxFields?.reduce((acc,curr)=>{
                   return {
                     ...acc,
@@ -402,7 +401,6 @@ const ReportFilters = (props: FiltersProps) => {
                 },{})
                 setSelectedData((prev)=> ({...prev,...updateData}));
                 setFormValues((prev)=> ({...prev,...updateFormValues}))
-            }
   }
 
   return (
