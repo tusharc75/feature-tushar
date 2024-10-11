@@ -136,8 +136,11 @@ export const sumOnParent = (parent, child, fields, currency) => {
                 if (ele.fieldName === "discountPercentage") {
                     row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
                 }
-                if (ele.fieldName === "taxPercentage") {
+                else if (ele.fieldName === "taxPercentage") {
                     row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+                }
+                else if (ele.type === 'percent') {
+                    row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / child?.length)?.toFixed(2));
                 }
             }
         })

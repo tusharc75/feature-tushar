@@ -8,7 +8,8 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { lowerFirst } from 'lodash';
+import { lowerFirst, startCase } from 'lodash';
+import { MATERIAL_TYPE } from 'src/constants/helpers';
 
 const customNodeStyles = {
   salesOrder: {
@@ -66,11 +67,14 @@ const IrtTicketView = ({ salesOrderData }) => {
 
   const fetchData = async () => {
     setLoading(true);
-    const res: any = await axiosInstance().get(`${routes?.salesOrder?.path}/material/${salesOrderData?._id}`);
-    const result: any = await axiosInstance().get(`${routes?.salesOrder?.path}/additionalcost/${salesOrderData?._id}`);
-    let materials = res?.data?.data?.material;
-    materials = [...materials, ...result?.data?.data];
-    
+    const materialData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/material/${salesOrderData?._id}`);
+    const additionalcostData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/additionalcost/${salesOrderData?._id}`);
+
+    const costData = additionalcostData?.data?.data || []
+    costData?.forEach((e) => {
+      e.type = MATERIAL_TYPE.manualEntry
+    })
+    const materials = [...(materialData?.data?.data?.material || []), ...costData];
 
     var xPosition = 0;
     var flow: any = [
@@ -132,11 +136,11 @@ const IrtTicketView = ({ salesOrderData }) => {
             <HtmlTooltip
               arrow
               placement="top"
-              title={material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
+              title={startCase(material?.type)}
             >
               <div>
                 <Typography variant="body2">
-                  {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
+                  {startCase(material?.type)}
                 </Typography>
                 <Typography variant="subtitle2">
                   {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName || material?.description}

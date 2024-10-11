@@ -33,7 +33,7 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
           onClick={() => setActivityShow(!showActivity)}
           style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}
         >
-          Collaborate
+          Workspace
         </Button>
       </HideWhenOffline>
       {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
@@ -59,14 +59,14 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                          type: extraRelatedTo?.resource,
-                          referenceId: extraRelatedTo?.referenceId,
-                          access: true
-                        }
+                        type: extraRelatedTo?.resource,
+                        referenceId: extraRelatedTo?.referenceId,
+                        access: true
+                      }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               )}

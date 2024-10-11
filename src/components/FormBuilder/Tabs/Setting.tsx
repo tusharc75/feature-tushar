@@ -26,8 +26,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     setFields(
       response?.data?.data
         ? response?.data?.data
-            ?.filter((d) => d?.fieldData?.primaryField)
-            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+          ?.filter((d) => d?.fieldData?.primaryField)
+          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
         : []
     );
   };
@@ -57,7 +57,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const validate = (values) => {
     const errors = {};
     if (values.collaborateTools && !values?.collaborateToolsField) {
-      errors['collaborateToolsField'] = 'Please Select Collaborate Tools Field';
+      errors['collaborateToolsField'] = 'Please Select Workspace Tools Field';
     }
     return errors;
   };
@@ -107,7 +107,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                         }}
                       />
                     }
-                    label="Collaborate Tools"
+                    label="Workspace Tools"
                   />
                 </Box>
                 {values['collaborateTools'] && (
@@ -130,8 +130,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                           {...params}
                           margin="dense"
                           variant="outlined"
-                          label="Collaborate Tools Field"
-                          placeholder="Collaborate Tools Field"
+                          label="Workspace Tools Field"
+                          placeholder="Workspace Tools Field"
                           name="collaborateToolsField"
                           required
                           error={touched['collaborateToolsField'] && Boolean(errors['collaborateToolsField'])}
