@@ -122,7 +122,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
     }
   };
 
-  const setFullAddressFields = (results: any, val?: any) => {
+  const setFullAddressFields = (results: any, val?: any, fromMarkerChange: Boolean = false) => {
     type addressType = {
       long_name: string;
       short_name: string;
@@ -165,7 +165,11 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       fullAddress.longitude = addressDetail?.longitude;
     }
     fullAddress.streetAddress = results.formatted_address;
-    fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    if(!fromMarkerChange || !(initialData?.fields?.some((f) => f.fieldName === 'searchAddress'))) {
+      fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    } else {
+      fullAddress.fullAddress = addressDetail?.fullAddress ?? '';
+    }
     fullAddress.searchAddress = val?.description ?? results.formatted_address;
     setAddressDetail(fullAddress);
   };
@@ -223,7 +227,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ location: latLng }, (result, status) => {
         if (status === google.maps.GeocoderStatus.OK) {
-          setFullAddressFields(result[1]);
+          setFullAddressFields(result[1], null, true);
         }
       });
     }
