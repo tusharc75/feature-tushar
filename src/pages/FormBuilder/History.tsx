@@ -37,14 +37,14 @@ const HistoryLogs = ({ onClose, resource }) => {
       {
         accessor: 'date',
         Header: 'Date Time',
-        width: 120,
+        width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.date}</p>
       },
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
+        width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <p className="text-truncate" title={row?.original?.user?.optionLabel}>
@@ -55,7 +55,7 @@ const HistoryLogs = ({ onClose, resource }) => {
       {
         accessor: 'changes',
         Header: 'Changes',
-        width: 300,
+        width: 500,
         Cell: ({ row }) =>
           row?.original?.changes ? (
             <div>
