@@ -502,6 +502,8 @@ const CustomReactTable = ({
             height={height}
             onRowClick={onRowClick}
             resource={resource}
+            expander={expander}
+            hideSelection={hideSelection}
           />
         </div>
       )}
