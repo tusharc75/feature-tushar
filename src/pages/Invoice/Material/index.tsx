@@ -426,39 +426,54 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       });
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
-    setUpdating(true);
-    axiosInstance()
-      .put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows })
-      .then(({ data }) => {
-        setUpdating(false);
+  const handleSaveData = async (rows: any, saveAndNext = false, showNext = false) => {
+    try {
+      setUpdating(true);
+      if (!showNext) {
+        const { data } = await axiosInstance().put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
-            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-            setAddCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-          } else {
-            setMaterialEdit({
-              open: true,
-              data: dataRows[rowIndex + 1],
-              bulkedit: false,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-            });
-          }
+      }
+      setUpdating(false);
+      if (saveAndNext) {
+        const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+
+        if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+          setMaterialEdit({
+            open: false,
+            data: null,
+            bulkedit: false,
+            showSaveAndNext: false
+          });
+          setAddCostDialog({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1
+          });
         } else {
-          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+          setMaterialEdit({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1
+          });
         }
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setMaterialEdit({
+          open: false,
+          data: null,
+          bulkedit: false,
+          showSaveAndNext: false
+        });
+      }
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSaveCostData = async (rows: any, saveAndNext = false) => {

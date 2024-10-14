@@ -382,6 +382,27 @@ const ReportFilters = (props: FiltersProps) => {
     return error;
   };
 
+  const handleUpdateCheckBoxes = (updateCheckBoxFields) => {
+    const updateData = updateCheckBoxFields?.reduce((acc, curr) => {
+      return {
+        ...acc,
+        [curr.fieldName]: {
+          lookup: false,
+          type: 'checkBox',
+          value: true
+        }
+      };
+    }, {});
+    const updateFormValues = updateCheckBoxFields?.reduce((acc, curr) => {
+      return {
+        ...acc,
+        [curr.fieldName]: true
+      };
+    }, {});
+    setSelectedData((prev) => ({ ...prev, ...updateData }));
+    setFormValues((prev) => ({ ...prev, ...updateFormValues }));
+  };
+
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
@@ -399,10 +420,19 @@ const ReportFilters = (props: FiltersProps) => {
           multiple
           value={selectedResources ?? []}
           onChange={(_, val, reason) => {
+            let updateCheckBoxFields = [];
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
+              updateCheckBoxFields = filterOptions?.filter((f) => f.type === 'checkBox') || [];
             } else {
+              const addedField = val?.find((v) => !selectedResources?.some((s) => s.fieldName == v.fieldName));
+              if (addedField && addedField.type === 'checkBox') {
+                updateCheckBoxFields = [addedField];
+              }
               setDefaultResource(val);
+            }
+            if (updateCheckBoxFields?.length) {
+              handleUpdateCheckBoxes(updateCheckBoxFields);
             }
             if (reason === 'remove-option' && selectedData) {
               const selectedKeys = val.map((f) => f?.fieldName);
