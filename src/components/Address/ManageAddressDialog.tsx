@@ -166,6 +166,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
     }
     fullAddress.streetAddress = results.formatted_address;
     fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    fullAddress.searchAddress = val?.description ?? results.formatted_address;
     setAddressDetail(fullAddress);
   };
 
@@ -185,6 +186,10 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       const country = addressDetail?.country ? `${addressDetail?.country}` : '';
 
       let fullAddress = `${city}${state}${zipCode}${country}`;
+
+      if (initialData?.fields?.some((f) => f.fieldName === 'fullAddress' && f.type === 'singleLine')) {
+        fullAddress = addressDetail?.fullAddress  ?? '';
+      }
 
       if (latLngChangedManually && !addressDetail?.streetAddress) {
         setFieldValue('fullAddress', fullAddress);
@@ -279,7 +284,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                             <Grid key={index2} item xs={12} sm={6} md={6}>
                               {
                                 ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
-                                  'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
+                                  'state/Province', 'zipCode/PostalCode', 'searchAddress'].includes(field.fieldName) ?
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -297,7 +302,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                     setFieldValue={setFieldValue}
                                     fieldData={field}
                                     onChange={
-                                      field.fieldName === 'fullAddress'
+                                      ((field.fieldName === 'fullAddress' && field.type !== 'singleLine') || (field.fieldName === 'searchAddress'))
                                         ? (_, val) => {
                                           if (typeof val !== 'object') return;
                                           getFullAddress(val);
