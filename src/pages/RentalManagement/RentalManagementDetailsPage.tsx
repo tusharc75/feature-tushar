@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -161,8 +161,13 @@ const RentalManagementDetailsPage = () => {
       .then(({ data: { data } }) => {
         if (data?.versions) {
           setQuotationData(data);
-          let keys = Object.keys(data.versions);
-          setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+          let keys: any = Object.keys(data.versions);
+          const versionsArray: any = []
+          Object.keys(data.versions)?.forEach((e) => {
+            versionsArray.push(data.versions[e])
+          })
+          const index = findIndex(versionsArray, { converted: true })
+          setCurrentVersion(versionNumber ? versionNumber : index !== -1 ? index : parseInt(keys[keys.length - 1]));
           const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
           if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
             setVersionNotClonned(true);
