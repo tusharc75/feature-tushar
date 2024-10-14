@@ -667,7 +667,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
+  const handleSaveData = async (rows: any, saveAndNext = false,  showNext = false) => {
     try {
       setUpdating(true);
       if (isOffline) {
@@ -691,7 +691,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         else updatedData = { ...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
-        await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
+        if(!showNext){
+          await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
+        }
       }
       fetchMaterial();
       if (saveAndNext) {
