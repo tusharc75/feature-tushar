@@ -76,7 +76,7 @@ const Address = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize='small' color="error" />
             </IconButton>
           </HtmlTooltip>
         )}
