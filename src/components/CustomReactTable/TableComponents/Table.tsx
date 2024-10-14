@@ -3,7 +3,7 @@ import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material
 import MaUTable from '@material-ui/core/Table';
 import { Error } from '@material-ui/icons';
 import { flexRender, Row, Table } from '@tanstack/react-table';
-import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
+import { defaultRangeExtractor, Range, useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
 import React, { Dispatch, ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
 import { getStickyColumnNames, getStickyPosition } from '../utils';
@@ -188,25 +188,23 @@ const RenderTable = forwardRef(function (
   }: RnderTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  const [tableStyles, setTableStyles] = useState<React.CSSProperties>({});
-
   // virtualization
   const parentRef = React.useRef();
   const rowVirtualizer = useVirtualizer({
-    count: rows.length,
+    count: isFooterVisible ? rows.length + 1 : rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 45,
+    estimateSize: () => 46,
     overscan: 10
   });
-  const { columnVisibility } = table.getState();
   const columns = table.getAllColumns();
+
   const visibleColumns = useMemo(() => {
-    return columns.filter((column) => columnVisibility[column.id]);
-  }, [columnVisibility, columns]);
+    return columns;
+  }, [columns]);
 
   const columnVirtualizer = useVirtualizer({
-    count: visibleColumns?.length || 1,
-    estimateSize: (index) => visibleColumns[index]?.getSize(),
+    count: columns?.length || 1,
+    estimateSize: (index) => columns[index]?.getSize(),
     getScrollElement: () => parentRef.current,
     horizontal: true,
     overscan: 5,
@@ -218,6 +216,7 @@ const RenderTable = forwardRef(function (
       [stickyColumns.stickyIndexes]
     )
   });
+
   useEffect(() => {
     columnVirtualizer.measure();
   }, [visibleColumns?.length]);
@@ -291,7 +290,7 @@ const RenderTable = forwardRef(function (
           ref={tableRef}
           size="small"
           className="tableWrap sticky table"
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${columnVirtualizer.getTotalSize()}px, 100%)`, ...tableStyles }}
+          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${columnVirtualizer.getTotalSize()}px, 100%)` }}
         >
           <TableHead
             style={{
@@ -366,10 +365,10 @@ const RenderTable = forwardRef(function (
           </TableBody>
           {isFooterVisible && (
             <>
-              <tfoot className="">
+              <tfoot className="sticky bottom-0">
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
-                    <tr key={footerGroup.id} className="!flex">
+                    <tr key={footerGroup.id} className="!flex ">
                       {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
                       {virtualColumns.map((vc) => {
                         const header = footerGroup.headers[vc?.index];
@@ -428,9 +427,10 @@ const NormalTable = ({
     <>
       {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
         const row = rows[virtualRow.index];
+        if (!row) return null;
         return (
           <TableRow
-            key={row.id}
+            key={row?.id}
             style={{
               height: `${virtualRow.size}px`,
               transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
@@ -441,7 +441,7 @@ const NormalTable = ({
           >
             {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
             {virtualColumns.map((virtualCell, index) => {
-              const cell = row.getVisibleCells()[virtualCell?.index];
+              const cell = row?.getVisibleCells()?.[virtualCell?.index];
               if (!cell) return null;
               return (
                 <MemoizedCellRenderer
