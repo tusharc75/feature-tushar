@@ -304,7 +304,6 @@ const RenderTable = forwardRef(function (
               <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
                 <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
                   {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
-
                   {virtualColumns.map((vc) => {
                     const header = headerGroup.headers[vc?.index];
                     if (!header) return null;
@@ -370,11 +369,14 @@ const RenderTable = forwardRef(function (
               <tfoot className="">
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
-                    <tr key={footerGroup.id}>
-                      {footerGroup.headers.map((header, index) => {
+                    <tr key={footerGroup.id} className="!flex">
+                      {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+                      {virtualColumns.map((vc) => {
+                        const header = footerGroup.headers[vc?.index];
+                        if (!header) return null;
                         if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
                         const columnDef = header.column.columnDef as TColType;
-                        const { style } = getStickyPosition(columnDef, index, table);
+                        const { style } = getStickyPosition(columnDef, vc.index, table);
                         const colSize = header.getSize();
                         return (
                           <th
@@ -392,6 +394,7 @@ const RenderTable = forwardRef(function (
                           </th>
                         );
                       })}
+                      {virtualPaddingRight ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} /> : null}
                     </tr>
                   );
                 })}
