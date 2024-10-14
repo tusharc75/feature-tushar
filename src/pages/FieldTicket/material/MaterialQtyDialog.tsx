@@ -267,6 +267,10 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
       handleSaveData(rows);
     } else {
+      if(isEqual(ref?.current?.values, initialData.values)){
+        handleSaveData([rowData], saveAndNext, true);
+        return;
+      }
       const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
@@ -664,7 +668,22 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   {'Close'}
                 </Button>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
+                  isEqual(ref?.current?.values, initialData.values) ? (
+                    <CustomButton
+                    loading={loading}
+                    disabled={loading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {'Next'}
+                  </CustomButton>
+                  ) : (
+                    <CustomButton
                     loading={loading}
                     disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                     variant="contained"
@@ -678,6 +697,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                     {' '}
                     Save & Next
                   </CustomButton>
+                  )
                 )}
                 <CustomButton
                   id="dialog-save-button"
