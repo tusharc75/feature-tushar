@@ -193,7 +193,7 @@ const RenderTable = forwardRef(function (
   const rowVirtualizer = useVirtualizer({
     count: isFooterVisible ? rows.length + 1 : rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 46,
+    estimateSize: () => 45,
     overscan: 10
   });
   const columns = table.getAllColumns();
