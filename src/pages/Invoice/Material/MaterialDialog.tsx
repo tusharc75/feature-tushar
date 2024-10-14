@@ -89,6 +89,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   };
 
   const fetchFields = async () => {
+    setLoading(true);
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
@@ -181,6 +182,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       });
     }
     EvaluteproductFields(data);
+    setLoading(false);
   };
 
   const EvaluteproductFields = async (fields) => {
@@ -219,6 +221,10 @@ const MaterialDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedProducts, material, allFields, invoiceData?.currency);
       handleSaveData(rows);
     } else {
+      if(isEqual(ref?.current?.values, initialData.values)){
+        handleSaveData([rowData], saveAndNext, true);
+        return;
+      }
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
@@ -304,7 +310,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       open={true}
       fullWidth
     >
-      {initialData && loadingEdit === false && initialData.fields.length ? (
+      {initialData && !loading && loadingEdit === false && initialData.fields.length ? (
         <Formik
           innerRef={ref}
           enableReinitialize={true}
@@ -529,6 +535,21 @@ const MaterialDialog: FC<EditDialogProps> = ({
                 </Button>
 
                 {isBulkedit === false && showSaveAndNext && (
+                  isEqual(ref?.current?.values, initialData.values) ? (
+                    <CustomButton
+                    loading={loading}
+                    disabled={loading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {'Next'}
+                  </CustomButton>
+                  ) : (
                   <CustomButton
                     loading={loadingEdit}
                     disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
@@ -542,6 +563,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                   >
                     {'Save & Next'}
                   </CustomButton>
+                  )
                 )}
 
                 <CustomButton
