@@ -393,26 +393,21 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                 setResponse({ open: false, type: '', id: '' });
               }}
               showRequiredLabel={false}
-              title={'Response comment'}
+              title={'Response Comment'}
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Box>
-                <Box pt={3} pb={3}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={10} sm={11} md={11}>
-                      <TextField
-                        id="outlined-multiline-static"
-                        label="comment"
-                        placeholder={`Add a comment`}
-                        fullWidth
-                        value={comment}
-                        onChange={handleChange}
-                        variant="outlined"
-                        helperText="At least more then 10 character"
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
+                <TextField
+                  id="outlined-multiline-static"
+                  label="Comment"
+                  placeholder={`Comment`}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={comment}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -429,6 +424,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                 type="button"
                 color="primary"
                 variant="contained"
+                size="small"
                 onClick={() => {
                   response.type === 'Reject' && handleReject();
                 }}
