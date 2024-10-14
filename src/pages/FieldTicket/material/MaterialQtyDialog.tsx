@@ -670,8 +670,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 {isBulkedit === false && showSaveAndNext && (
                   isEqual(ref?.current?.values, initialData.values) ? (
                     <CustomButton
-                    loading={loading}
-                    disabled={loading}
+                    loading={fetchingData}
+                    disabled={fetchingData}
                     variant="contained"
                     color="primary"
                     type="submit"
