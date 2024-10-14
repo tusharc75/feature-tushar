@@ -64,7 +64,7 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
   if (columnDef.sticky === 'left') {
     obj.style = { position: 'sticky', left: offset } as React.CSSProperties;
   }
-  if (columnDef.sticky === 'right') obj.style = { position: 'sticky', right: offset } as React.CSSProperties;
+  if (columnDef.sticky === 'right') obj.style = { position: 'sticky', right: offset, marginLeft: 'auto' } as React.CSSProperties;
   return obj;
 };
 
