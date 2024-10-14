@@ -5,14 +5,12 @@ import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { sortBy, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-
-let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -61,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
+const QuotationSupplierPrice = ({ openAuthData, openAuthId }) => {
   let renderedFrom = 'QuotationSupplierPrice';
 
   const classes = useStyles();
@@ -74,7 +72,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
   const [columns, setColumns] = useState(null);
   const [requireFieldArray, setRequireFieldArray] = useState([]);
-  const [quotationDetailsData, setQuotationDetailsData] = useState(null);
+  const [quotationData, setQuotationData] = useState(null);
   const [isSubmited, setIsSubmited] = useState(false);
 
   const quotationFields = [
@@ -156,9 +154,9 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axios
-      .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${quotationData?.data?.requestId}`)
+      .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${openAuthData?.requestId}`)
       .then(({ data: { data } }) => {
-        setQuotationDetailsData(data?.quotation);
+        setQuotationData(data?.quotation);
         const material = data?.materials.filter((e) => !!!e?.parentId);
         const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
         let rows = material?.map((item, index) => {
@@ -229,7 +227,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           }
         ];
 
-        const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
+        const newColumns = generateColumns(renderedFrom, filteredFields, null, false, data?.quotation?.currency);
         newColumns?.forEach((e) => {
           e.editable = true;
         });
@@ -351,7 +349,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     if (checkField) {
       let tempData = {
         material: material,
-        requestId: quotationData?.data?.requestId,
+        requestId: openAuthData?.requestId,
         openAuthId: openAuthId
       };
       axios
@@ -384,7 +382,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       let formData = new FormData();
       formData.append('file', file);
       axiosInstance()
-        .post(`/quotation/supplier-price-request/price-request-import/${quotationData?.data?.requestId}`, formData, {
+        .post(`/quotation/supplier-price-request/price-request-import/${openAuthData?.requestId}`, formData, {
           responseType: 'blob',
           headers: { 'Content-Type': 'multipart/form-data' }
         })
@@ -415,7 +413,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
     axiosInstance()
-      .get(`/quotation/supplier-price-request/price-request-template/${quotationData?.data?.requestId}`, {
+      .get(`/quotation/supplier-price-request/price-request-template/${openAuthData?.requestId}`, {
         responseType: 'arraybuffer'
       })
       .then((response) => {
@@ -473,7 +471,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         </h1>
       ) : (
         <>
-          {quotationDetailsData ? <DetailsPage data={quotationDetailsData} fields={quotationFields} /> : null}
+          {quotationData ? <DetailsPage data={quotationData} fields={quotationFields} /> : null}
           <Box mt={2} p={2}>
             <>
               <div className={'detail-box-content'}>
