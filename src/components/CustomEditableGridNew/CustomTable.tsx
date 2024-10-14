@@ -246,7 +246,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                   style={{
                     display: 'flex',
                     position: 'absolute',
-                    // transform: `translateY(${virtualRow.start}px)`,
+                    transform: `translateY(${virtualRow.start}px)`,
                     width: '100%'
                   }}
                 >
