@@ -196,7 +196,7 @@ const RenderTable = forwardRef(function (
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
-    overscan: 5
+    overscan: 10
   });
   const { columnVisibility } = table.getState();
   const columns = table.getAllColumns();
@@ -209,7 +209,7 @@ const RenderTable = forwardRef(function (
     estimateSize: (index) => visibleColumns[index]?.getSize(),
     getScrollElement: () => parentRef.current,
     horizontal: true,
-    overscan: 3,
+    overscan: 5,
     rangeExtractor: React.useCallback(
       (range: Range, ...rest) => {
         const next = new Set([...defaultRangeExtractor(range), ...stickyColumns.stickyIndexes]);
@@ -291,7 +291,7 @@ const RenderTable = forwardRef(function (
           ref={tableRef}
           size="small"
           className="tableWrap sticky table"
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `${columnVirtualizer.getTotalSize()}px`, ...tableStyles }}
+          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${columnVirtualizer.getTotalSize()}px, 100%)`, ...tableStyles }}
         >
           <TableHead
             style={{
