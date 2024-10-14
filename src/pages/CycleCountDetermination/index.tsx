@@ -66,8 +66,6 @@ const CycleCountDetermination = () => {
       {
         accessor: 'name',
         Header: 'Product Category',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row.original?.name ? (
             <p
@@ -84,15 +82,11 @@ const CycleCountDetermination = () => {
       {
         accessor: 'inventoryCycle',
         Header: 'Cycle Code',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.inventoryCycle ? <p className="text-truncate">{row.original?.inventoryCycle}</p> : <NoDataCell />)
       },
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.user ? <p className="text-truncate">{row.original?.user}</p> : <NoDataCell />)
       }
     ];
