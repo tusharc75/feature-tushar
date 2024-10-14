@@ -454,8 +454,12 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.isRental = false;
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
           element.estimateJobDuration = 1;
-          if (calValues && calValues['estimateJobDuration']) element.estimateJobDuration = calValues['estimateJobDuration'];
-          if (calValues && calValues['finalQty']) element.finalQty = calValues['finalQty'];
+          if (calValues && calValues['estimateJobDuration']) {
+            element.estimateJobDuration = calValues['estimateJobDuration'];
+          }
+          if (calValues && calValues['finalQty']) {
+            element.finalQty = calValues['finalQty'];
+          }
           if (taxCodeData) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
@@ -488,8 +492,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element[priceFieldName] = rateResult[0].mrp;
           element['pricingCondition'] = rateResult[0].conditionId;
           element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-          const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-          Object.assign(element, calValues);
+          const calValues1 = autoCalculateSpecificFields({ pricingMethod: element['pricingMethod'] }, element, allFields);
+          Object.assign(element, calValues1);
+          const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+          Object.assign(element, calValues2);
         }
       });
     }
