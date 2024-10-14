@@ -518,18 +518,40 @@ $isAppliedBillDark: #234623;
     // border-left: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
   }
 
-  & thead > tr > th::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0px;
-    width: 100%;
-    height: 1px;
-    background-color: var(--common-border-color, rgba(224, 224, 224, 1));
-  }
+  // & thead > tr > th::before {
+  //   content: '';
+  //   position: absolute;
+  //   left: 0;
+  //   bottom: 0px;
+  //   width: 100%;
+  //   height: 1px;
+  //   background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+  // }
 
   thead {
     max-height: 45px;
+    border-bottom: 1px solid var(--common-border-color);
+    tr {
+      border-bottom: 1px solid var(--common-border-color);
+      th {
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: 0px;
+          width: 100%;
+          height: 1px;
+          background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+        }
+        border-bottom: 1px solid var(--common-border-color);
+      }
+    }
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--common-border-color);
+  }
+  .MuiTableCell-root {
+    border-bottom: unset;
   }
   th {
     padding: 5px 8px;
@@ -567,29 +589,22 @@ $isAppliedBillDark: #234623;
   }
 
   tbody tr:not(:last-child) td {
-    border-bottom: 1px solid var(--common-border-color);
+    // border-bottom: 1px solid var(--common-border-color);
   }
-  tbody.with-footer tr:last-child td {
+  tbody.with-footer tr:last-child {
     border-bottom: 0px;
   }
 
   tfoot {
+    border-top: 1px solid var(--common-border-color);
+    border-bottom: 1px solid var(--common-border-color);
     th {
       text-align: left;
-      &::before,
       &::after {
-        width: 100% !important;
-        height: 1px !important;
-        background-color: var(--common-border-color, rgba(224, 224, 224, 1));
-        content: '' !important;
-        position: absolute;
-        left: 0;
+        display: none;
       }
       &::after {
         top: 0;
-      }
-      &::before {
-        bottom: 0px;
       }
     }
   }
