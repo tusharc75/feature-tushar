@@ -33,7 +33,7 @@ const ProductTemplate = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { productTemplateApi } = productTemplate;
 
   useEffect(() => {
@@ -231,7 +231,6 @@ const ProductTemplate = () => {
           addButtonOnclick={() => CreateNew('0', false)}
           isAddButtonVisible={permissions?.productTemplate?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -32,7 +32,7 @@ const PayTypes = ({ payrollPolicyId }) => {
   const [payTypeDialog, setPayTypeDialog] = useState({ open: false, data: null, isClone: false });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
   const [deleting, setDeleting] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
   const fetchGridColumns = async () => {

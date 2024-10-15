@@ -22,7 +22,7 @@ const renderedFrom = 'userDownloadRequest';
 
 const UserDownloadRequest = () => {
   const toastConfig = useContext(CustomToastContext);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, sorting } = state;

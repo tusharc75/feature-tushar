@@ -24,7 +24,7 @@ const FormBuilder = () => {
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [openSectionMaster, setOpenSectionMaster] = useState(false);
   const [resource, setResource] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
 
