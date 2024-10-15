@@ -16,7 +16,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
@@ -32,6 +32,7 @@ import { DraggableHeader } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import {
+  adjustSizes,
   camelCaseToWords,
   childrenProperty,
   extractLastNumberFromDataRange,
@@ -92,6 +93,7 @@ const CustomReactTable = ({
 
   const isMobileView = useMediaQuery('(max-width:768px)');
   const [expandedRefChanged, setExpandedRefChanged] = useState(0);
+  const [newColumns, setNewColumns] = useState([]);
 
   function toggleExpandChange() {
     if (isMobileView) return;
@@ -100,7 +102,7 @@ const CustomReactTable = ({
     });
   }
 
-  const newColumns = useCreateColumns({
+  const hookColumns = useCreateColumns({
     columns,
     expander,
     fetchChildAttachment,
@@ -114,6 +116,10 @@ const CustomReactTable = ({
     renderedFrom
   });
 
+  useEffect(() => {
+    setNewColumns(hookColumns);
+  }, [hookColumns]);
+
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
@@ -125,6 +131,7 @@ const CustomReactTable = ({
   const [exportTableView, setExportTableView] = useState(false);
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const { setSavedFilters } = useContext(FiltersContext);
 
@@ -293,6 +300,17 @@ const CustomReactTable = ({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
+
+  useLayoutEffect(() => {
+    if (tableContainerRef.current) {
+      const container = tableContainerRef.current;
+      const { clientWidth } = container;
+      const updatedColumns = adjustSizes(newColumns, clientWidth);
+      if (updatedColumns) {
+        setNewColumns(updatedColumns);
+      }
+    }
+  }, [tableContainerRef, newColumns.length]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
@@ -530,7 +548,7 @@ const CustomReactTable = ({
             hideExportTable={hideExportTable}
           />
           {!isMobileView && !showOnlyMobileView && (
-            <div className="relative">
+            <div className="relative" ref={tableContainerRef}>
               <TableComponent
                 virtualization={virtualization}
                 state={state}
@@ -548,6 +566,8 @@ const CustomReactTable = ({
                 onRowClick={onRowClick}
                 resource={resource}
                 pagination={pagination}
+                expander={expander}
+                hideSelection={hideSelection}
               />
             </div>
           )}
