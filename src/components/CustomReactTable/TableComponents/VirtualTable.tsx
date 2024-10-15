@@ -43,8 +43,11 @@ export const VirtualTable = forwardRef(function (
 ) {
   // virtualization
   const parentRef = React.useRef();
+
+  // if footer present then + 2 for header and footer height
+  // else + 1 for only header height
   const rowVirtualizer = useVirtualizer({
-    count: isFooterVisible ? rows.length + 1 : rows.length,
+    count: isFooterVisible ? rows.length + 2 : rows.length + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
     overscan: 10
@@ -56,7 +59,7 @@ export const VirtualTable = forwardRef(function (
   }, [columns]);
 
   const columnVirtualizer = useVirtualizer({
-    count: columns?.length || 1,
+    count: visibleColumns?.length || 1,
     estimateSize: (index) => columns[index]?.getSize(),
     getScrollElement: () => parentRef.current,
     horizontal: true,
