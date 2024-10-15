@@ -20,7 +20,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const {
     state: { user, permissions }
   }: any = useData();
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting } = state;
 

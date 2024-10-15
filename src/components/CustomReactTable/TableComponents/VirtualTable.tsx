@@ -90,13 +90,13 @@ export const VirtualTable = forwardRef(function (
   if (columnVirtualizer && virtualColumns?.length) {
     let leftIndex = 0;
     // check to see if the window passed the left sticky columns then move the left index to the first nonsticky index
-    if (virtualColumns[stickyLeft.length].index !== stickyLeft[stickyLeft.length - 1] + 1) {
+    if (virtualColumns[stickyLeft.length]?.index !== stickyLeft[stickyLeft.length - 1] + 1) {
       leftIndex = stickyLeft.length;
     }
     virtualPaddingLeft = virtualColumns[leftIndex]?.start ?? 0;
 
     let rightIndex = virtualColumns.length - 1;
-    if (virtualColumns[rightIndex - stickyRight.length].index !== stickyRight[0] - 1) {
+    if (virtualColumns[rightIndex - stickyRight.length]?.index !== stickyRight[0] - 1) {
       rightIndex = virtualColumns.length - 1 - stickyRight.length;
     }
 

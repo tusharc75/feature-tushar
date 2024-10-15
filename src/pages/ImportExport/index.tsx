@@ -15,6 +15,7 @@ import { CustomImport } from './customImport';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const renderedFrom = 'import-export';
 
@@ -30,7 +31,7 @@ const ImportExport = () => {
   const [selectCustomHeader, setSelectCustomHeader] = useState(null);
   const [selectTemplateHeader, setSelectTemplateHeader] = useState(null);
   const [customImportDialog, setCustomImportDialog] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [file, setFile] = useState({});
 
   useEffect(() => {
@@ -429,18 +430,21 @@ const ImportExport = () => {
             </Button>
           </Grid>
         </Grid>
-
         <Box>
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchLogs}
-            isClientSideGrid={true}
-            hideSelection={true}
-          />
+          {columns ?
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchLogs}
+              isClientSideGrid={true}
+              hideSelection={true}
+            /> : <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          }
           {customImportDialog && (
             <CustomImport
               open={customImportDialog}

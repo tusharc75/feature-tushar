@@ -22,13 +22,14 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const renderedFrom = 'import-export';
 
 const ImportExportDialog = ({ handleClose, type, resource, subResource, referenceId, handleExport, api, additionalParams, refresh }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
@@ -281,7 +282,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             Export to Excel
           </Button>
         )}
-        <CustomReactTable
+        {columns ? <CustomReactTable
           height={'300px'}
           columns={columns}
           state={state}
@@ -291,7 +292,9 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
           hideSelection={true}
           showFilters={false}
           showArrangeView={false}
-        />
+        /> : <Box p={2} height={300}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomDialogContent>
       <CustomDialogFooter>
         <CustomButton
