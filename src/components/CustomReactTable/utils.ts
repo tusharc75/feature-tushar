@@ -444,3 +444,18 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   }
   return formValues;
 };
+
+export function adjustSizes(columns: TColType[], containerSize: number): TColType[] | null {
+  const totalSize = columns.reduce((acc, size) => acc + (size.size || 200), 0);
+
+  if (totalSize >= containerSize) {
+    return null; // No adjustment needed if total size is greater than or equal to container size
+  }
+
+  const scaleFactor = containerSize / totalSize;
+
+  return columns.map((col) => {
+    const size = Math.floor(col.size * scaleFactor);
+    return { ...col, size, width: size };
+  });
+}
