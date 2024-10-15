@@ -34,7 +34,7 @@ const QuotePdfTemplate = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { qbApi } = quoteBuilder;
   const { quotePdfTemplateApi } = quotePdfTemplate;
 

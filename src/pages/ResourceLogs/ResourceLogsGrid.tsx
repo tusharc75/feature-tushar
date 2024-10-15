@@ -17,7 +17,7 @@ const renderedFrom = 'resourceLogs';
 const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedAction = '', selectedUser = '', hideResourceField = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, data: null });
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit } = state;
 
