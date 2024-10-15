@@ -457,7 +457,7 @@ export function adjustSizes(columns: TColType[], containerSize: number): TColTyp
   if (scaleFactor === Infinity) {
     return null;
   }
-  const scrollerWidth = 3;
+  const scrollerWidth = 2;
 
   return columns.map((col) => {
     const size = Math.floor(col.size * scaleFactor) - scrollerWidth;
