@@ -2780,7 +2780,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
   { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
-  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' }
+  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
+  { title: sidebarResource.assemblyOrder, value: sidebarResource.assemblyOrder, key: 'assemblyOrder' }
 ];
 
 export const COLOUR_MASTER = {
@@ -3565,7 +3566,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const columnSize = (type) => {
@@ -3615,8 +3616,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
