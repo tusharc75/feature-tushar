@@ -167,8 +167,8 @@ const RentalManagementDetailsPage = () => {
             versionsArray.push(data.versions[e])
           })
           const index = findIndex(versionsArray, { converted: true })
-          setCurrentVersion(versionNumber ? versionNumber : index !== -1 ? index : parseInt(keys[keys.length - 1]));
-          const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
+          setCurrentVersion(versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1]));
+          const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1])];
           if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
             setVersionNotClonned(true);
           } else {
