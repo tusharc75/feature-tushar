@@ -140,21 +140,21 @@ const Assign = ({ managedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
@@ -422,7 +422,6 @@ const Assign = ({ managedPackagesData }) => {
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    console.log('selectedRecords', selectedRecords);
     const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty);
     return flatArray.length === 0;
   };

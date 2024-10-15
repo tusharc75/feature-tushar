@@ -29,7 +29,6 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
-    console.log('inventory', inventory);
     fetchGridColumns();
   }, []);
 
@@ -169,7 +168,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, rentalId: null })}
           onSuccess={(_assetData) => {
             handleAddManagedPAckage(openAssetDataDialog.rentalId, _assetData);
