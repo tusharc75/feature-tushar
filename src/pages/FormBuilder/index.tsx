@@ -41,8 +41,8 @@ const FormBuilder = () => {
       {
         accessor: 'resourceLabel',
         Header: 'Resource Label',
-        width: 120,
         primaryField: true,
+        width: 300,
         Cell: ({ row }) => (
           <div>
             <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
@@ -54,32 +54,30 @@ const FormBuilder = () => {
       {
         accessor: 'homePageLabel',
         Header: 'Home Page Label',
-        width: 120,
+        width: 300,
         Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
       },
       {
         accessor: 'section',
         Header: 'Section',
-        width: 120,
+        width: 300,
         Cell: ({ row }) => (row?.original?.section ? <p className="text-truncate">{row?.original?.section}</p> : <NoDataCell />)
       },
       {
         accessor: 'resource',
         Header: 'Resource',
-        width: 120,
+        width: 300,
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
       },
       {
         accessor: 'childResource',
         Header: 'Child Resource',
-        width: 100,
         accessorFn: (data) => (data?.childResource ? 'Yes' : 'No'),
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.childResource ? 'Yes' : 'No'}</p>
       },
       {
         accessor: 'dynamicResource',
         Header: 'Dynamic Resource',
-        width: 100,
         accessorFn: (data) => (data?.dynamicResource ? 'Yes' : 'No'),
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.dynamicResource ? 'Yes' : 'No'}</p>
       }

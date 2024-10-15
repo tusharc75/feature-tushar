@@ -172,7 +172,7 @@ const PublicRoutePage = () => {
           resourceData?.referenceIdType === 'Quotes' ? (
             <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
           ) : resourceData?.referenceIdType === 'Quotation' ? (
-            <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
+            <QuotationSupplierPrice openAuthData={resourceData?.data} openAuthId={id} />
           ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
             <QuotationCustomerAccept openAuthId={id} />
           ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
