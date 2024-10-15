@@ -49,7 +49,7 @@ export const VirtualTable = forwardRef(function (
     estimateSize: () => 45,
     overscan: 10
   });
-  const columns = table.getAllColumns();
+  const columns = table.getVisibleFlatColumns();
 
   const visibleColumns = useMemo(() => {
     return columns;
