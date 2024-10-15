@@ -417,68 +417,80 @@ const CustomReactTable = ({
     const isFooterPresent = newColumns.some((c) => columnVisibility[c?.id] && typeof c.Footer === 'function');
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
-      const wb = xlsx.utils.book_new();
+      try {
+        const wb = xlsx.utils.book_new();
 
-      // Remove Hidden Elements "data-hide-in-export="true""
-      const table = tableRef.current;
-      table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
-        if (typeof e?.remove === 'function') e.remove();
-      });
+        // Remove Hidden Elements "data-hide-in-export="true""
+        const table = tableRef.current;
+        table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
+          if (typeof e?.remove === 'function') e.remove();
+        });
 
-      const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
+        const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
 
-      const columns = getExcelColumnNameFromRange(ws['!ref']);
+        const columns = getExcelColumnNameFromRange(ws['!ref']);
 
-      const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
-      for (const col of columns) {
-        // For header style
-        if (ws[`${col}1`]) {
-          ws[`${col}1`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+        const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+
+        for (const col of columns) {
+          // For header style
+          if (ws[`${col}1`]) {
+            const headerRow = ws[`${col}1`];
+            if (headerRow) {
+              headerRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
-        }
-        // For footer style
-        if (lastRowNumber && isFooterPresent) {
-          ws[`${col}${lastRowNumber}`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+          }
+          // For footer style
+          if (lastRowNumber && isFooterPresent) {
+            const lastRow = ws[`${col}${lastRowNumber}`];
+            if (lastRow) {
+              lastRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
+          }
         }
-      }
 
-      // For redirecting to the domain and cell style for links
-      const keys = Object.keys(ws);
-      // const origin = window?.location?.origin;
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (key.includes('!')) continue;
-        if (ws[key].hasOwnProperty('l')) {
-          delete ws[key].l; // this will remove link styles
+        // For redirecting to the domain and cell style for links
+        const keys = Object.keys(ws);
+        // const origin = window?.location?.origin;
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (key.includes('!')) continue;
+          if (ws[key].hasOwnProperty('l')) {
+            delete ws[key].l; // this will remove link styles
 
-          //! this section will style links
-          // const data = ws[key];
-          //  data.l.Target = `${origin}${data.l.Target}`;
-          //  ws[key].s = {
-          //    font: {
-          //      name: 'Calibri',
-          //      color: { rgb: '171db1' }
-          //   }
-          //  };
+            //! this section will style links
+            // const data = ws[key];
+            //  data.l.Target = `${origin}${data.l.Target}`;
+            //  ws[key].s = {
+            //    font: {
+            //      name: 'Calibri',
+            //      color: { rgb: '171db1' }
+            //   }
+            //  };
+          }
         }
+
+        // set column width to header width
+        ws['!cols'] = fitToColumn(columns, ws);
+
+        const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+        xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+        xlsx.writeFile(wb, `${name}.xlsx`);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setExportTableView(false);
       }
-
-      // set column width to header width
-      ws['!cols'] = fitToColumn(columns, ws);
-
-      const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-      xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-      xlsx.writeFile(wb, `${name}.xlsx`);
-      setExportTableView(false);
     }, 0);
   };
 
@@ -504,7 +516,7 @@ const CustomReactTable = ({
         <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
             ref={tableRef}
-            virtualization={virtualization}
+            virtualization={false}
             state={state}
             setWholeRowsCellColor={() => ''}
             table={table}
