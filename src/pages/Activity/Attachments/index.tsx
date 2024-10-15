@@ -72,7 +72,6 @@ export default function Attachment() {
       accessor: 'type',
       id: 'type',
       Header: 'Type',
-      width: 70,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => (
@@ -151,7 +150,6 @@ export default function Attachment() {
       id: 'attachmentType',
       accessor: 'attachmentType',
       Header: 'Attachment Type',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => {
@@ -162,7 +160,6 @@ export default function Attachment() {
       id: 'createdBy',
       accessor: 'createdBy',
       Header: 'Created By',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) =>
@@ -180,7 +177,6 @@ export default function Attachment() {
       id: 'updatedBy',
       accessor: 'updatedBy',
       Header: 'Updated By',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) =>
@@ -652,7 +648,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}

@@ -6,12 +6,10 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
 import { MdAutorenew, MdDelete } from 'react-icons/md';
-import { RiFlowChart } from 'react-icons/ri';
 import { SiSemanticrelease } from 'react-icons/si';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
@@ -127,19 +125,19 @@ const QuotationDetails = () => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob','assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.assemblyOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob','salesOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'salesOrder']?.includes(d?.fieldData?.fieldName));
       }
     }
     return tempQuotationFields;
@@ -556,21 +554,20 @@ const QuotationDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              Views
             </CustomTab>
           )}
           {resourceData &&
             resourceData?.tabs?.length &&
             resourceData?.tabs?.map((tab, i) => (
               <CustomTab value={i + 3}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" />
                 {tab?.tabName}
               </CustomTab>
             ))}
@@ -603,10 +600,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -623,10 +620,10 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                      if (allowedToEdit) {
-                        setCustomerAcceptable(true);
-                      }
+                    if (allowedToEdit) {
+                      setCustomerAcceptable(true);
                     }
+                  }
                   : null
               }
             />

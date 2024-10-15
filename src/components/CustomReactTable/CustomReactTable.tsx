@@ -16,7 +16,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
@@ -32,6 +32,7 @@ import { DraggableHeader } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import {
+  adjustSizes,
   camelCaseToWords,
   childrenProperty,
   extractLastNumberFromDataRange,
@@ -92,6 +93,7 @@ const CustomReactTable = ({
 
   const isMobileView = useMediaQuery('(max-width:768px)');
   const [expandedRefChanged, setExpandedRefChanged] = useState(0);
+  const [newColumns, setNewColumns] = useState([]);
 
   function toggleExpandChange() {
     if (isMobileView) return;
@@ -100,7 +102,7 @@ const CustomReactTable = ({
     });
   }
 
-  const newColumns = useCreateColumns({
+  const hookColumns = useCreateColumns({
     columns,
     expander,
     fetchChildAttachment,
@@ -114,6 +116,10 @@ const CustomReactTable = ({
     renderedFrom
   });
 
+  useEffect(() => {
+    setNewColumns(hookColumns);
+  }, [hookColumns]);
+
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
@@ -125,6 +131,7 @@ const CustomReactTable = ({
   const [exportTableView, setExportTableView] = useState(false);
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const { setSavedFilters } = useContext(FiltersContext);
 
@@ -294,6 +301,17 @@ const CustomReactTable = ({
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
 
+  useLayoutEffect(() => {
+    if (tableContainerRef.current) {
+      const container = tableContainerRef.current;
+      const { clientWidth } = container;
+      const updatedColumns = adjustSizes(newColumns, clientWidth);
+      if (updatedColumns) {
+        setNewColumns(updatedColumns);
+      }
+    }
+  }, [tableContainerRef, newColumns.length]);
+
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
   const paginationLimit = useMemo(() => {
@@ -399,68 +417,80 @@ const CustomReactTable = ({
     const isFooterPresent = newColumns.some((c) => columnVisibility[c?.id] && typeof c.Footer === 'function');
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
-      const wb = xlsx.utils.book_new();
+      try {
+        const wb = xlsx.utils.book_new();
 
-      // Remove Hidden Elements "data-hide-in-export="true""
-      const table = tableRef.current;
-      table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
-        if (typeof e?.remove === 'function') e.remove();
-      });
+        // Remove Hidden Elements "data-hide-in-export="true""
+        const table = tableRef.current;
+        table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
+          if (typeof e?.remove === 'function') e.remove();
+        });
 
-      const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
+        const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
 
-      const columns = getExcelColumnNameFromRange(ws['!ref']);
+        const columns = getExcelColumnNameFromRange(ws['!ref']);
 
-      const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
-      for (const col of columns) {
-        // For header style
-        if (ws[`${col}1`]) {
-          ws[`${col}1`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+        const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+
+        for (const col of columns) {
+          // For header style
+          if (ws[`${col}1`]) {
+            const headerRow = ws[`${col}1`];
+            if (headerRow) {
+              headerRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
-        }
-        // For footer style
-        if (lastRowNumber && isFooterPresent) {
-          ws[`${col}${lastRowNumber}`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+          }
+          // For footer style
+          if (lastRowNumber && isFooterPresent) {
+            const lastRow = ws[`${col}${lastRowNumber}`];
+            if (lastRow) {
+              lastRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
+          }
         }
-      }
 
-      // For redirecting to the domain and cell style for links
-      const keys = Object.keys(ws);
-      // const origin = window?.location?.origin;
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (key.includes('!')) continue;
-        if (ws[key].hasOwnProperty('l')) {
-          delete ws[key].l; // this will remove link styles
+        // For redirecting to the domain and cell style for links
+        const keys = Object.keys(ws);
+        // const origin = window?.location?.origin;
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (key.includes('!')) continue;
+          if (ws[key].hasOwnProperty('l')) {
+            delete ws[key].l; // this will remove link styles
 
-          //! this section will style links
-          // const data = ws[key];
-          //  data.l.Target = `${origin}${data.l.Target}`;
-          //  ws[key].s = {
-          //    font: {
-          //      name: 'Calibri',
-          //      color: { rgb: '171db1' }
-          //   }
-          //  };
+            //! this section will style links
+            // const data = ws[key];
+            //  data.l.Target = `${origin}${data.l.Target}`;
+            //  ws[key].s = {
+            //    font: {
+            //      name: 'Calibri',
+            //      color: { rgb: '171db1' }
+            //   }
+            //  };
+          }
         }
+
+        // set column width to header width
+        ws['!cols'] = fitToColumn(columns, ws);
+
+        const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+        xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+        xlsx.writeFile(wb, `${name}.xlsx`);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setExportTableView(false);
       }
-
-      // set column width to header width
-      ws['!cols'] = fitToColumn(columns, ws);
-
-      const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-      xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-      xlsx.writeFile(wb, `${name}.xlsx`);
-      setExportTableView(false);
     }, 0);
   };
 
@@ -486,7 +516,7 @@ const CustomReactTable = ({
         <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
             ref={tableRef}
-            virtualization={virtualization}
+            virtualization={false}
             state={state}
             setWholeRowsCellColor={() => ''}
             table={table}
@@ -530,7 +560,7 @@ const CustomReactTable = ({
             hideExportTable={hideExportTable}
           />
           {!isMobileView && !showOnlyMobileView && (
-            <div className="relative">
+            <div className="relative" ref={tableContainerRef}>
               <TableComponent
                 virtualization={virtualization}
                 state={state}
@@ -548,6 +578,8 @@ const CustomReactTable = ({
                 onRowClick={onRowClick}
                 resource={resource}
                 pagination={pagination}
+                expander={expander}
+                hideSelection={hideSelection}
               />
             </div>
           )}

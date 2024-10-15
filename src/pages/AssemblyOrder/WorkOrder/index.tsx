@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, Typography } from '@material-ui/core';
 import { CheckCircle, Delete } from '@material-ui/icons';
-import { startCase } from 'lodash';
+import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -12,12 +12,20 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORK_ORDER_STATUS, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORK_ORDER_STATUS, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SyncIcon from '@material-ui/icons/Sync';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import { flattenArray } from 'src/constants/columns';
+import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
+import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+
+const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScreen, allowedToEdit, setCurrentStep }) => {
   const {
@@ -25,7 +33,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -37,6 +45,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [autoCompleteData, setAutoCompleteData] = useState(null);
   const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
   const [isCompleting, setCompleting] = useState(false);
+  const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
 
   const { generateColumns } = useColumns();
 
@@ -111,6 +124,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -151,16 +166,92 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           )
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'status',
         Header: 'Status',
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original['workOrderStatus'] ? <h5 className="text-truncate">{row.original.workOrderStatus}</h5> : <NoDataCell />;
+          return row.original['status'] ? <h5 className="text-truncate">{row.original.status}</h5> : <NoDataCell />;
         }
       }
     ];
     coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'assignedUsers',
+      Header: 'Assigned Technician',
+      width: 200,
+      Cell: ({ row }) => (
+        <div>
+          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+            row?.original['assignedUsers']?.map((e, i) => {
+              return i === row?.original['assignedUsers'].length - 1 ? (
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.userDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel}
+                </a>
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.userDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )}
+        </div>
+      )
+    });
+    if (permissions?.workStations) {
+      coloum.push({
+        accessor: 'assignedWorkStations',
+        Header: 'Assigned Work Station',
+        width: 200,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+              row?.original['assignedWorkStations']?.map((e, i) => {
+                return i === row?.original['assignedWorkStations'].length - 1 ? (
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel}
+                  </a>
+                ) : (
+                  <>
+                    <a
+                      className="link text-truncate [flex-grow:0_!important]"
+                      target="_blank"
+                      href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                      rel="noreferrer"
+                    >
+                      {e?.optionLabel},
+                    </a>
+                    &nbsp;
+                  </>
+                );
+              })
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
+        )
+      });
+    }
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -170,7 +261,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       Cell: ({ row }) => {
         return (
           <>
-            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.subType && (
+            {checkParentProduct([row?.original], row?.original?.parentId) && (
               <HtmlTooltip title="Auto Complete Work Order">
                 <IconButton
                   size="small"
@@ -181,7 +272,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                   }}
                   disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-                  {row.original['workOrderStatus'] === 'Completed' ? (
+                  {row.original['status'] === 'Completed' ? (
                     <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                   ) : (
                     <AutoCompleteIcon size={18} />
@@ -231,23 +322,23 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       parent.description = parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.canDelete = false;
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generatedNestedProduct(data, parent);
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generatedNestedProduct = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : '';
       _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
       _subRow.qty = _subRow.qty;
-      _subRow.workOrderId = _subRow.subType === MATERIAL_SUB_TYPE.bom ? parent?.workOrderId : _subRow?.workOrder?._id;
-      _subRow.workOrderNumber = _subRow?.subType === MATERIAL_SUB_TYPE.bom ? parent?.workOrderNumber : _subRow?.workOrder?.workOrderNumber;
-      _subRow.workOrderStatus = _subRow?.workOrder?.status || '';
+      _subRow.workOrderId = _subRow?.workOrder?._id;
+      _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
+      _subRow.status = _subRow?.workOrder?.serviceProcessStatus || '';
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
         _subRow.canAutoCompleteWorkOrder = true;
       }
@@ -255,9 +346,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
       _subRow.canDelete = false;
       if (_subRow?.status !== WORK_ORDER_STATUS.completed) {
-        if (_subRow.type === MATERIAL_TYPE.product) {
-          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
-        }
+        _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
         }
@@ -267,14 +356,62 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     return subRows;
   };
 
+  const generateNestedData = (material, parent) => {
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    subRows = orderBy(subRows, ['type'], ['desc']);
+    let productIndex = 0;
+    let serviceIndex = 0;
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
+      _subRow.detail = _subRow.detail
+        ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.description
+        ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
+      _subRow.qty = _subRow.qty;
+      _subRow.workOrderId = parent?.workOrderId;
+      _subRow.workOrderNumber = parent?.workOrderNumber;
+      _subRow.hideSelection = false;
+      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
+      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+        _subRow.hideSelection = true;
+      }
+      _subRow.canDelete = false;
+      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+        if (_subRow.type === MATERIAL_TYPE.product) {
+          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
+        }
+        if (_subRow.type === MATERIAL_TYPE.service) {
+          _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
+        }
+        if (_subRow.type === MATERIAL_TYPE.package) {
+          _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
+        }
+        if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
+          _subRow.canDelete = false;
+        }
+      }
+    });
+    return subRows;
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     if (
       deleteData?.some(
-        (d) =>
-          d?.type === MATERIAL_TYPE.product &&
-          d?.subType === MATERIAL_SUB_TYPE.bom &&
-          material?.find((r) => r?._id === d?.parentId)?.type === MATERIAL_TYPE.product
+        (e) =>
+          [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) ||
+          (MATERIAL_TYPE.product === e.type && e.parentId && material?.find((r) => r?._id === e?.parentId)?.parentId)
       )
     ) {
       const records: any = [];
@@ -299,9 +436,9 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         message: 'Deleted Successfully'
       });
     } else {
-      if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrderStatus !== WORK_ORDER_STATUS.completed)?.length) {
+      if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.status !== WORK_ORDER_STATUS.completed)?.length) {
         handleDeleteWorkOrder(
-          deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrderStatus !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrderId)
+          deleteData?.filter((e: any) => !e?.subRows?.length && e?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrderId)
         );
       }
     }
@@ -368,6 +505,103 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     }
   };
 
+  const checkParentProduct = (selectedRecords, parentId = null) => {
+    if (parentId) {
+      return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((r) => r?._id === parentId)?.parentId;
+    }
+    return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
+      ? true
+      : false;
+  };
+
+  const checkUniqWorkOrder = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (
+      uniq(
+        map(
+          selectedRecords?.filter((r) => r?.workOrderId),
+          'workOrderId'
+        )
+      ).length === 1
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handleAddService = (ids) => {
+    setIsSubmitting(true);
+    const allWorkOrders = selectedRecords?.filter((r) => r?.workOrderId)?.map((e) => e.workOrderId);
+    const data: any = {};
+    data.serviceIds = ids;
+    data.workOrderIds = [...new Set(allWorkOrders)];
+    axiosInstance()
+      .post(`${workOrder.api}/service`, data)
+      .then(() => {
+        setAddServicesDialog({ open: false, new: false });
+        fetchData();
+        setIsSubmitting(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsSubmitting(false);
+      });
+  };
+
+  const handleAddConsumables = (rows, records = []) => {
+    setIsSubmitting(true);
+    const data: any = [];
+    let workOrderId = '';
+    const product = records?.find((s) => s.type === MATERIAL_TYPE.product);
+    if (product) {
+      workOrderId = product?.workOrderId;
+      rows?.forEach((e) => {
+        data.push({
+          product: e._id,
+          qty: parseInt(e.qty) || 1,
+          subType: MATERIAL_SUB_TYPE.consumable,
+          service: null,
+          uniqueId: null,
+          stepId: null
+        });
+      });
+    } else {
+      const services = records?.filter((s) => s.type === MATERIAL_TYPE.service);
+      workOrderId = services[0]?.workOrderId;
+      services?.forEach((s) => {
+        rows?.forEach((e) => {
+          data.push({
+            product: e._id,
+            qty: parseInt(e.qty) || 1,
+            subType: MATERIAL_SUB_TYPE.consumable,
+            service: s?.serviceDetail?._id,
+            uniqueId: s?.uniqueId,
+            stepId: null,
+            parentId: s?._id
+          });
+        });
+      });
+    }
+    axiosInstance()
+      .post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setIsSubmitting(false);
+        setConsumablesDialog({ open: false, ids: [], data: null });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -382,10 +616,20 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           <ActionButtonMenuItems
             {...{
               selectedRecords,
+              allowedToEdit,
+              permissions,
+              user,
+              checkUniqWorkOrder,
               setDeleteData,
               setShowConfirmBox,
               setAutoCompleteData,
-              setCompleteConfirmBox
+              setCompleteConfirmBox,
+              checkParentProduct,
+              setAddServicesDialog,
+              setUserAssignDialog,
+              setWorkStationAssignDialog,
+              dataRows,
+              setConsumablesDialog
             }}
           />
         }
@@ -402,6 +646,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
+              setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               expander={true}
@@ -438,15 +683,196 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onOk={handleAutoComplete}
         />
       )}
+
+      {addServicesDialog.open && !addServicesDialog.new && (
+        <AssignServiceDialog
+          handleClose={() => setAddServicesDialog({ open: false, new: false })}
+          onSuccess={(data) => {
+            handleAddService(
+              data?.map((e) => {
+                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
+              })
+            );
+          }}
+          isSubmitting={isSubmitting}
+          hideQty={true}
+        />
+      )}
+
+      {addServicesDialog.open && addServicesDialog.new && (
+        <ManageServiceMaster
+          isClone={false}
+          serviceMasterId={null}
+          onClose={() => setAddServicesDialog({ open: false, new: false })}
+          onSuccess={({ data }) => {
+            handleAddService([{ _id: data._id, qty: 1 }]);
+          }}
+          isRedirectToDetailPage={false}
+        />
+      )}
+
+      {userAssignDialog.open && (
+        <AssignUserDialog
+          warehouse={assemblyOrderData?.warehouse?.optionValue}
+          workOrderData={selectedRecords
+            .filter((e) => e.type === MATERIAL_TYPE.service)
+            .map((d) => {
+              return {
+                uniqueId: d?.uniqueId,
+                workOrderId: d?.workOrder?._id
+              };
+            })}
+          reference="service"
+          assignedUsers={userAssignDialog.assignedUsers}
+          handleClose={() => {
+            setUserAssignDialog({ open: false, assignedUsers: [] });
+          }}
+          handleSucess={() => {
+            fetchData();
+            setUserAssignDialog({ open: false, assignedUsers: [] });
+          }}
+          competencies={uniq(
+            flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
+          )}
+        />
+      )}
+
+      {workStationAssignDialog.open && (
+        <AssignWorkStationDialog
+          warehouse={assemblyOrderData?.warehouse?.optionValue}
+          workOrderData={selectedRecords
+            .filter((e) => e.type === MATERIAL_TYPE.service)
+            .map((d) => {
+              return {
+                uniqueId: d?.uniqueId,
+                workOrderId: d?.workOrderId
+              };
+            })}
+          workStations={workStationAssignDialog.assignedWorkStations}
+          handleClose={() => {
+            setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
+          }}
+          handleSucess={() => {
+            fetchData();
+            setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
+          }}
+        />
+      )}
+
+      {consumablesDialog.open && (
+        <AssignProductDialog
+          handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
+          ids={consumablesDialog.ids}
+          onSuccess={(rows) => {
+            handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
+          }}
+          serialized={false}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </>
   );
 };
 
 export default WorkOrder;
 
-const ActionButtonMenuItems = ({ selectedRecords, setDeleteData, setShowConfirmBox, setAutoCompleteData, setCompleteConfirmBox }) => {
+const ActionButtonMenuItems = ({
+  selectedRecords,
+  allowedToEdit,
+  permissions,
+  user,
+  checkUniqWorkOrder,
+  setDeleteData,
+  setShowConfirmBox,
+  setAutoCompleteData,
+  setCompleteConfirmBox,
+  checkParentProduct,
+  setAddServicesDialog,
+  setUserAssignDialog,
+  setWorkStationAssignDialog,
+  dataRows,
+  setConsumablesDialog
+}) => {
   return (
     <>
+      <MenuItem
+        disabled={!checkParentProduct(selectedRecords)}
+        onClick={() => {
+          setAddServicesDialog({ open: true, new: false });
+        }}
+      >
+        Add Existing Services
+      </MenuItem>
+      <MenuItem
+        disabled={!checkParentProduct(selectedRecords)}
+        onClick={() => {
+          setAddServicesDialog({ open: true, new: true });
+        }}
+      >
+        Add New Service
+      </MenuItem>
+      <MenuItem
+        disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
+        onClick={() => {
+          const uniqueAssignedUsers: any = flatMap(
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedUsers || [])
+          );
+          const assignedUsers = [];
+          uniqueAssignedUsers?.forEach((e: any) => {
+            if (!assignedUsers?.find((ele) => ele.optionValue === e.optionValue)) {
+              assignedUsers.push(e);
+            }
+          });
+          setUserAssignDialog({ open: true, assignedUsers: assignedUsers });
+        }}
+      >
+        Assign Technician
+      </MenuItem>
+      {allowedToEdit && permissions?.workStations?.isRead && (
+        <MenuItem
+          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+          onClick={() => {
+            const uniqueAssignedWorkStations: any = flatMap(
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedWorkStations || [])
+            );
+            const assignedWorkStations = [];
+            uniqueAssignedWorkStations?.forEach((e: any) => {
+              if (!assignedWorkStations?.find((ele) => ele.optionValue === e.optionValue)) {
+                assignedWorkStations.push(e);
+              }
+            });
+            setWorkStationAssignDialog({ open: true, assignedWorkStations: assignedWorkStations });
+          }}
+        >
+          Assign Work Station
+        </MenuItem>
+      )}
+      {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+        <MenuItem
+          disabled={
+            selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
+              ? false
+              : true
+          }
+          onClick={() => {
+            var ids = [];
+            if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product)) {
+              const product = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product);
+              ids = flattenArray(dataRows)
+                ?.filter((e) => e?.workOrderId === product?.workOrderId)
+                ?.map((e) => e.materialId);
+            } else {
+              const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+              ids = flattenArray(dataRows)
+                ?.filter((e) => serviceIds?.includes(e?.parentId))
+                ?.map((e) => e.materialId);
+            }
+            setConsumablesDialog({ open: true, ids: ids, data: null });
+          }}
+        >
+          Add Products/Consumables
+        </MenuItem>
+      )}
       <MenuItem
         onClick={() => {
           setAutoCompleteData(selectedRecords);

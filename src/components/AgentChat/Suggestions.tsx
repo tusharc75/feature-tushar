@@ -8,6 +8,8 @@ type SuggetionsProps = {
 };
 const Suggestions = ({ pathname, sendMessage }: SuggetionsProps) => {
   const title = useMemo(() => getPathTitleFromPath(pathname), [pathname]);
+
+  if (!title) return null;
   return (
     <div className="flex min-h-full w-fit max-w-[70%]  flex-col justify-end  ">
       <div className="rounded-lg bg-[#F4F4F4]  text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)]  dark:text-white">
