@@ -11,4 +11,4 @@ export const TRACKING_ID = 'UA-196035023-2'; //Google analytics tracking id
 export const backendApi =
   localStorage.getItem('backendApi') ?? (import.meta.env?.VITE_APP_API_URL || 'https://master.oms-backend.vebholic.com');
 
-export const AI_AGENT = ['local', 'master']?.includes(import.meta.env?.VITE_APP_ENV);
+export const AI_AGENT = ['local', 'master', 'development']?.includes(import.meta.env?.VITE_APP_ENV);
