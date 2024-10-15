@@ -452,10 +452,12 @@ export function adjustSizes(columns: TColType[], containerSize: number): TColTyp
     return null; // No adjustment needed if total size is greater than or equal to container size
   }
 
-  const scaleFactor = containerSize / totalSize;
+  const maxWidthColumnsSum = columns.reduce((acc, size) => acc + (size.maxSize || 0), 0);
+  const scaleFactor = (containerSize - maxWidthColumnsSum) / (totalSize - maxWidthColumnsSum);
+  const scrollerWidth = 3;
 
   return columns.map((col) => {
-    const size = Math.floor(col.size * scaleFactor);
+    const size = Math.floor(col.size * scaleFactor) - scrollerWidth;
     return { ...col, size, width: size };
   });
 }
