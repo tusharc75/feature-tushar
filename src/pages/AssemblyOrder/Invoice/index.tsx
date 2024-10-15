@@ -1,6 +1,6 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,17 +9,12 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 
 const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
-  const toastConfig = useContext(CustomToastContext);
-
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
-
   const { generateColumns } = useColumns();
-
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -173,28 +168,46 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
   return (
     <>
-      {columns ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              hideSelection={true}
-              hideAction={true}
-              isClientSideGrid={true}
-              expander={true}
-            />
-          </Box>
-        </>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
+          <PreviewDownload
+            fileName={`${routes.assemblyOrder.title}-${assemblyOrderData?.assemblyOrderNumber}`}
+            resource={sidebarResource.assemblyOrder}
+            referenceId={assemblyOrderData._id}
+            referenceLabel={assemblyOrderData?.assemblyOrderNumber}
+            columns={columns}
+            isSendEmail={true}
+            isAsyncDownload={true}
+            defaultColumns={['index', `detail`, `description`, `qty`]}
+          />
         </Box>
-      )}
+      </Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={12} sm={12}>
+          {columns ? (
+            <>
+              <Box zIndex={5} width={'100%'}>
+                <CustomReactTable
+                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  hideSelection={true}
+                  hideAction={true}
+                  isClientSideGrid={true}
+                  expander={true}
+                />
+              </Box>
+            </>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Grid>
+      </Grid>
     </>
   );
 };
