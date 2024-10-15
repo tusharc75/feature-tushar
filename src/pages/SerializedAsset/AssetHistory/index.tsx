@@ -14,7 +14,6 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
@@ -44,9 +43,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-              row.original.type === 'Receiving Ticket' ||
-              row.original.type === 'Return Ticket' ||
-              row.original.type === 'Delivery Ticket' ? (
+            row.original.type === 'Receiving Ticket' ||
+            row.original.type === 'Return Ticket' ||
+            row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -186,6 +185,16 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               >
                 {row.original.reference}
               </Link>
+            ) : row?.original?.type === sidebarResource.assemblyOrder ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.assemblyOrderDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
             ) : (
               row.original.reference
             )
@@ -231,9 +240,14 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     {
       accessor: 'comments',
       Header: 'Comment',
-      Cell: ({ row }) => (row.original?.comments ? <div>
-        <p title={row.original?.comments}>{row.original?.comments}</p>
-      </div> : <NoDataCell />)
+      Cell: ({ row }) =>
+        row.original?.comments ? (
+          <div>
+            <p title={row.original?.comments}>{row.original?.comments}</p>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
     },
     {
       accessor: 'warehouse',
@@ -372,20 +386,14 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     <Box>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
-          <DurationFilter
-            label={''}
-            defaultTimeFrame="all"
-            duration={duration}
-            setDuration={setDuration}
-            showAll={true}
-          />
+          <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
         </Box>
         <ImportExportLinks
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => { }}
-          onExportToExcelSuccess={() => { }}
+          afterImportCompleted={() => {}}
+          onExportToExcelSuccess={() => {}}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

@@ -126,11 +126,13 @@ const AssemblyOrderDetail = () => {
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (isManagedPackageCreated = false) => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
+        if (!isManagedPackageCreated) {
+          setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
+        }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
@@ -317,6 +319,7 @@ const AssemblyOrderDetail = () => {
           }}
           assemblyOrderId={id}
           onSuccess={() => {
+            fetchData(true);
             setOpenManagedPackageDialog(false);
             setCurrentStep((prevStep) => {
               const newStep = prevStep + 1;
