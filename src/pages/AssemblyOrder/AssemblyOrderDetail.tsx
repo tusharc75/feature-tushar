@@ -35,6 +35,7 @@ import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import Loading from 'src/pages/AssemblyOrder/Loading';
+import Invoice from 'src/pages/AssemblyOrder/Invoice';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -268,7 +269,9 @@ const AssemblyOrderDetail = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && <></>}
+            {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && (
+              <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
+            )}
           </ContentFullScreen>
         </TabPanel>
         {resourceData &&

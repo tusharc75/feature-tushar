@@ -60,12 +60,13 @@ const TableComponent = forwardRef(function (
   ref: ForwardedRef<HTMLTableElement>
 ) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
+  const colDef = table._getColumnDefs();
 
   const stickyColumns = useMemo(() => {
-    const allColumn = table._getColumnDefs();
+    const allColumn = colDef;
     const stickyData = getStickyColumnNames({ allColumn: allColumn as TColType[], expander, hideSelection });
     return stickyData;
-  }, [expander, hideSelection, table]);
+  }, [expander, hideSelection, colDef]);
 
   const tableRef = useRef<HTMLTableElement | null>(null);
 
