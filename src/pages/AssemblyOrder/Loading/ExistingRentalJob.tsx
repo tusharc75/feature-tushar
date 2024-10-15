@@ -5,14 +5,15 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'assemblyOrder_rental_management_existing';
 
-const ExistingRentalJob = ({ onClose, referenceData, managedPackages }) => {
+const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventory = [], assetPolicyData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity }
@@ -21,12 +22,14 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackages }) => {
   const [columns, setColumns] = useState(null);
   const [showRentalDialog, setShowRentalDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, rentalId: null });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
+    console.log('inventory', inventory);
     fetchGridColumns();
   }, []);
 
@@ -62,30 +65,40 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackages }) => {
     }
   };
 
-  const handleAdd = (data) => {
-    let rentalIds = [];
-    if (data) {
-      rentalIds = [data?._id];
-    } else if (selectedRecords?.length) {
-      rentalIds = selectedRecords?.map((r) => r?._id);
+  const handleAdd = (rentalId) => {
+    if (rentalId) {
+      const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved);
+      if (statusPolicy) {
+        if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+          const assetIds = inventory?.filter((r) => statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
+          if (assetIds && assetIds?.length > 0) {
+            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, _ids: assetIds, rentalId: rentalId });
+          }
+        } else {
+          setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, _ids: inventory?.map((a) => a?._id), rentalId: rentalId });
+        }
+      } else {
+        handleAddManagedPAckage(rentalId);
+      }
     }
-    if (rentalIds?.length > 0) {
-      setIsSubmitting(true);
-      const packageIds = managedPackages?.map((item) => item.managedPackageId);
-      axiosInstance()
-        .post(`${routes.assemblyOrder.path}/loading/managedPackages`, {
-          packageIds: packageIds,
-          rentalIds: rentalIds
-        })
-        .then(() => {
-          setIsSubmitting(false);
-          onClose();
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
+  };
+
+  const handleAddManagedPAckage = (rentalId, reserveAssetsData = null) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`${rentalManagement.api}/productpackage/${rentalId}/managedPackages`, {
+        ids: managedPackageIds,
+        reserveAssetsData: reserveAssetsData
+      })
+      .then(() => {
+        setIsSubmitting(false);
+        setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, rentalId: null });
+        onClose();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -109,7 +122,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackages }) => {
               size="small"
               color="primary"
               onClick={() => {
-                handleAdd(null);
+                handleAdd(selectedRecords[0]?._id);
               }}
               variant={'contained'}
               disabled={isSubmitting || selectedRecords.length > 1 || selectedRecords.length === 0}
@@ -147,7 +160,19 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackages }) => {
             setShowRentalDialog(false);
           }}
           onSuccess={(data) => {
-            handleAdd(data);
+            handleAdd(data?._id);
+          }}
+        />
+      )}
+
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={openAssetDataDialog._ids}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={() => {}}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, rentalId: null })}
+          onSuccess={(_assetData) => {
+            handleAddManagedPAckage(openAssetDataDialog.rentalId, _assetData);
           }}
         />
       )}

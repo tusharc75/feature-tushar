@@ -10,7 +10,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_TYPE } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import ExistingRentalJob from 'src/pages/AssemblyOrder/Loading/ExistingRentalJob';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -24,9 +24,11 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const [columns, setColumns] = useState(null);
   const [existingRentalJobDialog, setExistingRentalJobDialog] = useState(false);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
 
   useEffect(() => {
     fetchFields();
+    fetchPolicy();
   }, [assemblyOrderData]);
 
   const fetchFields = async () => {
@@ -48,7 +50,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       {
         accessor: 'type',
         Header: 'Type',
-        width: 100,
+        width: 150,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
@@ -69,8 +71,10 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -95,7 +99,23 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original['managedPackageName'] ? <h5 className="text-truncate">{row.original.managedPackageName}</h5> : <NoDataCell />;
+          return row.original?.managedPackageName ? (
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row.original?.managedPackageName}</h5>{' '}
+              <Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.managedPackagesDetail.path}/${row.original.managedPackageId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       }
     ];
@@ -111,6 +131,19 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     setColumns(coloum);
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -118,11 +151,12 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     setNextStep(false);
-    const {
-      data: { data, count }
-    } = await axiosInstance().get(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`);
 
-    let rows = data?.material?.filter((e) => e.parentId === null);
+    const {
+      data: { data }
+    } = await axiosInstance().get(`${routes.assemblyOrder.path}/loading/${assemblyOrderData?._id}`);
+
+    const rows = data?.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -131,10 +165,10 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.qtyDisplay = parent.qty;
       parent.managedPackageId = parent?.managedPackageDetail?._id;
       parent.managedPackageName = parent?.managedPackageDetail?.managedPackageName;
-      parent.subRows = generateNestedData(data.material, parent);
+      parent.subRows = generateNestedData(data, parent);
     });
 
-    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'initialize', data: rows, count: 2 });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -142,9 +176,15 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow?.assetDetail?.assetNumber
+            : '';
       _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
-      _subRow.qty = _subRow.qty;
+      _subRow.qty = _subRow.qty || 1;
+      _subRow.qtyDisplay = _subRow.qty || 1;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -154,6 +194,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
           onClick={() => {
             setExistingRentalJobDialog(true);
           }}
@@ -206,7 +247,14 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             setExistingRentalJobDialog(false);
           }}
           referenceData={assemblyOrderData}
-          managedPackages={selectedRecords?.filter((r) => r?.managedPackageId)}
+          managedPackageIds={selectedRecords?.filter((r) => r?.managedPackageId)?.map((m) => m?.managedPackageId)}
+          inventory={selectedRecords
+            ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
+            ?.map((a) => ({
+              _id: a?.materialId,
+              productId: a?.assetDetail?.product
+            }))}
+          assetPolicyData={assetPolicyData}
         />
       )}
     </>
