@@ -33,6 +33,7 @@ const AddExistingProduct = (props) => {
   const [productCategory, setProductCategory] = useState(null);
   const [productTemplate, setProductTemplate] = useState(null);
   const [isProductTemplate, setIsProductTemplate] = useState(true);
+  const [orderedSelectedRecords, setOrderedSelectedRecords] = useState([]);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -75,6 +76,22 @@ const AddExistingProduct = (props) => {
       fetchProduct();
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
+
+  useEffect(()=>{
+   if(selectedRecords?.length){
+    const newlySelected = selectedRecords?.filter(data => !orderedSelectedRecords?.some(item => item._id === data._id)) || [];
+    const deselected = orderedSelectedRecords?.filter(item => !selectedRecords?.some(data => data._id === item._id));
+
+    let updatedOrder = [];
+    if(orderedSelectedRecords?.length){
+      updatedOrder = [...orderedSelectedRecords?.filter(item => !deselected?.some(d => d._id === item._id))]
+    }
+  
+    updatedOrder = [...updatedOrder, ...newlySelected];
+
+    setOrderedSelectedRecords(updatedOrder);
+   }
+  },[selectedRecords])
 
   useEffect(() => {
     axiosInstance()
@@ -177,7 +194,7 @@ const AddExistingProduct = (props) => {
   };
 
   const handleAdd = () => {
-    const orderIds = selectedRecords?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
+    const orderIds = orderedSelectedRecords?.map((m) => m._id);
 
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
