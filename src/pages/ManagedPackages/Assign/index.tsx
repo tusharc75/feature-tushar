@@ -205,63 +205,70 @@ const Assign = ({ managedPackagesData }) => {
 
     axiosInstance()
       .get(`/managed-packages/${managedPackagesData?.package?.optionValue}/serialized-products`)
-      .then(({ data: { data } }) => {
-        const rows = [];
-        const packages = new Set();
-        let index = 1;
-        data?.forEach((parent) => {
-          let row: any = {};
-          if (parent?.package?.optionValue) {
-            if (!packages.has(parent?.package?.optionValue)) {
+      .then(
+        ({
+          data: {
+            data: { material, childProduct }
+          }
+        }) => {
+          const rows = [];
+          const packages = new Set();
+          let index = 1;
+          material?.forEach((parent) => {
+            let row: any = {};
+            if (parent?.package?.optionValue) {
+              if (!packages.has(parent?.package?.optionValue)) {
+                row.index = index;
+                row._id = parent?.package?.optionValue;
+                row.type = MATERIAL_TYPE.package;
+                row.detail = parent.package.optionLabel;
+                row.qty = parent?.package?.qty;
+                row.subRows = generateNestedData(material, [], assets, row);
+                packages.add(row._id);
+                row.parentId = null;
+                rows.push(row);
+                index++;
+              }
+            } else {
+              row = { ...parent };
               row.index = index;
-              row._id = parent?.package?.optionValue;
-              row.type = MATERIAL_TYPE.package;
-              row.detail = parent.package.optionLabel;
-              row.qty = parent?.package?.qty;
-              row.subRows = generateNestedData(data, assets, row);
-              packages.add(row._id);
+              row.productId = parent?._id;
+              row.type = MATERIAL_TYPE.product;
+              row.detail = parent?.productName;
+              row.description = parent?.productDescription;
+              row.productNumber = parent?.productNumber;
+              row.productCategory = parent?.productCategory?.optionLabel;
+              row.qty = parent?.qty;
+              row.assetQty =
+                assets?.filter((i: any) => {
+                  if (i?.package) {
+                    return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
+                  } else {
+                    return i.product.optionValue === row.productId && !row?.package;
+                  }
+                })?.length || 0;
+              row.subRows = generateNestedData([], childProduct, assets, row);
               row.parentId = null;
               rows.push(row);
               index++;
             }
-          } else {
-            row = { ...parent };
-            row.index = index;
-            row.productId = parent?._id;
-            row.type = MATERIAL_TYPE.product;
-            row.detail = parent?.productName;
-            row.description = parent?.productDescription;
-            row.productNumber = parent?.productNumber;
-            row.productCategory = parent?.productCategory?.optionLabel;
-            row.qty = parent?.qty;
-            row.assetQty =
-              assets?.filter((i: any) => {
-                if (i?.package) {
-                  return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
-                } else {
-                  return i.product.optionValue === row.productId && !row?.package;
-                }
-              })?.length || 0;
-            row.subRows = generateNestedData([], assets, row);
-            row.parentId = null;
-            rows.push(row);
-            index++;
-          }
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
+          });
+          dispatch({ type: 'initialize', data: rows, count: rows?.length });
+          dispatch({ type: 'loading', loading: false });
+        }
+      )
       .catch((err) => {
         setToastConfig(err);
       });
   };
 
-  const generateNestedData = (material, assets, parent) => {
-    let subRows: any;
-    if (parent.type === MATERIAL_TYPE.package) {
-      subRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
-      subRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1);
+  const generateNestedData = (material, childProduct, assets, parent) => {
+    let subRows: any = [];
+
+    if (material?.length > 0 && parent.type === MATERIAL_TYPE.package) {
+      const packageSubRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
+      packageSubRows.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
         _subRow.productId = _subRow._id;
         _subRow._id = parent._id + _subRow._id;
         _subRow.type = MATERIAL_TYPE.product;
@@ -279,18 +286,47 @@ const Assign = ({ managedPackagesData }) => {
               return i.product.optionValue === _subRow.productId && !_subRow?.package;
             }
           })?.length || 0;
-        _subRow.subRows = generateNestedData([], assets, _subRow);
+        _subRow.subRows = generateNestedData([], childProduct, assets, _subRow);
       });
-    } else {
-      subRows = assets.filter((e) => {
-        if (e?.package) {
-          return e.product.optionValue === parent.productId && e?.package?.optionValue === parent?.package?.optionValue;
-        } else {
-          return e.product.optionValue === parent.productId && !parent?.package;
-        }
+
+      subRows = [...subRows, ...packageSubRows];
+    }
+
+    if (childProduct?.length > 0) {
+      let childSubRows = childProduct?.filter((e) => {
+        return e.product === parent.productId;
       });
-      subRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1);
+
+      childSubRows = childSubRows?.map((_subRow, j) => {
+        const data: any = {
+          index: parent.index + '.' + (j + 1 + (subRows?.length || 0)),
+          _id: _subRow?._id,
+          type: MATERIAL_TYPE.product,
+          detail: _subRow?.childProductDetail?.productName,
+          productId: _subRow?.childProductDetail?._id,
+          description: _subRow?.childProductDetail?.productDescription,
+          productCategory: _subRow?.childProductDetail?.productCategory?.optionLabel,
+          productNumber: _subRow?.childProductDetail?.productNumber,
+          parentId: parent?._id,
+          qty: _subRow?.qty,
+          assetQty:
+            assets?.filter((i: any) => {
+              return i.product.optionValue === _subRow?.childProductDetail?._id;
+            })?.length || 0,
+          serializedProduct: _subRow?.childProductDetail?.serializedProduct
+        };
+        return { ...data, subRows: generateNestedData([], [], assets, data) };
+      });
+
+      subRows = [...subRows, ...childSubRows];
+    }
+
+    if (assets?.length > 0) {
+      const assetsSubRows = assets.filter((e) => {
+        return e.product.optionValue === parent.productId;
+      });
+      assetsSubRows.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetNumber;
         _subRow.description = _subRow?.description;
@@ -299,7 +335,50 @@ const Assign = ({ managedPackagesData }) => {
         _subRow.parentId = _subRow?.product?.optionValue;
         _subRow.qty = parent.qty;
       });
+      subRows = [...subRows, ...assetsSubRows];
     }
+    // if (parent.type === MATERIAL_TYPE.package) {
+    //   subRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
+    //   subRows.forEach((_subRow, j) => {
+    //     _subRow.index = parent.index + '.' + (j + 1);
+    //     _subRow.productId = _subRow._id;
+    //     _subRow._id = parent._id + _subRow._id;
+    //     _subRow.type = MATERIAL_TYPE.product;
+    //     _subRow.detail = _subRow?.productName;
+    //     _subRow.description = _subRow?.productDescription;
+    //     _subRow.productNumber = _subRow?.productNumber;
+    //     _subRow.productCategory = _subRow?.productCategory?.optionLabel;
+    //     _subRow.qty = parent.qty * _subRow.qty;
+    //     _subRow.parentId = parent?._id;
+    //     _subRow.assetQty =
+    //       assets?.filter((i: any) => {
+    //         if (i?.package) {
+    //           return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
+    //         } else {
+    //           return i.product.optionValue === _subRow.productId && !_subRow?.package;
+    //         }
+    //       })?.length || 0;
+    //     _subRow.subRows = generateNestedData([], [], assets, _subRow);
+    //   });
+    // } else {
+    //   subRows = assets.filter((e) => {
+    //     if (e?.package) {
+    //       return e.product.optionValue === parent.productId && e?.package?.optionValue === parent?.package?.optionValue;
+    //     } else {
+    //       return e.product.optionValue === parent.productId && !parent?.package;
+    //     }
+    //   });
+    //   subRows.forEach((_subRow, j) => {
+    //     _subRow.index = parent.index + '.' + (j + 1);
+    //     _subRow.type = MATERIAL_TYPE.serializedAsset;
+    //     _subRow.detail = _subRow?.assetNumber;
+    //     _subRow.description = _subRow?.description;
+    //     _subRow.productCategory = _subRow?.productCategory?.optionLabel;
+    //     _subRow.position = _subRow?.position;
+    //     _subRow.parentId = _subRow?.product?.optionValue;
+    //     _subRow.qty = parent.qty;
+    //   });
+    // }
     return subRows;
   };
 
@@ -343,6 +422,7 @@ const Assign = ({ managedPackagesData }) => {
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
+    console.log('selectedRecords', selectedRecords);
     const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty);
     return flatArray.length === 0;
   };
