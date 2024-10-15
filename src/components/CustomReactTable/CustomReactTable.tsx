@@ -102,7 +102,7 @@ const CustomReactTable = ({
     });
   }
 
-  const newColumns1 = useCreateColumns({
+  const hookColumns = useCreateColumns({
     columns,
     expander,
     fetchChildAttachment,
@@ -117,8 +117,8 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    setNewColumns(newColumns1);
-  }, [newColumns1]);
+    setNewColumns(hookColumns);
+  }, [hookColumns]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
