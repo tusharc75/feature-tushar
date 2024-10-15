@@ -55,10 +55,10 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
     setState({ type: 'reset' });
   };
 
-  useEffect(() => {
-    setState({ type: 'reset' });
-    setIsChatboxOpen(false);
-  }, [pathname, setState]);
+  // useEffect(() => {
+  //   setState({ type: 'reset' });
+  //   setIsChatboxOpen(false);
+  // }, [pathname, setState]);
 
   return (
     <Grow in={isChatboxOpen} unmountOnExit>
