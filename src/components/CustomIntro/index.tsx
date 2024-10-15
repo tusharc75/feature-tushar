@@ -10,7 +10,8 @@ import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { IS_AI_PRESENT, useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { AI_AGENT } from 'src/config';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
@@ -283,7 +284,6 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
   const isMobile = useMediaQuery('(max-width:768px)');
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
-  const [isAIPresent] = useStore((store) => store[IS_AI_PRESENT]);
   const [stepsForThisPage, setStepsForThisPage] = useState<WalkmeData[]>([]);
   const [filteredSteps, setFilteredSteps] = useState<WalkmeData[]>([]);
   const [search, setSearch] = useState('');
@@ -310,7 +310,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   return (
     <>
-      <div className={cn('floating-card fixed bottom-2  z-[50]', isAIPresent ? 'right-[60px]' : 'right-3')}>
+      <div className={cn('floating-card fixed bottom-2  z-[50]', AI_AGENT ? 'right-[60px]' : 'right-3')}>
         <HtmlTooltip className="block" title={'Walk me'}>
           <button
             type="button"
@@ -318,10 +318,9 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
             onClick={() => setOpen(true)}
           >
             <span className="sr-only">Walk me</span>
-            {!isAIPresent && (
+            {!AI_AGENT && (
               <span className="pointer-events-none absolute inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
             )}
-
             <FaQuestion className=" block h-5 w-5 text-gray-600 transition-all duration-300 group-hover:h-7 group-hover:w-7 dark:text-gray-200" />
           </button>
         </HtmlTooltip>

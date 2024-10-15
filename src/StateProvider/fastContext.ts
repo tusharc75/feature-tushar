@@ -13,7 +13,6 @@ export const WALK_ME_STEPS = 'walkMeSteps';
 export const WALK_ME_INSTANCE = 'walkMeInstance';
 export const GRID_METADATA = 'gridMetaData';
 export const USER_FAVOURITES = 'userFavorites';
-export const IS_AI_PRESENT = 'isAIPresent';
 
 const initialState: {
   searchQuery: string;
@@ -28,7 +27,6 @@ const initialState: {
   walkMeInstance: StateWalkmeInstance | null;
   gridMetaData: { [key: string]: { hide: string[]; order: string[]; name?: string; id?: string } | null };
   userFavorites: { [key: string]: boolean } | null;
-  isAIPresent: boolean;
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -42,7 +40,6 @@ const initialState: {
   walkMeInstance: null,
   gridMetaData: {},
   userFavorites: null,
-  isAIPresent: false
 };
 
 const { Provider, useStore } = createFastContext(initialState);

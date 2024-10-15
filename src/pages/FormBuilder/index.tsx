@@ -24,7 +24,7 @@ const FormBuilder = () => {
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [openSectionMaster, setOpenSectionMaster] = useState(false);
   const [resource, setResource] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
 
@@ -42,6 +42,7 @@ const FormBuilder = () => {
         accessor: 'resourceLabel',
         Header: 'Resource Label',
         primaryField: true,
+        width: 300,
         Cell: ({ row }) => (
           <div>
             <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
@@ -53,16 +54,19 @@ const FormBuilder = () => {
       {
         accessor: 'homePageLabel',
         Header: 'Home Page Label',
+        width: 300,
         Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
       },
       {
         accessor: 'section',
         Header: 'Section',
+        width: 300,
         Cell: ({ row }) => (row?.original?.section ? <p className="text-truncate">{row?.original?.section}</p> : <NoDataCell />)
       },
       {
         accessor: 'resource',
         Header: 'Resource',
+        width: 300,
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
       },
       {

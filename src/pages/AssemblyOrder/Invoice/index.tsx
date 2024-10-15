@@ -1,6 +1,6 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,30 +9,20 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import PreviewDownload from 'src/components/PreviewDownload';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
-import ExistingRentalJob from 'src/pages/AssemblyOrder/Loading/ExistingRentalJob';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
-  const toastConfig = useContext(CustomToastContext);
-
+const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
-
   const { generateColumns } = useColumns();
-
   const [columns, setColumns] = useState(null);
-  const [existingRentalJobDialog, setExistingRentalJobDialog] = useState(false);
-  const [assetPolicyData, setAssetPolicyData] = useState(null);
 
   useEffect(() => {
     fetchFields();
-    fetchPolicy();
   }, [assemblyOrderData]);
 
   const fetchFields = async () => {
-    const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
+    const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', false);
     const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
@@ -131,26 +121,12 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     setColumns(coloum);
   };
 
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    setNextStep(false);
 
     const {
       data: { data }
@@ -168,9 +144,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.subRows = generateNestedData(data, parent);
     });
 
-    if (rows?.every((r) => r?.managedPackageId)) {
-      setNextStep(true);
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -193,75 +166,50 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     return subRows;
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
-          onClick={() => {
-            setExistingRentalJobDialog(true);
-          }}
-        >
-          Add In Rental Job
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
-      {allowedToEdit && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={false}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
-            hasXpadding
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center" gridGap={'8px'}>
+          <PreviewDownload
+            fileName={`${routes.assemblyOrder.title}-${assemblyOrderData?.assemblyOrderNumber}`}
+            resource={sidebarResource.assemblyOrder}
+            referenceId={assemblyOrderData._id}
+            referenceLabel={assemblyOrderData?.assemblyOrderNumber}
+            columns={columns}
+            isSendEmail={true}
+            isAsyncDownload={true}
+            defaultColumns={['index', `detail`, `description`, `qty`]}
           />
-        </>
-      )}
-      {columns ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              isClientSideGrid={true}
-              expander={true}
-            />
-          </Box>
-        </>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-
-      {existingRentalJobDialog && (
-        <ExistingRentalJob
-          onClose={() => {
-            setExistingRentalJobDialog(false);
-          }}
-          referenceData={assemblyOrderData}
-          managedPackageIds={selectedRecords?.filter((r) => r?.managedPackageId)?.map((m) => m?.managedPackageId)}
-          inventory={selectedRecords
-            ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
-            ?.map((a) => ({
-              _id: a?.materialId,
-              productId: a?.assetDetail?.product
-            }))}
-          assetPolicyData={assetPolicyData}
-        />
-      )}
+      </Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={12} sm={12}>
+          {columns ? (
+            <>
+              <Box zIndex={5} width={'100%'}>
+                <CustomReactTable
+                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  hideSelection={true}
+                  hideAction={true}
+                  isClientSideGrid={true}
+                  expander={true}
+                />
+              </Box>
+            </>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Grid>
+      </Grid>
     </>
   );
 };
 
-export default Loading;
+export default Invoice;

@@ -35,7 +35,7 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'sectionName',
         Header: 'Section Name',
-        width: 150,
+        width: 500,
         disabled: true,
         Cell: ({ row }) => {
           const iconName = row.original?.iconName
@@ -56,8 +56,8 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'description',
         Header: 'Description',
-        width: 150,
         disabled: true,
+        width: 500,
         Cell: ({ row }) => {
           return row?.original['description'] ? <p className="text-truncate">{row?.original['description']}</p> : <NoDataCell />;
         }
@@ -65,8 +65,7 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 60,
-        width: 60,
+        width: 100,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -150,6 +149,7 @@ const SectionMaster = ({ close }) => {
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 hideExportTable={true}
+                showArrangeView={false}
               />
             </Box>
           ) : (

@@ -8,56 +8,49 @@ const intialState = {
 };
 
 function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitialChatboxState {
+  let newState = { ...state };
   switch (action.type) {
     case 'setSessionId':
-      return {
-        ...state,
-        sessionId: action.sessionId
-      };
+      newState = { ...newState, sessionId: action.sessionId };
+      break;
     case 'setMessages':
-      return {
-        ...state,
-        messages: action.messages
-      };
+      newState = { ...newState, messages: action.messages };
+      break;
     case 'setLoading':
-      return {
-        ...state,
-        loading: action.loading
-      };
+      newState = { ...newState, loading: action.loading };
+      break;
     case 'setError':
-      return {
-        ...state,
-        error: action.error
-      };
+      newState = { ...newState, error: action.error };
+      break;
     case 'initUserMessage': {
-      return {
-        ...state,
+      newState = {
+        ...newState,
         messages: [...state.messages, { _id: `${Date.now()}`, content: action.payload.query, role: 'user' }],
         loading: true,
         error: null
       };
+      break;
     }
     case 'setNewUserMessage':
-      return {
-        ...state,
-        messages: [...state.messages, { _id: `${Date.now()}`, content: action.payload.query, role: 'user' }]
-      };
+      newState = { ...newState, messages: [...state.messages, { _id: `${Date.now()}`, content: action.payload.query, role: 'user' }] };
+      break;
     case 'setNewAssistantMessage': {
-      return {
-        ...state,
+      newState = {
+        ...newState,
         messages: [...state.messages, { _id: `${Date.now()}`, content: action.payload.reply, role: 'assistant' }],
         loading: false,
         ...(!state.sessionId ? { sessionId: action.payload.session } : {})
       };
+      break;
     }
     case 'reset': {
+      newState = { ...intialState };
       return intialState;
     }
     default:
       break;
   }
-
-  return state;
+  return newState;
 }
 
 export type TInitialChatboxState = {

@@ -35,6 +35,7 @@ import Material from 'src/pages/AssemblyOrder/Material';
 import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import Loading from 'src/pages/AssemblyOrder/Loading';
+import Invoice from 'src/pages/AssemblyOrder/Invoice';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -126,11 +127,13 @@ const AssemblyOrderDetail = () => {
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (isManagedPackageCreated = false) => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
+        if (!isManagedPackageCreated) {
+          setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
+        }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
@@ -266,7 +269,9 @@ const AssemblyOrderDetail = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && <></>}
+            {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && (
+              <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
+            )}
           </ContentFullScreen>
         </TabPanel>
         {resourceData &&
@@ -317,6 +322,7 @@ const AssemblyOrderDetail = () => {
           }}
           assemblyOrderId={id}
           onSuccess={() => {
+            fetchData(true);
             setOpenManagedPackageDialog(false);
             setCurrentStep((prevStep) => {
               const newStep = prevStep + 1;

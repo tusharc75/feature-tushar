@@ -66,8 +66,7 @@ const Roles: FC = () => {
     {
       accessor: 'name',
       Header: 'Name',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       primaryField: true,
       disabled: true,
       Cell: ({ row }) => (
@@ -85,8 +84,7 @@ const Roles: FC = () => {
     {
       accessor: 'description',
       Header: 'Description',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.description ? (
@@ -102,8 +100,7 @@ const Roles: FC = () => {
     {
       accessor: 'tier',
       Header: 'Tier',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.tier ? (
@@ -325,7 +322,7 @@ const Roles: FC = () => {
             onSuccess={() => {
               userDialogClose();
             }}
-            selectedEntity={[selectedEntity] || []}
+            selectedEntity={selectedEntity ? [selectedEntity] : []}
           />
         ) : (
           <AssignRegionalRolesUserDialog
@@ -439,8 +436,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-          permissions?.role?.isDelete &&
-          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }
@@ -453,8 +450,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-          permissions?.role?.isDelete &&
-          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }

@@ -596,8 +596,10 @@ $isAppliedBillDark: #234623;
   }
 
   tfoot {
-    border-top: 1px solid var(--common-border-color);
-    border-bottom: 1px solid var(--common-border-color);
+    tr {
+      border-top: 1px solid var(--common-border-color);
+      border-bottom: 1px solid var(--common-border-color);
+    }
     th {
       text-align: left;
       &::after {
