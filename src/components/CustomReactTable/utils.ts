@@ -454,6 +454,9 @@ export function adjustSizes(columns: TColType[], containerSize: number): TColTyp
 
   const maxWidthColumnsSum = columns.reduce((acc, size) => acc + (size.maxSize || 0), 0);
   const scaleFactor = (containerSize - maxWidthColumnsSum) / (totalSize - maxWidthColumnsSum);
+  if (scaleFactor === Infinity) {
+    return null;
+  }
   const scrollerWidth = 3;
 
   return columns.map((col) => {
