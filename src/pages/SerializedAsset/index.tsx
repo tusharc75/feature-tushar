@@ -78,7 +78,7 @@ const SerializedAsset = () => {
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
-  const [statusOptions, setStatusOptions] = useState(null);
+  const [otherStatusOptions, setOtherStatusOptions] = useState(null);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const SerializedAsset = () => {
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option]);
+            setOtherStatusOptions([...o.fieldData.option?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))]);
             setAllowUpdateStatus(o?.isUpdate);
             return true;
           }
@@ -552,7 +552,7 @@ const SerializedAsset = () => {
                 handleStatusChange,
                 columns,
                 setOpenSupplierAccountDialog,
-                statusOptions
+                otherStatusOptions
               }}
             />
           }
@@ -807,7 +807,7 @@ const ActionMenuItems = ({
   handleStatusChange,
   columns,
   setOpenSupplierAccountDialog,
-  statusOptions
+  otherStatusOptions
 }) => {
   return (
     <>
@@ -940,34 +940,30 @@ const ActionMenuItems = ({
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
           </MenuItem>
-          {statusOptions
-            ?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))
-            ?.map((status) => {
-              return (
-                <MenuItem
-                  onClick={() => {
-                    handleStatusChange(status?.optionValue);
-                  }}
-                  disabled={
-                    !selectedRecords?.every((r) =>
-                      [
-                        ASSET_STATUS.new,
-                        ASSET_STATUS.available,
-                        ASSET_STATUS.underReview,
-                        ASSET_STATUS.scrap,
-                        ASSET_STATUS.needRepair,
-                        ASSET_STATUS.needRecert,
-                        ...(statusOptions
-                          ?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue) && o?.optionValue != status?.optionValue)
-                          ?.map((o) => o?.optionValue) || [])
-                      ]?.includes(r?.status)
-                    )
-                  }
-                >
-                  {`Status Change - ${status?.optionLabel}`}
-                </MenuItem>
-              );
-            })}
+          {otherStatusOptions?.map((status) => {
+            return (
+              <MenuItem
+                onClick={() => {
+                  handleStatusChange(status?.optionValue);
+                }}
+                disabled={
+                  !selectedRecords?.every((r) =>
+                    [
+                      ASSET_STATUS.new,
+                      ASSET_STATUS.available,
+                      ASSET_STATUS.underReview,
+                      ASSET_STATUS.scrap,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ...(otherStatusOptions?.filter((o) => o?.optionValue != status?.optionValue)?.map((o) => o?.optionValue) || [])
+                    ]?.includes(r?.status)
+                  )
+                }
+              >
+                {`Status Change - ${status?.optionLabel}`}
+              </MenuItem>
+            );
+          })}
           {columns?.some((e) => e.field === 'certificationSupplier') && (
             <MenuItem
               disabled={!permissions?.serializedAsset?.isUpdate}
