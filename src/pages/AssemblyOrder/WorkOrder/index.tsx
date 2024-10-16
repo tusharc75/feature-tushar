@@ -24,6 +24,8 @@ import { flattenArray } from 'src/constants/columns';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -50,6 +52,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
+  const [arrangeView, setArrangeView] = useState(false);
+  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const { generateColumns } = useColumns();
 
@@ -258,10 +262,10 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       minWidth: 100,
       width: 100,
       sticky: 'right',
-      Cell: ({ row }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
-            {checkParentProduct([row?.original], row?.original?.parentId) && (
+            {checkParentProduct([row?.original], row?.original?.parentId, table.getRowModel().rows) && (
               <HtmlTooltip title="Auto Complete Work Order">
                 <IconButton
                   size="small"
@@ -505,9 +509,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     }
   };
 
-  const checkParentProduct = (selectedRecords, parentId = null) => {
-    if (parentId) {
-      return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((r) => r?._id === parentId)?.parentId;
+  const checkParentProduct = (selectedRecords, parentId = null, rows = []) => {
+    if (parentId && rows?.length > 0) {
+      return selectedRecords[0]?.type === MATERIAL_TYPE.product && !rows?.find((r) => r?.original?._id === parentId)?.original?.parentId;
+    } else if (parentId && rows?.length === 0) {
+      return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
     return selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === e?.parentId)?.parentId)?.length
       ? true
@@ -602,6 +608,27 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
+  const handleArrangeUpdate = (rows: any[], workOrderId) => {
+    rows?.forEach((e: any) => {
+      delete e.name;
+      delete e.preWork;
+    });
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
+      .then(({ data }) => {
+        fetchData();
+        setArrangeView(false);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -629,7 +656,9 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               setUserAssignDialog,
               setWorkStationAssignDialog,
               dataRows,
-              setConsumablesDialog
+              setConsumablesDialog,
+              setArrangeView,
+              setAttachmentsDialog
             }}
           />
         }
@@ -770,6 +799,49 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           isSubmitting={isSubmitting}
         />
       )}
+
+      {arrangeView && (
+        <ArrangeView
+          data={
+            flattenArray(dataRows)
+              ?.filter((e) => e.type === MATERIAL_TYPE.service && e?.workOrderId === selectedRecords[0]?.workOrderId)
+              ?.map((d) => {
+                return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
+              }) || []
+          }
+          title={'Arrange Services'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrderId)}
+          loading={false}
+        />
+      )}
+
+      {attachmentsDialog.open && (
+        <AttachmentDialog
+          workOrderId={attachmentsDialog.workOrderId}
+          uniqueServiceId={attachmentsDialog.uniqueServiceId}
+          stepId={null}
+          stepName={attachmentsDialog.serviceName}
+          serviceName={attachmentsDialog.serviceName}
+          handleClose={() => {
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
+          }}
+          handleSuccess={() => {
+            fetchData();
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
+          }}
+        />
+      )}
     </>
   );
 };
@@ -791,7 +863,9 @@ const ActionButtonMenuItems = ({
   setUserAssignDialog,
   setWorkStationAssignDialog,
   dataRows,
-  setConsumablesDialog
+  setConsumablesDialog,
+  setArrangeView,
+  setAttachmentsDialog
 }) => {
   return (
     <>
@@ -875,12 +949,56 @@ const ActionButtonMenuItems = ({
       )}
       <MenuItem
         onClick={() => {
+          setArrangeView(true);
+        }}
+        disabled={
+          selectedRecords?.length &&
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            ? false
+            : true
+        }
+      >
+        Arrange Services
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
           setAutoCompleteData(selectedRecords);
           setCompleteConfirmBox(true);
         }}
         disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
       >
         Auto Complete Work Order(s)
+      </MenuItem>
+      <MenuItem
+        disabled={
+          checkUniqWorkOrder() &&
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            ? false
+            : true
+        }
+        onClick={() => {
+          const parentProduct = selectedRecords?.find((e) => checkParentProduct([e], e?.parentId));
+          if (parentProduct) {
+            setAttachmentsDialog({
+              open: true,
+              workOrderId: parentProduct?.workOrderId,
+              uniqueServiceId: null,
+              serviceName: parentProduct?.workOrderNumber
+            });
+          } else {
+            const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
+            setAttachmentsDialog({
+              open: true,
+              workOrderId: service?.workOrderId,
+              uniqueServiceId: service?.uniqueId,
+              serviceName: service?.serviceDetail?.serviceName
+            });
+          }
+        }}
+      >
+        Upload Documents
       </MenuItem>
       <MenuItem
         onClick={() => {

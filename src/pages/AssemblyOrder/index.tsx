@@ -19,6 +19,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AssemblyOrder = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -238,10 +239,10 @@ const AssemblyOrder = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.assemblyOrder]} />
-        {/* <ImportExportLinks
-          permissions={permissions?.productionOrder}
-          module={routes.productionOrder.title}
-          api={productionOrder.api}
+        <ImportExportLinks
+          permissions={permissions?.assemblyOrder}
+          module={routes.assemblyOrder.title}
+          api={routes.assemblyOrder.path}
           afterImportCompleted={() => {
             fetchData();
           }}
@@ -253,7 +254,7 @@ const AssemblyOrder = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
-        /> */}
+        />
       </div>
       <CustomContainer>
         <ListingPageHeader
