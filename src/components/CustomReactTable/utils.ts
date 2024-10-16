@@ -143,8 +143,8 @@ export const getStickyColumnNames = ({
   expander: boolean;
   hideSelection: boolean;
 }) => {
-  const left = [];
-  const right = [];
+  const left: string[] = [];
+  const right: string[] = [];
   const stickyColumns = [];
   const stickyIndexes: number[] = [];
   const leftIndexes: number[] = [];
