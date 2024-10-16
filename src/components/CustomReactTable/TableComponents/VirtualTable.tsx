@@ -4,12 +4,15 @@ import MaUTable from '@material-ui/core/Table';
 import { Error } from '@material-ui/icons';
 import { flexRender } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
-import React, { ForwardedRef, forwardRef, memo, useEffect, useMemo } from 'react';
+import React, { ForwardedRef, forwardRef, Fragment, memo, useEffect, useMemo } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
 import { getStickyPosition } from '../utils';
 import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 
 const MemoizedCellRenderer = memo(CellRenderer);
+
+let virtualPaddingLeft: number | undefined;
+let virtualPaddingRight: number | undefined;
 
 export const VirtualTable = forwardRef(function (
   {
@@ -82,10 +85,8 @@ export const VirtualTable = forwardRef(function (
   }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
-  const { leftIndexes: stickyLeft, rightIndexes: stickyRight } = stickyColumns;
-
-  let virtualPaddingLeft: number | undefined;
-  let virtualPaddingRight: number | undefined;
+  const virtualrows = rowVirtualizer.getVirtualItems();
+  const { leftIndexes: stickyLeft, rightIndexes: stickyRight, right, left } = stickyColumns;
 
   if (columnVirtualizer && virtualColumns?.length) {
     let leftIndex = 0;
@@ -158,39 +159,36 @@ export const VirtualTable = forwardRef(function (
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
                 <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
-                  {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+                  {virtualPaddingLeft && left.length === 0 ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                  ) : null}
                   {virtualColumns.map((vc) => {
                     const header = headerGroup.headers[vc?.index];
                     if (!header) return null;
                     return (
-                      <DraggableHeader
-                        virtualization={virtualization}
-                        table={table}
-                        customFilters={customFilters}
-                        dispatch={dispatch}
-                        isClientSideGrid={isClientSideGrid}
-                        header={header}
-                        key={header.id}
-                        resource={resource}
-                      />
+                      <Fragment key={header.id}>
+                        {right.length && header.id === right[0] && virtualPaddingRight ? (
+                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                        ) : null}
+                        <DraggableHeader
+                          virtualization={virtualization}
+                          table={table}
+                          customFilters={customFilters}
+                          dispatch={dispatch}
+                          isClientSideGrid={isClientSideGrid}
+                          header={header}
+                          key={header.id}
+                          resource={resource}
+                        />
+                        {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
+                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                        ) : null}
+                      </Fragment>
                     );
                   })}
-                  {virtualPaddingRight ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} /> : null}
-                  {/* {headerGroup.headers.map((header) => {
-                    if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
-                    return (
-                      <DraggableHeader
-                        virtualization={virtualization}
-                        table={table}
-                        customFilters={customFilters}
-                        dispatch={dispatch}
-                        isClientSideGrid={isClientSideGrid}
-                        header={header}
-                        key={header.id}
-                        resource={resource}
-                      />
-                    );
-                  })} */}
+                  {virtualPaddingRight && right.length === 0 ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                  ) : null}
                 </SortableContext>
               </TableRow>
             ))}
@@ -201,7 +199,7 @@ export const VirtualTable = forwardRef(function (
             }}
             className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
           >
-            <VirtualTableBody
+            <MemoizedVirtualBody
               onRowClick={onRowClick}
               rows={rows}
               virtualization={virtualization}
@@ -213,10 +211,12 @@ export const VirtualTable = forwardRef(function (
               submitInput={submitInput}
               cellValue={cellValue}
               resetField={resetField}
-              rowVirtualizer={rowVirtualizer}
+              virtualrows={virtualrows}
               virtualPaddingLeft={virtualPaddingLeft}
               virtualPaddingRight={virtualPaddingRight}
               virtualColumns={virtualColumns}
+              right={right}
+              left={left}
             />
           </TableBody>
           {isFooterVisible && (
@@ -274,15 +274,18 @@ const VirtualTableBody = ({
   submitInput,
   cellValue,
   resetField,
-  rowVirtualizer,
+  virtualrows,
   virtualPaddingLeft,
   virtualPaddingRight,
-  virtualColumns
+  virtualColumns,
+  right,
+  left
 }) => {
   return (
     <>
-      {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
+      {virtualrows.map((virtualRow, index) => {
         const row = rows[virtualRow.index];
+        const visibleCells = row?.getVisibleCells();
         if (!row) return null;
         return (
           <TableRow
@@ -295,34 +298,15 @@ const VirtualTableBody = ({
             className={`tr`}
             onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
           >
-            {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+            {virtualPaddingLeft && left.length === 0 ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
             {virtualColumns.map((virtualCell, index) => {
-              const cell = row?.getVisibleCells()?.[virtualCell?.index];
+              const cell = visibleCells?.[virtualCell?.index];
               if (!cell) return null;
               return (
-                <MemoizedCellRenderer
-                  key={cell.id}
-                  virtualStyles={{}}
-                  virtualization={virtualization}
-                  state={state}
-                  cell={cell}
-                  setWholeRowsCellColor={setWholeRowsCellColor}
-                  row={row}
-                  index={index}
-                  table={table}
-                  dispatch={dispatch}
-                  setCellValue={setCellValue}
-                  submitInput={submitInput}
-                  cellValue={cellValue}
-                  resetField={resetField}
-                />
-              );
-            })}
-            {virtualPaddingRight ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} /> : null}
-            {/* {row.getVisibleCells().map((cell, index) => {
-              if (exportTableView && excludedColumns.includes(cell.column.columnDef.id)) return null;
-              return (
-                <React.Fragment key={cell.id}>
+                <Fragment key={cell.id}>
+                  {right.length && cell.column.id === right[0] && virtualPaddingRight ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                  ) : null}
                   <MemoizedCellRenderer
                     key={cell.id}
                     virtualStyles={{}}
@@ -339,12 +323,20 @@ const VirtualTableBody = ({
                     cellValue={cellValue}
                     resetField={resetField}
                   />
-                </React.Fragment>
+                  {left.length && cell.column.id === left[left.length - 1] && virtualPaddingLeft ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                  ) : null}
+                </Fragment>
               );
-            })} */}
+            })}
+            {virtualPaddingRight && right.length === 0 ? (
+              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+            ) : null}
           </TableRow>
         );
       })}
     </>
   );
 };
+
+const MemoizedVirtualBody = memo(VirtualTableBody);
