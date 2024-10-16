@@ -85,6 +85,7 @@ export const VirtualTable = forwardRef(function (
   }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
+  const virtualrows = rowVirtualizer.getVirtualItems();
   const { leftIndexes: stickyLeft, rightIndexes: stickyRight, right, left } = stickyColumns;
 
   if (columnVirtualizer && virtualColumns?.length) {
@@ -166,7 +167,7 @@ export const VirtualTable = forwardRef(function (
                     if (!header) return null;
                     return (
                       <Fragment key={header.id}>
-                        {right.length && header.id === right[0] && virtualPaddingLeft ? (
+                        {right.length && header.id === right[0] && virtualPaddingRight ? (
                           <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
                         ) : null}
                         <DraggableHeader
@@ -198,7 +199,7 @@ export const VirtualTable = forwardRef(function (
             }}
             className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
           >
-            <VirtualTableBody
+            <MemoizedVirtualBody
               onRowClick={onRowClick}
               rows={rows}
               virtualization={virtualization}
@@ -210,7 +211,7 @@ export const VirtualTable = forwardRef(function (
               submitInput={submitInput}
               cellValue={cellValue}
               resetField={resetField}
-              rowVirtualizer={rowVirtualizer}
+              virtualrows={virtualrows}
               virtualPaddingLeft={virtualPaddingLeft}
               virtualPaddingRight={virtualPaddingRight}
               virtualColumns={virtualColumns}
@@ -273,7 +274,7 @@ const VirtualTableBody = ({
   submitInput,
   cellValue,
   resetField,
-  rowVirtualizer,
+  virtualrows,
   virtualPaddingLeft,
   virtualPaddingRight,
   virtualColumns,
@@ -282,7 +283,7 @@ const VirtualTableBody = ({
 }) => {
   return (
     <>
-      {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
+      {virtualrows.map((virtualRow, index) => {
         const row = rows[virtualRow.index];
         const visibleCells = row?.getVisibleCells();
         if (!row) return null;
@@ -303,7 +304,7 @@ const VirtualTableBody = ({
               if (!cell) return null;
               return (
                 <Fragment key={cell.id}>
-                  {right.length && cell.column.id === right[0] && virtualPaddingLeft ? (
+                  {right.length && cell.column.id === right[0] && virtualPaddingRight ? (
                     <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
                   ) : null}
                   <MemoizedCellRenderer
@@ -337,3 +338,5 @@ const VirtualTableBody = ({
     </>
   );
 };
+
+const MemoizedVirtualBody = memo(VirtualTableBody);
