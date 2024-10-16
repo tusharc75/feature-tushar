@@ -58,7 +58,7 @@ const VirtualSwipableList = ({
   const rows = rowVirtualizer.getVirtualItems();
 
   return (
-    <div ref={parentRef} className="max-h-[max(calc(100vh_-_250px),646px)] min-h-[200px] overflow-y-auto" id={`scrollableDiv_${renderedFrom}`}>
+    <div ref={parentRef} className="max-h-[max(calc(100vh_-_250px),646px)] min-h-[400px] overflow-y-auto" id={`scrollableDiv_${renderedFrom}`}>
       <div className={`relative w-full`} style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
         {dataRows.length && rows.length ? (
           <div
