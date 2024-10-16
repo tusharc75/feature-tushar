@@ -78,6 +78,7 @@ const SerializedAsset = () => {
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [statusOptions, setStatusOptions] = useState(null);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
@@ -143,15 +144,14 @@ const SerializedAsset = () => {
   }, [productCategory]);
 
   const fetchGridColumns = async () => {
-
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-    const resourceData = resourceDataResponce?.data?.data
+    const resourceData = resourceDataResponce?.data?.data;
 
     const statusColors = {};
     if (resourceData?.policy?.statusColor) {
       for (const item of resourceData?.policy?.statusColor) {
         if (Array.isArray(item.status)) {
-          item.status.forEach(status => {
+          item.status.forEach((status) => {
             statusColors[status] = item.colorCode;
           });
         } else {
@@ -160,10 +160,12 @@ const SerializedAsset = () => {
       }
     }
 
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option]);
             setAllowUpdateStatus(o?.isUpdate);
             return true;
           }
@@ -175,8 +177,9 @@ const SerializedAsset = () => {
               <div
                 style={{
                   backgroundColor: (() => {
-                    return statusColors[row?.original?.status] ? statusColors[row?.original?.status] :
-                      [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    return statusColors[row?.original?.status]
+                      ? statusColors[row?.original?.status]
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                         ? COLOUR_MASTER.lostAssets.background
                         : '';
                   })()
@@ -197,13 +200,13 @@ const SerializedAsset = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
-                {(row?.original?.currentLocationNotMatchWithGps && (
+                {row?.original?.currentLocationNotMatchWithGps && (
                   <Box ml={1}>
                     <HtmlTooltip title="Asset location needs to be update in Equipt">
                       <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
                     </HtmlTooltip>
                   </Box>
-                ))}
+                )}
               </div>
             );
           }
@@ -320,14 +323,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -548,7 +551,8 @@ const SerializedAsset = () => {
                 allowUpdateStatus,
                 handleStatusChange,
                 columns,
-                setOpenSupplierAccountDialog
+                setOpenSupplierAccountDialog,
+                statusOptions
               }}
             />
           }
@@ -593,8 +597,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -801,7 +806,8 @@ const ActionMenuItems = ({
   allowUpdateStatus,
   handleStatusChange,
   columns,
-  setOpenSupplierAccountDialog
+  setOpenSupplierAccountDialog,
+  statusOptions
 }) => {
   return (
     <>
@@ -934,6 +940,34 @@ const ActionMenuItems = ({
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
           </MenuItem>
+          {statusOptions
+            ?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))
+            ?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusChange(status?.optionValue);
+                  }}
+                  disabled={
+                    !selectedRecords?.every((r) =>
+                      [
+                        ASSET_STATUS.new,
+                        ASSET_STATUS.available,
+                        ASSET_STATUS.underReview,
+                        ASSET_STATUS.scrap,
+                        ASSET_STATUS.needRepair,
+                        ASSET_STATUS.needRecert,
+                        ...(statusOptions
+                          ?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue) && o?.optionValue != status?.optionValue)
+                          ?.map((o) => o?.optionValue) || [])
+                      ]?.includes(r?.status)
+                    )
+                  }
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
           {columns?.some((e) => e.field === 'certificationSupplier') && (
             <MenuItem
               disabled={!permissions?.serializedAsset?.isUpdate}
