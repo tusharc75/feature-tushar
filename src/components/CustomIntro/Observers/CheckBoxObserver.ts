@@ -13,7 +13,8 @@ export class CheckBoxObserver extends Observer {
   constructor(handleSteps: HandleSteps, element: HTMLElement, validator: (value: boolean) => boolean = (value) => value) {
     super(handleSteps, element, validator);
     this.options = {
-      attributes: true
+      attributes: true,
+      childList: true
     };
     this.debouncedTracker = null;
     this.cancelDebounceTracker = null;
@@ -24,7 +25,7 @@ export class CheckBoxObserver extends Observer {
 
   private init() {
     const target = this.isCheckBoxInsideTable
-      ? this.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement // table body
+      ? this.target.parentElement // checkbox parent span
       : this.target; // input element
     this.observe(target);
   }

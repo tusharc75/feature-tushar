@@ -35,7 +35,7 @@ export class CheckForRequiredFields {
     this.checkForRequiredFields = allStepData;
   }
   render() {
-    if (this?.checkForRequiredFields[this.handleStep.currentIndex + 1] && !this.checkForRequiredFields[this.handleStep.currentIndex + 1].found) {
+    if (this?.checkForRequiredFields?.[this.handleStep.currentIndex + 1] && !this.checkForRequiredFields[this.handleStep.currentIndex + 1].found) {
       this.handleStep.currentIndex += 2;
     }
   }
