@@ -59,8 +59,8 @@ const VirtualSwipableList = ({
 
   return (
     <div ref={parentRef} className="max-h-[max(calc(100vh_-_250px),646px)] min-h-[400px] overflow-y-auto" id={`scrollableDiv_${renderedFrom}`}>
-      <div className={`relative w-full`} style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
-        {dataRows.length && rows.length ? (
+      {dataRows.length && rows.length ? (
+        <div className={`relative w-full`} style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
           <div
             style={{
               position: 'absolute',
@@ -234,17 +234,17 @@ const VirtualSwipableList = ({
               );
             })}
           </div>
-        ) : (
-          !loading &&
-          !error && (
-            <div className=" absolute inset-0 flex items-center justify-center rounded-lg bg-[rgba(255,255,255,0.54)] [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] dark:bg-[rgba(5,9,19,0.54)]">
-              <div className="rounded-lg bg-[white] px-10 py-5 dark:bg-[var(--dark-secondary)]">
-                <p>No Data Found.</p>
-              </div>
+        </div>
+      ) : (
+        !loading &&
+        !error && (
+          <div className=" absolute inset-0 flex items-center justify-center rounded-lg bg-[rgba(255,255,255,0.54)] [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] dark:bg-[rgba(5,9,19,0.54)]">
+            <div className="rounded-lg bg-[white] px-10 py-5 dark:bg-[var(--dark-secondary)]">
+              <p>No Data Found.</p>
             </div>
-          )
-        )}
-      </div>
+          </div>
+        )
+      )}
     </div>
   );
 };
