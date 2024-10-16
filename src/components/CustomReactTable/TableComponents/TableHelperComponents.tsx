@@ -254,6 +254,7 @@ export const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, st
       size="small"
       ref={resolvedRef}
       {...rest}
+      checked={rest.checked ? true : false}
       color="primary"
       style={{ ...style, color: from === 'Header' ? 'white' : 'inherit', padding: 0 }}
       inputProps={{ 'aria-label': 'table-checkbox' }}
@@ -447,6 +448,50 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   );
 };
 
+const CellShell = ({
+  children,
+  className = '',
+  cell,
+  columnDef,
+  setWholeRowsCellColor,
+  stickyClassName,
+  virtualization,
+  virtualStyles,
+  dispatch,
+  row,
+  setCellValue,
+  style,
+  ...others
+}) => {
+  return (
+    <TableCell
+      id={cell.id}
+      key={cell.id}
+      className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
+      ${columnDef.sticky ? 'z-10 bg-[var(--dark-primary,_white)]' : ''} 
+      ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
+      style={{
+        minWidth: cell.column.getSize(),
+        maxWidth: cell.column.getSize(),
+        ...(virtualization ? { ...virtualStyles } : { ...style })
+      }}
+      onClick={() => {
+        if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
+          if (cellId !== cell.id) {
+            handleCellClick({ cell, dispatch, row, setCellValue });
+          }
+        } else {
+          handleCellClick({ cell, dispatch, row, setCellValue });
+        }
+        cellId = cell.id;
+      }}
+      {...others}
+    >
+      {children}
+    </TableCell>
+  );
+};
+
 // Cells
 export const CellRenderer = ({
   state,
@@ -469,40 +514,21 @@ export const CellRenderer = ({
 
   const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
 
-  const CellShell = ({ children, className = '', ...others }) => {
-    return (
-      <TableCell
-        id={cell.id}
-        key={cell.id}
-        className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
-        ${columnDef.sticky ? 'z-10 bg-[var(--dark-primary,_white)]' : ''} 
-        ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
-        style={{
-          minWidth: cell.column.getSize(),
-          maxWidth: cell.column.getSize(),
-          ...(virtualization ? { ...virtualStyles } : { ...style })
-        }}
-        onClick={() => {
-          if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
-            if (cellId !== cell.id) {
-              handleCellClick({ cell, dispatch, row, setCellValue });
-            }
-          } else {
-            handleCellClick({ cell, dispatch, row, setCellValue });
-          }
-          cellId = cell.id;
-        }}
-        {...others}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
   switch (true) {
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           <div className="p-[5px_10px]">
             <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
           </div>
@@ -512,7 +538,18 @@ export const CellRenderer = ({
       currentEditingCellPosition?.rowId === row.original._id &&
       currentEditingCellPosition?.columnName === cell?.column.id:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           <div className="w-full">
             {columnDef?.type === 'singleLine' ? (
               <input
@@ -693,7 +730,18 @@ export const CellRenderer = ({
 
     case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           <div className="action-cell">
             <HtmlTooltip title="Save">
               <IconButton size="small" aria-label="Save" onClick={submitInput}>
@@ -705,7 +753,20 @@ export const CellRenderer = ({
       );
     case columnDef?.editable:
       return (
-        <CellShell id={`${cell?.column.id}-${row.index}`} value={row.original[cell?.column.id]}>
+        <CellShell
+          id={`${cell?.column.id}-${row.index}`}
+          value={row.original[cell?.column.id]}
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
               <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
@@ -718,13 +779,36 @@ export const CellRenderer = ({
       );
     case cell.column.id === 'action':
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           <div className="action-cell">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
         </CellShell>
       );
     default:
       return (
-        <CellShell className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 ">
+        <CellShell
+          className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 "
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+        >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </CellShell>
       );

@@ -105,8 +105,8 @@ export class HandleSteps {
     window.requestAnimationFrame(() => {
       this.checkPreviousObservers();
       this.loop();
-      this.checkForRequiredFields.update();
-      this.checkForRequiredFields.render();
+      this.checkForRequiredFields?.update();
+      this.checkForRequiredFields?.render();
     });
   }
 
