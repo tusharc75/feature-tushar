@@ -36,9 +36,9 @@ const RenderSubCard = ({
   }
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+      className={`my-2 rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
         backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-      } ${typeof onRowClick === 'function' ? 'focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)] focus:outline-0' : ''}`}
+      } ${typeof onRowClick === 'function' ? 'focus:outline-0 focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)]' : ''}`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
@@ -65,7 +65,7 @@ const RenderSubCard = ({
         }
       }}
     >
-      <div className={`flex gap-2 items-center`}>
+      <div className={`flex items-center gap-2`}>
         {expander && expanderCol && flexRender(expanderCell?.column?.columnDef?.cell, expanderCell?.getContext())}
         {allowSelection && !row.original.hideSelection && (
           <div>
@@ -79,11 +79,11 @@ const RenderSubCard = ({
           </div>
         )}
         <div className="flex-grow">
-          <div className="flex gap-2 justify-between items-center">
+          <div className="flex items-center justify-between gap-2">
             {primaryField && (
               <div className="line-clamp-1">
-                <h6 className="text-[var(--dark-secondary-text,#8b8b8b)] text-[8px] font-medium line-clamp-1">{primaryField.header}:</h6>
-                <h4 className="quote-name line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:line-clamp-1  [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
+                <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.header}:</h6>
+                <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:line-clamp-1  [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
                   {primaryField.cell({ row, table })}
                 </h4>
               </div>
@@ -105,8 +105,8 @@ const RenderSubCard = ({
           </div>
         </div>
       </div>
-      <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
-        <div className="grid gap-2 w-full">
+      <div className="mt-2 grid gap-2 px-2 pt-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
+        <div className="grid w-full gap-2">
           {defaultDisplay.map((field) => {
             return (
               <RenderCellWithHeader
@@ -123,7 +123,7 @@ const RenderSubCard = ({
           })}
         </div>
         <Collapse in={compareCollapse(row.original._id)} unmountOnExit>
-          <div className="grid gap-2 w-full">
+          <div className="grid w-full gap-2">
             {collapsibleFields.map((field) => {
               return (
                 <RenderCellWithHeader
@@ -142,7 +142,7 @@ const RenderSubCard = ({
         </Collapse>
       </div>
       {expander && (
-        <Collapse in={row.getIsExpanded()}>
+        <Collapse in={row.getIsExpanded()} unmountOnExit>
           <div className="mt-3">
             {row.subRows?.map((row, index) => {
               return (
