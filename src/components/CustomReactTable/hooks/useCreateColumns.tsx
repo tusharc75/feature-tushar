@@ -117,7 +117,7 @@ export const useCreateColumns = ({
       header: ({ table }) => (
         <IndeterminateCheckbox
           {...{
-            checked: table.getIsAllRowsSelected(),
+            checked: table.getIsAllRowsSelected() ? true : false,
             indeterminate: table.getIsSomeRowsSelected(),
             onChange: table.getToggleAllRowsSelectedHandler(),
             id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
@@ -135,7 +135,7 @@ export const useCreateColumns = ({
           ) : (
             <IndeterminateCheckbox
               {...{
-                checked: row.getIsSelected(),
+                checked: row.getIsSelected() ? true : false,
                 value: row.getIsSelected() ? true : false,
                 indeterminate: row.getIsSomeSelected(),
                 onChange: row.getToggleSelectedHandler(),
