@@ -387,6 +387,7 @@ const Note = () => {
             }
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           <CreateNote
             noteId={isNew ? null : noteData?.id}

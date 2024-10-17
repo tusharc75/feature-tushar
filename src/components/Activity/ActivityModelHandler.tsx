@@ -36,6 +36,7 @@ const ActivityModelHandler = (props) => {
           setFullScreen(false);
         }
       }}
+      disableEnforceFocus={true}
       fullWidth
     >
       {activityType === 'task' ? (

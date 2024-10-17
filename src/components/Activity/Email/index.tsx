@@ -171,6 +171,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
               setFullScreen(false);
             }
           }}
+          disableEnforceFocus={true}
           fullWidth
         >
           <CreateEmail
@@ -200,6 +201,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
               }
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <ViewEmail
               emailId={emailId}

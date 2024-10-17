@@ -162,6 +162,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fullWidth
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
+        disableEnforceFocus={true}
       >
         <CreateNote
           noteId={noteId}

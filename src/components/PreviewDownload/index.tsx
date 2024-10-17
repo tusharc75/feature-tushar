@@ -295,6 +295,7 @@ function PreviewDownload({
             setEmailAttachments([]);
             setFullScreen(false);
           }}
+          disableEnforceFocus={true}
           fullWidth
         >
           <CreateEmail
