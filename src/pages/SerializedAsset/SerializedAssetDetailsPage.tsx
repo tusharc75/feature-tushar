@@ -31,6 +31,7 @@ import {
   repairJob,
   serializedAsset,
   sidebarResource,
+  SYSTEM_ASSET_STATUS,
   tabIndexValue
 } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
@@ -333,40 +334,11 @@ const SerializedAssetDetailsPage = () => {
         }
       });
 
-      const systemStatus = [
-        ASSET_STATUS.reserved,
-        ASSET_STATUS.readyToShip,
-        ASSET_STATUS.inTransit,
-        ASSET_STATUS.inUse,
-        ASSET_STATUS.standBy,
-        ASSET_STATUS.standByNotChargeable,
-        ASSET_STATUS.delivered,
-        ASSET_STATUS.customer,
-        ASSET_STATUS.supplier,
-        ASSET_STATUS.returned,
-        ASSET_STATUS.repair,
-        ASSET_STATUS.inRepair,
-        ASSET_STATUS.customerPossession,
-        ASSET_STATUS.scrapRequested
-      ];
-
       let tempStatus = [];
-      if (
-        [
-          ASSET_STATUS.inTransit,
-          ASSET_STATUS.delivered,
-          ASSET_STATUS.inUse,
-          ASSET_STATUS.standBy,
-          ASSET_STATUS.standByNotChargeable,
-          ASSET_STATUS.scrapRequested,
-          ASSET_STATUS.inRepair,
-          ASSET_STATUS.repair
-        ]?.includes(assetDetails.status)
-      ) {
+      if (SYSTEM_ASSET_STATUS?.includes(assetDetails.status)) {
         tempStatus = [];
-      } else if (systemStatus?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      } else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
+      }
+      else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
         tempStatus = [
           ASSET_STATUS.new,
           ASSET_STATUS.available,
@@ -399,8 +371,8 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [assetDetails, statusOptions]);
 
-  const openDataChange = ()=>{
-    return [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLogFields?.length; 
+  const openDataChange = () => {
+    return [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLogFields?.length;
   }
 
   return (
@@ -521,12 +493,12 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              const {policy} = resourceData;
-                              if(policy?.dataChangeStatus===o.optionValue && openDataChange()){
-                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o }) 
-                                 } else{
-                                  handleStatusChange(o);
-                                 }
+                              const { policy } = resourceData;
+                              if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o })
+                              } else {
+                                handleStatusChange(o);
+                              }
                             }}
                             value={o}
                           >
@@ -676,7 +648,7 @@ const SerializedAssetDetailsPage = () => {
             setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
           }}
           onSuccess={() => {
-            if(openUpdateDialog.updateStatus){
+            if (openUpdateDialog.updateStatus) {
               handleStatusChange(openUpdateDialog.updateStatus)
             }
             setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
