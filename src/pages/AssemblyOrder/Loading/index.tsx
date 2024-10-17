@@ -193,6 +193,23 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     return subRows;
   };
 
+  const handleSendToCustomer = () => {
+    axiosInstance()
+      .put(`${routes.managedPackages.path}/send-to-customer`, {
+        ids: selectedRecords?.filter((r) => r?.managedPackageId)?.map((r) => r?.managedPackageId)
+      })
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent to Customer Successfully'
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -207,6 +224,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         <MenuItem
           disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
           onClick={() => {
+            handleSendToCustomer();
           }}
         >
           Send to Customer
