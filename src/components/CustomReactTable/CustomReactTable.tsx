@@ -305,12 +305,12 @@ const CustomReactTable = ({
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(newColumns, clientWidth);
+      const updatedColumns = adjustSizes(newColumns, hookColumns, visibleColumns, clientWidth);
       if (updatedColumns) {
         setNewColumns(updatedColumns);
       }
     }
-  }, [tableContainerRef, newColumns.length]);
+  }, [tableContainerRef, newColumns.length, visibleColumns]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
