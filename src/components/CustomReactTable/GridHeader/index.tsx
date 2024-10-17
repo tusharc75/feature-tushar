@@ -61,7 +61,7 @@ const GridHeader = ({
   hideExportTable = false
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
-  const { selectedRecords, loading, filters: customFilters, dataRows, limit }: TInitialState = state;
+  const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
 
   const isMobileView = useMediaQuery('(max-width:768px)');
 
@@ -116,7 +116,7 @@ const GridHeader = ({
     <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
       <div className="flex-grow">
         <div className="table-filter-v1">
-          {(isClientSideGrid || limit <= 100) && (
+          {(isClientSideGrid || selectedRecords?.length <= 200) && (
             <ShowFilteredRecordsOnly
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
