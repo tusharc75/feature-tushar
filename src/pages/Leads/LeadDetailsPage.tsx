@@ -106,10 +106,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -128,12 +128,10 @@ const LeadDetailsPage = () => {
     axiosInstance()
       .get(`${leadApi}/${id}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
-
         setIsLeadAlreadyConvertedToOpportunity(
           data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
         );
-        setAllowedToEdit(isAllowedToUpdate);
+        setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
         setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') }]);
