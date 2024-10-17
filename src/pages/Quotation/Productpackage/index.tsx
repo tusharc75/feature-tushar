@@ -390,7 +390,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       element.type = addDialog.type;
       if (addDialog.type !== MATERIAL_TYPE.serializedAsset) {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
-        if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
+        if (quotationData?.estimateStartDate
+          && quotationData?.estimateEndDate
+          && allFields?.filter((e) => ['estimateStartDate', 'estimateEndDate', 'estimateJobDuration']?.includes(e?.fieldName))?.length === 3
+        ) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.estimateStartDate = quotationData?.estimateStartDate;
           element.estimateEndDate = quotationData?.estimateEndDate;

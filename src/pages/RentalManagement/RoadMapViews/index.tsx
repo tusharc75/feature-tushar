@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { DELIVERY_TICKET_TYPE, ASSET_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER } from '../../../constants/helpers';
+import { DELIVERY_TICKET_TYPE, ASSET_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER, MATERIAL_TYPE } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -118,6 +118,7 @@ const RentalManagementViews = (props) => {
       const transferAsset = viewsData?.data?.data?.transferAsset;
       const allAssets = viewsData?.data?.data?.transferAssetData;
       const consumeProducts = product?.consumeProducts;
+      const additionalCost = viewsData?.data?.data?.additionalCostData;
       const consumeID = `consume-product`;
 
       const loadingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
@@ -446,6 +447,35 @@ const RentalManagementViews = (props) => {
             source: productServices[item.productDetail?.productName || item.serviceDetail?.serviceName],
             arrowHeadType: 'arrow',
             target: `${assetsInLoading[item?.materialId]}`
+          });
+        });
+        
+      additionalCost
+        ?.map((item) => {
+          flow.push({
+            id: item._id,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item?.detail || ''}
+                  <br />
+                  {_.startCase(MATERIAL_TYPE.manualEntry)}
+                </div>
+              )
+            },
+            position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
+            style: customNodeStyles.product
+          });
+          beforeLoadingAssetIdx += 1;
+
+          flowEdge.push({
+            id: `edge-additionalCost-${item._id}`,
+            source: rentalId,
+            arrowHeadType: 'arrow',
+            target: item._id
           });
         });
 
