@@ -88,6 +88,8 @@ export const VirtualTable = forwardRef(function (
   const virtualrows = rowVirtualizer.getVirtualItems();
   const { leftIndexes: stickyLeft, rightIndexes: stickyRight, right, left } = stickyColumns;
 
+  const totalColumnSize = columnVirtualizer.getTotalSize();
+
   if (columnVirtualizer && virtualColumns?.length) {
     let leftIndex = 0;
     // check to see if the window passed the left sticky columns then move the left index to the first nonsticky index
@@ -101,7 +103,7 @@ export const VirtualTable = forwardRef(function (
       rightIndex = virtualColumns.length - 1 - stickyRight.length;
     }
 
-    virtualPaddingRight = columnVirtualizer.getTotalSize() - (virtualColumns[rightIndex]?.end ?? 0);
+    virtualPaddingRight = totalColumnSize - (virtualColumns[rightIndex] ? virtualColumns[rightIndex]?.end : totalColumnSize);
   }
 
   return (
@@ -147,7 +149,7 @@ export const VirtualTable = forwardRef(function (
           ref={tableRef}
           size="small"
           className="tableWrap sticky table"
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${columnVirtualizer.getTotalSize()}px, 100%)` }}
+          style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
         >
           <TableHead
             style={{
