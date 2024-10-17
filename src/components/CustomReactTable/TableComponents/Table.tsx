@@ -58,13 +58,12 @@ const TableComponent = forwardRef(function (
   ref: ForwardedRef<HTMLTableElement>
 ) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
-  const colDef = table._getColumnDefs();
+  const columns = table.getVisibleFlatColumns()?.map((d) => d?.columnDef);
 
   const stickyColumns = useMemo(() => {
-    const allColumn = colDef;
-    const stickyData = getStickyColumnNames({ allColumn: allColumn as TColType[], expander, hideSelection });
+    const stickyData = getStickyColumnNames({ allColumn: columns as TColType[], expander, hideSelection });
     return stickyData;
-  }, [expander, hideSelection, colDef]);
+  }, [expander, hideSelection, columns]);
 
   const tableRef = useRef<HTMLTableElement | null>(null);
 

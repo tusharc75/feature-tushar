@@ -203,9 +203,11 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
   if (lookupDependentOn && !isEmpty(lookupDependentOn)) {
     const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource;
     const value = values[lookupDependentOn] || values[camelCase(lookupResource)];
-    if (value) {
-      const newOptions =
-        options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
+    if (Array.isArray(value) && value?.length) {
+      const newOptions = options?.filter((option: any) => value.some((val) => option[lookupDependentOn]?.includes(val) || option[camelCase(lookupResource)]?.includes(val))) || [];
+      optionsToShow.push(...newOptions);
+    } else if (value) {
+      const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
     }
   }
