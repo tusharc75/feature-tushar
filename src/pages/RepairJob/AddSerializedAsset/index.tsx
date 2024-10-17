@@ -10,7 +10,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
+import DeleteIcon from '@material-ui/icons/Delete';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -22,7 +22,7 @@ import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerial
 import ManageAssetDialog from './ManageAssetDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
-import { generateAddExistingSerialisedAsset,generateAddNewSerialisedAsset , generateEditSerialisedAsset } from '../walkmeSteps';
+import { generateAddExistingSerialisedAsset, generateAddNewSerialisedAsset, generateEditSerialisedAsset } from '../walkmeSteps';
 
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
@@ -71,8 +71,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       generateAddNewSerialisedAsset()
     ];
     if (dataRows?.length) {
-      if(permissions?.repairJob?.isUpdate){
-        stepData.push(generateEditSerialisedAsset(false,0));
+      if (permissions?.repairJob?.isUpdate) {
+        stepData.push(generateEditSerialisedAsset(false, 0));
 
       }
     }
@@ -241,20 +241,22 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 }}
                 id={`edit-button-${row.index || 0}`}
               >
-                <Edit />
+                <Edit color="primary" fontSize='small' />
               </IconButton>
             </HtmlTooltip>
           }
-          {row?.original?.status === ASSET_STATUS.reserved && (
-            <GridDeleteIcon
-              hasDeletePermission={permissions?.repairJob?.isUpdate}
-              ownerId={user?.user?._id}
-              userId={user?.user?._id}
-              onDelete={() => {
-                setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
-              }}
-              entity={sidebarResource.serializedAsset}
-            />
+          {row?.original?.status === ASSET_STATUS.reserved && allowedToEdit && permissions?.repairJob?.isUpdate && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
+                }}
+              >
+                <DeleteIcon color="error" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
           )}
         </div>
       )
@@ -377,8 +379,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, repairJobData?.currency);
     handleSaveData(rows);
   };
 

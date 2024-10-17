@@ -660,7 +660,7 @@ const ContactDetailsPage = (props) => {
                 isRedirect={false}
                 contactId={id}
                 contactResource={contactResource}
-                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
+                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}
@@ -694,7 +694,7 @@ const ContactDetailsPage = (props) => {
                 accountResource={accountResource}
                 isRenderedInCustomerContact={true}
                 isRenderedFromCustomerAccount={true}
-                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
+                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}

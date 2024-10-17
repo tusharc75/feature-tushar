@@ -631,7 +631,7 @@ function OpportunityDetailsPage() {
                     }}
                     recordsPerLine={recordsPerLine}
                     accounts={cloneDeep(opportunityData?.supplierAccount)}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}
@@ -654,7 +654,7 @@ function OpportunityDetailsPage() {
                     recordsPerLine={recordsPerLine}
                     saveContactToOpportunity={handleAssignContacts}
                     accountId={opportunityData?.customerAccount?.optionValue}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}
@@ -689,7 +689,7 @@ function OpportunityDetailsPage() {
                     currency={opportunityData?.currency}
                     estimatedAmount={opportunityData?.estimatedAmount}
                     isRenderedFromOpportunity={true}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}

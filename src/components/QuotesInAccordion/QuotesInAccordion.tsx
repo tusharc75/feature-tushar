@@ -40,7 +40,7 @@ export default function QuotesInAccordion({
   contacts = null,
   isRenderedFromOpportunity = false,
   opportunityName = null,
-  isAllowedToUpdate,
+  allowedToEdit,
   marketSegmentId = null,
   subMarketSegmentId = null,
   currency = null,
@@ -182,7 +182,7 @@ export default function QuotesInAccordion({
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
-              {isAllowedToUpdate && (
+              {allowedToEdit && (
                 <>
                   <IconButton
                     aria-haspopup="true"
