@@ -462,7 +462,7 @@ const RentalManagementViews = (props) => {
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {item?.detail || ''}
                   <br />
-                  {_.startCase(_.camelCase(MATERIAL_TYPE.manualEntry))}
+                  {_.startCase(MATERIAL_TYPE.manualEntry)}
                 </div>
               )
             },
