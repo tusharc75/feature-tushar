@@ -49,7 +49,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && (
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
           <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
             <span>
               <IconButton
@@ -152,7 +152,7 @@ const FieldServiceTechnician = () => {
     if (isOffline) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -318,8 +318,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     } else {
       setSelectedData(null);
@@ -385,12 +385,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => {}}
+                    fetchServiceOrderData={() => { }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
