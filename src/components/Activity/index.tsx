@@ -313,6 +313,7 @@ const Activity = (props) => {
             setFullScreen(false);
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           {type === 'Task' ? (
             <CreateTask

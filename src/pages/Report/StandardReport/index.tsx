@@ -1011,6 +1011,7 @@ const Report = () => {
             setIsSendMail(false);
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           <CreateEmail
             isQuoteBuilder={true}

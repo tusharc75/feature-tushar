@@ -390,6 +390,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setSendMail(false);
               setFullScreen(false);
             }}
+            disableEnforceFocus={true}
             fullWidth
           >
             <CreateEmail
