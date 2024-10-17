@@ -771,7 +771,7 @@ const AddSerializedAsset = ({
               setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
             }
           }}
-          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
+          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber, wellName: [referenceData?.wellName?.optionValue] }}
           productsDefaultData={selectedProducts}
         />
       )}
