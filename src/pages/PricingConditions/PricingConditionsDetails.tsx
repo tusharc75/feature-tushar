@@ -3,8 +3,6 @@ import { Edit } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -118,10 +116,10 @@ const PricingConditionsDetails = () => {
           <>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               <CustomTab value={0}>
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                Header
               </CustomTab>
               <CustomTab value={1}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                Details
               </CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>

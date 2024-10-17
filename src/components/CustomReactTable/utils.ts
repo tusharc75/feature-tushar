@@ -445,14 +445,20 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   return formValues;
 };
 
-export function adjustSizes(columns: TColType[], containerSize: number): TColType[] | null {
-  const totalSize = columns.reduce((acc, size) => acc + (size.size || 200), 0);
+export function adjustSizes(
+  columns: TColType[],
+  original: TColType[],
+  visibleColumns: { [key: string]: boolean },
+  containerSize: number
+): TColType[] | null {
+  const visibleColumnsArray = columns.filter((col) => visibleColumns[col.id || col.accessor]);
+  const totalSize = visibleColumnsArray.reduce((acc, size) => acc + (size.size || 200), 0);
 
   if (totalSize >= containerSize) {
-    return null; // No adjustment needed if total size is greater than or equal to container size
+    return original; // No adjustment needed if total size is greater than or equal to container size
   }
 
-  const maxWidthColumnsSum = columns.reduce((acc, size) => acc + (size.maxSize || 0), 0);
+  const maxWidthColumnsSum = visibleColumnsArray.reduce((acc, size) => acc + (size.maxSize || 0), 0);
   const scaleFactor = (containerSize - maxWidthColumnsSum) / (totalSize - maxWidthColumnsSum);
   if (scaleFactor === Infinity) {
     return null;

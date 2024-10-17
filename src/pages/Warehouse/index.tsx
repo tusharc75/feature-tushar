@@ -3,11 +3,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EntitySelectionsDialog from 'src/components/EntitySelections';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -46,9 +44,6 @@ const Warehouse = () => {
   const [columns, setColumns] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
-  const [showEntityDialog, setShowEntityDialog] = useState(false);
-  const [warehouseId, setWarehouseId] = useState('');
-  const [entities, setEntities] = useState([]);
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
 
   useEffect(() => {
@@ -66,7 +61,6 @@ const Warehouse = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
     setWalkmeData([createResourceFlow(sidebarResource.warehouse, data)]);
-
     const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -75,7 +69,7 @@ const Warehouse = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 130,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     canDrag: false,
@@ -111,38 +105,7 @@ const Warehouse = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={row.original?.deleted ? 'disabled' : 'error'} />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {permissions?.warehouse?.isUpdate && row?.original?.isAllowedToUpdate && !row.original?.deleted ? (
-          <HtmlTooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setShowEntityDialog(true);
-                setWarehouseId(row?.original._id);
-                if (row?.original?.entity) {
-                  let entities = [];
-                  if (row?.original?.entityId) {
-                    entities.push(row?.original?.entityId);
-                  }
-                  if (row?.original?.restentity) {
-                    let restEntities = row?.original?.restentity.map((o) => o.optionValue);
-                    entities = [...entities, ...restEntities];
-                  }
-                  setEntities([...entities]);
-                }
-              }}
-            >
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
-            <IconButton aria-label="Clone" size="small">
-              <AiOutlineDeploymentUnit fontSize="15" />
+              <DeleteIcon fontSize='small' color={row.original?.deleted ? 'disabled' : 'error'} />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -211,7 +174,6 @@ const Warehouse = () => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -275,24 +237,23 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                  {
-                    title: 'Assign Users Template',
-                    api: `warehouse/user/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Assign Users Export',
-                    api: `warehouse/user/template?export=true${
-                      selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Assign Users Template',
+                  api: `warehouse/user/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Assign Users Export',
+                  api: `warehouse/user/template?export=true${selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Assign Users Import',
-                    api: `warehouse/user/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Assign Users Import',
+                  api: `warehouse/user/import`,
+                  type: 'import'
+                }
+              ]
               : []
           }
         />
@@ -309,9 +270,6 @@ const Warehouse = () => {
                 permissions,
                 selectedRecords,
                 setShowDeleteConfirmBox,
-                setShowUpdateWarningConfirmBox,
-                setEntities,
-                setShowEntityDialog,
                 user,
                 setUserAssignDialog
               }}
@@ -356,9 +314,8 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
-          } ?`}
+          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -386,19 +343,6 @@ const Warehouse = () => {
           onClose={() => setShowUpdateWarningConfirmBox(false)}
         />
       ) : null}
-      {showEntityDialog ? (
-        <EntitySelectionsDialog
-          open={showEntityDialog}
-          resource={sidebarResource.warehouse}
-          resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [warehouseId]}
-          onClose={() => {
-            setShowEntityDialog(false);
-            setWarehouseId('');
-          }}
-          onSuccess={fetchData}
-          entities={entities}
-        />
-      ) : null}
     </section>
   );
 };
@@ -409,9 +353,6 @@ const ActionMenuItems = ({
   permissions,
   selectedRecords,
   setShowDeleteConfirmBox,
-  setShowUpdateWarningConfirmBox,
-  setEntities,
-  setShowEntityDialog,
   user,
   setUserAssignDialog
 }) => {
@@ -427,34 +368,6 @@ const ActionMenuItems = ({
           }}
         >
           {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      )}
-      {permissions?.warehouse?.isUpdate && (
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.some((d) => d.isUpdate === false)) {
-              setShowUpdateWarningConfirmBox(true);
-            } else {
-              if (selectedRecords.length) {
-                let entities = [];
-                selectedRecords.map((current) => {
-                  if (current?.entity) {
-                    if (current?.entityId) {
-                      entities.push(current?.entityId);
-                    }
-                    if (current?.restentity) {
-                      let restEntities = current?.restentity.map((o) => o.optionValue);
-                      entities = [...entities, ...restEntities];
-                    }
-                  }
-                });
-                setEntities([...entities]);
-              }
-              setShowEntityDialog(true);
-            }
-          }}
-        >
-          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
         </MenuItem>
       )}
       {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
