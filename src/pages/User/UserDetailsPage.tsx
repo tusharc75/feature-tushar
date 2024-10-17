@@ -696,7 +696,7 @@ const UserDetailsPage = () => {
                   expanded={false}
                   fetchData={() => fetchUserRelatedDetail()}
                   quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
-                  isAllowedToUpdate={false}
+                  allowedToEdit={false}
                 />
               )}
             </div>
