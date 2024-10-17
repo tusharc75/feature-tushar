@@ -204,6 +204,13 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         >
           Add In Rental Job
         </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((r) => r?.managedPackageId)?.length > 0 ? false : true}
+          onClick={() => {
+          }}
+        >
+          Send to Customer
+        </MenuItem>
       </>
     );
   };
