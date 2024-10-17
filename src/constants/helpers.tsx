@@ -2141,6 +2141,26 @@ export const ASSET_STATUS = {
   scrapRequested: 'Scrap Requested'
 };
 
+
+//This is used to restrict status change
+export const SYSTEM_ASSET_STATUS = [
+  ASSET_STATUS.reserved,
+  ASSET_STATUS.readyToShip,
+  ASSET_STATUS.inTransit,
+  ASSET_STATUS.inUse,
+  ASSET_STATUS.standBy,
+  ASSET_STATUS.standByNotChargeable,
+  ASSET_STATUS.delivered,
+  ASSET_STATUS.customer,
+  ASSET_STATUS.supplier,
+  ASSET_STATUS.returned,
+  ASSET_STATUS.repair,
+  ASSET_STATUS.inRepair,
+  ASSET_STATUS.customerPossession,
+  ASSET_STATUS.scrapRequested,
+  ASSET_STATUS.onPO
+];
+
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',
   manual: 'Manual',
