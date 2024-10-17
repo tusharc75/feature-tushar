@@ -10,7 +10,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -24,6 +24,8 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   CustomDialogTransition,
   getDefaultMyRecordType,
   gridLoadingTimeout,
@@ -232,12 +234,12 @@ export default function Contact(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={contactPermissions?.isDelete && row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? false : true}
+              disabled={contactPermissions?.isDelete && row?.original?.canDelete ? false : true}
               onClick={() => {
                 setSingleContactDelete({
                   show: true,
@@ -248,19 +250,17 @@ export default function Contact(props) {
             >
               <DeleteIcon
                 fontSize="small"
-                color={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? 'error' : 'disabled'}
+                color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'}
               />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip
-          title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
-        >
+        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}    >
           <span>
             <IconButton
               size="small"
               aria-label="Entity"
-              disabled={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? false : true}
+              disabled={contactPermissions?.isUpdate && row?.original?.canEdit ? false : true}
               onClick={() => {
                 setContactId(row?.original?._id);
                 setShowEntityDialog(true);
@@ -280,10 +280,7 @@ export default function Contact(props) {
                 }
               }}
             >
-              <AiOutlineDeploymentUnit
-                fontSize="15"
-                color={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'primary' : 'disabled'}
-              />
+              <AiOutlineDeploymentUnit fontSize="15" color={contactPermissions?.isUpdate && row?.original?.canEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -347,7 +344,8 @@ export default function Contact(props) {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           return {
             ...finalObject,
-            canDelete: u.owner?.optionValue === user?.user._id,
+            canDelete: checkIsAllowedToDelete(user, sidebarResource[contactResource], u?.owner?.optionValue),
+            canEdit: checkIsAllowedToEdit(user, sidebarResource[contactResource], data),
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity
@@ -548,7 +546,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}

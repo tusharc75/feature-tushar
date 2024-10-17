@@ -25,7 +25,7 @@ export default function OpportunityContacts({
   accounts = null,
   saveContactToOpportunity = null,
   accountId = null,
-  isAllowedToUpdate
+  allowedToEdit
 }) {
   const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -118,7 +118,7 @@ export default function OpportunityContacts({
             </Box>
           </Grid>
           <Grid item xs={4} container justify="flex-end">
-            {isAllowedToUpdate && (
+            {allowedToEdit && (
               <>
                 <IconButton
                   aria-haspopup="true"

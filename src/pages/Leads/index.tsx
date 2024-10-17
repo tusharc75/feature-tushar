@@ -223,7 +223,7 @@ const Leads = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
-          finalObject['isAllowedToUpdate'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
+          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
           let res = {
             ...finalObject,
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
@@ -261,7 +261,7 @@ const Leads = () => {
     fetchData();
   };
 
-  const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, isAllowedToUpdate }) => {
+  const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, canEdit }) => {
     let dontHavePermissions = [];
 
     if (!permissions['customerAccount'].isCreate) {
@@ -299,7 +299,7 @@ const Leads = () => {
           </IconButton>
         </HtmlTooltip>
       </>
-    ) : !isAllowedToUpdate ? (
+    ) : !canEdit ? (
       <>
         <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton size="small" aria-label="Convert to opportunity">
@@ -428,7 +428,7 @@ const Leads = () => {
                   message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
                 });
               } else {
-                if (selectedRecords.some((d) => d.isAllowedToUpdate === false)) {
+                if (selectedRecords.some((d) => d.canEdit === false)) {
                   setMessageDialog({
                     open: true,
                     message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
@@ -537,9 +537,8 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
-              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-            }?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

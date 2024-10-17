@@ -5,10 +5,8 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CancelIcon from '@material-ui/icons/Cancel';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
@@ -17,7 +15,7 @@ import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, updateDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, entityDisable, updateDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -27,16 +25,16 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -243,27 +241,28 @@ export default function Account(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <GridDeleteIcon
-          hasDeletePermission={accountPermissions?.isDelete}
-          ownerId={row?.original?.ownerId}
-          userId={user?.user?._id}
-          onDelete={() => {
-            setSingleAccountDelete({
-              show: true,
-              id: row?.original?._id,
-              accountName: row?.original?.accountName
-            });
-          }}
-          entity="account"
-        />
-        <HtmlTooltip
-          title={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
-        >
+        <HtmlTooltip title={accountPermissions?.isDelete && row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <IconButton
+            size="small"
+            disabled={accountPermissions?.isDelete && row?.original?.canDelete ? false : true}
+            aria-label="Delete"
+            onClick={() => {
+              setSingleAccountDelete({
+                show: true,
+                id: row?.original?._id,
+                accountName: row?.original?.accountName
+              });
+            }}
+          >
+            <DeleteIcon color={accountPermissions?.isDelete && row?.original?.canDelete ? "error" : "disabled"} fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title={accountPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable} >
           <span>
             <IconButton
               size="small"
               aria-label="Entity"
-              disabled={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? false : true}
+              disabled={accountPermissions?.isUpdate && row?.original?.canEdit ? false : true}
               onClick={() => {
                 setAccountId(row?.original?._id);
                 setShowEntityDialog(true);
@@ -282,7 +281,7 @@ export default function Account(props) {
             >
               <AiOutlineDeploymentUnit
                 fontSize="20"
-                color={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'primary' : 'disabled'}
+                color={accountPermissions?.isUpdate && row?.original?.canEdit ? 'primary' : 'disabled'}
               />
             </IconButton>
           </span>
@@ -343,30 +342,27 @@ export default function Account(props) {
   const fetchAccounts = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${accountApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          let res = {
-            ...finalObject,
-            canDelete: u.owner?.optionValue === user?.user._id,
-            allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
-            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            approved: u.staticData?.approved ? u.staticData?.approved : false,
-            isChecked: false,
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
-          };
-          return res;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
+    axiosInstance().get(`${accountApi}${queryString}`, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u, user);
+        let res = {
+          ...finalObject,
+          canDelete: checkIsAllowedToDelete(user, sidebarResource[accountResource], u?.owner?.optionValue),
+          canEdit: checkIsAllowedToEdit(user, sidebarResource[accountResource], data),
+          lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+          leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+          leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+          approved: u.staticData?.approved ? u.staticData?.approved : false,
+          isChecked: false,
+          masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+          masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
+        };
+        return res;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
       .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -531,24 +527,23 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                  {
-                    title: 'Supplier View Template',
-                    api: `${accountApi}/items/unknown/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Supplier View Export',
-                    api: `${accountApi}/items/unknown/template?export=true${
-                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Supplier View Template',
+                  api: `${accountApi}/items/unknown/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Supplier View Export',
+                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Supplier View Import',
-                    api: `${accountApi}/items/unknown/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Supplier View Import',
+                  api: `${accountApi}/items/unknown/import`,
+                  type: 'import'
+                }
+              ]
               : [])
           ]}
         />
@@ -643,9 +638,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -660,9 +654,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -874,7 +867,7 @@ const ActionMenuItems = ({
         <MenuItem
           disabled={selectedRecords?.length === 0}
           onClick={() => {
-            if (selectedRecords?.some((d) => d?.isAllowedToUpdate === false)) {
+            if (selectedRecords?.some((d) => d?.canEdit === false)) {
               setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
             } else {
               if (selectedRecords?.length) {
