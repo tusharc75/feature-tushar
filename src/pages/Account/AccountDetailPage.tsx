@@ -744,7 +744,7 @@ export default function AccountDetailPage(props) {
                         recordsPerLine={3}
                         resource={accountResource}
                         isRedirect={false}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
+                        allowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
@@ -775,7 +775,7 @@ export default function AccountDetailPage(props) {
                         accountName={accountData.accountName}
                         accountResource={accountResource}
                         isRenderedFromCustomerAccount={true}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
+                        allowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
@@ -956,9 +956,8 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${
-            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
+          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+            }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1015,7 +1014,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 

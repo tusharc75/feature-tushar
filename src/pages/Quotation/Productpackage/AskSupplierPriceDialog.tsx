@@ -118,6 +118,7 @@ const AskSupplierPriceDialog = (props) => {
         }}
         open={askSupplierPriceDialog}
         disableBackdropClick={true}
+        disableEnforceFocus={true}
       >
         <CustomDialogHeader
           title={from != 'SupplierAskPrice' ? 'Ask Supplier to Quote' : 'Reject Supplier Quote'}
@@ -276,8 +277,7 @@ const AskSupplierPriceDialog = (props) => {
               variant="contained"
               color="primary"
               disabled={contactId.length === 0 || selectedFields.length === 0}
-              onClick={() => 
-                handelAskPriceToSupplier(contantValue, contactId, selectedFields, otherAttachments)}
+              onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields, otherAttachments)}
             >
               Send
             </CustomButton>

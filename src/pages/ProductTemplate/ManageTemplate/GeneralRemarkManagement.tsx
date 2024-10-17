@@ -25,6 +25,7 @@ const GeneralRemarkManagement = (props) => {
           }
         }}
         open={generalRemarkOpen}
+        disableEnforceFocus={true}
       >
         <CustomDialogHeader
           title={`General Remark`}

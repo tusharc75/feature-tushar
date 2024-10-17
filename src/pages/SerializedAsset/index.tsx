@@ -323,14 +323,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -597,9 +597,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -819,28 +818,23 @@ const ActionMenuItems = ({
       >
         {`Delete (${selectedRecords?.length})`}
       </MenuItem>
-      {permissions?.serializedAsset?.isUpdate &&
-        allowUpdateStatus &&
-        [ASSET_STATUS.available].map((status) => (
+      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
+        <>
           <MenuItem
             onClick={() => {
-              handleStatusChange(status);
+              handleStatusChange(ASSET_STATUS.available);
             }}
             disabled={
               selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(o.status) ||
-                  (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
-              ).length === selectedRecords?.length
+                (o) => [ASSET_STATUS.underReview, ASSET_STATUS.new,
+                ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords?.length
                 ? false
                 : true
             }
           >
-            {`Status Change - ${status}`}
+            {`Status Change - ${ASSET_STATUS.available}`}
           </MenuItem>
-        ))}
-      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
-        <>
           <MenuItem
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRepair);
@@ -848,16 +842,12 @@ const ActionMenuItems = ({
             disabled={
               selectedRecords?.filter(
                 (o) =>
-                  ![
-                    ASSET_STATUS.delivered,
-                    ASSET_STATUS.inTransit,
-                    ASSET_STATUS.inUse,
-                    ASSET_STATUS.inRepair,
-                    ASSET_STATUS.repair,
-                    ASSET_STATUS.standBy,
-                    ASSET_STATUS.standByNotChargeable,
-                    ASSET_STATUS.needRepair,
-                    ASSET_STATUS.lost
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRecert,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                   ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
@@ -873,16 +863,11 @@ const ActionMenuItems = ({
             disabled={
               selectedRecords?.filter(
                 (o) =>
-                  ![
-                    ASSET_STATUS.delivered,
-                    ASSET_STATUS.inTransit,
-                    ASSET_STATUS.inUse,
-                    ASSET_STATUS.standBy,
-                    ASSET_STATUS.standByNotChargeable,
-                    ASSET_STATUS.inRepair,
-                    ASSET_STATUS.repair,
-                    ASSET_STATUS.needRecert,
-                    ASSET_STATUS.lost
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRepair,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                   ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
@@ -898,16 +883,11 @@ const ActionMenuItems = ({
             disabled={
               selectedRecords?.filter(
                 (o) =>
-                  ![
-                    ASSET_STATUS.delivered,
-                    ASSET_STATUS.inTransit,
-                    ASSET_STATUS.inUse,
-                    ASSET_STATUS.standBy,
-                    ASSET_STATUS.standByNotChargeable,
-                    ASSET_STATUS.inRepair,
-                    ASSET_STATUS.repair,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.lost
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                   ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
@@ -923,15 +903,12 @@ const ActionMenuItems = ({
             disabled={
               selectedRecords?.filter(
                 (o) =>
-                  ![
-                    ASSET_STATUS.delivered,
-                    ASSET_STATUS.inTransit,
-                    ASSET_STATUS.inUse,
-                    ASSET_STATUS.inRepair,
-                    ASSET_STATUS.repair,
-                    ASSET_STATUS.standBy,
-                    ASSET_STATUS.standByNotChargeable,
-                    ASSET_STATUS.lost
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                   ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
@@ -964,17 +941,17 @@ const ActionMenuItems = ({
               </MenuItem>
             );
           })}
-          {columns?.some((e) => e.field === 'certificationSupplier') && (
-            <MenuItem
-              disabled={!permissions?.serializedAsset?.isUpdate}
-              onClick={() => {
-                setOpenSupplierAccountDialog(true);
-              }}
-            >
-              {`Assign Certification Supplier`}
-            </MenuItem>
-          )}
         </>
+      )}
+      {permissions?.serializedAsset?.isUpdate && selectedRecords?.length && columns?.some((e) => e.field === 'certificationSupplier') && (
+        <MenuItem
+          disabled={!permissions?.serializedAsset?.isUpdate}
+          onClick={() => {
+            setOpenSupplierAccountDialog(true);
+          }}
+        >
+          {`Assign Certification Supplier`}
+        </MenuItem>
       )}
     </>
   );

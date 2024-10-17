@@ -32,7 +32,7 @@ export default function OpportunityInAccordian({
   isRedirect,
   contactId = null,
   contactResource = null,
-  isAllowedToUpdate
+  allowedToEdit
 }) {
   const history = useHistory();
   const {
@@ -107,7 +107,7 @@ export default function OpportunityInAccordian({
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
-                {isAllowedToUpdate && (
+                {allowedToEdit && (
                   <>
                     {contactResource === customerContact.contactResource ? (
                       <>
