@@ -206,7 +206,7 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     if (Array.isArray(value) && value?.length) {
       const newOptions = options?.filter((option: any) => value.some((val) => option[lookupDependentOn]?.includes(val) || option[camelCase(lookupResource)]?.includes(val))) || [];
       optionsToShow.push(...newOptions);
-    } else if (value) {
+    } else if (!Array.isArray(value) && value) {
       const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
     }
@@ -399,32 +399,36 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -459,15 +463,15 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                            });
-                            handleLookUpDependent(name, val, fields, setFieldValue);
-                          }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                          handleLookUpDependent(name, val, fields, setFieldValue);
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
