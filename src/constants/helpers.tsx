@@ -2027,17 +2027,10 @@ export const prepareDataForGrid = (data, user = {}) => {
     }
   });
 
-  if (data?.collaborator) {
-    finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
-  }
-
   if (data?.createdBy) {
     finalObject['createdBy'] = data.createdBy?.user?.concatedName;
     finalObject['createdByDate'] = data.createdBy?.date;
     finalObject['createdById'] = data.createdBy?.user?._id;
-    if (!finalObject['isAllowedToUpdate']) {
-      finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
-    }
   }
   if (data?.updatedBy) {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
@@ -2147,6 +2140,26 @@ export const ASSET_STATUS = {
   notApplied: 'N/A',
   scrapRequested: 'Scrap Requested'
 };
+
+
+//This is used to restrict status change
+export const SYSTEM_ASSET_STATUS = [
+  ASSET_STATUS.reserved,
+  ASSET_STATUS.readyToShip,
+  ASSET_STATUS.inTransit,
+  ASSET_STATUS.inUse,
+  ASSET_STATUS.standBy,
+  ASSET_STATUS.standByNotChargeable,
+  ASSET_STATUS.delivered,
+  ASSET_STATUS.customer,
+  ASSET_STATUS.supplier,
+  ASSET_STATUS.returned,
+  ASSET_STATUS.repair,
+  ASSET_STATUS.inRepair,
+  ASSET_STATUS.customerPossession,
+  ASSET_STATUS.scrapRequested,
+  ASSET_STATUS.onPO
+];
 
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',

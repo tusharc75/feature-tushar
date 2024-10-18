@@ -396,7 +396,7 @@ export default function AssetDetailsChangeDialog({
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(name, value) => {
-                                        setFieldValue(`assetData.${index}.${field.fieldName}`, value);
+                                        setFieldValue(`assetData.${index}.${name}`, value);
                                       }}
                                       required={field.required}
                                       fullWidth

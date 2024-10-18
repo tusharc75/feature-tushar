@@ -457,6 +457,7 @@ const Email = () => {
               }
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <CreateEmail
               emailId={emailId}
@@ -495,6 +496,7 @@ const Email = () => {
               }
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <ViewEmail
               emailId={emailId}

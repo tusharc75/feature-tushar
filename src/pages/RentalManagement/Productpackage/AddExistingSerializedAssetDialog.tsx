@@ -599,7 +599,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
               }
             }
           }}
-          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
+          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber, wellName: [referenceData?.wellName?.optionValue] }}
         />
       )}
     </Dialog>

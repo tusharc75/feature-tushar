@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog/Dialog';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase, map, uniq } from 'lodash';
+import { camelCase, isString, map, uniq } from 'lodash';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Link } from 'react-router-dom';
@@ -483,30 +483,29 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                      <Box
-                        border={1}
-                        className={`cursor-pointer p-2 text-[13px] ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      border={1}
+                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        id={`serialized-products-${i}`}
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      id={`serialized-products-${i}`}
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -740,7 +739,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
@@ -771,7 +770,10 @@ const AddSerializedAsset = ({
               setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
             }
           }}
-          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
+          staticLookUpFilters={{
+            wellNumber: referenceData?.wellNumber,
+            wellName: referenceData?.wellName ? isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName : null
+          }}
           productsDefaultData={selectedProducts}
         />
       )}

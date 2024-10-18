@@ -811,6 +811,7 @@ export default function Attachment() {
               setEmailAttachment(null);
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <CreateEmail
               emailId={null}
