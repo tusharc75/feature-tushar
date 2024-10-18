@@ -351,15 +351,16 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-        if (taxCodeData) {
+        if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;
         }
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-
-        if (calValues && calValues['actualJobDuration']) {
-          element.actualJobDuration = calValues['actualJobDuration'];
+        if (allFields?.find((e) => e.fieldName === 'pricingMethod')) {
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          if (calValues && calValues['actualJobDuration']) {
+            element.actualJobDuration = calValues['actualJobDuration'];
+          }
         }
         material.push(element);
       });
@@ -400,7 +401,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         setIsAdding(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         setIsAdding(false);
         toastConfig.setToastConfig(error);
       });
