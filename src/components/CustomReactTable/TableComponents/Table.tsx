@@ -1,13 +1,10 @@
-import { TableRow } from '@material-ui/core';
 import { Row, Table } from '@tanstack/react-table';
-import React, { Dispatch, ForwardedRef, forwardRef, memo, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
 import { getStickyColumnNames } from '../utils';
-import { CellRenderer, TColType } from './TableHelperComponents';
-import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
-
-const MemoizedCellRenderer = memo(CellRenderer);
+import { TColType } from './TableHelperComponents';
 
 type StickyColumns = ReturnType<typeof getStickyColumnNames>;
 
