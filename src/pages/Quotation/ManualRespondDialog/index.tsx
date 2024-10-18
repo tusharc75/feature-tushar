@@ -70,7 +70,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
       onClose={closeManualDiaog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Reason For Ending`} />
+      <CustomDialogHeader title="Reason For Ending" onClose={closeManualDiaog} />
       <CustomDialogContent>
         <>
           <List style={{ padding: 0 }}>

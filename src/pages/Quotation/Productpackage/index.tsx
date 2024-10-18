@@ -717,7 +717,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: 'product', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
           }}
         >
           Add Existing Products
@@ -725,7 +725,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'package', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
             Add Existing Packages
@@ -734,7 +734,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'service', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
             }}
           >
             Add Existing Services
@@ -949,7 +949,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -981,7 +981,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           selectedProducts={products}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -991,7 +991,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
