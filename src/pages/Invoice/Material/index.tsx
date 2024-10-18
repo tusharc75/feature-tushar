@@ -355,7 +355,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;
         }
-        if (allFields?.find((e) => e.fieldName === 'pricingMethodMain')) {
+        if (allFields?.find((e) => e.fieldName === 'pricingMethod')) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
           if (calValues && calValues['actualJobDuration']) {
@@ -401,7 +401,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         setIsAdding(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         setIsAdding(false);
         toastConfig.setToastConfig(error);
       });
