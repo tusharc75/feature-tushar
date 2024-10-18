@@ -64,8 +64,8 @@ const Oauth = () => {
               </div>
               <Formik
                 initialValues={{
-                  email: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                  email: '',
+                  password: ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
