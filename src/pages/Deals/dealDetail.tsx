@@ -1,8 +1,6 @@
 import { Box, Grid } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -72,13 +70,13 @@ const DealDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           {/* <CustomTab
                         value={1}
                     ><BiFoodMenu className="mr-1" fontSize="inherit" /> Material</CustomTab> */}
           <CustomTab value={2}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.units.title}
+            {routes.units.title}
           </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
