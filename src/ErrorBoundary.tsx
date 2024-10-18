@@ -2,6 +2,7 @@ import React from 'react';
 import { Typography, Button } from '@material-ui/core';
 import styles from './error.module.scss';
 import errorImage from './assets/line-item.png';
+import { VITE_APP_ENV } from 'src/config';
 
 class ErrorBoundary extends React.Component<any, any> {
   constructor(props) {
@@ -10,7 +11,7 @@ class ErrorBoundary extends React.Component<any, any> {
   }
 
   componentDidCatch(error, errorInfo) {
-    if (import.meta.env.VITE_APP_ENV !== 'local') {
+    if (VITE_APP_ENV !== 'local') {
       if (error instanceof TypeError || error instanceof ReferenceError) {
         this.setState({
           error: error,

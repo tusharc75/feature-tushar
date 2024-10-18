@@ -12,7 +12,7 @@ export const isSectionVisible = (item: TResource) => {
     !item.isHidden &&
     // item.sectionName !== '' &&
     !staticHiddenResource.includes(item.name) &&
-    !(item?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging')
+    !(item?.name === 'Product Builder')
   );
 };
 

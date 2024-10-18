@@ -7,8 +7,7 @@ import moment from 'moment';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaSignature, FaWpforms } from 'react-icons/fa';
+import { FaSignature } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -551,19 +550,19 @@ export default function DeliveryTicketDetail(props) {
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>
-              <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              Header
             </CustomTab>
             {permissions?.serializedAsset?.isRead && (
               <CustomTab value={1}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
+                Serialized Assets
               </CustomTab>
             )}
             <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
+              Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
               <CustomTab value={3}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
+                Add-On
               </CustomTab>
             )}
             {resourceData &&

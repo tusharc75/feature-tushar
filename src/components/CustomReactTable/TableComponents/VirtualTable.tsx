@@ -168,7 +168,7 @@ export const VirtualTable = forwardRef(function (
                     const header = headerGroup.headers[vc?.index];
                     if (!header) return null;
                     return (
-                      <Fragment key={header.id}>
+                      <Fragment key={vc.index}>
                         {right.length && header.id === right[0] && virtualPaddingRight ? (
                           <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
                         ) : null}
@@ -290,51 +290,53 @@ const VirtualTableBody = ({
         const visibleCells = row?.getVisibleCells();
         if (!row) return null;
         return (
-          <TableRow
-            key={row?.id}
-            style={{
-              height: `${virtualRow.size}px`,
-              transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
-              display: 'flex'
-            }}
-            className={`tr`}
-            onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
-          >
-            {virtualPaddingLeft && left.length === 0 ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
-            {virtualColumns.map((virtualCell, index) => {
-              const cell = visibleCells?.[virtualCell?.index];
-              if (!cell) return null;
-              return (
-                <Fragment key={cell.id}>
-                  {right.length && cell.column.id === right[0] && virtualPaddingRight ? (
-                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-                  ) : null}
-                  <MemoizedCellRenderer
-                    key={cell.id}
-                    virtualStyles={{}}
-                    virtualization={virtualization}
-                    state={state}
-                    cell={cell}
-                    setWholeRowsCellColor={setWholeRowsCellColor}
-                    row={row}
-                    index={index}
-                    table={table}
-                    dispatch={dispatch}
-                    setCellValue={setCellValue}
-                    submitInput={submitInput}
-                    cellValue={cellValue}
-                    resetField={resetField}
-                  />
-                  {left.length && cell.column.id === left[left.length - 1] && virtualPaddingLeft ? (
-                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
-                  ) : null}
-                </Fragment>
-              );
-            })}
-            {virtualPaddingRight && right.length === 0 ? (
-              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-            ) : null}
-          </TableRow>
+          <Fragment key={virtualRow.index}>
+            <TableRow
+              key={virtualrows.index}
+              style={{
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
+                display: 'flex'
+              }}
+              className={`tr`}
+              onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
+            >
+              {virtualPaddingLeft && left.length === 0 ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+              {virtualColumns.map((virtualCell, index) => {
+                const cell = visibleCells?.[virtualCell?.index];
+                if (!cell) return null;
+                return (
+                  <Fragment key={virtualColumns.index}>
+                    {right.length && cell.column.id === right[0] && virtualPaddingRight ? (
+                      <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                    ) : null}
+                    <MemoizedCellRenderer
+                      key={virtualColumns.index}
+                      virtualStyles={{}}
+                      virtualization={virtualization}
+                      state={state}
+                      cell={cell}
+                      setWholeRowsCellColor={setWholeRowsCellColor}
+                      row={row}
+                      index={index}
+                      table={table}
+                      dispatch={dispatch}
+                      setCellValue={setCellValue}
+                      submitInput={submitInput}
+                      cellValue={cellValue}
+                      resetField={resetField}
+                    />
+                    {left.length && cell.column.id === left[left.length - 1] && virtualPaddingLeft ? (
+                      <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+              {virtualPaddingRight && right.length === 0 ? (
+                <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+              ) : null}
+            </TableRow>
+          </Fragment>
         );
       })}
     </>
