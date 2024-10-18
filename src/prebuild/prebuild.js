@@ -2,7 +2,7 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/update`;
+const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/auto-update-new-version`;
 
 fetch(apiUrl, {
   method: 'POST',
