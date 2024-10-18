@@ -356,8 +356,8 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             <>
               <div className={'detail-box-content'}>
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                <h3 className="form-label-style" title={' Product List'}>
-                  Product List
+                <h3 className="form-label-style" title={'Detail'}>
+                  Detail
                 </h3>
               </div>
               <div id="importExportLinks" className={`${classes.root}`}>
