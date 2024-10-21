@@ -48,7 +48,7 @@ type ArrangeViewMenuProps = {
 };
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander, appliedView, table }: ArrangeViewMenuProps) => {
   const walkmeInstance = useGetWalkmeInstance();
-  const { loading } = state;
+  const { loading, resized } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
 
   const {
@@ -111,6 +111,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         data: { data }
       } = await axiosInstance().get('/user/grid-view');
       setSavedData(data.filter((d) => d.key === renderedFrom));
+      dispatch({ type: 'setResized', resized: false });
       contextDispatch({ type: SET_USER, payload: { ...user, sizes, gridViews: data } });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -295,6 +296,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           hideSelection={hideSelection}
           expander={expander}
           table={table}
+          resized={resized}
         />
       )}
       {confirmationDialog.open && (

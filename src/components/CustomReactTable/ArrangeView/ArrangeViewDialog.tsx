@@ -47,6 +47,7 @@ type ArrangeViewDialogProps = {
   hideSelection: boolean;
   expander: boolean;
   table: Table<any>;
+  resized: boolean;
 };
 
 const formSchema = object().shape({
@@ -71,7 +72,17 @@ export type FormSchema = {
 
 type SetFieldValue = (field: string, value: any, shouldValidate?: boolean) => Promise<void | FormikErrors<FormSchema>>;
 
-const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, columns, hideSelection, expander, table }: ArrangeViewDialogProps) => {
+const ArrangeViewDialog = ({
+  onClose,
+  data,
+  getAllSavedViews,
+  renderedFrom,
+  columns,
+  hideSelection,
+  expander,
+  table,
+  resized
+}: ArrangeViewDialogProps) => {
   const { stickyColumns } = useMemo(() => getStickyColumnNames({ allColumn: columns, expander, hideSelection }), [columns, expander, hideSelection]);
 
   const columnsWithoutSticky = useMemo(() => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)), [stickyColumns, columns]);
@@ -404,7 +415,14 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
             <ThemeButton onClick={() => handleReset(setFieldValue)} iconForMobile={false} disabled={loading}>
               Reset
             </ThemeButton>
-            <ThemeButton type="submit" onClick={submitForm} iconForMobile={false} borderColor="none" color="primary" disabled={loading || !dirty}>
+            <ThemeButton
+              type="submit"
+              onClick={submitForm}
+              iconForMobile={false}
+              borderColor="none"
+              color="primary"
+              disabled={loading ? true : resized ? false : !dirty}
+            >
               Save <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
             </ThemeButton>
           </CustomDialogFooter>

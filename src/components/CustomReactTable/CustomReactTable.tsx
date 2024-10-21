@@ -303,10 +303,12 @@ const CustomReactTable = ({
 
   useLayoutEffect(() => {
     const handleApplySavedSize = (columns) => {
-      if (columnSavedSizes) {
+      if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
         const newData = columns?.map((column) => {
           if (columnSavedSizes[column.id]) {
             column.size = columnSavedSizes[column.id];
+          } else {
+            column.size = column.width || 200;
           }
           return column;
         });

@@ -1,5 +1,6 @@
 import { useStore, GRID_METADATA } from 'src/StateProvider/fastContext';
 import { Table } from '@tanstack/react-table';
+import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 export const useGridMetaData = () => {
   const [gridMetaData, setStoreGridMetaData] = useStore((store) => store[GRID_METADATA]);
@@ -11,7 +12,13 @@ export const useGridMetaData = () => {
 export const getCurrentColumnSizes = (table: Table<any>) => {
   const newSizes: { [key: string]: number } = {};
   table.getAllColumns().forEach((c) => {
-    newSizes[c.id] = c.getSize();
+    const colDef = c.columnDef as TColType;
+    const originalSize = colDef.width || 200;
+    const newSize = c.getSize();
+    if (newSize !== originalSize) {
+      console.log(c);
+      newSizes[c.id] = c.getSize();
+    }
   });
   return newSizes;
 };
