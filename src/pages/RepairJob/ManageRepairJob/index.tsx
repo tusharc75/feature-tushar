@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -13,9 +12,7 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   repairJob,
-  setFieldsInAscendingOrder,
   yupSchema,
-  repairJobProcessSteps,
   sidebarResource,
   GenerateResourceLineNumber,
   REPAIR_JOB_STATUS
@@ -25,26 +22,23 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
 import { useData } from '../../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user, selectedEntity }
+    state: { user }
   }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formsData, setFormsData] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
@@ -59,10 +53,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       walkmeInstance.handleNext();
     }
   }, [initialData]);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
@@ -224,15 +214,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    let startDate = moment(values?.startDate);
-    let expectedCompletionDate = moment(values?.expectedCompletionDate);
-    if (expectedCompletionDate.diff(startDate, 'days') < 0) {
-      errors['expectedCompletionDate'] = 'Please enter valid expected completion date';
-    }
-    return errors;
-  }
 
   return (
     <Dialog
@@ -248,9 +229,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       }}
       open={true}
     >
-      {formsData && formsData?.length ? (
+      {initialData && initialData?.fields?.length ? (
         <Formik
-          validate={validate}
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
@@ -260,7 +240,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             <>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (isEqual(values, initialData.values)) {
                     onClose();
                   } else {
@@ -275,106 +255,17 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               />
               <CustomDialogContent>
                 <Form>
-                  {formsData.map((form, i) => {
-                    return (
-                      form.name && (
-                        <div key={i}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field) => (
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  {field.fieldName === 'startDate' ? (
-                                    <FormTypes
-                                      repairJobId={repairJobId}
-                                      {...field}
-                                      disabled={!repairJobId && field.disableOnEdit}
-                                      values={values}
-                                      fieldData={field}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      minDate={new Date()}
-                                      maxDate={values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')}
-                                    />
-                                  ) : field.fieldName === 'expectedCompletionDate' ? (
-                                    <FormTypes
-                                      repairJobId={repairJobId}
-                                      {...field}
-                                      disabled={!repairJobId && field.disableOnEdit}
-                                      values={values}
-                                      fieldData={field}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      minDate={values['startDate']}
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      disabled={
-                                        (Boolean(repairJob) && field.disableOnEdit && !isClone) ||
-                                        (field.fieldName === 'repairJobName' && field?.isSystemGenerate)
-                                      }
-                                      fieldData={field}
-                                      fields={initialData.fields}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                          : null
-                                      }
-                                    />
-                                  )}
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      )
-                    );
-                  })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.repairJob}
+                    referenceId={repairJobId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

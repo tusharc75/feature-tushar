@@ -351,6 +351,12 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
+        if (allFields?.find((e) => e.fieldName === 'actualStartDate')) {
+          element.actualStartDate = new Date();
+        }
+        if (allFields?.find((e) => e.fieldName === 'actualEndDate')) {
+          element.actualEndDate = new Date();
+        }
         if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;

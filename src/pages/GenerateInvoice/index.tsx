@@ -91,6 +91,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
 
   const [resourceList, setResourceList] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
 
   useEffect(() => {
     const options: any = [];
@@ -330,13 +332,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const handleDownloadZip = async () => {
     try {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Your file will be downloaded in a matter of seconds`
+      });
+      setIsDownloading(true)
       const uniqueInvoice = uniqueInvoices();
       if (uniqueInvoice?.length > 0) {
         const invoiceIds = uniqueInvoice.join(',');
-        await axiosInstance()
-          .get(`${routes?.generateInvoice.path}/invoice-zip?invoiceIds=${invoiceIds}`, {
-            responseType: 'blob'
-          })
+        await axiosInstance().get(`${routes?.generateInvoice.path}/invoice-field-ticket-zip?invoiceIds=${invoiceIds}`, {
+          responseType: 'blob'
+        })
           .then((response) => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -344,14 +352,23 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             link.setAttribute('download', 'Invoice_Tickets.zip');
             document.body.appendChild(link);
             link.click();
+            setIsDownloading(false)
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Downloaded successfully.'
+            });
+            dispatch({ type: 'selection', selectedRecords: [] });
+            dispatch({ type: 'pageChange', page: 0 });
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
+            setIsDownloading(false)
           });
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
+      setIsDownloading(false)
     }
   }
 
@@ -368,10 +385,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         </MenuItem>
         {selectedResource?.resource === sidebarResource.fieldTicket && (
           <MenuItem
-            disabled={uniqueInvoices()?.length === 0}
+            disabled={uniqueInvoices()?.length === 0 || isDownloading}
             onClick={handleDownloadZip}
           >
-            Download Zip
+            Download Invoice Tickets
           </MenuItem>
         )}
       </>
