@@ -320,16 +320,61 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     );
   };
 
+  const uniqueInvoices = () => {
+    if (selectedRecords?.length > 0) {
+      const uniqueInvoice = uniq(map(selectedRecords, 'invoiceId'));
+      return uniqueInvoice?.filter(Boolean);
+    }
+    return [];
+  }
+
+  const handleDownloadZip = async () => {
+    try {
+      const uniqueInvoice = uniqueInvoices();
+      if (uniqueInvoice?.length > 0) {
+        const invoiceIds = uniqueInvoice.join(',');
+        await axiosInstance()
+          .get(`${routes?.generateInvoice.path}/invoice-zip?invoiceIds=${invoiceIds}`, {
+            responseType: 'blob'
+          })
+          .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Invoice_Tickets.zip');
+            document.body.appendChild(link);
+            link.click();
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
+
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={checkUniqCreateInvoice()}
-        onClick={() => {
-          setCreateInvoiceDialog({ open: true, data: selectedRecords });
-        }}
-      >
-        Create Invoice
-      </MenuItem>
+      <>
+        <MenuItem
+          disabled={checkUniqCreateInvoice()}
+          onClick={() => {
+            setCreateInvoiceDialog({ open: true, data: selectedRecords });
+          }}
+        >
+          Create Invoice
+        </MenuItem>
+        {selectedResource?.resource === sidebarResource.fieldTicket && (
+          <MenuItem
+            disabled={uniqueInvoices()?.length === 0}
+            onClick={handleDownloadZip}
+          >
+            Download Zip
+          </MenuItem>
+        )}
+      </>
     );
   };
 
