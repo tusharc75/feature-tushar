@@ -35,6 +35,8 @@ import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Table } from '@tanstack/react-table';
+import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
 
 type ArrangeViewDialogProps = {
   onClose: () => void;
@@ -44,6 +46,7 @@ type ArrangeViewDialogProps = {
   columns: any[];
   hideSelection: boolean;
   expander: boolean;
+  table: Table<any>;
 };
 
 const formSchema = object().shape({
@@ -68,7 +71,7 @@ export type FormSchema = {
 
 type SetFieldValue = (field: string, value: any, shouldValidate?: boolean) => Promise<void | FormikErrors<FormSchema>>;
 
-const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, columns, hideSelection, expander }: ArrangeViewDialogProps) => {
+const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, columns, hideSelection, expander, table }: ArrangeViewDialogProps) => {
   const { stickyColumns } = useMemo(() => getStickyColumnNames({ allColumn: columns, expander, hideSelection }), [columns, expander, hideSelection]);
 
   const columnsWithoutSticky = useMemo(() => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)), [stickyColumns, columns]);
@@ -103,9 +106,10 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
   const [loading, setLoading] = useState(false);
 
   const updateArrangeView = async (values: FormSchema) => {
+    const sizes = getCurrentColumnSizes(table);
     setLoading(true);
     try {
-      const payload = { ...values, key: renderedFrom, _id: data._id };
+      const payload = { ...values, sizes: sizes, key: renderedFrom, _id: data._id };
       await axiosInstance().put('/user/grid-view', payload);
       toastConfig.setToastConfig({
         open: true,
@@ -122,9 +126,10 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
   };
 
   const saveArrangeView = async (values: FormSchema) => {
+    const sizes = getCurrentColumnSizes(table);
     setLoading(true);
     try {
-      const payload = { ...values, key: renderedFrom };
+      const payload = { ...values, sizes, key: renderedFrom };
       await axiosInstance().post('/user/grid-view', payload);
       toastConfig.setToastConfig({
         open: true,

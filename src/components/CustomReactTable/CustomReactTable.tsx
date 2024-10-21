@@ -85,7 +85,8 @@ const CustomReactTable = ({
     error,
     visibleColumns,
     columnOrder,
-    sorting
+    sorting,
+    sizes: columnSavedSizes
   }: TInitialState = state;
 
   const debouncedSearch = useDebounce(search, 500);
@@ -301,15 +302,33 @@ const CustomReactTable = ({
   });
 
   useLayoutEffect(() => {
+    const handleApplySavedSize = (columns) => {
+      if (columnSavedSizes) {
+        const newData = columns?.map((column) => {
+          if (columnSavedSizes[column.id]) {
+            column.size = columnSavedSizes[column.id];
+            column.width = columnSavedSizes[column.id];
+          }
+          return column;
+        });
+        return newData;
+      } else {
+        return columns;
+      }
+    };
+
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(newColumns, hookColumns, visibleColumns, clientWidth);
+
+      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns), visibleColumns, clientWidth);
       if (updatedColumns) {
         setNewColumns(updatedColumns);
+        table.resetHeaderSizeInfo();
+        table.resetColumnSizing();
       }
     }
-  }, [tableContainerRef, newColumns.length, visibleColumns]);
+  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
