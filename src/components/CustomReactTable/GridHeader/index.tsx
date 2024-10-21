@@ -199,6 +199,7 @@ const GridHeader = ({
           ) : null}
           {showArrangeView && (
             <ArrangeView
+              table={table}
               columns={newColumns}
               hideSelection={hideSelection}
               renderedFrom={renderedFrom}
