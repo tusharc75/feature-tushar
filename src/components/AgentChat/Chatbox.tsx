@@ -115,25 +115,20 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
           </span>
         )}
       </h6>
-      <p
-        className={cn(
-          'rounded-lg px-[20px] py-[9px]',
-          isUserMessage
-            ? 'bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-            : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
-        )}
-      >
-        {loading ? (
-          <div className="">
-            <Skeleton animation="wave" />
-            <Skeleton />
-            <Skeleton animation="wave" />
-            <Skeleton width={`${getRandomNumber(30, 80)}%`} />
-          </div>
-        ) : (
-          message.content
-        )}
-      </p>
+      {loading ? (
+        <div className="">
+          <Skeleton animation="wave" />
+          <Skeleton />
+          <Skeleton animation="wave" />
+          <Skeleton width={`${getRandomNumber(30, 80)}%`} />
+        </div>
+      ) : isUserMessage ? (
+        <p className="rounded-lg bg-[#0DA0A840] px-[20px] py-[9px] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]">{message.content}</p>
+      ) : (
+        <pre className="whitespace-pre-wrap rounded-lg bg-[#F4F4F4] px-[20px] py-[9px] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white">
+          {message.content}
+        </pre>
+      )}
     </div>
   );
 };
