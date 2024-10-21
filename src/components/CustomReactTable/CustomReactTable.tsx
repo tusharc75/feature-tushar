@@ -117,7 +117,7 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    setNewColumns(hookColumns);
+    setNewColumns([...hookColumns]);
   }, [hookColumns]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -307,21 +307,19 @@ const CustomReactTable = ({
         const newData = columns?.map((column) => {
           if (columnSavedSizes[column.id]) {
             column.size = columnSavedSizes[column.id];
-            column.width = columnSavedSizes[column.id];
           }
           return column;
         });
         return newData;
       } else {
-        return columns;
+        return columns?.map((c) => ({ ...c, size: c.width }));
       }
     };
 
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-
-      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns), visibleColumns, clientWidth);
+      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
       if (updatedColumns) {
         setNewColumns(updatedColumns);
         table.resetHeaderSizeInfo();
