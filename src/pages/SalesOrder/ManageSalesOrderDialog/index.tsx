@@ -14,7 +14,8 @@ import {
   getObjKeysWithValues,
   salesOrder,
   yupSchema,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -180,7 +181,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     ? `Create ${routes.salesOrder.title}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                 }
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (isEqual(initialData.values, values)) {
                     onClose();
                   } else {
@@ -203,6 +204,8 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    resource={sidebarResource.salesOrder}
+                    referenceId={salesOrderId || null}
                   />
                 </Form>
               </CustomDialogContent>
