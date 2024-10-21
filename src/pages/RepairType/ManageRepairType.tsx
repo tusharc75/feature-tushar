@@ -204,7 +204,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
