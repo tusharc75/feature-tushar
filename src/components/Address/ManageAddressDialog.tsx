@@ -165,7 +165,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       fullAddress.longitude = addressDetail?.longitude;
     }
     fullAddress.streetAddress = results.formatted_address;
-    if(!fromMarkerChange || !(initialData?.fields?.some((f) => f.fieldName === 'searchAddress'))) {
+    if (!fromMarkerChange || !(initialData?.fields?.some((f) => f.fieldName === 'searchAddress'))) {
       fullAddress.fullAddress = val?.description ?? results.formatted_address;
     } else {
       fullAddress.fullAddress = addressDetail?.fullAddress ?? '';
@@ -180,7 +180,14 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       const keys = Object.keys(addressDetail);
       if (keys.length > 0) {
         Object.keys(initialData.values).forEach((k) => {
-          setFieldValue(k, addressDetail[k]);
+          if (k === 'fullAddress') {
+            if (initialData.fields?.find((e) => e?.fieldName === 'fullAddress')?.type !== 'singleLine') {
+              setFieldValue(k, addressDetail[k]);
+            }
+          }
+          else {
+            setFieldValue(k, addressDetail[k]);
+          }
         });
       }
 
@@ -192,11 +199,13 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       let fullAddress = `${city}${state}${zipCode}${country}`;
 
       if (initialData?.fields?.some((f) => f.fieldName === 'fullAddress' && f.type === 'singleLine')) {
-        fullAddress = addressDetail?.fullAddress  ?? '';
+        fullAddress = addressDetail?.fullAddress ?? '';
       }
 
       if (latLngChangedManually && !addressDetail?.streetAddress) {
-        setFieldValue('fullAddress', fullAddress);
+        if (initialData.fields?.find((e) => e?.fieldName === 'fullAddress')?.type !== 'singleLine') {
+          setFieldValue('fullAddress', fullAddress);
+        }
         setFieldValue('streetAddress', fullAddress);
       }
     }
@@ -287,8 +296,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                           {form.sectionFields.map((field, index2) => (
                             <Grid key={index2} item xs={12} sm={6} md={6}>
                               {
-                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
-                                  'state/Province', 'zipCode/PostalCode', 'searchAddress'].includes(field.fieldName) ?
+                                ['fullAddress', 'searchAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
+                                  'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -306,23 +315,24 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                     setFieldValue={setFieldValue}
                                     fieldData={field}
                                     onChange={
-                                      ((field.fieldName === 'fullAddress' && field.type !== 'singleLine') || (field.fieldName === 'searchAddress'))
-                                        ? (_, val) => {
-                                          if (typeof val !== 'object') return;
-                                          getFullAddress(val);
-                                          if (!val?.place_id) {
-                                            setAddressDetail(null);
+                                      field.fieldName === 'fullAddress' && field.type === 'singleLine' ? null
+                                        : (field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress')
+                                          ? (_, val) => {
+                                            if (typeof val !== 'object') return;
+                                            getFullAddress(val);
+                                            if (!val?.place_id) {
+                                              setAddressDetail(null);
+                                            }
                                           }
-                                        }
-                                        : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                          const { name, value } = e.target;
-                                          if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                                          setAddressDetail((prevState: any) => ({
-                                            ...prevState,
-                                            [name]: value
-                                          }));
-                                          setLatLngChangedManually(true);
-                                        }}
+                                          : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const { name, value } = e.target;
+                                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                            setAddressDetail((prevState: any) => ({
+                                              ...prevState,
+                                              [name]: value
+                                            }));
+                                            setLatLngChangedManually(true);
+                                          }}
                                   />
                                   :
                                   <FormTypes
