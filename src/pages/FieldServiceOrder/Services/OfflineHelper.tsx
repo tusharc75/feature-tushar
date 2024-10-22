@@ -29,6 +29,9 @@ export const fieldServiceOrderAddOffline = async (ids) => {
         axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketCost, data);
         });
+        axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketSubmit}`).then(({ data: { data } }) => {
+            insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketSubmit, data);
+        });
         axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.serviceMaster, data);
         });
