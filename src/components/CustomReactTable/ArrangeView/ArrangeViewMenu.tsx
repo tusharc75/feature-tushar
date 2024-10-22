@@ -76,12 +76,16 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       columnHiddenStateData[column.id] = !hide.includes(column.id);
     });
     if (order.length > 0) {
+      // This line ensures that the action column does not move left, if the order was saved previously and new columns have been added since then.
+      const restOfTheColumns = columns.map((d) => d.id).filter((d) => !order.includes(d));
+
       const newOrder = order.filter((d) => !stickycolumns.stickyColumns.includes(d));
-      columnOrder = [...stickycolumns.left, ...newOrder, ...stickycolumns.right];
+      columnOrder = [...stickycolumns.left, ...newOrder, ...restOfTheColumns, ...stickycolumns.right];
     } else {
       const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
       columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
     }
+
     dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
     dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
     dispatch({ type: 'setColumnSizes', sizes: sizes });
