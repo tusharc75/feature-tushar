@@ -428,7 +428,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => {}}
+                        afterImportCompleted={() => { }}
                         onlyExport={true}
                       />
                     )}
@@ -528,7 +528,6 @@ const Report = () => {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
-                  reportSave={true}
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
                 />

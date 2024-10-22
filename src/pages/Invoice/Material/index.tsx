@@ -351,37 +351,35 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-        if (taxCodeData) {
+        if (allFields?.find((e) => e.fieldName === 'actualStartDate')) {
+          element.actualStartDate = new Date();
+        }
+        if (allFields?.find((e) => e.fieldName === 'actualEndDate')) {
+          element.actualEndDate = new Date();
+        }
+        if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;
         }
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-
-        if (calValues && calValues['actualJobDuration']) {
-          element.actualJobDuration = calValues['actualJobDuration'];
+        if (allFields?.find((e) => e.fieldName === 'pricingMethod')) {
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          if (calValues && calValues['actualJobDuration']) {
+            element.actualJobDuration = calValues['actualJobDuration'];
+          }
         }
         material.push(element);
       });
     }
     const priceData: any = await calculatePrice(material);
-
     material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
       if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${invoiceData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields(
-          { [priceFieldName]: rateResult[0].mrp, pricingCondition: rateResult[0].conditionId },
-          element,
-          allFields
-        );
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
     });
@@ -400,7 +398,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         setIsAdding(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         setIsAdding(false);
         toastConfig.setToastConfig(error);
       });

@@ -2,9 +2,15 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/latest` || 'https://master.portal.equip-t.com/api/portal-version/latest';
+const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/auto-update-new-version`;
 
-fetch(apiUrl)
+fetch(apiUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({}),
+})
   .then((response) => response.json())
   .then((data) => {
     if (data?.data && data?.data?.version) {

@@ -965,7 +965,7 @@ const Report = () => {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
-                  reportSave={true}
+                  hideExportTable={true}
                   pagination={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true}
                   isClientSideGrid={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false}
                 />

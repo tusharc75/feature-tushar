@@ -64,7 +64,6 @@ const CustomReactTable = ({
   hideAction = false,
   selectedReportView = null,
   setSelectedReportView = null,
-  reportSave = false,
   virtualization = false,
   showArrangeView = true,
   hideExportTable = false,
@@ -86,7 +85,8 @@ const CustomReactTable = ({
     error,
     visibleColumns,
     columnOrder,
-    sorting
+    sorting,
+    sizes: columnSavedSizes
   }: TInitialState = state;
 
   const debouncedSearch = useDebounce(search, 500);
@@ -117,7 +117,7 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    setNewColumns(hookColumns);
+    setNewColumns([...hookColumns]);
   }, [hookColumns]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -302,15 +302,33 @@ const CustomReactTable = ({
   });
 
   useLayoutEffect(() => {
+    const handleApplySavedSize = (columns) => {
+      if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
+        const newData = columns?.map((column) => {
+          if (columnSavedSizes[column.id]) {
+            column.size = columnSavedSizes[column.id];
+          } else {
+            column.size = column.width || 200;
+          }
+          return column;
+        });
+        return newData;
+      } else {
+        return columns?.map((c) => ({ ...c, size: c.width }));
+      }
+    };
+
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(newColumns, hookColumns, visibleColumns, clientWidth);
+      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
       if (updatedColumns) {
         setNewColumns(updatedColumns);
+        table.resetHeaderSizeInfo();
+        table.resetColumnSizing();
       }
     }
-  }, [tableContainerRef, newColumns.length, visibleColumns]);
+  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
@@ -552,7 +570,6 @@ const CustomReactTable = ({
             showArrangeView={showArrangeView}
             newColumns={newColumns}
             refreshGrid={refreshGrid}
-            reportSave={reportSave}
             setSelectedReportView={setSelectedReportView}
             selectedReportView={selectedReportView}
             state={state}

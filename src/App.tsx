@@ -268,6 +268,7 @@ import { useData } from './StateProvider/Provider';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import AgentChat from 'src/components/AgentChat';
+import { VITE_APP_ENV } from 'src/config';
 
 var notificationInterval: any = null;
 
@@ -338,7 +339,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -354,8 +355,10 @@ function App() {
           }
 
           // check for version change
-          if (versionData?.version) {
-            handleVersion(versionData);
+          if (VITE_APP_ENV !== 'local') {
+            if (versionData?.version) {
+              handleVersion(versionData);
+            }
           }
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });

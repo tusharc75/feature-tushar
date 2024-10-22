@@ -249,7 +249,12 @@ export const CreateEmail = ({
       if (emailId) {
         axiosInstance()
           .put(`/email/${emailId}`, values)
-          .then(() => {
+          .then(({ data }) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             handleClose();
           })
           .catch((err) => {
@@ -306,6 +311,11 @@ export const CreateEmail = ({
     axiosInstance()
       .post(api, body)
       .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: "Email Sent Successfully"
+        });
         setSending(false);
         if (fetchData) fetchData();
       })
