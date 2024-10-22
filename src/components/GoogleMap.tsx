@@ -38,7 +38,7 @@ const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
             <GoogleMap
               key={themeColor}
               options={{
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                mapTypeId: google.maps.MapTypeId.SATELLITE,
                 gestureHandling: 'cooperative',
                 styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
               }}
@@ -47,7 +47,7 @@ const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
                 minWidth: '100%'
               }}
               center={new google.maps.LatLng(latitude, longitude)}
-              zoom={15}
+              zoom={21}
             >
               <Marker position={new google.maps.LatLng(latitude, longitude)} />
             </GoogleMap>
