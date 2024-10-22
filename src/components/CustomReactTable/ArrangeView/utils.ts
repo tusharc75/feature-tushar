@@ -16,7 +16,6 @@ export const getCurrentColumnSizes = (table: Table<any>) => {
     const originalSize = colDef.width || 200;
     const newSize = c.getSize();
     if (newSize !== originalSize) {
-      console.log(c);
       newSizes[c.id] = c.getSize();
     }
   });
