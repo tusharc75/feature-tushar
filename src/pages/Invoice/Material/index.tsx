@@ -364,9 +364,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         if (allFields?.find((e) => e.fieldName === 'pricingMethod')) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-          if (calValues && calValues['actualJobDuration']) {
-            element.actualJobDuration = calValues['actualJobDuration'];
-          }
+          Object.assign(element, calValues);
         }
         material.push(element);
       });
