@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
-import { sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -16,6 +16,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Edit } from '@material-ui/icons';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ManagedPackagedDetail = () => {
   const { id } = useParams();
@@ -118,6 +119,11 @@ const ManagedPackagedDetail = () => {
                 </Button>
               )}
               {permissions?.managedPackages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              <ActivityButton
+                referenceId={managedPackagesData?._id}
+                resource={ACTIVITY_RESOURCE.managedPackages}
+                resourceLabel={managedPackagesData?.managedPackageName}
+              />
             </>
           </Box>
         </Box>
@@ -125,7 +131,7 @@ const ManagedPackagedDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          <CustomTab value={1} label={'Assign'} />
+          <CustomTab value={1} label={'Products'} />
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -139,7 +145,7 @@ const ManagedPackagedDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign managedPackagesData={managedPackagesData}/>
+          <Assign managedPackagesData={managedPackagesData} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
