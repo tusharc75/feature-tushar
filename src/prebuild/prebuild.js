@@ -2,14 +2,22 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/auto-update-new-version`;
+let apiUrl = `${process.env.VITE_APP_API_URL}/portal-version`;
+let method = 'POST';
+
+if(process.env.VITE_APP_ENV === 'production') {
+  apiUrl += `/auto-update-new-version`;
+} else {
+  apiUrl += `/latest`;
+  method = 'GET';
+}
 
 fetch(apiUrl, {
-  method: 'POST',
+  method: method,
   headers: {
     'Content-Type': 'application/json',
   },
-  body: JSON.stringify({}),
+  body: method === 'POST' ? JSON.stringify({}) : undefined,
 })
   .then((response) => response.json())
   .then((data) => {
