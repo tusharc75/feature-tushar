@@ -45,10 +45,9 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'stepName',
       Header: 'Step Name',
-      minWidth: 150,
-      width: 150,
       primaryField: true,
       disabled: true,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.stepName ? (
@@ -70,8 +69,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'order',
       Header: 'Sequence',
-      minWidth: 150,
-      width: 150,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -88,8 +85,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'leadDay',
       Header: 'Lead Time',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.leadDay ? (
@@ -105,8 +100,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'costPrice',
       Header: 'Cost Price',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.costPrice ? (
@@ -122,8 +115,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'listPrice',
       Header: 'List Price',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.listPrice ? (
@@ -139,8 +130,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'fieldCount',
       Header: 'Fields',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.fieldCount ? (
