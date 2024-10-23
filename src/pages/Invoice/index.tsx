@@ -21,6 +21,7 @@ import {
   getDefaultMyRecordType,
   gridLoadingTimeout,
   invoice,
+  INVOICE_STATUS,
   prepareDataForGrid,
   sidebarResource,
   supplierAccount
@@ -78,7 +79,8 @@ const Invoice = () => {
     data = response?.data?.data;
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
-        setStatusOptions(d?.fieldData?.option);
+        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
+        setStatusOptions(statusOps);
       }
     });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
