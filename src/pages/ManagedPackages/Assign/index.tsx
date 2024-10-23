@@ -189,7 +189,7 @@ const Assign = ({ managedPackagesData }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <Delete color="error" />
+              <Delete color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -203,60 +203,58 @@ const Assign = ({ managedPackagesData }) => {
     const allAssetsResponse: any = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
     const assets = allAssetsResponse?.data?.data || [];
 
-    axiosInstance()
-      .get(`/managed-packages/${managedPackagesData?.package?.optionValue}/serialized-products`)
-      .then(
-        ({
-          data: {
-            data: { material, childProduct }
-          }
-        }) => {
-          const rows = [];
-          const packages = new Set();
-          let index = 1;
-          material?.forEach((parent) => {
-            let row: any = {};
-            if (parent?.package?.optionValue) {
-              if (!packages.has(parent?.package?.optionValue)) {
-                row.index = index;
-                row._id = parent?.package?.optionValue;
-                row.type = MATERIAL_TYPE.package;
-                row.detail = parent.package.optionLabel;
-                row.qty = parent?.package?.qty;
-                row.subRows = generateNestedData(material, [], assets, row);
-                packages.add(row._id);
-                row.parentId = null;
-                rows.push(row);
-                index++;
-              }
-            } else {
-              row = { ...parent };
+    axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`).then(
+      ({
+        data: {
+          data: { material, childProduct }
+        }
+      }) => {
+        const rows = [];
+        const packages = new Set();
+        let index = 1;
+        material?.forEach((parent) => {
+          let row: any = {};
+          if (parent?.package?.optionValue) {
+            if (!packages.has(parent?.package?.optionValue)) {
               row.index = index;
-              row.productId = parent?._id;
-              row.type = MATERIAL_TYPE.product;
-              row.detail = parent?.productName;
-              row.description = parent?.productDescription;
-              row.productNumber = parent?.productNumber;
-              row.productCategory = parent?.productCategory?.optionLabel;
-              row.qty = parent?.qty;
-              row.assetQty =
-                assets?.filter((i: any) => {
-                  if (i?.package) {
-                    return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
-                  } else {
-                    return i.product.optionValue === row.productId && !row?.package;
-                  }
-                })?.length || 0;
-              row.subRows = generateNestedData([], childProduct, assets, row);
+              row._id = parent?.package?.optionValue;
+              row.type = MATERIAL_TYPE.package;
+              row.detail = parent.package.optionLabel;
+              row.qty = parent?.package?.qty;
+              row.subRows = generateNestedData(material, [], assets, row);
+              packages.add(row._id);
               row.parentId = null;
               rows.push(row);
               index++;
             }
-          });
-          dispatch({ type: 'initialize', data: rows, count: rows?.length });
-          dispatch({ type: 'loading', loading: false });
-        }
-      )
+          } else {
+            row = { ...parent };
+            row.index = index;
+            row.productId = parent?._id;
+            row.type = MATERIAL_TYPE.product;
+            row.detail = parent?.productName;
+            row.description = parent?.productDescription;
+            row.productNumber = parent?.productNumber;
+            row.productCategory = parent?.productCategory?.optionLabel;
+            row.qty = parent?.qty;
+            row.assetQty =
+              assets?.filter((i: any) => {
+                if (i?.package) {
+                  return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
+                } else {
+                  return i.product.optionValue === row.productId && !row?.package;
+                }
+              })?.length || 0;
+            row.subRows = generateNestedData([], childProduct, assets, row);
+            row.parentId = null;
+            rows.push(row);
+            index++;
+          }
+        });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+      }
+    )
       .catch((err) => {
         setToastConfig(err);
       });
@@ -264,7 +262,6 @@ const Assign = ({ managedPackagesData }) => {
 
   const generateNestedData = (material, childProduct, assets, parent) => {
     let subRows: any = [];
-
     if (material?.length > 0 && parent.type === MATERIAL_TYPE.package) {
       const packageSubRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
       packageSubRows.forEach((_subRow, j) => {
@@ -291,7 +288,6 @@ const Assign = ({ managedPackagesData }) => {
 
       subRows = [...subRows, ...packageSubRows];
     }
-
     if (childProduct?.length > 0) {
       let childSubRows = childProduct?.filter((e) => {
         return e.product === parent.productId;
@@ -320,7 +316,6 @@ const Assign = ({ managedPackagesData }) => {
 
       subRows = [...subRows, ...childSubRows];
     }
-
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => {
         return e.product.optionValue === parent.productId;
@@ -337,48 +332,6 @@ const Assign = ({ managedPackagesData }) => {
       });
       subRows = [...subRows, ...assetsSubRows];
     }
-    // if (parent.type === MATERIAL_TYPE.package) {
-    //   subRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
-    //   subRows.forEach((_subRow, j) => {
-    //     _subRow.index = parent.index + '.' + (j + 1);
-    //     _subRow.productId = _subRow._id;
-    //     _subRow._id = parent._id + _subRow._id;
-    //     _subRow.type = MATERIAL_TYPE.product;
-    //     _subRow.detail = _subRow?.productName;
-    //     _subRow.description = _subRow?.productDescription;
-    //     _subRow.productNumber = _subRow?.productNumber;
-    //     _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-    //     _subRow.qty = parent.qty * _subRow.qty;
-    //     _subRow.parentId = parent?._id;
-    //     _subRow.assetQty =
-    //       assets?.filter((i: any) => {
-    //         if (i?.package) {
-    //           return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
-    //         } else {
-    //           return i.product.optionValue === _subRow.productId && !_subRow?.package;
-    //         }
-    //       })?.length || 0;
-    //     _subRow.subRows = generateNestedData([], [], assets, _subRow);
-    //   });
-    // } else {
-    //   subRows = assets.filter((e) => {
-    //     if (e?.package) {
-    //       return e.product.optionValue === parent.productId && e?.package?.optionValue === parent?.package?.optionValue;
-    //     } else {
-    //       return e.product.optionValue === parent.productId && !parent?.package;
-    //     }
-    //   });
-    //   subRows.forEach((_subRow, j) => {
-    //     _subRow.index = parent.index + '.' + (j + 1);
-    //     _subRow.type = MATERIAL_TYPE.serializedAsset;
-    //     _subRow.detail = _subRow?.assetNumber;
-    //     _subRow.description = _subRow?.description;
-    //     _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-    //     _subRow.position = _subRow?.position;
-    //     _subRow.parentId = _subRow?.product?.optionValue;
-    //     _subRow.qty = parent.qty;
-    //   });
-    // }
     return subRows;
   };
 
@@ -488,7 +441,7 @@ const Assign = ({ managedPackagesData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
