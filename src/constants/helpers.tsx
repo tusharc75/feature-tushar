@@ -2376,7 +2376,8 @@ export const ACTIVITY_RESOURCE = {
   budget: 'budget',
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
-  assemblyOrder: 'assemblyOrder'
+  assemblyOrder: 'assemblyOrder',
+  managedPackages: 'managedPackages',
 };
 
 export const LOG_RESOURCE = {
