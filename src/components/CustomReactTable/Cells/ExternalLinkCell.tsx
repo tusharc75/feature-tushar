@@ -8,12 +8,22 @@ export const ExternalLinkCell = ({ value, link, endComma = false, startComma = f
         {startComma && <span className="hidden">,&nbsp;</span>}
         {value}
         {endComma && <span className="hidden">,&nbsp;</span>}
+        <span className="md:sr-only md:hidden">&nbsp;</span>
+        <RenderLink link={link} value={value} className="md:sr-only md:hidden" />
       </span>
-      {link && (
-        <Link title={value} to={link} target="_blank" rel="noopener noreferrer" className={'max-h-fit flex-shrink-0'}>
-          <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
-        </Link>
-      )}
+
+      <RenderLink link={link} value={value} className="max-md:sr-only max-md:hidden" />
     </p>
+  );
+};
+
+const RenderLink = ({ link, value, className = '' }) => {
+  if (!link) return null;
+  return (
+    <>
+      <Link title={value} to={link} target="_blank" rel="noopener noreferrer" className={`max-h-fit flex-shrink-0 ${className}`}>
+        <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+      </Link>
+    </>
   );
 };
