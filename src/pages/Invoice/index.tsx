@@ -78,8 +78,7 @@ const Invoice = () => {
     data = response?.data?.data;
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
-        const statusOps = d?.fieldData?.option?.filter((e) => e.optionValue !== 'Closed');
-        setStatusOptions(statusOps);
+        setStatusOptions(d?.fieldData?.option);
       }
     });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
@@ -281,7 +280,7 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.invoice?.isUpdate && selectedRecords?.length && (
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s)=> s.status==='Closed') && (
           <>
             {statusOptions?.map((status) => {
               return (
