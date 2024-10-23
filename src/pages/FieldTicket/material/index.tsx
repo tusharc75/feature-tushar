@@ -149,9 +149,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {isOffline ? (
-              <p> {row.original.detail}</p>
-            ) : !allowedToEdit || fieldTicketData?.quotation ? (
+            {!allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
             ) : row.original.detail ? (
               <p
@@ -376,9 +374,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         element.estimateEndDate = fieldTicketData ? new Date(fieldTicketData?.estimateEndDate) : new Date();
         element.isRental = false;
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        element.estimateJobDuration = 1;
-        if (calValues && calValues['estimateJobDuration']) element.estimateJobDuration = calValues['estimateJobDuration'];
-        if (calValues && calValues['finalQty']) element.finalQty = calValues['finalQty'];
+        Object.assign(element, calValues);
         let id = Math.floor(Math.random() * 1000000).toString();
         element._id = id;
         element.serviceDetail = {
@@ -433,10 +429,6 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element['totalPrice_' + currency] = d['totalPrice_' + currency] || 0;
           element['finalPrice_' + currency] = d['finalPrice_' + currency] || 0;
           element.isRental = true;
-          if (taxCodeData) {
-            element.taxCode = taxCodeData?.optionValue;
-            element.taxPercentage = taxCodeData?.taxRate || 0;
-          }
           material.push(element);
         });
         AddMaterial(material, null);
@@ -452,18 +444,12 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
           element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
           element.isRental = false;
-          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-          element.estimateJobDuration = 1;
-          if (calValues && calValues['estimateJobDuration']) {
-            element.estimateJobDuration = calValues['estimateJobDuration'];
-          }
-          if (calValues && calValues['finalQty']) {
-            element.finalQty = calValues['finalQty'];
-          }
           if (taxCodeData) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          Object.assign(element, calValues);
           material.push(element);
         });
         let priceData: any = await calculatePrice(fieldTicketData, material);
@@ -479,9 +465,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter(
-          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
-        );
+        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
@@ -667,7 +651,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false,  showNext = false) => {
+  const handleSaveData = async (rows: any, saveAndNext = false, showNext = false) => {
     try {
       setUpdating(true);
       if (isOffline) {
@@ -691,7 +675,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         else updatedData = { ...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
-        if(!showNext){
+        if (!showNext) {
           await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
         }
       }
@@ -910,6 +894,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
+          currency={fieldTicketData.currency}
         />
       )}
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
