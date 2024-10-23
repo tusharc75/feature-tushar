@@ -22,6 +22,7 @@ import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import FormTypes from '../../components/Helpers/FormTypes';
 import VirtualizedList from '../../components/VirtualizedList';
 import { dateFormat } from '../../constants/helpers';
+import SingleLine from 'src/components/CustomReactTable/GridFilter/SingleLine';
 
 interface FiltersProps {
   resource: string;
@@ -200,7 +201,11 @@ const ReportFilters = (props: FiltersProps) => {
 
     if (Array.isArray(value)) {
       if (!fieldProps.lookup) {
-        newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
+        if(fieldProps.type = 'singleLine'){
+          newData.value = value
+        }else {
+          newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
+        }
       } else {
         newData.value = value;
       }
@@ -209,6 +214,7 @@ const ReportFilters = (props: FiltersProps) => {
       newData.value = value;
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
     }
+   
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
     if (error[name] && value) {
       setError((prev) => {
@@ -520,7 +526,25 @@ const ReportFilters = (props: FiltersProps) => {
                           fieldLabel={field.fieldLabel}
                           required={reportConfig?.defaultColumn ? field?.required : false}
                         />
-                      ) : (
+                      ) : 
+                       field?.type === 'singleLine' ? (
+                        <SingleLine
+                          key={field?._id}
+                          resource={field?.resource}
+                          errors={error}
+                          touched={error}
+                          value={formValues[field.fieldName] ?? []}
+                          onChange={(_, value) => {
+                            handleSelectFilter(field?.type, field?.fieldName, value);
+                          }}
+                          fieldName={field.fieldName}
+                          fieldLabel={field.fieldLabel}
+                          required={reportConfig?.defaultColumn ? field?.required : false}
+                          fieldData={field}
+                          allFields={[]}
+                        />
+                      ) :
+                      (
                         <FormTypes
                           values={formValues}
                           errors={error}
