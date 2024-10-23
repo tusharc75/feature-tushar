@@ -45,6 +45,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import WorkOrderCostDialog from './WorkOrderCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import Assign from 'src/pages/WorkOrder/Assign';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -381,10 +382,10 @@ const WorkOrderDetails = () => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${routes?.repairJob.title}`,
@@ -474,10 +475,10 @@ const WorkOrderDetails = () => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -490,10 +491,10 @@ const WorkOrderDetails = () => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -574,12 +575,13 @@ const WorkOrderDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
-          {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) && resourceData?.policy?.showBom && (
-            <CustomTab value={3}>BOM</CustomTab>
-          )}
-          <CustomTab value={4}>Drawings</CustomTab>
-          {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+          {[WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
+            && <CustomTab value={3}>Assign</CustomTab>}
+          {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
+            && resourceData?.policy?.showBom && <CustomTab value={4}>BOM</CustomTab>}
+          <CustomTab value={5}>Drawings</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={6}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 7}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -663,6 +665,14 @@ const WorkOrderDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
+            <Assign
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
+              workOrderData={workOrderData}
+            />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
+          {workOrderData && (
             <Consumables
               allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
@@ -676,7 +686,7 @@ const WorkOrderDetails = () => {
             />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={5}>
           {workOrderData && (
             <Diagram
               resource={ACTIVITY_RESOURCE.workOrder}
@@ -686,7 +696,7 @@ const WorkOrderDetails = () => {
             />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={5}>
+        <TabPanel value={tabValue} index={6}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
@@ -695,7 +705,7 @@ const WorkOrderDetails = () => {
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 6}>
+              <TabPanel value={tabValue} index={i + 7}>
                 <Box>
                   <Step
                     tab={tab}
