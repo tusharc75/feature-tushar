@@ -43,11 +43,11 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     [theme.breakpoints.down('md')]: {
-      whiteSpace: 'nowrap',
+      whiteSpace: 'pre-wrap',
       width: '250px'
     },
     [theme.breakpoints.down('xs')]: {
-      whiteSpace: 'nowrap',
+      whiteSpace: 'pre-wrap',
       width: '250px'
     }
   },
@@ -243,7 +243,7 @@ const Details = (props: DetailProps) => {
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
-          <Typography className={`${classes.fieldText} ${classes.withMultichild}`} variant="body2">
+          <Typography className={`${classes.fieldText} ${classes.withMultichild} w-full`} variant="body2">
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
@@ -251,10 +251,11 @@ const Details = (props: DetailProps) => {
                     <Link
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
                       target="_blank"
-                      className="link"
                       rel="noopener noreferrer"
+                      className="link block w-full"
+                      title={_val.optionLabel}
                     >
-                      <span className={`text-truncate link block`}>
+                      <span className={`link block md:truncate md:text-ellipsis`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -267,8 +268,14 @@ const Details = (props: DetailProps) => {
                 </Typography>
               )
             ) : data[fieldData.fieldName] ? (
-              <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`} target="_blank" rel="noopener noreferrer">
-                <span className={`text-truncate link block`}>
+              <Link
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link block w-full"
+                title={data[fieldData.fieldName].optionLabel || value}
+              >
+                <span className={`link block md:truncate md:text-ellipsis`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -414,7 +421,7 @@ const Details = (props: DetailProps) => {
             {value?.locationName ? (
               <Box display="flex" alignItems="center">
                 <Typography title={value?.locationName || value} className={cn(classes.fieldText, ' flex items-center')} variant="body2">
-                  <span className={`text-truncate line-clamp-1 block`}>{value?.locationName || value}</span>
+                  <span className={`block md:truncate`}>{value?.locationName || value}</span>
                 </Typography>
                 {value?.longitude && value?.latitude ? (
                   <Box>
@@ -464,7 +471,7 @@ const Details = (props: DetailProps) => {
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
             </>
           ) : (
-            <span className={`text-truncate line-clamp-1 block`}>{value}</span>
+            <span className={` block md:truncate`}>{value}</span>
           )}
         </Typography>
       );
