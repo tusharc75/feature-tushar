@@ -279,7 +279,7 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={isOffline ? fieldTicketSteps.filter((s) => s.name === 'Add') : fieldTicketSteps}
+            steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}

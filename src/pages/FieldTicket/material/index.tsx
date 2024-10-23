@@ -910,6 +910,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
+          currency={fieldTicketData.currency}
         />
       )}
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
