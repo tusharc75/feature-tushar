@@ -1,5 +1,5 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -30,8 +30,6 @@ import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import { isMobile, isTablet } from 'react-device-detect';
-import { RiExchangeBoxFill } from 'react-icons/ri';
 
 let invoiceTimeout;
 
