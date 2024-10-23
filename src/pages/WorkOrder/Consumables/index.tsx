@@ -70,6 +70,7 @@ const Consumables = ({
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [assignAssetDialog, setAssignAssetDialog] = useState(false);
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false);
+  const [serialNumbers, setSerialNumbers] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -383,6 +384,7 @@ const Consumables = ({
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
+        setSerialNumbers(data?.filter((d) => d?.type === OTHER_MATERIAL_TYPE.serialNumber));
         if (materialSubType === MATERIAL_SUB_TYPE.bom) {
           data = data?.filter((e) => e?.subType === materialSubType);
         } else {
@@ -826,7 +828,7 @@ const Consumables = ({
             referenceType={'Work Order'}
             isAssigning={isSubmitting}
             filterByPlant={warehouse}
-            ids={selectedRecords?.filter((r) => r?.type === OTHER_MATERIAL_TYPE.serialNumber)?.map((r) => r?.materialId)}
+            ids={serialNumbers?.map((s) => s?.materialId)}
             showWarehouseFilter={true}
           />
         )}
