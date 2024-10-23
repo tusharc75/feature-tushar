@@ -67,7 +67,7 @@ const Invoice = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-
+  const [statusOptions, setStatusOptions] = useState(null);
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -76,6 +76,11 @@ const Invoice = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
+    data?.forEach((d) => {
+      if (d?.fieldData?.fieldName === 'status') {
+        setStatusOptions(d?.fieldData?.option);
+      }
+    });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -275,8 +280,45 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s)=> s.status==='Closed') && (
+          <>
+            {statusOptions?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusUpdate(status?.optionValue);
+                  }}
+                  disabled={false}
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
+          </>
+        )}
       </>
     );
+  };
+
+  const handleStatusUpdate = (status) => {
+    const ids = selectedRecords?.map((s) => s._id);
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -287,7 +329,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
