@@ -69,8 +69,6 @@ const Invoice = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [updateLoading, setUpdateLoading] = useState(false);
   const [statusOptions, setStatusOptions] = useState(null);
   useEffect(() => {
     fetchGridColumns();
@@ -285,23 +283,31 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && (
+          <>
+            {statusOptions?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusUpdate(status?.optionValue);
+                  }}
+                  disabled={false}
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
+          </>
+        )}
       </>
     );
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleStatusUpdate = (status) => {
     const ids = selectedRecords?.map((s) => s._id);
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status.optionValue })
+      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -321,67 +327,19 @@ const Invoice = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <Box>
-          <CustomBreadCrumbs routes={[routes.invoice]} />
-        </Box>
-        <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            {statusOptions?.length > 0 && (
-              <Button
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                className="new-headerbox-button-v1"
-                disabled={updateLoading || selectedRecords?.length === 0}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-              >
-                {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              {statusOptions?.map((o) => {
-                return (
-                  <MenuItem
-                    key={o?.optionValue}
-                    disabled={false}
-                    onClick={() => {
-                      closeActions();
-                      handleStatusUpdate(o);
-                    }}
-                    value={o}
-                  >
-                    {o?.optionLabel}
-                  </MenuItem>
-                );
-              })}
-            </Menu>
-            <ImportExportLinks
-              permissions={permissions?.invoice}
-              module="invoice"
-              api={invoice.api}
-              afterImportCompleted={() => {}}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords?.length}
-              ids={selectedRecords?.map((obj) => obj._id)}
-              onExportToExcelSuccess={fetchData}
-              additionalParams={getQueryString(true)}
-            />
-          </Box>
-        </Box>
+        <CustomBreadCrumbs routes={[routes.invoice]} />
+        <ImportExportLinks
+          permissions={permissions?.invoice}
+          module="invoice"
+          api={invoice.api}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={fetchData}
+          additionalParams={getQueryString(true)}
+        />
       </div>
       <CustomContainer>
         <ListingPageHeader
