@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -30,6 +30,8 @@ import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { isMobile, isTablet } from 'react-device-detect';
+import { RiExchangeBoxFill } from 'react-icons/ri';
 
 let invoiceTimeout;
 
@@ -67,7 +69,9 @@ const Invoice = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [statusOptions, setStatusOptions] = useState(null);
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -76,6 +80,12 @@ const Invoice = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
+    data?.forEach((d) => {
+      if (d?.fieldData?.fieldName === 'status') {
+        const statusOps = d?.fieldData?.option?.filter((e) => e.optionValue !== 'Closed');
+        setStatusOptions(statusOps);
+      }
+    });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -279,22 +289,99 @@ const Invoice = () => {
     );
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleStatusUpdate = (status) => {
+    const ids = selectedRecords?.map((s) => s._id);
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status.optionValue })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.invoice]} />
-        <ImportExportLinks
-          permissions={permissions?.invoice}
-          module="invoice"
-          api={invoice.api}
-          afterImportCompleted={() => { }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={fetchData}
-          additionalParams={getQueryString(true)}
-        />
+        <Box>
+          <CustomBreadCrumbs routes={[routes.invoice]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {statusOptions?.length > 0 && (
+              <Button
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={openActions}
+                className="new-headerbox-button-v1"
+                disabled={updateLoading || selectedRecords?.length === 0}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
+              >
+                {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+              </Button>
+            )}
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              {statusOptions?.map((o) => {
+                return (
+                  <MenuItem
+                    key={o?.optionValue}
+                    disabled={false}
+                    onClick={() => {
+                      closeActions();
+                      handleStatusUpdate(o);
+                    }}
+                    value={o}
+                  >
+                    {o?.optionLabel}
+                  </MenuItem>
+                );
+              })}
+            </Menu>
+            <ImportExportLinks
+              permissions={permissions?.invoice}
+              module="invoice"
+              api={invoice.api}
+              afterImportCompleted={() => {}}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords?.length}
+              ids={selectedRecords?.map((obj) => obj._id)}
+              onExportToExcelSuccess={fetchData}
+              additionalParams={getQueryString(true)}
+            />
+          </Box>
+        </Box>
       </div>
       <CustomContainer>
         <ListingPageHeader
