@@ -242,7 +242,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                     ? `Create ${routes.quotation.title}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${quotationData?.quotationNumber}`}`
                 }
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
@@ -267,7 +267,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                     fullWidth
                     resource={sidebarResource.quotation}
                     referenceId={quotationId || null}
-                    collaborateTools = {true}
+                    collaborateTools={true}
                   />
                 </Form>
               </CustomDialogContent>

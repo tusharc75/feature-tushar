@@ -12,3 +12,5 @@ export const backendApi =
   localStorage.getItem('backendApi') ?? (import.meta.env?.VITE_APP_API_URL || 'https://master.oms-backend.vebholic.com');
 
 export const AI_AGENT = ['local', 'master', 'development']?.includes(import.meta.env?.VITE_APP_ENV);
+
+export const VITE_APP_ENV = import.meta.env?.VITE_APP_ENV;

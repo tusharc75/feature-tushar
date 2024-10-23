@@ -99,6 +99,18 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         columnOrder: typeof action.columnOrder === 'function' ? action.columnOrder(state.columnOrder) : action.columnOrder
       };
+    case 'setColumnSizes': {
+      return {
+        ...state,
+        sizes: action.sizes
+      };
+    }
+    case 'setResized': {
+      return {
+        ...state,
+        resized: action.resized
+      };
+    }
     default:
       break;
   }
@@ -123,7 +135,9 @@ const intialState = {
   loadingExpanderRowId: null,
   initialDataLoaded: false,
   visibleColumns: {},
-  columnOrder: []
+  columnOrder: [],
+  sizes: null,
+  resized: false
 };
 
 export type TInitialState = {
@@ -144,6 +158,8 @@ export type TInitialState = {
   initialDataLoaded: boolean;
   visibleColumns: { [key: string]: boolean };
   columnOrder: string[];
+  sizes: { [key: string]: number } | null;
+  resized: boolean;
 };
 
 export type TActios =
@@ -164,7 +180,9 @@ export type TActios =
   | { type: 'hiddenColumns'; hiddenColumns: boolean }
   | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
-  | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] };
+  | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] }
+  | { type: 'setColumnSizes'; sizes: { [key: string]: number } | null }
+  | { type: 'setResized'; resized: boolean };
 
 type UseTableReducerProps = {
   renderedFrom?: string;

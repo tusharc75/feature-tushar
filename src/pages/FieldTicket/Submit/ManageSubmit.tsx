@@ -9,10 +9,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, fieldTicket, getObjKeys, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, FIELD_TICKET_STATUS, fieldTicket, getObjKeys, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -21,6 +23,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const walkmeInstance = useGetWalkmeInstance();
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
@@ -29,6 +32,9 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const fetchFields = async () => {
     try {
       fields = fields?.filter((f) => f?.isRead);
+      if (isOffline) {
+        fields = fields?.filter((f) => f?.type !== "multiFileUpload" && f?.type !== "fileUpload");
+      }
       const tempInitialData = getObjKeys('', fields);
       if (fields?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
         tempInitialData['customerAccount'] = fieldTicketData.customerAccount.optionValue;
@@ -49,22 +55,37 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const handleSubmit = async (values) => {
     setSubmitting(true);
 
-    await axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
+    if (isOffline) {
+      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+      let updatedData;
+      if (result && result?.type === 'fieldTicket') {
+        updatedData = { ...result?.data, logs: [values] };
+      } else {
+        updatedData = { _id: fieldTicketData?._id, offlineSyncStatus: 'update', logs: [values] };
+      }
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicket', data: updatedData });
+      const fieldTicket = await findOne(objectStore.fieldTicket, fieldTicketData?._id);
+      if (fieldTicket) {
+        await insertUpdate(objectStore.fieldTicket, fieldTicketData?._id, { ...fieldTicket, status: FIELD_TICKET_STATUS.readyToInvoice });
+      }
+      onSuccess();
+    } else {
+      await axiosInstance()
+        .put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+          setSubmitting(false);
+          onSuccess();
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(err);
         });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(err);
-      });
-
+    }
     setSubmitting(false);
   };
 

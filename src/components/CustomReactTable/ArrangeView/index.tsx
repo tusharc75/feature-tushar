@@ -1,9 +1,10 @@
 import ArrangeViewMenu from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 
-const ArrangeView = ({ columns, renderedFrom = null, dispatchTable, hideSelection, state, expander, appliedView }) => {
+const ArrangeView = ({ columns, renderedFrom = null, dispatchTable, hideSelection, state, expander, appliedView, table }) => {
   return (
     <>
       <ArrangeViewMenu
+        table={table}
         dispatch={dispatchTable}
         renderedFrom={renderedFrom}
         state={state}

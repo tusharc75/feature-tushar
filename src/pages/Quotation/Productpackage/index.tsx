@@ -411,21 +411,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
     const priceData: any = await calculatePrice(material);
     material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
       if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields(
-          { [priceFieldName]: rateResult[0].mrp, pricingCondition: rateResult[0].conditionId },
-          element,
-          allFields
-        );
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
     });
@@ -717,7 +709,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: 'product', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
           }}
         >
           Add Existing Products
@@ -725,7 +717,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'package', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
             Add Existing Packages
@@ -734,7 +726,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'service', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
             }}
           >
             Add Existing Services
@@ -949,7 +941,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -981,7 +973,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           selectedProducts={products}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -991,7 +983,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {

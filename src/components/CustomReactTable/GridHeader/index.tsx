@@ -31,7 +31,6 @@ type GridHeaderProps = {
   showArrangeView: any;
   newColumns: any;
   refreshGrid: any;
-  reportSave: any;
   setSelectedReportView: any;
   selectedReportView: any;
   expander: any;
@@ -52,7 +51,6 @@ const GridHeader = ({
   showArrangeView,
   newColumns,
   refreshGrid,
-  reportSave,
   setSelectedReportView,
   selectedReportView,
   expander,
@@ -201,12 +199,14 @@ const GridHeader = ({
           ) : null}
           {showArrangeView && (
             <ArrangeView
+              table={table}
               columns={newColumns}
               hideSelection={hideSelection}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               state={state}
               expander={expander}
+              appliedView={null}
             />
           )}
           {refreshGrid && (
