@@ -390,8 +390,9 @@ const Consumables = ({
         } else {
           data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom || e?.product?.serializedProduct);
         }
+
         let rows = orderBy(data, 'product.serializedProduct')
-          ?.filter((d) => !d?.parentId)
+          ?.filter((d) => !([MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type) && d?.parentId))
           ?.map((u) => {
             let res: any = {
               ...prepareDataForGrid(u)
