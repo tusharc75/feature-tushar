@@ -75,7 +75,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
           } else {
             if (data?.canEdit === false) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (['warehouse']?.includes(e?.fieldName)) {
+                if (['warehouse', 'customerAccount']?.includes(e?.fieldName)) {
                   e.disableOnEdit = true;
                 }
               });
