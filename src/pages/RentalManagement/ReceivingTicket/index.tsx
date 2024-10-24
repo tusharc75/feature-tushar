@@ -9,7 +9,7 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -1574,7 +1574,7 @@ const ReceivingTicket = ({
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
-    let rows = selectedRecords.map((record: any) => ({
+    let rows = uniqBy(selectedRecords, '_id').map((record: any) => ({
       materialId: record._id,
       type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
