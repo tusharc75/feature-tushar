@@ -62,7 +62,7 @@ const AssignServiceDialog = ({
   ];
 
   useEffect(() => {
-    if (pricingCondition) {
+    if (pricingCondition && !isOffline) {
       fetchPricingCondition();
     }
   }, []);
@@ -89,7 +89,7 @@ const AssignServiceDialog = ({
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
       columns = [...newColumns, ...getStaticFields()];
-      if (pricingCondition) {
+      if (pricingCondition && !isOffline) {
         columns?.forEach((column) => {
           if (column?.primaryField) {
             column.cell = ({ row }) => (
