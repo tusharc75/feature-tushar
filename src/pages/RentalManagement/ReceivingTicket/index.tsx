@@ -9,7 +9,7 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -650,10 +650,7 @@ const ReceivingTicket = ({
         }
       });
 
-      products = uniqueProduct(
-        material?.filter((e) => e.consumableType !== 'Internal'),
-        nonSerializedInventory
-      );
+      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'), nonSerializedInventory);
 
       products?.forEach((element) => {
         var qty = element.qty;
@@ -669,7 +666,7 @@ const ReceivingTicket = ({
 
         ticketProduct?.forEach((ele) => {
           var returnTicket: any = [];
-          if (ele?.warehouse) {
+          if (ele?.warehouse && productSerialNumbers?.length) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
@@ -1574,7 +1571,7 @@ const ReceivingTicket = ({
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
-    let rows = selectedRecords.map((record: any) => ({
+    let rows = uniqBy(selectedRecords, '_id').map((record: any) => ({
       materialId: record._id,
       type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
