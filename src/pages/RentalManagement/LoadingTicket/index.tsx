@@ -113,7 +113,6 @@ const LoadingTicket = ({
   const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
-  const [columnHeader, setColumnHeader] = useState(null);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
@@ -129,8 +128,8 @@ const LoadingTicket = ({
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchRecords();
     getColumn();
+    fetchRecords();
     fetchPolicy();
   }, []);
 
