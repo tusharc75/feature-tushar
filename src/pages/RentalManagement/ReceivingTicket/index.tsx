@@ -650,10 +650,7 @@ const ReceivingTicket = ({
         }
       });
 
-      products = uniqueProduct(
-        material?.filter((e) => e.consumableType !== 'Internal'),
-        nonSerializedInventory
-      );
+      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'), nonSerializedInventory);
 
       products?.forEach((element) => {
         var qty = element.qty;
@@ -669,7 +666,7 @@ const ReceivingTicket = ({
 
         ticketProduct?.forEach((ele) => {
           var returnTicket: any = [];
-          if (ele?.warehouse) {
+          if (ele?.warehouse && productSerialNumbers?.length) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
