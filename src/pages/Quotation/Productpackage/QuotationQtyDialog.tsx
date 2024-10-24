@@ -281,6 +281,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   };
 
   const getTitle = () => {
+    if (isBulkedit) {
+      return 'Bulk Edit';
+    }
     if (rowData) {
       let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
@@ -288,7 +291,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       }
       return editTitle;
     } else {
-      return 'Bulk Edit';
+      return 'Edit';
     }
   };
 
