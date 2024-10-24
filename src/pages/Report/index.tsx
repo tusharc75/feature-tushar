@@ -328,11 +328,18 @@ const Report = () => {
               term: selectedData[key].value ? 'Yes' : 'No'
             });
           } else {
-            if (Array.isArray(selectedData[key].value)) {
-              deepFilter.push({
-                field: key,
-                term: selectedData[key].value?.map((d: any) => d.optionValue)
-              });
+            if (Array.isArray(selectedData[key].value) ) {
+              if(selectedData[key].type==='singleLine'){
+                deepFilter.push({
+                  field: key,
+                  term: selectedData[key].value
+                });
+              }else {
+                deepFilter.push({
+                  field: key,
+                  term: selectedData[key].value?.map((d: any) => d.optionValue)
+                });
+              }
             } else {
               deepFilter.push({
                 field: key,
