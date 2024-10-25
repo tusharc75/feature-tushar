@@ -303,10 +303,15 @@ const Invoice = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = selectedRecords?.map((s) => s._id);
+    const invoices = selectedRecords?.map((s) => {
+      return {
+        _id: s._id,
+        prevStatus: s.status
+      }
+    });
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status })
+      .put(`${invoice.api}/update-status`, { invoices: invoices, status: status })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
