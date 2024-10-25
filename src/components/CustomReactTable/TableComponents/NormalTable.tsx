@@ -8,8 +8,6 @@ import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents
 import { getStickyPosition } from '../utils';
 import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 
-const MemoizedCellRenderer = memo(CellRenderer);
-
 export const NormalTable = forwardRef(function (
   {
     state,
@@ -41,7 +39,6 @@ export const NormalTable = forwardRef(function (
   ref: ForwardedRef<HTMLTableElement>
 ) {
   // virtualization
-  const parentRef = React.useRef();
 
   return (
     <>
@@ -52,8 +49,7 @@ export const NormalTable = forwardRef(function (
           maxHeight: height ?? '100%',
           height: isFooterVisible && !pagination ? 'unset' : height || '100%'
         }}
-        className="isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
-        ref={parentRef}
+        className="without-virtualization isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
       >
         {!loading && !error && rows.length === 0 && initialDataLoaded && (
           <>
@@ -91,7 +87,7 @@ export const NormalTable = forwardRef(function (
             className="header sticky top-0 z-[11] bg-[var(--dark-primary,_white)]"
           >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
+              <TableRow className="tr sticky top-0 z-[11] bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
                 <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
                   {headerGroup.headers.map((header) => {
                     if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
@@ -105,6 +101,7 @@ export const NormalTable = forwardRef(function (
                         header={header}
                         key={header.id}
                         resource={resource}
+                        virtualTable={false}
                       />
                     );
                   })}
@@ -137,14 +134,16 @@ export const NormalTable = forwardRef(function (
           {isFooterVisible && (
             <>
               <tfoot className="sticky bottom-0">
-                {table?.getFooterGroups().map((footerGroup, index) => {
+                {table?.getFooterGroups().map((footerGroup) => {
                   return (
-                    <tr key={footerGroup.id} className="!flex ">
-                      {footerGroup.headers.map((header) => {
+                    <tr key={footerGroup.id}>
+                      {footerGroup.headers.map((header, index) => {
                         if (!header) return null;
                         if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
                         const columnDef = header.column.columnDef as TColType;
+
                         const { style } = getStickyPosition(columnDef, index, table);
+
                         const colSize = header.getSize();
                         return (
                           <th
@@ -152,7 +151,7 @@ export const NormalTable = forwardRef(function (
                             style={{
                               ...style,
                               position: 'sticky',
-                              zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                              zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? '15' : '1',
                               minWidth: colSize,
                               maxWidth: colSize
                             }}
@@ -199,7 +198,7 @@ const NormalTableBody = ({
               if (exportTableView && excludedColumns.includes(cell.column.columnDef.id)) return null;
               return (
                 <React.Fragment key={cell.id}>
-                  <MemoizedCellRenderer
+                  <CellRenderer
                     key={cell.id}
                     virtualStyles={{}}
                     virtualization={virtualization}
@@ -214,6 +213,7 @@ const NormalTableBody = ({
                     submitInput={submitInput}
                     cellValue={cellValue}
                     resetField={resetField}
+                    virtualTable={false}
                   />
                 </React.Fragment>
               );

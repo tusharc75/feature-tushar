@@ -272,6 +272,7 @@ interface DraggableHeaderProps {
   virtualization: boolean;
   resource: string;
   overlayMode?: boolean;
+  virtualTable?: boolean;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -281,7 +282,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   isClientSideGrid,
   virtualization,
   resource,
-  overlayMode
+  overlayMode,
+  virtualTable = true
 }) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -372,7 +374,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       }}
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
-      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? 'z-10' : ''} bg-[var(--dark-primary,_white)] ${
+      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
         overlayMode ? 'border text-[13px] font-semibold' : ''
       } `}
       ref={setNodeRef}
@@ -467,6 +469,7 @@ const CellShell = ({
   row,
   setCellValue,
   style,
+  virtualTable = true,
   ...others
 }) => {
   return (
@@ -474,7 +477,7 @@ const CellShell = ({
       id={cell.id}
       key={cell.id}
       className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
-      ${columnDef.sticky ? 'z-10 bg-[var(--dark-primary,_white)]' : ''} 
+      ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
       ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
       style={{
         minWidth: cell.column.getSize(),
@@ -512,7 +515,8 @@ export const CellRenderer = ({
   cellValue,
   resetField,
   virtualStyles,
-  virtualization
+  virtualization,
+  virtualTable = true
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
@@ -534,6 +538,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           <div className="p-[5px_10px]">
             <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
@@ -555,6 +560,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           <div className="w-full">
             {columnDef?.type === 'singleLine' ? (
@@ -747,6 +753,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           <div className="action-cell">
             <HtmlTooltip title="Save">
@@ -772,6 +779,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
@@ -796,6 +804,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           <div className="action-cell">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
         </CellShell>
@@ -814,6 +823,7 @@ export const CellRenderer = ({
           row={row}
           setCellValue={setCellValue}
           style={style}
+          virtualTable={virtualTable}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </CellShell>
