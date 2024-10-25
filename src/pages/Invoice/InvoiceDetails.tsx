@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -39,7 +39,8 @@ import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Step from '../DynamicForm/Step'
+import Step from '../DynamicForm/Step';
+import { RiExchangeBoxFill } from 'react-icons/ri';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -74,6 +75,8 @@ const InvoiceDetails = () => {
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -191,18 +194,20 @@ const InvoiceDetails = () => {
   };
 
   const handleChangeStatus = (status) => {
+    setUpdateLoading(true);
     const invoices = [
       {
         _id: invoiceData._id,
         prevStatus: invoiceData?.status
       }
-    ]
+    ];
     axiosInstance()
       .put(`${invoice.api}/update-status`, { status: status, invoices: invoices })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
         setShowClosedConfirmBox(false);
         setShowReOpenConfirmBox(false);
+        setUpdateLoading(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -210,8 +215,22 @@ const InvoiceDetails = () => {
         });
       })
       .catch((error) => {
+        setUpdateLoading(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === invoiceData.status);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
   return (
@@ -252,6 +271,20 @@ const InvoiceDetails = () => {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
                   </Button>
                 )}
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className="btn-outline-v1"
+                    disabled={updateLoading}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+                  </Button>
+                )}
                 {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
@@ -265,7 +298,37 @@ const InvoiceDetails = () => {
                     </Button>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                {permissions?.invoice?.isUpdate &&
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {statusOptions
+                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
+                    .map((o) => {
+                      return (
+                        <MenuItem
+                          key={o?.optionValue}
+                          disabled={validateStatus(o?.optionValue)}
+                          onClick={() => {
+                            closeActions();
+                            handleChangeStatus(o?.optionValue);
+                          }}
+                          value={o}
+                        >
+                          {o?.optionLabel}
+                        </MenuItem>
+                      );
+                    })}
+                </Menu>
+                {/* {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                     <ButtonWithPulse
@@ -279,7 +342,7 @@ const InvoiceDetails = () => {
                     >
                       Close
                     </ButtonWithPulse>
-                  )}
+                  )} */}
                 {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
                   <Button
                     variant="outlined"
@@ -303,17 +366,9 @@ const InvoiceDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {permissions?.creditMemo?.isRead && (
-            <CustomTab value={2}>
-              {routes.creditMemo.title}
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{routes.creditMemo.title}</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 

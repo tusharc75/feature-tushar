@@ -303,6 +303,15 @@ const Invoice = () => {
   };
 
   const handleStatusUpdate = (status) => {
+    const isSameStatus = selectedRecords?.every((e)=> e.status===selectedRecords[0].status);
+    if(!isSameStatus){
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please select invoices with same status'
+      });
+      return;
+    }
     const invoices = selectedRecords?.map((s) => {
       return {
         _id: s._id,
