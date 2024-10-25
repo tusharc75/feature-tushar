@@ -191,8 +191,14 @@ const InvoiceDetails = () => {
   };
 
   const handleChangeStatus = (status) => {
+    const invoices = [
+      {
+        _id: invoiceData._id,
+        prevStatus: invoiceData?.status
+      }
+    ]
     axiosInstance()
-      .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status, prevStatus: invoiceData?.status })
+      .put(`${invoice.api}/update-status`, { status: status, invoices: invoices })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
         setShowClosedConfirmBox(false);
