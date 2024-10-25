@@ -243,6 +243,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     {
       accessor: 'action',
       Header: 'Actions',
+      minWidth: 100,
+      width: 110,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
