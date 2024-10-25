@@ -103,6 +103,10 @@ export const FormBuilder = ({
         setSection([...newSections]);
       }
     } else if (activeItemType === 'Field' && overItemType === 'Section') {
+      const overSectionId = over.data.current?.props?.section?.sectionId
+      if (sectionId === overSectionId) {
+        return;
+      }
       const destinationSectionIndex = over.data.current.index;
       const destionationSection = newSections[destinationSectionIndex];
       const overIndex = destionationSection.field.length;
