@@ -384,6 +384,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const handleAdd = async (rows) => {
     setSubmitting(true);
     const material: any = [];
+    var taxCodeData: any = null;
+    if (quotationData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?taxCode=${quotationData?.taxCode?.optionValue}&materialType=${addDialog.type}`
+      );
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
+    }
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
@@ -406,6 +417,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       }
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog?.parentId || d.parentId;
+      if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
+      }
       material.push(element);
     });
 
