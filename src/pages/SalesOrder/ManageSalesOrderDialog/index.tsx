@@ -73,6 +73,13 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             });
             setLoading(false);
           } else {
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['warehouse', 'customerAccount']?.includes(e?.fieldName)) {
+                  e.disableOnEdit = true;
+                }
+              });
+            }
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)

@@ -73,7 +73,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
         </HtmlTooltip>
         <div className="flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)]">
           <div className="head flex items-center justify-between p-3 [border-bottom:1px_solid_var(--common-border-color)]">
-            <h5 className="text-[16px] font-semibold">Equipt Agent</h5>
+            <h5 className="text-[16px] font-semibold">Equipt Genie</h5>
             <IconButton size="small" onClick={() => setIsChatboxOpen(false)}>
               <Close />
             </IconButton>

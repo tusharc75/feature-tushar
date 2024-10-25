@@ -446,7 +446,7 @@ $isAppliedBillDark: #234623;
     line-height: 18px !important;
     color: #1d1d1d !important;
   }
-  tfoot.footer td {
+  &:not(.without-virtualization) tfoot.footer td {
     font-weight: 500 !important;
     font-size: 12.6448px !important;
     line-height: 18px !important;
@@ -710,6 +710,16 @@ $isAppliedBillDark: #234623;
       }
       svg {
         opacity: 0;
+      }
+    }
+  }
+}
+.react-table-v8 {
+  .without-virtualization {
+    tfoot {
+      position: static !important;
+      th {
+        position: sticky;
       }
     }
   }

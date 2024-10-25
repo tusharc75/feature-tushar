@@ -4,22 +4,22 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldServiceOrder, sidebar
 
 export const fieldServiceOrderAddOffline = async (ids) => {
     try {
-        const { data } = await axiosInstance().post(`${fieldServiceOrder.api}/get-all-offline-data`, { ids: ids });
-        await asyncForEach(data?.data?.fieldServiceOrder, async (element) => {
-            await insertUpdate(objectStore.fieldServiceOrder, element._id, element);
-        })
-        await asyncForEach(data?.data?.fieldTicket, async (element) => {
-            await insertUpdate(objectStore.fieldTicket, element._id, element);
-        })
-        await asyncForEach(data?.data?.fieldTicketMaterial, async (element) => {
-            await insertUpdate(objectStore.fieldTicketMaterial, element._id, element);
-        })
-        await asyncForEach(data?.data?.fieldTicketCost, async (element) => {
-            await insertUpdate(objectStore.fieldTicketMaterial, element._id, { ...element, type: MATERIAL_TYPE.manualEntry });
-        })
-        await insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
-        await insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
-
+        axiosInstance().post(`${fieldServiceOrder.api}/get-all-offline-data`, { ids: ids }).then(({ data }) => {
+            asyncForEach(data?.data?.fieldServiceOrder, async (element) => {
+                insertUpdate(objectStore.fieldServiceOrder, element._id, element);
+            })
+            asyncForEach(data?.data?.fieldTicket, async (element) => {
+                insertUpdate(objectStore.fieldTicket, element._id, element);
+            })
+            asyncForEach(data?.data?.fieldTicketMaterial, async (element) => {
+                insertUpdate(objectStore.fieldTicketMaterial, element._id, element);
+            })
+            asyncForEach(data?.data?.fieldTicketCost, async (element) => {
+                insertUpdate(objectStore.fieldTicketMaterial, element._id, { ...element, type: MATERIAL_TYPE.manualEntry });
+            })
+            insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
+            insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
+        });
         axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.fieldTicket, data);
         });
@@ -28,6 +28,9 @@ export const fieldServiceOrderAddOffline = async (ids) => {
         });
         axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketCost, data);
+        });
+        axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketSubmit}`).then(({ data: { data } }) => {
+            insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketSubmit, data);
         });
         axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.serviceMaster, data);
@@ -44,15 +47,15 @@ export const fieldServiceOrderAddOffline = async (ids) => {
     }
 };
 
-export const fieldServiceOrderClearOffline = async (ids: any []= []) => {
-    if(!ids.length) {
+export const fieldServiceOrderClearOffline = async (ids: any[] = []) => {
+    if (!ids.length) {
         clearAll(objectStore.fieldServiceOrder);
         clearAll(objectStore.fieldTicket);
         clearAll(objectStore.fieldTicketMaterial);
     } else {
         const fieldTicketIdsToDelete = [];
         const fieldTicketMaterialIdsToDelete = [];
-        for(const id of ids) {
+        for (const id of ids) {
             const fieldServiceOrder = await findOne(objectStore.fieldServiceOrder, id);
             fieldServiceOrder?.fieldTickets?.forEach((fieldTicket: any) => {
                 fieldTicketIdsToDelete.push(fieldTicket?._id);
@@ -64,6 +67,6 @@ export const fieldServiceOrderClearOffline = async (ids: any []= []) => {
         deleteMany(objectStore.fieldServiceOrder, ids);
         deleteMany(objectStore.fieldTicket, fieldTicketIdsToDelete);
         deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterialIdsToDelete);
-    }  
+    }
 }
 
