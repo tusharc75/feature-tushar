@@ -165,6 +165,7 @@
     "prebuild": "node -r dotenv/config src/prebuild/prebuild.js",
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
+    "dev:prebuild": "yarn prebuild && yarn dev",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
     "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
     "winBuild": "set \"GENERATE_SOURCEMAP=true\" && node --max_old_space_size=10240 ./node_modules/vite/bin/vite build",
