@@ -297,7 +297,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
-  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -331,7 +330,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        if (!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 

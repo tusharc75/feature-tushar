@@ -83,7 +83,6 @@ const CustomReactTable = ({
     page,
     limit,
     search,
-    filters: customFilters,
     error,
     visibleColumns,
     columnOrder,
@@ -131,8 +130,6 @@ const CustomReactTable = ({
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
-  const { setSavedFilters } = useContext(FiltersContext);
-
   // initialize
   useEffect(() => {
     if (JSON.stringify(baseColumns) !== JSON.stringify(newColumns)) {
@@ -162,38 +159,6 @@ const CustomReactTable = ({
   useEffect(() => {
     setSortedColumns(returnSortedColumns(newColumns, columnOrder));
   }, [columnOrder, returnSortedColumns, newColumns]);
-
-  const columnFilters = React.useMemo(() => {
-    const filters = [];
-    for (const key of Object.keys(customFilters)) {
-      if (typeof customFilters[key].filter !== 'string') continue;
-      filters.push({ id: key, value: customFilters[key].filter });
-    }
-    return filters;
-  }, [customFilters]);
-
-  const setColumnFilters = (filtersfn) => {
-    if (!isClientSideGrid) return;
-    const filters = filtersfn();
-    let tempArray = Object.keys(customFilters).map((key, i) => {
-      return { id: key, value: customFilters[key].filter };
-    });
-    if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-      var tempResult = {};
-      filters?.forEach((v) => {
-        if (v.value && v.value !== '') {
-          tempResult[v.id] = { filter: v.value };
-        } else {
-          //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-          if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-            tempResult[v.id] = customFilters[v.id];
-          }
-        }
-      });
-      dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
-      if (!isClientSideGrid) setSavedFilters((prev) => ({ ...prev, [resource]: tempResult }));
-    }
-  };
 
   const setGlobalFilter = useCallback(
     (value: string) => {
@@ -260,13 +225,10 @@ const CustomReactTable = ({
       columnOrder,
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
-      columnFilters: isClientSideGrid ? columnFilters : [],
       columnVisibility: visibleColumns,
       rowSelection
     },
     // flags
-    debugAll: true,
-    debugColumns: true,
     autoResetAll: false,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
@@ -284,7 +246,6 @@ const CustomReactTable = ({
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors

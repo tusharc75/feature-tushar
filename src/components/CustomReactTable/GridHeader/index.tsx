@@ -67,8 +67,6 @@ const GridHeader = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
 
-  const { savedFilters } = useContext(FiltersContext);
-
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
   };
@@ -99,8 +97,6 @@ const GridHeader = ({
               });
             }
           }
-        } else if (!isEmpty(savedFilters[resource]) && !isClientSideGrid) {
-          dispatch({ type: 'filter', filters: savedFilters[resource] });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
