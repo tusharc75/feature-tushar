@@ -303,10 +303,24 @@ const Invoice = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = selectedRecords?.map((s) => s._id);
+    const isSameStatus = selectedRecords?.every((e)=> e.status===selectedRecords[0].status);
+    if(!isSameStatus){
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please select invoices with same status'
+      });
+      return;
+    }
+    const invoices = selectedRecords?.map((s) => {
+      return {
+        _id: s._id,
+        prevStatus: s.status
+      }
+    });
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status })
+      .put(`${invoice.api}/update-status`, { invoices: invoices, status: status })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
