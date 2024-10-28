@@ -183,9 +183,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     } else {
       delete values.tax;
     }
-    if (values?.description) {
-      values.description = values.description.trim();
-    }
     delete values.productDetail;
     delete values.packageDetail;
     if (isBulkedit) {
@@ -339,7 +336,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                       <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Pricing</h2>
                     </div>
                     <Box marginTop={1} marginBottom={1}>
-                      <Grid spacing={1} container>
+                      <Grid spacing={3} container>
                         <Grid item xs={12} sm={6} md={6}>
                           <Autocomplete
                             multiple
@@ -395,19 +392,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             />
                           </Grid>
                         )}
-                        <Grid item xs={12} sm={6} md={6}>
-                          <TextField
-                            value={values['description']}
-                            margin="dense"
-                            name="description"
-                            variant="outlined"
-                            label="Description"
-                            error={touched['description'] && Boolean(errors['description'])}
-                            helperText={touched['description'] && errors['description']}
-                            onChange={(e) => { setFieldValue('description', e.target.value) }}
-                            fullWidth
-                          />
-                        </Grid>
                       </Grid>
                     </Box>
                   </Fragment>

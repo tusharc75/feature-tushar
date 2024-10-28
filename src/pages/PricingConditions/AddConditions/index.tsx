@@ -217,12 +217,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       Cell: ({ row }) => (row?.original?.materialType ? <h5 className="text-truncate">{row?.original?.materialType}</h5> : <NoDataCell />)
     },
     {
-      accessor: 'description',
-      Header: 'Description',
-      disabled: true,
-      Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
-    },
-    {
       accessor: 'conditionType',
       Header: 'Pricing Type',
       disabled: true,
