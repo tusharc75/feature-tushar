@@ -168,7 +168,8 @@ export const useCreateColumns = ({
         e.header = e.header ?? e.Header;
 
         e.maxSize = e.maxSize ?? e.maxWidth;
-        e.size = e.size ?? e.width ?? 200;
+        e.size = e.size || e.width || 200;
+        e.width = e.width || e.size || 200;
         e.footer = e.footer ?? e.Footer;
 
         if (e.disableSortBy !== true && isClientSideGrid) {

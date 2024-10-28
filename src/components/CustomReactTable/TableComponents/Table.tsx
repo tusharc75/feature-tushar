@@ -94,7 +94,7 @@ const TableComponent = forwardRef(function (
 
   return (
     <>
-      {exportTableView || isClientSideGrid ? (
+      {exportTableView ? (
         <>
           <NormalTable
             state={state}
