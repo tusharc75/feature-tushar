@@ -5,10 +5,9 @@ import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui
 import { Autocomplete } from '@material-ui/lab';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 import DataList from './DataList';
@@ -297,7 +296,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
-  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -331,7 +329,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        if (!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 

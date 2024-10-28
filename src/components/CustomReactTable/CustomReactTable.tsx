@@ -16,8 +16,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
@@ -81,7 +80,6 @@ const CustomReactTable = ({
     page,
     limit,
     search,
-    filters: customFilters,
     error,
     visibleColumns,
     columnOrder,
@@ -116,10 +114,6 @@ const CustomReactTable = ({
     renderedFrom
   });
 
-  useEffect(() => {
-    setNewColumns([...hookColumns]);
-  }, [hookColumns]);
-
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
@@ -132,8 +126,6 @@ const CustomReactTable = ({
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const { setSavedFilters } = useContext(FiltersContext);
 
   // initialize
   useEffect(() => {
@@ -164,38 +156,6 @@ const CustomReactTable = ({
   useEffect(() => {
     setSortedColumns(returnSortedColumns(newColumns, columnOrder));
   }, [columnOrder, returnSortedColumns, newColumns]);
-
-  const columnFilters = React.useMemo(() => {
-    const filters = [];
-    for (const key of Object.keys(customFilters)) {
-      if (typeof customFilters[key].filter !== 'string') continue;
-      filters.push({ id: key, value: customFilters[key].filter });
-    }
-    return filters;
-  }, [customFilters]);
-
-  const setColumnFilters = (filtersfn) => {
-    if (!isClientSideGrid) return;
-    const filters = filtersfn();
-    let tempArray = Object.keys(customFilters).map((key, i) => {
-      return { id: key, value: customFilters[key].filter };
-    });
-    if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-      var tempResult = {};
-      filters?.forEach((v) => {
-        if (v.value && v.value !== '') {
-          tempResult[v.id] = { filter: v.value };
-        } else {
-          //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-          if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-            tempResult[v.id] = customFilters[v.id];
-          }
-        }
-      });
-      dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
-      if (!isClientSideGrid) setSavedFilters((prev) => ({ ...prev, [resource]: tempResult }));
-    }
-  };
 
   const setGlobalFilter = useCallback(
     (value: string) => {
@@ -262,11 +222,11 @@ const CustomReactTable = ({
       columnOrder,
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
-      columnFilters: isClientSideGrid ? columnFilters : [],
       columnVisibility: visibleColumns,
       rowSelection
     },
     // flags
+    autoResetAll: false,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
     enableHiding: true,
@@ -283,7 +243,6 @@ const CustomReactTable = ({
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
@@ -321,14 +280,19 @@ const CustomReactTable = ({
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+      const updatedColumns = adjustSizes(handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+
       if (updatedColumns) {
         setNewColumns(updatedColumns);
-        table.resetHeaderSizeInfo();
-        table.resetColumnSizing();
+        setTimeout(() => {
+          table.resetHeaderSizeInfo();
+          table.resetColumnSizing();
+        }, 100);
+      } else {
+        setNewColumns([...hookColumns]);
       }
     }
-  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes]);
+  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes, hookColumns.length]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
