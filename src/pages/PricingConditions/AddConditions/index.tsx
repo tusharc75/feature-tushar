@@ -67,6 +67,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   ? element.packageDetail?.packageName
                   : element.competencyDetail.competencyName
           }`;
+          element.description = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productDescription
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceDescription
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageDescription
+                  : ''
+          }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -215,6 +224,12 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       Header: 'Type',
       disabled: true,
       Cell: ({ row }) => (row?.original?.materialType ? <h5 className="text-truncate">{row?.original?.materialType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'description',
+      Header: 'Description',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
     },
     {
       accessor: 'conditionType',
