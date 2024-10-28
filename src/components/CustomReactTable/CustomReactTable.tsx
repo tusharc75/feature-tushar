@@ -2,6 +2,8 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@material-ui/core';
 import {
+  ColumnSizingInfoState,
+  ColumnSizingState,
   ExpandedState,
   Row,
   SortingState,
@@ -115,10 +117,6 @@ const CustomReactTable = ({
     resource,
     renderedFrom
   });
-
-  useEffect(() => {
-    setNewColumns([...hookColumns]);
-  }, [hookColumns]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
@@ -267,6 +265,9 @@ const CustomReactTable = ({
       rowSelection
     },
     // flags
+    debugAll: true,
+    debugColumns: true,
+    autoResetAll: false,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
     enableHiding: true,
@@ -321,14 +322,19 @@ const CustomReactTable = ({
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(newColumns, handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+      const updatedColumns = adjustSizes(handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+
       if (updatedColumns) {
         setNewColumns(updatedColumns);
-        table.resetHeaderSizeInfo();
-        table.resetColumnSizing();
+        setTimeout(() => {
+          table.resetHeaderSizeInfo();
+          table.resetColumnSizing();
+        }, 100);
+      } else {
+        setNewColumns([...hookColumns]);
       }
     }
-  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes]);
+  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes, hookColumns.length]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
