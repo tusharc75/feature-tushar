@@ -11,6 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ViewDialog } from './ViewDialog';
 import { PreviewFields } from './PreviewFields';
 import DownloadHistory from './DownloadHistory';
+import { useData } from '../../StateProvider/Provider';
 
 export const PreviewDialog = ({
   type,
@@ -43,6 +44,8 @@ export const PreviewDialog = ({
 
   const [sortBy, setSortBy] = useState(null);
   const [orderBy, setOrderBy] = useState(null);
+
+  const { state: { user: { user } } } = useData();
 
   useEffect(() => {
     setDefaultColumns();
@@ -82,7 +85,7 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if(col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
+            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
           })
           .filter((col) => col !== undefined)
       );
@@ -90,7 +93,7 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if(col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
+            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
           })
           .filter((col) => col !== undefined)
       );
@@ -178,7 +181,7 @@ export const PreviewDialog = ({
               onClick={() => {
                 setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
               }}
-              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
+              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (user?._id !== selectedPdfView?.user)}
               size="small"
               className="yellow-button"
             >
