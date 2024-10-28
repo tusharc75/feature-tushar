@@ -2,8 +2,6 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@material-ui/core';
 import {
-  ColumnSizingInfoState,
-  ColumnSizingState,
   ExpandedState,
   Row,
   SortingState,
@@ -18,8 +16,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';

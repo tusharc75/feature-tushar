@@ -5,10 +5,9 @@ import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui
 import { Autocomplete } from '@material-ui/lab';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 import DataList from './DataList';

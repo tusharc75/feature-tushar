@@ -1,6 +1,5 @@
 import { Fragment, useContext, useState } from 'react';
 import DisplayChips from './ChipDataDisplay';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 
 function DisplayFilters({
   columns,

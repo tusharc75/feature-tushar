@@ -3,21 +3,19 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { sidebarResource } from 'src/constants/helpers';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { sidebarResource } from 'src/constants/helpers';
 
 import { Table } from '@tanstack/react-table';
-import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { createFilterModel, fetchFieldOptions } from '../utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { isEmpty } from 'lodash';
+import { createFilterModel, fetchFieldOptions } from '../utils';
 
 type GridHeaderProps = {
   resource: any;
