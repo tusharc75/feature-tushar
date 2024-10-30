@@ -43,7 +43,6 @@ const AssignServiceDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [pricingConditionData, setPricingConditionData] = useState(null);
   const [openConditionDetails, setOpenConditionDetails] = useState({anchorEl: null, materialCondition: null})
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -61,21 +60,9 @@ const AssignServiceDialog = ({
     }
   ];
 
-  useEffect(() => {
-    if (pricingCondition && !isOffline) {
-      fetchPricingCondition();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (pricingCondition && !isOffline) {
-      if(pricingConditionData){
-        fetchGridColumns();
-      }
-    }else{
-      fetchGridColumns();
-    }
-  }, [pricingConditionData]);
+  useEffect(()=>{
+    fetchGridColumns();
+  },[])
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -85,17 +72,20 @@ const AssignServiceDialog = ({
 
   const fetchGridColumns = async () => {
     try {
-      let data;
+      let data, pricingConditionData;
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
       } else {
         const response = await axiosInstance().get('/field?resource=Service Master&view=true');
         data = response?.data?.data;
+        const pricingData = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
+        pricingConditionData = pricingData?.data?.data?.condition;
       }
+
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
       columns = [...newColumns, ...getStaticFields()];
-      if (pricingCondition && !isOffline) {
+      if (pricingCondition && pricingConditionData && !isOffline) {
         columns?.forEach((column) => {
           if (column?.primaryField) {
             column.cell = ({ row }) => (
@@ -176,16 +166,6 @@ const AssignServiceDialog = ({
     } catch (error) {
       toastConfig.setToastConfig(error);
       dispatch({ type: 'loading', loading: false });
-    }
-  };
-
-  const fetchPricingCondition = async () => {
-    try {
-      const response = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
-      let data = response?.data?.data?.condition || [];
-      setPricingConditionData(data);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
     }
   };
 
