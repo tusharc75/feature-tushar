@@ -334,7 +334,12 @@ const Report = () => {
                   field: key,
                   term: selectedData[key].value
                 });
-              }else {
+              } else if(!selectedData[key].lookup) {
+                deepFilter.push({
+                  field: key,
+                  term: selectedData[key].value?.map((d: any) => d)
+                });
+              } else {
                 deepFilter.push({
                   field: key,
                   term: selectedData[key].value?.map((d: any) => d.optionValue)
