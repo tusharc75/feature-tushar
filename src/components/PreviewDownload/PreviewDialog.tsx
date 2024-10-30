@@ -12,6 +12,7 @@ import { ViewDialog } from './ViewDialog';
 import { PreviewFields } from './PreviewFields';
 import DownloadHistory from './DownloadHistory';
 import { useData } from '../../StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export const PreviewDialog = ({
   type,
@@ -176,17 +177,21 @@ export const PreviewDialog = ({
         </CustomDialogContent>
         <CustomDialogFooter>
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
-            <CustomButton
-              id={'show-column-dialog-save-update-button'}
-              onClick={() => {
-                setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
-              }}
-              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (user?._id !== selectedPdfView?.user)}
-              size="small"
-              className="yellow-button"
-            >
-              {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
-            </CustomButton>
+            <HtmlTooltip title={user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
+              <>
+                <CustomButton
+                  id={'show-column-dialog-save-update-button'}
+                  onClick={() => {
+                    setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
+                  }}
+                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (user?._id !== selectedPdfView?.user)}
+                  size="small"
+                  className="yellow-button"
+                >
+                  {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+                </CustomButton>
+              </>
+            </HtmlTooltip>
           )}
           {operation === 'Send Email' ? (
             <CustomButton
