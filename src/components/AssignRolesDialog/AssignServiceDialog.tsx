@@ -78,8 +78,10 @@ const AssignServiceDialog = ({
       } else {
         const response = await axiosInstance().get('/field?resource=Service Master&view=true');
         data = response?.data?.data;
-        const pricingData = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
-        pricingConditionData = pricingData?.data?.data?.condition;
+        if(pricingCondition){
+          const pricingData = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
+          pricingConditionData = pricingData?.data?.data?.condition;
+        }
       }
 
       let columns = [];
