@@ -68,7 +68,13 @@ const AssignServiceDialog = ({
   }, []);
 
   useEffect(() => {
-    fetchGridColumns();
+    if (pricingCondition && !isOffline) {
+      if(pricingConditionData){
+        fetchGridColumns();
+      }
+    }else{
+      fetchGridColumns();
+    }
   }, [pricingConditionData]);
 
   useEffect(() => {
