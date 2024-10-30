@@ -329,15 +329,10 @@ const Report = () => {
             });
           } else {
             if (Array.isArray(selectedData[key].value) ) {
-              if(selectedData[key].type==='singleLine'){
+              if(selectedData[key].type==='singleLine' || selectedData[key].lookup === false){
                 deepFilter.push({
                   field: key,
                   term: selectedData[key].value
-                });
-              } else if(!selectedData[key].lookup) {
-                deepFilter.push({
-                  field: key,
-                  term: selectedData[key].value?.map((d: any) => d)
                 });
               } else {
                 deepFilter.push({
