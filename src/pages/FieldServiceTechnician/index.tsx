@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -113,20 +113,12 @@ const FieldServiceTechnician = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const history = useHistory();
 
-  useEffect(() => {
-    setColumns((prev) => {
-      return prev?.map((c) => {
-        if (c.accessor === 'action') {
-          return getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData });
-        }
-        return c;
-      });
-    });
-  }, [isOffline]);
+  const isOfflineRef = useRef(isOffline);
 
   useEffect(() => {
     setUpindexDB();
     fetchColumns();
+    isOfflineRef.current = isOffline;
   }, [isOffline]);
 
   const fetchColumns = async () => {
@@ -149,7 +141,7 @@ const FieldServiceTechnician = () => {
   };
 
   const handleChangeFieldServiceOrderStatus = (fieldServiceOrderId, status) => {
-    if (isOffline) return;
+    if (isOfflineRef.current) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
       .then(() => { })
@@ -166,7 +158,7 @@ const FieldServiceTechnician = () => {
       message: 'Field Ticket Creation In-Progress...'
     });
     var fieldTicketField: any = [];
-    if (isOffline) {
+    if (isOfflineRef.current) {
       fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
@@ -185,7 +177,7 @@ const FieldServiceTechnician = () => {
     }
     tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
 
-    if (isOffline) {
+    if (isOfflineRef.current) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
       const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
       data['_id'] = _id;
