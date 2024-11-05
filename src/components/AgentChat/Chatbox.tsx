@@ -172,11 +172,8 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
             {message.content}
           </Typography>
         ) : (
-          <div className="whitespace-pre-wrap rounded-lg pt-[8px] text-[var(--primary)] dark:text-white">
+          <div className="whitespace-pre-wrap rounded-lg pt-[8px] text-sm text-[var(--primary)] dark:text-white">
             <Markdown>{message.content}</Markdown>
-            {/* <Typography component={'pre'} variant="body2" >
-            {message.content}
-          </Typography> */}
           </div>
         )}
       </div>
