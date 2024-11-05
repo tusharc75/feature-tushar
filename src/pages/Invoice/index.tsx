@@ -1,7 +1,7 @@
 import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -312,12 +312,10 @@ const Invoice = () => {
       });
       return;
     }
-    const invoices = selectedRecords?.map((s) => {
-      return {
-        _id: s._id,
-        prevStatus: s.status
-      }
-    });
+    const invoices = sortBy(selectedRecords, '_id').map((s) => ({
+      _id: s._id,
+      prevStatus: s.status
+    }));
     setIsSubmitting(true);
     axiosInstance()
       .put(`${invoice.api}/update-status`, { invoices: invoices, status: status })
