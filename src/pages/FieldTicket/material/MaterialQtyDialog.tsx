@@ -145,6 +145,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         element.isMulitFormula = false;
       });
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      
       setInitialData({
         fields: data,
         values: {
@@ -340,7 +341,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     if (referenceType === 'consumables') {
-      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty)) {
+      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty>0) {
         errors['qty'] = 'Quantity can not be change in bulk edit once consumed';
       }
       else {
