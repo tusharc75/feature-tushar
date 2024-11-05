@@ -39,13 +39,15 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
       if (fields?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
         tempInitialData['customerAccount'] = fieldTicketData.customerAccount.optionValue;
       }
-      const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
-      for (const d of data?.data) {
-        if (d?.type === FIELD_TICKET_LOG_TYPE.readyToInvoice) {
-          tempInitialData = { ...tempInitialData, ...d };
-          break;
-        }
-      };
+      if (!isOffline) {
+        const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
+        for (const d of data?.data) {
+          if (d?.type === FIELD_TICKET_LOG_TYPE.readyToInvoice) {
+            tempInitialData = { ...tempInitialData, ...d };
+            break;
+          }
+        };
+      }
       setInitialData({
         fields: fields,
         values: getObjKeysWithValues(tempInitialData, fields)
