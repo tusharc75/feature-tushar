@@ -2,11 +2,11 @@ import { Form, Formik } from 'formik';
 
 import moment from 'moment';
 import { Dispatch, Fragment, useEffect, useMemo, useState } from 'react';
-import { TChatboxActions } from 'src/components/AgentChat/chatboxReducer';
+import { TChatboxActions, TInitialChatboxState } from 'src/components/AgentChat/chatboxReducer';
 import { Field } from 'src/components/AgentChat/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { dateFormat, yupSchema } from 'src/constants/helpers';
+import { cn, dateFormat, yupSchema } from 'src/constants/helpers';
 
 function validate(values: any) {
   const errors = {};
@@ -18,9 +18,11 @@ type RenderFieldsProps = {
   handleSubmit: (values: any) => void;
   disabled?: boolean;
   setState?: Dispatch<TChatboxActions>;
+  state: TInitialChatboxState;
 };
 
-const RenderFields = ({ fields, handleSubmit, disabled = false, setState }: RenderFieldsProps) => {
+const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state }: RenderFieldsProps) => {
+  const { fullScreen } = state;
   const updatedFields = useMemo(() => {
     return fields
       ?.filter((f) => {
@@ -38,7 +40,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState }: Rend
 
   useEffect(() => {
     if (updatedFields.length && !disabled) {
-      setState?.({ type: 'disableSendButton', payload: { disabled: true } });
+      setState?.({ type: 'disableSendButton', payload: true });
     }
   }, [updatedFields, disabled, setState]);
 
@@ -55,13 +57,20 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState }: Rend
 
   if (!updatedFields || updatedFields.length === 0) return null;
   return (
-    <div className="mt-4 flex flex-col gap-2 rounded-md p-4 shadow-md [border:1px_solid_var(--common-border-color)]">
-      <p className="text-md mb-3 text-center font-semibold text-[var(--primary)] dark:text-white">Please fill the following details</p>
+    <div
+      className={cn(
+        'my-[18px] ml-[50px] flex max-w-[800px] flex-col gap-2 rounded-md  shadow-md [border:1px_solid_var(--common-border-color)]',
+        fullScreen ? 'md:p-8' : 'p-4'
+      )}
+    >
+      <p className={cn('text-md text-center font-semibold text-[var(--primary)] dark:text-white', fullScreen ? 'md:mb-4 md:text-xl' : 'mb-3')}>
+        Please fill the following details
+      </p>
       <Formik initialValues={{}} validationSchema={yupSchema(fields)} validateOnMount validate={validate} onSubmit={handleSubmitWithFormattedData}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Fragment>
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <div className="grid gap-3">
+              <div className={cn('grid gap-3', fullScreen ? 'grid-cols-1 md:grid-cols-2 md:gap-4' : 'grid-cols-1')}>
                 {updatedFields.map((field) => (
                   <div>
                     <FormTypes
@@ -86,14 +95,15 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState }: Rend
                 ))}
               </div>
             </Form>
-            <div className="mt-3">
+            <div className={cn('text-right', fullScreen ? 'md:mt-5' : 'mt-3')}>
               <ThemeButton
                 borderColor="none"
                 disabled={disabled}
                 iconForMobile={false}
                 id="dialog-save-button"
+                fullWidth={!fullScreen}
                 color="primary"
-                fullWidth
+                style={{ padding: '6px 25px' }}
                 onClick={(e) => {
                   e.preventDefault();
                   submitForm();

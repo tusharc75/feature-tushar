@@ -6,7 +6,8 @@ const intialState = {
   loading: false,
   error: null,
   messages: [],
-  isSendButtonDisabled: false
+  isSendButtonDisabled: false,
+  fullScreen: false
 };
 
 function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitialChatboxState {
@@ -50,7 +51,12 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
       break;
     }
     case 'disableSendButton': {
-      newState = { ...newState, isSendButtonDisabled: action.payload.disabled };
+      newState = { ...newState, isSendButtonDisabled: action.payload };
+      break;
+    }
+    case 'setFullScreen': {
+      document.body.style.overflow = action.payload ? 'hidden' : '';
+      newState = { ...newState, fullScreen: action.payload };
       break;
     }
     case 'reset': {
@@ -69,6 +75,7 @@ export type TInitialChatboxState = {
   loading: boolean;
   error: string | null;
   isSendButtonDisabled: boolean;
+  fullScreen: boolean;
 };
 
 export type TMessage = {
@@ -88,7 +95,8 @@ export type TChatboxActions =
   | { type: 'setNewAssistantMessage'; payload: { reply: string; session: string; fields?: Field[]; data?: Data } }
   | { type: 'initUserMessage'; payload: { query: string } }
   | { type: 'reset' }
-  | { type: 'disableSendButton'; payload: { disabled: boolean } };
+  | { type: 'setFullScreen'; payload: boolean }
+  | { type: 'disableSendButton'; payload: boolean };
 
 export const useChatboxReducer = (): [TInitialChatboxState, React.Dispatch<TChatboxActions>] => {
   const [state, dispatch] = useReducer(reducer, intialState);
