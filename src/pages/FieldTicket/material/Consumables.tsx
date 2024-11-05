@@ -304,7 +304,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         consumables = await findAll(objectStore.fieldTicketMaterial);
         consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && e?.type === MATERIAL_TYPE.product && !e?.isRental);
         if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue);
+          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue && e?.uniqueId === selectedServiceOption?._id);
         }
       } else if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.product}`;
@@ -339,6 +339,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         element.materialId = d._id;
         element.type = MATERIAL_TYPE.product;
         element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption : null;
+        element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
