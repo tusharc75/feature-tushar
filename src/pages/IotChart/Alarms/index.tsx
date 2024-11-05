@@ -20,7 +20,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
   const [alarmOptions, setAlarmOptions] = useState(null);
   const [selectedAlarm, setSelectedAlarm] = useState({ optionValue: 'All', optionLabel: 'All' });
   const [alertOptions, setAlertOptions] = useState(null);
-  const [selectedAlert, setSelectedAlert] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState([]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -48,7 +48,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
     } else {
       deepFilter = deepFilter + `&dataPoints=${selectedAlarm.optionValue}`;
     }
-    if (selectedAlert) {
+    if (selectedAlert?.length > 0) {
       deepFilter = deepFilter + `&fieldValue=${selectedAlert}`;
     }
     return `${deepFilter}`;
@@ -143,6 +143,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
           {alertOptions && (
             <Autocomplete
               options={alertOptions || []}
+              multiple
               getOptionLabel={(option: any) => option || ''}
               style={{ width: '350px' }}
               value={selectedAlert}
