@@ -1,12 +1,13 @@
-import { Grow, IconButton } from '@material-ui/core';
+import { Grow, IconButton, Typography } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } from 'react';
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
 import { RiChatNewLine } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
-import { TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
+import { TChatboxActions, TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
+import RenderFields from 'src/components/AgentChat/RenderFields';
 import SendMessageForm from 'src/components/AgentChat/SendMessageInputForm';
 import Suggestions from 'src/components/AgentChat/Suggestions';
 import { getRandomNumber, scrollToBottom } from 'src/components/AgentChat/utils';
@@ -21,7 +22,7 @@ type ChatboxProps = {
 const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [state, setState] = useChatboxReducer();
-  const { sessionId, loading, messages } = state;
+  const { sessionId, loading, messages, isSendButtonDisabled } = state;
   const { pathname } = useLocation();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
@@ -51,14 +52,20 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
     [sessionId, setState, toastConfig]
   );
 
+  const transformObjToMessage = useCallback(
+    (obj) => {
+      let query = '';
+      for (let i = 0; i < Object.keys(obj).length; i++) {
+        query += `${Object.keys(obj)[i]}: ${Object.values(obj)[i]}\n`;
+      }
+      sendMessage(query);
+    },
+    [sendMessage]
+  );
+
   const resetChat = () => {
     setState({ type: 'reset' });
   };
-
-  // useEffect(() => {
-  //   setState({ type: 'reset' });
-  //   setIsChatboxOpen(false);
-  // }, [pathname, setState]);
 
   return (
     <Grow in={isChatboxOpen} unmountOnExit>
@@ -71,7 +78,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
             <RiChatNewLine />
           </IconButton>
         </HtmlTooltip>
-        <div className="flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)]">
+        <div className="flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)] ">
           <div className="head flex items-center justify-between p-3 [border-bottom:1px_solid_var(--common-border-color)]">
             <h5 className="text-[16px] font-semibold">Equipt Genie</h5>
             <IconButton size="small" onClick={() => setIsChatboxOpen(false)}>
@@ -80,18 +87,21 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
           </div>
           <div
             ref={scrollContainer}
-            className="body h-[var(--chat-container-h)] max-h-[var(--chat-container-h)] overflow-y-auto overscroll-contain scroll-smooth p-3"
+            className="body h-[var(--chat-container-h)] max-h-[var(--chat-container-h)]  overflow-y-auto overscroll-contain scroll-smooth p-3"
           >
             {messages.length > 0 &&
-              messages?.map((message) => {
+              messages?.map((message, i) => {
                 return <RenderSingleChat message={message} />;
               })}
             {loading && <RenderSingleChat loading={true} />}
+            {messages[messages.length - 1]?.fields && (
+              <RenderFields fields={messages[messages.length - 1].fields} disabled={false} setState={setState} handleSubmit={transformObjToMessage} />
+            )}
 
             {messages.length === 0 && <Suggestions pathname={pathname} sendMessage={sendMessage} />}
           </div>
           <div className="footer p-3 [border-top:1px_solid_var(--common-border-color)]">
-            <SendMessageForm sendMessage={sendMessage} loading={loading} />
+            <SendMessageForm sendMessage={sendMessage} loading={loading} disabled={isSendButtonDisabled} />
           </div>
         </div>
       </div>
@@ -105,30 +115,38 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
   const isUserMessage = message?.role === 'user' || false;
 
   return (
-    <div className={cn('w-fit max-w-[60%]', isUserMessage ? ' ml-auto text-right' : '', loading ? 'w-full' : '')}>
-      <h6 className="user mb-[6px] text-[14px] font-medium">
-        {isUserMessage ? (
-          ''
+    <>
+      <div className={cn(isUserMessage ? ' ml-auto ' : 'my-4 flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
+        <h6 className="user mb-[6px] text-[14px] font-medium">
+          {isUserMessage ? (
+            ''
+          ) : (
+            <span className="flex  h-10 w-10 items-center justify-center rounded-full [border:1px_solid_var(--common-border-color)]">
+              <BsStars className="text-[var(--new-theme-color)]" />
+            </span>
+          )}
+        </h6>
+        {loading ? (
+          <div className="w-full">
+            <Skeleton animation="wave" />
+            <Skeleton />
+            <Skeleton animation="wave" />
+            <Skeleton width={`${getRandomNumber(30, 80)}%`} />
+          </div>
+        ) : isUserMessage ? (
+          <Typography
+            component={'pre'}
+            variant="body2"
+            className="whitespace-pre-wrap rounded-3xl bg-[#0DA0A840] px-[20px] py-[10px] text-[#777575] dark:bg-[#1e4358] dark:text-[white]"
+          >
+            {message.content}
+          </Typography>
         ) : (
-          <span>
-            <BsStars className="text-[var(--new-theme-color)]" />
-          </span>
+          <Typography component={'pre'} variant="body2" className="whitespace-pre-wrap rounded-lg pt-[8px] text-[var(--primary)] dark:text-white">
+            {message.content}
+          </Typography>
         )}
-      </h6>
-      {loading ? (
-        <div className="">
-          <Skeleton animation="wave" />
-          <Skeleton />
-          <Skeleton animation="wave" />
-          <Skeleton width={`${getRandomNumber(30, 80)}%`} />
-        </div>
-      ) : isUserMessage ? (
-        <p className="rounded-lg bg-[#0DA0A840] px-[20px] py-[9px] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]">{message.content}</p>
-      ) : (
-        <pre className="whitespace-pre-wrap rounded-lg bg-[#F4F4F4] px-[20px] py-[9px] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white">
-          {message.content}
-        </pre>
-      )}
-    </div>
+      </div>
+    </>
   );
 };

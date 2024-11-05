@@ -1,10 +1,12 @@
 import { useReducer } from 'react';
+import { Data, Field } from 'src/components/AgentChat/types';
 
 const intialState = {
   sessionId: null,
   loading: false,
   error: null,
-  messages: []
+  messages: [],
+  isSendButtonDisabled: false
 };
 
 function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitialChatboxState {
@@ -37,10 +39,18 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
     case 'setNewAssistantMessage': {
       newState = {
         ...newState,
-        messages: [...state.messages, { _id: `${Date.now()}`, content: action.payload.reply, role: 'assistant' }],
+        isSendButtonDisabled: false,
+        messages: [
+          ...state.messages,
+          { _id: `${Date.now()}`, content: action.payload.reply, role: 'assistant', fields: action.payload.fields, data: action.payload.data }
+        ],
         loading: false,
         ...(!state.sessionId ? { sessionId: action.payload.session } : {})
       };
+      break;
+    }
+    case 'disableSendButton': {
+      newState = { ...newState, isSendButtonDisabled: action.payload.disabled };
       break;
     }
     case 'reset': {
@@ -58,12 +68,15 @@ export type TInitialChatboxState = {
   messages: TMessage[];
   loading: boolean;
   error: string | null;
+  isSendButtonDisabled: boolean;
 };
 
 export type TMessage = {
   _id: string;
   content: string;
   role: 'user' | 'assistant';
+  fields?: Field[];
+  data?: Data;
 };
 
 export type TChatboxActions =
@@ -72,9 +85,10 @@ export type TChatboxActions =
   | { type: 'setLoading'; loading: boolean }
   | { type: 'setError'; error: string | null }
   | { type: 'setNewUserMessage'; payload: { query: string } }
-  | { type: 'setNewAssistantMessage'; payload: { reply: string; session: string } }
+  | { type: 'setNewAssistantMessage'; payload: { reply: string; session: string; fields?: Field[]; data?: Data } }
   | { type: 'initUserMessage'; payload: { query: string } }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'disableSendButton'; payload: { disabled: boolean } };
 
 export const useChatboxReducer = (): [TInitialChatboxState, React.Dispatch<TChatboxActions>] => {
   const [state, dispatch] = useReducer(reducer, intialState);

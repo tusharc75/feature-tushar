@@ -5,9 +5,10 @@ import { SendIcon } from 'src/assets/svg/svgIcons';
 type SendMessageFormProps = {
   sendMessage: (query: string) => Promise<void>;
   loading: boolean;
+  disabled?: boolean;
 };
 
-const SendMessageForm = ({ sendMessage, loading }: SendMessageFormProps) => {
+const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessageFormProps) => {
   const [message, setMessage] = useState('');
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,11 +18,11 @@ const SendMessageForm = ({ sendMessage, loading }: SendMessageFormProps) => {
 
   return (
     <form onSubmit={handleSendMessage} className="flex items-center">
-      <InputBase value={message} onChange={(e) => setMessage(e.target.value)} fullWidth placeholder="Write a message..." />
+      <InputBase value={message} disabled={disabled} onChange={(e) => setMessage(e.target.value)} fullWidth placeholder="Write a message..." />
       <IconButton
         size="small"
         type="submit"
-        disabled={!message || loading}
+        disabled={!message || loading || disabled}
         style={{ borderRadius: 10, background: 'var(--new-theme-color)', width: 32, height: 32 }}
         className="!ml-[5px]"
       >
