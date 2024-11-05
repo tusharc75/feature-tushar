@@ -15,6 +15,7 @@ import { getRandomNumber, scrollToBottom } from 'src/components/AgentChat/utils'
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import Markdown from 'react-markdown';
 
 type ChatboxProps = {
   isChatboxOpen: boolean;
@@ -171,9 +172,9 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
             {message.content}
           </Typography>
         ) : (
-          <Typography component={'pre'} variant="body2" className="whitespace-pre-wrap rounded-lg pt-[8px] text-[var(--primary)] dark:text-white">
-            {message.content}
-          </Typography>
+          <div className="whitespace-pre-wrap rounded-lg pt-[8px] text-sm text-[var(--primary)] dark:text-white">
+            <Markdown>{message.content}</Markdown>
+          </div>
         )}
       </div>
     </>
