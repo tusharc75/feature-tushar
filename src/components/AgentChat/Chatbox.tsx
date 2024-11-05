@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } 
 import { BsStars } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { RiChatNewLine } from 'react-icons/ri';
+import Markdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
@@ -15,7 +16,6 @@ import { getRandomNumber, scrollToBottom } from 'src/components/AgentChat/utils'
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import Markdown from 'react-markdown';
 
 type ChatboxProps = {
   isChatboxOpen: boolean;
