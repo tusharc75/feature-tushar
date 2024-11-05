@@ -490,9 +490,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               ? parent.assetAssignedQty ===
               parent.subRows
                 .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) || parent.subRows.every((d) => d.isValid)
+                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) + (parent.serializedProduct ? parent.realAssetQty : 0) || (parent.isValid && parent.subRows.every((d) => d.isValid))
               : true;
-
+              
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
             parent.isValid = true;
