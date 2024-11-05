@@ -1,5 +1,5 @@
 import { Grow, IconButton, Typography } from '@material-ui/core';
-import { Close, Fullscreen } from '@material-ui/icons';
+import { Close } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } from 'react';
 import { BsStars } from 'react-icons/bs';
