@@ -519,7 +519,11 @@ export const CellRenderer = ({
 
   const { currentEditingCellPosition, loadingExpanderRowId } = state;
 
-  const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
+  const { style: stickyStyle, className: stickyClassName } = getStickyPosition(columnDef, index, table);
+  let style = { position: 'static', ...stickyStyle };
+  if (stickyStyle['position'] && stickyStyle['position'] === 'sticky') {
+    style['zIndex'] = 11;
+  }
 
   switch (true) {
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
