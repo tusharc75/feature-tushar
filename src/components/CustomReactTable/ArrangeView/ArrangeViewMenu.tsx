@@ -245,7 +245,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                     </>
                                   )}
                                 </span>
-                                <div className="flex gap-2">
+                                <div className="flex cursor-auto gap-2">
                                   <HtmlTooltip title={d?.user === user?.user?._id ? 'Edit' : 'You have not permission to edit'}>
                                     <IconButton
                                       size={'small'}
