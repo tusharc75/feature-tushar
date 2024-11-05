@@ -424,6 +424,18 @@ const ReceivingTicket = ({
       }
     });
     if (action === rentalManagementActions.transferToAnotherRental && errorMessages?.length === 0) {
+      const similarRecords = findSimilarRecords(
+        records?.filter((e) => e.type === 'Asset'),
+        '_id'
+      );
+ 
+      if(similarRecords?.length){
+        similarRecords?.forEach((ele: any) => {
+          ele?.forEach((e: any) => {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.sameAssetsSelected });
+          });
+        });
+      } else {
       if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
         if (
           records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
@@ -446,6 +458,7 @@ const ReceivingTicket = ({
           });
         }
       }
+    }
     }
     if (action === rentalManagementActions.updateStartDateEndDate) {
       if (selectedRecords?.find((e) => e?.isAllowedStartDate)) {
