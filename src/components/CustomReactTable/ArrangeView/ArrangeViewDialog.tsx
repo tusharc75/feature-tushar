@@ -86,14 +86,20 @@ const ArrangeViewDialog = ({
 }: ArrangeViewDialogProps) => {
   const { stickyColumns } = useMemo(() => getStickyColumnNames({ allColumn: columns, expander, hideSelection }), [columns, expander, hideSelection]);
 
-  const columnsWithoutSticky = useMemo(() => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)), [stickyColumns, columns]);
+  const applySearchMatchProperty = (column, matched: boolean) => {
+    return { ...column, searchMatched: matched };
+  };
+
+  const columnsWithoutSticky = useMemo(
+    () => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)).map((c) => applySearchMatchProperty(c, true)),
+    [stickyColumns, columns]
+  );
   const sensors = useDndSensors();
   const toastConfig = useContext(CustomToastContext);
 
   const [sortedColumns, setSortedColumns] = useState(
     data?.order ? columnsWithoutSticky.sort((a, b) => data.order?.indexOf(a.id) - data.order?.indexOf(b.id)) : columnsWithoutSticky
   );
-  const [filteredColumns, setFilteredColumns] = useState([]);
   const [stateVisibleColumns, setStateVisibleColumns] = useState(() => {
     const temp = {};
     if (data?.hide?.length > 0) {
@@ -114,7 +120,6 @@ const ArrangeViewDialog = ({
     data ? { name: data.name, access: data.access, default: data.default, order: data.order, hide: data.hide } : initialValue
   );
   const [serchedValue, setSearchedValue] = useState('');
-
   const [loading, setLoading] = useState(false);
 
   const updateArrangeView = async (values: FormSchema) => {
@@ -214,8 +219,10 @@ const ArrangeViewDialog = ({
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>, setFieldValue: SetFieldValue) => {
-    const visibleColumns = {};
-    columnsWithoutSticky?.forEach((c: any) => {
+    const visibleColumns = { ...stateVisibleColumns };
+    const filteredColumns = sortedColumns.filter((c) => c.searchMatched);
+
+    filteredColumns?.forEach((c: any) => {
       if (c.disabled) {
         visibleColumns[c.id] = true;
       } else {
@@ -231,23 +238,27 @@ const ArrangeViewDialog = ({
     );
   };
 
-  const isAllChecked = () => {
-    return columnsWithoutSticky?.every((c: any) => {
-      if (c.disabled) {
+  const isAllChecked = useMemo(
+    () =>
+      sortedColumns?.every((c: any) => {
+        if (c.disabled) return true;
+        if (c.searchMatched) return stateVisibleColumns[c.id];
         return true;
-      }
-      return stateVisibleColumns[c.id];
-    });
-  };
+      }),
+    [sortedColumns, stateVisibleColumns]
+  );
 
   const handeSearch = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const value = e.target.value;
     setSearchedValue(value);
     if (value.trim() !== '') {
-      const filteredColumns = columnsWithoutSticky.filter((column) => column.Header.toLowerCase().includes(value.trim().toLowerCase()));
-      setFilteredColumns(filteredColumns);
+      const filteredColumns = sortedColumns.map((column) =>
+        applySearchMatchProperty(column, column.Header.toLowerCase().includes(value.trim().toLowerCase()))
+      );
+      setSortedColumns(filteredColumns);
     } else {
-      setFilteredColumns([]);
+      const filteredColumns = sortedColumns.map((c) => applySearchMatchProperty(c, true));
+      setSortedColumns(filteredColumns);
     }
   };
 
@@ -342,7 +353,7 @@ const ArrangeViewDialog = ({
                   <div className="flex items-center justify-between gap-2">
                     <SearchBox onChange={handeSearch} value={serchedValue} />
                     <span className="mr-[12px] flex-shrink-0">
-                      <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
+                      <Switch size="small" checked={isAllChecked} onChange={(e) => handleToggleAll(e, setFieldValue)} />
                     </span>
                   </div>
                 </div>
@@ -352,34 +363,19 @@ const ArrangeViewDialog = ({
                     !isMinimized || (isMobile && !isTablet) || isMobileView ? 'h-[calc(100vh-324px)] md:h-[calc(100vh-338px)]' : 'h-[350px]'
                   )}
                 >
-                  {serchedValue.trim().length > 0 ? (
-                    <>
+                  <DndContext
+                    onDragEnd={(e) => moveItem(e, setFieldValue)}
+                    modifiers={[restrictToVerticalAxis]}
+                    onDragStart={onDragStart}
+                    sensors={sensors}
+                  >
+                    <SortableContext items={sortedColumns.map((c) => c.accessor)} disabled={serchedValue.length > 0}>
                       <ul className="list-none">
-                        {filteredColumns.map((column, index) => (
-                          <RenderListItem
-                            key={column.accessor}
-                            checked={stateVisibleColumns[column.id]}
-                            column={column}
-                            index={index}
-                            handleToggle={handleToggle}
-                            setFieldValue={setFieldValue}
-                            values={values}
-                            isFilteredColumn={true}
-                          />
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <DndContext
-                      onDragEnd={(e) => moveItem(e, setFieldValue)}
-                      modifiers={[restrictToVerticalAxis]}
-                      onDragStart={onDragStart}
-                      sensors={sensors}
-                    >
-                      <SortableContext items={sortedColumns.map((c) => c.accessor)}>
-                        <ul className="list-none">
-                          {sortedColumns.map((column, index) => (
+                        {sortedColumns.map((column, index) => {
+                          if (column.searchMatched === false) return null;
+                          return (
                             <RenderListItem
+                              isFilteredColumn={serchedValue.length > 0}
                               key={column.accessor}
                               checked={stateVisibleColumns[column.id]}
                               column={column}
@@ -388,18 +384,18 @@ const ArrangeViewDialog = ({
                               setFieldValue={setFieldValue}
                               values={values}
                             />
-                          ))}
-                        </ul>
-                      </SortableContext>
-                      <DragOverlay>
-                        {activeItem && (
-                          <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
-                            <RenderListItem {...activeItem} />
-                          </span>
-                        )}
-                      </DragOverlay>
-                    </DndContext>
-                  )}
+                          );
+                        })}
+                      </ul>
+                    </SortableContext>
+                    <DragOverlay>
+                      {activeItem && (
+                        <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
+                          <RenderListItem {...activeItem} />
+                        </span>
+                      )}
+                    </DragOverlay>
+                  </DndContext>
                 </div>
               </div>
             </div>
