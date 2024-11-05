@@ -5,15 +5,15 @@ import { objectStore, findAll, deleteOne, setUpindexDB, deleteMany } from '../..
 import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOfflineHelper';
 import { sortBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import { useHistory } from 'react-router-dom';
 
 export const CustomOfflineContext = createContext(null);
 
-
 export const CustomOfflineProvider = ({ children }) => {
-
 
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [isSynch, setIsSynch] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
@@ -49,6 +49,7 @@ export const CustomOfflineProvider = ({ children }) => {
         await setUpindexDB();
         var data = await findAll(objectStore.offlineDataSync);
         if (data?.length) {
+          history.push('/');
           setIsSynch(true);
           var OrderBy = ['Loading', 'Receiving'];
           data = sortBy(data, function (item: any) {
