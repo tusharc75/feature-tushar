@@ -1,12 +1,13 @@
 import { Grow, IconButton, Typography } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef } from 'react';
 import { BsStars } from 'react-icons/bs';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { RiChatNewLine } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
-import { TChatboxActions, TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
+import { TMessage, useChatboxReducer } from 'src/components/AgentChat/chatboxReducer';
 import RenderFields from 'src/components/AgentChat/RenderFields';
 import SendMessageForm from 'src/components/AgentChat/SendMessageInputForm';
 import Suggestions from 'src/components/AgentChat/Suggestions';
@@ -22,7 +23,7 @@ type ChatboxProps = {
 const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [state, setState] = useChatboxReducer();
-  const { sessionId, loading, messages, isSendButtonDisabled } = state;
+  const { sessionId, loading, messages, isSendButtonDisabled, fullScreen } = state;
   const { pathname } = useLocation();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
@@ -52,6 +53,10 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
     [sessionId, setState, toastConfig]
   );
 
+  useEffect(() => {
+    scrollToBottom(scrollContainer.current);
+  }, [fullScreen]);
+
   const transformObjToMessage = useCallback(
     (obj) => {
       let query = '';
@@ -69,7 +74,12 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
 
   return (
     <Grow in={isChatboxOpen} unmountOnExit>
-      <div className="absolute bottom-[calc(100%+10px)] right-0 flex w-[min(var(--chatbox-width),calc(100vw-24px))] max-w-[min(var(--chatbox-width),calc(100vw-24px))] items-end justify-end gap-2">
+      <div
+        className={cn(
+          'absolute bottom-[calc(100%+10px)] right-0 z-10 flex w-[min(var(--chatbox-width),calc(100vw-24px))] max-w-[min(var(--chatbox-width),calc(100vw-24px))] items-end justify-end gap-2',
+          fullScreen ? '[--chat-container-h:calc(100vh-113px)] [--chatbox-width:100vw]' : '[--chat-container-h:500px] [--chatbox-width:500px]'
+        )}
+      >
         <HtmlTooltip title={'New Chat'}>
           <IconButton
             onClick={resetChat}
@@ -78,27 +88,46 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
             <RiChatNewLine />
           </IconButton>
         </HtmlTooltip>
-        <div className="flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)] ">
+
+        <div
+          className={cn(
+            'flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)] ',
+            fullScreen && 'fixed inset-0 '
+          )}
+        >
           <div className="head flex items-center justify-between p-3 [border-bottom:1px_solid_var(--common-border-color)]">
             <h5 className="text-[16px] font-semibold">Equipt Genie</h5>
-            <IconButton size="small" onClick={() => setIsChatboxOpen(false)}>
-              <Close />
-            </IconButton>
+            <div className="flex gap-2">
+              <IconButton size="small" onClick={() => setState({ type: 'setFullScreen', payload: !fullScreen })}>
+                {fullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
+              </IconButton>
+              <IconButton size="small" onClick={() => setIsChatboxOpen(false)}>
+                <Close />
+              </IconButton>
+            </div>
           </div>
           <div
             ref={scrollContainer}
-            className="body h-[var(--chat-container-h)] max-h-[var(--chat-container-h)]  overflow-y-auto overscroll-contain scroll-smooth p-3"
+            className={cn('body h-[var(--chat-container-h)] max-h-[var(--chat-container-h)]  overflow-y-auto overscroll-contain scroll-smooth p-3')}
           >
-            {messages.length > 0 &&
-              messages?.map((message, i) => {
-                return <RenderSingleChat message={message} />;
-              })}
-            {loading && <RenderSingleChat loading={true} />}
-            {messages[messages.length - 1]?.fields && (
-              <RenderFields fields={messages[messages.length - 1].fields} disabled={false} setState={setState} handleSubmit={transformObjToMessage} />
-            )}
+            <div className={cn('container', fullScreen ? '' : '!w-full')}>
+              {messages.length > 0 &&
+                messages?.map((message, i) => {
+                  return <RenderSingleChat message={message} />;
+                })}
+              {loading && <RenderSingleChat loading={true} />}
+              {messages[messages.length - 1]?.fields && (
+                <RenderFields
+                  state={state}
+                  fields={messages[messages.length - 1].fields}
+                  disabled={false}
+                  setState={setState}
+                  handleSubmit={transformObjToMessage}
+                />
+              )}
 
-            {messages.length === 0 && <Suggestions pathname={pathname} sendMessage={sendMessage} />}
+              {messages.length === 0 && <Suggestions pathname={pathname} sendMessage={sendMessage} />}
+            </div>
           </div>
           <div className="footer p-3 [border-top:1px_solid_var(--common-border-color)]">
             <SendMessageForm sendMessage={sendMessage} loading={loading} disabled={isSendButtonDisabled} />
@@ -116,12 +145,12 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
 
   return (
     <>
-      <div className={cn(isUserMessage ? ' ml-auto ' : 'my-4 flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
+      <div className={cn('py-[18px]', isUserMessage ? ' ml-auto' : 'flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
         <h6 className="user mb-[6px] text-[14px] font-medium">
           {isUserMessage ? (
             ''
           ) : (
-            <span className="flex  h-10 w-10 items-center justify-center rounded-full [border:1px_solid_var(--common-border-color)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full [border:1px_solid_var(--common-border-color)]">
               <BsStars className="text-[var(--new-theme-color)]" />
             </span>
           )}
@@ -137,7 +166,7 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
           <Typography
             component={'pre'}
             variant="body2"
-            className="whitespace-pre-wrap rounded-3xl bg-[#0DA0A840] px-[20px] py-[10px] text-[#777575] dark:bg-[#1e4358] dark:text-[white]"
+            className="!ml-[46px] whitespace-pre-wrap rounded-3xl bg-[#f4f4f4] px-[20px] py-[10px] text-[black] dark:bg-[#1e4358] dark:text-[white]"
           >
             {message.content}
           </Typography>
