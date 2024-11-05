@@ -131,7 +131,7 @@ const ReceivingTicket = ({
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
-  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, inUseAsset: false });
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
@@ -546,7 +546,7 @@ const ReceivingTicket = ({
               wellNumber: d?.inventory?.wellNumber,
               position: d?.inventory?.position,
               currentGpsLocation: d?.inventory?.currentGpsLocation,
-              currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps,
+              currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps
             };
           })
           .map((u) => ({
@@ -1093,11 +1093,11 @@ const ReceivingTicket = ({
                 <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
-            {(row?.original?.currentLocationNotMatchWithGps && (
+            {row?.original?.currentLocationNotMatchWithGps && (
               <HtmlTooltip title="Asset location needs to be update in Equipt">
                 <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
               </HtmlTooltip>
-            ))}
+            )}
           </div>
         )
       },
@@ -1575,12 +1575,12 @@ const ReceivingTicket = ({
       materialId: record._id,
       type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
-      parentId: null
+      parentId: null,
     }));
     axiosInstance()
-      .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows })
+      .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows, inUseAsset: showRepairOrderDialog.inUseAsset })
       .then(() => {
-        setShowRepairOrderDialog(false);
+        setShowRepairOrderDialog({ open: false, inUseAsset: false });
         fetchRecords();
       })
       .catch((error) => {
@@ -2527,7 +2527,7 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {showRepairOrderDialog && (
+      {showRepairOrderDialog.open && (
         <ManageRepairOrder
           referenceType="rentalJob"
           referenceData={{
@@ -2536,7 +2536,7 @@ const ReceivingTicket = ({
             customerAccount: rentalManagementData?.customerAccount?.optionValue,
             customerContact: rentalManagementData?.customerContact?.optionValue
           }}
-          onClose={() => setShowRepairOrderDialog(false)}
+          onClose={() => setShowRepairOrderDialog({ open: false, inUseAsset: false })}
           onSuccess={(obj) => {
             handleAddAssetsToRepairOrder(obj?._id);
           }}
@@ -3118,13 +3118,29 @@ const ActionButtonMenuItems = ({
           id={'create-repair-order-menu-item'}
           onClick={() => {
             if (validateAction(rentalManagementActions.createRepairOrder)) {
-              setShowRepairOrderDialog(true);
+              setShowRepairOrderDialog({ open: true, inUseAsset: false });
             }
           }}
         >
           {`Create ${routes.repairOrder.title}`}
         </MenuItem>
       )}
+      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep))
+        && user?.user?.brandPolicy?.rentalInUseAssetRepair
+        && permissions?.repairOrder?.isCreate
+        && !isOffline
+        && selectedRecords?.length > 0
+        && selectedRecords?.every(r => r?.status === ASSET_STATUS.inUse && r?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse) && (
+          <MenuItem
+            id={'create-repair-order-menu-item-in-use-assets'}
+            onClick={() => {
+              setShowRepairOrderDialog({ open: true, inUseAsset: true });
+            }}
+          >
+            {`Create ${routes.repairOrder.title} (${ASSET_STATUS.inUse} Assets)`}
+          </MenuItem>
+        )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <>
