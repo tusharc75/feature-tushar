@@ -116,7 +116,7 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
 
   return (
     <>
-      <div className={cn(isUserMessage ? ' ml-auto ' : 'my-4 flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
+      <div className={cn(isUserMessage ? ' ml-auto' : 'my-4 flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
         <h6 className="user mb-[6px] text-[14px] font-medium">
           {isUserMessage ? (
             ''
@@ -137,7 +137,7 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
           <Typography
             component={'pre'}
             variant="body2"
-            className="whitespace-pre-wrap rounded-3xl bg-[#0DA0A840] px-[20px] py-[10px] text-[#777575] dark:bg-[#1e4358] dark:text-[white]"
+            className="!ml-[46px] whitespace-pre-wrap rounded-3xl bg-[#0DA0A840] px-[20px] py-[10px] text-[#777575] dark:bg-[#1e4358] dark:text-[white]"
           >
             {message.content}
           </Typography>
