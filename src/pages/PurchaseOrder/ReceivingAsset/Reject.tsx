@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Dialog, Button, Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -9,6 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { Formik, Form, FieldArray } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
+  CustomDialogTransition,
   MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
@@ -25,7 +26,6 @@ import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -131,8 +131,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
         }
         if (tempProduct?.serializedProduct) {
           if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-
-            const removeActualReceivedQty = parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+            const removeActualReceivedQty =
+              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
 
             const totalSelected = d?.assetIds?.length + d.serialNumber?.length;
 
@@ -175,6 +175,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
     <Dialog
       open
       fullScreen={fullScreen}
+      TransitionComponent={CustomDialogTransition}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {
@@ -211,7 +212,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -227,35 +228,35 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                               {values.material.map((data, index) => (
                                 <div
                                   style={{ border: '1.5px solid var(--common-border-color)' }}
-                                  className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                  className="grid gap-[15px] rounded-[6px] px-[23px] pb-[21px] pt-[17px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)] sm:grid-cols-[24px,1fr] md:gap-[29px]"
                                   key={index}
                                 >
-                                  <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
-                                    <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+                                  <div className="flex h-[24px] w-[24px] items-center justify-center rounded-[6px] bg-[var(--new\_theme\_color)]">
+                                    <p className="text-[13px] font-[700] leading-none text-white">{index + 1}</p>
                                   </div>
                                   <div>
                                     <div
                                       style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                      className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                      className="flex flex-wrap gap-[20px]  border-b border-b-[var(--common-border-color)] pb-[9px] md:gap-[61px]"
                                     >
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Type: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Type: </span>
                                         {startCase(data?.type)}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">PO Quantity: </span>
                                         {data?.row?.qty}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Received: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Received: </span>
                                         {data?.row?.actualReceived || 0}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Rejected: </span>
                                         {data?.row?.rejectQuantity || 0}
                                       </span>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                                    <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                       <TextField
                                         variant="outlined"
                                         name={`${data?.type}_${data?._id}`}
@@ -266,6 +267,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                       />
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
+                                          id="select-storage-location"
                                           size="small"
                                           value={data?.storageLocation}
                                           options={storageLocationOptions}
@@ -345,7 +347,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                       />
                                     </div>
                                     {data?.row?.serializedProduct && (
-                                      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-[20px] md:gap-[25px] mt-[28px]">
+                                      <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-1 md:gap-[25px] lg:grid-cols-2">
                                         <Autocomplete
                                           size="small"
                                           multiple
@@ -374,7 +376,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                             />
                                           )}
                                         />
-                                        {user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory &&
+                                        {user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory && (
                                           <Autocomplete
                                             size="small"
                                             multiple
@@ -403,7 +405,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                                 helperText={validate([data]).serialNumber}
                                               />
                                             )}
-                                          />}
+                                          />
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -453,6 +456,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                   Cancel
                 </Button>
                 <Button
+                  id={'dialog-save-button'}
                   onClick={() => {
                     if (
                       !validate(values.material).rejectQuantity &&

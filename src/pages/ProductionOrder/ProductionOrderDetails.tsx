@@ -5,8 +5,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -36,6 +34,9 @@ import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -62,7 +63,8 @@ const ProductionOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
   const productionOrderProcessStepsNames = React.useMemo(() => {
     return productionOrderProcessSteps.map((item) => item.name);
   }, [productionOrderProcessSteps]);
@@ -87,21 +89,31 @@ const ProductionOrderDetails = () => {
     });
   }, [locationKeys]);
 
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       fetchProductionOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
   useEffect(() => {
     getResourceFields();
   }, []);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= productionOrderProcessStepsNames.length) {
-      updateProcessStatus(productionOrderProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
 
   const getResourceFields = () => {
     axiosInstance()
@@ -125,7 +137,7 @@ const ProductionOrderDetails = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, tempStepList));
         }
-      
+
         // if (!data?.customerAccount) {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
@@ -157,15 +169,6 @@ const ProductionOrderDetails = () => {
     if (newValue === 0) {
       fetchProductionOrderData();
     }
-  };
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        fetchProductionOrderData();
-      })
-      .catch((error) => {});
   };
 
   const updateOrderStatus = (status) => {
@@ -221,7 +224,7 @@ const ProductionOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                { allowedToDelete && (
+                {allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
@@ -239,11 +242,12 @@ const ProductionOrderDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -268,23 +272,26 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
-                    setNextStep(false);
-                    axiosInstance()
-                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                      .then(({ data: { data } }) => {
-                        if (data) {
-                          setCurrentStep((prevStep) => {
-                            const newStep = prevStep + 1;
-                            return newStep;
-                          });
-                        }
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                      });
-                  }
+                  setNextStep(false);
+                  axiosInstance()
+                    .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                    .then(({ data: { data } }) => {
+                      if (data) {
+                        setCurrentStep((prevStep) => {
+                          const newStep = prevStep + 1;
+                          return newStep;
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                    });
+                }
                 : null
             }
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[step], id);
+            }}
           />
           <ContentFullScreen title={productionOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {productionOrderProcessStepsNames[currentStep] === 'Add' && productionOrderData && (
@@ -322,6 +329,22 @@ const ProductionOrderDetails = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.productionOrder}
+                  data={productionOrderData}
+                  allowedToEdit={permissions?.productionOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

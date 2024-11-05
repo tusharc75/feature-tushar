@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -22,7 +22,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
 
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -206,7 +206,15 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Assign ${routes[camelCase(resource)]?.title || resource}`}
         showManimizeMaximize={false}

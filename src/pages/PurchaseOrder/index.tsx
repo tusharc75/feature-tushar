@@ -19,11 +19,20 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  purchaseOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createPurchaseOrderFlow } from './walkmeSteps';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -38,7 +47,7 @@ const PurchaseOrder = () => {
   ];
 
   let renderedFrom = camelCase(routes.purchaseOrder?.title);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -54,11 +63,13 @@ const PurchaseOrder = () => {
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
+  const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData([createPurchaseOrderFlow()]);
   }, []);
 
   useEffect(() => {
@@ -161,7 +172,11 @@ const PurchaseOrder = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.purchaseOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseOrder, finalObject?.ownerId) && u?.canDelete && !u?.deleted;
+          finalObject['canDelete'] =
+            permissions?.purchaseOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.purchaseOrder, finalObject?.ownerId) &&
+            u?.canDelete &&
+            !u?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

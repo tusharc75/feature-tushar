@@ -1,12 +1,14 @@
 import { Avatar, IconButton, ListItem, TextField } from '@material-ui/core';
-import { Add, Remove } from '@material-ui/icons';
+import { Add, Remove, RemoveCircleOutline } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { useAppTheme } from 'src/constants/AppConfig';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -24,6 +26,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, data: null });
+  const [themeColor] = useAppTheme();
 
   const handleRemoveMember = useCallback(
     async (userId) => {
@@ -93,13 +96,14 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
               <div className="flex items-center gap-2">
                 <Avatar
                   style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
-                    fontSize: 12
+                    width: 25,
+                    height: 25,
+                    borderRadius: '999px',
+                    fontSize: 12,
+                    ...getAvatarColor(member?.optionLabel, themeColor)
                   }}
                   variant="rounded"
-                  className="my-[2px]"
+                  className="my-[2px] uppercase "
                   src={member.avatar}
                 >
                   {member?.optionLabel.match(/(\b\S)?/g).join('')}
@@ -108,7 +112,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
               </div>
               <HtmlTooltip title={<span className="block w-[200px] py-2 text-center">Remove {member.optionLabel}</span>}>
                 <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
-                  <Remove color="error" />
+                  <RemoveCircleOutline color="error" />
                 </IconButton>
               </HtmlTooltip>
             </ListItem>

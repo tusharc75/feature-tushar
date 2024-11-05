@@ -317,6 +317,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
 
   return (
     <Dialog
+      TransitionComponent={CustomDialogTransition}
       open={true}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {

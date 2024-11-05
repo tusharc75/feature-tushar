@@ -38,7 +38,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import { fetch_child_resource_fields ,fetch_child_resource_fields_perm} from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
@@ -48,7 +48,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     state: { user, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const [isUpdating, setUpdating] = useState(false);
 
@@ -93,12 +93,12 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   }, [version, columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit); 
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     var c_fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
     c_fields = c_fields?.filter((f) => f?.isRead);
     setCostFields(c_fields);
-    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let column: any = [
       {
@@ -116,7 +116,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <div>
             <p className="text-truncate">
               {row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original.type)} `}
@@ -133,6 +133,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                     : ''}
             </p>
           </div>
+        )
       },
       {
         accessor: 'detail',
@@ -161,9 +162,9 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 <span>({row.original?.subRows?.length})</span>
               </>
             ) : null}
-            {allowedToEdit && ![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
-              quotationData?.type === QUOTATION_TYPE.fieldJob &&
-                row.original.type === MATERIAL_TYPE.product ? null :
+            {allowedToEdit &&
+              ![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) &&
+              (quotationData?.type === QUOTATION_TYPE.fieldJob && row.original.type === MATERIAL_TYPE.product ? null : (
                 <HtmlTooltip title="Add ">
                   <IconButton
                     onClick={(event) =>
@@ -181,7 +182,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
-            )}
+              ))}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
               <IconButton
                 size="small"
@@ -207,7 +208,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       {
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
-        Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
+        Cell: ({ row }) => <div> {row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0} </div>,
         Footer: (info) => {
           let rows = info.table.getExpandedRowModel().rows;
           const total = rows
@@ -297,12 +298,12 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const additionalData = additionalCost?.data?.data || [];
     const updatedAdditionalData = additionalData?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
-    })
+    });
 
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...updatedAdditionalData]
+    rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
@@ -383,13 +384,27 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const handleAdd = async (rows) => {
     setSubmitting(true);
     const material: any = [];
+    var taxCodeData: any = null;
+    if (quotationData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?taxCode=${quotationData?.taxCode?.optionValue}&materialType=${addDialog.type}`
+      );
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
+    }
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
       element.type = addDialog.type;
       if (addDialog.type !== MATERIAL_TYPE.serializedAsset) {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
-        if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
+        if (quotationData?.estimateStartDate
+          && quotationData?.estimateEndDate
+          && allFields?.filter((e) => ['estimateStartDate', 'estimateEndDate', 'estimateJobDuration']?.includes(e?.fieldName))?.length === 3
+        ) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.estimateStartDate = quotationData?.estimateStartDate;
           element.estimateEndDate = quotationData?.estimateEndDate;
@@ -402,26 +417,22 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       }
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog?.parentId || d.parentId;
+      if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
+      }
       material.push(element);
     });
 
     const priceData: any = await calculatePrice(material);
     material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
       if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields(
-          { [priceFieldName]: rateResult[0].mrp, pricingCondition: rateResult[0].conditionId },
-          element,
-          allFields
-        );
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
     });
@@ -549,8 +560,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   const handleDelete = (rows) => {
     setDeleting(true);
-    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
-    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
 
     if (products?.length) {
       axiosInstance()
@@ -583,7 +594,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           setDeleteData(null);
         });
     }
-
   };
 
   const openMaterial = (row, rows) => {
@@ -685,10 +695,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     let rows: any = [{ ...rowData, ...updatedData }];
 
     if (rowData?.type === MATERIAL_TYPE.manualEntry) {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, quotationData?.currency);
       handleSaveCostData(rows);
     } else {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, quotationData?.currency);
       handleSaveData(rows);
     }
   };
@@ -714,7 +724,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: 'product', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
           }}
         >
           Add Existing Products
@@ -722,7 +732,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type !== QUOTATION_TYPE.fieldJob && (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'package', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
             Add Existing Packages
@@ -731,13 +741,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
           <MenuItem
             onClick={() => {
-              setAddDialog({ open: true, type: 'service', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
             }}
           >
             Add Existing Services
           </MenuItem>
         )}
-        {costFields?.length > 0 &&
+        {costFields?.length > 0 && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
@@ -745,7 +755,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           >
             Add Manual Entry
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -808,7 +818,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 View Customer Price
               </MenuItem> */}
         <MenuItem
-          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length && !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry))}
+          disabled={
+            !Boolean(
+              selectedRecords &&
+              selectedRecords.filter((e) => !e.hideSelection).length &&
+              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+            )
+          }
           onClick={() => {
             setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
           }}
@@ -839,23 +855,23 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   };
 
   const handleSaveLeadTime = (data) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const value = {
       leadTime: data?.steps || [],
       _id: leadTimeDialog?.data?._id
     };
     let api = '';
     if (quotationData?.type === 'Manual Entry') {
-      api = `${quotation.api}/additionalcost/${quotationData?._id}/${versionId}/lead-time`
+      api = `${quotation.api}/additionalcost/${quotationData?._id}/${versionId}/lead-time`;
     } else {
-      api = `${quotation.api}/productpackage/${quotationData?._id}/${versionId}/lead-time`
+      api = `${quotation.api}/productpackage/${quotationData?._id}/${versionId}/lead-time`;
     }
     axiosInstance()
       .put(api, value)
       .then((res) => {
         setSubmitting(false);
         setLeadTimeDialog({ open: false, data: null });
-        fetchData()
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -866,7 +882,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         setSubmitting(false);
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -920,7 +936,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
           quotationData={quotationData}
-          rowData={recordToUpdate}
+          rowData={!isProductEdit.isBulkedit ? recordToUpdate : selectedRecords}
           material={material}
           selectedProducts={selectedRecords}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
@@ -940,7 +956,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -972,7 +988,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           selectedProducts={products}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -982,7 +998,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -1018,16 +1034,18 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             setLeadTimeDialog({ open: false, data: null });
           }}
           onSuccess={(data) => {
-            handleSaveLeadTime(data)
+            handleSaveLeadTime(data);
           }}
           referenceType={sidebarResource.quotation}
           referenceId={null}
           referenceData={leadTimeDialog?.data}
-          referenceLabel={leadTimeDialog?.data?.detail ||
+          referenceLabel={
+            leadTimeDialog?.data?.detail ||
             leadTimeDialog?.data?.productDetail?.productName ||
             leadTimeDialog?.data?.serviceDetail?.serviceName ||
             leadTimeDialog?.data?.packageDetail?.packageName ||
-            'Lead Time Status'}
+            'Lead Time Status'
+          }
           loading={isSubmitting}
         />
       )}
@@ -1067,17 +1085,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
-              quotationData?.type === QUOTATION_TYPE.fieldJob ? null : (
-                <MenuItem
-                  onClick={() => {
-                    setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                    setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-              )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : quotationData?.type ===
+              QUOTATION_TYPE.fieldJob ? null : (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}

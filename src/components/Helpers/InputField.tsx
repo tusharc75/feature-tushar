@@ -1,16 +1,25 @@
+import { Box, Grid, IconButton, InputAdornment } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { Grid, Box, InputAdornment, IconButton } from '@material-ui/core';
-import FormTypes from './FormTypes';
-import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import { FaUserPlus } from 'react-icons/fa6';
+import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { checkCondition } from './FormTypes';
-import { LOGIC } from 'src/components/FormBuilder/helper';
+import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
+import FormTypes, { isFieldVisible, isSectionVisible } from './FormTypes';
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, resource = null, referenceId = null, collaborateTools = false, ...rest } = props;
+  const {
+    fieldsData,
+    errors,
+    touched,
+    values,
+    setFieldValue,
+    onImageUploadCompletePercentage,
+    resource = null,
+    referenceId = null,
+    collaborateTools = false,
+    ...rest
+  } = props;
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -20,55 +29,11 @@ const InputField = (props) => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
   }, [fieldsData]);
 
-  const isSectionVisible = (section) => {
-    const fieldData = section?.sectionFields?.find((field) => field?.sectionProperties?.visibilityCondition?.length > 0);
-    if (fieldData) {
-      let visible = false;
-      let show = true;
-      fieldData?.sectionProperties?.visibilityCondition?.forEach((condition, i) => {
-        if (condition?.logic === LOGIC[0]) {
-          condition?.fields?.forEach((field) => {
-            if (field?.fieldName && field?.value) {
-              if (!checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
-                show = false;
-                return;
-              }
-            }
-          });
-        } else if (condition?.logic === LOGIC[1]) {
-          let count = 0;
-          condition?.fields?.forEach((field) => {
-            if (field?.fieldName && field?.value) {
-              if (checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
-                return;
-              } else {
-                count = count + 1;
-              }
-            }
-          });
-
-          if (count === condition?.fields?.length) {
-            show = false;
-          }
-        }
-        if (!show) {
-          visible = false;
-          return;
-        }
-        if (i === fieldData?.sectionProperties?.visibilityCondition?.length - 1) {
-          visible = show;
-        }
-      });
-      return visible;
-    }
-    return true;
-  };
-
   return (
     <React.Fragment>
       {formsData &&
         formsData.map((form, i) => {
-          if (isSectionVisible(form)) {
+          if (isSectionVisible(form, fieldsData, values)) {
             return (
               <div key={i}>
                 <div className={'detail-box-new'}>
@@ -78,7 +43,7 @@ const InputField = (props) => {
                   </div>
                   {resource && referenceId && collaborateTools && (
                     <div>
-                      <HtmlTooltip title='Follow-Ups'>
+                      <HtmlTooltip title="Follow-Ups">
                         <IconButton
                           size="small"
                           onClick={() => {
@@ -94,7 +59,7 @@ const InputField = (props) => {
                 <Box marginY={2}>
                   <Grid spacing={3} container>
                     {form.sectionFields.map((field) =>
-                      field.type === 'converter' || field.type === 'currencyAmount' ? (
+                      field?.type === 'converter' || field?.type === 'currencyAmount' || field?.isConverter ? (
                         <FormTypes
                           {...rest}
                           {...field}
@@ -111,55 +76,9 @@ const InputField = (props) => {
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
                           fieldData={field}
-                          disabled={(Boolean(referenceId) && field.disableOnEdit)}
+                          disabled={Boolean(referenceId) && field.disableOnEdit}
                         />
-                      ) : field.fieldName === 'day' ? (
-                        values.recurrence === 'Monthly' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormTypes
-                              {...rest}
-                              {...field}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={setFieldValue}
-                              required={field.required}
-                              isTooltip={field.isTooltip}
-                              tooltipMessage={field.tooltipMessage}
-                              fields={fieldsData}
-                              fieldData={field}
-                              disabled={(Boolean(referenceId) && field.disableOnEdit)}
-                            />
-                          </Grid>
-                        )
-                      ) : field.fieldName === 'dayName' ? (
-                        values.recurrence === 'Weekly' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormTypes
-                              {...rest}
-                              {...field}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={setFieldValue}
-                              required={field.required}
-                              isTooltip={field.isTooltip}
-                              tooltipMessage={field.tooltipMessage}
-                              fields={fieldsData}
-                              fieldData={field}
-                              disabled={(Boolean(referenceId) && field.disableOnEdit)}
-                            />
-                          </Grid>
-                        )
-                      ) : (
+                      ) : isFieldVisible(field, fieldsData, values) ? (
                         <Grid
                           key={field.fieldName}
                           item
@@ -172,7 +91,7 @@ const InputField = (props) => {
                           <FormTypes
                             {...rest}
                             {...field}
-                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
+                            startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : null}
                             values={values}
                             errors={errors}
                             touched={touched}
@@ -208,16 +127,16 @@ const InputField = (props) => {
                             }
                             fields={fieldsData}
                             fieldData={field}
-                            disabled={(Boolean(referenceId) && field.disableOnEdit)}
+                            disabled={Boolean(referenceId) && field.disableOnEdit}
                           />
                         </Grid>
-                      )
+                      ) : null
                     )}
                   </Grid>
                 </Box>
               </div>
             );
-          }
+          } else return null;
         })}
       {open?.open && (
         <FollowUpsDialog

@@ -29,7 +29,7 @@ export default function DeviceTemplates() {
   }: any = useData();
   const { generateColumns } = useColumns();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [columns, setColumns] = useState(null);
@@ -95,8 +95,6 @@ export default function DeviceTemplates() {
       </>
     )
   };
-
-
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -275,8 +273,9 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-            }?`}
+          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
+            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
+          }?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

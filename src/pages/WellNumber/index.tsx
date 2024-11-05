@@ -20,11 +20,12 @@ import routes from './../../components/Helpers/Routes';
 import ManageWellNumber from './ManageWellNumber';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.wellNumber.title);
+
 const WellNumber = () => {
-  const renderedFrom = camelCase(routes?.wellNumber.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

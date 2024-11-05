@@ -7,8 +7,7 @@ import moment from 'moment';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaSignature, FaWpforms } from 'react-icons/fa';
+import { FaSignature } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -53,6 +52,7 @@ import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiFolderReceivedLine } from 'react-icons/ri';
 import { TbTruckDelivery } from 'react-icons/tb';
+import Step from 'src/pages/DynamicForm/Step';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
@@ -63,7 +63,7 @@ export default function DeliveryTicketDetail(props) {
     state: { user, selectedEntity, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
@@ -92,6 +92,7 @@ export default function DeliveryTicketDetail(props) {
   const [locationKeys, setLocationKeys] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -220,8 +221,22 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.deliveryTicket}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     fetchGridColumns();
+    fetchPolicy();
   }, []);
 
   const defaultColumns = [
@@ -535,21 +550,24 @@ export default function DeliveryTicketDetail(props) {
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>
-              <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              Header
             </CustomTab>
             {permissions?.serializedAsset?.isRead && (
               <CustomTab value={1}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
+                Serialized Assets
               </CustomTab>
             )}
             <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
+              Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
               <CustomTab value={3}>
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
+                Add-On
               </CustomTab>
             )}
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             {deliveryTicketData && deliveryTicketFields.length > 0 && !loading ? (
@@ -666,6 +684,22 @@ export default function DeliveryTicketDetail(props) {
               />
             </TabPanel>
           )}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={tabValue} index={i + 4}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.deliveryTicket}
+                    data={deliveryTicketData}
+                    allowedToEdit={permissions?.deliveryTicket?.isUpdate}
+                  />
+                </TabPanel>
+              );
+            })}
         </Box>
         {showConfirmBox ? (
           <ConfirmationDialog

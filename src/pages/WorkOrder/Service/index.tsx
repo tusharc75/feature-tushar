@@ -18,6 +18,7 @@ import {
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
+  cn,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -591,7 +592,7 @@ const Service = ({
                   minHeight: '100%'
                 }}
               >
-                {selectedService && (
+                {selectedService ? (
                   <>
                     {selectedService?.type === 'service' ? (
                       <Steps
@@ -609,6 +610,14 @@ const Service = ({
                       <Quotation />
                     )}
                   </>
+                ) : (
+                  <div
+                    className={cn(
+                      'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
+                    )}
+                  >
+                    <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
+                  </div>
                 )}
               </Box>
             </Grid>
@@ -616,7 +625,7 @@ const Service = ({
           {mobScreen && (
             <div
               className={`
-              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px -bottom-2 left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
+              p-[10px_20px fixed -bottom-2 left-0 right-0 z-[5] border-b-0 bg-[var(--dark-primary,_#fff)] transition-all duration-300 [border:1px_solid_var(--common-border-color)]`}
             >
               <RenderService
                 {...{
@@ -679,7 +688,11 @@ const Service = ({
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
               {allowedToEdit && resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed ? false : true}
+                  disabled={
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
+                      ? false
+                      : true
+                  }
                   onClick={() => {
                     setUserAssignDialog(true);
                     setAnchorEl(null);
@@ -714,8 +727,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -730,7 +743,9 @@ const Service = ({
               {resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={
-                    allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
+                    allowedToEdit &&
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                       ? false
                       : true
                   }
@@ -785,8 +800,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -800,8 +815,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -919,7 +934,7 @@ const Service = ({
             );
           }}
           isSubmitting={isSubmitting}
-          extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
+          extraStaticFilter={serviceDialog?.preWork ? [{ field: 'preWork', term: serviceDialog.preWork }] : []}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (

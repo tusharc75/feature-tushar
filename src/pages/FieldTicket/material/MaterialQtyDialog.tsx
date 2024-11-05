@@ -101,8 +101,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const fetchData = async () => {
     setFetchingData(true);
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
-    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
+    data = data?.filter((f) => f?.isRead);
     if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
@@ -267,7 +267,11 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
       handleSaveData(rows);
     } else {
-      const rows = await calculateRowsField(material, values, allFields, rowData);
+      if(isEqual(ref?.current?.values, initialData.values)){
+        handleSaveData([rowData], saveAndNext, true);
+        return;
+      }
+      const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
     }
@@ -664,7 +668,22 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   {'Close'}
                 </Button>
                 {isBulkedit === false && showSaveAndNext && (
-                  <CustomButton
+                  isEqual(ref?.current?.values, initialData.values) ? (
+                    <CustomButton
+                    loading={fetchingData}
+                    disabled={fetchingData}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {'Next'}
+                  </CustomButton>
+                  ) : (
+                    <CustomButton
                     loading={loading}
                     disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                     variant="contained"
@@ -678,6 +697,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                     {' '}
                     Save & Next
                   </CustomButton>
+                  )
                 )}
                 <CustomButton
                   id="dialog-save-button"

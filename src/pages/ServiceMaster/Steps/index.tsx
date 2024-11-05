@@ -23,12 +23,13 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
+const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
+
 const Steps = ({ serviceId }) => {
   const isMobile = useMediaQuery('(max-width:768px)');
-  const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, dataRows, page, limit, selectedRecords } = state;
   const {
     state: { permissions, user, selectedEntity }
@@ -44,10 +45,9 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'stepName',
       Header: 'Step Name',
-      minWidth: 150,
-      width: 150,
       primaryField: true,
       disabled: true,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.stepName ? (
@@ -69,8 +69,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'order',
       Header: 'Sequence',
-      minWidth: 150,
-      width: 150,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -87,8 +85,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'leadDay',
       Header: 'Lead Time',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.leadDay ? (
@@ -104,8 +100,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'costPrice',
       Header: 'Cost Price',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.costPrice ? (
@@ -121,8 +115,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'listPrice',
       Header: 'List Price',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.listPrice ? (
@@ -138,8 +130,6 @@ const Steps = ({ serviceId }) => {
     {
       accessor: 'fieldCount',
       Header: 'Fields',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.fieldCount ? (
@@ -291,7 +281,7 @@ const Steps = ({ serviceId }) => {
       <>
         {dataRows?.length ? (
           <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} tooltip="Arrange" borderColor="default">
-            <DragIndicatorIcon fontSize="small" className="mr-1 dark:text-white text-[var(--primary)]" /> Arrange
+            <DragIndicatorIcon fontSize="small" className="mr-1 text-[var(--primary)] dark:text-white" /> Arrange
           </ThemeButton>
         ) : null}
         {!isMobile ? (

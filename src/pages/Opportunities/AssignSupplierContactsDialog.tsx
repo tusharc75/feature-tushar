@@ -20,6 +20,7 @@ import Loader from '../../components/Loader';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { cloneDeep } from 'lodash';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function AssignSupplierContactsDialog({
   opportunityId,
@@ -63,15 +64,15 @@ export default function AssignSupplierContactsDialog({
         contactType === 'supplier'
           ? getFilteredIds(currentContacts)
           : isDataAvailable('supplierContacts')
-          ? getFilteredIds(contacts.supplierContacts)
-          : [],
+            ? getFilteredIds(contacts.supplierContacts)
+            : [],
       supplierAccountName: selectedSupplierAccounts,
       customerContact:
         contactType === 'customer'
           ? getFilteredIds(currentContacts)
           : isDataAvailable('customerContacts')
-          ? getFilteredIds(contacts.customerContacts)
-          : [],
+            ? getFilteredIds(contacts.customerContacts)
+            : [],
       notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
     };
 
@@ -123,7 +124,14 @@ export default function AssignSupplierContactsDialog({
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={open} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      fullWidth
+      TransitionComponent={CustomDialogTransition}
+      maxWidth="xs"
+      open={open}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={title} />
       <CustomDialogContent>
         {contactType === 'supplier' ? (

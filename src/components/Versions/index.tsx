@@ -7,7 +7,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { fetch_child_resource_fields } from '../ChildResourceField';
@@ -18,7 +18,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(versions[0]?._id);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -68,18 +68,18 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
           <div className="flex items-center gap-2">
             <p title={row.original.detail}>{row.original.detail}</p>
             {['product', 'service'].includes(row.original.type) && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )
@@ -135,6 +135,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
       <Dialog
         open
         fullScreen={fullScreen}
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullWidth
         onClose={(e, reason) => {

@@ -19,7 +19,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const [columns, setColumns] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -186,15 +186,16 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
 
   const handleViewPdf = (type, PDFType) => {
     setPdfLoading(type);
+    const Column = JSON.stringify(columns.map(col => ({ name: col.accessor })));
     axiosInstance()
-      .get(`/pdf/${jobData._id}?resource=Job`, { responseType: 'blob' })
+      .get(`/pdf/${jobData._id}?resource=Job&columns=${encodeURIComponent(Column)}`, { responseType: 'blob' })
       .then(({ data }) => {
         setPdfLoading(null);
         if (type === 'download') {
           const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
+          link.setAttribute('download', `Quotation-${jobData.jobNumber}.pdf`);
           document.body.appendChild(link);
           link.click();
         } else {

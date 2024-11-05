@@ -47,7 +47,7 @@ const ProductConfiguration = (props: ConfigProps) => {
   });
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   React.useEffect(() => {

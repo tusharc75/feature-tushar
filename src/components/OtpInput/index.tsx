@@ -229,7 +229,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
   };
 
   return (
-    <div ref={propRef} className={cn(`flex items-center gap-4`, className)} {...restBoxProps}>
+    <div ref={propRef} className={cn(`flex items-center gap-3 md:gap-4`, className)} {...restBoxProps}>
       {valueSplitted.map(({ character, inputRef }, index) => {
         const {
           onPaste,
@@ -237,6 +237,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
           onKeyDown,
           className: TextFieldClassName,
           onBlur: TextFieldOnBlur,
+          inputProps,
           ...restTextFieldsProps
         } = typeof TextFieldsProps === 'function' ? TextFieldsProps(index) || {} : TextFieldsProps || {};
 
@@ -247,7 +248,10 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
             variant="outlined"
             value={character}
             inputRef={inputRef}
-            className={`MuiOtpInput-TextField MuiOtpInput-TextField-${index + 1} ${TextFieldClassName || ''} [&_.MuiInputBase-input]:text-center`}
+            className={cn(
+              `MuiOtpInput-TextField MuiOtpInput-TextField-${index + 1}  [&_.MuiInputBase-input]:!p-[10px_0px] [&_.MuiInputBase-input]:text-center`,
+              TextFieldClassName || ''
+            )}
             onPaste={(event) => {
               event.preventDefault();
               handleOneInputPaste(event);
@@ -258,6 +262,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
               event.target.select();
               onFocus?.(event);
             }}
+            inputProps={inputProps}
             onChange={handleOneInputChange}
             onKeyDown={(event) => {
               handleOneInputKeyDown(event);

@@ -14,7 +14,8 @@ import {
   getObjKeysWithValues,
   salesOrder,
   yupSchema,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -26,7 +27,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -39,7 +39,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
-
 
   useEffect(() => {
     setLoading(true);
@@ -74,6 +73,13 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             });
             setLoading(false);
           } else {
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['warehouse', 'customerAccount']?.includes(e?.fieldName)) {
+                  e.disableOnEdit = true;
+                }
+              });
+            }
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -182,7 +188,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     ? `Create ${routes.salesOrder.title}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                 }
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (isEqual(initialData.values, values)) {
                     onClose();
                   } else {
@@ -197,7 +203,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
@@ -205,6 +211,8 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    resource={sidebarResource.salesOrder}
+                    referenceId={salesOrderId || null}
                   />
                 </Form>
               </CustomDialogContent>

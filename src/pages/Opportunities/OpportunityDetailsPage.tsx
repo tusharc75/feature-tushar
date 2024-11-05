@@ -132,9 +132,14 @@ function OpportunityDetailsPage() {
     if (id) {
       fetchData();
       fetchRelatedData();
-      fetchPolicy();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id && opportunityFields?.length) {
+      fetchPolicy();
+    }
+  }, [id, opportunityFields]);
 
   useEffect(() => {
     if (
@@ -219,6 +224,12 @@ function OpportunityDetailsPage() {
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.opportunity}`);
       if (data) {
+        const policyFields = data?.policy?.outcomeFields;
+        const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+        if (processSteps && processSteps?.isRead && policyFields) {
+          const policyOutcomeFields = opportunityFields?.filter((_field) => [...policyFields]?.includes(_field.fieldData.fieldName));
+          setSectionFields(policyOutcomeFields);
+        }
         setResourceData(data);
       }
     } catch (error) {
@@ -359,14 +370,6 @@ function OpportunityDetailsPage() {
         }
 
         if (processSteps && processSteps.isRead) {
-          data.map((d) => {
-            if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
-              setSectionFields((prevItems) => {
-                return [...prevItems, d];
-              });
-            }
-          });
-
           const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
             return {
               text: m.optionLabel,
@@ -388,18 +391,11 @@ function OpportunityDetailsPage() {
                 (d) => d.optionLabel === passedOpportunityData[processFieldName]
               );
               setActiveStep(currentStepToShow);
-
-              if (currentStepToShow === allProcessSteps.length - 1) {
-                setOpportunityFields(filteredFields);
-              } else {
-                setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
-              }
             }
           }
           setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
-        } else {
-          setOpportunityFields(filteredFields);
         }
+        setOpportunityFields(filteredFields);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -600,7 +596,7 @@ function OpportunityDetailsPage() {
             }}
           >
             <CustomTab value={0}>Details</CustomTab>
-            {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+            {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <TabPanel value={currentTabIndex} index={0}>
             <ProcessFlow
@@ -635,7 +631,7 @@ function OpportunityDetailsPage() {
                     }}
                     recordsPerLine={recordsPerLine}
                     accounts={cloneDeep(opportunityData?.supplierAccount)}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}
@@ -658,7 +654,7 @@ function OpportunityDetailsPage() {
                     recordsPerLine={recordsPerLine}
                     saveContactToOpportunity={handleAssignContacts}
                     accountId={opportunityData?.customerAccount?.optionValue}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}
@@ -693,7 +689,7 @@ function OpportunityDetailsPage() {
                     currency={opportunityData?.currency}
                     estimatedAmount={opportunityData?.estimatedAmount}
                     isRenderedFromOpportunity={true}
-                    isAllowedToUpdate={allowedToEdit}
+                    allowedToEdit={allowedToEdit}
                   />
                 </Box>
               )}
@@ -708,15 +704,22 @@ function OpportunityDetailsPage() {
               )}
             </div>
           </TabPanel>
-          <TabPanel value={currentTabIndex} index={1}>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.opportunity}
-              data={opportunityData}
-              allowedToEdit={permissions?.opportunity?.isUpdate}
-            />
-          </TabPanel>
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={currentTabIndex} index={i + 1}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.opportunity}
+                    data={opportunityData}
+                    allowedToEdit={permissions?.opportunity?.isUpdate}
+                  />
+                </TabPanel>
+              );
+            })}
         </Box>
 
         {showConfirmBox ? (

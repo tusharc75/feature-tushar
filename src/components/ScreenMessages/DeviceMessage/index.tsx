@@ -50,11 +50,11 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
   }, [history.location.pathname]);
 
   return isVisible ? (
-    <div className="fixed inset-0 bg-[var(--new-theme-color)] text-[white] z-[999999]">
-      <div className=" grid place-items-center h-full">
-        <div className="text-center px-2">
-          <h1 className="text-[20px] font-bold mb-2">{message}</h1>
-          <p className="text-[14px] mb-3">{description}</p>
+    <div className="fixed inset-0 z-[999999] bg-[var(--new-theme-color)] text-[white]">
+      <div className="grid h-full place-items-center">
+        <div className="px-2 text-center">
+          <h1 className="mb-2 text-[20px] font-bold">{message}</h1>
+          <p className="mb-3 text-[14px]">{description}</p>
           <Button
             startIcon={<ArrowBack className="mr-2" />}
             onClick={() => {

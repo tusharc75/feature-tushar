@@ -5,10 +5,9 @@ import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui
 import { Autocomplete } from '@material-ui/lab';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 import DataList from './DataList';
@@ -54,6 +53,7 @@ export type TColType = {
   option: any;
   dataList?: undefined | boolean;
   dataListId?: undefined | string;
+  width?: number;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
@@ -253,9 +253,10 @@ export const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, st
       size="small"
       ref={resolvedRef}
       {...rest}
+      checked={rest.checked ? true : false}
       color="primary"
       style={{ ...style, color: from === 'Header' ? 'white' : 'inherit', padding: 0 }}
-      inputProps={{ 'aria-label': 'secondary checkbox' }}
+      inputProps={{ 'aria-label': 'table-checkbox' }}
     />
   );
 });
@@ -270,6 +271,7 @@ interface DraggableHeaderProps {
   virtualization: boolean;
   resource: string;
   overlayMode?: boolean;
+  virtualTable?: boolean;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -279,7 +281,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   isClientSideGrid,
   virtualization,
   resource,
-  overlayMode
+  overlayMode,
+  virtualTable = true
 }) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -293,7 +296,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
-  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -327,7 +329,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        if (!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
@@ -370,7 +371,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       }}
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
-      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? 'z-10' : ''} bg-[var(--dark-primary,_white)] ${
+      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
         overlayMode ? 'border text-[13px] font-semibold' : ''
       } `}
       ref={setNodeRef}
@@ -436,12 +437,63 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       {column.getCanResize() && !virtualization && (
         <div
           {...{
-            onMouseDown: header.getResizeHandler(),
-            onTouchStart: header.getResizeHandler(),
+            onMouseDown: (e) => {
+              header.getResizeHandler()(e);
+              dispatch({ type: 'setResized', resized: true });
+            },
+            onTouchStart: (e) => {
+              header.getResizeHandler()(e);
+              dispatch({ type: 'setResized', resized: true });
+            },
             className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
           }}
         />
       )}
+    </TableCell>
+  );
+};
+
+const CellShell = ({
+  children,
+  className = '',
+  cell,
+  columnDef,
+  setWholeRowsCellColor,
+  stickyClassName,
+  virtualization,
+  virtualStyles,
+  dispatch,
+  row,
+  setCellValue,
+  style,
+  virtualTable = true,
+  ...others
+}) => {
+  return (
+    <TableCell
+      id={cell.id}
+      key={cell.id}
+      className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
+      ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
+      ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
+      style={{
+        minWidth: cell.column.getSize(),
+        maxWidth: cell.column.getSize(),
+        ...(virtualization ? { ...virtualStyles } : { ...style })
+      }}
+      onClick={() => {
+        if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
+          if (cellId !== cell.id) {
+            handleCellClick({ cell, dispatch, row, setCellValue });
+          }
+        } else {
+          handleCellClick({ cell, dispatch, row, setCellValue });
+        }
+        cellId = cell.id;
+      }}
+      {...others}
+    >
+      {children}
     </TableCell>
   );
 };
@@ -460,7 +512,8 @@ export const CellRenderer = ({
   cellValue,
   resetField,
   virtualStyles,
-  virtualization
+  virtualization,
+  virtualTable = true
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
@@ -468,40 +521,22 @@ export const CellRenderer = ({
 
   const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
 
-  const CellShell = ({ children, className = '', ...others }) => {
-    return (
-      <TableCell
-        id={cell.id}
-        key={cell.id}
-        className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
-        ${columnDef.sticky ? 'z-10 bg-[var(--dark-primary,_white)]' : ''} 
-        ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
-        style={{
-          minWidth: cell.column.getSize(),
-          maxWidth: cell.column.getSize(),
-          ...(virtualization ? { ...virtualStyles } : { ...style })
-        }}
-        onClick={() => {
-          if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
-            if (cellId != cell.id) {
-              handleCellClick({ cell, dispatch, row, setCellValue });
-            }
-          } else {
-            handleCellClick({ cell, dispatch, row, setCellValue });
-          }
-          cellId = cell.id;
-        }}
-        {...others}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
   switch (true) {
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           <div className="p-[5px_10px]">
             <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
           </div>
@@ -511,11 +546,24 @@ export const CellRenderer = ({
       currentEditingCellPosition?.rowId === row.original._id &&
       currentEditingCellPosition?.columnName === cell?.column.id:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           <div className="w-full">
             {columnDef?.type === 'singleLine' ? (
               <input
                 autoFocus
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 type="text"
                 onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
                 value={cellValue}
@@ -577,6 +625,7 @@ export const CellRenderer = ({
                   <TextField
                     {...params}
                     variant="standard"
+                    id={`${cell.column.id}-input-${row.index || 0}`}
                     autoFocus
                     onBlur={() => {
                       if (getCellValue(cell) !== cellValue) {
@@ -618,6 +667,7 @@ export const CellRenderer = ({
                   <TextField
                     {...params}
                     variant="standard"
+                    id={`${cell.column.id}-input-${row.index || 0}`}
                     autoFocus
                     onBlur={() => {
                       if (!isEqual(getCellValue(cell), cellValue)) {
@@ -633,6 +683,7 @@ export const CellRenderer = ({
             ) : columnDef?.type === 'date' ? (
               <input
                 type="date"
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
                 value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
                 onKeyDown={(e) => {
@@ -662,6 +713,7 @@ export const CellRenderer = ({
               <input
                 autoFocus
                 type="number"
+                id={`${cell.column.id}-input-${row.index || 0}`}
                 min="0"
                 onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
                 value={cellValue}
@@ -684,9 +736,22 @@ export const CellRenderer = ({
           </div>
         </CellShell>
       );
+
     case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           <div className="action-cell">
             <HtmlTooltip title="Save">
               <IconButton size="small" aria-label="Save" onClick={submitInput}>
@@ -698,7 +763,21 @@ export const CellRenderer = ({
       );
     case columnDef?.editable:
       return (
-        <CellShell>
+        <CellShell
+          id={`${cell?.column.id}-${row.index}`}
+          value={row.original[cell?.column.id]}
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
               <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
@@ -711,13 +790,38 @@ export const CellRenderer = ({
       );
     case cell.column.id === 'action':
       return (
-        <CellShell>
+        <CellShell
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           <div className="action-cell">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
         </CellShell>
       );
     default:
       return (
-        <CellShell className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 ">
+        <CellShell
+          className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 "
+          cell={cell}
+          columnDef={columnDef}
+          setWholeRowsCellColor={setWholeRowsCellColor}
+          stickyClassName={stickyClassName}
+          virtualization={virtualization}
+          virtualStyles={virtualStyles}
+          dispatch={dispatch}
+          row={row}
+          setCellValue={setCellValue}
+          style={style}
+          virtualTable={virtualTable}
+        >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </CellShell>
       );

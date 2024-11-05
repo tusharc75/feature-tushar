@@ -446,7 +446,7 @@ $isAppliedBillDark: #234623;
     line-height: 18px !important;
     color: #1d1d1d !important;
   }
-  tfoot.footer td {
+  &:not(.without-virtualization) tfoot.footer td {
     font-weight: 500 !important;
     font-size: 12.6448px !important;
     line-height: 18px !important;
@@ -518,18 +518,40 @@ $isAppliedBillDark: #234623;
     // border-left: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
   }
 
-  & thead > tr > th::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0px;
-    width: 100%;
-    height: 1px;
-    background-color: var(--common-border-color, rgba(224, 224, 224, 1));
-  }
+  // & thead > tr > th::before {
+  //   content: '';
+  //   position: absolute;
+  //   left: 0;
+  //   bottom: 0px;
+  //   width: 100%;
+  //   height: 1px;
+  //   background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+  // }
 
   thead {
     max-height: 45px;
+    border-bottom: 1px solid var(--common-border-color);
+    tr {
+      border-bottom: 1px solid var(--common-border-color);
+      th {
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: 0px;
+          width: 100%;
+          height: 1px;
+          background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+        }
+        border-bottom: 1px solid var(--common-border-color);
+      }
+    }
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--common-border-color);
+  }
+  .MuiTableCell-root {
+    border-bottom: unset;
   }
   th {
     padding: 5px 8px;
@@ -567,29 +589,24 @@ $isAppliedBillDark: #234623;
   }
 
   tbody tr:not(:last-child) td {
-    border-bottom: 1px solid var(--common-border-color);
+    // border-bottom: 1px solid var(--common-border-color);
   }
-  tbody.with-footer tr:last-child td {
+  tbody.with-footer tr:last-child {
     border-bottom: 0px;
   }
 
   tfoot {
+    tr {
+      border-top: 1px solid var(--common-border-color);
+      border-bottom: 1px solid var(--common-border-color);
+    }
     th {
       text-align: left;
-      &::before,
       &::after {
-        width: 100% !important;
-        height: 1px !important;
-        background-color: var(--common-border-color, rgba(224, 224, 224, 1));
-        content: '' !important;
-        position: absolute;
-        left: 0;
+        display: none;
       }
       &::after {
         top: 0;
-      }
-      &::before {
-        bottom: 0px;
       }
     }
   }
@@ -693,6 +710,16 @@ $isAppliedBillDark: #234623;
       }
       svg {
         opacity: 0;
+      }
+    }
+  }
+}
+.react-table-v8 {
+  .without-virtualization {
+    tfoot {
+      position: static !important;
+      th {
+        position: sticky;
       }
     }
   }

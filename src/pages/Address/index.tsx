@@ -22,7 +22,7 @@ import axios, { CancelTokenSource } from 'axios';
 const Address = () => {
   const renderedFrom = camelCase(routes?.address.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -76,7 +76,7 @@ const Address = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize='small' color="error" />
             </IconButton>
           </HtmlTooltip>
         )}

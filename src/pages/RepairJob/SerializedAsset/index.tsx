@@ -34,7 +34,7 @@ import {
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import RepairProcess from '../RepairProcess';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const SerializedAsset = ({
@@ -58,7 +58,7 @@ const SerializedAsset = ({
 
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -79,7 +79,8 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
+    fields = fields?.filter((f) => f?.isRead);
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -222,7 +223,8 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : alloweOperation && ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+            ) : alloweOperation &&
+              ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
@@ -594,8 +596,9 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-            } ? `}
+          message={`Are you sure you want to mark repair complete for ${
+            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

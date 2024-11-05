@@ -64,7 +64,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
   let renderedFrom = 'QuoteSupplierPrice';
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
@@ -356,20 +356,20 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             <>
               <div className={'detail-box-content'}>
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                <h3 className="form-label-style" title={' Product List'}>
-                  Product List
+                <h3 className="form-label-style" title={'Detail'}>
+                  Detail
                 </h3>
               </div>
               <div id="importExportLinks" className={`${classes.root}`}>
                 <div className={classes.linksContainer}>
                   <>
-                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} cursor-pointer p-1`}>
                       {ImportInput}
                       Import from Excel
                     </label>
                     <Divider orientation="vertical" flexItem className={classes.darkLinks} />
                   </>
-                  <label onClick={exportToExcel} className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                  <label onClick={exportToExcel} className={`${classes.darkLinks} cursor-pointer p-1`}>
                     Export to Excel
                   </label>
                 </div>

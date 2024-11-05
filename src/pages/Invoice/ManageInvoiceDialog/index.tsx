@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -14,18 +13,18 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   invoice,
-  setFieldsInAscendingOrder,
   yupSchema,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
@@ -33,20 +32,13 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  const [invoiceDetails, setinvoiceDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
 
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
@@ -75,11 +67,10 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             setCloneHeading(invoiceNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
             setLoading(false);
           } else {
-            setinvoiceDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -202,66 +193,18 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={'detail-box-content'}>
-                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        invoiceId={invoiceId}
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={
-                                          field.fieldName === 'currency'
-                                            ? invoiceDetails && invoiceDetails?.material?.length
-                                              ? true
-                                              : false
-                                            : field.fieldName === 'warehouse'
-                                              ? invoiceDetails && invoiceDetails?.productInventory?.length
-                                                ? true
-                                                : false
-                                              : invoiceId && field.disableOnEdit && !isClone
-                                        }
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                        fields={initialData?.fields}
-                                      />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource.invoice}
+                      referenceId={invoiceId || null}
+                      collaborateTools={true}
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
@@ -284,7 +227,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);

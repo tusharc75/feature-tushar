@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -16,7 +16,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
   const renderedFrom = `${camelCase(routes.managedPackages?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -98,7 +98,15 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Assign ${routes.managedPackages.title}`}
         showManimizeMaximize={false}

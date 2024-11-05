@@ -14,7 +14,16 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import {
+  WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  workOrder
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
@@ -50,7 +59,7 @@ const WorkOrder = () => {
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [alloweToCreate, setAlloweToCreate] = useState(false);
@@ -79,9 +88,9 @@ const WorkOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`);
     data = response?.data?.data;
-    const typeFieldOption = data?.find((e) => e.fieldData.fieldName === 'type')?.fieldData?.option
+    const typeFieldOption = data?.find((e) => e.fieldData.fieldName === 'type')?.fieldData?.option;
     if (typeFieldOption?.find((e) => e?.default)?.optionValue === WORK_ORDER_TYPE.productionOrder) {
-      setAlloweToCreate(true)
+      setAlloweToCreate(true);
     }
     const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
@@ -96,7 +105,11 @@ const WorkOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && checkIsAllowedToDelete(user, sidebarResource.workOrder, finalObject?.ownerId) && !data?.deleted;
+          finalObject['canDelete'] =
+            permissions?.workOrder?.isDelete &&
+            u?.canDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.workOrder, finalObject?.ownerId) &&
+            !data?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -112,16 +125,18 @@ const WorkOrder = () => {
   };
 
   const handlePreview = (workOrder) => {
-    axiosInstance().get(`/pdf/${workOrder}?resource=${sidebarResource.workOrder}&columns=[]`, { responseType: 'blob' }).then((response) => {
-      const blobData = new Blob([response.data], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(blobData);
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.target = '_blank';
-      link.style.display = 'none';
-      link.click();
-      toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-    })
+    axiosInstance()
+      .get(`/pdf/${workOrder}?resource=${sidebarResource.workOrder}&columns=[]`, { responseType: 'blob' })
+      .then((response) => {
+        const blobData = new Blob([response.data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(blobData);
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.target = '_blank';
+        link.style.display = 'none';
+        link.click();
+        toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -138,18 +153,19 @@ const WorkOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {row?.original?.type === WORK_ORDER_TYPE.productionOrder &&
+        {row?.original?.type === WORK_ORDER_TYPE.productionOrder && (
           <HtmlTooltip title={'Preview'}>
             <IconButton
               size="small"
               aria-label="Preview"
               onClick={() => {
-                handlePreview(row?.original?._id)
+                handlePreview(row?.original?._id);
               }}
             >
               <VisibilityIcon fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>}
+          </HtmlTooltip>
+        )}
         <HtmlTooltip title={row?.original?.canDelete && !row?.original?.deleted ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -317,8 +333,9 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
+              deleteRecord?.workOrderName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

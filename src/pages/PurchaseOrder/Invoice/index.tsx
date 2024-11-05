@@ -14,11 +14,13 @@ import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
+const renderedFrom = `po_invoice`;
+
 const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
-  const { selectedRecords } =state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { selectedRecords } = state;
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
@@ -153,8 +155,9 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
+
           onClick={() => {
-            const ids=selectedRecords.map(d=>d._id);
+            const ids = selectedRecords.map((d) => d._id);
             setShowDeleteConfirmBox(true);
             setDeleteData(ids);
           }}
@@ -172,8 +175,10 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           isAddButtonVisible={true}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
           actionButtonMenuItems={actionButtonMenuItems()}
-          hasXpadding={false} />
+          hasXpadding={false}
+        />
       )}
       <Box>
         {columns ? (
@@ -182,7 +187,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={`po_invoice`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchData}
             hideAction={!allowedToEdit}

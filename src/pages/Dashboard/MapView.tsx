@@ -134,7 +134,7 @@ const MapView = (props: MapViewProps) => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`dashboard/location-base-status-count?location=${id}`);
+      } = await axiosInstance().get(`/kpi/asset/location-base-status-count?location=${id}`);
       if (data) {
         setSelectedAsset(data);
       }
@@ -176,22 +176,22 @@ const MapView = (props: MapViewProps) => {
           {(clusterer) =>
             data.length > 0
               ? data.map(
-                  (asset: locationType) =>
-                    asset?._id && (
-                      <Marker
-                        key={asset._id}
-                        label={{
-                          text: asset.count.toString(),
-                          fontWeight: 'bold',
-                          color: 'black',
-                          fontSize: '14px'
-                        }}
-                        onClick={() => handleMarkerClick(asset)}
-                        position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
-                        clusterer={clusterer}
-                      />
-                    )
-                )
+                (asset: locationType) =>
+                  asset?._id && (
+                    <Marker
+                      key={asset._id}
+                      label={{
+                        text: asset.count.toString(),
+                        fontWeight: 'bold',
+                        color: 'black',
+                        fontSize: '14px'
+                      }}
+                      onClick={() => handleMarkerClick(asset)}
+                      position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
+                      clusterer={clusterer}
+                    />
+                  )
+              )
               : null
           }
         </MarkerClusterer>

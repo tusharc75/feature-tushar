@@ -38,7 +38,7 @@ const tabs = {
 
 const Email = () => {
   const renderedFrom = camelCase(routes?.activityEmail.title);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -457,6 +457,7 @@ const Email = () => {
               }
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <CreateEmail
               emailId={emailId}
@@ -495,6 +496,7 @@ const Email = () => {
               }
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <ViewEmail
               emailId={emailId}

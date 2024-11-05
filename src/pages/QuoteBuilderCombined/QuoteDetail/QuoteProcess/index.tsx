@@ -799,10 +799,6 @@ export default function QuoteProcess(props) {
           version={currentVersion}
           Refresh={fetchQuoteData}
           nextStep={nextStep}
-          // nextStep={
-          //   processStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
-          //     ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
-          // }
           isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
           versionStatus={versionStatus}
           loading={loading}

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -49,7 +49,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && (
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
           <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
             <span>
               <IconButton
@@ -100,7 +100,7 @@ const FieldServiceTechnician = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [columns, setColumns] = useState(null);
@@ -113,20 +113,12 @@ const FieldServiceTechnician = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const history = useHistory();
 
-  useEffect(() => {
-    setColumns((prev) => {
-      return prev?.map((c) => {
-        if (c.accessor === 'action') {
-          return getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData });
-        }
-        return c;
-      });
-    });
-  }, [isOffline]);
+  const isOfflineRef = useRef(isOffline);
 
   useEffect(() => {
     setUpindexDB();
     fetchColumns();
+    isOfflineRef.current = isOffline;
   }, [isOffline]);
 
   const fetchColumns = async () => {
@@ -149,10 +141,10 @@ const FieldServiceTechnician = () => {
   };
 
   const handleChangeFieldServiceOrderStatus = (fieldServiceOrderId, status) => {
-    if (isOffline) return;
+    if (isOfflineRef.current) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -166,7 +158,7 @@ const FieldServiceTechnician = () => {
       message: 'Field Ticket Creation In-Progress...'
     });
     var fieldTicketField: any = [];
-    if (isOffline) {
+    if (isOfflineRef.current) {
       fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
@@ -185,7 +177,7 @@ const FieldServiceTechnician = () => {
     }
     tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
 
-    if (isOffline) {
+    if (isOfflineRef.current) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
       const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
       data['_id'] = _id;
@@ -318,8 +310,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     } else {
       setSelectedData(null);
@@ -385,12 +377,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => {}}
+                    fetchServiceOrderData={() => { }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

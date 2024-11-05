@@ -1,11 +1,9 @@
 import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -33,6 +31,11 @@ import LoadingTicketGrid from './LoadingTicket';
 import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
+
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -44,6 +47,8 @@ const TransferAssetDetailPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [loading, setLoading] = useState(true);
@@ -60,10 +65,10 @@ const TransferAssetDetailPage = () => {
   const [canReceive, setCanReceive] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
-  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
+  const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
+  const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -88,15 +93,23 @@ const TransferAssetDetailPage = () => {
   useEffect(() => {
     if (id) {
       fetchTransferAssetData();
+      fetchPolicy();
     }
   }, [id]);
 
-  const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferAsset}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchFields = (transferType) => {
@@ -181,6 +194,11 @@ const TransferAssetDetailPage = () => {
         } else {
           setCanReceive(true);
         }
+        if (data?.status === TRANSFER_ASSET_STATUS.completed) {
+          setTransferIsEnded(true);
+        } else {
+          setTransferIsEnded(false);
+        }
         setTransferAssetData(data);
       })
       .catch((err) => {
@@ -215,8 +233,8 @@ const TransferAssetDetailPage = () => {
   };
 
   const updateTransferStatus = (status) => {
-    axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/status`, { status })
+    const body: any = { status };
+    axiosInstance().put(`${routes.transferAsset.path}/${id}/status`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -238,21 +256,39 @@ const TransferAssetDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={(e) => {
+                  setShowReopenCloseConfirmation({ open: true, type: 'reopen' });
+                }}
+              >
+                Re-Open
+              </Button>
+            )}
+            {permissions?.transferAsset?.isUpdate &&
+              allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => {
+                    setShowReopenCloseConfirmation({ open: true, type: 'close' });
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-            {/* {permissions?.transferAsset?.isUpdate && allowedToEdit && transferAssetData?.status === TRANSFER_ASSET_STATUS.completed && (
-              <Button
-                variant={'contained'}
-                onClick={() => {
-                  setShowReopenConfirmation(true)
-                }}
-                className={'btn-outline-v1'}>
-                {'Re-Open'}
-              </Button>
-            )} */}
+
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -264,16 +300,17 @@ const TransferAssetDetailPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -296,7 +333,9 @@ const TransferAssetDetailPage = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={isTransferEnded}
               setStepFullScreen={() => setStepFullScreen(true)}
-              updateStatus={updateProcessStatus}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.transferAsset, stepNames[step], id);
+              }}
             />
             <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && transferAssetData && (
@@ -317,13 +356,13 @@ const TransferAssetDetailPage = () => {
                   transferAssetData={transferAssetData}
                   permissions={permissions}
                   setNextStep={setNextStep}
-                  setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-2`}
                   allowedToEdit={allowedToEdit || isProcessor}
                   canReceive={canReceive}
                   stepFullScreen={stepFullScreen}
+                  setAllAssetsDelivered={setAllAssetsDelivered}
                 />
               )}
               {currentStep === 2 && transferAssetData && (
@@ -331,9 +370,7 @@ const TransferAssetDetailPage = () => {
                   currentStep={currentStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
-                  permissions={permissions}
                   setNextStep={setNextStep}
-                  setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-3`}
@@ -349,6 +386,22 @@ const TransferAssetDetailPage = () => {
             <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
           </Box>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.transferAsset}
+                  data={transferAssetData}
+                  allowedToEdit={permissions?.transferAsset?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {/* Confirm Delete Dialog */}
       {showConfirmBox && (
@@ -377,16 +430,20 @@ const TransferAssetDetailPage = () => {
           }}
         />
       )}
-      {showReopenConfirmation && (
+      {showReopenCloseConfirmation.open && (
         <ConfirmationDialog
-          open={showReopenConfirmation}
-          message={`Are you sure you want to re-open ?`}
+          open={showReopenCloseConfirmation.open}
+          message={`Are you sure you want to ${startCase(showReopenCloseConfirmation.type)} ?`}
           onClose={() => {
-            setShowReopenConfirmation(false);
+            setShowReopenCloseConfirmation({ open: false, type: null });
           }}
           onOk={() => {
-            updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
-            setShowReopenConfirmation(false);
+            if (showReopenCloseConfirmation.type === 'reopen') {
+              updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
+            } else {
+              updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+            }
+            setShowReopenCloseConfirmation({ open: false, type: null });
           }}
           okBtnLoading={false}
         />

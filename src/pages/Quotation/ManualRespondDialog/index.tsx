@@ -4,7 +4,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
-import { quotation, QUOTATION_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
@@ -43,7 +43,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
         .then(() => {
           setSubmitting(false);
           if (setNextStep) {
-            setNextStep(options[selectedOption])
+            setNextStep(options[selectedOption]);
           }
           setCurrentStep((prevStep) => {
             const newStep = prevStep + 1;
@@ -62,8 +62,15 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Reason For Ending`} />
+    <Dialog
+      fullWidth
+      TransitionComponent={CustomDialogTransition}
+      maxWidth="xs"
+      open
+      onClose={closeManualDiaog}
+      aria-labelledby="assign-roles-dialog"
+    >
+      <CustomDialogHeader title="Reason For Ending" onClose={closeManualDiaog} />
       <CustomDialogContent>
         <>
           <List style={{ padding: 0 }}>

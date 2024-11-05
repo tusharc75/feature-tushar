@@ -21,10 +21,10 @@ const Digital = ({ renderedFrom, productId }) => {
   const {
     state: { permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const toastConfig = useContext(CustomToastContext);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();

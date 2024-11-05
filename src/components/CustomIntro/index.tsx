@@ -11,6 +11,7 @@ import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { AI_AGENT } from 'src/config';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
@@ -38,14 +39,16 @@ export type StepDefination = {
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   formFields?: boolean;
-  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[] | boolean) => boolean);
   nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
-  fieldType?: string;
+  fieldType?: 'checkbox' | string;
+  checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 
 export type NormalStep = {
@@ -60,13 +63,15 @@ export type NormalStep = {
   waitForStepInsertion?: boolean;
   fieldType?: string;
   index: number;
+  checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 export type HiddenStep = {
   target: string;
   isHiddenStep: true;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[] | boolean) => boolean);
   nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
@@ -75,6 +80,8 @@ export type HiddenStep = {
   waitForStepInsertion?: boolean;
   fieldType?: string;
   index: number;
+  checkForRequired?: boolean;
+  isPreviousButtonDisabled?: boolean;
 };
 
 let timeout: NodeJS.Timeout;
@@ -109,7 +116,7 @@ const CustomIntro = () => {
         const frame = currentStepData?.element as HTMLIFrameElement;
         frame.contentDocument.body.focus();
         frame.contentDocument.body.click();
-      } else {
+      } else if (currentStepData.fieldType !== 'checkbox') {
         currentStepData?.element.click();
       }
       if (currentStepData?.waitForStepInsertion) {
@@ -120,7 +127,7 @@ const CustomIntro = () => {
       handleSteps.current.resume();
     }
 
-    if (currentStepData?.willOpenDialog) {
+    if (currentStepData?.willOpenDialog || currentStepData?.waitForStepInsertion) {
       // check if dialog will open then wait for 500ms to let dialog open properly
       timeout = setTimeout(() => {
         handleSteps.current?.next();
@@ -175,13 +182,13 @@ const CustomIntro = () => {
       {handleSteps.current?.started && currentStepData && !isHiddenStep && (
         <div className="">
           <div
-            className="backdrop absolute left-0 right-0 top-0 z-[1301] bg-black/50 mix-blend-hard-light"
+            className={'backdrop absolute left-0 right-0 top-0 z-[1301] bg-black/50 mix-blend-hard-light'}
             style={{ height: handleSteps.current?.documentHeight, minHeight: '100vh' }}
           >
             {currentStepData?.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-[gray] bg-blend-lighten"
                 onClick={() => {
                   handleNext();
                 }}
@@ -190,6 +197,7 @@ const CustomIntro = () => {
                   height: currentStepData?.positionData?.height + 10,
                   top: currentStepData?.positionData?.top - 5,
                   left: currentStepData?.positionData?.left - 5,
+                  backgroundBlendMode: 'lighten',
                   background: 'gray'
                 }}
               ></div>
@@ -224,7 +232,7 @@ const CustomIntro = () => {
                 {!isFirstStep ? (
                   <ThemeButton
                     color="secondary"
-                    disabled={isWaiting}
+                    disabled={isWaiting || currentStepData.isPreviousButtonDisabled}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
                     startIcon={<FaArrowLeft size={16} />}
@@ -302,18 +310,20 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   return (
     <>
-      <div className={cn('floating-card fixed bottom-2 right-3 z-[1300]')}>
-        <button
-          type="button"
-          className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-14 hover:w-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
-          onClick={() => setOpen(true)}
-        >
-          <span className="sr-only">Walk me</span>
-          <span className="absolute  inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
-          <HtmlTooltip title={'Walk me'}>
+      <div className={cn('floating-card fixed bottom-2  z-[50]', AI_AGENT ? 'right-[60px]' : 'right-3')}>
+        <HtmlTooltip className="block" title={'Walk me'}>
+          <button
+            type="button"
+            className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-14 hover:w-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
+            onClick={() => setOpen(true)}
+          >
+            <span className="sr-only">Walk me</span>
+            {!AI_AGENT && (
+              <span className="pointer-events-none absolute inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
+            )}
             <FaQuestion className=" block h-5 w-5 text-gray-600 transition-all duration-300 group-hover:h-7 group-hover:w-7 dark:text-gray-200" />
-          </HtmlTooltip>
-        </button>
+          </button>
+        </HtmlTooltip>
       </div>
       <Dialog
         open={open}

@@ -30,7 +30,7 @@ const CycleCountDetermination = () => {
 
   const [open, setOpen] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [editData, setEditData] = useState(null);
   const { rowCount, selectedRecords } = state;
@@ -66,8 +66,6 @@ const CycleCountDetermination = () => {
       {
         accessor: 'name',
         Header: 'Product Category',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row.original?.name ? (
             <p
@@ -84,15 +82,11 @@ const CycleCountDetermination = () => {
       {
         accessor: 'inventoryCycle',
         Header: 'Cycle Code',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.inventoryCycle ? <p className="text-truncate">{row.original?.inventoryCycle}</p> : <NoDataCell />)
       },
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original?.user ? <p className="text-truncate">{row.original?.user}</p> : <NoDataCell />)
       }
     ];
@@ -181,7 +175,7 @@ const CycleCountDetermination = () => {
             fetchData();
           }}
           isDownloadExcel={false}
-          additionalParams={`warehouse=${warehouse}`}
+          additionalParams={`&warehouse=${warehouse}`}
           onlyExport={false}
         />
       </div>
@@ -219,7 +213,7 @@ const CycleCountDetermination = () => {
             }}
             data={editData}
             warehouse={warehouse}
-            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.optionLabel}
+            warehouseName={warehouseOption?.find((e) => e?.optionValue === warehouse)?.optionLabel}
           />
         )}
       </CustomContainer>

@@ -65,7 +65,7 @@ const Quotation = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -100,7 +100,7 @@ const Quotation = () => {
                 {isDateWithinNext15Days(row.original?.estimateEndDate) && (
                   <Box ml={1}>
                     <HtmlTooltip title={`${routes.quotation.title} about to renew`} enterTouchDelay={0} arrow placement="top">
-                      <span className=" text-yellow-600 dark:text-yellow-500 cursor-pointer block">
+                      <span className=" block cursor-pointer text-yellow-600 dark:text-yellow-500">
                         <Help className=" text-[22px] md:text-[14px]" fontSize="small" />
                       </span>
                     </HtmlTooltip>
@@ -269,7 +269,8 @@ const Quotation = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

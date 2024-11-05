@@ -1,7 +1,7 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import { useContext, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
-import { formatAmountWithCurrency, gridLoadingTimeout } from '../../constants/helpers';
+import { CustomDialogTransition, formatAmountWithCurrency, gridLoadingTimeout } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -41,6 +41,8 @@ const DOASteps = [
   }
 ];
 
+const renderedFrom = 'AllVersionStatus';
+
 export default function AllVersionStatus({
   open,
   onClose,
@@ -52,7 +54,7 @@ export default function AllVersionStatus({
   handleCloneQuoteWithVersionFromAllVersion
 }) {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const columns = [
@@ -219,6 +221,7 @@ export default function AllVersionStatus({
       aria-labelledby="customized-dialog-title"
       open={open}
       onClose={onClose}
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
     >
@@ -239,7 +242,7 @@ export default function AllVersionStatus({
             onSelect={() => {}}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'AllVersionStatus'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchQuoteData}
             isClientSideGrid={true}
             showOnlyShowFilteredRecordSwitch={true}

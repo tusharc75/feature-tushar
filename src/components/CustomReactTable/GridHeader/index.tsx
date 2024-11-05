@@ -3,21 +3,19 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { sidebarResource } from 'src/constants/helpers';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { sidebarResource } from 'src/constants/helpers';
 
 import { Table } from '@tanstack/react-table';
-import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { createFilterModel, fetchFieldOptions } from '../utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { isEmpty } from 'lodash';
+import { createFilterModel, fetchFieldOptions } from '../utils';
 
 type GridHeaderProps = {
   resource: any;
@@ -31,7 +29,6 @@ type GridHeaderProps = {
   showArrangeView: any;
   newColumns: any;
   refreshGrid: any;
-  reportSave: any;
   setSelectedReportView: any;
   selectedReportView: any;
   expander: any;
@@ -52,7 +49,6 @@ const GridHeader = ({
   showArrangeView,
   newColumns,
   refreshGrid,
-  reportSave,
   setSelectedReportView,
   selectedReportView,
   expander,
@@ -62,13 +58,12 @@ const GridHeader = ({
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
+
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
-
-  const { savedFilters } = useContext(FiltersContext);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -100,8 +95,6 @@ const GridHeader = ({
               });
             }
           }
-        } else if (!isEmpty(savedFilters[resource]) && !isClientSideGrid) {
-          dispatch({ type: 'filter', filters: savedFilters[resource] });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
@@ -115,11 +108,13 @@ const GridHeader = ({
     <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
       <div className="flex-grow">
         <div className="table-filter-v1">
-          <ShowFilteredRecordsOnly
-            dispatchTable={dispatch}
-            showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
-            selectedRecords={selectedRecords?.length}
-          />
+          {(isClientSideGrid || selectedRecords?.length <= 200) && (
+            <ShowFilteredRecordsOnly
+              dispatchTable={dispatch}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
+              selectedRecords={selectedRecords?.length}
+            />
+          )}
           <DisplayFilters
             columns={newColumns}
             customFilters={customFilters}
@@ -198,12 +193,14 @@ const GridHeader = ({
           ) : null}
           {showArrangeView && (
             <ArrangeView
+              table={table}
               columns={newColumns}
               hideSelection={hideSelection}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               state={state}
               expander={expander}
+              appliedView={null}
             />
           )}
           {refreshGrid && (

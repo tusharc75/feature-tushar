@@ -24,6 +24,7 @@ import ManageFieldTicket from './ManageFieldTicket';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FieldTicket = () => {
   const types = [
@@ -46,7 +47,7 @@ const FieldTicket = () => {
     state: { permissions, selectedEntity, user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [fieldTicketId, setFieldTicketId] = useState(null);
@@ -85,7 +86,23 @@ const FieldTicket = () => {
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    const extraColumns = [];
+    extraColumns.push({
+      accessor: 'totalAmount',
+      Header: 'Total Amount',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => {
+        return row.original?.totalAmount ? (
+          <div>
+            <p className="text-truncate">{row.original.totalAmount}</p>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
+      }
+    });
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
@@ -96,7 +113,8 @@ const FieldTicket = () => {
       let rows = data?.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, finalObject?.ownerId) && u?.canDelete;
+        finalObject['canDelete'] =
+          permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, finalObject?.ownerId) && u?.canDelete;
         return {
           ...finalObject
         };
@@ -112,7 +130,8 @@ const FieldTicket = () => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, finalObject?.ownerId) && u?.canDelete;
+            finalObject['canDelete'] =
+              permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, finalObject?.ownerId) && u?.canDelete;
             return {
               ...finalObject
             };
@@ -280,7 +299,7 @@ const FieldTicket = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
-        {!isOffline &&
+        {!isOffline && (
           <ImportExportLinks
             permissions={permissions.fieldTicket}
             module={routes.fieldTicket.title}
@@ -297,7 +316,7 @@ const FieldTicket = () => {
             }}
             additionalParams={getQueryString(true)}
           />
-        }
+        )}
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -337,8 +356,9 @@ const FieldTicket = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldTicketNumber || ''
-              } ?`}
+            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+              deleteRecord?.fieldTicketNumber || ''
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

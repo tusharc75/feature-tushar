@@ -8,70 +8,73 @@ import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { Typography } from '@material-ui/core';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        width: '100%',
-        maxWidth: 360,
-        backgroundColor: theme.palette.background.paper,
-    },
-    paper: {
-        width: '80%',
-        maxHeight: 435,
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500]
+  }
 }));
 
 export default function ConfirmationCancelDialog(props) {
-    const classes = useStyles();
-    const { onClose, onSave, open, close } = props;
+  const classes = useStyles();
+  const { onClose, onSave, open, close } = props;
 
-    return (
-        <Dialog
-            disableEscapeKeyDown
-            maxWidth="xs"
-            aria-labelledby="confirmation-dialog-title"
-            open={open}
-            classes={{
-                paper: classes.paper,
-            }}
-            id="confirmation-dialog"
-            keepMounted
-            onClose={(e, reason) => {
-                if (reason !== 'backdropClick') {
-                }
-            }}
-        >
-            <DialogTitle id="confirmation-dialog-title" className="text-white">
-                Confirm
-                {onClose ? (
-                    <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={onClose}>
-                        <CloseIcon />
-                    </IconButton>
-                ) : null}
-            </DialogTitle>
-            <DialogContent dividers>
-                <Typography>Do you want to save changes or leave?</Typography>
-            </DialogContent>
-            <DialogActions>
-                <Button title='Leave Form' size="small" autoFocus onClick={onClose} color="primary">Leave</Button>
-                <Button title='Save and Close' size="small" onClick={onSave}
-                    color="primary">
-                    Save</Button>
-            </DialogActions>
-        </Dialog>
-    );
+  return (
+    <Dialog
+      disableEscapeKeyDown
+      TransitionComponent={CustomDialogTransition}
+      maxWidth="xs"
+      aria-labelledby="confirmation-dialog-title"
+      open={open}
+      classes={{
+        paper: classes.paper
+      }}
+      id="confirmation-dialog"
+      keepMounted
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+        }
+      }}
+    >
+      <DialogTitle id="confirmation-dialog-title" className="text-white">
+        Confirm
+        {onClose ? (
+          <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        ) : null}
+      </DialogTitle>
+      <DialogContent dividers>
+        <Typography>Do you want to save changes or leave?</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button title="Leave Form" id="confirm-dialog-cancel-button" size="small" autoFocus onClick={onClose} color="primary">
+          Leave
+        </Button>
+        <Button title="Save and Close" size="small" id="confirm-dialog-confirm-button" onClick={onSave} color="primary">
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 ConfirmationCancelDialog.propTypes = {
-    onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
-    onSave: PropTypes.func,
-    close: PropTypes.func
+  onClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  onSave: PropTypes.func,
+  close: PropTypes.func
 };
-

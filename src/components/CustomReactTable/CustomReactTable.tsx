@@ -16,8 +16,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
@@ -32,6 +31,7 @@ import { DraggableHeader } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import {
+  adjustSizes,
   camelCaseToWords,
   childrenProperty,
   extractLastNumberFromDataRange,
@@ -63,13 +63,13 @@ const CustomReactTable = ({
   hideAction = false,
   selectedReportView = null,
   setSelectedReportView = null,
-  reportSave = false,
   virtualization = false,
   showArrangeView = true,
   hideExportTable = false,
   showOnlyMobileView = false,
   onRowClick = null,
-  enableGlobalSearch = true
+  enableGlobalSearch = true,
+  pagination = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -80,17 +80,18 @@ const CustomReactTable = ({
     page,
     limit,
     search,
-    filters: customFilters,
     error,
     visibleColumns,
     columnOrder,
-    sorting
+    sorting,
+    sizes: columnSavedSizes
   }: TInitialState = state;
 
   const debouncedSearch = useDebounce(search, 500);
 
   const isMobileView = useMediaQuery('(max-width:768px)');
   const [expandedRefChanged, setExpandedRefChanged] = useState(0);
+  const [newColumns, setNewColumns] = useState([]);
 
   function toggleExpandChange() {
     if (isMobileView) return;
@@ -99,7 +100,7 @@ const CustomReactTable = ({
     });
   }
 
-  const newColumns = useCreateColumns({
+  const hookColumns = useCreateColumns({
     columns,
     expander,
     fetchChildAttachment,
@@ -124,8 +125,7 @@ const CustomReactTable = ({
   const [exportTableView, setExportTableView] = useState(false);
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
-
-  const { setSavedFilters } = useContext(FiltersContext);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // initialize
   useEffect(() => {
@@ -156,38 +156,6 @@ const CustomReactTable = ({
   useEffect(() => {
     setSortedColumns(returnSortedColumns(newColumns, columnOrder));
   }, [columnOrder, returnSortedColumns, newColumns]);
-
-  const columnFilters = React.useMemo(() => {
-    const filters = [];
-    for (const key of Object.keys(customFilters)) {
-      if (typeof customFilters[key].filter !== 'string') continue;
-      filters.push({ id: key, value: customFilters[key].filter });
-    }
-    return filters;
-  }, [customFilters]);
-
-  const setColumnFilters = (filtersfn) => {
-    if (!isClientSideGrid) return;
-    const filters = filtersfn();
-    let tempArray = Object.keys(customFilters).map((key, i) => {
-      return { id: key, value: customFilters[key].filter };
-    });
-    if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-      var tempResult = {};
-      filters?.forEach((v) => {
-        if (v.value && v.value !== '') {
-          tempResult[v.id] = { filter: v.value };
-        } else {
-          //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-          if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-            tempResult[v.id] = customFilters[v.id];
-          }
-        }
-      });
-      dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
-      if (!isClientSideGrid) setSavedFilters((prev) => ({ ...prev, [resource]: tempResult }));
-    }
-  };
 
   const setGlobalFilter = useCallback(
     (value: string) => {
@@ -254,11 +222,11 @@ const CustomReactTable = ({
       columnOrder,
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
-      columnFilters: isClientSideGrid ? columnFilters : [],
       columnVisibility: visibleColumns,
       rowSelection
     },
     // flags
+    autoResetAll: false,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
     enableHiding: true,
@@ -275,7 +243,6 @@ const CustomReactTable = ({
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
@@ -287,11 +254,45 @@ const CustomReactTable = ({
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: pagination ? getPaginationRowModel() : null,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
+
+  useLayoutEffect(() => {
+    const handleApplySavedSize = (columns) => {
+      if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
+        const newData = columns?.map((column) => {
+          if (columnSavedSizes[column.id]) {
+            column.size = columnSavedSizes[column.id];
+          } else {
+            column.size = column.width || 200;
+          }
+          return column;
+        });
+        return newData;
+      } else {
+        return columns?.map((c) => ({ ...c, size: c.width }));
+      }
+    };
+
+    if (tableContainerRef.current) {
+      const container = tableContainerRef.current;
+      const { clientWidth } = container;
+      const updatedColumns = adjustSizes(handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+
+      if (updatedColumns) {
+        setNewColumns(updatedColumns);
+        setTimeout(() => {
+          table.resetHeaderSizeInfo();
+          table.resetColumnSizing();
+        }, 100);
+      } else {
+        setNewColumns([...hookColumns]);
+      }
+    }
+  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes, hookColumns.length]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
@@ -398,68 +399,80 @@ const CustomReactTable = ({
     const isFooterPresent = newColumns.some((c) => columnVisibility[c?.id] && typeof c.Footer === 'function');
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
-      const wb = xlsx.utils.book_new();
+      try {
+        const wb = xlsx.utils.book_new();
 
-      // Remove Hidden Elements "data-hide-in-export="true""
-      const table = tableRef.current;
-      table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
-        if (typeof e?.remove === 'function') e.remove();
-      });
+        // Remove Hidden Elements "data-hide-in-export="true""
+        const table = tableRef.current;
+        table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
+          if (typeof e?.remove === 'function') e.remove();
+        });
 
-      const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
+        const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
 
-      const columns = getExcelColumnNameFromRange(ws['!ref']);
+        const columns = getExcelColumnNameFromRange(ws['!ref']);
 
-      const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
-      for (const col of columns) {
-        // For header style
-        if (ws[`${col}1`]) {
-          ws[`${col}1`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+        const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+
+        for (const col of columns) {
+          // For header style
+          if (ws[`${col}1`]) {
+            const headerRow = ws[`${col}1`];
+            if (headerRow) {
+              headerRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
-        }
-        // For footer style
-        if (lastRowNumber && isFooterPresent) {
-          ws[`${col}${lastRowNumber}`].s = {
-            font: {
-              name: 'Calibri',
-              bold: true
+          }
+          // For footer style
+          if (lastRowNumber && isFooterPresent) {
+            const lastRow = ws[`${col}${lastRowNumber}`];
+            if (lastRow) {
+              lastRow.s = {
+                font: {
+                  name: 'Calibri',
+                  bold: true
+                }
+              };
             }
-          };
+          }
         }
-      }
 
-      // For redirecting to the domain and cell style for links
-      const keys = Object.keys(ws);
-      // const origin = window?.location?.origin;
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (key.includes('!')) continue;
-        if (ws[key].hasOwnProperty('l')) {
-          delete ws[key].l; // this will remove link styles
+        // For redirecting to the domain and cell style for links
+        const keys = Object.keys(ws);
+        // const origin = window?.location?.origin;
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          if (key.includes('!')) continue;
+          if (ws[key].hasOwnProperty('l')) {
+            delete ws[key].l; // this will remove link styles
 
-          //! this section will style links
-          // const data = ws[key];
-          //  data.l.Target = `${origin}${data.l.Target}`;
-          //  ws[key].s = {
-          //    font: {
-          //      name: 'Calibri',
-          //      color: { rgb: '171db1' }
-          //   }
-          //  };
+            //! this section will style links
+            // const data = ws[key];
+            //  data.l.Target = `${origin}${data.l.Target}`;
+            //  ws[key].s = {
+            //    font: {
+            //      name: 'Calibri',
+            //      color: { rgb: '171db1' }
+            //   }
+            //  };
+          }
         }
+
+        // set column width to header width
+        ws['!cols'] = fitToColumn(columns, ws);
+
+        const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+        xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+        xlsx.writeFile(wb, `${name}.xlsx`);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setExportTableView(false);
       }
-
-      // set column width to header width
-      ws['!cols'] = fitToColumn(columns, ws);
-
-      const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-      xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-      xlsx.writeFile(wb, `${name}.xlsx`);
-      setExportTableView(false);
     }, 0);
   };
 
@@ -485,7 +498,7 @@ const CustomReactTable = ({
         <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
             ref={tableRef}
-            virtualization={virtualization}
+            virtualization={false}
             state={state}
             setWholeRowsCellColor={() => ''}
             table={table}
@@ -501,6 +514,8 @@ const CustomReactTable = ({
             height={height}
             onRowClick={onRowClick}
             resource={resource}
+            expander={expander}
+            hideSelection={hideSelection}
           />
         </div>
       )}
@@ -519,7 +534,6 @@ const CustomReactTable = ({
             showArrangeView={showArrangeView}
             newColumns={newColumns}
             refreshGrid={refreshGrid}
-            reportSave={reportSave}
             setSelectedReportView={setSelectedReportView}
             selectedReportView={selectedReportView}
             state={state}
@@ -527,7 +541,7 @@ const CustomReactTable = ({
             hideExportTable={hideExportTable}
           />
           {!isMobileView && !showOnlyMobileView && (
-            <div className="relative">
+            <div className="relative" ref={tableContainerRef}>
               <TableComponent
                 virtualization={virtualization}
                 state={state}
@@ -544,6 +558,9 @@ const CustomReactTable = ({
                 height={height}
                 onRowClick={onRowClick}
                 resource={resource}
+                pagination={pagination}
+                expander={expander}
+                hideSelection={hideSelection}
               />
             </div>
           )}
@@ -567,7 +584,7 @@ const CustomReactTable = ({
               onRowClick={onRowClick}
             />
           ) : null}
-          {(!isClientSideGrid || data?.length > 25) && (
+          {(!isClientSideGrid || data?.length > 25) && pagination && (
             <Pagination
               count={isClientSideGrid ? table.getExpandedRowModel().rows.length : rowCount ?? data.length}
               page={page}
@@ -576,6 +593,7 @@ const CustomReactTable = ({
                 if (!isClientSideGrid || rowCount <= limit || data.length <= limit) return;
                 table.setPageIndex(newPage);
               }}
+              renderedFrom={renderedFrom}
               rowsPerPage={limit}
               onRowsPerPageChange={(event, value) => {
                 dispatch({ type: 'pageSizeChange', limit: value, loading: isClientSideGrid ? false : true });

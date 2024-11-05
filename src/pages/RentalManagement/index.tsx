@@ -12,7 +12,7 @@ import { IOTIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import { createAddItemStepdata, useSetWalkmeData } from 'src/components/CustomIntro';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -32,10 +32,10 @@ import {
 } from 'src/constants/helpers';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -59,7 +59,7 @@ const RentalManagement = () => {
 
   const history = useHistory();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
 

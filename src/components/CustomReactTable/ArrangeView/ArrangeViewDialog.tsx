@@ -27,7 +27,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { object, string } from 'yup';
@@ -35,6 +35,8 @@ import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Table } from '@tanstack/react-table';
+import { getCurrentColumnSizes } from 'src/components/CustomReactTable/ArrangeView/utils';
 
 type ArrangeViewDialogProps = {
   onClose: () => void;
@@ -44,6 +46,8 @@ type ArrangeViewDialogProps = {
   columns: any[];
   hideSelection: boolean;
   expander: boolean;
+  table: Table<any>;
+  resized: boolean;
 };
 
 const formSchema = object().shape({
@@ -68,7 +72,17 @@ export type FormSchema = {
 
 type SetFieldValue = (field: string, value: any, shouldValidate?: boolean) => Promise<void | FormikErrors<FormSchema>>;
 
-const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, columns, hideSelection, expander }: ArrangeViewDialogProps) => {
+const ArrangeViewDialog = ({
+  onClose,
+  data,
+  getAllSavedViews,
+  renderedFrom,
+  columns,
+  hideSelection,
+  expander,
+  table,
+  resized
+}: ArrangeViewDialogProps) => {
   const { stickyColumns } = useMemo(() => getStickyColumnNames({ allColumn: columns, expander, hideSelection }), [columns, expander, hideSelection]);
 
   const columnsWithoutSticky = useMemo(() => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)), [stickyColumns, columns]);
@@ -103,9 +117,10 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
   const [loading, setLoading] = useState(false);
 
   const updateArrangeView = async (values: FormSchema) => {
+    const sizes = getCurrentColumnSizes(table);
     setLoading(true);
     try {
-      const payload = { ...values, key: renderedFrom, _id: data._id };
+      const payload = { ...values, sizes: sizes, key: renderedFrom, _id: data._id };
       await axiosInstance().put('/user/grid-view', payload);
       toastConfig.setToastConfig({
         open: true,
@@ -122,9 +137,10 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
   };
 
   const saveArrangeView = async (values: FormSchema) => {
+    const sizes = getCurrentColumnSizes(table);
     setLoading(true);
     try {
-      const payload = { ...values, key: renderedFrom };
+      const payload = { ...values, sizes, key: renderedFrom };
       await axiosInstance().post('/user/grid-view', payload);
       toastConfig.setToastConfig({
         open: true,
@@ -248,7 +264,14 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
       }}
     >
       {({ submitForm, values, errors, touched, setFieldValue, dirty }) => (
-        <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          open
+          onClose={onClose}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}
+        >
           <CustomDialogHeader
             title={data ? 'Edit View' : 'Create View'}
             onClose={onClose}
@@ -392,7 +415,14 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
             <ThemeButton onClick={() => handleReset(setFieldValue)} iconForMobile={false} disabled={loading}>
               Reset
             </ThemeButton>
-            <ThemeButton type="submit" onClick={submitForm} iconForMobile={false} borderColor="none" color="primary" disabled={loading || !dirty}>
+            <ThemeButton
+              type="submit"
+              onClick={submitForm}
+              iconForMobile={false}
+              borderColor="none"
+              color="primary"
+              disabled={loading ? true : resized ? false : !dirty}
+            >
               Save <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
             </ThemeButton>
           </CustomDialogFooter>
@@ -436,12 +466,14 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
         <HtmlTooltip title={isFilteredColumn ? 'Clear search filter to arrange' : ''}>
           <ListItemIcon

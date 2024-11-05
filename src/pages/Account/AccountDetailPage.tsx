@@ -720,7 +720,7 @@ export default function AccountDetailPage(props) {
                 <CustomTab value={3} label={'Supplier View'} />
               )}
               {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab value={4} label={routes.warehouse.title} />}
-              {resourceData && resourceData?.steps?.length && <CustomTab value={5} label={'Associations'} />}
+              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5} label={tab?.tabName} />)}
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -744,7 +744,7 @@ export default function AccountDetailPage(props) {
                         recordsPerLine={3}
                         resource={accountResource}
                         isRedirect={false}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
+                        allowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
@@ -775,7 +775,7 @@ export default function AccountDetailPage(props) {
                         accountName={accountData.accountName}
                         accountResource={accountResource}
                         isRenderedFromCustomerAccount={true}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
+                        allowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
@@ -934,24 +934,30 @@ export default function AccountDetailPage(props) {
             <TabPanel value={tabValue} index={4}>
               <Warehouse reference={accountResource} api={accountApi} id={id} />
             </TabPanel>
-            <TabPanel value={tabValue} index={5}>
-              <Step
-                resourceData={resourceData}
-                resourceId={id}
-                resource={sidebarResource[accountResource]}
-                data={accountData}
-                allowedToEdit={permissions[accountResource]?.isUpdate}
-              />
-            </TabPanel>
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => {
+                return (
+                  <TabPanel value={tabValue} index={i + 5}>
+                    <Step
+                      tab={tab}
+                      resourcePolicyId={resourceData?._id}
+                      resourceId={id}
+                      resource={sidebarResource[accountResource]}
+                      data={accountData}
+                      allowedToEdit={permissions[accountResource]?.isUpdate}
+                    />
+                  </TabPanel>
+                );
+              })}
           </>
         )}
       </Box>
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${
-            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
+          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+            }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1008,7 +1014,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 

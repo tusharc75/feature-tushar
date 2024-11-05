@@ -6,13 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import {
-  CHILD_RESOURCE,
-  CustomDialogTransition,
-  MATERIAL_TYPE,
-  dateFormat,
-  sidebarResource
-} from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -29,12 +23,15 @@ import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import CustomButton from 'src/components/Helpers/CustomButton';
+
+const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
+  const [isDateApplying, setIsDateApplying] = useState(false);
 
   const [material, setMaterial] = useState([]);
 
@@ -45,15 +42,13 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
 
-  const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const {
     state: { permissions }
   }: any = useData();
-
-  const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
 
   useEffect(() => {
     fetchFields();
@@ -69,9 +64,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setColumns(null);
     let data;
 
-    const childResourceName = resource === sidebarResource.sublease ? CHILD_RESOURCE.subleaseProduct
-      : resource === sidebarResource.fieldTicket ? CHILD_RESOURCE.fieldTicketMateial
-        : sidebarResource.salesOrder ? CHILD_RESOURCE.salesOrderProduct : CHILD_RESOURCE.quotationProduct;
+    const childResourceName =
+      resource === sidebarResource.sublease
+        ? CHILD_RESOURCE.subleaseProduct
+        : resource === sidebarResource.fieldTicket
+          ? CHILD_RESOURCE.fieldTicketMateial
+          : sidebarResource.salesOrder
+            ? CHILD_RESOURCE.salesOrderProduct
+            : CHILD_RESOURCE.quotationProduct;
 
     data = await fetch_child_resource_fields(childResourceName, resourceData[0]?.currency, false);
 
@@ -98,30 +98,40 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
-            <div><p className="text-truncate" title={startCase(row.original?.type)}> {startCase(row.original?.type)}</p></div>
+            <div>
+              <p className="text-truncate" title={startCase(row.original?.type)}>
+                {' '}
+                {startCase(row.original?.type)}
+              </p>
+            </div>
           ) : (
             <NoDataCell />
           )
       },
-      ...(resource === sidebarResource.fieldTicket ? [{
-        accessor: 'fieldTicketNumber',
-        Header: 'Field Ticket',
-        disabled: true,
-        Cell: ({ row }) =>
-          <div className="flex items-center gap-2">
-            <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-            {permissions?.fieldTicket?.isRead &&
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+      ...(resource === sidebarResource.fieldTicket
+        ? [
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              disabled: true,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                  {permissions?.fieldTicket?.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  )}
+                </div>
+              )
             }
-          </div>
-      }] : []),
+          ]
+        : []),
       {
         accessor: 'detail',
         Header: 'Details',
@@ -166,20 +176,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     ];
 
     if (resource === sidebarResource.sublease) {
-      newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'))
+      newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'));
     }
     column = [...column, ...newColumns];
     setColumns(column);
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setRowsApplied([]);
 
     const referenceIds = resourceData?.map((d) => d._id);
-    const { data: { data: data } } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
+    const {
+      data: { data: data }
+    } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
 
     let newMaterial: any = [];
 
@@ -188,31 +199,37 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     });
 
     if (resource === sidebarResource.sublease) {
-      const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
+      const invoiceResponse = await axiosInstance().get(
+        `/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`
+      );
       const invoicedProducts = invoiceResponse?.data?.data?.material || [];
 
-      data?.material?.filter((d) => d.actualStartDate)?.forEach((element) => {
-        let values: any = {};
-        values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-        values['manualEndDate'] = element?.actualEndDate;
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        newMaterial.push({ ...element, ...calValues });
-      });
+      data?.material
+        ?.filter((d) => d.actualStartDate)
+        ?.forEach((element) => {
+          let values: any = {};
+          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+          values['manualEndDate'] = element?.actualEndDate;
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          newMaterial.push({ ...element, ...calValues });
+        });
 
       if (invoicedProducts?.length) {
-        newMaterial = newMaterial?.map((_material) => {
-          const product = invoicedProducts?.find((p) => p._id === _material._id);
-          if (product) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            _material.actualStartDate = actualEndDate;
-          }
-          return _material;
-        }).filter((d) => d.qty > 0);
+        newMaterial = newMaterial
+          ?.map((_material) => {
+            const product = invoicedProducts?.find((p) => p._id === _material._id);
+            if (product) {
+              const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+              _material.actualStartDate = actualEndDate;
+            }
+            return _material;
+          })
+          .filter((d) => d.qty > 0);
       }
 
       data?.assets?.forEach((_asset) => {
         const product = newMaterial?.find((p) => p._id === _asset._id);
-        const obj: any = {}
+        const obj: any = {};
         obj._id = _asset.inventory;
         obj.parentId = _asset._id;
         obj.type = MATERIAL_TYPE.serializedAsset;
@@ -222,9 +239,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         obj.pricingMethod = product?.pricingMethod;
         obj.qty = 1;
         newMaterial.push(obj);
-      })
-    }
-    else {
+      });
+    } else {
       newMaterial = data?.material;
     }
     setMaterial([...newMaterial, ...data?.manualEntry]);
@@ -293,8 +309,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   };
 
   const handleApplyDate = async () => {
+    setIsDateApplying(true);
     let tempValues: any = { actualEndDate: endDate };
-    let newEndDate = moment(endDate).toISOString()
+    let newEndDate = moment(endDate).toISOString();
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
@@ -342,6 +359,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       return [...prevRowsApplied, ...rows];
     });
     setAppliedDate(true);
+    setIsDateApplying(false);
   };
 
   const handleCreateInvoice = () => {
@@ -360,20 +378,23 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         delete element?.subRows;
         delete element?.manualEndDate;
       });
-      axiosInstance().post(`/generate-invoice/create-progressive`, {
-        resource: resource,
-        referenceId: resourceData[0]?._id,
-        material: rowsApplied
-      }).then(() => {
-        setUpdating(false);
-        onSuccess();
-      })
+      axiosInstance()
+        .post(`/generate-invoice/create-progressive`, {
+          resource: resource,
+          referenceId: resourceData[0]?._id,
+          material: rowsApplied
+        })
+        .then(() => {
+          setUpdating(false);
+          onSuccess();
+        })
         .catch((error) => {
           setUpdating(false);
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance().post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id) })
+      axiosInstance()
+        .post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id) })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -397,7 +418,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             {progressiveBilling && (
               <MuiPickersUtilsProvider utils={MomentUtils}>
                 <Grid container className={styles.rental_header_layout}>
-                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet"></Grid>
+                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
                   <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
                     <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                       <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
@@ -422,17 +443,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                         <Box>
                           <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
                             <span>
-                              <Button
+                              <CustomButton
+                                id="dialog-apply-button"
+                                loading={isDateApplying}
+                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
                                 variant="contained"
                                 color="primary"
-                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? false : true}
-                                size="small"
+                                type="button"
                                 onClick={() => {
                                   handleApplyDate();
                                 }}
                               >
                                 Apply
-                              </Button>
+                              </CustomButton>
                             </span>
                           </HtmlTooltip>
                         </Box>
@@ -491,18 +514,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             }
           >
             <span>
-              <Button
-                type="button"
+              <CustomButton
+                id="dialog-save-button"
+                loading={isUpdating}
+                disabled={
+                  progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false
+                }
                 variant="contained"
                 color="primary"
-                size="small"
-                disabled={progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false}
+                type="button"
                 onClick={() => {
                   handleCreateInvoice();
                 }}
               >
                 Create Invoice
-              </Button>
+              </CustomButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>

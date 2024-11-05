@@ -6,7 +6,7 @@ import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import ArrangeViewDialog from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog';
-import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
+import { getCurrentColumnSizes, useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -15,6 +15,7 @@ import { SET_USER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import { Table } from '@tanstack/react-table';
 
 export type GridViewSavedData = {
   _id: string;
@@ -27,6 +28,7 @@ export type GridViewSavedData = {
   user: string;
   createdBy: CreatedBy;
   default: boolean;
+  sizes: { [key: string]: number };
 };
 
 export type CreatedBy = {
@@ -41,10 +43,12 @@ type ArrangeViewMenuProps = {
   columns: any[];
   hideSelection: boolean;
   expander: boolean;
+  appliedView?: { hide: string[]; order: string[]; sizes: { [key: string]: number }; name?: string; id?: string };
+  table: Table<any>;
 };
-const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
+const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander, appliedView, table }: ArrangeViewMenuProps) => {
   const walkmeInstance = useGetWalkmeInstance();
-  const { loading } = state;
+  const { loading, resized } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
 
   const {
@@ -62,9 +66,9 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
-  const [selected, setSelected] = useState(defaultView);
+  const [selected, setSelected] = useState(appliedView ? { ...appliedView, _id: appliedView.id } : defaultView);
 
-  const applyViewInTable = (order: string[], hide: string[]) => {
+  const applyViewInTable = (order: string[], hide: string[], sizes: { [key: string]: number } | null, name?: string, id?: string) => {
     const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
     let columnOrder = [];
     const columnHiddenStateData = {};
@@ -72,45 +76,54 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       columnHiddenStateData[column.id] = !hide.includes(column.id);
     });
     if (order.length > 0) {
+      // This line ensures that the action column does not move left, if the order was saved previously and new columns have been added since then.
+      const restOfTheColumns = columns.map((d) => d.id).filter((d) => !order.includes(d));
+
       const newOrder = order.filter((d) => !stickycolumns.stickyColumns.includes(d));
-      columnOrder = [...stickycolumns.left, ...newOrder, ...stickycolumns.right];
+      columnOrder = [...stickycolumns.left, ...newOrder, ...restOfTheColumns, ...stickycolumns.right];
     } else {
       const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
       columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
     }
+
     dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
     dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+    dispatch({ type: 'setColumnSizes', sizes: sizes });
 
     const newData = {
       ...gridMetaData,
-      [renderedFrom]: { hide, order }
+      [renderedFrom]: { hide, order, name, id }
     };
 
     setGridMetaData(newData);
   };
 
   useEffect(() => {
-    if (defaultView) {
-      applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
+    if (appliedView) {
+      applyViewInTable(appliedView.order, appliedView.hide, appliedView.sizes, appliedView.name, appliedView.id);
+    } else if (defaultView) {
+      applyViewInTable(defaultView?.order || [], defaultView?.hide || [], defaultView.sizes || null, defaultView.name, defaultView._id);
     } else {
-      applyViewInTable([], []);
+      applyViewInTable([], [], null);
     }
-  }, [renderedFrom, defaultView, columns.length]);
+  }, [renderedFrom, columns.length]);
 
   const getAllSavedViews = useCallback(async () => {
+    const sizes = getCurrentColumnSizes(table);
     try {
       const {
         data: { data }
       } = await axiosInstance().get('/user/grid-view');
       setSavedData(data.filter((d) => d.key === renderedFrom));
-      contextDispatch({ type: SET_USER, payload: { ...user, gridViews: data } });
+      dispatch({ type: 'setResized', resized: false });
+      contextDispatch({ type: SET_USER, payload: { ...user, sizes, gridViews: data } });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   }, [renderedFrom, toastConfig, contextDispatch, user]);
 
   const applyView = (data: GridViewSavedData) => {
-    applyViewInTable(data.order, data.hide);
+    applyViewInTable(data.order, data.hide, data.sizes, data.name, data._id);
     setSelected(data);
   };
 
@@ -121,7 +134,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       getAllSavedViews();
       setConfirmationDialog({ open: false, data: null });
       if (selected._id === data._id) {
-        applyViewInTable([], []);
+        applyViewInTable([], [], null);
         setSelected(null);
       }
       toastConfig.setToastConfig({
@@ -233,14 +246,22 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                   )}
                                 </span>
                                 <div className="flex gap-2">
-                                  <HtmlTooltip title={'Edit'}>
-                                    <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
-                                      <Edit fontSize="small" />
+                                  <HtmlTooltip title={d?.user === user?.user?._id ? 'Edit' : 'You have not permission to edit'}>
+                                    <IconButton
+                                      size={'small'}
+                                      disabled={d?.user === user?.user?._id ? false : true}
+                                      onClick={(e) => openEditModal(e, d)}
+                                    >
+                                      <Edit fontSize="small" color={d?.user === user?.user?._id ? 'primary' : 'disabled'} />
                                     </IconButton>
                                   </HtmlTooltip>
-                                  <HtmlTooltip title={'Delete'}>
-                                    <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
-                                      <Delete fontSize="small" color="error" />
+                                  <HtmlTooltip title={d?.user === user?.user?._id ? 'Delete' : 'You have not permission to delete'}>
+                                    <IconButton
+                                      size={'small'}
+                                      disabled={d?.user === user?.user?._id ? false : true}
+                                      onClick={(e) => openDeleteConfirmationModal(e, d)}
+                                    >
+                                      <Delete fontSize="small" color={d?.user === user?.user?._id ? 'error' : 'disabled'} />
                                     </IconButton>
                                   </HtmlTooltip>
                                 </div>
@@ -264,7 +285,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                 iconForMobile={false}
                 onClick={() => {
                   setAnchorEl(null);
-                  applyViewInTable([], []);
+                  applyViewInTable([], [], null);
                   setSelected(null);
                 }}
               >
@@ -286,6 +307,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           columns={columns}
           hideSelection={hideSelection}
           expander={expander}
+          table={table}
+          resized={resized}
         />
       )}
       {confirmationDialog.open && (

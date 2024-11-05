@@ -59,12 +59,12 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
       return sum;
     }
   };
-  const offset = addSizes(index);
 
-  if (columnDef.sticky === 'left') {
-    obj.style = { position: 'sticky', left: offset } as React.CSSProperties;
+  if (columnDef.sticky) {
+    const offset = addSizes(index);
+    obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
   }
-  if (columnDef.sticky === 'right') obj.style = { position: 'sticky', right: offset } as React.CSSProperties;
+
   return obj;
 };
 
@@ -105,9 +105,8 @@ export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
   setCellValue(getCellValue(cell) || null);
 };
 
-export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentId, dispatch }) => {
+export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, dispatch, parentId }) => {
   const updatedRows = [...existingRows];
-  if (!subRowsToInsert) return;
 
   for (let row of updatedRows) {
     if (row._id === parentId) {
@@ -144,32 +143,43 @@ export const getStickyColumnNames = ({
   expander: boolean;
   hideSelection: boolean;
 }) => {
-  const left = [];
-  const right = [];
+  const left: string[] = [];
+  const right: string[] = [];
   const stickyColumns = [];
-
-  for (let col of allColumn) {
+  const stickyIndexes: number[] = [];
+  const leftIndexes: number[] = [];
+  const rightIndexes: number[] = [];
+  for (let i = 0; i < allColumn.length; i++) {
+    const col = allColumn[i];
     const colName = col?.id ?? col?.accessor;
     if (colName === 'expander' && expander) {
       left.push(colName);
+      leftIndexes.push(i);
       stickyColumns.push(colName);
+      stickyIndexes.push(i);
       continue;
     }
     if (colName === 'selection' && !hideSelection) {
       left.push(colName);
+      leftIndexes.push(i);
       stickyColumns.push(colName);
+      stickyIndexes.push(i);
       continue;
     }
     if (col.sticky === 'left') {
       left.push(colName);
+      leftIndexes.push(i);
       stickyColumns.push(colName);
+      stickyIndexes.push(i);
     }
     if (col.sticky === 'right') {
       right.push(colName);
+      rightIndexes.push(i);
       stickyColumns.push(colName);
+      stickyIndexes.push(i);
     }
   }
-  return { left, right, stickyColumns };
+  return { left, right, stickyColumns, stickyIndexes, leftIndexes, rightIndexes };
 };
 
 export const getUniqueRows = (rows: any[], key = '_id') => {
@@ -343,20 +353,25 @@ export const createFilterModel = (formValues, coloums) => {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
-      case 'multiLine':
-      case 'email':
-      case 'mobileNumber':
-      case 'currency':
       case 'lookUpDisplay':
-      case 'url':
-        if (formValues[fieldName]?.trim()) {
-          filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
       case 'number':
       case 'decimal':
         if (formValues[fieldName]) {
-          filterModel.set(fieldName, { filter: formValues[fieldName]?.toString() });
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
+      case 'multiLine':
+      case 'email':
+      case 'mobileNumber':
+      case 'currency':
+      case 'location':
+      case 'url':
+        if (formValues[fieldName]?.trim()) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
         }
         break;
       case 'year':
@@ -401,9 +416,9 @@ export const createFilterModel = (formValues, coloums) => {
           filterModel.set(fieldName, { filter: formValues[fieldName] === true || formValues[fieldName] === 'true' ? 'Yes' : 'No' });
         }
         break;
-      case 'location':
-        if (formValues[fieldName]?.length > 0) {
-          filterModel.set(fieldName, { filter: formValues[fieldName] });
+      case 'gpsLocation':
+        if (formValues[fieldName] && formValues[fieldName]?.locationName) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.locationName });
         }
         break;
       default:
@@ -429,3 +444,24 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   }
   return formValues;
 };
+
+export function adjustSizes(original: TColType[], visibleColumns: { [key: string]: boolean }, containerSize: number): TColType[] | null {
+  const visibleColumnsArray = original.filter((col) => visibleColumns[col.id || col.accessor]);
+  const totalSize = visibleColumnsArray.reduce((acc, size) => acc + (size.size || 200), 0);
+
+  if (totalSize >= containerSize) {
+    return original; // No adjustment needed if total size is greater than or equal to container size
+  }
+
+  const maxWidthColumnsSum = visibleColumnsArray.reduce((acc, size) => acc + (size.maxSize || 0), 0);
+  const scaleFactor = (containerSize - maxWidthColumnsSum) / (totalSize - maxWidthColumnsSum);
+  if (scaleFactor === Infinity) {
+    return null;
+  }
+  const scrollerWidth = 2;
+
+  return original.map((col) => {
+    const size = Math.floor((col.size || 200) * scaleFactor) - scrollerWidth;
+    return { ...col, size };
+  });
+}

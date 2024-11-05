@@ -26,6 +26,7 @@ import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
@@ -48,7 +49,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addCostDialog, setAddCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -99,7 +100,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
             {allowedToEdit ? (
-              row.original.detail ?
+              row.original.detail ? (
                 <p
                   onClick={() => {
                     openMaterial(row, table.getRowModel().rows);
@@ -109,7 +110,9 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
                 >
                   {row.original?.detail}
                 </p>
-                : <NoDataCell />
+              ) : (
+                <NoDataCell />
+              )
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
@@ -148,7 +151,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
                     </IconButton>
                   </HtmlTooltip>
                 </Box>
-
               </>
             )}
             {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
@@ -236,10 +238,10 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     let additionalCost = additionalData?.data?.data || [];
     additionalCost = additionalCost?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
-    })
+    });
     data = response?.data?.data;
     let rows = data.material.filter((e) => !e.parentId);
-    rows = [...rows, ...additionalCost]
+    rows = [...rows, ...additionalCost];
     assignedAssets = data.material.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.parentId);
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {
@@ -264,7 +266,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               ? parent?.serializedAssetDetail?.product?.productDescription
               : parent.type === MATERIAL_TYPE.service
                 ? parent?.serviceDetail?.serviceDescription
-                : parent.description || ''
+                : parent.description || '';
 
       parent.qty = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
@@ -291,17 +293,19 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             ? _subRow.packageDetail?.packageName
             : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName :
-                _subRow?.detail;
+              : _subRow.type === MATERIAL_TYPE.service
+                ? _subRow.serviceDetail?.serviceName
+                : _subRow?.detail;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
             ? _subRow?.packageDetail?.packageDescription
             : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? parent.description :
-              _subRow.type === MATERIAL_TYPE.service ?
-                _subRow?.serviceDetail?.serviceDescription : '';
+              ? parent.description
+              : _subRow.type === MATERIAL_TYPE.service
+                ? _subRow?.serviceDetail?.serviceDescription
+                : '';
       _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -310,7 +314,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const openMaterial = (data, rows) => {
     if (data?.original?.type === MATERIAL_TYPE.manualEntry) {
-      setAddCostDialog({ open: true, data: data.original, showSaveAndNext: data?.index < rows?.length - 1 ? true : false })
+      setAddCostDialog({ open: true, data: data.original, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
     } else {
       setMaterialEdit({
         open: true,
@@ -324,6 +328,17 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
+    var taxCodeData: any = null;
+    if (invoiceData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?taxCode=${invoiceData?.taxCode?.optionValue}&materialType=${addDialog.type}`
+      );
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
+    }
     if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
         material.push(e);
@@ -336,9 +351,36 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
+        if (allFields?.find((e) => e.fieldName === 'actualStartDate')) {
+          element.actualStartDate = new Date();
+        }
+        if (allFields?.find((e) => e.fieldName === 'actualEndDate')) {
+          element.actualEndDate = new Date();
+        }
+        if (taxCodeData && allFields?.find((e) => e.fieldName === 'taxCode')) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        if (allFields?.find((e) => e.fieldName === 'pricingMethod')) {
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          Object.assign(element, calValues);
+        }
         material.push(element);
       });
     }
+    const priceData: any = await calculatePrice(material);
+    material.forEach((element) => {
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+      if (rateResult.length && rateResult[0].mrp) {
+        const priceFieldName = `price_${invoiceData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = rateResult[0].mrp;
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+        Object.assign(element, calValues);
+      }
+    });
     setAssetAssignedProduct([]);
     axiosInstance()
       .post(`${routes?.invoice?.path}/material/${invoiceData._id}`, { material })
@@ -354,7 +396,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         setIsAdding(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         setIsAdding(false);
         toastConfig.setToastConfig(error);
       });
@@ -380,39 +421,54 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       });
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
-    setUpdating(true);
-    axiosInstance()
-      .put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows })
-      .then(({ data }) => {
-        setUpdating(false);
+  const handleSaveData = async (rows: any, saveAndNext = false, showNext = false) => {
+    try {
+      setUpdating(true);
+      if (!showNext) {
+        const { data } = await axiosInstance().put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
-            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-            setAddCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-          } else {
-            setMaterialEdit({
-              open: true,
-              data: dataRows[rowIndex + 1],
-              bulkedit: false,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-            });
-          }
+      }
+      setUpdating(false);
+      if (saveAndNext) {
+        const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+
+        if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+          setMaterialEdit({
+            open: false,
+            data: null,
+            bulkedit: false,
+            showSaveAndNext: false
+          });
+          setAddCostDialog({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1
+          });
         } else {
-          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+          setMaterialEdit({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1
+          });
         }
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setMaterialEdit({
+          open: false,
+          data: null,
+          bulkedit: false,
+          showSaveAndNext: false
+        });
+      }
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSaveCostData = async (rows: any, saveAndNext = false) => {
@@ -491,7 +547,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const calculatePrice = (arr: any[]) => {
     if (invoiceData) {
       const data: any = {};
-      data.conditionType = [(invoiceData?.repairOrder || invoiceData?.salesOrder) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
+      data.conditionType = [invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
       const material: any = [];
       arr?.forEach((ele) => {
         const obj = {
@@ -531,10 +587,10 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
     if (rowData?.type === MATERIAL_TYPE.manualEntry) {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, invoiceData?.currency);
       handleSaveCostData(rows[0]);
     } else {
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, invoiceData?.currency);
       handleSaveData(rows);
     }
   };
@@ -581,7 +637,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         >
           {`Add Existing Assets`}
         </MenuItem>
-        {costFields?.length > 0 &&
+        {costFields?.length > 0 && (
           <MenuItem
             onClick={() => {
               setAddCostDialog({ open: true, data: null, showSaveAndNext: false });
@@ -589,7 +645,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           >
             Add Manual Entry
           </MenuItem>
-        }
+        )}
       </>
     );
   };

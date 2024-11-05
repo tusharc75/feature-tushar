@@ -92,7 +92,8 @@ export const CreateEmail = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   referenceType = '',
-  isAttachmentLoading = false
+  isAttachmentLoading = false,
+  content = null,
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const {
@@ -219,8 +220,8 @@ export const CreateEmail = ({
       let initialData = {
         subject: subject ?? '',
         file: '',
-        content: RichTextEditor.createEmptyValue(),
-        to: [],
+        content: content ?? RichTextEditor.createEmptyValue(),
+        to: isQuoteBuilder ? [...options] : [],
         cc: isQuoteBuilder ? [...cc] : []
       };
       setInitialValues(initialData);
@@ -248,7 +249,12 @@ export const CreateEmail = ({
       if (emailId) {
         axiosInstance()
           .put(`/email/${emailId}`, values)
-          .then(() => {
+          .then(({ data }) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             handleClose();
           })
           .catch((err) => {
@@ -274,7 +280,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSendEmail = async (values) => {
@@ -305,6 +311,11 @@ export const CreateEmail = ({
     axiosInstance()
       .post(api, body)
       .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: "Email Sent Successfully"
+        });
         setSending(false);
         if (fetchData) fetchData();
       })

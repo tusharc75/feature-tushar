@@ -11,6 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import {
   ASSET_STATUS,
+  CustomDialogTransition,
   deliveryTicket,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -30,11 +31,10 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 import { Link } from 'react-router-dom';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
-
   const renderedFrom = `${camelCase(routes.serializedAsset.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -54,7 +54,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, type: '' });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, type: '' });
   const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
 
   useEffect(() => {
@@ -236,11 +236,12 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           obj.assetData = assetData;
         }
       }
-      assetsAdd.push(obj)
-    })
-    axiosInstance().post(`${rentalManagement.api}/productpackage/${referenceData?.rentalJob}/assets`, { assets: assetsAdd })
+      assetsAdd.push(obj);
+    });
+    axiosInstance()
+      .post(`${rentalManagement.api}/productpackage/${referenceData?.rentalJob}/assets`, { assets: assetsAdd })
       .then(() => {
-        handleSucess()
+        handleSucess();
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -316,6 +317,22 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
       });
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = selectedRecords?.filter((r) => statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds };
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.map((a) => a?._id) };
+      }
+    }
+    return result;
+  };
+
   const leftSideContentsOfSearchFilter = () => {
     return (
       <Box mt={0.5} width={'30%'}>
@@ -360,14 +377,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
                 size="small"
                 color="primary"
                 onClick={() => {
-                  if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                  if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                    const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                     setOpenAssetDataDialog({
                       open: true,
-                      statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                      statusPolicy: statusPolicy,
+                      _ids: assetIds,
                       type: 'transfer'
                     });
-                  }
-                  else {
+                  } else {
                     setShowTransferAssetDialog({ open: true, data: null });
                   }
                 }}
@@ -386,14 +404,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
               size="small"
               disabled={isSubmitting || selectedRecords?.length === 0}
               onClick={() => {
-                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                   setOpenAssetDataDialog({
                     open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    statusPolicy: statusPolicy,
+                    _ids: assetIds,
                     type: 'add'
                   });
-                }
-                else if (checkMTRValidation) {
+                } else if (checkMTRValidation) {
                   if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                     setMtrConfirmBox(true);
                   } else {
@@ -428,7 +447,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Add ${routes.serializedAsset.title}`}
         showManimizeMaximize={false}
@@ -514,17 +541,20 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
+            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+                statusPolicy: statusPolicy,
+                _ids: assetIds,
                 type: 'underReview'
               });
-            }
-            else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+            } else if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                statusPolicy: statusPolicy,
+                _ids: assetIds,
                 type: 'reserved'
               });
             } else {
@@ -535,42 +565,41 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          ids={selectedRecords?.map((e) => e._id)}
+          ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' })}
+          setAssetsData={() => {}}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
-              if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+              if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                 if (openAssetDataDialog.type === 'underReview') {
-                  setUnderReviewAssetData(data)
+                  setUnderReviewAssetData(data);
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                   setOpenAssetDataDialog({
                     open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    statusPolicy: statusPolicy,
+                    _ids: assetIds,
                     type: 'reserved'
                   });
-                }
-                else {
+                } else {
                   handleAutoTransferAssets(underReviewAssetData, data);
-                  setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                  setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
                 }
-              }
-              else {
+              } else {
                 handleAutoTransferAssets(data);
-                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
               }
             } else {
               if (openAssetDataDialog.type === 'add') {
                 handleAddAsset(data);
-                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
-              }
-              else {
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
+              } else {
                 setShowTransferAssetDialog({ open: true, data: data });
-                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
               }
             }
           }}
-          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
+          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber, wellName: [referenceData?.wellName?.optionValue] }}
         />
       )}
     </Dialog>

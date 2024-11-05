@@ -3,6 +3,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
 import { Entity } from '../../AddField/entity';
+import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
   return (
@@ -18,6 +19,9 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   checked={values['isDefaultValue']}
                   onChange={(e) => {
                     setFieldValue('isDefaultValue', e.target.checked);
+                    if (fieldData.type === 'checkBox' && !e.target.checked) {
+                      setFieldValue('defaultValue', '');
+                    }
                   }}
                   color="primary"
                 />
@@ -70,6 +74,28 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? (
+                <ResourceDropdown
+                  type={fieldData.type}
+                  value={values['defaultValue']}
+                  options={values.option}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
+              ) : fieldData.type === 'groupSignature' ? (
+                <ResourceDropdown
+                  type={'multiSelect'}
+                  lookupResource={'User'}
+                  value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
+              ) : fieldData.type === 'checkBox' || fieldData.type === 'switch' ? (
+                <CheckboxDropdown value={values['defaultValue']} setFieldValue={setFieldValue} touched={touched} errors={errors} />
               ) : (
                 <Box display="block">
                   <TextField
@@ -275,7 +301,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {initialValues?.hasOwnProperty('unique') && (
+            {fieldData?.type === 'singleLine' && initialValues?.hasOwnProperty('unique') && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -297,19 +323,21 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="primaryField"
-                  checked={values['primaryField']}
-                  onChange={(e) => {
-                    setFieldValue('primaryField', e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Primary Field"
-            />
+            {['singleLine', 'location']?.includes(fieldData?.type) && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="primaryField"
+                    checked={values['primaryField']}
+                    onChange={(e) => {
+                      setFieldValue('primaryField', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Primary Field"
+              />
+            )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
         </Grid>
@@ -337,6 +365,33 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               />
             )}
           </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            {values['isSystemGenerate'] && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="systemGeneratedAutoIncrement"
+                    checked={values['systemGeneratedAutoIncrement']}
+                    onChange={(e) => {
+                      setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="System Generated Auto Increment"
+              />
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
           <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
               <Box display="block">
@@ -358,25 +413,56 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               </Box>
             )}
           </Grid>
+          <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="systemGeneratedAutoIncrement"
-                    checked={values['systemGeneratedAutoIncrement']}
-                    onChange={(e) => {
-                      setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
-                    }}
-                    color="primary"
-                  />
-                }
-                label="System Generated Auto Increment"
-              />
+              <Box display="block">
+                <TextField
+                  variant="outlined"
+                  type="number"
+                  label="System Generated Prefix Digit"
+                  name="systemGeneratedPrefixDigit"
+                  rows={4}
+                  fullWidth
+                  margin="dense"
+                  value={values['systemGeneratedPrefixDigit']}
+                  error={touched['systemGeneratedPrefixDigit'] && Boolean(errors['systemGeneratedPrefixDigit'])}
+                  helperText={touched['systemGeneratedPrefixDigit'] && errors['systemGeneratedPrefixDigit']}
+                  onChange={(e) => {
+                    setFieldValue('systemGeneratedPrefixDigit', Number(e.target.value));
+                  }}
+                />
+              </Box>
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            {values['isSystemGenerate'] && (
+              <Box display="block">
+                <TextField
+                  variant="outlined"
+                  type="number"
+                  label="System Generated Start Number"
+                  name="systemGeneratedStartNumber"
+                  rows={4}
+                  fullWidth
+                  margin="dense"
+                  value={values['systemGeneratedStartNumber']}
+                  error={touched['systemGeneratedStartNumber'] && Boolean(errors['systemGeneratedStartNumber'])}
+                  helperText={touched['systemGeneratedStartNumber'] && errors['systemGeneratedStartNumber']}
+                  onChange={(e) => {
+                    setFieldValue('systemGeneratedStartNumber', Number(e.target.value));
+                  }}
+                />
+              </Box>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
@@ -594,9 +680,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} brandId={brandId} />
       <Box mt={1}>
         <FormControl component="fieldset">
-          <FormLabel component="legend">
-            Column Size
-          </FormLabel>
+          <FormLabel component="legend">Column Size</FormLabel>
           <RadioGroup
             aria-label="columnSize"
             name="columnSize"
@@ -606,8 +690,8 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               setFieldValue('columnSize', Number(e?.target?.value));
             }}
           >
-            <FormControlLabel value={6} control={<Radio size='small' />} label="Col 6" />
-            <FormControlLabel value={12} control={<Radio size='small' />} label="Col 12" />
+            <FormControlLabel value={6} control={<Radio size="small" />} label="Col 6" />
+            <FormControlLabel value={12} control={<Radio size="small" />} label="Col 12" />
           </RadioGroup>
         </FormControl>
       </Box>

@@ -20,12 +20,13 @@ import routes from './../../components/Helpers/Routes';
 import CreateZone from './CreateZone';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.zone.title);
+
 const Zone = () => {
-  const renderedFrom = camelCase(routes?.zone.title);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

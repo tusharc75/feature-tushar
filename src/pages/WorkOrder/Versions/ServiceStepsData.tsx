@@ -9,7 +9,7 @@ const ServiceStepsData = ({ servicesData, stepsData }) => {
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const isMobile = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {

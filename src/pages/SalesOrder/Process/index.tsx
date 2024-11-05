@@ -12,13 +12,12 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 
+const renderedFrom = `${routes.salesOrder.title}_Process`;
+
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
-
-  const renderedFrom = `${routes.salesOrder.title}_Process`;
-
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const {
@@ -84,23 +83,22 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         accessor: 'description',
         Header: 'Description',
         width: 200,
-        Cell: ({ row }) => row.original?.description ? <p title={row.original?.description}>{row.original?.description} </p> : <NoDataCell />
+        Cell: ({ row }) => (row.original?.description ? <p title={row.original?.description}>{row.original?.description} </p> : <NoDataCell />)
       },
       {
         accessor: 'procurementType',
         Header: 'Procurement Type',
         width: 200,
-        Cell: ({ row }) => (
+        Cell: ({ row }) =>
           row.original?.procurementType ? <div>{<p title={row.original?.procurementType}>{row.original?.procurementType}</p>}</div> : <NoDataCell />
-        )
       },
       {
         accessor: 'procurementName',
         Header: 'Procurement',
         width: 200,
-        Cell: ({ row }) => (
-          row.original.procurementName ?
-            <div >
+        Cell: ({ row }) =>
+          row.original.procurementName ? (
+            <div>
               {row.original?.procurementType === sidebarResource.purchaseRequisition ? (
                 <a className="link text-truncate" href={`${routes.purchaseRequisitionDetail.path}/${row.original.procurementId}`} target="_blank">
                   {row.original.procurementName}
@@ -116,16 +114,21 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
               ) : (
                 row.original.procurementName
               )}
-            </div> : <NoDataCell />
-        )
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'procurementStatus',
         Header: 'Status',
         width: 200,
-        Cell: ({ row }) => (
-          row.original?.procurementStatus ? <div>{<p title={row.original?.procurementStatus}>{row.original?.procurementStatus}</p>}</div> : <NoDataCell />
-        )
+        Cell: ({ row }) =>
+          row.original?.procurementStatus ? (
+            <div>{<p title={row.original?.procurementStatus}>{row.original?.procurementStatus}</p>}</div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'leadTime',
@@ -138,7 +141,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
             .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      },
+      }
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
@@ -146,7 +149,6 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -161,12 +163,13 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     const rows = material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
@@ -181,8 +184,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         parent.procurementName = parent?.procurement?.optionLabel;
         parent.procurementId = parent?.procurement?.optionValue;
         parent.procurementStatus = parent?.procurement?.status;
-      }
-      else {
+      } else {
         parent.procurementName = 'Inventory Available';
       }
       parent.subRows = generateNestedData(material, parent);
@@ -196,12 +198,13 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -216,8 +219,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         _subRow.procurementName = _subRow?.procurement?.optionLabel;
         _subRow.procurementId = _subRow?.procurement?.optionValue;
         _subRow.procurementStatus = _subRow?.procurement?.status;
-      }
-      else {
+      } else {
         _subRow.procurementName = 'Inventory Available';
       }
       _subRow.subRows = generateNestedData(material, _subRow);

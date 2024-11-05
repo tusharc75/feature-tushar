@@ -3486,6 +3486,10 @@ body {
       font-size: 0.8rem;
     }
   }
+  span.html-custom-tooltip,
+  span.ling {
+    padding: 0;
+  }
 
   & a > * {
     color: var(--link) !important;
@@ -4709,5 +4713,22 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
 td.google-visualization-orgchart-node {
   .card {
     border: 1px solid var(--common-border-color) !important;
+  }
+}
+
+.editable-table-cell {
+  &[data-sticky-td='true'] {
+    background-color: var(--dark-primary, white);
+  }
+}
+
+.funnel-pipeline-chart .funnel-pipeline-chart-row .funnel-pipeline-chart-title {
+  font-size: 0.7rem;
+  padding-bottom: 5px;
+}
+
+.editable-table-v1 {
+  .MuiTableCell-sizeSmall {
+    padding: 6px 10px;
   }
 }

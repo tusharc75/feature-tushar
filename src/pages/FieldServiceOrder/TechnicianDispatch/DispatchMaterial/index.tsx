@@ -9,9 +9,12 @@ import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { FiExternalLink } from 'react-icons/fi';
+import { CustomDialogTransition } from 'src/constants/helpers';
+
+const renderedFrom = `product_dispatch_technician`;
 
 const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -85,7 +88,14 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
   };
 
   return (
-    <Dialog maxWidth="md" fullScreen={fullScreen || isMobile || isTablet} aria-labelledby="customized-dialog-title" open={true} fullWidth>
+    <Dialog
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={fullScreen || isMobile || isTablet}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+    >
       <CustomDialogHeader
         title={'Dispatch'}
         showRequiredLabel={false}
@@ -104,7 +114,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
             dispatch={dispatch}
             refreshGrid={fetchData}
             hideAction={true}
-            renderedFrom={`product_dispatch_technician`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         )}

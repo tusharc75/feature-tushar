@@ -21,7 +21,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   const {
     state: { selectedEntity }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -70,7 +70,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     }
     const { deepFilters } = gridFilterParser(filters);
 
-    if(deepFilters?.length){
+    if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
     }
 
@@ -87,7 +87,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true)
+    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };
 
@@ -132,9 +132,11 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
               showOnlyShowFilteredRecordSwitch={true}
               resource={sidebarResource.warehouse}
             />
-          ) : <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>}
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </div>
       </Dialog>
     </Fragment>

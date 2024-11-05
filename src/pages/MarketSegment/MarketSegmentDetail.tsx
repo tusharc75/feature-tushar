@@ -20,7 +20,6 @@ const MarketSegmentDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.marketSegment]);
   const [marketSegmentData, setMarketSegmentData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +54,6 @@ const MarketSegmentDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes?.marketSegment?.path}/${id}`);
-      setHeadingLbl(data.name);
       setMarketSegmentData(data);
       setCustomizedRoutes([routes.marketSegment, { title: data?.name }]);
       setLoading(false);

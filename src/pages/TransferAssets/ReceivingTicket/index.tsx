@@ -19,19 +19,19 @@ import {
   deliveryTicket,
   prepareDataForGrid,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import InfoIcon from '@material-ui/icons/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { FiExternalLink } from 'react-icons/fi';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 interface ReceivingGridProps {
-  permissions: any;
   transferAssetData: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setTransferIsEnded?: any;
   currentStep: number;
   updateTransferStatus?: any;
   renderedFrom?: string;
@@ -41,21 +41,11 @@ interface ReceivingGridProps {
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const {
-    permissions,
-    transferAssetId,
-    transferAssetData,
-    setNextStep,
-    setTransferIsEnded,
-    updateTransferStatus,
-    isTransferEnded,
-    renderedFrom,
-    allowedToEdit,
-    stepFullScreen
-  } = props;
+  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen } =
+    props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
@@ -68,7 +58,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const fetchFields = () => {
     setColumns(null);
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(
           renderedFrom,
@@ -79,7 +70,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
                 <div
-                className="flex items-center gap-2"
+                  className="flex items-center gap-2"
                   style={{
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
@@ -89,14 +80,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                   {row?.original?.isReplaced && (
                     <Box>
                       <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
@@ -113,14 +104,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               row?.original?.product ? (
                 <div className="flex items-center gap-2">
                   <p> {row.original?.product}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />
@@ -133,7 +124,21 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             Header: 'Index',
             width: 70,
             sticky: 'left',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Cell: ({ row }) => (
+              <div className="d-flex align-items-center gap-2">
+                <h5 className="text-truncate">{row?.original?.index}</h5>
+                {row?.original?.loadingTicketId && !row?.original?.receivingTicketId && (
+                  <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                    <LocalShippingIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
+                )}
+                {row?.original?.receivingTicketId && (
+                  <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}>
+                    <LocalShippingIcon fontSize="small" color={'primary'} className="[transform:scaleX(-1)_!important]" />
+                  </HtmlTooltip>
+                )}
+              </div>
+            ),
             Footer: () => {
               return <>Total</>;
             }
@@ -200,17 +205,19 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const fetchAssets = () =>
     new Promise((resolve, reject) => {
-      axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetId}`).then(({ data: { data } }) => {
-        data = [
-          ...data?.assets?.map((d: any) => ({
-            ...d,
-            productDescription: d?.product?.optionLabel ?? '',
-            productId: d?.product?.optionValue ?? '',
-            isChecked: false
-          }))
-        ];
-        resolve(data);
-      })
+      axiosInstance()
+        .get(`${routes.transferAsset.path}/get-asset/${transferAssetId}`)
+        .then(({ data: { data } }) => {
+          data = [
+            ...data?.assets?.map((d: any) => ({
+              ...d,
+              productDescription: d?.product?.optionLabel ?? '',
+              productId: d?.product?.optionValue ?? '',
+              isChecked: false
+            }))
+          ];
+          resolve(data);
+        })
         .catch((error) => {
           reject(error);
         });
@@ -269,7 +276,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
   };
 
-
   useEffect(() => {
     if (selectedRecords.length > 0) {
       const inventoryWithNoTicket = selectedRecords.filter(
@@ -289,11 +295,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         setNextStep(true);
       }
       if (transferAssetData?.transferType.includes('External')) {
-        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length) {
-          setTransferIsEnded(true);
-          updateTransferStatus('Completed');
-        } else {
-          setTransferIsEnded(false);
+        if (
+          transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed &&
+          inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length
+        ) {
+          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
         }
       }
     }
@@ -366,7 +372,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           Create Receiving Ticket
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords.length === 0 ||
+          disabled={
+            selectedRecords.length === 0 ||
             selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
@@ -381,7 +388,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const handelReceiveAssets = () => {
     let data = {};
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     const loadingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
@@ -392,7 +399,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         .then(({ data: { data } }) => {
           fetchAssetsData(true);
           setShowConfirmBoxReceive(false);
-          setIsSubmitting(false)
+          setIsSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -400,12 +407,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           });
         })
         .catch((error) => {
-          setIsSubmitting(false)
+          setIsSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
-
 
   return (
     <Fragment>

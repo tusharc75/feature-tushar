@@ -23,7 +23,7 @@ const PayTypes = ({ payrollPolicyId }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_payTypes`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, selectedRecords } = state;
   const {
     state: { permissions, user }
@@ -32,7 +32,7 @@ const PayTypes = ({ payrollPolicyId }) => {
   const [payTypeDialog, setPayTypeDialog] = useState({ open: false, data: null, isClone: false });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
   const [deleting, setDeleting] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
   const fetchGridColumns = async () => {

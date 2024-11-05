@@ -19,7 +19,7 @@ const Material = ({ dealId }) => {
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { generateColumns } = useColumns();
 
@@ -27,7 +27,6 @@ const Material = ({ dealId }) => {
     fetchFields();
     fetchData();
   }, []);
-
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.dealsMaterial, user.user?.brandCurrency, true);
@@ -50,14 +49,7 @@ const Material = ({ dealId }) => {
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -68,10 +60,7 @@ const Material = ({ dealId }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            <p
-              className="link text-truncate"
-              title={row.original.detail}
-            >
+            <p className="link text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
             <IconButton
@@ -100,7 +89,7 @@ const Material = ({ dealId }) => {
       return {
         ...finalObject,
         index: i + 1,
-        detail: u?.productDetail[0]?.productName || "",
+        detail: u?.productDetail[0]?.productName || '',
         materialId: u?.productDetail[0]?._id
       };
     });

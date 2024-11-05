@@ -95,7 +95,6 @@ const CreateProduct = (props) => {
             _isProductTemplate = true;
           }
         });
-        //setMasterFields(data.map((_f) => _f.fieldData))
         setMasterFields(_productField);
         const _fields = [];
         _productField.map((_f) => _fields.push(_f));
@@ -121,7 +120,7 @@ const CreateProduct = (props) => {
               });
               setInitialData({
                 fields: newField,
-                values: isClone ? getObjKeysWithValues(data.productData, newField, true, user) :getObjKeysWithValues(data.productData, newField)
+                values: isClone ? getObjKeysWithValues(data.productData, newField, true, user) : getObjKeysWithValues(data.productData, newField)
               });
               EvaluteproductFields(newField);
               if (_isProductTemplate) {
@@ -143,9 +142,6 @@ const CreateProduct = (props) => {
               return true;
             }
           });
-          if (selectedEntity && fromQuote) {
-            values['entity'] = [selectedEntity];
-          }
           setInitialData({
             fields: _fields,
             values: values
@@ -536,9 +532,8 @@ const CreateProduct = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`${
-                  productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
-                }`}
+                title={`${productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -877,8 +872,8 @@ const CreateProduct = (props) => {
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                             />
@@ -909,6 +904,7 @@ const CreateProduct = (props) => {
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
                   size="small"
                   color="primary"
+                  id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -924,6 +920,7 @@ const CreateProduct = (props) => {
                   variant="contained"
                   color="primary"
                   type="submit"
+                  id="dialog-save-button"
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -931,7 +928,6 @@ const CreateProduct = (props) => {
                     submitForm();
                   }}
                 >
-                  {' '}
                   Save
                 </CustomButton>
               </CustomDialogFooter>

@@ -1,7 +1,7 @@
 import { CircularProgress, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { debounce } from 'lodash';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';
@@ -13,7 +13,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
 
   const fetchOptions = debounce(async (searchKey: string = '', page: number = 0) => {
@@ -36,9 +36,10 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
       if (page > 0 && optionsData?.length > 0) {
         setCurrentPage(page);
       }
-      setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
+    } finally {
+      setLoading(false);
     }
   }, 1000);
 
@@ -55,6 +56,10 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  useEffect(() => {
+    fetchOptions();
+  }, []);
 
   return (
     <DashboardModal
@@ -94,7 +99,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
             fetchOptions(value);
           }
         }}
-        loading={loading}
+        loading={loading || !options}
         options={options}
         autoHighlight
         value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
@@ -108,6 +113,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
             {...params}
             label={'Select Members'}
             name={'members'}
+            autoFocus
             required={true}
             InputProps={{
               ...params.InputProps,

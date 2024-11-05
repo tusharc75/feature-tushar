@@ -1,5 +1,6 @@
 import { Box, Chip, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -30,7 +31,8 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
-import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createRepairJobFlow } from './walkmeSteps';
 
 let repairJobTimeout;
 
@@ -71,16 +73,18 @@ const RepairJob = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
+  const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData([createRepairJobFlow()]);
   }, []);
 
   const fetchGridColumns = async () => {

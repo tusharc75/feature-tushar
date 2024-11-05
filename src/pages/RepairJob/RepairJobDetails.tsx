@@ -4,8 +4,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { GiAbstract055 } from 'react-icons/gi';
 import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
@@ -35,6 +33,9 @@ import ManageRepairJob from './ManageRepairJob';
 import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step'
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(routes?.repairJob.title);
@@ -48,7 +49,8 @@ const RepairJobDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
   const [repairJobData, setRepairJobData] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -93,6 +95,7 @@ const RepairJobDetails = () => {
   useEffect(() => {
     if (id) {
       fetchRepairJobData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -101,11 +104,20 @@ const RepairJobDetails = () => {
     fetchAssetStatusRights();
   }, []);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(repairJobProcessStepsNames[currentStep]);
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairJob}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
-  }, [currentStep]);
+  };
 
   const getResourceFields = () => {
     axiosInstance()
@@ -131,7 +143,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -139,7 +151,6 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
-        
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
         setAlloweOperation(data?.workOrder ? false : true);
         setRepairJobData({ ...data });
@@ -174,17 +185,10 @@ const RepairJobDetails = () => {
     }
   };
 
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
-  };
-
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -224,10 +228,10 @@ const RepairJobDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           <CustomTab value={2}>
             <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
@@ -237,6 +241,7 @@ const RepairJobDetails = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -259,6 +264,9 @@ const RepairJobDetails = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.repairJob, repairJobProcessStepsNames[step], id);
+              }}
             />
             <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && repairJobData && (
@@ -297,6 +305,22 @@ const RepairJobDetails = () => {
             <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
           </Box>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 4}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.repairJob}
+                  data={repairJobData}
+                  allowedToEdit={permissions?.repairJob?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

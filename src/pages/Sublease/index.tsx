@@ -1,6 +1,7 @@
 import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -10,19 +11,28 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  sublease
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { createSubleaseFlow } from 'src/pages/Sublease/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSublease from './ManageSublease';
-import axios, { CancelTokenSource } from 'axios';
 
 const Sublease = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   let renderedFrom = camelCase(routes.sublease?.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -39,7 +49,7 @@ const Sublease = () => {
 
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -70,6 +80,7 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
+    setWalkmeData([createSubleaseFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -160,7 +171,8 @@ const Sublease = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.sublease?.isDelete && checkIsAllowedToDelete(user, sidebarResource.sublease, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.sublease?.isDelete && checkIsAllowedToDelete(user, sidebarResource.sublease, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

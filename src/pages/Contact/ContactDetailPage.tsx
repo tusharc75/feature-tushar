@@ -37,6 +37,7 @@ import axiosInstance from './../../axios/axiosInstance';
 import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  CustomDialogTransition,
   customerAccount,
   customerContact,
   getObjKeysWithValues,
@@ -533,8 +534,10 @@ const ContactDetailsPage = (props) => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource
-              && contactPermissions?.isUpdate && allowedToEdit && (
+            {permissions?.eCommercePolicy?.isRead &&
+              contactResource === customerContact.contactResource &&
+              contactPermissions?.isUpdate &&
+              allowedToEdit && (
                 <HtmlTooltip title="E-Commerce Access" arrow placement="top">
                   <Button
                     size="small"
@@ -573,9 +576,7 @@ const ContactDetailsPage = (props) => {
               </HtmlTooltip>
             )}
             {contactPermissions?.isDelete && allowedToDelete && (
-              <DeleteButton
-                text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton
               referenceId={contactData?._id}
@@ -659,7 +660,7 @@ const ContactDetailsPage = (props) => {
                 isRedirect={false}
                 contactId={id}
                 contactResource={contactResource}
-                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
+                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}
@@ -693,7 +694,7 @@ const ContactDetailsPage = (props) => {
                 accountResource={accountResource}
                 isRenderedInCustomerContact={true}
                 isRenderedFromCustomerAccount={true}
-                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
+                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}
@@ -752,19 +753,19 @@ const ContactDetailsPage = (props) => {
                               <React.Fragment>
                                 <Typography component="p" variant="body2" className="cardDetail">
                                   {contactData?.staticData?.lead?.title && (
-                                    <span className="d-flex gap-2 align-items-center">
+                                    <span className="d-flex align-items-center gap-2">
                                       <FiStar size="15" />
                                       {contactData?.staticData?.lead?.title}
                                     </span>
                                   )}
                                   {contactData?.staticData?.lead?.email && (
-                                    <span className="d-flex gap-2 align-items-center">
+                                    <span className="d-flex align-items-center gap-2">
                                       <AiOutlineMail size="15" />
                                       {contactData?.staticData?.lead?.email}
                                     </span>
                                   )}
                                   {contactData?.staticData?.lead?.phone && (
-                                    <span className="d-flex gap-2 align-items-center">
+                                    <span className="d-flex align-items-center gap-2">
                                       <BiPhone size="15" />
                                       {contactData?.staticData?.lead?.phone}
                                     </span>
@@ -814,6 +815,7 @@ const ContactDetailsPage = (props) => {
         <Dialog
           fullWidth
           fullScreen={isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
           maxWidth="xs"
           open={showEntityRoleDialog}
           onClose={() => setShowEntityRoleDialog(false)}

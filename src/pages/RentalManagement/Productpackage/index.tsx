@@ -95,7 +95,7 @@ const Productpackage = ({
   const [costFields, setCostFields] = useState([]);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
@@ -333,44 +333,44 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit || !quotationApproved ? (
-              row.original.hideSelection ? (
-                <HtmlTooltip
-                  title={
-                    row.original?.assetQty
-                      ? row?.original?.productDetail?.serializedProduct
-                        ? 'Assets/Serial Numbers is already assigned'
-                        : 'Inventory/Serial Numbers is already assigned'
-                      : row.original?.status
-                        ? rentalManagementMessage.loadingAlreadyCreated
-                        : row.original?.invoiceCreated
+            {allowedToEdit || !quotationApproved ? (row.original.hideSelection ? (
+              <HtmlTooltip
+                title={
+                  row.original?.assetQty
+                    ? row?.original?.productDetail?.serializedProduct
+                      ? 'Assets/Serial Numbers is already assigned'
+                      : 'Inventory/Serial Numbers is already assigned'
+                    : row.original?.status
+                      ? rentalManagementMessage.loadingAlreadyCreated
+                      : row.original?.invoiceCreated
                         ? rentalManagementMessage.invoiceCreated
-                        : " "
-                  }
-                >
-                  <span>
-                    <IconButton size="small" aria-label="Details" disabled={true}>
-                      <DeleteIcon fontSize="small" color={'disabled'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              ) : (
-                <HtmlTooltip title={'Delete'}>
-                  <span>
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                        getNestedSubRows(obj, row.original);
-                        setDeleteData(obj);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" color={'error'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              )
+                        : row.original.type === MATERIAL_TYPE.service && row.original?.serviceLog?.length
+                          ? rentalManagementMessage.serviceAlreadyStarted : ''
+                }
+              >
+                <span>
+                  <IconButton size="small" aria-label="Details" disabled={true}>
+                    <DeleteIcon fontSize="small" color={'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : (
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )
             ) : (
               ''
             )}
@@ -460,14 +460,17 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
-      if(parent?.type==MATERIAL_TYPE.manualEntry && invoiceMaterialData.find((e)=>{
-        if(e._id===parent._id){
-          parent.invoiceCreated=true;
+      if (
+        parent?.type == MATERIAL_TYPE.manualEntry &&
+        invoiceMaterialData.find((e) => {
+          if (e._id === parent._id) {
+            parent.invoiceCreated = true;
+          }
+        })
+      )
+        if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+          parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
         }
-      }))
-      if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
-        parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
-      }
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice;
       }
@@ -483,8 +486,8 @@ const Productpackage = ({
             : parent?.status
               ? true
               : parent?.invoiceCreated
-              ? true
-              : false;
+                ? true
+                : false;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
           !parent.serializedProduct &&
@@ -509,17 +512,29 @@ const Productpackage = ({
       }
     });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
-        if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
-          nextStepMessage = rentalManagementMessage.validServicePrice
+    if (rows?.length) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+        if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+          if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+            nextStepMessage = rentalManagementMessage.validServicePrice;
+          }
         }
+        setNextStep(false);
+        setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
+      } else {
+        setNextStep(true);
+        setNextStepToolTip(null);
       }
-      setNextStep(false);
-      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
-    } else {
-      setNextStep(true);
-      setNextStepToolTip(null);
+    }
+    else {
+      if (user?.user?.brandPolicy?.rentalService) {
+        setNextStep(true);
+        setNextStepToolTip(null);
+      }
+      else {
+        setNextStep(false);
+        setNextStepToolTip(rentalManagementMessage.addProductPackage);
+      }
     }
     addWalkmeData(rows);
 
@@ -580,7 +595,8 @@ const Productpackage = ({
         loadingTicketProducts
       );
     });
-    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
+
+    if ((subRows.length === 0 || (subRows?.filter((s)=>s.type===MATERIAL_TYPE.package && !s.isValid)?.length>0)) && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
@@ -911,10 +927,10 @@ const Productpackage = ({
       }
       let rows: any = [{ ...rowData, ...updatedData }];
       if (updatedData.type === MATERIAL_TYPE.manualEntry) {
-        rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+        rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData, rentalManagementData?.currency);
         handleSaveCostData(rows);
       } else {
-        rows = await calculateRowsField(material, inputField, allFields, updatedData);
+        rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
         handleSaveData(rows);
       }
       setShowConfirmationDialog({ open: false, data: {} });
@@ -1175,11 +1191,9 @@ const Productpackage = ({
           isSubmitting={isSubmitting}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+      {addExistingProductDialog.open && addExistingProductDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
-          onSuccess={(services) => {
-            handleAdd(services);
-          }}
+          onSuccess={handleAdd}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}

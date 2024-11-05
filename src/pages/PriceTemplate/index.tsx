@@ -23,7 +23,7 @@ const PriceTemplate = () => {
   const renderedFrom = camelCase(routes?.priceTemplate.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions, selectedEntity }
@@ -33,7 +33,7 @@ const PriceTemplate = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { priceTemplateApi } = priceTemplate;
 
   useEffect(() => {
@@ -230,7 +230,6 @@ const PriceTemplate = () => {
           addButtonOnclick={() => CreateNew('0', false)}
           isAddButtonVisible={permissions?.priceTemplate?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

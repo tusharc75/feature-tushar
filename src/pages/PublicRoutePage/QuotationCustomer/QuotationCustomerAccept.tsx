@@ -5,16 +5,19 @@ import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import axiosInstance from 'src/axios/axiosInstance';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CHILD_RESOURCE, dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
+import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
 import QCcomment from './QCcomment';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import axios from 'axios';
+import { backendApi } from 'src/config';
+
+const renderedFrom = 'quotation_product_package';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -24,15 +27,15 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { loading } = state;
 
   useEffect(() => {
     fetchProductInventory();
   }, [openAuthId]);
 
-  const fetchFields = async (quotationData) => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
+  const fetchFields = async (fields, currency) => {
+    var data = CURReplaceByCurrencySingle(fields, currency ? currency : 'USD');
     const coloum: any = [
       {
         accessor: 'index',
@@ -60,12 +63,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -146,7 +149,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                 Header: fieldLabel,
                 Cell: ({ row }) =>
                   row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
                   )
@@ -162,7 +165,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               Header: fieldLabel,
               Cell: ({ row }) =>
                 row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(quotationData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                  <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                 ) : (
                   <NoDataCell />
                 )
@@ -185,18 +188,18 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
+            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
       } else if (element.accessor.includes('finalPrice')) {
         element['Footer'] = (info) => {
           const total = info?.rows
-            .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
+            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
+            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
           return (
             <>
-              {getUniqueCurrencies().find((d) => d.currencyCode === quotationData?.currency)?.symbolNative}{' '}
-              {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}
+              {getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}{' '}
+              {formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}
             </>
           );
         };
@@ -211,7 +214,9 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     dispatch({ type: 'loading', loading: true });
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/customer/${openAuthId}`);
+    const response = await axios.get(backendApi + `${quotation.api}/customer/${openAuthId}`);
+
+    const fields = response?.data?.data?.fields;
 
     setQuotationName(response?.data?.data?.name);
     data = response?.data?.data?.product;
@@ -220,23 +225,23 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
-        parent.type === 'serializedAsset'
+        parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
       }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
+      parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -246,7 +251,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       parent.subRows = generateNestedData(data.material, inventory, parent, response?.data?.data?.quoteData?.currency);
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
-    fetchFields(response?.data?.data?.quoteData);
+    fetchFields(fields, response?.data?.data?.quoteData?.currency);
   };
 
   const generateNestedData = (material, inventory, parent, currency) => {
@@ -258,22 +263,22 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+        _subRow.type === MATERIAL_TYPE.serializedAsset
           ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
       }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -283,10 +288,10 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow, currency);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return orderBy(subRows, ['order'], ['asc']);
@@ -298,8 +303,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       comment: comment,
       openAuthId: openAuthId
     };
-    axiosInstance()
-      .put(`${quotation.api}/customer/customer-response`, dataObj)
+    axios
+      .put(backendApi + `${quotation.api}/customer/customer-response`, dataObj)
       .then((res) => {
         setIsSubmited(true);
         toastConfig.setToastConfig({
@@ -340,7 +345,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               id="detailHeaderPageActions"
               item
               className={
-                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
+                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center justify-flex-end gap-2'
               }
             >
               {loading ? (
@@ -409,7 +414,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   refreshGrid={fetchProductInventory}
                   hideSelection={true}
                   hideAction={true}
-                  renderedFrom="quotation_product_package"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               ) : (

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -13,14 +13,14 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autorenew } from '@material-ui/icons';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
-function ProcessLogs({ onClose, logsData, productName, product }) {
+function ProcessLogs({ onClose, logsData, productName, product, referenceType }) {
   const renderedFrom = 'workOrder_consumables_request_process_logs';
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();
@@ -86,15 +86,13 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
             <>
               {row?.original['serialNumber']?.length ? (
                 <>
-                  <p className="text-truncate">
-                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
-                  </p>
+                  <p className="text-truncate">{row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}</p>
                 </>
               ) : (
                 <NoDataCell />
               )}
             </>
-          )
+          );
         }
       }
     ];
@@ -150,6 +148,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
     <Dialog
       open
       fullScreen={fullScreen}
+      TransitionComponent={CustomDialogTransition}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {
@@ -192,7 +191,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
       </CustomDialogContent>
       {revertQtyDialog.open && (
         <RevertQtyDialog
-          referenceType="workOrder"
+          referenceType={referenceType}
           productName={productName}
           product={product}
           qty={revertQtyDialog.qty}
@@ -205,11 +204,15 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
             setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
             onClose();
           }}
-          serialNumber={revertQtyDialog.serialNumber?.map(s => {
-            if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
-              return s;
-            }
-          })?.filter(Boolean) || []}
+          serialNumber={
+            revertQtyDialog.serialNumber
+              ?.map((s) => {
+                if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
+                  return s;
+                }
+              })
+              ?.filter(Boolean) || []
+          }
         />
       )}
     </Dialog>

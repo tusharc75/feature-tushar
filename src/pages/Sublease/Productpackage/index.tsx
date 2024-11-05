@@ -24,12 +24,15 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, su
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
 
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [isUpdating, setUpdating] = useState(false);
@@ -160,6 +163,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               onClick={() => {
                 openMaterial(row.original);
               }}
+              id={`edit-product-button-${row.index || 0}`}
             >
               <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
             </IconButton>
@@ -169,6 +173,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             size="small"
             aria-label="Details"
             disabled={row.original.canDelete ? false : true}
+            id={`delete-product-button-${row.index || 0}`}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -187,6 +192,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setColumns(coloum);
   };
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (allowedToEdit && rows.length > 0) {
+      setWalkmeData([generateAddStepEditProduct(0)]);
+    }
+  };
+
   const fetchMaterial = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -202,7 +213,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
+      parent.description =
+        parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
@@ -238,9 +250,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
-      setNextStep(true)
+      setNextStep(true);
     }
-
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -337,7 +349,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setRecordToUpdate(rowData);
   };
 
-
   const calculatePrice = (arr: any[]) => {
     if (subleaseData) {
       const data: any = {};
@@ -391,7 +402,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       return;
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, subleaseData?.currency);
     handleSaveData(rows);
   };
 
@@ -399,6 +410,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     return (
       <>
         <MenuItem
+          id="add-existing-products-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
           }}
@@ -406,6 +418,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           Add Existing Products
         </MenuItem>
         <MenuItem
+          id="add-existing-package-menu-item"
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
           }}

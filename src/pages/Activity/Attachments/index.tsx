@@ -35,6 +35,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
+const renderedFrom = 'attachment_render';
+
 export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -55,7 +57,7 @@ export default function Attachment() {
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
@@ -70,7 +72,6 @@ export default function Attachment() {
       accessor: 'type',
       id: 'type',
       Header: 'Type',
-      width: 70,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => (
@@ -149,7 +150,6 @@ export default function Attachment() {
       id: 'attachmentType',
       accessor: 'attachmentType',
       Header: 'Attachment Type',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => {
@@ -160,7 +160,6 @@ export default function Attachment() {
       id: 'createdBy',
       accessor: 'createdBy',
       Header: 'Created By',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) =>
@@ -178,7 +177,6 @@ export default function Attachment() {
       id: 'updatedBy',
       accessor: 'updatedBy',
       Header: 'Updated By',
-      width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) =>
@@ -547,7 +545,7 @@ export default function Attachment() {
       )
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'error', error: true });
+        // dispatch({ type: 'error', error: true });
       })
       .finally(() => {
         setTimeout(() => {
@@ -650,7 +648,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -694,7 +692,7 @@ export default function Attachment() {
               dispatch={dispatch}
               state={state}
               expander={true}
-              renderedFrom={'attachment_render'}
+              renderedFrom={renderedFrom}
               fetchChildAttachment={fetchChildAttachment}
               refreshGrid={fetchAttachments}
             />
@@ -813,6 +811,7 @@ export default function Attachment() {
               setEmailAttachment(null);
             }}
             fullWidth
+            disableEnforceFocus={true}
           >
             <CreateEmail
               emailId={null}

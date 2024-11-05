@@ -20,13 +20,13 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const {
     state: { user, permissions }
   }: any = useData();
-  const [columns, setColumns] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const [columns, setColumns] = useState(null);
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting } = state;
 
   useEffect(() => {
     fetchGridColumns();
-  }, [])
+  }, []);
 
   const fetchGridColumns = () => {
     let columns = [
@@ -35,9 +35,17 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         Header: 'Product Name',
         width: 200,
         Cell: ({ row }) => {
-          return row.original?.productName ? <Link className="link text-truncate" title={row?.original?.productName} to={`${routes.posProductDetail.path}/${row?.original?._id}/${row?.original?.plantId}`}>
-            {row.original?.productName}
-          </Link> : <NoDataCell />;
+          return row.original?.productName ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.productName}
+              to={`${routes.posProductDetail.path}/${row?.original?._id}/${row?.original?.plantId}`}
+            >
+              {row.original?.productName}
+            </Link>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -69,9 +77,9 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
       //   }
       // },
       ActionsRenderer
-    ]
+    ];
     setColumns(columns);
-  }
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -99,7 +107,8 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
             </IconButton>
           </span>
         </HtmlTooltip>
-      </>)
+      </>
+    )
   };
 
   useEffect(() => {
@@ -114,13 +123,13 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
   const getQueryString = () => {
     let deepFilter = `&page=${page}&limit=${limit}`;
-    
+
     const { deepFilters } = gridFilterParser(filters);
 
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
     }
- 
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -164,8 +173,6 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         dispatch({ type: 'loading', loading: false });
       });
   };
-
-
 
   return (
     <Fragment>

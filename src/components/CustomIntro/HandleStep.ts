@@ -1,6 +1,8 @@
 import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { CheckBoxObserver } from 'src/components/CustomIntro/Observers/CheckBoxObserver';
+import { CheckForRequiredFields } from 'src/components/CustomIntro/Observers/CheckForRequiredFields';
 import { DisableObserver } from 'src/components/CustomIntro/Observers/DisableObserver';
 import { MultiSelectAutoCompleteObserver } from 'src/components/CustomIntro/Observers/MultiSelectAutoCompleteObserver';
 import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
@@ -40,9 +42,11 @@ export class HandleSteps {
   handleReset: () => void;
   findingElement: boolean;
   attachedOvservers: Observer[];
+  originalSteps: StepDefination[];
   clicked: boolean;
   waiting: boolean;
   tempIndex: number;
+  checkForRequiredFields: CheckForRequiredFields;
   constructor({
     setUpdateSignal,
     steps,
@@ -84,6 +88,7 @@ export class HandleSteps {
     this.loop();
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
+    this.checkForRequiredFields = new CheckForRequiredFields(this);
   }
 
   private addEventListeners() {
@@ -100,6 +105,8 @@ export class HandleSteps {
     window.requestAnimationFrame(() => {
       this.checkPreviousObservers();
       this.loop();
+      this.checkForRequiredFields?.update();
+      this.checkForRequiredFields?.render();
     });
   }
 
@@ -135,6 +142,7 @@ export class HandleSteps {
   attachObservers() {
     this.attachedOvservers.map((o) => o.cleanup());
     const currStepData = this.currentStepData;
+
     if (!currStepData) return;
     const isObserverPresent = this.attachedOvservers.find((o) => o.actualIndex === this.currentIndex);
     if (isObserverPresent) return;
@@ -163,6 +171,7 @@ export class HandleSteps {
       const isMultiInputAutoComplete = parent === 'multiSelect';
 
       const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
+      const isCheckBox = this.currentStepData.fieldType === 'checkbox';
 
       if (isMultiInputAutoComplete) {
         // Track multiselect autocomplete via MultiSelectAutoComplete observer
@@ -179,6 +188,13 @@ export class HandleSteps {
           validator = this.currentStepData.nextOnValueChange;
         }
         const observer = new AutocompleteObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
+      } else if (isCheckBox) {
+        let validator = (value: boolean) => value === true;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new CheckBoxObserver(this, this.currentStepData.element, validator);
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via observer
@@ -258,8 +274,18 @@ export class HandleSteps {
         this.tempIndex = -1;
       }
     }
+    // if previous step will open dialog then retry to get element position in 500ms to see if there is any layout shift
+    if (this.currentIndex > 0) {
+      const prevStep = this.steps[this.currentIndex - 1];
+      if (prevStep.willOpenDialog) {
+        setTimeout(() => {
+          this.getCurrentStep(true, this.currentIndex);
+        }, 500);
+      }
+    }
     this.getCurrentStep();
   }
+
   previous() {
     if (this.currentIndex === 0) {
       this.getCurrentStep();
@@ -305,24 +331,6 @@ export class HandleSteps {
       this.sendUpdateSignal();
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
-      // this.scrollToCurrentStep(element);
-
-      // Check if value exist then move on to the next step
-      // if (activeStep.skipIfValueExist) {
-      //   const inputElement = element as HTMLInputElement;
-      //   let validator = (value: string) => {
-      //     if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
-      //       return value.length > 0 && Number(value) !== 0;
-      //     }
-      //     return value.length > 0;
-      //   };
-
-      //   if (validator(inputElement.value)) {
-      //     this.clicked = false;
-      //     this.next();
-      //     return;
-      //   }
-      // }
 
       this.currentStepData = {
         ...activeStep,
@@ -330,15 +338,18 @@ export class HandleSteps {
         index: index,
         element
       };
-      // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
-      // setTimeout(() => {
+
       this.attachObservers();
       this.sendUpdateSignal();
-      // }, 0);
     }
   }
 
-  private initializeStepData(steps: StepDefination[]) {
+  private initializeStepData(steps: StepDefination[], firstTimeInitialization = true, from = '') {
+    if (firstTimeInitialization) {
+      this.originalSteps = steps;
+    } else {
+      this.originalSteps = [...this.originalSteps, ...steps];
+    }
     const newSteps: Step[] = [];
     for (let i = 0; i < steps.length; i++) {
       const data = steps[i];
@@ -351,13 +362,14 @@ export class HandleSteps {
         nextButtonName: data.nextButtonName,
         willOpenDialog: data.willOpenDialog,
         waitForStepInsertion: data.waitForStepInsertion,
-        fieldType: data.fieldType
+        fieldType: data.fieldType,
+        isPreviousButtonDisabled: data.isPreviousButtonDisabled
       };
       if (data.skipIfValueExist) {
         normalStep.skipIfValueExist = data.skipIfValueExist;
       }
 
-      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
+      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data) || data.fieldType === 'checkbox') {
         newSteps.push(normalStep);
         newSteps.push({
           ...data,
@@ -373,15 +385,19 @@ export class HandleSteps {
   }
 
   push(steps: StepDefination[]) {
-    this.steps.push(...this.initializeStepData(steps));
+    this.steps.push(...this.initializeStepData(steps, false, 'push'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   insert(steps: StepDefination[], index: number) {
     if (!steps || steps.length === 0 || !index) return;
-    this.steps.splice(index, 0, ...this.initializeStepData(steps));
+    this.originalSteps.splice(index, 0, ...steps);
+    this.steps = this.initializeStepData(this.originalSteps, false, 'insert');
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
     if (!steps || steps.length === 0) return;
-    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps));
+    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps, false, 'insertAtCurrentIndex'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   pop() {
     this.steps.pop();
@@ -390,13 +406,20 @@ export class HandleSteps {
     this.steps.shift();
   }
   unshift(steps: StepDefination[]) {
-    this.steps.unshift(...this.initializeStepData(steps));
+    this.steps.unshift(...this.initializeStepData(steps, false, 'unshift'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   splice(start: number, deleteCount: number, steps: StepDefination[]) {
-    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps));
+    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps, false, 'splice'));
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   sort(compareFn?: (a: Step, b: Step) => number) {
     this.steps.sort(compareFn);
+  }
+  remove(index: number) {
+    this.originalSteps.splice(index, 1);
+    this.steps = this.initializeStepData(this.originalSteps, false, 'remove');
+    this.checkForRequiredFields.initSteps(this.steps);
   }
   reverse() {
     this.steps.reverse();

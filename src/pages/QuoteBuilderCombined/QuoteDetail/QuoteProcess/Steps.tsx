@@ -1,16 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-
 import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-
 import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
-import NewStepper from '../../../../components/Helpers/NewStepper';
 import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
@@ -18,6 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DoaStepUsers from './DOAStepUsers';
 
 import Steps1 from 'src/components/Steps';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   rejected: {
@@ -156,15 +153,7 @@ const Steps = (props) => {
       <Steps1
         currentStep={currentStep}
         nextStep={!loading && !globalLoading && nextStep}
-        isPrevStep={
-          currentStep >= 0 && !loading && !globalLoading && isPrevStep
-          // allowedToEdit &&
-          // !versionStatus.includes('Rejected by Customer') &&
-          // !(steps.length === 5 && currentStep > 3) &&
-          // !versionStatus.includes('Sent for DOA') &&
-          // !(steps.length === 6 && currentStep >= 4) &&
-          // !versionStatus.includes('Sent to Customer') &&
-        }
+        isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
         setCurrentStep={() => {}}
@@ -178,26 +167,25 @@ const Steps = (props) => {
         handlePrev={handleBack}
         setStepFullScreen={setStepFullScreen}
       />
-      {/* {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>} */}
       {isMobile && !isTablet ? (
         <></>
       ) : (
         <>
-          <div className="absolute top-[64px] right-[25px] text-[20px]  font-semibold rounded-bl-md">
+          <div className="absolute right-[25px] top-[64px] rounded-bl-md  text-[20px] font-semibold">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
-                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                className={`${approvedClasses} text d-flex align-items-center justify-content-center max-w-max gap-1  rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px] font-bold`}
               >
                 <h6>Quote version - {approvedQuote.versionApproved} of this quote has been Approved</h6>
               </div>
             )}
             <>
               {versionStatus === 'Sent for DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Sent for DOA'} />}
-              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
+              {versionStatus.split(' (')[0] === 'Accepted by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
               {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
                 <div
-                  className={`${classes.sent} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${classes.sent} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <AiOutlineClockCircle size={20} />
                   <h6>Quote has been sent to customer</h6>
@@ -205,7 +193,7 @@ const Steps = (props) => {
               )}
               {versionStatus.includes('Accepted by Customer') && (
                 <div
-                  className={`${approvedClasses} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${approvedClasses} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <FcApproval size={20} />
                   <h6>Approved by Customer</h6>
@@ -213,7 +201,7 @@ const Steps = (props) => {
               )}
               {versionStatus.includes('Rejected by Customer') && (
                 <div
-                  className={`${classes.rejected} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${classes.rejected} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <FcCancel size={20} />
                   <h6>Rejected by Customer</h6>
@@ -225,8 +213,15 @@ const Steps = (props) => {
       )}
 
       {showManualCustomerActionDialog && (
-        <Dialog fullWidth maxWidth="xs" open={showManualCustomerActionDialog} onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
-          <CustomDialogHeader title={`Reason For Ending`} />
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          TransitionComponent={CustomDialogTransition}
+          open={showManualCustomerActionDialog}
+          onClose={closeManualDiaog}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <CustomDialogHeader title="Reason For Ending" onClose={closeManualDiaog} />
           <CustomDialogContent>
             <>
               <List style={{ padding: 0 }}>

@@ -23,8 +23,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
-import { FunnelChart } from 'react-funnel-pipeline'
-import 'react-funnel-pipeline/dist/index.css'
+import { FunnelChart } from 'react-funnel-pipeline';
+import 'react-funnel-pipeline/dist/index.css';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -198,7 +198,7 @@ const ChartTypes = ({
       .then(async ({ data: { data } }) => {
         if (chart?.chartType === 'Funnel') {
           const funnelData = data?.map((d: any) => {
-            return { name: d.name, value: d.percentage }
+            return { name: `${d.name} - ${d.percentage}%`, value: d.percentage };
           });
           setChartData(funnelData);
         } else {
@@ -389,7 +389,7 @@ const ChartTypes = ({
                 <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : chart.chartType === 'Funnel' ? (
                 <Box pr={2} pl={2} pb={2}>
-                  <FunnelChart data={chartData} />
+                  <FunnelChart data={chartData} showValues={false} />
                 </Box>
               ) : (
                 <>

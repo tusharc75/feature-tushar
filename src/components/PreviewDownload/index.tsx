@@ -9,7 +9,6 @@ import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isTablet } from 'react-device-detect';
-import HtmlTooltip from '../CustomTooltipTitle';
 import { ThemeButton } from '../Helpers/Buttons';
 
 function PreviewDownload({
@@ -59,11 +58,17 @@ function PreviewDownload({
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  const handleView = (type, operation, subType, visibleColumns, sortBy= '', orderBy= '') => {
+  const handleView = (type, operation, subType, visibleColumns, sortBy = '', orderBy = '') => {
     setLoadingType(subType);
     setBtnLoading(operation);
 
-    let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
+    let showColumns = JSON.stringify(visibleColumns?.map((e) => {
+      return ({
+        name: e?.fieldName,
+        width: e?.width,
+        customLabel: e?.customLabel
+      })
+    }));
 
     let api = '';
     if (type === 'Excel') {
@@ -81,7 +86,7 @@ function PreviewDownload({
         } else {
           api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
         }
-        if(sortBy && orderBy) {
+        if (sortBy && orderBy) {
           api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
         }
       }
@@ -242,7 +247,7 @@ function PreviewDownload({
           handleClose={() => {
             setShowColumnsDialog({ open: false, type: '', operation: '' });
           }}
-          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy= '', orderBy= '') => {
+          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy = '', orderBy = '') => {
             if (showColumnsDialog.operation === 'Send Email') {
               setLoadingType('email');
               handleView('PDF', 'base64', 'Regular', visibleColumnsPdf);
@@ -290,6 +295,7 @@ function PreviewDownload({
             setEmailAttachments([]);
             setFullScreen(false);
           }}
+          disableEnforceFocus={true}
           fullWidth
         >
           <CreateEmail

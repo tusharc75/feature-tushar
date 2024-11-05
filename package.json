@@ -46,7 +46,7 @@
     "clsx": "^2.1.1",
     "css-loader": "4.3.0",
     "date-fns": "^2.20.0",
-    "dotenv": "^10.0.0",
+    "dotenv": "^16.4.5",
     "dotenv-expand": "5.1.0",
     "draft-convert": "^2.1.11",
     "draft-js": "^0.11.7",
@@ -162,8 +162,10 @@
     "yup": "^0.32.9"
   },
   "scripts": {
+    "prebuild": "node -r dotenv/config src/prebuild/prebuild.js",
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
+    "dev:prebuild": "yarn prebuild && yarn dev",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
     "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
     "winBuild": "set \"GENERATE_SOURCEMAP=true\" && node --max_old_space_size=10240 ./node_modules/vite/bin/vite build",
@@ -174,7 +176,8 @@
     "release": "standard-version",
     "prepare": "husky install",
     "analyze": "yarn winBuild && source-map-explorer 'build/static/js/*.js'",
-    "serve": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build"
+    "serve": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [

@@ -1,10 +1,24 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, TextField, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  List,
+  Menu,
+  MenuItem,
+  Popover,
+  Select,
+  Switch,
+  TextField,
+  useMediaQuery
+} from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
-import React, { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer, datarowInterface } from 'src/components/CardColTimeline';
@@ -18,14 +32,55 @@ import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialo
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
-
-const RESOURCE = [
-  { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
-  { key: 'repairOrder', resource: sidebarResource.repairOrder, title: routes.repairOrder.title },
-  { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title }
-];
+import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
+import CustomFilter from 'src/components/Helpers/CustomFilter';
+import AppsIcon from '@material-ui/icons/Apps';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
+import { KeyboardArrowDown } from '@material-ui/icons';
+import ProductFrequencyDialog from './ProductFrequencyDialog';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 
 const LIMIT = 25;
+
+const FIELD_TO_FILTER = [
+  {
+    key: 'user',
+    fieldName: 'user',
+    fieldLabel: routes.employeeMaster.title,
+    resource: sidebarResource.employeeMaster,
+    type: 'dropDown'
+  },
+  {
+    key: 'serviceMaster',
+    fieldName: 'service',
+    fieldLabel: routes.serviceMaster.title,
+    resource: sidebarResource.serviceMaster,
+    type: 'dropDown'
+  },
+  {
+    key: 'workOrder',
+    fieldName: 'workOrder',
+    fieldLabel: routes.workOrder.title,
+    resource: sidebarResource.workOrder,
+    type: 'dropDown'
+  },
+  {
+    key: 'repairOrder',
+    fieldName: 'repairOrder',
+    fieldLabel: routes.repairOrder.title,
+    resource: sidebarResource.repairOrder,
+    type: 'dropDown'
+  },
+  {
+    key: 'productionOrder',
+    fieldName: 'productionOrder',
+    fieldLabel: routes.productionOrder.title,
+    resource: sidebarResource.productionOrder,
+    type: 'dropDown'
+  }
+];
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -37,27 +92,38 @@ const WorkOrderSupervisor = () => {
   }: any = useData();
 
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
 
-  const [usersOption, setUsersOption] = useState([]);
-  const [serviceMasterOption, setServiceMasterOption] = useState([]);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [resourceOptions, setResourceOptions] = useState([]);
-  const [selectedResourceOption, setSelectedResourceOption] = useState(null);
+  const [fieldToFilterList, setFieldToFilterList] = useState([]);
+  const [filterResourceQuery, setFilterResourceQuery] = useState({
+    filterById: [],
+    deepFilter: []
+  });
+  const [viewType, setViewType] = useState(1);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
+  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
+  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
+  const [resourceType, setResourceType] = useState('workOrder');
+  const [isOpen, setOpen] = useState({ open: false, id: null });
 
-  const resourceFilter: any = RESOURCE.filter((e) => {
-    if (permissions[e.key]) return true;
-    else return false;
-  });
+  const ref: any = useRef();
+
+  useEffect(() => {
+    const options: any = [];
+    FIELD_TO_FILTER?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push(item);
+      }
+    });
+    setFieldToFilterList(options);
+  }, []);
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -89,25 +155,6 @@ const WorkOrderSupervisor = () => {
         break;
     }
   }, [timeFrame]);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master`)
-      .then(({ data: { data } }) => {
-        setServiceMasterOption(data['Service Master'] || []);
-        setUsersOption(data['Employee Master'] || []);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (selectedResource) {
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${selectedResource.resource}`)
-        .then(({ data: { data } }) => {
-          setResourceOptions(data[selectedResource.resource]);
-        });
-    }
-  }, [selectedResource]);
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
@@ -169,7 +216,7 @@ const WorkOrderSupervisor = () => {
 
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
-      let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
       dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
       axiosInstance()
         .get(api)
@@ -209,43 +256,33 @@ const WorkOrderSupervisor = () => {
     [dispatch, limit, toastConfig]
   );
 
-  const getQueryString = useCallback(() => {
-    let deepFilter = '';
-    if (selectedUser) {
-      deepFilter = `${deepFilter}&user=${selectedUser}`;
-    }
-    if (selectedService) {
-      deepFilter = `${deepFilter}&service=${selectedService}`;
-    }
-    if (selectedResource && selectedResourceOption) {
-      deepFilter = `${deepFilter}&${selectedResource.key}=${selectedResourceOption}`;
-    }
-    if (globalFilters) {
-      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
-    }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
-  }, [globalFilters, selectedResource, selectedResourceOption, selectedService, selectedUser]);
+  const getQueryString = useCallback(
+    (selectDateFilter = true) => {
+      let deepFilter = '';
+      if (filterResourceQuery?.filterById?.length) {
+        filterResourceQuery?.filterById?.forEach((f) => {
+          deepFilter = `${deepFilter}&${f.field}=${f.term}`;
+        });
+      }
+
+      if (globalFilters && selectDateFilter) {
+        deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
+      }
+      return `${deepFilter}&filterType=and&filterByIdType=and`;
+    },
+    [globalFilters, selectedUser, filterResourceQuery]
+  );
 
   useEffect(() => {
-    if (selectedUser || selectedService || selectedResourceOption || timeFrame || globalFilters) {
+    if (selectedUser || timeFrame || globalFilters || filterResourceQuery?.filterById?.length) {
       const query = getQueryString();
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
-  }, [
-    selectedUser,
-    selectedResourceOption,
-    selectedService,
-    timeFrame,
-    globalFilters.from,
-    globalFilters.to,
-    dispatch,
-    getQueryString,
-    globalFilters
-  ]);
+  }, [selectedUser, timeFrame, globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType, filterResourceQuery]);
 
-  const isMobile = useMediaQuery('(max-width: 650px)');
+  const isMobile = useMediaQuery('(max-width: 800px)');
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
@@ -262,143 +299,90 @@ const WorkOrderSupervisor = () => {
 
   const reset = () => {
     setSelectedUser(null);
-    setSelectedService(null);
-    setSelectedResource(null);
-    setSelectedResourceOption(null);
+    setFilterResourceQuery({
+      filterById: [],
+      deepFilter: []
+    });
   };
 
   const isFilterPresent = useMemo(() => {
-    return selectedUser || selectedService || selectedResource || selectedResourceOption;
-  }, [selectedUser, selectedService, selectedResource, selectedResourceOption]);
+    return selectedUser || filterResourceQuery?.filterById?.length;
+  }, [selectedUser, filterResourceQuery]);
 
   const filters = (
     <>
-      <Autocomplete
-        fullWidth
-        options={usersOption}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        getOptionSelected={(option: any, val) => {
-          return option.optionValue === val.optionValue;
-        }}
-        value={
-          usersOption.filter((data) => data.optionValue === selectedUser).length
-            ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-            : ''
-        }
-        onChange={(e, val) => {
-          setSelectedUser(val && val.optionValue ? val.optionValue : '');
-        }}
-        renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
-        )}
-      />
-      <Autocomplete
-        fullWidth
-        options={serviceMasterOption}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        getOptionSelected={(option: any, val) => {
-          return option.optionValue === val.optionValue;
-        }}
-        value={
-          serviceMasterOption.filter((data) => data.optionValue === selectedService).length
-            ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
-            : ''
-        }
-        onChange={(e, val) => {
-          setSelectedService(val && val.optionValue ? val.optionValue : '');
-        }}
-        renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
-        )}
-      />
-      <Autocomplete
-        fullWidth
-        options={resourceFilter}
-        getOptionLabel={(option: any) => (option ? option?.title : '')}
-        value={selectedResource}
-        onChange={(e, val) => {
-          setSelectedResourceOption(null);
-          setSelectedResource(val);
-        }}
-        renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
-      />
-      {selectedResource && (
-        <Autocomplete
-          fullWidth
-          options={resourceOptions}
-          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => {
-            return option.optionValue === val.optionValue;
+      {viewType !== 2 && (
+        <FormControl fullWidth size="small" margin="none" variant="outlined">
+          <InputLabel id="duration">Select Duration</InputLabel>
+          <Select
+            labelId="duration"
+            id="time-duration"
+            value={timeFrame}
+            onChange={(e) => setTimeFrame(e.target.value)}
+            label="Select Duration"
+            SelectDisplayProps={{
+              style: { minHeight: 22.5 }
+            }}
+            fullWidth
+          >
+            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+            <MenuItem value={'custom'}>Custom</MenuItem>
+          </Select>
+        </FormControl>
+      )}
+      {viewType !== 2 && (
+        <KeyboardDatePicker
+          disabled={timeFrame !== 'custom'}
+          inputVariant="outlined"
+          variant="inline"
+          size="small"
+          InputProps={{
+            style: { minHeight: '38px' }
           }}
-          value={
-            resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
-              ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
-              : ''
-          }
-          onChange={(e, val) => {
-            setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+          autoOk
+          format={dateFormatForInputControl}
+          maxDate={globalFilters.to}
+          label="From"
+          value={globalFilters.from}
+          onChange={(date) => {
+            setGlobalFilters({ ...globalFilters, from: date });
           }}
-          renderInput={(params) => (
-            <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
-          )}
         />
       )}
-      <FormControl fullWidth size="small" margin="none" variant="outlined">
-        <InputLabel id="duration">Select Duration</InputLabel>
-        <Select
-          labelId="duration"
-          id="time-duration"
-          value={timeFrame}
-          onChange={(e) => setTimeFrame(e.target.value)}
-          label="Select Duration"
-          SelectDisplayProps={{
-            style: { minHeight: 22.5 }
+      {viewType !== 2 && (
+        <KeyboardDatePicker
+          disabled={timeFrame !== 'custom'}
+          inputVariant="outlined"
+          variant="inline"
+          autoOk
+          size="small"
+          InputProps={{
+            style: { minHeight: '38px' }
           }}
-          fullWidth
-        >
-          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-          <MenuItem value={'custom'}>Custom</MenuItem>
-        </Select>
-      </FormControl>
-      <KeyboardDatePicker
-        disabled={timeFrame !== 'custom'}
-        inputVariant="outlined"
-        variant="inline"
-        size="small"
-        InputProps={{
-          style: { minHeight: '38px' }
-        }}
-        autoOk
-        format={dateFormatForInputControl}
-        maxDate={globalFilters.to}
-        label="From"
-        value={globalFilters.from}
-        onChange={(date) => {
-          setGlobalFilters({ ...globalFilters, from: date });
-        }}
-      />
-      <KeyboardDatePicker
-        disabled={timeFrame !== 'custom'}
-        inputVariant="outlined"
-        variant="inline"
-        autoOk
-        size="small"
-        InputProps={{
-          style: { minHeight: '38px' }
-        }}
-        minDate={globalFilters.from}
-        format={dateFormatForInputControl}
-        label="To"
-        value={globalFilters.to}
-        onChange={(date) => {
-          setGlobalFilters({ ...globalFilters, to: date });
-        }}
-      />
+          minDate={globalFilters.from}
+          format={dateFormatForInputControl}
+          label="To"
+          value={globalFilters.to}
+          onChange={(date) => {
+            setGlobalFilters({ ...globalFilters, to: date });
+          }}
+        />
+      )}
     </>
   );
+
+  const onClickRefreshIcon = () => {
+    if (viewType === 2) {
+      if (ref?.current) {
+        ref?.current?.childFunction();
+      }
+    } else {
+      dispatch({ type: 'refreshData' });
+    }
+  };
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -410,22 +394,22 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-[1fr_30px] gap-2 items-start">
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
-                {isMobile ? (
+            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
+              {viewType == 1 ? (
+                isMobile ? (
                   <>
-                    <div className="max-w-fit mr-auto relative">
+                    <div className="relative mr-auto max-w-fit">
                       {isFilterPresent ? (
                         <>
                           <span
                             className={`${
                               isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-[9] animate-ping`}
+                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
                             className={`${
                               isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-10`}
+                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -466,31 +450,84 @@ const WorkOrderSupervisor = () => {
                     </Popover>
                   </>
                 ) : (
-                  filters
-                )}
-              </div>
-              <div className="pt-[4px]">
-                <HtmlTooltip title={'Refresh'}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      dispatch({ type: 'refreshData' });
-                    }}
-                    style={{ display: 'flex', marginLeft: 'auto' }}
-                  >
-                    <RefreshIcon />
-                  </IconButton>
-                </HtmlTooltip>
+                  <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
+                )
+              ) : (
+                <Box display="flex">
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                    <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
+                      {routes.workOrder.title}
+                    </ToggleButton>
+                    <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
+                      {routes.repairOrder.title}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+              )}
+
+              <div className="flex gap-2 max-[600px]:flex-wrap">
+                <div className="flex-grow pt-[4px]">
+                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                </div>
+                <div className="pt-[4px]">
+                  <RenderActionOptions
+                    permissions={permissions}
+                    setShowProductFreqDialog={setShowProductFreqDialog}
+                    setShowManageWorkOrder={setShowManageWorkOrder}
+                  />
+                </div>
+
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
+                    <IconButton
+                      size="small"
+                      aria-label="Clone"
+                      onClick={() => {
+                        setViewType(1);
+                      }}
+                    >
+                      <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small" onClick={() => setViewType(2)}>
+                      <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={'Refresh'}>
+                    <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
+                      <RefreshIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
               </div>
             </div>
           </div>
-          <CardColTimeline
-            fetchSingleColumn={fetchSingleColumn}
-            state={state}
-            dispatch={dispatch}
-            passFailStatus={true}
-            passFailAccessor="serviceStatus"
-          />
+          {viewType === 1 && (
+            <CardColTimeline
+              fetchSingleColumn={fetchSingleColumn}
+              state={state}
+              dispatch={dispatch}
+              passFailStatus={true}
+              passFailAccessor="serviceStatus"
+              cardOnClick={(e, data) => {
+                setOpen({ open: true, id: data._id });
+              }}
+            />
+          )}
+          {viewType === 2 && (
+            <WorkOrderCalendar
+              getFilterQuery={getQueryString}
+              filterResourceQuery={filterResourceQuery}
+              reference={resourceType}
+              ref={ref}
+              setOpen={setOpen}
+            />
+          )}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
@@ -530,6 +567,37 @@ const WorkOrderSupervisor = () => {
               setWorkStationAssignDialog(false);
               dispatch({ type: 'refreshData' });
             }}
+          />
+        )}
+        {showManageWorkOrder && (
+          <ManageWorkOrder
+            isClone={false}
+            workOrderId={null}
+            onClose={() => setShowManageWorkOrder(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowManageWorkOrder(false);
+            }}
+            isRedirectToDetailPage={false}
+          />
+        )}
+        {showProductFreqDialog && (
+          <ProductFrequencyDialog
+            onClose={() => setShowProductFreqDialog(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowProductFreqDialog(false);
+            }}
+          />
+        )}
+        {isOpen.open && (
+          <TechnicianDialog
+            handleClose={() => {
+              setOpen({ open: false, id: null });
+            }}
+            workOrderId={isOpen?.id}
+            uniqueId={null}
+            canPerform={false}
           />
         )}
       </Fragment>
@@ -583,6 +651,64 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
           )}
         </Menu>
       )}
+    </>
+  );
+};
+
+const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog, permissions }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <span>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          disabled={false}
+          onClick={handleOpenMenu}
+          endIcon={<KeyboardArrowDown fontSize="small" />}
+          className="new-dropdown-v1"
+        >
+          Actions
+        </Button>
+      </span>
+      <Menu
+        anchorEl={anchorEl}
+        keepMounted
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {permissions?.workOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setShowManageWorkOrder(true);
+              handleClose();
+            }}
+          >
+            {`Create ${routes?.workOrder.title}`}
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setShowProductFreqDialog(true);
+            handleClose();
+          }}
+        >
+          Set Product Frequency
+        </MenuItem>
+      </Menu>
     </>
   );
 };

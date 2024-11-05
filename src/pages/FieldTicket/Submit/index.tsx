@@ -19,6 +19,8 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateFieldTicketSubmit, generateFieldTicketReopen } from '../walkmeSteps';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
@@ -31,8 +33,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const [viewLogsDialog, setViewLogsDialog] = useState(false);
   const [fieldTicketSubmitFields, setFieldTicketSubmitFields] = useState(null);
   const isStepDataSet = useRef(false);
-
-  const { state, dispatch } = useTableReducer();
+  const { isOffline } = useContext(CustomOfflineContext);
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -58,8 +60,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const fetchFields = async () => {
     setColumns(null);
-    let fieldTicketMaterialFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
-    const fieldTicketSubmitField = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
+    let fieldTicketMaterialFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false, isOffline);
+    const fieldTicketSubmitField = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true, isOffline);
     setFieldTicketSubmitFields(fieldTicketSubmitField);
     fieldTicketMaterialFields = fieldTicketMaterialFields?.filter((f) => f?.isRead);
 
@@ -163,12 +165,18 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const fetchGridData = async () => {
     dispatch({ type: 'loading', loading: true });
+    let material, costs;
+    if (isOffline) {
+      let data = await findAll(objectStore.fieldTicketMaterial);
+      material = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && d?.type !== MATERIAL_TYPE.manualEntry);
+      costs = data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && d?.type === MATERIAL_TYPE.manualEntry);
+    } else {
+      const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
+      const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
+      material = [...materialResponse?.data?.data?.material];
+      costs = costResponse?.data?.data || [];
+    }
 
-    const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
-    const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
-
-    const material = [...materialResponse?.data?.data?.material];
-    const costs = costResponse?.data?.data || [];
     const materialRows = material?.filter((e) => !e.parentId);
 
     materialRows?.forEach((parent, i) => {
@@ -250,18 +258,20 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
                 Submit
               </Button>
             )}
-            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
+            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && !isOffline && (
               <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
                 Re-Open
               </Button>
             )}
           </Fragment>
         )}
-        <HtmlTooltip title="View Logs">
-          <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
-            <HistoryIcon />
-          </IconButton>
-        </HtmlTooltip>
+        {!isOffline && (
+          <HtmlTooltip title="View Logs">
+            <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
+              <HistoryIcon />
+            </IconButton>
+          </HtmlTooltip>
+        )}
       </>
     );
   };
@@ -271,7 +281,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
       <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={false}
-        previewDownloadProps={previewDownloadProps}
+        previewDownloadProps={isOffline ? null : previewDownloadProps}
         rightSideContents={<RightSideContents />}
         hasXpadding
       />

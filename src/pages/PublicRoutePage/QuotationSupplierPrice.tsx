@@ -5,14 +5,12 @@ import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { sortBy, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-
-let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -61,12 +59,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
+const QuotationSupplierPrice = ({ openAuthData, openAuthId }) => {
   let renderedFrom = 'QuotationSupplierPrice';
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { dataRows } = state;
 
@@ -74,7 +72,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
   const [columns, setColumns] = useState(null);
   const [requireFieldArray, setRequireFieldArray] = useState([]);
-  const [quotationDetailsData, setQuotationDetailsData] = useState(null);
+  const [quotationData, setQuotationData] = useState(null);
   const [isSubmited, setIsSubmited] = useState(false);
 
   const quotationFields = [
@@ -140,13 +138,27 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     fetchData();
   }, []);
 
+  const getParentPricing = (row: any, fieldName: any) => {
+    let pricing = 0;
+    if (row?.subRows?.length > 0) {
+      row?.subRows?.forEach((subRow) => {
+        pricing += subRow[fieldName] || 0;
+      });
+    }
+    if (pricing === 0) {
+      return row[fieldName] || 0;
+    }
+    return pricing;
+  };
+
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axios
-      .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${quotationData?.data?.requestId}`)
+      .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${openAuthData?.requestId}`)
       .then(({ data: { data } }) => {
-        setQuotationDetailsData(data?.quotation);
+        setQuotationData(data?.quotation);
         const material = data?.materials.filter((e) => !!!e?.parentId);
+        const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
         let rows = material?.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
@@ -168,7 +180,11 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 : item?.type === MATERIAL_TYPE.package
                   ? item?.packageDetail?.packageDescription
                   : '';
-          res.subRows = generateNestedData(data?.materials, res);
+          res.subRows = generateNestedData(data?.materials, res, filteredFields);
+          filteredFields?.forEach((field) => {
+            const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+            res[fieldName] = getParentPricing(res, fieldName);
+          });
           return res;
         });
         let columns = [];
@@ -211,8 +227,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           }
         ];
 
-        const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
-        const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
+        const newColumns = generateColumns(renderedFrom, filteredFields, null, false, data?.quotation?.currency);
         newColumns?.forEach((e) => {
           e.editable = true;
         });
@@ -231,28 +246,31 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, filteredFields) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'service'
+          : _subRow?.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.type === 'package'
+            : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageName
               : '';
       _subRow.description =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === 'service'
+          : _subRow?.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceDescription
-            : _subRow?.type === 'package'
+            : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription
               : '';
-
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow, filteredFields);
+      filteredFields?.forEach((field) => {
+        const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+        _subRow[fieldName] = getParentPricing(_subRow, fieldName);
+      });
     });
 
     return subRows;
@@ -264,6 +282,28 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     rows?.forEach((d) => {
       if (row?._id === d._id) {
         Object.assign(d, data);
+        requireFieldArray?.forEach((field) => {
+          const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+          if (data.hasOwnProperty(fieldName)) {
+            d?.subRows?.forEach((subRow) => {
+              subRow[fieldName] = 0;
+            });
+          }
+        });
+      } else {
+        if (d?.subRows?.length > 0) {
+          d.subRows.forEach((subRow) => {
+            if (subRow?._id === row?._id) {
+              Object.assign(subRow, data);
+              requireFieldArray?.forEach((field) => {
+                const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+                if (data.hasOwnProperty(fieldName)) {
+                  d[fieldName] = getParentPricing(d, fieldName);
+                }
+              });
+            }
+          });
+        }
       }
     });
     dispatch({ type: 'update', data: rows });
@@ -281,23 +321,35 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       );
     }
 
-    const material = dataRows?.map((e) => {
+    const material = [];
+
+    dataRows?.forEach((e: any) => {
       const data: any = {};
       requireFieldArray?.forEach((field) => {
         data[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`] =
           e[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`];
       });
-
-      return {
+      material.push({
         _id: e._id,
         ...data
-      };
+      });
+      e?.subRows?.forEach((subRow) => {
+        const data: any = {};
+        requireFieldArray?.forEach((field) => {
+          data[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`] =
+            subRow[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`];
+        });
+        material.push({
+          _id: subRow._id,
+          ...data
+        });
+      });
     });
 
     if (checkField) {
       let tempData = {
         material: material,
-        requestId: quotationData?.data?.requestId,
+        requestId: openAuthData?.requestId,
         openAuthId: openAuthId
       };
       axios
@@ -330,7 +382,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       let formData = new FormData();
       formData.append('file', file);
       axiosInstance()
-        .post(`/quotation/supplier-price-request/price-request-import/${quotationData?.data?.requestId}`, formData, {
+        .post(`/quotation/supplier-price-request/price-request-import/${openAuthData?.requestId}`, formData, {
           responseType: 'blob',
           headers: { 'Content-Type': 'multipart/form-data' }
         })
@@ -361,7 +413,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
     axiosInstance()
-      .get(`/quotation/supplier-price-request/price-request-template/${quotationData?.data?.requestId}`, {
+      .get(`/quotation/supplier-price-request/price-request-template/${openAuthData?.requestId}`, {
         responseType: 'arraybuffer'
       })
       .then((response) => {
@@ -419,25 +471,25 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         </h1>
       ) : (
         <>
-          {quotationDetailsData ? <DetailsPage data={quotationDetailsData} fields={quotationFields} /> : null}
+          {quotationData ? <DetailsPage data={quotationData} fields={quotationFields} /> : null}
           <Box mt={2} p={2}>
             <>
               <div className={'detail-box-content'}>
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                <h3 className="form-label-style" title={' Product List'}>
-                  Products
+                <h3 className="form-label-style" title={'Detail'}>
+                  Detail
                 </h3>
               </div>
               <div id="importExportLinks" className={`${classes.root}`}>
                 <div className={classes.linksContainer}>
                   <>
-                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} cursor-pointer p-1`}>
                       {ImportInput}
                       Import from Excel
                     </label>
                     <Divider orientation="vertical" flexItem className={classes.darkLinks} />
                   </>
-                  <label onClick={exportToExcel} className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                  <label onClick={exportToExcel} className={`${classes.darkLinks} cursor-pointer p-1`}>
                     Export to Excel
                   </label>
                 </div>

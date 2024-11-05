@@ -2,7 +2,15 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys, DELIVERY_TICKET_TYPE } from '../../../constants/helpers';
+import {
+  CustomDialogTransition,
+  getObjKeysWithValues,
+  yupSchema,
+  sidebarResource,
+  serializedAsset,
+  getObjKeys,
+  DELIVERY_TICKET_TYPE
+} from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -26,7 +34,7 @@ export default function AssetDetailsChangeDialog({
   setAssetsData,
   staticLookUpFilters = {},
   productsDefaultData = [],
-  ticketType = null,
+  ticketType = null
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -37,7 +45,6 @@ export default function AssetDetailsChangeDialog({
   const [allFields, setAllFields] = useState([]);
 
   const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
-
 
   useEffect(() => {
     fetchFields();
@@ -53,7 +60,7 @@ export default function AssetDetailsChangeDialog({
     setAssetHeaders({
       assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
       product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
-    })
+    });
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
@@ -80,7 +87,7 @@ export default function AssetDetailsChangeDialog({
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
           } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
-            if (!ticketType || ticketType && ticketType !== DELIVERY_TICKET_TYPE.return) {
+            if (!ticketType || (ticketType && ticketType !== DELIVERY_TICKET_TYPE.return)) {
               initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
             }
           }
@@ -89,7 +96,6 @@ export default function AssetDetailsChangeDialog({
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
       initialValues['productName'] = data?.product?.optionLabel;
-
 
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
@@ -390,7 +396,7 @@ export default function AssetDetailsChangeDialog({
                                       type={field.type}
                                       options={field.option}
                                       setFieldValue={(name, value) => {
-                                        setFieldValue(`assetData.${index}.${field.fieldName}`, value);
+                                        setFieldValue(`assetData.${index}.${name}`, value);
                                       }}
                                       required={field.required}
                                       fullWidth

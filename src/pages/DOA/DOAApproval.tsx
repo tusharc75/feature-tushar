@@ -17,7 +17,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import ProductBuilder from '../../components/productBuilder';
-import { CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
 import DOAReasonDialog from './DOAReasonDialog';
 
 const DOAApproval = () => {
@@ -136,7 +136,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -248,12 +248,15 @@ const DOAApproval = () => {
                 </HtmlTooltip>
               </>
             ) : null}
-            <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" resourceLabel={QData?.quoteName} />
+            <ActivityButton
+              referenceId={QData?.quoteBuilderId}
+              resource={ACTIVITY_RESOURCE.quote}
+              resourceLabel={QData?.quoteName} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <div className="flex items-center flex-wrap gap-1 quotePanel mb-4">
+        <div className="quotePanel mb-4 flex flex-wrap items-center gap-1">
           {QData && (
             <>
               <div className="quoteBox">
@@ -284,7 +287,7 @@ const DOAApproval = () => {
               fromQuote={true}
               permissions={permissions[quoteBuilder.qbResource]}
               hasPermission={false}
-              currency={quoteData?.currency.toLowerCase()}
+              currency={quoteData?.currency}
               productBuilderId={productBuilderId}
               isAddNewProduct={isAddNewProduct}
               setIsAddNewProduct={setIsAddNewProduct}

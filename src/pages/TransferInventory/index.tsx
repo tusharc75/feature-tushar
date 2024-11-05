@@ -18,12 +18,22 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  transferInventory
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeSteps';
 
 const TransferInventory = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   const types = [
     {
       key: `My ${routes.transferInventory.title}`,
@@ -41,7 +51,7 @@ const TransferInventory = () => {
   const [isDeleting, setDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
@@ -66,6 +76,7 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
+        setWalkmeData([createTransferInventoryFlow(data)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
@@ -124,7 +135,10 @@ const TransferInventory = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferInventory, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.transferInventory?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, finalObject?.ownerId) &&
+            u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

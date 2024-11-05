@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CreateBillingDialog from './CreateBillingDialog';
@@ -17,7 +17,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
-const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
+const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
   const renderedFrom = camelCase(routes?.invoice?.title);
 
   const toastConfig = useContext(CustomToastContext);
@@ -26,13 +26,28 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
   const {
     state: { user, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [rentalManagementData, setRentalManagementData] = useState(null);
+
+  const fetchRentalManagementData = async () => {
+    try {
+      let data;
+      const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
+      data = response?.data?.data;
+      setRentalManagementData(data);
+    } catch (error) {
+    }
+  };
+
+  useEffect(() => {
+    fetchRentalManagementData();
+  }, [rentalId]);
 
   useEffect(() => {
     fetchData();
@@ -192,33 +207,47 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
 
   return (
     <>
-      {allowCreateInvoice && permissions?.invoice?.isCreate && (
-        <Box display="flex" justifyContent="flex-end">
-          <Box display="flex" alignItems="center" pt={2} pr={2}>
-            <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
-              Create Billing
-            </Button>
-          </Box>
-        </Box>
-      )}
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 250px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            hideSelection={true}
-            isClientSideGrid={true}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
+      {rentalManagementData ?
+        <>
+          {allowCreateInvoice && permissions?.invoice?.isCreate && (
+            <Box display="flex" justifyContent="flex-end">
+              <Box display="flex" alignItems="center" pt={2} pr={2}>
+                <HtmlTooltip title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => setCreateBillDialog({ open: true })}
+                    aria-controls="action-menu"
+                    disabled={!rentalManagementData?.allowToCreateBill}
+                  >
+                    Create Billing
+                  </Button>
+                </HtmlTooltip>
+              </Box>
+            </Box>
+          )}
+          <Grid item xs={12} md={12} sm={12} className="mt-3">
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 250px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                hideSelection={true}
+                isClientSideGrid={true}
+              />
+            ) : (
+              <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Grid>
+        </> : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       {createBillDialog.open && (
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}
@@ -247,7 +276,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
           isLatestInvoice={viewBillDialog?.invoiceData?.isLatestInvoice}
         />
       )}
-      {isConfirmDialogVisible ? (
+      {isConfirmDialogVisible && (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
           message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
@@ -258,7 +287,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
           okBtnLoading={deleteLoading}
           onOk={handleDeleteInvoice}
         />
-      ) : null}
+      )}
     </>
   );
 };

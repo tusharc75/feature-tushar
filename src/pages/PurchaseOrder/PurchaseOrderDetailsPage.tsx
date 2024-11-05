@@ -4,8 +4,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -36,8 +34,12 @@ import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -81,13 +83,12 @@ const PurchaseOrderDetailsPage = () => {
       fetchPurchaseOrderData();
       fetchPolicy();
     }
-  }, [id]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 3) {
-      updateProcessStatus(purchaseOrderStepNames[currentStep]);
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddManualEntry(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
     }
-  }, [currentStep]);
+  }, [id]);
 
   const fetchPurchaseOrderData = async () => {
     setLoadingPurchaseOrder(true);
@@ -95,7 +96,7 @@ const PurchaseOrderDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
-     
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseOrder, data));
       setPurchaseOrderData(data);
       if (data?.status === PURCHASE_ORDER_STATUS.closed) {
@@ -150,31 +151,17 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
-  };
-
   const updateStatus = (status) => {
-    axiosInstance()
-      .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
-      .then(({ data: { data } }) => {
-        if ([PURCHASE_ORDER_STATUS.closed].includes(status)) {
-          updateProcessStatus(purchaseOrderStepNames[1]);
-          setCurrentStep(1);
-        }
-        fetchPurchaseOrderData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().patch(`${purchaseOrder.api}/status/${id}`, { status: status }).then(({ data: { data } }) => {
+      fetchPurchaseOrderData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const checkReceivedProduct = (data) => {
@@ -211,7 +198,12 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <ButtonWithPulse color="default" variant={'outlined'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
+                  <ButtonWithPulse
+                    color="default"
+                    variant={'outlined'}
+                    className={'btn-outline-v1'}
+                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
+                  >
                     Close
                   </ButtonWithPulse>
                 </Fragment>
@@ -258,16 +250,16 @@ const PurchaseOrderDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           {purchaseOrderData?.deleted ? null : (
             <CustomTab value={1}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              Details
             </CustomTab>
           )}
           {purchaseOrderData?.deleted ? null : (
             <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
+              Invoice
             </CustomTab>
           )}
           {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
@@ -275,11 +267,13 @@ const PurchaseOrderDetailsPage = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={4}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 4}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -308,6 +302,9 @@ const PurchaseOrderDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.purchaseOrder, purchaseOrderStepNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={purchaseOrderStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && (
@@ -339,15 +336,22 @@ const PurchaseOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Box>{purchaseOrderData && <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={4}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.purchaseOrder}
-            data={purchaseOrderData}
-            allowedToEdit={permissions?.purchaseOrder?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 4}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.purchaseOrder}
+                  data={purchaseOrderData}
+                  allowedToEdit={permissions?.purchaseOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

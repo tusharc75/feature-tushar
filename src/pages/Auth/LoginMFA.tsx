@@ -1,29 +1,28 @@
-import { Box, Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import { SVG } from 'src/assets';
-import axiosInstance from 'src/axios/axiosInstance';
-import OtpInput from 'src/components/OtpInput';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
-import routes from 'src/components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
-import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { SVG } from 'src/assets';
+import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-
-type AuthenticationMethods = 'totp' | 'emailOtp';
+import routes from 'src/components/Helpers/Routes';
+import OtpInput from 'src/components/OtpInput';
+import { MFA_METHOD } from 'src/constants/helpers';
 
 const LoginMFA = () => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
-  const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('emailOtp');
+  const [selectedMethod, setSelectedMethod] = useState<any>(MFA_METHOD.emailOtp);
   const [otp, setOtp] = useState('');
 
-  const [isValidToken, setIsValidToken] = useState(false);
+  const [tokenData, settokenData] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -35,7 +34,7 @@ const LoginMFA = () => {
   let { token }: any = queryString.parse(history.location.search);
 
   useEffect(() => {
-    if (token && token !== undefined) {
+    if (token) {
       verifyToken();
     }
   }, [token]);
@@ -58,29 +57,34 @@ const LoginMFA = () => {
 
   const handleResendCode = () => {
     setIsCodeSending(true);
-    axiosInstance().post('/user/mfa-auth/resend-otp', { token: token }).then(({ data: { data } }) => {
-      setIsCodeSending(false);
-      setTimeLeft(60);
-      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Resend Successfully'
+    axiosInstance()
+      .post('/user/mfa-auth/resend-otp', { token: token })
+      .then(({ data: { data } }) => {
+        setIsCodeSending(false);
+        setTimeLeft(60);
+        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent Successfully'
+        });
+      })
+      .catch((error) => {
+        setTimeLeft(0);
+        setIsCodeSending(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setTimeLeft(0);
-      setIsCodeSending(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const verifyToken = () => {
-    axiosInstance().post('/user/mfa-auth/verify-token', { token: token })
-      .then(({ data }) => {
-        setIsValidToken(true)
+    axiosInstance()
+      .post('/user/mfa-auth/verify-token', { token: token })
+      .then(({ data: { data } }) => {
+        settokenData(data);
+        setSelectedMethod(data?.authenticationMethod);
       })
       .catch((error) => {
-        setIsValidToken(false)
+        settokenData(null);
         history.push({ pathname: '/login' });
       });
   };
@@ -146,9 +150,9 @@ const LoginMFA = () => {
 
   return (
     <>
-      {isValidToken ?
+      <CssBaseline />
+      {tokenData ? (
         <>
-          <CssBaseline />
           <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
             <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
               <div className="logo-container mx-auto mb-3 max-w-[150px]">
@@ -162,58 +166,76 @@ const LoginMFA = () => {
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value={selectedMethod}
-                  label="Age"
-                  onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
+                  onChange={(e) => setSelectedMethod(e.target.value)}
                 >
-                  <MenuItem value={'emailOtp'}>Email Code</MenuItem>
-                  <MenuItem value={'totp'}>Authenticator App</MenuItem>
+                  <MenuItem value={MFA_METHOD.emailOtp}>Email Code</MenuItem>
+                  {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}
                 </Select>
               </FormControl>
-              <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and
-                be redirected.
-              </p>
-              <div className="mb-6 px-5">
-                <OtpInput
-                  validateChar={(character, index) => /^[0-9]$/.test(character)}
-                  value={otp}
-                  onChange={(value) => setOtp(value)}
-                  TextFieldsProps={{ size: 'small' }}
-                />
-              </div>
-              {selectedMethod === 'emailOtp' && (
-                <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
-                  <span
-                    className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
-                    onClick={() => {
-                      if (timeLeft === 0) {
-                        handleResendCode();
-                      }
-                    }}
+              {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
+                <Box mt={2} mb={2}>
+                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
+                    Send Code
+                  </Button>
+                </Box>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                >
+                  <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
+                    An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and be
+                    redirected.
+                  </p>
+                  <div className="mb-6 md:px-5">
+                    <OtpInput
+                      validateChar={(character, index) => /^[0-9]$/.test(character)}
+                      value={otp}
+                      onChange={(value) => setOtp(value)}
+                      TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
+                      autoFocus
+                    />
+                  </div>
+                  {selectedMethod === 'emailOtp' && (
+                    <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
+                      <span
+                        className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
+                        onClick={() => {
+                          if (timeLeft === 0) {
+                            handleResendCode();
+                          }
+                        }}
+                      >
+                        Resend Code
+                      </span>
+                      {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
+                    </div>
+                  )}
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    fullWidth
+                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                    disabled={otp.length < 6 || isSubmitting}
+                    onClick={handleSubmit}
+                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
-                    Resend Code
-                  </span>
-                  {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
-                </div>
+                    Submit
+                  </Button>
+                </form>
               )}
-              <Button
-                disableElevation
-                variant="contained"
-                color="primary"
-                fullWidth
-                style={{ paddingBlock: 10, borderRadius: 9 }}
-                disabled={otp.length < 6 || isSubmitting}
-                onClick={handleSubmit}
-              >
-                Submit
-              </Button>
             </div>
           </div>
         </>
-        : <Box p={2} height={500}>
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      }
+      )}
     </>
   );
 };

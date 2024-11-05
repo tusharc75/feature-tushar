@@ -8,6 +8,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -37,7 +38,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
         let product = d?.row;
         if (returnQty > product.qty) {
           errors.returnQuantity = 'Return quantity is not more then order quantity';
-        } else if (returnQty > (product.qty - invoiceQuantity - consumeQty)) {
+        } else if (returnQty > product.qty - invoiceQuantity - consumeQty) {
           errors.returnQuantity = `Sum of return and consume quantity cannot exceed the quantity you ordered`;
         }
       });
@@ -50,6 +51,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
       open
       fullScreen={fullScreen || isMobile || isTablet}
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -83,7 +85,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values }) => (
             <>

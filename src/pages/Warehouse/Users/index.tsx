@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -15,10 +15,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
+let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
+
 const Users = ({ warehouse }) => {
-  let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
@@ -76,19 +77,43 @@ const Users = ({ warehouse }) => {
     )
   };
 
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    return deepFilter;
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.warehouse.path}/user/${warehouse}`)
+      .get(`${routes.warehouse.path}/user/${warehouse}${queryString}`)
       .then(({ data: { data } }) => {
-        let rows = data?.map((u) => {
+        let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'initialize', data: rows, count: data?.count || 0 });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

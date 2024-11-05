@@ -71,7 +71,7 @@ const Services = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [isRateRequired, setIsRateRequired] = useState(false);
@@ -344,20 +344,30 @@ const Services = ({
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
       });
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-        if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
-          if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
-            nextStepMessage = rentalManagementMessage.validServicePrice
+
+      if (rows?.length) {
+        if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+          if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+            if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+              nextStepMessage = rentalManagementMessage.validServicePrice;
+            }
           }
+          setNextStep(false);
+          setNextStepToolTip(nextStepMessage);
+        } else {
+          setNextStep(true);
+          setNextStepToolTip(null);
         }
-        setNextStep(false);
-        setNextStepToolTip(nextStepMessage);
-      } else {
-        setNextStep(true);
-        setNextStepToolTip(null);
       }
-      if (rows?.length === 0) {
-        setNextStep(true);
+      else {
+        if (data?.material?.filter((e) => e.parentId === null).filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
+          setNextStep(true);
+          setNextStepToolTip(null);
+        }
+        else {
+          setNextStep(false);
+          setNextStepToolTip(rentalManagementMessage.addServicePackage);
+        }
       }
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
@@ -381,7 +391,6 @@ const Services = ({
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
-
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -555,7 +564,7 @@ const Services = ({
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    rows = await calculateRowsField(material, inputField, allFields, updatedData, rentalManagementData?.currency);
     handleSaveData(rows);
   };
 

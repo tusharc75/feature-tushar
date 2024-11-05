@@ -3,25 +3,19 @@ import {
   Button,
   CircularProgress,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Menu,
   MenuItem,
   TextField,
   Typography,
-  makeStyles
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
-import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
 import { IoArrowDownCircleSharp } from 'react-icons/io5';
@@ -41,7 +35,9 @@ import routes from '../../../components/Helpers/Routes';
 import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
 import {
   ACTIVITY_RESOURCE,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  CustomDialogTransition,
   customerAccount,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -57,28 +53,10 @@ import AllVersionStatus from '../AllVersionStatus';
 import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import QuoteDetailPage from './QuoteDetailPage';
 import QuoteProcess from './QuoteProcess';
-
-const useStyles = makeStyles((theme) => ({
-  reasonDialog: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper
-  },
-  paper: {
-    width: '80%',
-    maxHeight: 435
-  },
-  productPos: {
-    position: 'absolute',
-    top: '1px',
-    left: '6px',
-    [theme.breakpoints.down('xs')]: {
-      position: 'static',
-      display: 'flex',
-      alignItems: 'center'
-    }
-  }
-}));
+import Step from 'src/pages/DynamicForm/Step';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 const DOASteps = [
   {
@@ -131,32 +109,29 @@ const OtherSteps = [
 ];
 
 export default function QuoteDetail() {
-  const classes = useStyles();
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom: '' });
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
   const { qbResource, qbApi } = quoteBuilder;
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(0);
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isQuoteClone, setIsQuoteClone] = useState(false);
 
-  const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState('');
   const [versionStatus, setVersionStatus] = useState('Building Quote');
   const [processStatus, setProcessStatus] = useState('New');
-  const [updatingVersion, setUpdatingVersion] = useState(false);
   const [reopenReasonDialog, setReopenReasonDialog] = useState(false);
   const [reopenReason, setReopenReason] = useState('');
   const [quoteReOpening, setQuoteReOpening] = useState(false);
@@ -165,7 +140,6 @@ export default function QuoteDetail() {
   const [relatedTo, setRelatedTo] = useState({});
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: qbResource }]);
   const [DOAneeded, setDOAneeded] = useState(false);
-  const [deletingDOA, setDeletingDOA] = useState(false);
   const [DOAApproved, setDOAApproved] = useState(false);
   const [isCloning, setCloning] = useState(false);
 
@@ -179,6 +153,8 @@ export default function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -202,6 +178,7 @@ export default function QuoteDetail() {
 
       fetchTermsAndConditions();
       fetchRelatedTo();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -306,13 +283,17 @@ export default function QuoteDetail() {
       });
   };
 
-  const handleOpenCloneDialog = () => {
-    setOpenUpdateDialog(true);
-    setIsQuoteClone(true);
-  };
-
-  const handleSetSteps = (steps) => {
-    setSteps(steps);
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quoteBuilder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchQuoteData = (version: any) => {
@@ -337,8 +318,10 @@ export default function QuoteDetail() {
               });
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
-            
+
             setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quoteBuilder, data));
+            setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource.quoteBuilder, data?.owner?.optionValue));
+
             let keys = Object.keys(data.versions);
             let tempCurrentVersion;
             if (version == 0) {
@@ -400,10 +383,6 @@ export default function QuoteDetail() {
   const fetchTermsAndConditions = (selectedTermsAndConditions = null, updateVersionStatus = false) => {
     dispatch({ type: 'loading', loading: true });
     const { selectedRecords } = state;
-
-    // if (gridApi) {
-    //   // gridApi.setRowData([]);
-    // }
     axiosInstance()
       .get(`${termsAndCondition.api}?limit=0`)
       .then(({ data: { data, count } }) => {
@@ -523,16 +502,12 @@ export default function QuoteDetail() {
       status: versionStatus,
       TNC: selectedTermsAndConditions
     };
-
-    setUpdatingVersion(true);
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
       .then(() => {
-        setUpdatingVersion(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setUpdatingVersion(false);
       });
   };
 
@@ -542,19 +517,14 @@ export default function QuoteDetail() {
 
   const deleteVersion = () => {
     let versions = quoteData?.versions;
-
     delete versions[currentVersion];
-
-    setDeletingDOA(true);
     axiosInstance()
       .delete(`${qbApi}/${quoteData._id}/${currentVersion}`)
       .then(() => {
-        setDeletingDOA(false);
         fetchQuoteData(0);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setDeletingDOA(false);
       });
   };
 
@@ -685,7 +655,7 @@ export default function QuoteDetail() {
                         handleOpenUpdateDialog();
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <HiPencil />
                         <Typography variant="inherit">Edit Quote</Typography>
                       </div>
@@ -698,7 +668,7 @@ export default function QuoteDetail() {
                     }}
                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                   >
-                    <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-3">
                       {isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus />}
                       <Typography variant="inherit">
                         {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
@@ -713,22 +683,9 @@ export default function QuoteDetail() {
                         setReopenReasonDialog(true);
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <VscIssueReopened />
                         <Typography variant="inherit">Re-Open</Typography>
-                      </div>
-                    </MenuItem>
-                  )}
-                  {allowedToEdit && ifQuoteApproved.approved && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setOpenUpdateDialog(true);
-                      }}
-                    >
-                      <div className="flex gap-3 items-center">
-                        <HiPencil />
-                        <Typography variant="inherit">Edit Information</Typography>
                       </div>
                     </MenuItem>
                   )}
@@ -736,8 +693,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -746,29 +703,25 @@ export default function QuoteDetail() {
                         deleteVersion();
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <MdDelete />
                         <Typography variant="inherit">Delete Version-{currentVersion}</Typography>
                       </div>
                     </MenuItem>
                   )}
-
-                  {permissions[qbResource].isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowConfirmBox(true);
-                        }}
-                      >
-                        <div className="flex gap-3 items-center">
-                          <MdDelete />
-                          <Typography variant="inherit">Delete Quote</Typography>
-                        </div>
-                      </MenuItem>
-                    )}
+                  {permissions[qbResource].isDelete && allowedToDelete && (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setShowConfirmBox(true);
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <MdDelete />
+                        <Typography variant="inherit">Delete Quote</Typography>
+                      </div>
+                    </MenuItem>
+                  )}
                 </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
@@ -779,7 +732,7 @@ export default function QuoteDetail() {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<ThumbUpIcon />}
                         color="primary"
                       >
@@ -814,24 +767,20 @@ export default function QuoteDetail() {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
+            Quote Versions
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <>
             {quoteData && (
               <QuoteDetailPage
                 quoteData={quoteData}
-                quotePermissions={permissions[qbResource]}
                 selectedEntity={selectedEntity}
                 ifQuoteApprovedAapproved={ifQuoteApproved.approved}
-                allowedToEdit={allowedToEdit}
-                handleOpenUpdateDialog={handleOpenUpdateDialog}
-                handleOpenCloneDialog={handleOpenCloneDialog}
-                handleSetSteps={handleSetSteps}
               />
             )}
             {permissions?.projectSales?.isRead && (
@@ -849,7 +798,6 @@ export default function QuoteDetail() {
             )}
           </>
         </TabPanel>
-
         <TabPanel value={tabValue} index={1}>
           {quoteData && (
             <QuoteProcess
@@ -883,6 +831,20 @@ export default function QuoteDetail() {
             />
           )}
         </TabPanel>
+        {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => {
+          return (
+            <TabPanel value={tabValue} index={i + 2}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourceData?._id}
+                resourceId={id}
+                resource={sidebarResource.quoteBuilder}
+                data={quoteData}
+                allowedToEdit={permissions?.quoteBuilder?.isUpdate}
+              />
+            </TabPanel>
+          );
+        })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -920,42 +882,52 @@ export default function QuoteDetail() {
         />
       )}
       {reopenReasonDialog && (
-        <div className={classes.reasonDialog}>
-          <Dialog
-            maxWidth="xs"
-            open={reopenReasonDialog}
-            aria-labelledby="confirmation-dialog-title"
-            classes={{
-              paper: classes.paper
+        <Dialog
+          maxWidth="sm"
+          fullWidth
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          onClose={() => {
+            setReopenReasonDialog(false)
+          }}
+          open={reopenReasonDialog}
+        >
+          <CustomDialogHeader
+            title="Reason for Re-Open"
+            onClose={() => {
+              setReopenReasonDialog(false)
             }}
-            id="confirmation-dialog"
-            keepMounted
-          >
-            <DialogTitle id="confirmation-dialog-title" className="text-white">
-              Reason for Re-Open
-            </DialogTitle>
-            <DialogContent dividers>
-              <TextField
-                fullWidth
-                id="outlined-multiline-static"
-                label="Reason"
-                multiline
-                value={reopenReason}
-                onChange={handleReopenReasonChange}
-                rows={4}
-                variant="outlined"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
-                Close
-              </Button>
-              <Button size="small" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
-                Save
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
+
+            showManimizeMaximize={false}
+          />
+          <CustomDialogContent>
+            <TextField
+              fullWidth
+              id="outlined-multiline-static"
+              label="Reason"
+              multiline
+              value={reopenReason}
+              onChange={handleReopenReasonChange}
+              rows={3}
+              required
+              variant="outlined"
+            />
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
+              Close
+            </Button>
+            <Button
+              size="small"
+              variant='contained'
+              disabled={reopenReason === ''}
+              onClick={handleReOpenQuote}
+              color="primary"
+            >
+              Save
+            </Button>
+          </CustomDialogFooter>
+        </Dialog>
       )}
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog

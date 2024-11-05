@@ -14,7 +14,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PURCHASE_REQUISITION_STATUS, checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  PURCHASE_REQUISITION_STATUS,
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -34,7 +41,7 @@ const PurchaseRequisition = () => {
   ];
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
@@ -184,7 +191,8 @@ const PurchaseRequisition = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
+          finalObject['canDelete'] =
+            permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

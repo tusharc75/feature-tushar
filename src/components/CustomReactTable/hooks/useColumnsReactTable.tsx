@@ -26,6 +26,9 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import routes from '../../Helpers/Routes';
 import DataListCell from '../Cells/DataListCell';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
+import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
+import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
+import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -55,6 +58,7 @@ export const getStaticFields = () => {
       accessorKey: 'createdBy',
       accessor: 'createdBy',
       size: 200,
+      width: 200,
       header: 'Created By',
       Header: 'Created By',
       show: true,
@@ -78,6 +82,7 @@ export const getStaticFields = () => {
       size: 200,
       header: 'Updated By',
       Header: 'Updated By',
+      width: 200,
       minSize: 185,
       show: true,
       disableFilters: true,
@@ -101,6 +106,7 @@ export const getCompletedByField = () => {
       accessorKey: 'completedBy',
       accessor: 'completedBy',
       size: 200,
+      width: 200,
       header: 'Completed By',
       Header: 'CompletedBy',
       show: true,
@@ -550,6 +556,25 @@ export default function useColumns() {
               )}
             </div>
           )
+        });
+      } else if (field.type === 'lookUpDisplay') {
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          cell: ({ row }) => <LookupCell field={field} original={row?.original} />
+        });
+      } else if (field.type === 'switch') {
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
+          cell: ({ row }) => <SwitchCell field={field} original={row?.original} />
+        });
+      } else if (field.type === 'gpsLocation') {
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          cell: ({ row }) => <GpsLocationCell value={row?.original?.[field?.fieldName]} />
         });
       } else {
         column.push({

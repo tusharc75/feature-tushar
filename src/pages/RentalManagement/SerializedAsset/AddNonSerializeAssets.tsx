@@ -25,6 +25,7 @@ import { CircularProgress } from '@material-ui/core';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { addAssetsInRental } from '../rentalOfflineHelper';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -208,7 +209,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   };
 
   return (
-    <Dialog open onClose={closeDialog} fullScreen>
+    <Dialog open onClose={closeDialog} TransitionComponent={CustomDialogTransition} fullScreen>
       <CustomDialogHeader
         title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`}
         onClose={closeDialog}

@@ -1,12 +1,10 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
@@ -39,6 +37,10 @@ import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
+import { RiExchangeBoxFill } from 'react-icons/ri';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,6 +53,8 @@ const InvoiceDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,6 +75,8 @@ const InvoiceDetails = () => {
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -85,22 +91,23 @@ const InvoiceDetails = () => {
     if (id) {
       fetchFields();
       fetchInvoiceData();
+      fetchPolicy();
     }
   }, [id]);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(invoiceProcessStepsNames[currentStep]);
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const fetchFields = async () => {
@@ -187,12 +194,20 @@ const InvoiceDetails = () => {
   };
 
   const handleChangeStatus = (status) => {
+    setUpdateLoading(true);
+    const invoices = [
+      {
+        _id: invoiceData._id,
+        prevStatus: invoiceData?.status
+      }
+    ];
     axiosInstance()
-      .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status, prevStatus: invoiceData?.status })
+      .put(`${invoice.api}/update-status`, { status: status, invoices: invoices })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
         setShowClosedConfirmBox(false);
         setShowReOpenConfirmBox(false);
+        setUpdateLoading(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -200,8 +215,22 @@ const InvoiceDetails = () => {
         });
       })
       .catch((error) => {
+        setUpdateLoading(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === invoiceData.status);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
   return (
@@ -242,6 +271,20 @@ const InvoiceDetails = () => {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
                   </Button>
                 )}
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className="btn-outline-v1"
+                    disabled={updateLoading}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+                  </Button>
+                )}
                 {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
@@ -255,7 +298,37 @@ const InvoiceDetails = () => {
                     </Button>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                {permissions?.invoice?.isUpdate &&
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {statusOptions
+                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
+                    .map((o) => {
+                      return (
+                        <MenuItem
+                          key={o?.optionValue}
+                          disabled={validateStatus(o?.optionValue)}
+                          onClick={() => {
+                            closeActions();
+                            handleChangeStatus(o?.optionValue);
+                          }}
+                          value={o}
+                        >
+                          {o?.optionLabel}
+                        </MenuItem>
+                      );
+                    })}
+                </Menu>
+                {/* {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                     <ButtonWithPulse
@@ -269,7 +342,7 @@ const InvoiceDetails = () => {
                     >
                       Close
                     </ButtonWithPulse>
-                  )}
+                  )} */}
                 {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
                   <Button
                     variant="outlined"
@@ -293,17 +366,10 @@ const InvoiceDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
-          </CustomTab>
-          <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-          </CustomTab>
-          {permissions?.creditMemo?.isRead && (
-            <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{routes.creditMemo.title}</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -330,6 +396,10 @@ const InvoiceDetails = () => {
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+                  setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && invoiceData && (
@@ -365,6 +435,22 @@ const InvoiceDetails = () => {
             allowedToEdit={allowedToEdit && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
           />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.invoice}
+                  data={invoiceData}
+                  allowedToEdit={permissions?.invoice?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

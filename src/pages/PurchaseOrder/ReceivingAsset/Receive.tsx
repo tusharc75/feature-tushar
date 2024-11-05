@@ -7,6 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
+  CustomDialogTransition,
   MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
@@ -236,6 +237,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
       <Dialog
         open
         fullScreen={fullScreen}
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullWidth
         onClose={(e, reason) => {
@@ -274,7 +276,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
               }))
             }}
             enableReinitialize={true}
-            onSubmit={() => { }}
+            onSubmit={() => {}}
           >
             {({ values, setFieldValue, errors }) => (
               <>
@@ -289,35 +291,35 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                               {values.material.map((data, index) => (
                                 <div
                                   style={{ border: '1.5px solid var(--common-border-color)' }}
-                                  className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                  className="grid gap-[15px] rounded-[6px] px-[23px] pb-[21px] pt-[17px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)] sm:grid-cols-[24px,1fr] md:gap-[29px]"
                                   key={index}
                                 >
-                                  <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
-                                    <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+                                  <div className="flex h-[24px] w-[24px] items-center justify-center rounded-[6px] bg-[var(--new\_theme\_color)]">
+                                    <p className="text-[13px] font-[700] leading-none text-white">{index + 1}</p>
                                   </div>
                                   <div>
                                     <div
                                       style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                      className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                      className="flex flex-wrap gap-[20px]  border-b border-b-[var(--common-border-color)] pb-[9px] md:gap-[61px]"
                                     >
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Type: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Type: </span>
                                         {startCase(data?.type)}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">PO Quantity: </span>
                                         {data?.row?.qty}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Received: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Received: </span>
                                         {data?.row?.actualReceived || 0}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Rejected: </span>
                                         {data?.row?.rejectQuantity || 0}
                                       </span>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                                    <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                       <TextField
                                         variant="outlined"
                                         name={`${data?.type}_${data?._id}`}
@@ -352,6 +354,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                       />
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
+                                          id="select-storage-location"
                                           size="small"
                                           value={data?.storageLocation}
                                           options={storageLocationOptions}
@@ -454,7 +457,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                         }}
                                       />
                                       {data?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory && (
-                                        <div className="flex gap-2 items-center">
+                                        <div className="flex items-center gap-2">
                                           <Autocomplete
                                             options={[]}
                                             size="small"
@@ -554,6 +557,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                     Cancel
                   </Button>
                   <Button
+                    id={'dialog-save-button'}
                     onClick={() => {
                       if (
                         !validate(values.material).inventoryQuantity &&

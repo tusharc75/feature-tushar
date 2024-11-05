@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -17,9 +17,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
-  const renderedFrom = 'workOrder_consumables_request';
+const renderedFrom = 'workOrder_consumables_request';
 
+function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();
@@ -159,15 +159,13 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
             <>
               {row?.original['serialNumber']?.length ? (
                 <>
-                  <p className="text-truncate">
-                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
-                  </p>
+                  <p className="text-truncate">{row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}</p>
                 </>
               ) : (
                 <NoDataCell />
               )}
             </>
-          )
+          );
         }
       },
       {
@@ -244,6 +242,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       <Dialog
         open
         fullScreen={fullScreen}
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullWidth
         onClose={(e, reason) => {
@@ -289,10 +288,12 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           <ProcessLogs
             onClose={() => {
               setOpenProcessLogs({ open: false, logs: [] });
+              fetchData()
             }}
             logsData={openProcessLogs.logs}
             productName={productName}
             product={product}
+            referenceType={referenceType}
           />
         )}
       </Dialog>

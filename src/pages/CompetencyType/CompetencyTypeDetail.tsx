@@ -11,12 +11,14 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import Competencies from './Competencies';
 import ManageCompetencyType from './ManageCompetencyType';
+import Step from '../DynamicForm/Step';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -29,6 +31,8 @@ const CompetencyMasterDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
   const {
     state: { permissions }
   }: any = useData();
@@ -37,6 +41,7 @@ const CompetencyMasterDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -89,6 +94,21 @@ const CompetencyMasterDetail = () => {
     }
   };
 
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.competencyType}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -128,7 +148,8 @@ const CompetencyMasterDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}  
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -144,6 +165,22 @@ const CompetencyMasterDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <Competencies competencyType={id} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.competencyType}
+                  data={competencyMasterData}
+                  allowedToEdit={permissions?.competencyType?.isUpdate }
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

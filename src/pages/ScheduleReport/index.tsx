@@ -19,11 +19,13 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+
+const renderedFrom = 'schedule-report';
 
 const ScheduleReport = () => {
-  const renderedFrom = 'schedule-report';
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
 
   const {
@@ -55,7 +57,7 @@ const ScheduleReport = () => {
         width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <p
+          row?.original?.scheduleName ? <p
             className="text-truncate link"
             onClick={() => {
               if (permissions?.scheduleReport?.isUpdate) {
@@ -65,42 +67,49 @@ const ScheduleReport = () => {
           >
             {row.original.scheduleName}
           </p>
-        )
+        : <NoDataCell />)
       },
       {
         accessor: 'resource',
         Header: 'Report',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.resource}</p>
+        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.subscribeUsers}</p>
+        Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
         Header: 'Frequency',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.frequency}</p>
+        Cell: ({ row }) => (row?.original?.frequency ? <p className="text-truncate">{row.original.frequency}</p> : <NoDataCell/>)
       },
       {
         accessor: 'day',
         Header: 'Day',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.day}</p>
+        Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'reportAction',
+        Header: 'Report Action',
+        width: 150,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) =>( row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>)
       },
       {
         accessor: 'time',
         Header: 'Time',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.time}</p>
+        Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
       },
       ...getStaticFields(),
       ActionsRenderer

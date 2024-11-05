@@ -1,9 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
-import { getObjKeys, sidebarResource, getObjKeysWithValues, setFieldsInAscendingOrder, CustomDialogTransition, yupSchema } from '../../../constants/helpers';
+import {
+  getObjKeys,
+  sidebarResource,
+  getObjKeysWithValues,
+  CustomDialogTransition,
+  yupSchema
+} from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -11,11 +17,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import { FaDiceOne } from 'react-icons/fa';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
+import InputField from 'src/components/Helpers/InputField';
 
 export default function ManageContactDialog({
   contactResource,
@@ -27,7 +32,6 @@ export default function ManageContactDialog({
   isRedirectToDetailPage = false,
   referenceData = null
 }) {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user }
@@ -37,8 +41,6 @@ export default function ManageContactDialog({
     initialValues: {}
   });
   const [loading, setLoading] = useState(false);
-
-  const [formsData, setFormsData] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -111,10 +113,6 @@ export default function ManageContactDialog({
     }
   };
 
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(contactData.fields));
-  }, [contactData.fields]);
-
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -142,8 +140,7 @@ export default function ManageContactDialog({
           setLoading(false);
           if (isRedirectToDetailPage) {
             history.push(`${contactApi}/detail/${data?._id}`);
-          }
-          else {
+          } else {
             onSuccess(data);
           }
         })
@@ -171,151 +168,112 @@ export default function ManageContactDialog({
     }
   };
 
-  return (<Dialog
-    maxWidth="md"
-    aria-labelledby="customized-dialog-title"
-    onClose={(e, reason) => {
-      if (reason !== 'backdropClick') {
-        setShowConfirmDialog(true);
-      }
-    }}
-    open={true}
-    fullWidth
-    fullScreen={fullScreen || isMobile || isTablet}
-    TransitionComponent={CustomDialogTransition}
-  >
-    {contactData?.fields?.length > 0 ? (
-      <Formik
-        initialValues={contactData.initialValues}
-        validationSchema={yupSchema(contactData.fields)}
-        validateOnMount
-        onSubmit={handleSubmit}>
-        {({ submitForm, values, errors, touched, setFieldValue }) => (
-          <>
-            <CustomDialogHeader
-              onClose={() => {
-                if (isEqual(contactData.initialValues, values)) {
-                  onClose();
-                } else {
-                  setShowConfirmDialog(true);
-                }
-              }}
-              title={
-                isClone
-                  ? `Clone - ${cloneHeading}`
-                  : isNew
-                    ? contactResource === 'customerContact'
-                      ? `Add ${routes?.customerContact?.title}`
-                      : `Add ${routes?.supplierContact?.title}`
-                    : `Edit ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
-              }
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                {formsData &&
-                  formsData?.map((form, i) => (
-                    <div key={i}>
-                      <div className={'detail-box-content'}>
-                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                      </div>
-                      <Box marginY={2}>
-                        <Grid spacing={3} container>
-                          {form.sectionFields.map((field) => (
-                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                              <FormTypes
-                                isNew={isNew}
-                                {...field}
-                                disabled={!isNew && field.disableOnEdit}
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                label={field.fieldLabel}
-                                name={field.fieldName}
-                                type={field.type}
-                                options={field.option}
-                                setFieldValue={(name, value) => {
-                                  setFieldValue(name, value);
-                                }}
-                                required={field.required}
-                                fullWidth
-                                isTooltip={field?.isTooltip || false}
-                                tooltipMessage={field?.tooltipMessage}
-                                size="small"
-                                imageOrFileUploadCompletePercentage={
-                                  ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                    ? (completePercentage) => {
-                                      setUploadingImageOrFileProgress(completePercentage);
-                                    }
-                                    : null
-                                }
-                                fieldData={field}
-                                fields={contactData?.fields}
-                              />
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </div>
-                  ))
-                }
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                onClick={() => {
-                  if (isEqual(contactData.initialValues, values)) onClose();
-                  else setShowConfirmDialog(true);
-                }}
-                variant="outlined"
-                color="primary"
-                size="small"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={loading || uploadingImageOrFileProgress > 0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(errors);
-                  submitForm();
-                }}
-              >
-                Save
-              </Button>
-            </CustomDialogFooter>
-            {showConfirmDialog && (
-              <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  handleScroll(errors);
-                  submitForm();
-                }}
+  return (
+    <Dialog
+      maxWidth="md"
+      aria-labelledby="customized-dialog-title"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+      open={true}
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+    >
+      {contactData?.fields?.length > 0 ? (
+        <Formik initialValues={contactData.initialValues} validationSchema={yupSchema(contactData.fields)} validateOnMount onSubmit={handleSubmit}>
+          {({ submitForm, values, errors, touched, setFieldValue }) => (
+            <>
+              <CustomDialogHeader
                 onClose={() => {
-                  setShowConfirmDialog(false);
-                  onClose();
+                  if (isEqual(contactData.initialValues, values)) {
+                    onClose();
+                  } else {
+                    setShowConfirmDialog(true);
+                  }
                 }}
+                title={
+                  isClone
+                    ? `Clone - ${cloneHeading}`
+                    : isNew
+                      ? contactResource === 'customerContact'
+                        ? `Add ${routes?.customerContact?.title}`
+                        : `Add ${routes?.supplierContact?.title}`
+                      : `Edit ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
+                }
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
               />
-            )}
-          </>
-        )}
-      </Formik>
-    ) : (
-      <Box p={2} height={500}>
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>
-    )}
-  </Dialog>
-
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={contactData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource[contactResource]}
+                      referenceId={contactId || null}
+                      collaborateTools = {true}
+                    />
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  onClick={() => {
+                    if (isEqual(contactData.initialValues, values)) onClose();
+                    else setShowConfirmDialog(true);
+                  }}
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={loading || uploadingImageOrFileProgress > 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                >
+                  Save
+                </Button>
+              </CustomDialogFooter>
+              {showConfirmDialog && (
+                <ConfirmationCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
+                  }}
+                />
+              )}
+            </>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
   );
 }

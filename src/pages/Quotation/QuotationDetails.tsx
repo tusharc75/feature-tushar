@@ -6,12 +6,10 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
 import { MdAutorenew, MdDelete } from 'react-icons/md';
-import { RiFlowChart } from 'react-icons/ri';
 import { SiSemanticrelease } from 'react-icons/si';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
@@ -127,33 +125,19 @@ const QuotationDetails = () => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['estimateStartDate', 'estimateEndDate', 'fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
+      }
+      if (quotationData['type'] === QUOTATION_TYPE.assemblyOrder) {
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'salesOrder']?.includes(d?.fieldData?.fieldName));
       }
     }
     return tempQuotationFields;
@@ -192,7 +176,6 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-
             setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
           } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -218,6 +201,12 @@ const QuotationDetails = () => {
           } else {
             setCanConvert(false);
           }
+        } else if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
+          if (!quotationData?.assemblyOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
+          }
         }
       }
     }
@@ -230,7 +219,7 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data)
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data);
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }
@@ -256,8 +245,7 @@ const QuotationDetails = () => {
 
       if (data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer) {
         setCurrentStep(tempStepList?.length - 2);
-      }
-      else if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
+      } else if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
         setCurrentStep(tempStepList?.length - 1);
       } else {
         setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
@@ -367,6 +355,9 @@ const QuotationDetails = () => {
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
           window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
         }
+        if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
+          window.open(`${routes.assemblyOrderDetail.path}/${data?._id}`);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -405,7 +396,7 @@ const QuotationDetails = () => {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<MdAutorenew />}
                         color="primary"
                       >
@@ -419,7 +410,7 @@ const QuotationDetails = () => {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<SiSemanticrelease />}
                         color="primary"
                       >
@@ -435,7 +426,7 @@ const QuotationDetails = () => {
                     }}
                     variant="outlined"
                     size="small"
-                    className="mx-1 btn-outline-v1"
+                    className="btn-outline-v1 mx-1"
                     startIcon={<GiReceiveMoney />}
                     color="primary"
                   >
@@ -538,17 +529,19 @@ const QuotationDetails = () => {
                         Delete Version-{currentVersion}
                       </MenuItem>
                     )}
-                  {permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, quotationData.owner.optionValue) && quotationData?.canDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                        closeActionsAction();
-                      }}
-                    >
-                      <MdDelete className={'mr-2'} />
-                      Delete
-                    </MenuItem>
-                  )}
+                  {permissions?.quotation?.isDelete &&
+                    checkIsAllowedToDelete(user, sidebarResource.quotation, quotationData.owner.optionValue) &&
+                    quotationData?.canDelete && (
+                      <MenuItem
+                        onClick={() => {
+                          setShowConfirmBox(true);
+                          closeActionsAction();
+                        }}
+                      >
+                        <MdDelete className={'mr-2'} />
+                        Delete
+                      </MenuItem>
+                    )}
                 </Menu>
               </>
             ) : (
@@ -561,21 +554,23 @@ const QuotationDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={3}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 3}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -605,7 +600,7 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+              <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
                 <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
               </Box>
             )}
@@ -718,17 +713,22 @@ const QuotationDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <Box>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.quotation}
-              data={quotationData}
-              allowedToEdit={permissions?.quotation?.isUpdate}
-            />
-          </Box>
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.quotation}
+                  data={quotationData}
+                  allowedToEdit={permissions?.quotation?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

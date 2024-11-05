@@ -36,12 +36,12 @@ import axios, { CancelTokenSource } from 'axios';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 
+const renderedFrom = camelCase(routes.role.title);
 
 const Roles: FC = () => {
-  const renderedFrom = camelCase(routes.role.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   const {
@@ -66,8 +66,7 @@ const Roles: FC = () => {
     {
       accessor: 'name',
       Header: 'Name',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       primaryField: true,
       disabled: true,
       Cell: ({ row }) => (
@@ -85,8 +84,7 @@ const Roles: FC = () => {
     {
       accessor: 'description',
       Header: 'Description',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.description ? (
@@ -102,8 +100,7 @@ const Roles: FC = () => {
     {
       accessor: 'tier',
       Header: 'Tier',
-      minWidth: 150,
-      width: 150,
+      width: 300,
       Cell: ({ row }) => (
         <>
           {row?.original?.tier ? (
@@ -325,7 +322,7 @@ const Roles: FC = () => {
             onSuccess={() => {
               userDialogClose();
             }}
-            selectedEntity={[selectedEntity] || []}
+            selectedEntity={selectedEntity ? [selectedEntity] : []}
           />
         ) : (
           <AssignRegionalRolesUserDialog

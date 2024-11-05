@@ -10,14 +10,12 @@ import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import TextField from '@material-ui/core/TextField';
-import Steps from './Steps';
 import ActivationCondition from './ActivationCondition';
 import Notifications from 'src/pages/WorkFlow/Notifications';
 import { RiCloseCircleFill } from 'react-icons/ri';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
-import { WORK_FLOW_STATUS } from 'src/constants/helpers';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const CreateWorkFlow = () => {
   const {
@@ -31,7 +29,7 @@ const CreateWorkFlow = () => {
   const [workFlowData, setWorkFlowData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showManageWorkFlowDialog, setShowManageWorkFlowDialog] = useState({ open: false, data: null });
-  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     fetchWorkFlowData();
@@ -40,7 +38,7 @@ const CreateWorkFlow = () => {
   const fetchWorkFlowData = async () => {
     setLoading(true);
     axiosInstance()
-      .get(`${routes?.workFlow?.path}/${id}`)
+      .get(`${routes?.workflow?.path}/${id}`)
       .then(({ data: { data } }) => {
         setLoading(false);
         setWorkFlowData(data);
@@ -51,19 +49,8 @@ const CreateWorkFlow = () => {
       });
   };
 
-  const handleChangeStatus = (status) => {
-    axiosInstance()
-      .put(`${routes.workFlow.path}/${id}/update-status`, { status: status })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
   };
 
   return (
@@ -72,29 +59,12 @@ const CreateWorkFlow = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workFlow, { title: workFlowData ? workFlowData.workFlowName : '' }]}
+              routes={[routes.workflow, { title: workFlowData ? workFlowData.workflowName : '' }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 history.push({ pathname: path });
               }}
             />
-          </Box>
-          <Box className="controls-v1">
-            <Box className="control-buttons-v1">
-              {permissions?.workFlow?.isUpdate && [WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress ].includes(workFlowData?.status) &&
-              (<ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowClosedConfirmBox(true);
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>)
-              }
-            </Box>
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
@@ -107,12 +77,12 @@ const CreateWorkFlow = () => {
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Work Flow Name"
+                        label="Workflow Name"
                         disabled={true}
-                        name="workFlowName"
+                        name="workflowName"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workFlowName || ''}
+                        value={workFlowData.workflowName || ''}
                         // onChange={(e) => {
                         //   setWorkFlowName(e.target.value.trimStart());
                         // }}
@@ -122,17 +92,17 @@ const CreateWorkFlow = () => {
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Work Flow Resource"
+                        label="Workflow Resource"
                         disabled={true}
-                        name="workFlowResource"
+                        name="workflowResource"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workFlowResource || ''}
+                        value={workFlowData?.workflowResource?.optionLabel || ''}
                       />
                     </Grid>
                   </Grid>
                   <Grid item xs={3} container justifyContent="flex-end">
-                    {permissions?.workFlow?.isUpdate && (
+                    {permissions?.workflow?.isUpdate && (
                       <Box className="gap-1">
                         <Button
                           disabled={false}
@@ -143,8 +113,8 @@ const CreateWorkFlow = () => {
                               open: true,
                               data: {
                                 _id: workFlowData?._id,
-                                workFlowName: workFlowData.workFlowName,
-                                workFlowResource: workFlowData.workFlowResource
+                                workflowName: workFlowData.workflowName,
+                                workflowResource: workFlowData.workflowResource?.optionValue
                               }
                             })
                           }
@@ -161,7 +131,7 @@ const CreateWorkFlow = () => {
                         size="small"
                         style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
                         onClick={() => {
-                          history.push({ pathname: routes.workFlow.path });
+                          history.push({ pathname: routes.workflow.path });
                         }}
                       >
                         {' '}
@@ -171,16 +141,27 @@ const CreateWorkFlow = () => {
                   </Grid>
                 </Grid>
               </Box>
-              <Box className="mt-2 flex flex-col gap-3">
-                <ActivationCondition
-                  resource={workFlowData?.workFlowResource}
-                  fetchWorkFlowData={fetchWorkFlowData}
-                  activationCondition={workFlowData?.activationCondition}
-                  loading={loading}
-                  id={id}
-                />
-                <Steps resource={workFlowData?.workFlowResoure} loading={loading} id={id} />
-                <Notifications resource={workFlowData?.workFlowResoure} id={id} />
+              <Box>
+                <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                  <CustomTab value={0} label={'Activation Condition'} />
+                  <CustomTab value={1} label={'Steps'} />
+                  <CustomTab value={2} label={'Notifications'} />
+                </CustomTabs>
+                <TabPanel value={tabValue} index={0}>
+                  <ActivationCondition
+                    resource={workFlowData?.workflowResource?.optionValue}
+                    fetchWorkFlowData={fetchWorkFlowData}
+                    activationCondition={workFlowData?.activationCondition}
+                    loading={loading}
+                    id={id}
+                  />
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                  <DynamicTabs workflowId = {id} resource = {workFlowData?.workflowResoure?.optionValue} />
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                  <Notifications resource={workFlowData?.workflowResource?.optionValue} id={id} />
+                </TabPanel>
               </Box>
             </Fragment>
           ) : (
@@ -200,19 +181,6 @@ const CreateWorkFlow = () => {
           />
         )}
       </Box>
-      {showClosedConfirmBox && (
-        <ConfirmationDialog
-          open={showClosedConfirmBox}
-          message={`Are you sure you want to close workflow?`}
-          onClose={() => {
-            setShowClosedConfirmBox(false);
-          }}
-          onOk={() => {
-            handleChangeStatus(WORK_FLOW_STATUS.completed);
-            setShowClosedConfirmBox(false);
-          }}
-        />
-      )}
     </Fragment>
   );
 };

@@ -34,6 +34,8 @@ import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.lead.title);
+
 const Leads = () => {
   const LeadTypes = [
     {
@@ -45,10 +47,9 @@ const Leads = () => {
       value: 2
     }
   ];
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.lead.title);
 
   const {
     state: { user, selectedEntity, permissions }
@@ -63,6 +64,7 @@ const Leads = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
     open: false,
     id: null,
@@ -85,6 +87,16 @@ const Leads = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
+  };
+
+  useEffect(() => {
+    if (allFields?.length) {
+      createColumns(allFields);
+    }
+  }, [allFields]);
+
+  const createColumns = (data) => {
     let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
     newColumns = [
       ...newColumns,
@@ -211,7 +223,7 @@ const Leads = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
-          finalObject['isAllowedToUpdate'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
+          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
           let res = {
             ...finalObject,
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
@@ -249,7 +261,7 @@ const Leads = () => {
     fetchData();
   };
 
-  const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, isAllowedToUpdate }) => {
+  const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, canEdit }) => {
     let dontHavePermissions = [];
 
     if (!permissions['customerAccount'].isCreate) {
@@ -262,7 +274,11 @@ const Leads = () => {
       dontHavePermissions.push('Opportunity');
     }
 
-    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === 'qualified';
+    const lastStepText =
+      allFields?.find((f) => f?.isRead && f?.fieldData?.fieldName?.toLowerCase() === processFieldName.toLowerCase())?.fieldData?.option?.at(-1)
+        ?.optionLabel || '';
+
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === lastStepText?.toLowerCase();
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -283,7 +299,7 @@ const Leads = () => {
           </IconButton>
         </HtmlTooltip>
       </>
-    ) : !isAllowedToUpdate ? (
+    ) : !canEdit ? (
       <>
         <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton size="small" aria-label="Convert to opportunity">
@@ -412,7 +428,7 @@ const Leads = () => {
                   message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
                 });
               } else {
-                if (selectedRecords.some((d) => d.isAllowedToUpdate === false)) {
+                if (selectedRecords.some((d) => d.canEdit === false)) {
                   setMessageDialog({
                     open: true,
                     message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`

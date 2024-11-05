@@ -3,11 +3,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EntitySelectionsDialog from 'src/components/EntitySelections';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -22,11 +20,15 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWarehouse from './ManageWarehouse';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+
+const renderedFrom = camelCase(routes?.warehouse.title);
 
 const Warehouse = () => {
-  const renderedFrom = camelCase(routes?.warehouse.title);
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -42,9 +44,6 @@ const Warehouse = () => {
   const [columns, setColumns] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
-  const [showEntityDialog, setShowEntityDialog] = useState(false);
-  const [warehouseId, setWarehouseId] = useState('');
-  const [entities, setEntities] = useState([]);
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
 
   useEffect(() => {
@@ -61,6 +60,7 @@ const Warehouse = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
+    setWalkmeData([createResourceFlow(sidebarResource.warehouse, data)]);
     const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -69,7 +69,7 @@ const Warehouse = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 130,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     canDrag: false,
@@ -105,38 +105,7 @@ const Warehouse = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={row.original?.deleted ? 'disabled' : "error"} />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {permissions?.warehouse?.isUpdate && row?.original?.isAllowedToUpdate && !row.original?.deleted ? (
-          <HtmlTooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setShowEntityDialog(true);
-                setWarehouseId(row?.original._id);
-                if (row?.original?.entity) {
-                  let entities = [];
-                  if (row?.original?.entityId) {
-                    entities.push(row?.original?.entityId);
-                  }
-                  if (row?.original?.restentity) {
-                    let restEntities = row?.original?.restentity.map((o) => o.optionValue);
-                    entities = [...entities, ...restEntities];
-                  }
-                  setEntities([...entities]);
-                }
-              }}
-            >
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
-            <IconButton aria-label="Clone" size="small">
-              <AiOutlineDeploymentUnit fontSize="15" />
+              <DeleteIcon fontSize='small' color={row.original?.deleted ? 'disabled' : 'error'} />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -205,7 +174,6 @@ const Warehouse = () => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -302,9 +270,6 @@ const Warehouse = () => {
                 permissions,
                 selectedRecords,
                 setShowDeleteConfirmBox,
-                setShowUpdateWarningConfirmBox,
-                setEntities,
-                setShowEntityDialog,
                 user,
                 setUserAssignDialog
               }}
@@ -378,19 +343,6 @@ const Warehouse = () => {
           onClose={() => setShowUpdateWarningConfirmBox(false)}
         />
       ) : null}
-      {showEntityDialog ? (
-        <EntitySelectionsDialog
-          open={showEntityDialog}
-          resource={sidebarResource.warehouse}
-          resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [warehouseId]}
-          onClose={() => {
-            setShowEntityDialog(false);
-            setWarehouseId('');
-          }}
-          onSuccess={fetchData}
-          entities={entities}
-        />
-      ) : null}
     </section>
   );
 };
@@ -401,9 +353,6 @@ const ActionMenuItems = ({
   permissions,
   selectedRecords,
   setShowDeleteConfirmBox,
-  setShowUpdateWarningConfirmBox,
-  setEntities,
-  setShowEntityDialog,
   user,
   setUserAssignDialog
 }) => {
@@ -411,40 +360,14 @@ const ActionMenuItems = ({
     <>
       {permissions?.warehouse?.isDelete && (
         <MenuItem
-          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)}
+          disabled={
+            !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)
+          }
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      )}
-      {permissions?.warehouse?.isUpdate && (
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.some((d) => d.isUpdate === false)) {
-              setShowUpdateWarningConfirmBox(true);
-            } else {
-              if (selectedRecords.length) {
-                let entities = [];
-                selectedRecords.map((current) => {
-                  if (current?.entity) {
-                    if (current?.entityId) {
-                      entities.push(current?.entityId);
-                    }
-                    if (current?.restentity) {
-                      let restEntities = current?.restentity.map((o) => o.optionValue);
-                      entities = [...entities, ...restEntities];
-                    }
-                  }
-                });
-                setEntities([...entities]);
-              }
-              setShowEntityDialog(true);
-            }
-          }}
-        >
-          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
         </MenuItem>
       )}
       {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (

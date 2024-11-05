@@ -13,14 +13,14 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, unionBy, uniqBy, isEmpty } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
+import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
+import { autoCalculateSpecificFields, } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -90,8 +90,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
-    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
+    data = data?.filter((f) => f?.isRead);
     if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
@@ -129,16 +129,13 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         element.isFormula = false;
         element.isMulitFormula = false;
       });
+      const initialData = getObjKeys('', data);
+      data?.filter((e) => e.type === 'date')?.forEach((e) => {
+        initialData[e?.fieldName] = ''
+      })
       setInitialData({
         fields: data,
-        values: {
-          ...getObjKeys('', data),
-          estimateStartDate: quotationData.estimateStartDate,
-          estimateEndDate: '',
-          actualStartDate: '',
-          actualEndDate: '',
-          tenure: ''
-        }
+        values: initialData
       });
     } else {
       let unitOptions: any = [];
@@ -284,6 +281,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   };
 
   const getTitle = () => {
+    if (isBulkedit) {
+      return 'Bulk Edit';
+    }
     if (rowData) {
       let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
@@ -291,7 +291,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       }
       return editTitle;
     } else {
-      return 'Bulk Edit';
+      return 'Edit';
     }
   };
 
@@ -303,7 +303,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData, quotationData?.currency);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

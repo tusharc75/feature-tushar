@@ -19,6 +19,7 @@ import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBi
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const GENERATE_RESOURCE = [
   {
@@ -75,7 +76,12 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     state: { permissions, selectedEntity }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const [selectedResource, setSelectedResource] = useState(null);
+  const renderedFrom = resourceRendered
+    ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
+    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -83,12 +89,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [resourceList, setResourceList] = useState([]);
 
-  const renderedFrom = resourceRendered
-    ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
-    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+  const [resourceList, setResourceList] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
 
   useEffect(() => {
     const options: any = [];
@@ -124,7 +128,25 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    let extraColumns = [];
+    if (selectedResource?.resource === sidebarResource.fieldTicket) {
+      extraColumns.push({
+        accessor: 'totalAmount',
+        Header: 'Total Amount',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          return row.original?.totalAmount ? (
+            <div>
+              <p className="text-truncate">{row.original.totalAmount}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      });
+    }
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
@@ -300,16 +322,76 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     );
   };
 
+  const uniqueInvoices = () => {
+    if (selectedRecords?.length > 0) {
+      const uniqueInvoice = uniq(map(selectedRecords, 'invoiceId'));
+      return uniqueInvoice?.filter(Boolean);
+    }
+    return [];
+  }
+
+  const handleDownloadZip = async () => {
+    try {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Your file will be downloaded in a matter of seconds`
+      });
+      setIsDownloading(true)
+      const uniqueInvoice = uniqueInvoices();
+      if (uniqueInvoice?.length > 0) {
+        const invoiceIds = uniqueInvoice.join(',');
+        await axiosInstance().get(`${routes?.generateInvoice.path}/invoice-field-ticket-zip?invoiceIds=${invoiceIds}`, {
+          responseType: 'blob'
+        })
+          .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Invoice_Tickets.zip');
+            document.body.appendChild(link);
+            link.click();
+            setIsDownloading(false)
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Downloaded successfully.'
+            });
+            dispatch({ type: 'selection', selectedRecords: [] });
+            dispatch({ type: 'pageChange', page: 0 });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setIsDownloading(false)
+          });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      setIsDownloading(false)
+    }
+  }
+
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={checkUniqCreateInvoice()}
-        onClick={() => {
-          setCreateInvoiceDialog({ open: true, data: selectedRecords });
-        }}
-      >
-        Create Invoice
-      </MenuItem>
+      <>
+        <MenuItem
+          disabled={checkUniqCreateInvoice()}
+          onClick={() => {
+            setCreateInvoiceDialog({ open: true, data: selectedRecords });
+          }}
+        >
+          Create Invoice
+        </MenuItem>
+        {selectedResource?.resource === sidebarResource.fieldTicket && (
+          <MenuItem
+            disabled={uniqueInvoices()?.length === 0 || isDownloading}
+            onClick={handleDownloadZip}
+          >
+            Download Invoice Tickets
+          </MenuItem>
+        )}
+      </>
     );
   };
 

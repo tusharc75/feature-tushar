@@ -33,7 +33,7 @@ const InventoryProduct = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -188,7 +188,13 @@ const InventoryProduct = () => {
     Cell: ({ row }) => (
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <HtmlTooltip
-          title={!permissions?.productInventory?.isCreate ? TOOLTIP_MESSAGE.add : row?.original?.plantId === 'All' ? 'Select Plant' : 'Add'}
+          title={
+            !permissions?.productInventory?.isCreate
+              ? TOOLTIP_MESSAGE.add
+              : row?.original?.plantId === 'All'
+                ? `Select ${routes.warehouse.title}`
+                : 'Add'
+          }
         >
           <span>
             <IconButton
@@ -212,7 +218,7 @@ const InventoryProduct = () => {
               !permissions?.productInventory?.isUpdate
                 ? TOOLTIP_MESSAGE.remove
                 : row?.original?.plantId === 'All'
-                  ? 'Select Plant'
+                  ? `Select ${routes.warehouse.title}`
                   : user?.user?.brandPolicy?.allowNegativeInventory
                     ? 'Remove'
                     : !row?.original?.availableInventory
@@ -453,7 +459,7 @@ const InventoryProduct = () => {
     return (
       <>
         {user?.role?.selectedEntity?.policy?.isProductInventorySettings ? (
-          <HtmlTooltip title={plantId === 'All' ? 'Select Plant' : 'Setting'}>
+          <HtmlTooltip title={plantId === 'All' ? `Select ${routes.warehouse.title}` : 'Setting'}>
             <span>
               <IconButton
                 size="small"

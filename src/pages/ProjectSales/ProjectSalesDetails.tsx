@@ -47,7 +47,6 @@ const ProjectSalesDetails = () => {
   const [quotes, setQuotes] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState('');
-  const [headingLbl, setHeadingLbl] = useState('');
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [removeUserRec, setRemoveUserRec] = useState(null);
@@ -127,8 +126,6 @@ const ProjectSalesDetails = () => {
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
-
-      setHeadingLbl(name);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
@@ -351,7 +348,7 @@ const ProjectSalesDetails = () => {
               <CustomTab value={1}>OM-Neurons</CustomTab>
               <CustomTab value={2}>Project Team</CustomTab>
               <CustomTab value={3}>{routes.customerAccount.title}</CustomTab>
-              {resourceData && resourceData?.steps?.length && <CustomTab value={4}>Associations</CustomTab>}
+              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -439,15 +436,22 @@ const ProjectSalesDetails = () => {
                 />
               </Box>
             </TabPanel>
-            <TabPanel value={currentTabIndex} index={4}>
-              <Step
-                resourceData={resourceData}
-                resourceId={id}
-                resource={sidebarResource.projectSales}
-                data={projectSalesData}
-                allowedToEdit={permissions?.projectSales?.isUpdate}
-              />
-            </TabPanel>
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => {
+                return (
+                  <TabPanel value={currentTabIndex} index={i + 4}>
+                    <Step
+                      tab={tab}
+                      resourcePolicyId={resourceData?._id}
+                      resourceId={id}
+                      resource={sidebarResource.projectSales}
+                      data={projectSalesData}
+                      allowedToEdit={permissions?.projectSales?.isUpdate}
+                    />
+                  </TabPanel>
+                );
+              })}
           </>
         )}
         <TabPanel value={tabValue} index={1}>
@@ -499,8 +503,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
-              : ''
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

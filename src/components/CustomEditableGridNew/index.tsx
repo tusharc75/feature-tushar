@@ -1,28 +1,48 @@
 import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition } from 'src/constants/helpers';
-import { RefObject, useContext, useEffect, useRef, useState } from 'react';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
-import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
-import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
-import { AddField } from 'src/components/FormBuilder/AddField';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
+import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
+import { TActios, TInitialState } from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 import { useGridMetaData } from 'src/components/CustomReactTable';
-import { useScrollController } from 'src/hooks';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { AddField } from 'src/components/FormBuilder/AddField';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import IconWithPulse from 'src/components/IconWithPulse';
+import InfoIcon from '@material-ui/icons/Info';
+
+export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
+type CustomEditableGridProps = {
+  state: TInitialState;
+  dispatch: React.Dispatch<TActios>;
+  onClose: () => void;
+  fields?: any[];
+  data: any[];
+  extraDisabledFields: any;
+  handleSave: (data: any[]) => void;
+  isSubmitting: boolean;
+  referenceId: string | null;
+  restData: any[];
+  renderedFrom;
+};
+
 const CustomEditableGrid = ({
+  state,
+  dispatch,
   onClose,
   fields = [],
   data,
@@ -32,12 +52,14 @@ const CustomEditableGrid = ({
   referenceId = null,
   restData = [],
   renderedFrom = ''
-}) => {
+}: CustomEditableGridProps) => {
+  const { columnOrder, loading, visibleColumns } = state;
+
   const toastConfig = useContext(CustomToastContext);
   const { gridMetaData } = useGridMetaData();
   const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
 
-  const [columns, setColumns] = useState(null);
+  const [columns, setColumns] = useState<any[]>(null);
   const [allFields, setAllFields] = useState([]);
   const [flatRows, setFlatRows] = useState(null);
   const [constColummns, setConstColummns] = useState([]);
@@ -46,20 +68,13 @@ const CustomEditableGrid = ({
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
   const [scrollToHeader, setScrollToHeader] = useState('');
-  const {
-    isLeftDisabled,
-    isRightDisabled,
-    scrollLeft,
-    scrollRight,
-    setRef: scrollContainerRef
-  } = useScrollController({ scrollDistance: Math.floor(window.innerWidth / 2) });
 
   useEffect(() => {
     if (referenceId) {
       fetchColumns();
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
-      const { newColumns, constColumns } = generateColumn(fields, tableData.order, tableData.hide);
+      const { newColumns, constColumns } = generateColumn(fields);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -77,7 +92,7 @@ const CustomEditableGrid = ({
           return levalOrderBy.indexOf(item.leval);
         });
         setAllFields(JSON.parse(JSON.stringify(_fields)));
-        const { newColumns, constColumns } = generateColumn(_fields, tableData.order, tableData.hide);
+        const { newColumns, constColumns } = generateColumn(_fields);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
@@ -93,7 +108,12 @@ const CustomEditableGrid = ({
 
   useEffect(() => {
     if (flatRows) {
-      setError(yupSchemaForBulkEdit(constColummns, flatRows));
+      setError(
+        yupSchemaForBulkEdit(
+          constColummns?.filter((c) => visibleColumns[c?.fieldName]),
+          flatRows
+        )
+      );
     }
   }, [flatRows]);
 
@@ -136,18 +156,48 @@ const CustomEditableGrid = ({
     setFlatRows([...flatRows, ...rows?.map((r, i) => ({ ...r, index: flatRows?.length + i + 1, id: r?._id }))]);
   };
 
+  const finalColumns = useMemo(() => {
+    return columns
+      ?.filter((c) => visibleColumns[c.id])
+      .sort((a, b) => columnOrder.findIndex((c) => c === a.id) - columnOrder.findIndex((c) => c === b.id));
+  }, [columnOrder, columns, visibleColumns]);
+
   const rightSideContents = () => {
     return (
-      <Button
-        size="small"
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setIsAddField(true);
-        }}
-      >
-        Add Field
-      </Button>
+      <>
+        {columns?.filter((c) => c?.required && !visibleColumns[c?.id])?.length > 0 && (
+          <IconWithPulse>
+            <IconButton
+              size="small"
+              title={`Required Hidden Columns :- ${columns
+                ?.filter((c) => c?.required && !visibleColumns[c?.id])
+                ?.map((c) => c?.id || '')
+                ?.join(', ')}`}
+            >
+              <InfoIcon fontSize="small" color={'primary'} />{' '}
+            </IconButton>
+          </IconWithPulse>
+        )}
+        <ArrangeView
+          columns={columns}
+          hideSelection={true}
+          renderedFrom={renderedFrom}
+          dispatchTable={dispatch}
+          state={state}
+          expander={false}
+          appliedView={tableData}
+        />
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsAddField(true);
+          }}
+        >
+          Add Field
+        </Button>
+      </>
     );
   };
 
@@ -161,7 +211,7 @@ const CustomEditableGrid = ({
 
     setAddedField([...addedField, { ..._field }]);
     setAllFields(JSON.parse(JSON.stringify([...allFields, { ..._field }])));
-    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }], tableData.order, tableData.hide);
+    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }]);
     setColumns(newColumns);
     setConstColummns(constColumns);
 
@@ -209,48 +259,18 @@ const CustomEditableGrid = ({
                   rightSideContents={rightSideContents()}
                   hasXpadding={false}
                 />
-                <div
-                  style={{
-                    display: 'block',
-                    overflow: 'auto',
-                    height: 'calc(100vh - 230px)',
-                    marginTop: '10px'
-                  }}
-                  ref={scrollContainerRef}
-                  className="custom-react-table editable-table-v1 border"
-                >
-                  <CustomTable
-                    columns={columns}
-                    flatRows={flatRows}
-                    setFlatRows={setFlatRows}
-                    constColummns={constColummns}
-                    fields={allFields}
-                    extraDisabledFields={extraDisabledFields}
-                    error={error}
-                    updateData={updateData}
-                    scrollToHeader={scrollToHeader}
-                  />
-                </div>
-                <div className="sr-only mt-1 flex justify-end gap-3 lg:not-sr-only">
-                  <HtmlTooltip title="Scroll left">
-                    <IconButton
-                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
-                      disabled={isLeftDisabled}
-                      onClick={scrollLeft}
-                    >
-                      <ChevronLeft className="text-white" />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <HtmlTooltip title="Scroll right">
-                    <IconButton
-                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
-                      disabled={isRightDisabled}
-                      onClick={scrollRight}
-                    >
-                      <ChevronRight className="text-white" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
+
+                <CustomTable
+                  columns={finalColumns}
+                  flatRows={flatRows}
+                  setFlatRows={setFlatRows}
+                  constColummns={constColummns}
+                  fields={allFields}
+                  extraDisabledFields={extraDisabledFields}
+                  error={error}
+                  updateData={updateData}
+                  scrollToHeader={scrollToHeader}
+                />
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>

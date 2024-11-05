@@ -20,6 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { mapDarkTheme, mapLightTheme } from 'src/constants/helpers';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
 
@@ -39,98 +40,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const formikRef = {
     current: null
   };
-
-  const mapDarkTheme: GoogleMapProps['options']['styles'] = [
-    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-    {
-      featureType: 'administrative.locality',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#d59563' }]
-    },
-    {
-      featureType: 'poi',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#d59563' }]
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'geometry',
-      stylers: [{ color: '#263c3f' }]
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#6b9a76' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry',
-      stylers: [{ color: '#38414e' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry.stroke',
-      stylers: [{ color: '#212a37' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#9ca5b3' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry',
-      stylers: [{ color: '#746855' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry.stroke',
-      stylers: [{ color: '#1f2835' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#f3d19c' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'geometry',
-      stylers: [{ color: '#17263c' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#515c6d' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'labels.text.stroke',
-      stylers: [{ color: '#17263c' }]
-    },
-    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-  ];
-
-  const mapLightTheme: GoogleMapProps['options']['styles'] = [
-    {
-      featureType: 'water',
-      stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
-    },
-    { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
-    {
-      featureType: 'road',
-      stylers: [{ saturation: -100 }, { lightness: 45 }]
-    },
-    {
-      featureType: 'road.highway',
-      stylers: [{ visibility: 'simplified' }]
-    },
-  
-    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-  ];
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -213,7 +122,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
     }
   };
 
-  const setFullAddressFields = (results: any, val?: any) => {
+  const setFullAddressFields = (results: any, val?: any, fromMarkerChange: Boolean = false) => {
     type addressType = {
       long_name: string;
       short_name: string;
@@ -256,7 +165,12 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       fullAddress.longitude = addressDetail?.longitude;
     }
     fullAddress.streetAddress = results.formatted_address;
-    fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    if (!fromMarkerChange || !(initialData?.fields?.some((f) => f.fieldName === 'searchAddress'))) {
+      fullAddress.fullAddress = val?.description ?? results.formatted_address;
+    } else {
+      fullAddress.fullAddress = addressDetail?.fullAddress ?? '';
+    }
+    fullAddress.searchAddress = val?.description ?? results.formatted_address;
     setAddressDetail(fullAddress);
   };
 
@@ -266,7 +180,14 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       const keys = Object.keys(addressDetail);
       if (keys.length > 0) {
         Object.keys(initialData.values).forEach((k) => {
-          setFieldValue(k, addressDetail[k]);
+          if (k === 'fullAddress') {
+            if (initialData.fields?.find((e) => e?.fieldName === 'fullAddress')?.type !== 'singleLine') {
+              setFieldValue(k, addressDetail[k]);
+            }
+          }
+          else {
+            setFieldValue(k, addressDetail[k]);
+          }
         });
       }
 
@@ -277,8 +198,14 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
 
       let fullAddress = `${city}${state}${zipCode}${country}`;
 
+      if (initialData?.fields?.some((f) => f.fieldName === 'fullAddress' && f.type === 'singleLine')) {
+        fullAddress = addressDetail?.fullAddress ?? '';
+      }
+
       if (latLngChangedManually && !addressDetail?.streetAddress) {
-        setFieldValue('fullAddress', fullAddress);
+        if (initialData.fields?.find((e) => e?.fieldName === 'fullAddress')?.type !== 'singleLine') {
+          setFieldValue('fullAddress', fullAddress);
+        }
         setFieldValue('streetAddress', fullAddress);
       }
     }
@@ -309,7 +236,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ location: latLng }, (result, status) => {
         if (status === google.maps.GeocoderStatus.OK) {
-          setFullAddressFields(result[1]);
+          setFullAddressFields(result[1], null, true);
         }
       });
     }
@@ -369,7 +296,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                           {form.sectionFields.map((field, index2) => (
                             <Grid key={index2} item xs={12} sm={6} md={6}>
                               {
-                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'country', 'latitude', 'longitude',
+                                ['fullAddress', 'searchAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
                                   'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
                                   <FormTypes
                                     values={values}
@@ -388,23 +315,24 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                     setFieldValue={setFieldValue}
                                     fieldData={field}
                                     onChange={
-                                      field.fieldName === 'fullAddress'
-                                        ? (_, val) => {
-                                          if (typeof val !== 'object') return;
-                                          getFullAddress(val);
-                                          if (!val?.place_id) {
-                                            setAddressDetail(null);
+                                      field.fieldName === 'fullAddress' && field.type === 'singleLine' ? null
+                                        : (field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress')
+                                          ? (_, val) => {
+                                            if (typeof val !== 'object') return;
+                                            getFullAddress(val);
+                                            if (!val?.place_id) {
+                                              setAddressDetail(null);
+                                            }
                                           }
-                                        }
-                                        : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                          const { name, value } = e.target;
-                                          if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                                          setAddressDetail((prevState: any) => ({
-                                            ...prevState,
-                                            [name]: value
-                                          }));
-                                          setLatLngChangedManually(true);
-                                        }}
+                                          : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                            const { name, value } = e.target;
+                                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                            setAddressDetail((prevState: any) => ({
+                                              ...prevState,
+                                              [name]: value
+                                            }));
+                                            setLatLngChangedManually(true);
+                                          }}
                                   />
                                   :
                                   <FormTypes

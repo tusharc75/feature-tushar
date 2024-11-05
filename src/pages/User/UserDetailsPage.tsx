@@ -49,6 +49,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   checkSuperAdminAccess,
+  CustomDialogTransition,
   customerAccount,
   customerContact,
   displayDate,
@@ -69,7 +70,7 @@ import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
 
-import { isMobile, isTablet } from "react-device-detect";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -695,7 +696,7 @@ const UserDetailsPage = () => {
                   expanded={false}
                   fetchData={() => fetchUserRelatedDetail()}
                   quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
-                  isAllowedToUpdate={false}
+                  allowedToEdit={false}
                 />
               )}
             </div>
@@ -710,13 +711,20 @@ const UserDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchUserData();
           }}
-          userId={userData._id}
+          userId={userData?._id}
           dataToUpdate={userData}
           isNew={false}
         />
       )}
       {rolesDialogOpen && (
-        <Dialog fullWidth maxWidth="xs" open={rolesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullWidth
+          maxWidth="xs"
+          open={rolesDialogOpen}
+          onClose={handleCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignRolesDialog
             rolesDialogOpen={rolesDialogOpen}
             handleCloseDialog={handleCloseDialog}
@@ -733,10 +741,12 @@ const UserDetailsPage = () => {
         <Dialog
           fullWidth
           fullScreen={isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
           maxWidth="xs"
           open={showAssignEntityDialog}
           onClose={entityDialogClose}
-          aria-labelledby="assign-roles-dialog">
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={entityDialogClose}

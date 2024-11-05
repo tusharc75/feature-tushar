@@ -7,7 +7,6 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Autocomplete } from '@material-ui/lab';
-
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -41,13 +40,13 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.serializedAsset.title);
 
 const SerializedAsset = () => {
-  const renderedFrom = camelCase(routes?.serializedAsset.title);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -79,11 +78,15 @@ const SerializedAsset = () => {
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [otherStatusOptions, setOtherStatusOptions] = useState(null);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    fetchGridColumns();
-  }, []);
+    const fetch = async () => {
+      await fetchGridColumns();
+    };
+    fetch();
+  }, [permissions, selectedEntity]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -140,28 +143,46 @@ const SerializedAsset = () => {
     }
   }, [productCategory]);
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
+    const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+    const resourceData = resourceDataResponce?.data?.data;
+
+    const statusColors = {};
+    if (resourceData?.policy?.statusColor) {
+      for (const item of resourceData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
+            setOtherStatusOptions([...o.fieldData.option?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))]);
             setAllowUpdateStatus(o?.isUpdate);
             return true;
           }
         });
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) => (
               <div
                 style={{
-                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                    row?.original?.status
-                  )
-                    ? COLOUR_MASTER.lostAssets.background
-                    : ''
+                  backgroundColor: (() => {
+                    return statusColors[row?.original?.status]
+                      ? statusColors[row?.original?.status]
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                        ? COLOUR_MASTER.lostAssets.background
+                        : '';
+                  })()
                 }}
               >
                 <Link
@@ -179,6 +200,13 @@ const SerializedAsset = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
+                {row?.original?.currentLocationNotMatchWithGps && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Asset location needs to be update in Equipt">
+                      <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
               </div>
             );
           }
@@ -326,8 +354,7 @@ const SerializedAsset = () => {
 
     if (showScrapAsset) {
       deepFilter = `${deepFilter}&showScrapAsset=true`;
-    }
-    else {
+    } else {
       deepFilter = `${deepFilter}&hideScrapAsset=true`;
     }
 
@@ -524,7 +551,8 @@ const SerializedAsset = () => {
                 allowUpdateStatus,
                 handleStatusChange,
                 columns,
-                setOpenSupplierAccountDialog
+                setOpenSupplierAccountDialog,
+                otherStatusOptions
               }}
             />
           }
@@ -680,7 +708,7 @@ const LeftSideContent = ({
         <Fragment>
           {permissions?.productCategory?.isRead && (
             <Autocomplete
-              className={`lg:w-[230px] w-full`}
+              className={`w-full lg:w-[230px]`}
               options={productCategoryList}
               getOptionLabel={(option: any) => (option ? option.name : '')}
               getOptionSelected={(option: any, val) => option._id === val}
@@ -699,7 +727,7 @@ const LeftSideContent = ({
           )}
           {productCategory && (
             <Autocomplete
-              className={`lg:w-[230px] w-full`}
+              className={`w-full lg:w-[230px]`}
               options={productFilterList}
               size="small"
               getOptionLabel={(option: any) => (option ? option.productName : '')}
@@ -718,7 +746,7 @@ const LeftSideContent = ({
             />
           )}
           <Autocomplete
-            className={`lg:w-[230px] w-full`}
+            className={`w-full lg:w-[230px]`}
             options={warehouseOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
             getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -777,7 +805,8 @@ const ActionMenuItems = ({
   allowUpdateStatus,
   handleStatusChange,
   columns,
-  setOpenSupplierAccountDialog
+  setOpenSupplierAccountDialog,
+  otherStatusOptions
 }) => {
   return (
     <>
@@ -789,35 +818,38 @@ const ActionMenuItems = ({
       >
         {`Delete (${selectedRecords?.length})`}
       </MenuItem>
-      {permissions?.serializedAsset?.isUpdate &&
-        allowUpdateStatus &&
-        [ASSET_STATUS.available].map((status) => (
+      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
+        <>
           <MenuItem
             onClick={() => {
-              handleStatusChange(status);
+              handleStatusChange(ASSET_STATUS.available);
             }}
             disabled={
               selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(o.status) ||
-                  (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
-              ).length === selectedRecords?.length
+                (o) => [ASSET_STATUS.underReview, ASSET_STATUS.new,
+                ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords?.length
                 ? false
                 : true
             }
           >
-            {`Status Change - ${status}`}
+            {`Status Change - ${ASSET_STATUS.available}`}
           </MenuItem>
-        ))}
-      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
-        <>
           <MenuItem
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRecert,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -829,8 +861,15 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-              ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRepair,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -842,8 +881,15 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-              ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -854,22 +900,58 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.lost);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-            ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter(
+                (o) =>
+                  [ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
           </MenuItem>
-          {columns?.some((e) => e.field === 'certificationSupplier') && (
-            <MenuItem
-              disabled={!permissions?.serializedAsset?.isUpdate}
-              onClick={() => {
-                setOpenSupplierAccountDialog(true);
-              }}
-            >
-              {`Assign Certification Supplier`}
-            </MenuItem>
-          )}
+          {otherStatusOptions?.map((status) => {
+            return (
+              <MenuItem
+                onClick={() => {
+                  handleStatusChange(status?.optionValue);
+                }}
+                disabled={
+                  !selectedRecords?.every((r) =>
+                    [
+                      ASSET_STATUS.new,
+                      ASSET_STATUS.available,
+                      ASSET_STATUS.underReview,
+                      ASSET_STATUS.scrap,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ...(otherStatusOptions?.filter((o) => o?.optionValue != status?.optionValue)?.map((o) => o?.optionValue) || [])
+                    ]?.includes(r?.status)
+                  )
+                }
+              >
+                {`Status Change - ${status?.optionLabel}`}
+              </MenuItem>
+            );
+          })}
         </>
+      )}
+      {permissions?.serializedAsset?.isUpdate && selectedRecords?.length && columns?.some((e) => e.field === 'certificationSupplier') && (
+        <MenuItem
+          disabled={!permissions?.serializedAsset?.isUpdate}
+          onClick={() => {
+            setOpenSupplierAccountDialog(true);
+          }}
+        >
+          {`Assign Certification Supplier`}
+        </MenuItem>
       )}
     </>
   );

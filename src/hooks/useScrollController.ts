@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ScrollState {
   x: number;
@@ -12,6 +12,7 @@ type UseScrollController = {
 export const useScrollController = ({
   scrollDistance = 200
 }: UseScrollController): {
+  container: HTMLElement | null;
   setRef: React.Dispatch<React.SetStateAction<HTMLElement>>;
   scrollLeft: () => void;
   scrollRight: () => void;
@@ -22,7 +23,7 @@ export const useScrollController = ({
   isUpDisabled: boolean;
   isDownDisabled: boolean;
 } => {
-  const [ref, setRef] = useState<HTMLElement>(null);
+  const [ref, setRef] = useState<HTMLElement | null>(null);
   const [scrollState, setScrollState] = useState<ScrollState>({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -81,6 +82,7 @@ export const useScrollController = ({
   const isDownDisabled = ref ? scrollState.y >= ref.scrollHeight - ref.clientHeight : true;
 
   return {
+    container: ref,
     setRef,
     scrollLeft,
     scrollRight,

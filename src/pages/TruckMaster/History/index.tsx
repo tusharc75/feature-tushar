@@ -10,11 +10,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import { dateTimeFormat } from 'src/constants/helpers';
 
+const renderedFrom = `${camelCase(routes?.truckMaster.title)}_History`;
+
 const History = ({ id, status }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const columns = [
     {
@@ -140,7 +141,7 @@ const History = ({ id, status }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={`${camelCase(routes?.truckMaster.title)}_History`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchData}
             hideSelection={true}

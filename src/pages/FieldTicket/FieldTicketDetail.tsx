@@ -3,8 +3,6 @@ import { Edit } from '@material-ui/icons';
 import { camelCase, isNumber } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -40,6 +38,7 @@ import Submit from './Submit';
 import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -123,7 +122,9 @@ const FieldTicketDetail = () => {
       }
 
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
-      setAllowedToDelete(permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, data.owner.optionValue) && data?.canDelete
+      );
       setFieldTicketData(data);
       setLoading(false);
     } catch (error) {
@@ -178,19 +179,6 @@ const FieldTicketDetail = () => {
     setTabValue(newValue);
   };
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0) {
-      updateProcessStatus(fieldTicketSteps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    if (!isOffline) {
-      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
-        .catch((error) => { toastConfig.setToastConfig(error); });
-    }
-  };
-
   const handleChangeStatus = async (status) => {
     await axiosInstance()
       .patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status })
@@ -201,7 +189,6 @@ const FieldTicketDetail = () => {
           type: 'success',
           message: data?.message
         });
-        fetchData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -265,16 +252,18 @@ const FieldTicketDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 2}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -290,11 +279,16 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
+            steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              if (!isOffline) {
+                dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
+              }
+            }}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && fieldTicketData && (
@@ -305,7 +299,7 @@ const FieldTicketDetail = () => {
                 handleChangeStatus={handleChangeStatus}
                 resourcePolicy={resourceData?.policy}
                 stepFullScreen={stepFullScreen}
-
+                fetchData={fetchData}
               />
             )}
             {currentStep === 1 && fieldTicketData && (
@@ -319,15 +313,22 @@ const FieldTicketDetail = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.fieldTicket}
-            data={fieldTicketData}
-            allowedToEdit={permissions?.fieldTicket?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.fieldTicket}
+                  data={fieldTicketData}
+                  allowedToEdit={permissions?.fieldTicket?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -348,6 +349,7 @@ const FieldTicketDetail = () => {
           }}
           onOk={() => {
             handleChangeStatus(FIELD_TICKET_STATUS.closed);
+            fetchData();
           }}
         />
       )}

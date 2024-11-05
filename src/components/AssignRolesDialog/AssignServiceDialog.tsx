@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, Popover } from '@material-ui/core';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, formatAmountWithCurrency, gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
@@ -15,6 +15,9 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
+import { Link } from 'react-router-dom';
+import { Info } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AssignServiceDialog = ({
   onSuccess,
@@ -24,12 +27,13 @@ const AssignServiceDialog = ({
   isSubmitting = false,
   hideQty = false,
   extraFilterById = null,
-  pricingCondition = null
+  pricingCondition = null,
+  currency = null
 }) => {
   const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -39,6 +43,7 @@ const AssignServiceDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const [openConditionDetails, setOpenConditionDetails] = useState({anchorEl: null, materialCondition: null})
   const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
@@ -50,14 +55,14 @@ const AssignServiceDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
-      disabled:true,
+      disabled: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
 
-  useEffect(() => {
+  useEffect(()=>{
     fetchGridColumns();
-  }, []);
+  },[])
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -67,16 +72,57 @@ const AssignServiceDialog = ({
 
   const fetchGridColumns = async () => {
     try {
-      let data;
+      let data, pricingConditionData;
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
       } else {
         const response = await axiosInstance().get('/field?resource=Service Master&view=true');
         data = response?.data?.data;
+        if(pricingCondition){
+          const pricingData = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
+          pricingConditionData = pricingData?.data?.data?.condition;
+        }
       }
+
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
       columns = [...newColumns, ...getStaticFields()];
+      if (pricingCondition && pricingConditionData && !isOffline) {
+        columns?.forEach((column) => {
+          if (column?.primaryField) {
+            column.cell = ({ row }) => (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <Link
+                    className="link text-truncate"
+                    title={row.original[column.accessor]}
+                    to={`${routes.serviceMaster.path}/detail/${row.original._id}`}
+                  >
+                    {row.original[column.accessor]}
+                  </Link>
+                  <HtmlTooltip title={'Pricing Information'}>
+                  <IconButton
+                    aria-label="info"
+                    size="small"
+                    color="primary"
+                    disabled={false}
+                    onClick={(e) => {
+                      const matchedPricingCondition = pricingConditionData?.find((ele)=> ele.materialId===row?.original?._id);
+                      if(matchedPricingCondition && matchedPricingCondition?.unit?.length && matchedPricingCondition?.pricingMethod?.length){
+                        setOpenConditionDetails({anchorEl: e.currentTarget, materialCondition: matchedPricingCondition });
+                      }
+                    }}
+                  >
+                    <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />
+                  </IconButton>
+                  </HtmlTooltip>
+                </div>
+              </>
+            );
+          }
+        });
+      }
+
       if (hideQty) {
         setColumns([...columns]);
       } else {
@@ -215,7 +261,15 @@ const AssignServiceDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Assign ${routes.serviceMaster.title}`}
         showManimizeMaximize={false}
@@ -268,6 +322,50 @@ const AssignServiceDialog = ({
           </Box>
         )}
       </CustomDialogContent>
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        id={openConditionDetails.materialCondition?.materialId}
+        open={Boolean(openConditionDetails.anchorEl)}
+        anchorEl={openConditionDetails.anchorEl}
+        onClose={() => setOpenConditionDetails({anchorEl: null, materialCondition: null})}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+    <div className="p-3 border-b overflow-auto">
+      <table className="min-w-full table-auto border-collapse border border-gray-300">
+        <thead>
+          <tr>
+            <th className="border border-gray-300 px-4 py-2"></th>
+            {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
+              <th key={index} className="border border-gray-300 px-4 py-2 whitespace-nowrap">
+                {method}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
+            <tr key={rowIndex}>
+              <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+              {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
+                <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                   <p>{formatAmountWithCurrency(currency, openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`] )?.fullFormatAmount || ''}</p>  
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+      </Popover>
     </Dialog>
   );
 };

@@ -2,8 +2,6 @@ import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -25,7 +23,6 @@ const SurveysDetail = () => {
   const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.surveys]);
   const [SurveyData, setSurveyData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -64,10 +61,9 @@ const SurveysDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/surveys/${id}`);
-      
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
       setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
-      setHeadingLbl(data.surveyName);
       setSurveyData(data);
       setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
       setLoading(false);
@@ -147,10 +143,10 @@ const SurveysDetail = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange} textColor="primary">
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>

@@ -8,20 +8,19 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from '../../../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../CustomDialog/CustomDialogFooter';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const FieldSchema = object().shape({
   fieldName: string().required('Please enter field Name')
 });
 
 const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
-
   const [initialValues, setInitialValues] = useState({ fieldName: fieldData?.fieldName });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-
   const handleSubmit = (values) => {
-    handleSave({ ...values, _id: fieldData?._id })
+    handleSave({ ...values, _id: fieldData?._id });
   };
 
   const validate = (values) => {
@@ -34,6 +33,7 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
 
   return (
     <Dialog
+      TransitionComponent={CustomDialogTransition}
       maxWidth="sm"
       fullScreen={fullScreen || isMobile || isTablet}
       aria-labelledby="customized-dialog-title"
@@ -46,22 +46,15 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
         }
       }}
     >
-      <Formik
-        enableReinitialize={true}
-        initialValues={initialValues}
-        validationSchema={FieldSchema}
-        onSubmit={handleSubmit}
-        validate={validate}
-      >
+      <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSubmit} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
               title={`Change Field Name`}
               onClose={() => {
                 if (isEqual(values, initialValues)) {
-                  handleClose()
-                }
-                else {
+                  handleClose();
+                } else {
                   setShowConfirmDialog(true);
                 }
               }}
@@ -72,7 +65,7 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
               showManimizeMaximize={true}
             ></CustomDialogHeader>
             <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate >
+              <Form autoComplete="off" autoCorrect="off" noValidate>
                 <TextField
                   variant="outlined"
                   type="text"
@@ -95,9 +88,8 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
                 size="small"
                 onClick={() => {
                   if (isEqual(values, initialValues)) {
-                    handleClose()
-                  }
-                  else {
+                    handleClose();
+                  } else {
                     setShowConfirmDialog(true);
                   }
                 }}
@@ -119,7 +111,7 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
                 }}
                 onClose={() => {
                   setShowConfirmDialog(false);
-                  handleClose()
+                  handleClose();
                 }}
               />
             ) : null}

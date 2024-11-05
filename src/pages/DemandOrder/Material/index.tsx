@@ -23,12 +23,11 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
-
   const renderedFrom = `${camelCase(routes?.demandOrder.title)}_material`;
 
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -86,7 +85,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
         minWidth: 300,
         width: 300,
         Cell: ({ row, table }) => (
-          <div className="flex items-center gap-2 flex-nowrap">
+          <div className="flex flex-nowrap items-center gap-2">
             {allowedToEdit ? (
               <p
                 onClick={() => {
@@ -200,7 +199,8 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-        parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+        parent.description =
+          parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
         parent.qty = parent.qty;
         parent.qtyDisplay = parent.qty;
         parent.subRows = generateNestedData(data.material, parent);
@@ -264,7 +264,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
-        fetchDemadOrderData()
+        fetchDemadOrderData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -280,7 +280,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
-        fetchDemadOrderData()
+        fetchDemadOrderData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -312,13 +312,14 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
     });
   };
+
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData, demandOrderData?.currency);
     handleSaveData(rows);
   };
 
@@ -334,7 +335,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
-        fetchDemadOrderData()
+        fetchDemadOrderData();
         setDeleteData(null);
       })
       .catch((error) => {

@@ -25,7 +25,7 @@ export default function IotDataPoints({ deviceTemplate }) {
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly, search } = state;
   const [columns, setColumns] = useState(null);
 

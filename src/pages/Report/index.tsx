@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, isObject, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -12,7 +12,14 @@ import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
+import {
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  primaryFields,
+  sidebarResource,
+  isObjectEmpty,
+  CustomDialogTransition
+} from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -54,8 +61,8 @@ const Report = () => {
 
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
-  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const fetchGridColumns = async () => {
     setLoadingColumns(true);
@@ -145,24 +152,46 @@ const Report = () => {
     if (resourceStartCase === sidebarResource.invoice) {
       const extraColumns = [
         {
-          accessor: 'totalPrice',
-          Header: 'Total Price',
+          accessor: 'amount',
+          Header: 'Amount',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['totalPrice'] ? row.original['totalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['amount'] ? row.original['amount'] : <NoDataCell />}</h5>
             </>
           )
         },
         {
-          accessor: 'finalPrice',
-          Header: 'Final Price',
+          accessor: 'tax',
+          Header: 'Tax',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['finalPrice'] ? row.original['finalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['tax'] ? row.original['tax'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'discount',
+          Header: 'Discount',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['discount'] ? row.original['discount'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'totalAmount',
+          Header: 'Total Amount',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['totalAmount'] ? row.original['totalAmount'] : <NoDataCell />}</h5>
             </>
           )
         }
@@ -302,7 +331,7 @@ const Report = () => {
             if (Array.isArray(selectedData[key].value)) {
               deepFilter.push({
                 field: key,
-                term: selectedData[key].value?.map((d: any) => d.optionValue)
+                term: selectedData[key].value?.map((d: any) => d.optionValue || d)
               });
             } else {
               deepFilter.push({
@@ -357,8 +386,13 @@ const Report = () => {
 
   const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
-    if (colState.length) {
-      newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
+    if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
+      newColumns = [];
+      for (const [key, value] of Object.entries(visibleColumns)) {
+        if (value) {
+          newColumns.push(key);
+        }
+      }
     }
     let filterQuery = getFilter(true);
     let api = null;
@@ -394,7 +428,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => {}}
+                        afterImportCompleted={() => { }}
                         onlyExport={true}
                       />
                     )}
@@ -438,6 +472,7 @@ const Report = () => {
                 open={true}
                 maxWidth="md"
                 fullWidth
+                TransitionComponent={CustomDialogTransition}
                 onClose={(e, reason) => {
                   if (reason !== 'backdropClick') {
                     setShowGrid(true);
@@ -493,7 +528,6 @@ const Report = () => {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
-                  reportSave={true}
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
                 />

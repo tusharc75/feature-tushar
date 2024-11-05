@@ -22,7 +22,7 @@ const renderedFrom = 'productPage';
 const AddExistingProduct = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { handleClose, addProductInBuilder, referenceData = null } = props;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [productColoums, setProductColoums] = useState([]);
@@ -33,6 +33,7 @@ const AddExistingProduct = (props) => {
   const [productCategory, setProductCategory] = useState(null);
   const [productTemplate, setProductTemplate] = useState(null);
   const [isProductTemplate, setIsProductTemplate] = useState(true);
+  const [orderedSelectedRecords, setOrderedSelectedRecords] = useState([]);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -76,6 +77,22 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
+  useEffect(()=>{
+   if(selectedRecords?.length){
+    const newlySelected = selectedRecords?.filter(data => !orderedSelectedRecords?.some(item => item._id === data._id)) || [];
+    const deselected = orderedSelectedRecords?.filter(item => !selectedRecords?.some(data => data._id === item._id));
+
+    let updatedOrder = [];
+    if(orderedSelectedRecords?.length){
+      updatedOrder = [...orderedSelectedRecords?.filter(item => !deselected?.some(d => d._id === item._id))]
+    }
+  
+    updatedOrder = [...updatedOrder, ...newlySelected];
+
+    setOrderedSelectedRecords(updatedOrder);
+   }
+  },[selectedRecords])
+
   useEffect(() => {
     axiosInstance()
       .get('/field?resource=Product&view=true')
@@ -99,7 +116,7 @@ const AddExistingProduct = (props) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${selectedRecords?.map((m) => m._id)}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
     const { deepFilters } = gridFilterParser(filters);
@@ -155,6 +172,8 @@ const AddExistingProduct = (props) => {
         const newColumns = generateColumns(renderedFrom, fields, `${routes.productDetail.path}`);
         newColumns?.forEach((ele) => {
           ele.leval = 'product-template';
+          ele.disableFilters = true;
+          ele.disableSortBy = true;
         });
         let columns = [...productColoums, ...newColumns];
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
@@ -175,7 +194,7 @@ const AddExistingProduct = (props) => {
   };
 
   const handleAdd = () => {
-    const orderIds = selectedRecords?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
+    const orderIds = orderedSelectedRecords?.map((m) => m._id);
 
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
@@ -271,12 +290,7 @@ const AddExistingProduct = (props) => {
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button
-                size="small"
-                color="primary"
-                onClick={handleAdd}
-                variant="contained"
-                disabled={selectedRecords.length > 0 ? false : true}>
+              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
               </Button>
@@ -285,7 +299,7 @@ const AddExistingProduct = (props) => {
         </Box>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}

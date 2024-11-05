@@ -12,10 +12,9 @@ import { ExpandMore } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
-
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
-const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
+const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -129,9 +128,15 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
 
     const accessor: CardInterface = {
       name: (row) => (
-        <Typography component={'h6'}>
+        <Typography component={'h6'} className="mt-0 line-clamp-2 !leading-[1.5] max-[768px]:!text-[13px]">
           Product Type :{' '}
-          <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
+          <a
+            className="link"
+            href={`${routes.productDetail.path}/${row?.product?.optionValue}`}
+            title={row['productName']}
+            rel="noreferrer"
+            target="_blank"
+          >
             {row['productName']}
           </a>
         </Typography>
@@ -217,7 +222,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
             <Typography>Storage Location:</Typography>
             <Typography>
               {row?.['storageLocation'] ? (
-                <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} target="_blank">
+                <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} rel="noreferrer" target="_blank">
                   {row?.['storageLocation']}
                 </a>
               ) : (
@@ -247,16 +252,18 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
     <>
       <Box display="flex" justifyContent={'space-between'}>
         <Box>
-          <Typography
-            variant="subtitle2"
-            style={{
-              color: 'var(--card-color-primary)',
-              fontSize: 15,
-              fontWeight: 700
-            }}
-          >
-            Consumables Requests
-          </Typography>
+          {!isMobile && (
+            <Typography
+              variant="subtitle2"
+              style={{
+                color: 'var(--card-color-primary)',
+                fontSize: 15,
+                fontWeight: 700
+              }}
+            >
+              Consumables Requests
+            </Typography>
+          )}
         </Box>
         <Box>
           <Button
@@ -316,16 +323,15 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
       </Box>
       <Box pt={2}>
         {rowsData && accessor ? (
-          <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
+          <Box zIndex={5} width={'100%'} height={isMobile ? 'calc(100vh - 143px)' : 'calc(100vh - 290px)'}>
             <CustomTableWithCard
-              // collapsible={true}
               data={rowsData}
               accessor={accessor}
               uniqueKey={(data) => data._id}
               onSelect={setSelectedRecords}
               checkBox={true}
               showSelectAll={true}
-              height={'calc(100vh - 290px)'}
+              height={isMobile ? 'calc(100vh - 160px)' : 'calc(100vh - 290px)'}
             />
           </Box>
         ) : (
@@ -360,11 +366,12 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
                   _id: item?._id,
                   uniqueId: item?.uniqueId,
                   qty: item?.qty - (item?.processedQty || 0),
-                  serialNumber: item?.serialNumber?.map((s: any) => {
-                    if(s.status === PRODUCT_SERIAL_NUMBER_STATUS.available) {
-                      return s.optionValue;
-                    }
-                  }) || []
+                  serialNumber:
+                    item?.serialNumber?.map((s: any) => {
+                      if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.available) {
+                        return s.optionValue;
+                      }
+                    }) || []
                 };
               });
               handleUpdateStatus(qtyDialog.status, rows, data.comment || '');
@@ -381,6 +388,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
           product={openProcessLogs.product}
+          referenceType={referenceType}
         />
       )}
     </>

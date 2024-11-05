@@ -9,7 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import moment from 'moment';
 import { TextField, Button, Grid } from '@material-ui/core';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
 import PersonIcon from '@material-ui/icons/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -92,6 +92,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
   return (
     <Dialog
       fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       maxWidth="md"
       style={{ maxWidth: '800px', marginLeft: 'auto', marginRight: 'auto' }}
@@ -117,7 +118,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                 <div key={item._id} className="mb-4 md:mb-[26px]">
                   <div
                     style={{ borderBottomStyle: 'solid' }}
-                    className="flex flex-wrap border-b border-[var(--common-border-color)] md:gap-[32px] gap-4 items-start justify-between"
+                    className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--common-border-color)] md:gap-[32px]"
                   >
                     {editingCommentId === item._id ? (
                       <div className=" basis-[100%] pb-[6px]">
@@ -130,7 +131,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                           placeholder="Comment"
                           label={'Comment'}
                         />
-                        <div className="mt-[8px] flex flex-wrap gap-[8px] justify-end">
+                        <div className="mt-[8px] flex flex-wrap justify-end gap-[8px]">
                           <Button variant="contained" size="small" color="primary" onClick={handleSave} disabled={!editedComment?.trim().length}>
                             Save
                           </Button>
@@ -141,7 +142,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                       </div>
                     ) : (
                       <>
-                        <p className="basis-[calc(100%-100px)] font-[500] text-[16px]">{item.comment}</p>
+                        <p className="basis-[calc(100%-100px)] text-[16px] font-[500]">{item.comment}</p>
                         {userId === item?.user?.optionValue ? (
                           <HtmlTooltip title="Edit">
                             <IconButton
@@ -158,15 +159,15 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                       </>
                     )}
                   </div>
-                  <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)]">
+                  <div className="mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)]">
                     <p>
                       Created by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.date).format(dateTimeFormat)}</span>
                     </p>
                     {item.updatedBy && item.updatedAt ? (
                       <p>
                         Edited by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                        <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.updatedAt).format(dateTimeFormat)}</span>
+                        <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.updatedAt).format(dateTimeFormat)}</span>
                       </p>
                     ) : null}
                     <div></div>

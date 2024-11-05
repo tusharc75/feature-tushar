@@ -21,13 +21,14 @@ import ManageIotDataPoints from './ManageIotDataPoints';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.iotDataPoints.title);
+
 const IotDataPoints = () => {
-  const renderedFrom = camelCase(routes?.iotDataPoints.title);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRecord, setDeleteRecord] = useState(null);

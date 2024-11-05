@@ -18,7 +18,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
     state: { user, permissions }
   }: any = useData();
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
@@ -32,13 +32,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
         Header: 'Product Name',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <p
-            className="text-truncate"
-          >
-            {row.original.productName}
-          </p>
-        )
+        Cell: ({ row }) => <p className="text-truncate">{row.original.productName}</p>
       },
       {
         accessor: 'availableInventory',

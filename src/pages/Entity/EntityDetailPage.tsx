@@ -24,7 +24,7 @@ import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
 import DoaSetup from '../DoaSetupNew';
-import { DOA_RESOURCE } from 'src/constants/helpers';
+import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -35,7 +35,6 @@ const EntityDetailsPage = () => {
     state: { user, permissions },
     dispatch
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -78,7 +77,6 @@ const EntityDetailsPage = () => {
       } = await axiosInstance().get(`/entity/${id}`);
 
       handleMainPoints(data);
-      setHeadingLbl(data?.entityName);
       setEntityData(data);
       setCustomizedRoutes([routes.entity, { title: data?.entityName }]);
       setLoading(false);
@@ -291,9 +289,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -487,7 +485,15 @@ const EntityDetailsPage = () => {
         />
       )}
       {showAssignUserDialog && (
-        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullScreen={isMobile || isTablet}
+          fullWidth
+          maxWidth="sm"
+          open={showAssignUserDialog}
+          onClose={userDialogClose}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}

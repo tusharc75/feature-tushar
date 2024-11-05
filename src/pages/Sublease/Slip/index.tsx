@@ -17,7 +17,7 @@ import { FiExternalLink } from 'react-icons/fi';
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -109,12 +109,13 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
       let rows = data.material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageName
-            : ''
-          }`;
+        parent.detail = `${
+          parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : ''
+        }`;
         parent.description =
           parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''

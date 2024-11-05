@@ -24,7 +24,7 @@ const QuotePdfTemplate = () => {
   const renderedFrom = camelCase(routes?.quotePdfTemplate.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions, selectedEntity }
@@ -34,14 +34,13 @@ const QuotePdfTemplate = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { qbApi } = quoteBuilder;
   const { quotePdfTemplateApi } = quotePdfTemplate;
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
 
   useEffect(() => {
     if (renderCount > 0) {

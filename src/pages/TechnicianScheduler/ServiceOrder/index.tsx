@@ -26,6 +26,7 @@ const TECHNICIAN_RESOURCE = [
     title: routes.fieldTicketDetail.title
   }
 ];
+const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
@@ -33,10 +34,10 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -258,15 +259,15 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   };
 
   const handleUnAssign = () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
       .then(() => {
         handleSucess();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -291,7 +292,6 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           renderInput={(params) => <TextField {...params} label={'Select Type'} variant="outlined" />}
         />
       </Box>
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -301,7 +301,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
             dispatch={dispatch}
             refreshGrid={fetchData}
             hideAction={true}
-            renderedFrom={`service_order_technician`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         </Box>

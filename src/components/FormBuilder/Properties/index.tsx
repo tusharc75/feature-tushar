@@ -15,6 +15,7 @@ import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
 import Visibility from './Visibility';
+import Validation from 'src/components/FormBuilder/Properties/Validation';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -190,7 +191,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
           if (ele._id.toString() === fieldData._id.toString()) {
-            ele.fieldLabel = values.fieldLabel;
+            ele.fieldLabel = values.fieldLabel?.trim();
             ele.required = values.required;
             ele.isTooltip = values.isTooltip;
             ele.tooltipMessage = values.tooltipMessage;
@@ -225,11 +226,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
+            ele.restrictFutureDate = values.restrictFutureDate || false;
+            ele.restrictBackDate = values.restrictBackDate || false;
+            ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
+              ele.systemGeneratedPrefixDigit = values.systemGeneratedPrefixDigit;
+              ele.systemGeneratedStartNumber = values.systemGeneratedStartNumber;
             }
             ele.isFieldEntityWise = values?.isFieldEntityWise || false;
             if (ele.isFieldEntityWise) {
@@ -335,14 +341,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.dropdownOnConverter = values.dropdownOnConverter;
             }
 
-            if (['signature', 'groupSignature'].includes(fieldData.type)) {
-              if (values?.signatureUsers && values?.signatureUsers?.length) {
-                ele.signatureUsers = values.signatureUsers;
-              } else {
-                ele.signatureUsers = [];
-              }
-            }
-
             if (fieldData?.lookup) {
               if (values.lookupDependentOn) {
                 ele.lookupDependentOn = values.lookupDependentOn;
@@ -371,7 +369,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     handleClose();
   };
 
-  function validate(values) {
+  function validate(values, fieldData) {
     const errors = {};
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
@@ -424,8 +422,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
 
-    if (values.isDefaultValue && !values.defaultValue) {
-      errors['defaultValue'] = 'Please enter default value.';
+    if (fieldData.type !== 'checkBox') {
+      if (values.isDefaultValue && !values.defaultValue) {
+        errors['defaultValue'] = 'Please enter default value.';
+      }
     }
 
     if (values.isTooltip && !values.tooltipMessage) {
@@ -511,7 +511,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         }
       }}
     >
-      <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
+      <Formik
+        enableReinitialize={true}
+        initialValues={initialValues}
+        validationSchema={FieldSchema}
+        onSubmit={handleSave}
+        validate={(v) => validate(v, fieldData)}
+      >
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
@@ -533,7 +539,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     <CustomTabs value={tabValue} onChange={handleTabChange}>
                       <CustomTab value={0} label={'General'} />
                       <CustomTab value={1} label={'Visibility'} />
-                      <CustomTab value={2} label={'Setting'} />
+                      {['date', 'dateTime']?.includes(fieldData?.type) && <CustomTab value={2} label={'Validation'} />}
+                      <CustomTab value={3} label={'Setting'} />
                     </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General
@@ -552,6 +559,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
+                      <Validation values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={3}>
                       <Setting
                         initialValues={initialValues}
                         values={values}

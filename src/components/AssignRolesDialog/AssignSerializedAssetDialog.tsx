@@ -4,7 +4,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource
+} from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -17,7 +24,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const renderedFrom = `${routes.serializedAsset.title}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -147,6 +154,12 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       }
     }
 
+    if (reference === 'workOrder_assign_asset') {
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+    }
+
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
@@ -258,7 +271,15 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Add ${routes.serializedAsset.title}`}
         showManimizeMaximize={false}

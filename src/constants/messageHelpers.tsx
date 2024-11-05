@@ -39,6 +39,7 @@ export const rentalManagementActions = {
 
 export const rentalManagementMessage = {
   addProductPackage: 'Add Products or Packages to proceed',
+  addServicePackage: 'Add Services or Packages to proceed',
   validPrice: 'Enter Price to proceed',
   validServicePrice: 'Enter Service Price to proceed',
   acceptRejectQuotation: `Accept/Reject ${routes.quotation.title} to proceed`,
@@ -76,7 +77,7 @@ export const rentalManagementMessage = {
   cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
   statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
   rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
-  statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
+  statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review/Available assets',
   rentalProductConsumed: 'Product already consumed',
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
@@ -91,7 +92,8 @@ export const rentalManagementMessage = {
   canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
   canNotChangeStartDate: `Can not change Start Date`,
   canNotChangeEndDate: `Can not change End Date`,
-  invoiceCreated: `Invoice already created`
+  invoiceCreated: `Invoice already created`,
+  sameAssetsSelected: `Same Assets Seleted`
 };
 
 export const subleaseActions = {

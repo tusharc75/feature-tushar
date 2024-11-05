@@ -1,14 +1,14 @@
 import { Box } from '@material-ui/core';
 import { camelCase, isEmpty } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
@@ -17,7 +17,7 @@ const DOARequest = () => {
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 

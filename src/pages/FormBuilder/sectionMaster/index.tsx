@@ -14,14 +14,16 @@ import ManageSectionMaster from './ManageSectionMaster';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DynamicIcon, defaultIcons } from 'src/assets/IconGenerator';
 import { ServiceManagementIcon } from 'src/assets/sidebar_assets/icons';
+import { CustomDialogTransition } from 'src/constants/helpers';
+
+const renderedFrom = `section-master`;
 
 const SectionMaster = ({ close }) => {
-  const renderedFrom = `section-master`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [openManageSectionMaster, setOpenManageSectionMaster] = useState({ open: false, data: null });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();
@@ -33,14 +35,14 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'sectionName',
         Header: 'Section Name',
-        width: 150,
+        width: 500,
         disabled: true,
         Cell: ({ row }) => {
           const iconName = row.original?.iconName
             ? row.original?.iconName
             : defaultIcons.includes(row.original?.sectionName || '')
-            ? row.original?.sectionName
-            : '';
+              ? row.original?.sectionName
+              : '';
           return row?.original['sectionName'] ? (
             <p className="text-truncate">
               <span className="mr-2">{DynamicIcon(iconName, { size: 18 }) || <ServiceManagementIcon size={18} />}</span>
@@ -54,8 +56,8 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'description',
         Header: 'Description',
-        width: 150,
         disabled: true,
+        width: 500,
         Cell: ({ row }) => {
           return row?.original['description'] ? <p className="text-truncate">{row?.original['description']}</p> : <NoDataCell />;
         }
@@ -63,8 +65,7 @@ const SectionMaster = ({ close }) => {
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 60,
-        width: 60,
+        width: 100,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -123,6 +124,7 @@ const SectionMaster = ({ close }) => {
     <>
       <Dialog
         open
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullScreen={true}
         fullWidth
@@ -147,6 +149,7 @@ const SectionMaster = ({ close }) => {
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 hideExportTable={true}
+                showArrangeView={false}
               />
             </Box>
           ) : (

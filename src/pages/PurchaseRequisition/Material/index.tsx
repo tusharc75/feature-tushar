@@ -16,7 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CHILD_RESOURCE, MATERIAL_TYPE, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -53,7 +53,7 @@ const Material = ({
 
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
@@ -126,20 +126,20 @@ const Material = ({
               <p className="text-truncate">{row.original?.detail}</p>
             )}
             {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )
@@ -220,14 +220,14 @@ const Material = ({
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.detail || parent.description;
+            ? parent.serviceDetail?.serviceName
+            : parent.detail || parent.description;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceDescription
-          : parent.description;
+            ? parent.serviceDetail?.serviceDescription
+            : parent.description;
       parent.isValid = parent['finalPrice_' + purchaseRequisitionData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice;
@@ -327,7 +327,7 @@ const Material = ({
           message: data.message
         });
         fetchData();
-        fetchpurchaseRequisitionData()
+        fetchpurchaseRequisitionData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -343,7 +343,7 @@ const Material = ({
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
-        fetchpurchaseRequisitionData()
+        fetchpurchaseRequisitionData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -390,7 +390,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
-          fetchpurchaseRequisitionData()
+          fetchpurchaseRequisitionData();
           setDeleteData(null);
         })
         .catch((error) => {
@@ -410,7 +410,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
-          fetchpurchaseRequisitionData()
+          fetchpurchaseRequisitionData();
           setDeleteData(null);
         })
         .catch((error) => {
@@ -424,7 +424,7 @@ const Material = ({
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, purchaseRequisitionData?.currency);
     handleSaveData(rows);
   };
 

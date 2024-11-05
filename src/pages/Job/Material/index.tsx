@@ -34,7 +34,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const [addDialog, setAddDialog] = useState({ open: false, type: '' });
   const [allFields, setAllFields] = useState([]);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -81,14 +81,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
             >
               {row.original?.detail}
             </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       }
@@ -137,7 +137,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   };
 
   const fetchJobData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -257,7 +256,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, jobData?.currency);
     handleSaveData(rows);
   };
 

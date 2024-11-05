@@ -9,7 +9,7 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -36,6 +36,7 @@ import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import {
   ASSET_STATUS,
   COLOUR_MASTER,
+  CustomDialogTransition,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -46,6 +47,7 @@ import {
   REPAIR_JOB_STATUS,
   dateFormat,
   deliveryTicket,
+  findSimilarRecords,
   gridLoadingTimeout,
   serializedAsset as productInventoryHelperObject,
   rentalManagement,
@@ -75,6 +77,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
+import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -101,7 +105,6 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  checkProgressiveBilling,
   rentalPolicyData,
   hideDeliveryTicketDelivered
 }) => {
@@ -111,7 +114,7 @@ const ReceivingTicket = ({
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
 
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -133,7 +136,7 @@ const ReceivingTicket = ({
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
-  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, bulkUpdate: false });
+  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, records: null, isBulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -146,7 +149,13 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({ open: false, statusPolicy: null, referenceData: {}, ticketType: null });
+  const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({
+    open: false,
+    statusPolicy: null,
+    _ids: null,
+    referenceData: {},
+    ticketType: null
+  });
   const [assetsData, setAssetsData] = useState([]);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false);
   const [serviceData, setServiceData] = useState([]);
@@ -244,6 +253,18 @@ const ReceivingTicket = ({
         ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
         ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
       ];
+
+      const similarRecords = findSimilarRecords(
+        records?.filter((e) => e.type === 'Asset'),
+        '_id'
+      );
+      if (similarRecords?.length) {
+        similarRecords?.forEach((ele: any) => {
+          ele?.forEach((e: any) => {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.sameAssetsSelected });
+          });
+        });
+      }
     }
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
@@ -356,7 +377,7 @@ const ReceivingTicket = ({
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           if (e?.isReplaced && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
-          } else if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
+          } else if (![ASSET_STATUS.underReview, ASSET_STATUS.available]?.includes(e?.status) && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
           } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
@@ -523,7 +544,9 @@ const ReceivingTicket = ({
               replaceAsset: d?.replaceAsset?.optionLabel,
               description: d?.product?.productDescription,
               wellNumber: d?.inventory?.wellNumber,
-              position: d?.inventory?.position
+              position: d?.inventory?.position,
+              currentGpsLocation: d?.inventory?.currentGpsLocation,
+              currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps,
             };
           })
           .map((u) => ({
@@ -564,7 +587,7 @@ const ReceivingTicket = ({
         setInvoiceData(invoiceData);
       }
 
-      setAllMaterial(material)
+      setAllMaterial(material);
 
       if (permissions?.repairJob?.isRead && transactionData?.repairJob?.length) {
         setRepairJobCount(transactionData?.repairJob?.length);
@@ -627,10 +650,7 @@ const ReceivingTicket = ({
         }
       });
 
-      products = uniqueProduct(
-        material?.filter((e) => e.consumableType !== 'Internal'),
-        nonSerializedInventory
-      );
+      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'), nonSerializedInventory);
 
       products?.forEach((element) => {
         var qty = element.qty;
@@ -646,7 +666,7 @@ const ReceivingTicket = ({
 
         ticketProduct?.forEach((ele) => {
           var returnTicket: any = [];
-          if (ele?.warehouse) {
+          if (ele?.warehouse && productSerialNumbers?.length) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
@@ -934,28 +954,32 @@ const ReceivingTicket = ({
         }
       });
 
-      if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
-        if (productAssets.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
-          setNextStep(true);
+      if (productAssets?.length) {
+        if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
+          if (productAssets.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
+            setNextStep(true);
+          } else {
+            setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
+          }
         } else {
-          setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
+          if (
+            productAssets?.every((e) =>
+              [
+                RENTAL_INTERNAL_ASSET_STATUS.consumed,
+                RENTAL_INTERNAL_ASSET_STATUS.complete,
+                RENTAL_INTERNAL_ASSET_STATUS.return,
+                'Returned',
+                RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+              ].includes(e.rentalAssetStatus)
+            )
+          ) {
+            setNextStep(true);
+          } else {
+            setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered);
+          }
         }
       } else {
-        if (
-          productAssets?.every((e) =>
-            [
-              RENTAL_INTERNAL_ASSET_STATUS.consumed,
-              RENTAL_INTERNAL_ASSET_STATUS.complete,
-              RENTAL_INTERNAL_ASSET_STATUS.return,
-              'Returned',
-              RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-            ].includes(e.rentalAssetStatus)
-          )
-        ) {
-          setNextStep(true);
-        } else {
-          setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered);
-        }
+        setNextStep(true);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
@@ -1012,7 +1036,7 @@ const ReceivingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'warehouse', 'jobCount']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation']
         }
       ]
     });
@@ -1069,6 +1093,11 @@ const ReceivingTicket = ({
                 <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
+            {(row?.original?.currentLocationNotMatchWithGps && (
+              <HtmlTooltip title="Asset location needs to be update in Equipt">
+                <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+              </HtmlTooltip>
+            ))}
           </div>
         )
       },
@@ -1182,6 +1211,15 @@ const ReceivingTicket = ({
             accessor: 'jobCount',
             Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
             Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
+        ? [
+          {
+            accessor: 'currentGpsLocation',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
           }
         ]
         : []),
@@ -1418,7 +1456,7 @@ const ReceivingTicket = ({
                     size="small"
                     disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
                     onClick={() => {
-                      setOpenChangeActualDateDialog({ bulkUpdate: false, open: true, data: row?.original });
+                      setOpenChangeActualDateDialog({ isBulkUpdate: false, open: true, data: row?.original, records: [row?.original] });
                     }}
                   >
                     <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
@@ -1431,6 +1469,22 @@ const ReceivingTicket = ({
       }
     });
     setColumns(column);
+  };
+
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = selectedRecords?.filter((r) => r?.type === 'Asset' && statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds };
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.filter((r) => r?.type === 'Asset')?.map((a) => a?._id) };
+      }
+    }
+    return result;
   };
 
   const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
@@ -1482,10 +1536,15 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-
-    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
+    const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
-      setOpenAssetDetailDialog({ open: true, statusPolicy: statusPolicy, referenceData: data, ticketType: ticketType });
+      setOpenAssetDetailDialog({
+        open: open,
+        statusPolicy: statusPolicy?.statusPolicy,
+        _ids: statusPolicy?.assetIds,
+        referenceData: data,
+        ticketType: ticketType
+      });
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     }
@@ -1512,7 +1571,7 @@ const ReceivingTicket = ({
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
-    let rows = selectedRecords.map((record: any) => ({
+    let rows = uniqBy(selectedRecords, '_id').map((record: any) => ({
       materialId: record._id,
       type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
@@ -1553,7 +1612,6 @@ const ReceivingTicket = ({
             setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
             fetchRecords();
           }
-          checkProgressiveBilling();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -1797,7 +1855,7 @@ const ReceivingTicket = ({
     setIsSubmitting(true);
     let ids = [],
       asset = [];
-    if (openChangeActualDateDialog.bulkUpdate) {
+    if (openChangeActualDateDialog.isBulkUpdate) {
       selectedRecords?.forEach((ele) => {
         ids.push(ele.uniqueId);
         asset.push(ele._id?.split('_')[0]);
@@ -1824,7 +1882,7 @@ const ReceivingTicket = ({
           message: response?.data?.message,
           type: 'success'
         });
-        setOpenChangeActualDateDialog({ open: false, data: null, bulkUpdate: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, records: null, isBulkUpdate: false });
         setIsSubmitting(false);
         fetchRecords();
       })
@@ -1986,7 +2044,10 @@ const ReceivingTicket = ({
                   ASSET_STATUS.inUse,
                   ASSET_STATUS.standBy,
                   ASSET_STATUS.standByNotChargeable,
-                  ASSET_STATUS.inTransit
+                  ASSET_STATUS.inTransit,
+                  ASSET_STATUS.inRepair,
+                  ASSET_STATUS.repair,
+                  ASSET_STATUS.scrapRequested
                 ].includes(f.status)
               )
             }
@@ -2310,15 +2371,15 @@ const ReceivingTicket = ({
       )}
       {openAssetDetailDialog.open && (
         <AssetDetailsChangeDialog
-          ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
+          ids={openAssetDetailDialog._ids}
           statusPolicy={openAssetDetailDialog.statusPolicy}
           setAssetsData={setAssetsData}
           ticketType={openAssetDetailDialog.ticketType}
-          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null })}
+          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null })}
           onSuccess={() => {
             const referenceData = openAssetDetailDialog.referenceData;
             const ticketType = openAssetDetailDialog.ticketType;
-            setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null });
+            setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null });
             setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
           }}
         />
@@ -2328,7 +2389,12 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+            if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
+              setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
+            } else {
+              setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            }
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });
@@ -2388,6 +2454,7 @@ const ReceivingTicket = ({
       {statusToUpdate.open && (
         <Dialog
           open
+          TransitionComponent={CustomDialogTransition}
           classes={{
             paper: classes.paper
           }}
@@ -2532,12 +2599,14 @@ const ReceivingTicket = ({
       {openChangeActualDateDialog.open && (
         <ChangeActualDateDialog
           data={openChangeActualDateDialog.data}
+          records={openChangeActualDateDialog.records}
           loading={isSubmitting}
-          bulkUpdate={openChangeActualDateDialog.bulkUpdate}
+          isBulkUpdate={openChangeActualDateDialog.isBulkUpdate}
           onClose={() => {
-            setOpenChangeActualDateDialog({ open: false, data: null, bulkUpdate: false });
+            setOpenChangeActualDateDialog({ open: false, data: null, records: null, isBulkUpdate: false });
           }}
           handleSubmit={handleSubmitChangeDates}
+          rentalId={rentalManagementData?._id}
         />
       )}
       {openMessageDialog.open && (
@@ -2552,7 +2621,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            if (addSerializedAssetDialog.type === 'ReplaceAsset') {
+            if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
               handleOpenReplaceAssetReason(rows);
             } else {
               handleSwapAssets(rows);
@@ -2964,7 +3033,8 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
-      {selectedRecords?.length && selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
+      {selectedRecords?.length &&
+        selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
         selectedRecords?.every((e) => e?.loadingTicketId) &&
         !selectedRecords?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&
         selectedRecords?.map((r) => getParentPackageId(r?.uniqueId))?.every((_id) => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
@@ -2996,7 +3066,7 @@ const ActionButtonMenuItems = ({
                   });
                 }
               });
-              setAddSerializedAssetDialog({ open: true, products: products, type: 'ReplaceAsset' });
+              setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobReplaceAsset' });
             }
           }}
         >
@@ -3024,7 +3094,7 @@ const ActionButtonMenuItems = ({
                     });
                   }
                 });
-                setAddSerializedAssetDialog({ open: true, products: products, type: 'SwapAsset' });
+                setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobSwapAsset' });
               }
             }}
           >
@@ -3142,7 +3212,8 @@ const ActionButtonMenuItems = ({
                   manualStartDate: minStartDate?.toISOString(),
                   manualEndDate: maxEndDate?.toISOString()
                 },
-                bulkUpdate: true
+                records: selectedRecords,
+                isBulkUpdate: true
               });
             }
           }}
@@ -3151,13 +3222,16 @@ const ActionButtonMenuItems = ({
         </MenuItem>
       )}
       {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
-        selectedRecords?.length > 0 && selectedRecords?.every((r) => r?.type === 'Asset' &&
-          [
-            RENTAL_INTERNAL_ASSET_STATUS.reserved,
-            RENTAL_INTERNAL_ASSET_STATUS.inUse,
-            RENTAL_INTERNAL_ASSET_STATUS.standBy,
-            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
-          ]?.includes(r?.rentalAssetStatus)
+        selectedRecords?.length > 0 &&
+        selectedRecords?.every(
+          (r) =>
+            r?.type === 'Asset' &&
+            [
+              RENTAL_INTERNAL_ASSET_STATUS.reserved,
+              RENTAL_INTERNAL_ASSET_STATUS.inUse,
+              RENTAL_INTERNAL_ASSET_STATUS.standBy,
+              RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+            ]?.includes(r?.rentalAssetStatus)
         ) && (
           <MenuItem
             onClick={() => {

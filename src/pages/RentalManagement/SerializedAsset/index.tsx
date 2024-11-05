@@ -49,7 +49,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, checkProgressiveBilling }) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
@@ -80,7 +80,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
   const { generateColumns } = useColumns();
 
@@ -490,9 +490,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               ? parent.assetAssignedQty ===
               parent.subRows
                 .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) || parent.subRows.every((d) => d.isValid)
+                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) + (parent.serializedProduct ? parent.realAssetQty : 0) || (parent.isValid && parent.subRows.every((d) => d.isValid))
               : true;
-
+              
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
             parent.isValid = true;
@@ -542,6 +542,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             walkmeInstance.instance.push(steps);
             walkmeInstance.handleNext();
           }
+        } else {
+          setWalkmeData([]);
         }
       }
     }
@@ -1247,9 +1249,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             warehouse: rentalManagementData?.warehouse?.optionValue,
             customerAccount: rentalManagementData?.customerAccount?.optionValue,
             shippingAddress: rentalManagementData?.shippingAddress?.optionValue,
-            wellName: rentalManagementData?.wellName?.optionValue,
             wellNumber: rentalManagementData?.wellNumber
               ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            wellName: rentalManagementData?.wellName
+              ? rentalManagementData?.wellName?.optionValue || rentalManagementData?.wellName?.map((e) => e?.optionValue)
               : null,
             fromDate: rentalManagementData?.estimateStartDate,
             toDate: rentalManagementData?.estimateEndDate,
@@ -1262,7 +1266,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();
-            checkProgressiveBilling();
             setAssetAssignedProduct([]);
             setAdding(false);
           }}

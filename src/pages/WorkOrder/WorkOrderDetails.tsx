@@ -105,11 +105,11 @@ const WorkOrderDetails = () => {
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false)
+  const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false);
 
-  const [workOrderCostFields, setWorkOrderCostFields] = useState(null)
+  const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -148,7 +148,7 @@ const WorkOrderDetails = () => {
       fetchWorkOrderData();
       fetchTotalConsumablesCost();
       fetchPolicy();
-      fetchSerializedAssetPolicy()
+      fetchSerializedAssetPolicy();
     }
   }, [id]);
 
@@ -160,12 +160,12 @@ const WorkOrderDetails = () => {
 
   useEffect(() => {
     getResourceFields();
-    getWorkOrderCostFields()
+    getWorkOrderCostFields();
   }, []);
 
   const getWorkOrderCostFields = async () => {
     let workOrderCost = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderCost, workOrderData?.currency || user.user?.brandCurrency, true);
-    setWorkOrderCostFields(workOrderCost)
+    setWorkOrderCostFields(workOrderCost);
   };
 
   const getResourceFields = () => {
@@ -267,15 +267,16 @@ const WorkOrderDetails = () => {
         data.assetData = assetData;
       }
     }
-    axiosInstance().patch(`${workOrder.api}/status/${id}`, data)
+    axiosInstance()
+      .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
-        setOpenTotalCostDialog(false)
+        setOpenTotalCostDialog(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data
         });
-        setOpenAssetDataDialog({ open: false, statusPolicy: null })
+        setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
         fetchWorkOrderData();
         setIsSubmitting(false);
       })
@@ -358,16 +359,32 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = statusPolicy?.products?.includes(workOrderData?.product?.optionValue) ? [workOrderData?.serializedAsset?.optionValue] : [];
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds };
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: [workOrderData?.serializedAsset?.optionValue] };
+      }
+    }
+    return result;
+  };
+
   const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
     {
       id: `Repair Job`,
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${routes?.repairJob.title}`,
@@ -406,7 +423,9 @@ const WorkOrderDetails = () => {
     {
       id: 'On-hold',
       type: 'menuItem',
-      isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
+      isVisible: Boolean(
+        allowedToEdit && !workOrderData?.currentRepairJob && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)
+      ),
       onClick: () => updateStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       children: WORK_ORDER_STATUS.onHold
@@ -418,16 +437,16 @@ const WorkOrderDetails = () => {
       isVisible: Boolean(allowedToEdit && workOrderData?.canComplete),
       onClick: () => {
         if (workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length) {
-          setOpenTotalCostDialog(true)
+          setOpenTotalCostDialog(true);
         } else if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
-          const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
+          const statusPolicy = checkAssetPolicy(ASSET_STATUS.available);
           if (statusPolicy) {
-            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
+            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
           } else {
-            updateStatus(WORK_ORDER_STATUS.completed)
+            updateStatus(WORK_ORDER_STATUS.completed);
           }
         } else {
-          updateStatus(WORK_ORDER_STATUS.completed)
+          updateStatus(WORK_ORDER_STATUS.completed);
         }
       },
       iconForMobile: <FaDoorClosed />,
@@ -455,10 +474,10 @@ const WorkOrderDetails = () => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        !workOrderData?.deleted &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          !workOrderData?.deleted &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -471,10 +490,10 @@ const WorkOrderDetails = () => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        !workOrderData?.deleted &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          !workOrderData?.deleted &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -513,7 +532,12 @@ const WorkOrderDetails = () => {
       id: 'delete',
       type: 'menuItem',
       onClick: () => setShowConfirmBox(true),
-      isVisible: permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue) && !workOrderData?.deleted,
+      isVisible:
+        permissions?.workOrder?.isDelete &&
+        allowedToEdit &&
+        workOrderData?.canDelete &&
+        checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue) &&
+        !workOrderData?.deleted,
       children: 'Delete'
     }
   ] as const;
@@ -550,10 +574,12 @@ const WorkOrderDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && resourceData?.policy?.showBom && <CustomTab value={3}>BOM</CustomTab>}
+          {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) && resourceData?.policy?.showBom && (
+            <CustomTab value={3}>BOM</CustomTab>
+          )}
           <CustomTab value={4}>Drawings</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
-          {resourceData && resourceData?.steps?.length && <CustomTab value={6}>Associations</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -564,11 +590,16 @@ const WorkOrderDetails = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             )}
-            {workOrderCostFields?.length && workOrderData?.workOrderCost ?
+            {workOrderCostFields?.length && workOrderData?.workOrderCost ? (
               <Box pt={2}>
-                <DetailsPage data={workOrderData?.workOrderCost} fields={workOrderCostFields?.map((e) => { return { fieldData: e } })} />
+                <DetailsPage
+                  data={workOrderData?.workOrderCost}
+                  fields={workOrderCostFields?.map((e) => {
+                    return { fieldData: e };
+                  })}
+                />
               </Box>
-              :
+            ) : (
               <Box pt={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={6} xl={6}>
@@ -598,7 +629,7 @@ const WorkOrderDetails = () => {
                   </Grid>
                 </Grid>
               </Box>
-            }
+            )}
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
@@ -660,17 +691,24 @@ const WorkOrderDetails = () => {
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={6}>
-          <Box>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.workOrder}
-              data={workOrderData}
-              allowedToEdit={permissions?.workOrder?.isUpdate}
-            />
-          </Box>
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 6}>
+                <Box>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.workOrder}
+                    data={workOrderData}
+                    allowedToEdit={permissions?.workOrder?.isUpdate}
+                  />
+                </Box>
+              </TabPanel>
+            );
+          })}
         <Box my={1} />
       </Box>
       {showConfirmBox && (
@@ -750,7 +788,7 @@ const WorkOrderDetails = () => {
           currency={workOrderData?.currency || user.user?.brandCurrency}
           onClose={() => setOpenTotalCostDialog(false)}
           onSuccess={(data) => {
-            updateStatus(WORK_ORDER_STATUS.completed, null, data)
+            updateStatus(WORK_ORDER_STATUS.completed, null, data);
           }}
           isSubmitting={isSubmitting}
         />
@@ -779,12 +817,12 @@ const WorkOrderDetails = () => {
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          ids={[workOrderData?.serializedAsset?.optionValue]}
+          ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={null}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
-            updateStatus(WORK_ORDER_STATUS.completed, null, null, data)
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, data);
           }}
         />
       )}
@@ -824,7 +862,7 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
     if (componentOptions.type === 'button' && componentOptions.ripple) {
       return (
         <div className="relative isolate ">
-          <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
+          <span className="animate-ripple dark-bg-[var(--dark-primary)] rounded-[3px] bg-white">
             <span></span>
             <span></span>
           </span>

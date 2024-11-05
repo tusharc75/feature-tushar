@@ -23,17 +23,25 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { checkSuperAdminAccess, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
+import {
+  checkSuperAdminAccess,
+  CustomDialogTransition,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  userType
+} from './../../constants/helpers';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
-import { isMobile, isTablet } from "react-device-detect";
+import { isMobile, isTablet } from 'react-device-detect';
+
+const renderedFrom = camelCase(routes?.user.title);
 
 const User: FC = () => {
-  const renderedFrom = camelCase(routes?.user.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -603,7 +611,14 @@ const User: FC = () => {
         />
       )}
       {globalRolesDialogOpen && (
-        <Dialog fullWidth maxWidth="xs" open={globalRolesDialogOpen} onClose={handleGlobalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullWidth
+          TransitionComponent={CustomDialogTransition}
+          maxWidth="xs"
+          open={globalRolesDialogOpen}
+          onClose={handleGlobalRolesCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignRolesDialog
             rolesDialogOpen={globalRolesDialogOpen}
             handleCloseDialog={handleGlobalRolesCloseDialog}
@@ -617,7 +632,15 @@ const User: FC = () => {
         </Dialog>
       )}
       {regionalRolesDialogOpen && (
-        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="xs" open={regionalRolesDialogOpen} onClose={handleRegionalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullScreen={isMobile || isTablet}
+          fullWidth
+          maxWidth="xs"
+          TransitionComponent={CustomDialogTransition}
+          open={regionalRolesDialogOpen}
+          onClose={handleRegionalRolesCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={regionalRolesDialogOpen}
             handleCloseDialog={handleRegionalRolesCloseDialog}

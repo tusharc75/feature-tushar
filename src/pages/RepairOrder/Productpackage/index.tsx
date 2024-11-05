@@ -23,8 +23,16 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+
+const dataAdded = {
+  nextButtonAdded: false
+};
 
 const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -56,7 +64,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
@@ -66,6 +74,25 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   useEffect(() => {
     fetchData();
   }, [columns]);
+
+  useEffect(() => {
+    const walkmeData = generateAddExistingSerializedAsset(
+      false,
+      repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`
+    );
+    setWalkmeData([walkmeData]);
+  }, []);
+
+  const addWalkmeData = (rows: any[]) => {
+    // Adding Step Data
+    if (!rows.length || dataAdded.nextButtonAdded) return;
+    const stepData = [nextButtonStep(true)];
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(stepData);
+      walkmeInstance.handleNext();
+    }
+    dataAdded.nextButtonAdded = true;
+  };
 
   const fetchFields = async () => {
     setColumns(null);
@@ -330,7 +357,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       setHasAssetsAdded(false);
       setNextStep(false);
     }
-
+    addWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -478,11 +505,13 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               productCategory: null
             });
           }}
+          id="add-existing-serialized-asset-menu-item"
         >
           {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
           <MenuItem
+            id="add-new-customer-asset-menu-item"
             onClick={() => {
               setAddExistingProductDialog({
                 open: true,
@@ -501,6 +530,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           <>
             {permissions?.product?.isCreate && (
               <MenuItem
+                id="add-new-product-menu-item"
                 onClick={() => {
                   setAddExistingProductDialog({
                     open: true,
@@ -527,6 +557,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                     productCategory: null
                   });
                 }}
+                id="add-new-package-menu-item"
               >
                 Add New Packages
               </MenuItem>
@@ -673,7 +704,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           handleClose={() =>
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
           }
-          ids={[...dataRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
+          ids={[...material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
           referenceData={{
             customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
             warehouse: repairOrderData?.warehouse?.optionValue

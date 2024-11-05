@@ -49,7 +49,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, filters, sorting, selectedRecords, search } = state;
 
   const toastConfig = useContext(CustomToastContext);
@@ -105,12 +105,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order?limit=${limit}&page=${0}`);
         tempCount = tempCount - limit;
         if (page === 0) {
-          fetchData()
+          fetchData();
         }
         page++;
       }
       setIsAutoCreating({ open: false, total: 0, done: 0 });
-      fetchData()
+      fetchData();
     } catch (error) {
       setIsAutoCreating({ open: false, total: 0, done: 0 });
       toastConfig.setToastConfig(error);
@@ -127,7 +127,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       setNextStep(true);
     }
     if (response?.data?.data?.materialCount) {
-      autoCreateWorkOrder(response?.data?.data?.materialCount)
+      autoCreateWorkOrder(response?.data?.data?.materialCount);
     }
   };
 
@@ -332,7 +332,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                   >
                     {row.original['workOrderStatus'] === 'Completed' ? (
-                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-green-400" />
+                      <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                     ) : (
                       <AutoCompleteIcon size={18} />
                     )}
@@ -744,7 +744,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const isDisabledCompleteService = () => {
-    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
+    const records = selectedRecords?.filter(
+      (e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status)
+    );
     if (records?.length === 0) {
       return true;
     }
@@ -776,9 +778,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const leftSideContents = () => {
     return (
       <>
-        {allowedToEdit &&
+        {allowedToEdit && (
           <Autocomplete
-            className="max-w-[400px] flex-grow min-w-[200px]"
+            className="min-w-[200px] max-w-[400px] flex-grow"
             options={serviceOptions}
             getOptionLabel={(option) => option?.optionLabel || ''}
             size="small"
@@ -788,7 +790,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               handleServiceSelect(newValue);
             }}
           />
-        }
+        )}
       </>
     );
   };
@@ -848,7 +850,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     <Fragment>
       {isAutoCreating.open && (
         <Box p={1} display="flex" alignItems="center">
-          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress {`${(isAutoCreating.total - isAutoCreating.done)}/${isAutoCreating.total}`}</Typography>
+          <SyncIcon className="rotate" />{' '}
+          <Typography variant="subtitle2">
+            Work order Auto Creation in Progress {`${isAutoCreating.total - isAutoCreating.done}/${isAutoCreating.total}`}
+          </Typography>
         </Box>
       )}
       <DetailsPageHeader
@@ -995,12 +1000,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-            ? 'complete'
-            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-              ? 'skip'
-              : 'revert'
-            } this Service(s)`}
+          message={`Are you sure you want to ${
+            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+              ? 'complete'
+              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                ? 'skip'
+                : 'revert'
+          } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1189,8 +1195,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1209,8 +1215,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }

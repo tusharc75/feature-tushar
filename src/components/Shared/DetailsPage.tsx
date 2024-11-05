@@ -1,15 +1,15 @@
-import { Avatar, Box, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
+import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
 import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import { camelCase, isArray, kebabCase } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
-import routes from 'src/components/Helpers/Routes';
 import { PreviewFile } from 'src/components/PreviewFile';
 import {
   cn,
   colSpans,
   columnSize,
+  CustomDialogTransition,
   dateFormat,
   displayDate,
   displayDateTime,
@@ -22,8 +22,6 @@ import {
 import { useData } from '../../StateProvider/Provider';
 import CarouselDialog from '../CarouselDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
-import CopyToClipboard from '../Helpers/CopyToClipboard';
-import { FiExternalLink } from 'react-icons/fi';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -32,6 +30,11 @@ import { FaUserPlus } from 'react-icons/fa6';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
+import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
+import GoogleMaps from 'src/components/GoogleMap';
+import { CreateTask } from 'src/components/Activity/Task/CreateTask';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -40,11 +43,11 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     [theme.breakpoints.down('md')]: {
-      whiteSpace: 'nowrap',
+      whiteSpace: 'pre-wrap',
       width: '250px'
     },
     [theme.breakpoints.down('xs')]: {
-      whiteSpace: 'nowrap',
+      whiteSpace: 'pre-wrap',
       width: '250px'
     }
   },
@@ -111,12 +114,16 @@ const Details = (props: DetailProps) => {
   const [dialogData, setDialogData] = useState<any>(null);
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
+  const fieldsData = useMemo(() => fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData), [fields]);
+  const [viewMap, setViewMap] = useState({ open: false, locationName: null, longitude: null, latitude: null });
+  const [openTask, setOpenTask] = useState({ open: false, _id: null });
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     sortArray();
-    const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
-    const vals = getObjKeysWithValues(data, fieldData);
-    fieldData?.forEach((e) => {
+    // const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
+    const vals = getObjKeysWithValues(data, fieldsData);
+    fieldsData?.forEach((e) => {
       if (e.type === 'lookUpDisplay') {
         vals[e.fieldName] = data[e.fieldName];
       }
@@ -182,7 +189,7 @@ const Details = (props: DetailProps) => {
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
       text = `${currencySymbol}${formatAmountWithCurrency(currency, values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
     } else if (input.type === 'switch') {
-      text = values[input.fieldName] ? 'Inactive' : 'Active';
+      text = values[input.fieldName] ? 'Yes' : 'No';
     } else if (input.type === 'checkBox') {
       text = values[input.fieldName] === true ? 'Yes' : 'No';
     } else if (input.type === 'date') {
@@ -190,7 +197,13 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'dateTime') {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
-      text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
+      text = isArray(values[input.fieldName])
+        ? values[input.fieldName]?.map((e) => e?.optionLabel)?.toString()
+        : values[input.fieldName]
+          ? values[input.fieldName]?.optionLabel
+          : '-';
+    } else if (input.type === 'location') {
+      text = values[input.fieldName];
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -230,7 +243,7 @@ const Details = (props: DetailProps) => {
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
-          <Typography className={`${classes.fieldText} ${classes.withMultichild}`} variant="body2">
+          <Typography className={`${classes.fieldText} ${classes.withMultichild} w-full`} variant="body2">
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
@@ -238,10 +251,11 @@ const Details = (props: DetailProps) => {
                     <Link
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
                       target="_blank"
-                      className="link"
                       rel="noopener noreferrer"
+                      className="link block w-full"
+                      title={_val.optionLabel}
                     >
-                      <span className={`text-truncate link block`}>
+                      <span className={`link block md:truncate md:text-ellipsis`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -254,8 +268,14 @@ const Details = (props: DetailProps) => {
                 </Typography>
               )
             ) : data[fieldData.fieldName] ? (
-              <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`} target="_blank" rel="noopener noreferrer">
-                <span className={`text-truncate link block`}>
+              <Link
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link block w-full"
+                title={data[fieldData.fieldName].optionLabel || value}
+              >
+                <span className={`link block md:truncate md:text-ellipsis`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -297,10 +317,10 @@ const Details = (props: DetailProps) => {
         const Icon = getFileIconSrc(value || '');
         if (value === '-' || Array.isArray(value)) return value;
         return (
-          <div className="flex items-center gap-2 p-[8.6px_10px] pt-0">
-            <Icon />
-            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
-              <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{value}</span>
+          <div className="flex w-full min-w-0 items-center p-[8.6px_10px] pt-0">
+            <Icon className="flex-shrink-0" />
+            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={`${classes.fieldText} flex-grow`} variant="body2">
+              <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
             <PreviewFile fileName={value} showDownload />
           </div>
@@ -310,14 +330,14 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length > 0) {
           return (
-            <div className="space-y-2 p-[8.6px_10px] pt-0">
+            <div className="w-full min-w-0 space-y-2 p-[8.6px_10px] pt-0">
               {files.map((d) => {
                 const Icon = getFileIconSrc(d.fileName || '');
                 return (
-                  <div className="flex gap-2" key={d.fileName}>
-                    <Icon />
-                    <Typography className={classes.fieldText} variant="body2">
-                      <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
+                  <div className="flex min-w-0 items-center" key={d.fileName}>
+                    <Icon className="flex-shrink-0" />
+                    <Typography className={`${classes.fieldText} flex-grow`} variant="body2">
+                      <span className={`text-truncate block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
                     <PreviewFile fileName={d.fileName} showDownload />
                   </div>
@@ -327,7 +347,7 @@ const Details = (props: DetailProps) => {
           );
         }
         return (
-          <Typography className={classes.fieldText} variant="body2">
+          <Typography className={classes.fieldText} variant="body2" component={'span'}>
             -
           </Typography>
         );
@@ -395,6 +415,43 @@ const Details = (props: DetailProps) => {
           </span>
         );
       }
+      if (fieldData.type === 'gpsLocation') {
+        return (
+          <>
+            {value?.locationName ? (
+              <Box display="flex" alignItems="center">
+                <Typography title={value?.locationName || value} className={cn(classes.fieldText, ' flex items-center')} variant="body2">
+                  <span className={`block md:truncate`}>{value?.locationName || value}</span>
+                </Typography>
+                {value?.longitude && value?.latitude ? (
+                  <Box>
+                    <HtmlTooltip title="View in Map">
+                      <IconButton
+                        size="small"
+                        aria-label="view-in-map"
+                        onClick={() => {
+                          setViewMap({
+                            open: true,
+                            locationName: value?.locationName,
+                            longitude: value.longitude,
+                            latitude: value.latitude
+                          });
+                        }}
+                      >
+                        <LocationOnIcon fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                ) : null}
+              </Box>
+            ) : (
+              <Typography component={'span'} style={{ padding: '7px 10px' }}>
+                -
+              </Typography>
+            )}
+          </>
+        );
+      }
       return (
         <Typography
           title={value === '-' || Array.isArray(value) ? '' : value}
@@ -414,7 +471,7 @@ const Details = (props: DetailProps) => {
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
             </>
           ) : (
-            <span className={`text-truncate line-clamp-1 block`}>{value}</span>
+            <span className={` block md:truncate`}>{value}</span>
           )}
         </Typography>
       );
@@ -472,123 +529,176 @@ const Details = (props: DetailProps) => {
   }, [formsData, taskData]);
 
   return (
-    <div className="form-v1">
-      {formDataWithFollowUps?.map((form) => {
-        return (
-          form.name && (
-            <React.Fragment key={form.name}>
-              <div
-                className={`single-form-v1 ${fullHeight && 'full-height-details-from'}`}
-                style={containerPadding ? { padding: containerPadding } : {}}
-              >
-                <div className={'form-head-v1'}>
-                  <h3 className="form-label-style-v1" title={form.name}>
-                    {form.name}
-                  </h3>
-                  {resource && referenceId && (
-                    <HtmlTooltip title="Follow-Ups">
-                      <IconButton
-                        style={{ padding: '0px' }}
-                        size="small"
-                        color="primary"
-                        aria-label="follow-ups"
-                        onClick={() => {
-                          setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map((f) => f?.fieldData) } });
-                        }}
-                      >
-                        <FaUserPlus />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                </div>
-                <div className="formdata-v1 grid grid-cols-12">
-                  {form.sectionFields.map((field, i) => (
-                    <div
-                      className={cn(
-                        `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                        'col-span-12'
-                      )}
-                      key={i}
-                    >
-                      <div
-                        className={cn(
-                          isTypeFile(field.fieldData.type) && 'flex-wrap',
-                          'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
-                        )}
-                      >
-                        <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                          <div className={cn('d-flex formdata-title-v1 min-h-full', isTypeFile(field.fieldData.type) && '!border-r-0')}>
-                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
-                              {field.fieldData.fieldLabel}
-                            </h4>
-                            {field.fieldData.isTooltip && (
-                              <HtmlTooltip title={field.fieldData.tooltipMessage}>
-                                <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
-                              </HtmlTooltip>
+    <>
+      <div className="form-v1">
+        {formDataWithFollowUps?.map((form) => {
+          if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
+          return (
+            form.name && (
+              <React.Fragment key={form.name}>
+                <div
+                  className={`single-form-v1 ${fullHeight && 'full-height-details-from'}`}
+                  style={containerPadding ? { padding: containerPadding } : {}}
+                >
+                  <div className={'form-head-v1'}>
+                    <h3 className="form-label-style-v1" title={form.name}>
+                      {form.name}
+                    </h3>
+                    {resource && referenceId && (
+                      <HtmlTooltip title="Follow-Ups">
+                        <IconButton
+                          style={{ padding: '0px' }}
+                          size="small"
+                          color="primary"
+                          aria-label="follow-ups"
+                          onClick={() => {
+                            setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map((f) => f?.fieldData) } });
+                          }}
+                        >
+                          <FaUserPlus />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
+                  </div>
+                  <div className="formdata-v1 grid grid-cols-12">
+                    {form.sectionFields.map((field, i) => {
+                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
+                      return (
+                        <div
+                          className={cn(
+                            `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                            'col-span-12'
+                          )}
+                          key={i}
+                        >
+                          <div
+                            className={cn(
+                              isTypeFile(field.fieldData.type) && 'flex-wrap',
+                              'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
                             )}
+                          >
+                            <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                              <div
+                                className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
+                              >
+                                <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
+                                  {field.fieldData.fieldLabel}
+                                </h4>
+                                {field.fieldData.isTooltip && (
+                                  <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
+                                    <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
+                                  </HtmlTooltip>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
+                              {field.fieldData.type === 'imageUpload' ? (
+                                <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
+                                  <span
+                                    className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                    onClick={() => {
+                                      if (initialVals[field.fieldData.fieldName]) {
+                                        setDialogData({
+                                          index: 0,
+                                          title: field.fieldData.fieldLabel,
+                                          open: true,
+                                          images: [initialVals[field.fieldData.fieldName]]
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                      <Image style={{ fontSize: 30 }} />
+                                    </Avatar>
+                                  </span>
+                                </Box>
+                              ) : (
+                                <Box display="flex" alignItems="center" className="formdata-text-v1">
+                                  {renderData(initialVals, field.fieldData) === '-' ? (
+                                    <span>{renderData(initialVals, field.fieldData)}</span>
+                                  ) : (
+                                    renderData(initialVals, field.fieldData)
+                                  )}
+                                </Box>
+                              )}
+                              {field.followUpData?.length > 0 && (
+                                <RenderFollowUP
+                                  data={field.followUpData}
+                                  columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                                  setOpenTask={setOpenTask}
+                                />
+                              )}
+                            </div>
                           </div>
                         </div>
-
-                        <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
-                          {field.fieldData.type === 'imageUpload' ? (
-                            <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                              <span
-                                className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
-                                onClick={() => {
-                                  if (initialVals[field.fieldData.fieldName]) {
-                                    setDialogData({
-                                      index: 0,
-                                      title: field.fieldData.fieldLabel,
-                                      open: true,
-                                      images: [initialVals[field.fieldData.fieldName]]
-                                    });
-                                  }
-                                }}
-                              >
-                                <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                  <Image style={{ fontSize: 30 }} />
-                                </Avatar>
-                              </span>
-                            </Box>
-                          ) : (
-                            <Box display="flex" alignItems="center" className="formdata-text-v1">
-                              {renderData(initialVals, field.fieldData)}
-                            </Box>
-                          )}
-                          {field.followUpData?.length > 0 && (
-                            <RenderFollowUP
-                              data={field.followUpData}
-                              columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </React.Fragment>
-          )
-        );
-      })}
-      {dialogData && dialogData.open && (
-        <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
-      )}
-      {open?.open && (
-        <FollowUpsDialog
+              </React.Fragment>
+            )
+          );
+        })}
+        {dialogData && dialogData.open && (
+          <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
+        )}
+        {open?.open && (
+          <FollowUpsDialog
+            onClose={() => {
+              setOpen({ open: false, section: null });
+            }}
+            onSuccess={() => {
+              fetchTaskData();
+              setOpen({ open: false, section: null });
+            }}
+            section={open?.section}
+            resource={resource}
+            referenceId={referenceId}
+          />
+        )}
+
+        {openTask?.open && (
+          <Dialog
+            open={true}
+            fullScreen={fullScreen}
+            TransitionComponent={CustomDialogTransition}
+            fullWidth
+            maxWidth="md"
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                setOpenTask({ open: false, _id: null });
+                setFullScreen(false);
+              }
+            }}
+          >
+            <CreateTask
+              taskId={openTask?._id}
+              relatedTo={[{ type: resource, referenceId: referenceId, access: true }]}
+              handleClose={() => {
+                setOpenTask({ open: false, _id: null });
+                setFullScreen(false);
+              }}
+              isMinimized={true}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          </Dialog>
+        )}
+      </div>
+      {viewMap?.open && (
+        <GoogleMaps
           onClose={() => {
-            setOpen({ open: false, section: null });
+            setViewMap({ open: false, locationName: null, longitude: null, latitude: null });
           }}
-          onSuccess={() => {
-            fetchTaskData();
-            setOpen({ open: false, section: null });
-          }}
-          section={open?.section}
-          resource={resource}
-          referenceId={referenceId}
+          longitude={viewMap.longitude}
+          latitude={viewMap.latitude}
+          locationName={viewMap.locationName}
         />
       )}
-    </div>
+    </>
   );
 };
 
@@ -632,7 +742,15 @@ export type RelatedTo = {
   name: string;
 };
 
-const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 | 12 }) => {
+const RenderFollowUP = ({
+  data,
+  columnSize,
+  setOpenTask
+}: {
+  data: FollowUP[];
+  columnSize: 6 | 12;
+  setOpenTask: React.Dispatch<React.SetStateAction<any>>;
+}) => {
   return (
     <div className="my-2">
       <p className="mx-[10px] pb-1 text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
@@ -649,7 +767,14 @@ const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 
               d.description && 'mb-1 pb-1 [border-bottom:1px_solid_var(--common-border-color)]'
             )}
           >
-            <p className={cn('text-[14px] font-semibold')}>{d.name}</p>
+            <p
+              className={cn('cursor-pointer text-[14px] font-semibold')}
+              onClick={() => {
+                setOpenTask({ open: true, _id: d?._id });
+              }}
+            >
+              {d.name}
+            </p>
             <span className="block flex-shrink-0 rounded-md bg-[var(--new-theme-color)] px-2 py-1 text-white">{d.status}</span>
           </div>
           {d.description && <p className="py-2 text-gray-600 dark:text-gray-400">{d.description}</p>}

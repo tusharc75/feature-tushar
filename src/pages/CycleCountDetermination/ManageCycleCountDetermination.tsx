@@ -13,7 +13,6 @@ import { Formik, Form, FieldArray } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 
 const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [users, setUsers] = useState([]);
@@ -36,22 +35,29 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
   const fetchInventoryCycle = () => {
     axiosInstance()
       .get(`/inventory-cycle`)
-      .then(({ data: { data } }) => {
-        setInventoryCycle(data?.map((o) => ({ optionValue: o?._id, optionLabel: o?.cycleCode })));
-      });
+      .then(
+        ({
+          data: {
+            data: { data }
+          }
+        }) => {
+          setInventoryCycle(data?.map((o) => ({ optionValue: o?._id, optionLabel: o?.cycleCode })));
+        }
+      );
   };
 
   const handleSave = (values) => {
     const payload = [];
-    values?.forEach(element => {
-      if (element?.inventoryCycle?.optionValue && element?.user?.optionValue) {
+    values?.forEach((element) => {
+      if (element?.inventoryCycle?.optionValue || element?.user?.optionValue) {
         payload.push({
           productCategory: element._id,
-          inventoryCycle: element?.inventoryCycle?.optionValue,
-          user: element?.user?.optionValue
-        })
+          inventoryCycle: element?.inventoryCycle?.optionValue || '',
+          user: element?.user?.optionValue || ''
+        });
       }
     });
+
     axiosInstance()
       .post(`/cycle-count-determination/${warehouse}`, payload)
       .then(({ data }) => {
@@ -87,15 +93,16 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
       ></CustomDialogHeader>
       <Formik
         initialValues={{
-          categoryArray: data.map(d => ({
-            "_id": d?._id,
-            "categoryName": d?.name,
-            "inventoryCycle": d?.inventoryCycle ? d?.inventoryCycle : "",
-            "user": d?.user ? d?.user : "",
+          categoryArray: data.map((d) => ({
+            _id: d?._id,
+            categoryName: d?.name,
+            inventoryCycle: d?.inventoryCycle ? d?.inventoryCycle : '',
+            user: d?.user ? d?.user : ''
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => { }}>
+        onSubmit={() => {}}
+      >
         {({ values }) => (
           <>
             <CustomDialogContent>
@@ -113,8 +120,8 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
                     <TableBody>
                       <FieldArray
                         name="categoryArray"
-                        render={arrayHelpers => (
-                          (values.categoryArray.map((data, index) => (
+                        render={(arrayHelpers) =>
+                          values.categoryArray.map((data, index) => (
                             <TableRow key={data._id}>
                               <TableCell component="th" scope="row">
                                 {index + 1}
@@ -125,19 +132,14 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
                                   size="small"
                                   value={data.inventoryCycle}
                                   options={inventoryCycle}
-                                  getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
+                                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                                   onChange={(_, newValue) => {
                                     arrayHelpers.replace(index, {
                                       ...values.categoryArray[index],
-                                      ["inventoryCycle"]: newValue,
+                                      ['inventoryCycle']: newValue
                                     });
                                   }}
-                                  renderInput={(params) => <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    name="inventoryCycle"
-                                    label="Cycle Code"
-                                  />}
+                                  renderInput={(params) => <TextField {...params} variant="outlined" name="inventoryCycle" label="Cycle Code" />}
                                 />
                               </TableCell>
                               <TableCell align="left">
@@ -145,25 +147,19 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
                                   size="small"
                                   value={data.user}
                                   options={users}
-                                  getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
+                                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                                   onChange={(_, newValue) => {
                                     arrayHelpers.replace(index, {
                                       ...values.categoryArray[index],
-                                      ["user"]: newValue,
+                                      ['user']: newValue
                                     });
                                   }}
-                                  renderInput={(params) => <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    name="user"
-                                    label="User"
-                                  />
-                                  }
+                                  renderInput={(params) => <TextField {...params} variant="outlined" name="user" label="User" />}
                                 />
                               </TableCell>
                             </TableRow>
-                          )))
-                        )}
+                          ))
+                        }
                       />
                     </TableBody>
                   </Table>
@@ -171,13 +167,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                onClick={() => handleSave(values.categoryArray)}
-                variant={'contained'}
-                size="small"
-                color="primary"
-                disabled={false}
-              >
+              <Button onClick={() => handleSave(values.categoryArray)} variant={'contained'} size="small" color="primary" disabled={false}>
                 Save
               </Button>
             </CustomDialogFooter>

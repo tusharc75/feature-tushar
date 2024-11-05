@@ -1,8 +1,7 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -16,7 +15,17 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { checkIsAllowedToDelete, customerAccount, getDefaultMyRecordType, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  customerAccount,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  invoice,
+  INVOICE_STATUS,
+  prepareDataForGrid,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
@@ -55,11 +64,11 @@ const Invoice = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-
+  const [statusOptions, setStatusOptions] = useState(null);
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -68,6 +77,12 @@ const Invoice = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
+    data?.forEach((d) => {
+      if (d?.fieldData?.fieldName === 'status') {
+        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
+        setStatusOptions(statusOps);
+      }
+    });
     const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -225,7 +240,8 @@ const Invoice = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -266,8 +282,57 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s)=> s.status==='Closed') && (
+          <>
+            {statusOptions?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusUpdate(status?.optionValue);
+                  }}
+                  disabled={false}
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
+          </>
+        )}
       </>
     );
+  };
+
+  const handleStatusUpdate = (status) => {
+    const isSameStatus = selectedRecords?.every((e)=> e.status===selectedRecords[0].status);
+    if(!isSameStatus){
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please select invoices with same status'
+      });
+      return;
+    }
+    const invoices = sortBy(selectedRecords, '_id').map((s) => ({
+      _id: s._id,
+      prevStatus: s.status
+    }));
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${invoice.api}/update-status`, { invoices: invoices, status: status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -278,7 +343,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}

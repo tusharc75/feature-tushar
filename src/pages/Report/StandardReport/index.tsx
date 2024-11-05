@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, Button, Box, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, isArray, startCase } from 'lodash';
+import { Grid, Button, Box, IconButton, CircularProgress } from '@material-ui/core';
+import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -18,8 +18,9 @@ import {
   downloadExcel,
   isObjectEmpty,
   sidebarResource,
-  dateFormat,
-  REPORT_LIST
+  REPORT_LIST,
+  formatAmountWithCurrency,
+  CustomDialogTransition
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -38,6 +39,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
 import PadData from 'src/pages/Report/PadData';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import { isMobile, isTablet } from 'react-device-detect';
+import SendMailMenu from './SendMailMenu';
 
 let cancelTokenSource = null;
 
@@ -66,21 +71,27 @@ const Report = () => {
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [formValues, setFormValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
-  const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [defaultColumns, setDefaultColumns] = React.useState([]);
+  const [footerData, setFooterData] = React.useState<Record<string, number>>(null);
 
   // Grid Configs
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
-  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
+  const [isSendMail, setIsSendMail] = React.useState(false);
+  const [emailAttachments, setEmailAttachments] = React.useState([]);
+  const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+  const [htmlContent, setHtmlContent] = React.useState(null);
+
+  const [isProcessing, setIsProcessing] = React.useState(null);
 
   const fetchGridColumns = async () => {
     try {
@@ -93,7 +104,7 @@ const Report = () => {
       } = await axiosInstance().get(`/report/${type}/column`);
       let newColumns = generateColumns(type, columnFields);
       newColumns?.forEach((o) => {
-        if (type === 'inventory-history') {
+        if (resourceCamelCase === 'inventoryHistory') {
           if (o?.accessor === 'type') {
             o.cell = ({ row }) => CreditDebitTypeRenderer(row);
           }
@@ -101,7 +112,7 @@ const Report = () => {
             o.cell = ({ row }) => CreditDebitRenderer(row);
           }
         }
-        if (type === 'fleet-report') {
+        if (resourceCamelCase === 'fleetReport') {
           if (o?.accessor === 'unitNumber') {
             o.cell = ({ row }) => UnitNameRenderer(row);
           }
@@ -124,7 +135,7 @@ const Report = () => {
         }
         o.editable = false;
       });
-      if (type === 'inventory-evaluation') {
+      if (resourceCamelCase === 'inventoryEvaluation') {
         newColumns?.forEach((e) => {
           if (e.accessor === 'productName') {
             e.cell = ({ row }) => ProductRenderer(row);
@@ -138,7 +149,7 @@ const Report = () => {
           }
         });
         columns = [...newColumns, ActionsRenderer];
-      } else if (type === 'in-used-serialized-asset') {
+      } else if (resourceCamelCase === 'inUsedSerializedAsset') {
         newColumns?.forEach((e) => {
           if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -146,15 +157,7 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      } else if (type === 'day-wise-volume-report') {
-        newColumns?.forEach((e) => {
-          if (['asset', 'customerAccount', 'padName']?.includes(e.accessor)) {
-            e.disableFilters = true;
-            e.disableSortBy = true;
-          }
-        });
-        columns = [...newColumns];
-      } else if (type === 'purchase-order-details') {
+      } else if (resourceCamelCase === 'purchaseOrderDetails') {
         newColumns?.forEach((e) => {
           if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -162,20 +165,7 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      } else if (type === 'historical-report') {
-        newColumns?.forEach((e) => {
-          if (['startDate']?.includes(e.accessor)) {
-            e.cell = ({ row }) => (
-              <div>
-                {row?.original?.startDate ? (
-                  <h5 title={`${moment(row?.original?.startDate).format(dateFormat)}`}>{moment(row?.original?.startDate)?.format(dateFormat)}</h5>
-                ) : (
-                  'Total'
-                )}
-              </div>
-            );
-          }
-        });
+      } else if (resourceCamelCase === 'volumeReport') {
         columns = [...newColumns, ActionsRenderer];
       } else {
         columns = [...newColumns];
@@ -429,7 +419,7 @@ const Report = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {type === 'inventory-evaluation' && (
+        {resourceCamelCase === 'inventoryEvaluation' && (
           <HtmlTooltip title={'View History'}>
             <span>
               <IconButton
@@ -444,7 +434,7 @@ const Report = () => {
             </span>
           </HtmlTooltip>
         )}
-        {type === 'historical-report' && row?.original['startDate'] && (
+        {resourceCamelCase === 'volumeReport' && (
           <HtmlTooltip title={'View Pad Wise Data'}>
             <span>
               <IconButton
@@ -525,6 +515,16 @@ const Report = () => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
+        if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
+          data = data.filter((d) => {
+            if (d?.isFooter) {
+              setFooterData(d);
+              return false;
+            } else {
+              return true;
+            }
+          });
+        }
         dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -562,7 +562,7 @@ const Report = () => {
     if (selectedResources.length > 0) {
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
-        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup && selectedData[key]?.value?.length > 0);
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
         let filterById = idFilter.map((key) => {
           if (key === 'warehouse') {
@@ -658,8 +658,13 @@ const Report = () => {
 
     if (isExport) {
       let newColumns = columns.map((col) => col.accessor);
-      if (colState.length) {
-        newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
+      if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
+        newColumns = [];
+        for (const [key, value] of Object.entries(visibleColumns)) {
+          if (value) {
+            newColumns.push(key);
+          }
+        }
       }
       filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
     }
@@ -667,42 +672,145 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = () => {
-    if (isExporting) return;
+  const exportData = (exportType = 'excel', processType = 'excel') => {
     toastConfig.setToastConfig({
       open: true,
-      message: 'Please wait exporting data',
+      message: `Please wait ${processType === 'sendMail' ? '' : 'exporting data'}`,
       type: 'info'
     });
-    let newColumns = columns.map((col) => col.accessor);
-    if (colState.length) {
-      newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
-    }
-    setExporting(true);
+
+    setIsProcessing(processType);
+
     let filterQuery = getQueryString(true);
 
     var api = '';
-    api = `/report/${type}/export`;
+    if (exportType === 'pdf') {
+      api = `/report/${type}/pdf`;
+    } else if (exportType === 'html') {
+      api = `/report/${type}/pdf`;
+    } else {
+      api = `/report/${type}/export`;
+    }
+    const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
+    const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+    if (processType === 'sendMail' && exportType === 'html') {
+      axiosInstance().get(`${api}${filterQuery}&html=true`)
+        .then((res) => {
+          setHtmlContent(res.data);
+          setIsProcessing(null);
+        })
+        .catch((err) => {
+          setIsProcessing(null);
+          toastConfig.setToastConfig(err);
+        });
+      return;
+    }
 
     axiosInstance()
-      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
+      .get(`${api}${filterQuery}`, {
         responseType: 'arraybuffer'
       })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(res.data, fileName);
-        setExporting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
+        if (processType === 'sendMail') {
+          const blobData = new Blob([res.data], { type: contentType });
+          generateBase64forFile(blobData, fileName, extension);
+        } else if (processType === 'pdf') {
+          const url = window.URL.createObjectURL(new Blob([res.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName + '.pdf');
+          document.body.appendChild(link);
+          link.click();
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        } else {
+          downloadExcel(res.data, fileName);
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        }
       })
       .catch((err) => {
-        setExporting(false);
+        setIsProcessing(null);
         toastConfig.setToastConfig(err);
       });
   };
+
+  const generateBase64forFile = (blobData, fileName, extension) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      const attachments = {
+        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${extension}`,
+        name: fileName
+      };
+      setEmailAttachments((prevState) => {
+        return [...prevState, attachments];
+      });
+    };
+  };
+
+  useEffect(() => {
+    if (emailAttachments?.length > 0 || htmlContent) {
+      setIsProcessing(null);
+      setIsSendMail(true);
+    }
+  }, [emailAttachments, htmlContent]);
+
+  useEffect(() => {
+    if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
+      const dataKeys = Object.keys(footerData);
+      const newColumns = columns.map((col, index) => {
+        if (index === 0) {
+          return { ...col, Footer: 'Total' };
+        }
+        if (dataKeys.includes(col.accessor)) {
+          return {
+            ...col,
+            Footer:
+              footerData[col.accessor] && isNumber(footerData[col.accessor]) ? (
+                col?.type === 'currencyNumber' ? (
+                  `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}`
+                ) : (
+                  footerData[col.accessor]
+                )
+              ) : (
+                <NoDataCell />
+              )
+          };
+        }
+        return col;
+      });
+      setColumns(newColumns);
+    }
+  }, [columns?.length, type, footerData]);
+
+
+  const getFilteredColumn = (column) => {
+    if (resourceCamelCase === 'dailyVolumeReport') {
+      let tempColumn = column;
+      if (!selectedData?.dayWise?.value) {
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date')
+      }
+      if (selectedData?.padWise?.value) {
+        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor))
+      }
+      return tempColumn;
+    }
+    return column;
+  }
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -711,7 +819,7 @@ const Report = () => {
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
           {showGrid && (
             <div id="importExportLinks" style={{ minWidth: 80 }}>
-              {type === 'in-used-serialized-asset' ? (
+              {resourceCamelCase === 'inUsedSerializedAsset' ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={type}
@@ -719,7 +827,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -727,9 +835,33 @@ const Report = () => {
                   additionalParams={getQueryString(true)}
                 />
               ) : (
-                <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
-                  Export All
-                </Button>
+                <div className="flex items-center gap-1">
+                  {reportConfig?.isSendMail && (
+                    <SendMailMenu exportData={exportData} isProcessing={isProcessing} />
+                  )}
+                  {reportConfig?.isExportPdf && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isProcessing === 'pdf'}
+                      onClick={() => exportData('pdf', 'pdf')}
+                      startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
+                      className={`btn-outline-v-1`}
+                    >
+                      Export To PDF
+                    </Button>
+                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    disabled={isProcessing === 'excel'}
+                    onClick={() => exportData('excel', 'excel')}
+                    startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
+                    className={`btn-outline-v-1`}
+                  >
+                    Export To Excel
+                  </Button>
+                </div>
               )}
             </div>
           )}
@@ -766,6 +898,7 @@ const Report = () => {
               open={true}
               maxWidth="md"
               fullWidth
+              TransitionComponent={CustomDialogTransition}
               onClose={(e, reason) => {
                 if (reason !== 'backdropClick') {
                   if (defaultColumns?.length) {
@@ -823,21 +956,20 @@ const Report = () => {
           )}
           <div>
             {columns ? (
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchResourceData}
-                hideSelection={true}
-                reportSave={true}
-                setWholeRowsCellColor={(rowData) => {
-                  if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
-                  return '';
-                }}
-                isClientSideGrid={type === 'historical-report' ? true : false}
-              />
+              <>
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  columns={getFilteredColumn(columns)}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchResourceData}
+                  hideSelection={true}
+                  hideExportTable={true}
+                  pagination={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true}
+                  isClientSideGrid={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false}
+                />
+              </>
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -864,6 +996,46 @@ const Report = () => {
           column={columns}
           data={showPadData.data}
         />
+      )}
+      {isSendMail && (
+        <Dialog
+          open={isSendMail}
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
+            setEmailAttachments([]);
+            setHtmlContent(null);
+            setFullScreen(false);
+            setIsSendMail(false);
+          }}
+          fullWidth
+          disableEnforceFocus={true}
+        >
+          <CreateEmail
+            isQuoteBuilder={true}
+            relatedTo={null}
+            emailId={null}
+            handleClose={() => {
+              setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
+            }}
+            fetchData={() => {
+              setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
+            }}
+            qouteBuilderAttachments={emailAttachments}
+            isMinimized={true}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            content={htmlContent}
+          />
+        </Dialog>
       )}
     </MuiPickersUtilsProvider>
   );

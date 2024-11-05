@@ -21,8 +21,9 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.workOrderTechnician.title);
+
 const GridView = ({ serviceStatus, filterQuery, permissions }) => {
-  const renderedFrom = camelCase(routes?.workOrderTechnician.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -32,7 +33,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, sorting, selectedRecords, filters } = state;
 
   const [tabValue, setTabValue] = useState('');
@@ -90,7 +91,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
                 <Box ml={1}>
                   {row?.original?.canPerformInfo ? (
                     <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                      <Info className="[font-size:20px_!important] text-red-500" />
+                      <Info className="text-red-500 [font-size:20px_!important]" />
                     </HtmlTooltip>
                   ) : null}
                 </Box>

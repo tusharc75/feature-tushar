@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -31,6 +31,7 @@ import {
   yupSchema
 } from '../../constants/helpers';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManageSerializedAsset = ({
   isClone = false,
@@ -40,10 +41,10 @@ const ManageSerializedAsset = ({
   productId = null,
   productCategory = null,
   referenceType = null,
-  referenceData = null
+  referenceData = null,
+  assetLogFields = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [loading, setLoading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -56,16 +57,34 @@ const ManageSerializedAsset = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [productCategoryID, setProductCategoryID] = useState(null);
   const [productCategoryName, setProductCategoryName] = useState(null);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   const {
     state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && allFields?.length > 0) {
+      isStepDataSet.current = true;
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(allFields, ignoreField)]);
+      walkmeInstance.handleNext();
+    }
+  }, [allFields]);
+
+  useEffect(() => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data = data.filter((d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName));
+
+        if (assetLogFields && assetLogFields?.length) {
+          data = data.filter((d) => [...assetLogFields].includes(d.fieldData.fieldName));
+          data.forEach((d) => {
+            d.fieldData.disableOnEdit = false;
+          })
+        }
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -107,7 +126,6 @@ const ManageSerializedAsset = ({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
-                setLoading(false);
               } else {
                 fieldsDataForUpdate?.forEach((e: any) => {
                   if (e?.fieldName === 'warehouse') {
@@ -184,16 +202,25 @@ const ManageSerializedAsset = ({
     delete values?.productDescription;
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
-      axiosInstance()
-        .put(`${serializedAsset.api}`, values)
-        .then(({ data: { data } }) => {
+      if (assetLogFields) {
+        axiosInstance().put(`${serializedAsset.api}/update-with-log`, values).then(({ data: { data } }) => {
           setSubmitting(false);
           onSuccess();
         })
-        .catch((error) => {
+          .catch((error) => {
+            setSubmitting(false);
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        axiosInstance().put(`${serializedAsset.api}`, values).then(({ data: { data } }) => {
           setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+          onSuccess();
+        })
+          .catch((error) => {
+            setSubmitting(false);
+            toastConfig.setToastConfig(error);
+          });
+      }
     } else {
       axiosInstance()
         .post(`${serializedAsset.api}`, values)
@@ -268,8 +295,8 @@ const ManageSerializedAsset = ({
                                               productId
                                                 ? true
                                                 : Boolean(productInventoryId) && !isClone
-                                                ? field.disableOnEdit || field.isUneditable
-                                                : field.isUneditable
+                                                  ? field.disableOnEdit || field.isUneditable
+                                                  : field.isUneditable
                                             }
                                             values={values}
                                             errors={errors}
@@ -321,12 +348,12 @@ const ManageSerializedAsset = ({
                                                     productId
                                                       ? 'disabled'
                                                       : Boolean(productInventoryId) && !isClone
-                                                      ? field.disableOnEdit || field.isUneditable
-                                                        ? 'disabled'
-                                                        : 'primary'
-                                                      : field.isUneditable
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? field.disableOnEdit || field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
+                                                        : field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -345,8 +372,8 @@ const ManageSerializedAsset = ({
                                               productCategory
                                                 ? true
                                                 : Boolean(productInventoryId) && !isClone
-                                                ? field.disableOnEdit || field.isUneditable
-                                                : field.isUneditable
+                                                  ? field.disableOnEdit || field.isUneditable
+                                                  : field.isUneditable
                                             }
                                             values={values}
                                             errors={errors}
@@ -381,8 +408,8 @@ const ManageSerializedAsset = ({
                                                   productCategory
                                                     ? true
                                                     : Boolean(productInventoryId) && !isClone
-                                                    ? field.disableOnEdit || field.isUneditable
-                                                    : field.isUneditable
+                                                      ? field.disableOnEdit || field.isUneditable
+                                                      : field.isUneditable
                                                 }
                                                 size="small"
                                               >
@@ -391,12 +418,12 @@ const ManageSerializedAsset = ({
                                                     productCategory
                                                       ? 'disabled'
                                                       : Boolean(productInventoryId) && !isClone
-                                                      ? field.disableOnEdit || field.isUneditable
-                                                        ? 'disabled'
-                                                        : 'primary'
-                                                      : field.isUneditable
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? field.disableOnEdit || field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
+                                                        : field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -461,11 +488,12 @@ const ManageSerializedAsset = ({
                                       disabled={
                                         values['assetNumberType']
                                           ? values['assetNumberType'] === ASSET_NUMBER_TYPE.manual
-                                            ? false
+                                            ? Boolean(productInventoryId) && !isClone ?
+                                              field.disableOnEdit || field.isUneditable : false
                                             : true
                                           : Boolean(productInventoryId) && !isClone
-                                          ? field.disableOnEdit || field.isUneditable
-                                          : field.isUneditable
+                                            ? field.disableOnEdit || field.isUneditable
+                                            : field.isUneditable
                                       }
                                       fieldData={field}
                                       values={values}
@@ -594,7 +622,14 @@ const ManageSerializedAsset = ({
                   >
                     Cancel
                   </Button>
-                  <CustomButton disabled={isSubmitting} loading={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  <CustomButton
+                    disabled={isSubmitting || (!isClone && isEqual(initialData.values, values))}
+                    loading={isSubmitting}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}
+                    id="dialog-save-button">
                     {' '}
                     Save
                   </CustomButton>

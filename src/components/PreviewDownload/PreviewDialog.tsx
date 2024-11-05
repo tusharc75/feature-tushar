@@ -11,6 +11,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ViewDialog } from './ViewDialog';
 import { PreviewFields } from './PreviewFields';
 import DownloadHistory from './DownloadHistory';
+import { useData } from '../../StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export const PreviewDialog = ({
   type,
@@ -43,6 +45,8 @@ export const PreviewDialog = ({
 
   const [sortBy, setSortBy] = useState(null);
   const [orderBy, setOrderBy] = useState(null);
+
+  const { state: { user: { user } } } = useData();
 
   useEffect(() => {
     setDefaultColumns();
@@ -77,19 +81,20 @@ export const PreviewDialog = ({
 
   const handleSelectView = (data) => {
     setSelectedPdfView(data);
-    if (data?.columns) {
-      const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
+    if (data?.columns?.length) {
       setVisibleColumnsPdf(
-        columnsArray
+        data.columns
           ?.map((e) => {
-            return allColumn.find((col) => col.fieldName === e);
+            const col = allColumn.find((col) => col.fieldName === e.name);
+            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
           })
           .filter((col) => col !== undefined)
       );
       setVisibleColumnsExcel(
-        columnsArray
+        data.columns
           ?.map((e) => {
-            return allColumn.find((col) => col.fieldName === e);
+            const col = allColumn.find((col) => col.fieldName === e.name);
+            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}) };
           })
           .filter((col) => col !== undefined)
       );
@@ -172,17 +177,21 @@ export const PreviewDialog = ({
         </CustomDialogContent>
         <CustomDialogFooter>
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
-            <CustomButton
-              id={'show-column-dialog-save-update-button'}
-              onClick={() => {
-                setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
-              }}
-              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
-              size="small"
-              className="yellow-button"
-            >
-              {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
-            </CustomButton>
+            <HtmlTooltip title={user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
+              <>
+                <CustomButton
+                  id={'show-column-dialog-save-update-button'}
+                  onClick={() => {
+                    setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
+                  }}
+                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (user?._id !== selectedPdfView?.user)}
+                  size="small"
+                  className="yellow-button"
+                >
+                  {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+                </CustomButton>
+              </>
+            </HtmlTooltip>
           )}
           {operation === 'Send Email' ? (
             <CustomButton
@@ -237,7 +246,7 @@ export const PreviewDialog = ({
       </Dialog>
       {showSaveViewDialog.open && (
         <ViewDialog
-          columns={type === 'Excel' ? visibleColumnsExcel?.map((e) => e?.fieldName) : visibleColumnsPdf?.map((e) => e?.fieldName)}
+          columns={type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf}
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });

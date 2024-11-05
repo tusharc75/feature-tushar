@@ -26,13 +26,13 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const parsed = queryString.parse(history.location.search);
   const { itemTab }: any = parsed;
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+
   const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [assignDialog, setAssignDialog] = useState({ open: false, type: null, data: null });
@@ -44,6 +44,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const renderedFrom = camelCase(
     tabValue === 0 ? routes?.productCategory.title : tabValue === 1 ? routes?.product.title : routes?.serializedAsset.title
   );
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
     setColumns(null);

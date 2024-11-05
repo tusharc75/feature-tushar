@@ -26,12 +26,12 @@ import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatN
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import { version } from '../package.json';
-import { FiltersProvider } from './StateProvider/FiltersContext/FiltersContext';
+import { VITE_APP_ENV } from 'src/config';
 
 // @ts-ignore
-if (import.meta.env.VITE_APP_ENV !== 'local' && navigator.onLine) {
+if (VITE_APP_ENV !== 'local' && navigator.onLine) {
   init({
-    environment: import.meta.env.VITE_APP_ENV,
+    environment: VITE_APP_ENV,
     release: version,
     dsn: 'https://42514b3242b14f7d8c5b8dbacd0c4237@o718098.ingest.sentry.io/5850347',
     integrations: [new Integrations.BrowserTracing()],
@@ -55,9 +55,7 @@ ReactDOM.render(
                   <GlobalChatProvider>
                     <CustomOfflineProvider>
                       <NewAddressOptionListProvider>
-                        <FiltersProvider>
-                          <App />
-                        </FiltersProvider>
+                        <App />
                       </NewAddressOptionListProvider>
                     </CustomOfflineProvider>
                   </GlobalChatProvider>

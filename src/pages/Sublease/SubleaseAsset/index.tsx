@@ -20,7 +20,6 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
-  SUBLEASE_STATUS,
   prepareDataForGrid,
   serializedAsset,
   sidebarResource,
@@ -30,18 +29,12 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { generateStepSendToSupplier } from 'src/pages/Sublease/walkmeSteps';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 
-const SerializedAsset = ({
-  subleaseData,
-  fetchData,
-  currentStep,
-  renderedFrom,
-  allowedToEdit,
-  isProcessor,
-  stepFullScreen
-}) => {
-
-  const { state, dispatch } = useTableReducer();
+const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
+  const { setWalkmeData } = useSetWalkmeData();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -89,7 +82,8 @@ const SerializedAsset = ({
   };
 
   const fetchGridColumns = () => {
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         newColumns?.forEach((o) => {
@@ -159,6 +153,14 @@ const SerializedAsset = ({
       });
   };
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (rows.length > 0) {
+      setWalkmeData([generateStepSendToSupplier(0)]);
+    } else {
+      setWalkmeData([]);
+    }
+  };
+
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -171,6 +173,7 @@ const SerializedAsset = ({
       res['isChecked'] = false;
       return res;
     });
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -233,11 +236,12 @@ const SerializedAsset = ({
             ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
         )}
-        {allowedToEdit &&
+        {allowedToEdit && (
           <Button
             variant={'contained'}
             color="primary"
             size="small"
+            id="send-to-supplier-button"
             disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
             onClick={() => {
               if (!validateAction()) {
@@ -275,7 +279,7 @@ const SerializedAsset = ({
           >
             Send to Supplier
           </Button>
-        }
+        )}
       </>
     );
   };
@@ -285,11 +289,9 @@ const SerializedAsset = ({
     selectedRecords?.forEach((e, i) => {
       if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
-      }
-      else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
+      } else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetsIsWithCustomer });
-      }
-      else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+      } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
         errorMessages.push({ index: e.index, message: subleaseMessage.assetStatusSendSupplier });
       }
     });
@@ -336,7 +338,7 @@ const SerializedAsset = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
-            fetchData()
+            fetchData();
           }}
         />
       )}

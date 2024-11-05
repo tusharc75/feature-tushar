@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { changeItemIndex } from 'src/constants/helpers';
+import { changeItemIndex, CustomDialogTransition } from 'src/constants/helpers';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
@@ -93,6 +93,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
 
   return (
     <Dialog
+      TransitionComponent={CustomDialogTransition}
       open
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}

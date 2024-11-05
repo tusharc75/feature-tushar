@@ -8,12 +8,19 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  productInventory,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
@@ -71,7 +78,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           finalObject['_id'] = u._id;
           finalObject['inventory'] = u?.inventory ? u?.inventory - (u?.softHold || 0) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
-          finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
+          finalObject['hideSelection'] = finalObject['inventory'] && finalObject['inventory'] <= 0 ? true : false;
           return {
             ...finalObject
           };
@@ -195,7 +202,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   return (
-    <Dialog open fullScreen fullWidth onClose={close}>
+    <Dialog open TransitionComponent={CustomDialogTransition} fullScreen fullWidth onClose={close}>
       <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader

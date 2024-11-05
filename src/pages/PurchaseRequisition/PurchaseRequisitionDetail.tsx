@@ -3,8 +3,6 @@ import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -24,6 +22,9 @@ import ShowDoa from '../DoaSetupNew/ShowDoa';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
 
 const PurchaseRequisitionDetail = () => {
 
@@ -50,13 +51,31 @@ const PurchaseRequisitionDetail = () => {
   const {
     state: { permissions, user }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseRequisition}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     axiosInstance()
@@ -89,7 +108,7 @@ const PurchaseRequisitionDetail = () => {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-      setCurrentStep(getIndex(data?.processStatus, stepList));
+      setCurrentStep(getIndex(data?.processStatus, tempStepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
@@ -203,11 +222,12 @@ const PurchaseRequisitionDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -250,6 +270,9 @@ const PurchaseRequisitionDetail = () => {
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
                     isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.purchaseRequisition, stepList[step]?.name, id);
+                    }}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
@@ -297,6 +320,22 @@ const PurchaseRequisitionDetail = () => {
             )}
           </Grid>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.purchaseRequisition}
+                  data={purchaseRequisitionData}
+                  allowedToEdit={permissions?.purchaseRequisition?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showOrderDialog.open && (
         <ManagePurchaseOrder

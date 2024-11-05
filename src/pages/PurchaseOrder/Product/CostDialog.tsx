@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment, useRef } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -16,6 +16,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { bulkUpdate } from 'src/components/RentalManagment/helper';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -23,10 +24,20 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchFields();
   }, [costData]);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
@@ -238,6 +249,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
                   </CustomButton>
                 )}
                 <CustomButton
+                  id={'dialog-save-button'}
                   loading={loadingEdit}
                   disabled={loadingEdit}
                   variant="contained"

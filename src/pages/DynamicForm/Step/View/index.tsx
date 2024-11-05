@@ -25,8 +25,17 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false, referenceData }) => {
-
+const View = ({
+  step,
+  allowedToEdit,
+  data,
+  resource,
+  resourceId,
+  setNextStep = null,
+  fromAccordian = false,
+  stepFullScreen = false,
+  referenceData
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
@@ -37,13 +46,13 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const [openMaterial, setOpenMaterial] = useState({ open: false, type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchColumns()
+    fetchColumns();
   }, [step]);
 
   useEffect(() => {
@@ -52,8 +61,8 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     }
   }, [step]);
 
-  const fetchColumns = () => {
-    const newColumns = generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
+  const fetchColumns = async () => {
+    setColumns(null);
     const column: any = [
       {
         accessor: 'index',
@@ -115,55 +124,53 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         ]
         : [])
     ];
-    setColumns([
-      ...column,
-      ...newColumns,
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 110,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }) => (
-          <>
-            {step?.fields?.length > 0 &&
-              <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    disabled={allowedToEdit ? false : true}
-                    onClick={() => {
-                      setOpen({ open: true, id: row?.original?._id });
-                    }}
-                  >
-                    <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            }
-            <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+    const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
+    const ActionsRenderer = {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {step?.fields?.length > 0 && (
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
               <span>
                 <IconButton
                   size="small"
-                  aria-label="Delete"
+                  aria-label="Edit"
                   disabled={allowedToEdit ? false : true}
                   onClick={() => {
-                    setDeleteRecord(row?.original);
-                    setShowDeleteConfirmBox(true);
+                    setOpen({ open: true, id: row?.original?._id });
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
-          </>
-        )
-      }
-    ])
+          )}
+          <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={allowedToEdit ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    };
+    setColumns([...column, ...newColumns, ActionsRenderer]);
   };
 
   const fetchData = () => {
@@ -248,22 +255,25 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const handleAdd = (rows) => {
     const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
     setIsSubmitting(true);
-    axiosInstance().post(`/dynamic-form/step/${resourceId}`, values, {
-      headers: {
-        Resource: resource
-      }
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .post(`/dynamic-form/step/${resourceId}`, values, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const handleDelete = async () => {
@@ -273,47 +283,57 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     } else {
       ids = selectedRecords.map((m) => m._id);
     }
-    axiosInstance().put(`/dynamic-form/step/remove/${resourceId}`, { ids: ids, stepId: step?._id },
-      {
-        headers: {
-          Resource: resource
+    axiosInstance()
+      .put(
+        `/dynamic-form/step/remove/${resourceId}`,
+        { ids: ids, stepId: step?._id },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    ).then(({ data }) => {
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+      )
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, step?.fields || [], updatedData);
-    axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...rows[0], stepId: step?._id },
-      {
-        headers: {
-          Resource: resource
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, step?.fields || [], updatedData, data?.currency);
+    axiosInstance()
+      .put(
+        `/dynamic-form/step/${resourceId}`,
+        { ...rows[0], stepId: step?._id },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    ).then(({ data }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+      )
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const actionButtonMenuItems = () => {
@@ -335,13 +355,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   return (
     <>
       {step?.linkWithResource ? (
-        <ResourceField
-          step={step}
-          renderedFrom={renderedFrom}
-          data={data}
-          stepFullScreen={stepFullScreen}
-          referenceData={referenceData}
-        />
+        <ResourceField step={step} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} referenceData={referenceData} />
       ) : (
         <>
           {step?.fields?.length || step?.linkWithMaterial ? (

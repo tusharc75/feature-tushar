@@ -3,8 +3,6 @@ import { Edit } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -19,6 +17,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageTrailerMaster from './ManageTrailerMaster';
+import Step from '../DynamicForm/Step';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const TrailerMasterDetail = () => {
   const { id } = useParams();
@@ -36,11 +36,14 @@ const TrailerMasterDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -71,6 +74,21 @@ const TrailerMasterDetail = () => {
       } = await axiosInstance().get(`${routes.trailerMaster.path}/${id}`);
       setTrailerMasterData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.trailerMaster}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -206,11 +224,12 @@ const TrailerMasterDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> History
+            History
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -224,6 +243,22 @@ const TrailerMasterDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <History id={id} status={trailerMasterData?.status} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.trailerMaster}
+                  data={trailerMasterData}
+                  allowedToEdit={permissions?.trailerMaster?.isUpdate }
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

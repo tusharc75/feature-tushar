@@ -1,35 +1,20 @@
-import { Slide } from '@material-ui/core';
+import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
-import {
-  AddBox,
-  ArrowDownward,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Clear,
-  DeleteOutline,
-  Edit,
-  FilterList,
-  FirstPage,
-  LastPage,
-  Remove,
-  SaveAlt,
-  Search,
-  ViewColumn
-} from '@material-ui/icons';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
+import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import { GoogleMapProps } from '@react-google-maps/api';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -197,6 +182,13 @@ export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Receiving', title: 'Receiving', icon: 'ticket' }
 ];
 
+export const assemblyOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Loading', title: 'Loading', icon: 'ticket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
+];
+
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 
@@ -240,7 +232,7 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const gridPageSizes = [25, 50, 75, 100];
+export const gridPageSizes = [25, 50, 100, 250, 500];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
 
@@ -392,7 +384,8 @@ export const sidebarResource = {
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
   managedPackages: 'Managed Packages',
-  trainAiModel: 'Train Ai Model'
+  trainAiModel: 'Train Ai Model',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const primaryFields = {
@@ -539,8 +532,9 @@ export const RESOURCE_LABEL = {
   equiptAi: 'Equipt Ai',
   trainAiModel: 'Train Ai Model',
   workSpace: 'Work Space',
-  workFlow: 'Work Flow',
-  workflowReport: 'Workflow Report'
+  workflow: 'Workflow',
+  workflowReport: 'Workflow Report',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const CHILD_RESOURCE = {
@@ -583,7 +577,8 @@ export const CHILD_RESOURCE = {
   dealsMaterial: 'Deals Material',
   rentalManagementTechnician: 'Rental Management Technician',
   subcontractAssemblyMaterial: 'Subcontract Assembly Material',
-  subcontractAssemblyCost: 'Subcontract Assembly Cost'
+  subcontractAssemblyCost: 'Subcontract Assembly Cost',
+  assemblyOrderMaterial: 'Assembly Order Material'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -942,11 +937,11 @@ export const profileMenuItems = {
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
+export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
   let user = JSON.parse(localStorage.getItem('userData'));
 
   const obj = {};
-  for (const key of arr) {
+  for (const key of fields) {
     let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
@@ -1003,11 +998,29 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
     } else if (key.type === 'groupSignature') {
-      obj[key.fieldName] = [];
+      if (isArray(value) && value?.length) {
+        obj[key.fieldName] = value?.map((e) => {
+          return { signature: '', user: e };
+        });
+      } else {
+        obj[key.fieldName] = [];
+      }
+    } else if (key.type === 'signature') {
+      obj[key.fieldName] = '';
+    } else if (key.type === 'gpsLocation') {
+      obj[key.fieldName] = {};
     } else {
       obj[key.fieldName] = value;
     }
   }
+
+  fields?.forEach((ele) => {
+    if (ele?.isDefaultValue && fields?.find((e) => e?.inputFields?.includes(ele?.fieldName))) {
+      const calValues = autoCalculateSpecificFields({ [ele?.fieldName]: obj[ele?.fieldName] }, obj, fields);
+      Object.assign(obj, calValues);
+    }
+  });
+
   return obj;
 };
 
@@ -1109,6 +1122,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
+    } else if (key.type === 'gpsLocation') {
+      const values = dataObj[key.fieldName]
+        ? isString(dataObj[key.fieldName])
+          ? { locationName: dataObj[key.fieldName] }
+          : dataObj[key.fieldName]
+        : {};
+      obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1124,46 +1144,268 @@ export const removeEmptyKeys = (obj: object) => {
  * @param {Array} fields
  * @param {boolean} validEmail
  */
+
+export const checkValue = (fields, fieldName, value1, value2) => {
+  const input = fields?.find((f) => f?.fieldName === fieldName);
+  if (input) {
+    if (input?.type === 'checkBox' || input?.type === 'switch') {
+      if (value2?.toUpperCase() === 'YES') {
+        return value1;
+      } else {
+        return !value1;
+      }
+    } else if (input?.type === 'dropDown') {
+      if (value2?.split(',')?.includes(value1)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
+      if (value2?.split(',').some((v) => (value1 || [])?.includes(v))) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'year') {
+      return moment(new Date(value1)).year() == value2;
+    } else if (input?.type === 'date') {
+      return moment(value1).format('DD/MM/YYYY') == value2;
+    } else if (input?.type === 'dateTime') {
+      return moment(new Date(value1))?.isSame(moment(value2, 'DD/MM/YYYY HH:mm'));
+    } else if (input?.type === 'number' || input?.type === 'percent' || input?.type === 'decimal' || input?.type === 'formula') {
+      if (+value2 === +value1) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'currency') {
+      if (value2?.split(',').includes(value1)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (value2 === value1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+};
+
+const urlRegex = /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+const nameRegex = /^([^0-9]*)$/;
+
+const validateDateWithOperator = (date1, date2, operator, type) => {
+  if (!date2) {
+    return true;
+  }
+  let newDate1 = moment(date1);
+  let newDate2 = moment(date2);
+  if (type === 'date') {
+    newDate1 = moment(moment(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate2 = moment(moment(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+  }
+
+  if (operator === 'lessThan') {
+    return newDate1.isBefore(newDate2);
+  } else if (operator === 'lessThanOrEquals') {
+    return newDate1.isBefore(newDate2) || newDate1.isSame(newDate2);
+  } else if (operator === 'greaterThan') {
+    return newDate1.isAfter(newDate2);
+  } else if (operator === 'greaterThanOrEquals') {
+    return newDate1.isAfter(newDate2) || newDate1.isSame(newDate2);
+  }
+  return false;
+};
+
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
   fields.forEach((input) => {
+    let message = `${input.fieldLabel} is required`;
+
+    let dateValidation = string().nullable();
+    if (['date', 'dateTime']?.includes(input?.type)) {
+      if (input?.required) {
+        dateValidation = string().required(message).nullable();
+      }
+
+      if (input?.dateValidation && input?.dateValidation?.length > 0) {
+        input?.dateValidation?.forEach((d) => {
+          dateValidation = dateValidation.test(
+            `${d?.fieldName}_${d?.operator}`,
+            `${input?.fieldLabel} should be ${OPERATOR?.find((o) => o?.optionValue === d?.operator)?.optionLabel} from ${fields?.find((f) => f?.fieldName === d?.fieldName)?.fieldLabel}`,
+            function (value) {
+              const date = this?.parent[d?.fieldName];
+              return validateDateWithOperator(value, date, d?.operator, input?.type);
+            }
+          );
+        });
+      }
+    }
+
+    const sectionProperties = fields?.find((f) => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties;
+    let sectionVisibility = [];
+    if (sectionProperties && sectionProperties?.visibilityCondition && sectionProperties?.visibilityCondition?.length) {
+      sectionVisibility = sectionProperties?.visibilityCondition;
+    }
+
+    const validationFields: any = [];
+    let validation: any = null;
+    if (input?.visibilityCondition?.length || sectionVisibility?.length) {
+      sectionVisibility?.forEach((condition) => {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
+          }
+        });
+      });
+      input?.visibilityCondition?.forEach((condition) => {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'field' });
+          }
+        });
+      });
+
+      validation = (...args) => {
+        let validate = false;
+        for (let i = 0; i < validationFields?.length; ) {
+          const field = validationFields[i];
+          const condition =
+            field?.type === 'section'
+              ? sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic)
+              : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+          if (condition?.logic === LOGIC.AND) {
+            if (condition?.fields?.every((f, j) => checkValue(fields, f?.fieldName, args[i + j], f?.value))) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          } else if (condition?.logic === LOGIC.OR) {
+            if (condition?.fields?.some((f, j) => checkValue(fields, f?.fieldName, args[i + j], f?.value))) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          }
+          if (!validate) {
+            break;
+          }
+          i = i + condition?.fields?.length;
+        }
+        return validate;
+      };
+    }
+
     if (input.type === 'singleLine') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
+          : string().required(message)
+        : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
-        ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+              }
+            )
+          : string().matches(nameRegex, "Numbers aren't allowed").required(message)
+        : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
-        ? string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(urlRegex, 'Enter valid URL').required(message),
+                otherwise: string().matches(urlRegex, 'Enter valid URL')
+              }
+            )
+          : string().matches(urlRegex, 'Enter valid URL').required(message)
+        : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
-        ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().min(10, 'Mobile number is too short').required(message),
+                otherwise: string().min(10, 'Mobile number is too short')
+              }
+            )
+          : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
-    } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
+    } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
-        ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+        ? validationFields?.length && validation
+          ? array().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: array().min(1, message),
+                otherwise: array()
+              }
+            )
+          : array().min(1, message)
+        : array();
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? number().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+                otherwise: number().nullable()
+              }
+            )
+          : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
-          ? string().email().required(`${input.fieldLabel} is required`)
+          ? validationFields?.length && validation
+            ? string().when(
+                validationFields?.map((f) => f?.fieldName),
+                {
+                  is: validation,
+                  then: string().email().required(message),
+                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+                }
+              )
+            : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
-      schema[input.fieldName] = input.required ? boolean().required(`${input.fieldLabel} is required`) : boolean();
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? boolean().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: boolean().required(message),
+                otherwise: boolean()
+              }
+            )
+          : boolean().required(message)
+        : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
@@ -1186,24 +1428,46 @@ export const yupSchema = (fields: any[], validEmail = true) => {
               : number().nullable();
           }
         });
-    } else if (input.type === 'date') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
-    } else if (input.type === 'dateTime') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
-    } else if (input.type === 'freeStyleMultiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'date' || input?.type === 'dateTime') {
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: dateValidation,
+                otherwise: dateValidation
+              }
+            )
+          : dateValidation
+        : dateValidation;
     } else if (input.type === 'colorPicker') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array().nullable();
     } else if (input.type === 'multiFileUpload') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array().nullable();
     } else if (input.type === 'counter') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'signature') {
+      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'gpsLocation') {
+      schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
     } else {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
+          : string().required(message)
+        : string();
     }
   });
 
@@ -1329,8 +1593,6 @@ export const convertDateTimToDate = (date) => {
   return newDate;
 };
 
-
-
 interface IPermission {
   [key: string]: {
     isCreate: boolean;
@@ -1401,12 +1663,10 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
         });
       }
 
-
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
       return permissions;
-    }
-    catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
   }
 };
@@ -1647,152 +1907,6 @@ export const determineLightOrDark = (color: any) => {
   }
 };
 
-/**
- * Convert Miliseconds to Hour
- */
-
-//  Currencies Short Form Symbols
-// const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-
-// export const formatAmountWithCurrency = (currencyCode, amount) => {
-
-//   if (!currencyCode && !amount || (!amount || isNaN(amount))) {
-//     return {
-//       shortFormatAmount: "", fullFormatAmount: ""
-//     }
-//   }
-
-//   // what tier? (determines SI symbol)
-//   var tier = Math.log10(Math.abs(amount)) / 3 | 0;
-
-//   // if zero, we don't need a suffix
-//   // if (tier == 0) return {
-//   //   shortFormatAmount: amount, fullFormatAmount: amount
-//   // }
-
-//   // get suffix and determine scale
-//   var suffix = SI_SYMBOL[tier];
-//   var scale = Math.pow(10, tier * 3);
-
-//   // scale the number
-//   var scaled = amount / scale;
-
-//   // format number and add suffix, For eg - 1.2M, 3.2k etc
-//   const formattedAmount = `${(amount % scale) !== 0 ? scaled.toFixed(1) : scaled}${suffix}`;
-
-//   const filterCountries = currencies.filter(
-//     (data) => data?.currencyCode === currencyCode
-//   );
-
-//   //  Make default language "en"
-//   let language = "en";
-
-//   let options = {
-//     style: "currency",
-//     currency: currencyCode,
-//   };
-
-//   if (Number.isInteger(amount)) {
-//     options["maximumFractionDigits"] = 0;
-//   }
-
-//   if (filterCountries.length === 0) {
-//     return {
-//       shortFormatAmount: formattedAmount,
-//       fullFormatAmount: new Intl.NumberFormat(
-//         `${language}`,
-//         options
-//       ).format(amount)
-//         .replace(/^(\D+)/, "$1 ")
-//     };
-//   }
-
-//   let currencyData = filterCountries[0];
-//   let combinedAllLanguages = filterCountries[0].languages;
-
-//   if (filterCountries.length > 1) {
-//     combinedAllLanguages = [...new Set(filterCountries.map(m => m.languages).flat())];
-
-//     switch (currencyCode) {
-//       case "AUD":
-//         currencyData = filterCountries.find(f => f.country === "Australia");
-//         break;
-
-//       case "CHF":
-//         currencyData = filterCountries.find(f => f.country === "Switzerland");
-//         break;
-
-//       case "EUR":
-//         currencyData = filterCountries.find(f => f.country === "France");
-//         break;
-
-//       case "GBP":
-//         currencyData = filterCountries.find(f => f.country === "United Kingdom");
-//         break;
-
-//       case "NOK":
-//         currencyData = filterCountries.find(f => f.country === "Norway");
-//         break;
-
-//       case "NZD":
-//         currencyData = filterCountries.find(f => f.country === "New Zeland");
-//         break;
-
-//       case "XAF":
-//         currencyData = filterCountries.find(f => f.country === "Cameroon");
-//         break;
-
-//       case "XCD":
-//         currencyData = filterCountries.find(f => f.country === "Dominica");
-//         break;
-
-//       case "XOF":
-//         currencyData = filterCountries.find(f => f.country === "Benin");
-//         break;
-
-//       case "XPF":
-//         currencyData = filterCountries.find(f => f.country === "French Polynesia");
-//         break;
-//     }
-
-//     //  just for safe side, if no record found, change the value to initial state;
-//     if (!currencyData) {
-//       currencyData = filterCountries[0];
-//     }
-
-//     currencyData.languages = [...new Set(filterCountries.map(m => m.languages).flat())];
-//   }
-
-//   // Check if that currency's country has multiple language,
-//   //  And if it has "en", then pick that one, or else take first of the array of languages
-//   if (
-//     currencyData.languages.length > 0 &&
-//     currencyData.languages.some((d) => d !== language)
-//   ) {
-//     language = currencyData.languages[0];
-//   }
-
-//   if (!currencyData) {
-//     return {
-//       shortFormatAmount: formattedAmount,
-//       fullFormatAmount: new Intl.NumberFormat(
-//         `${language}`,
-//         options
-//       ).format(amount).replace(/^(\D+)/, "$1 ")
-//     };
-//   }
-
-//   return {
-//     shortFormatAmount: `${currencyData.symbolNative} ${formattedAmount}`,
-//     fullFormatAmount: new Intl.NumberFormat(
-//       `${language}-${currencyData.countryCode}`,
-//       options
-//     ).format(amount).replace(/^(\D+)/, "$1 ")
-
-//     // `${currencyData.symbolNative} ${amount}`,
-//   };
-// }
-
 export const graphOptions = {
   layout: {
     randomSeed: 2
@@ -1844,7 +1958,7 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
   props: TransitionProps & { children?: React.ReactElement<any, any> },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Grow ref={ref} {...props} />;
 });
 
 //  Don't use this for details screen as the model being passed is different
@@ -1908,20 +2022,15 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
       finalObject[d] = objectValues[d]['optionLabel'];
       finalObject[`${d}Id`] = objectValues[d]['optionValue'];
+    } else if (objectValues[d] && objectValues[d].hasOwnProperty('locationName')) {
+      finalObject[d] = objectValues[d];
     }
   });
-
-  if (data?.collaborator) {
-    finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
-  }
 
   if (data?.createdBy) {
     finalObject['createdBy'] = data.createdBy?.user?.concatedName;
     finalObject['createdByDate'] = data.createdBy?.date;
     finalObject['createdById'] = data.createdBy?.user?._id;
-    if (!finalObject['isAllowedToUpdate']) {
-      finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
-    }
   }
   if (data?.updatedBy) {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
@@ -2031,6 +2140,25 @@ export const ASSET_STATUS = {
   notApplied: 'N/A',
   scrapRequested: 'Scrap Requested'
 };
+
+//This is used to restrict status change
+export const SYSTEM_ASSET_STATUS = [
+  ASSET_STATUS.reserved,
+  ASSET_STATUS.readyToShip,
+  ASSET_STATUS.inTransit,
+  ASSET_STATUS.inUse,
+  ASSET_STATUS.standBy,
+  ASSET_STATUS.standByNotChargeable,
+  ASSET_STATUS.delivered,
+  ASSET_STATUS.customer,
+  ASSET_STATUS.supplier,
+  ASSET_STATUS.returned,
+  ASSET_STATUS.repair,
+  ASSET_STATUS.inRepair,
+  ASSET_STATUS.customerPossession,
+  ASSET_STATUS.scrapRequested,
+  ASSET_STATUS.onPO
+];
 
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',
@@ -2246,7 +2374,9 @@ export const ACTIVITY_RESOURCE = {
   marketSegment: 'marketSegment',
   budget: 'budget',
   irtTicket: 'irtTicket',
-  subcontractAssembly: 'subcontractAssembly'
+  subcontractAssembly: 'subcontractAssembly',
+  assemblyOrder: 'assemblyOrder',
+  managedPackages: 'managedPackages',
 };
 
 export const LOG_RESOURCE = {
@@ -2455,7 +2585,7 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
-    title: 'Work Order',
+    title: sidebarResource.workOrder,
     permission: 'workOrder',
     key: 'workOrder',
     type: 'dynamic'
@@ -2477,6 +2607,30 @@ export const REPORT_LIST = [
     permission: 'invoice',
     key: 'invoice',
     type: 'dynamic'
+  },
+  {
+    title: 'Invoice Details',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'invoiceDetails'
+  },
+  {
+    title: 'Invoice Backlog',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'invoiceBacklog'
+  },
+  {
+    title: 'Syteline Invoice Integration',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'sytelineInvoiceIntegration'
+  },
+  {
+    title: 'Revenue By Customer',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'revenueByCustomer'
   },
   {
     title: 'Lost Assets',
@@ -2567,29 +2721,19 @@ export const REPORT_LIST = [
     permission: 'iotChart',
     key: 'standardReport',
     type: 'dailyVolumeReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Daily Volume Revenue Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'dailyVolumeRevenueReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Day Wise Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'dayWiseVolumeReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Weekly/Monthly Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'historicalReport',
     defaultColumn: true,
-    notMultiSelectFields: ['frequency']
+    isExportPdf: true,
+    isSendMail: true
+  },
+  {
+    title: 'Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'volumeReport',
+    defaultColumn: true,
+    notMultiSelectFields: ['frequency'],
+    isExportPdf: true,
+    isSendMail: true
   },
   {
     title: 'Unit Downtime Report',
@@ -2598,12 +2742,27 @@ export const REPORT_LIST = [
     type: 'iotUnitDowntimeReport'
   },
   {
+    title: `Pad Job Volume Report`,
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'rentalVolumeReport',
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true
+  },
+  {
     title: 'IOT Data Points',
     permission: 'iotChart',
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true,
     notMultiSelectFields: ['asset', 'interval']
+  },
+  {
+    title: 'Sales Funnel Report',
+    permission: 'lead',
+    key: 'standardReport',
+    type: 'salesFunnel'
   }
 ];
 
@@ -2634,7 +2793,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
   { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
-  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' }
+  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
+  { title: sidebarResource.assemblyOrder, value: sidebarResource.assemblyOrder, key: 'assemblyOrder' }
 ];
 
 export const COLOUR_MASTER = {
@@ -2743,7 +2903,8 @@ export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
   repairOrder: 'Repair Order',
-  fieldJob: 'Field Job'
+  fieldJob: 'Field Job',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2868,7 +3029,8 @@ export const WORK_ORDER_STATUS = {
 
 export const WORK_ORDER_TYPE = {
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order'
+  productionOrder: 'Production Order',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const IRT_APPROVER_STATUS = {
@@ -2912,6 +3074,10 @@ export const MATERIAL_SUB_TYPE = {
   bom: 'bom'
 };
 
+export const OTHER_MATERIAL_TYPE = {
+  serialNumber: 'serialNumber'
+};
+
 export const FIELD_TICKET_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
@@ -2919,6 +3085,14 @@ export const FIELD_TICKET_STATUS = {
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed'
+};
+
+export const FIELD_TICKET_LOG_TYPE = {
+  invoiceCancelled: 'Invoice Cancelled',
+  invoiceCreated: 'Invoice Created',
+  readyToInvoice: 'Ready to Invoice',
+  reOpen: 'Re-Open',
+  inProgress: 'In-Progress',
 };
 
 export const SUBCONTRACT_ASSEMBLY_STATUS = {
@@ -2931,7 +3105,7 @@ export const WORK_FLOW_STATUS = {
   open: 'Open',
   inProgress: 'In-Progress',
   completed: 'Completed'
-}
+};
 
 export const INVOICE_STATUS = {
   new: 'New',
@@ -3497,3 +3671,161 @@ export function debounceCallBack<T extends (...args: any[]) => void>(func: T, ti
   return [debouncedFunc, teardown];
 }
 export type DebounceCallBack = ReturnType<typeof debounceCallBack>;
+
+export const MFA_METHOD = {
+  emailOtp: 'emailOtp',
+  totp: 'totp'
+};
+
+export const findSimilarRecords = (array, property) => {
+  const similarRecords: any = {};
+  array.forEach((item) => {
+    if (!similarRecords[item[property]]) {
+      similarRecords[item[property]] = [];
+    }
+    similarRecords[item[property]].push(item);
+  });
+  return Object.values(similarRecords).filter((group: any) => group.length > 1);
+};
+
+export function compareVersions(newVersion: number, oldVersion: number): 1 | -1 | 0 {
+  if (newVersion > oldVersion) {
+    return 1;
+  }
+  if (newVersion < oldVersion) {
+    return -1;
+  }
+  return 0;
+}
+
+export async function handleHardReload(url = window.location.href) {
+  await fetch(url, {
+    headers: {
+      Pragma: 'no-cache',
+      Expires: '-1',
+      'Cache-Control': 'no-cache'
+    }
+  });
+  if ('caches' in window) {
+    caches?.keys().then((names) => {
+      names.forEach((name) => {
+        caches.delete(name);
+      });
+    });
+  }
+  window.location.href = url;
+  // This is to ensure reload with url's having '#'
+  window.location.reload();
+}
+
+export const tabIndexValue = (resourceData, index) => {
+  if (resourceData && resourceData?.tabs?.length > 0) {
+    index = resourceData?.tabs?.length + index;
+  }
+  return index;
+};
+export const mapDarkTheme: GoogleMapProps['options']['styles'] = [
+  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#263c3f' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#6b9a76' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#38414e' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#212a37' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9ca5b3' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#746855' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#1f2835' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#f3d19c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#17263c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#515c6d' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#17263c' }]
+  }
+];
+
+export const mapLightTheme: GoogleMapProps['options']['styles'] = [
+  {
+    featureType: 'water',
+    stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+  },
+  { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+  {
+    featureType: 'road',
+    stylers: [{ saturation: -100 }, { lightness: 45 }]
+  },
+  {
+    featureType: 'road.highway',
+    stylers: [{ visibility: 'simplified' }]
+  }
+];
+
+export function getSubdomain(url = window.location.origin) {
+  const parsedUrl = new URL(url);
+  const hostname = parsedUrl.hostname;
+  const parts = hostname.split('.');
+
+  // Handle localhost with subdomains (e.g., http://developer.localhost)
+  if (hostname === 'localhost' || parts.includes('localhost')) {
+    if (parts.length > 1) {
+      return parts.slice(0, parts.indexOf('localhost')).join('.');
+    }
+    return null;
+  }
+
+  if (parts.length > 2) {
+    return parts.slice(0, -2).join('.');
+  }
+  return null;
+}

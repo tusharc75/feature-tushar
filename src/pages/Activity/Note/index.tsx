@@ -29,7 +29,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const Note = () => {
   const renderedFrom = camelCase(routes?.activityNote.title);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
     state: { user, permissions }
   }: any = useData();
@@ -137,7 +137,6 @@ const Note = () => {
     setColumns(column);
   };
 
-
   useEffect(() => {
     if (referenceType) {
       axiosInstance()
@@ -195,18 +194,24 @@ const Note = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    let apiUrl = `/note?relatedTo=${JSON.stringify(filter?.map((e) => { return { type: e?.type, referenceId: e?._id, access: true } }))}${queryString}`;
-    axiosInstance().get(apiUrl, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      let rows = data?.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject.canDelete = permissions?.note?.isDelete && finalObject?.createdById === user?.user?._id ? true : false
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    let apiUrl = `/note?relatedTo=${JSON.stringify(
+      filter?.map((e) => {
+        return { type: e?.type, referenceId: e?._id, access: true };
+      })
+    )}${queryString}`;
+    axiosInstance()
+      .get(apiUrl, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject.canDelete = permissions?.note?.isDelete && finalObject?.createdById === user?.user?._id ? true : false;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
@@ -382,6 +387,7 @@ const Note = () => {
             }
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           <CreateNote
             noteId={isNew ? null : noteData?.id}
@@ -405,7 +411,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}
@@ -430,7 +436,7 @@ const LeftSideContents = ({
       <Autocomplete
         options={resourceOptions || []}
         getOptionLabel={(option) => option.optionLabel || ''}
-        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+        className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
         value={resource}
         size="small"
         fullWidth
@@ -459,7 +465,7 @@ const LeftSideContents = ({
           disabled={loadingResources}
           options={resourceData || []}
           fullWidth
-          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+          className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
@@ -475,7 +481,7 @@ const LeftSideContents = ({
           renderInput={(params) => (
             <TextField
               fullWidth
-              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
               margin="none"
               size="small"
               {...params}

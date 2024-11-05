@@ -6,6 +6,7 @@ export type TChannel = {
   access: string;
   members: string[];
   createdBy: CreatedBy;
+  notifications?: number;
 };
 
 export type CreatedBy = {
@@ -47,7 +48,6 @@ export type Message = {
   user: MessageUser;
   replies: Message[];
   lastModified?: Date;
-  avatar?: string;
   attachments?: any[];
   reactions?: any[];
 };
@@ -55,4 +55,5 @@ export type Message = {
 export type MessageUser = {
   optionValue: string;
   optionLabel: string;
+  avatar: string;
 };

@@ -1,16 +1,16 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { Edit } from '@material-ui/icons';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
+import DeleteIcon from '@material-ui/icons/Delete';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -21,6 +21,9 @@ import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAss
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingSerialisedAsset, generateAddNewSerialisedAsset, generateEditSerialisedAsset } from '../walkmeSteps';
+
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,6 +36,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   const [columns, setColumns] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const {
     state: { user, permissions }
   }: any = useData();
@@ -46,7 +51,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [isRateRequired, setIsRateRequired] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -60,9 +65,25 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     fetchRecords();
   }, [columns]);
 
+  useEffect(() => {
+    let stepData = [
+      generateAddExistingSerialisedAsset(),
+      generateAddNewSerialisedAsset()
+    ];
+    if (dataRows?.length) {
+      if (permissions?.repairJob?.isUpdate) {
+        stepData.push(generateEditSerialisedAsset(false, 0));
+
+      }
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
+
+
   const fetchFields = async () => {
     setColumns(null);
-    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
+    fields = fields?.filter((f) => f?.isRead);
 
     const isPriceRequired = fields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
@@ -131,14 +152,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                   ) : (
                     <p className="text-truncate">{row.original.assetNumber}</p>
                   )}
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </>
               ) : (
                 <NoDataCell />
@@ -218,21 +239,24 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 onClick={() => {
                   setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
                 }}
+                id={`edit-button-${row.index || 0}`}
               >
-                <Edit />
+                <Edit color="primary" fontSize='small' />
               </IconButton>
             </HtmlTooltip>
           }
-          {row?.original?.status === ASSET_STATUS.reserved && (
-            <GridDeleteIcon
-              hasDeletePermission={permissions?.repairJob?.isUpdate}
-              ownerId={user?.user?._id}
-              userId={user?.user?._id}
-              onDelete={() => {
-                setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
-              }}
-              entity={sidebarResource.serializedAsset}
-            />
+          {row?.original?.status === ASSET_STATUS.reserved && allowedToEdit && permissions?.repairJob?.isUpdate && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
+                }}
+              >
+                <DeleteIcon color="error" fontSize='small' />
+              </IconButton>
+            </HtmlTooltip>
           )}
         </div>
       )
@@ -355,8 +379,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, repairJobData?.currency);
     handleSaveData(rows);
   };
 
@@ -367,6 +390,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           onClick={() => {
             setAddSerializedAssetDialog(true);
           }}
+          id={'add-existing-serialised-asset-menu-item'}
         >
           Add Existing {routes.serializedAsset.title}
         </MenuItem>
@@ -375,6 +399,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             onClick={() => {
               setAddNewSerializedAssetDialog(true);
             }}
+            id={'add-new-serialised-asset-menu-item'}
           >
             Add New {routes.serializedAsset.title}
           </MenuItem>

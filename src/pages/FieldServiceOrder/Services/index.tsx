@@ -39,7 +39,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -335,7 +335,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, serviceOrderData?.currency);
     handleSaveData(rows);
   };
 

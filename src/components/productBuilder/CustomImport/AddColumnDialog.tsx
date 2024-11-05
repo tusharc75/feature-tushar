@@ -77,11 +77,9 @@ export const AddColumnDialog = (props) => {
 
   function validate(values) {
     const errors = {};
-
     if (!values.sectionName) {
       errors['sectionName'] = 'Please select SectionName';
     }
-
     return errors;
   }
 

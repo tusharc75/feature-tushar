@@ -4,7 +4,7 @@ import { Cancel } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -23,12 +23,14 @@ import Receive from './Receive';
 import Reject from './Reject';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateReceiveProduct, generateRejectProduct } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
-  const { selectedRecords } = state;
+  const { selectedRecords, dataRows } = state;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -46,11 +48,35 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
 
   const [materialserializedAssets, setMaterialserializedAssets] = useState([]);
   const [materialSerialNumbers, setMaterialSerialNumbers] = useState([]);
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchColumns();
     fetchProduct();
   }, [purchaseOrderData]);
+
+  useEffect(() => {
+    if (dataRows?.length) {
+      let receiveIndex = dataRows.findIndex((e) => e.qty - (e?.actualReceived || 0) > 0);
+      let rejectIndex = dataRows.findIndex((e) => e.qty - (e?.rejectQuantity || 0) > 0);
+      let stepData = [];
+      if(receiveIndex > -1) {
+        stepData.push(generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, receiveIndex));
+      }
+      if(rejectIndex > -1) {
+        stepData.push(generateRejectProduct(user?.user?.brandPolicy?.storageLocation, rejectIndex));
+      }
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
+        isStepDataSet.current = true;
+        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation).steps;
+        walkmeInstance.instance.push(steps);
+        walkmeInstance.handleNext();
+      }
+      setWalkmeData(stepData);
+    }
+  }, [dataRows]);
 
   const fetchColumns = async () => {
     setColumns(null);
@@ -191,10 +217,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -285,38 +311,46 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           productCategory: item.productDetail?.productCategory,
           chartOfAccount: item.productDetail?.chartOfAccount
         };
-        const subRows = []
-        serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
-          subRows.push({
-            index: `${res.index}.${subRows?.length + 1}`,
-            _id: e?._id,
-            detail: e.assetNumber,
-            type: MATERIAL_TYPE.serializedAsset,
-            assetId: e?._id,
-            hideSelection: true
-          })
-        })
-        productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
-          subRows.push({
-            index: `${res.index}.${subRows?.length + 1}`,
-            _id: e?._id,
-            detail: e.serialNumber,
-            type: 'Serial Number',
-            assetId: e?._id,
-            hideSelection: true
-          })
-        })
+        const subRows = [];
+        serializedAsset
+          ?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)
+          ?.forEach((e) => {
+            subRows.push({
+              index: `${res.index}.${subRows?.length + 1}`,
+              _id: e?._id,
+              detail: e.assetNumber,
+              type: MATERIAL_TYPE.serializedAsset,
+              assetId: e?._id,
+              hideSelection: true
+            });
+          });
+        productSerialNumber
+          ?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)
+          ?.forEach((e) => {
+            subRows.push({
+              index: `${res.index}.${subRows?.length + 1}`,
+              _id: e?._id,
+              detail: e.serialNumber,
+              type: 'Serial Number',
+              assetId: e?._id,
+              hideSelection: true
+            });
+          });
         res.subRows = subRows;
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
         res['inventoryQty'] = item?.actualReceived
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
-        tempMaterialserializedAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
-          return { optionValue: e?._id, optionLabel: e?.detail }
-        });
-        tempMaterialSerialNumbers[res?._id] = res?.subRows?.filter((e) => e.type === 'Serial Number')?.map((e) => {
-          return { optionValue: e?._id, optionLabel: e?.detail };
-        });
+        tempMaterialserializedAssets[res?._id] = res?.subRows
+          ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
+        tempMaterialSerialNumbers[res?._id] = res?.subRows
+          ?.filter((e) => e.type === 'Serial Number')
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
         return res;
       });
 
@@ -351,6 +385,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       <>
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
           <Button
+            id={'receive-button'}
             variant={'contained'}
             color="primary"
             size="small"
@@ -366,6 +401,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
         )}
         {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
           <Button
+            id={'reject-button'}
             variant={'contained'}
             color="primary"
             size="small"
@@ -470,7 +506,8 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           )}
           purchaseOrderData={purchaseOrderData}
           materialserializedAssets={materialserializedAssets}
-          materialSerialNumbers={materialSerialNumbers} />
+          materialSerialNumbers={materialSerialNumbers}
+        />
       )}
       {rejectProductDialog && (
         <Reject

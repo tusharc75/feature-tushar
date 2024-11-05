@@ -23,10 +23,15 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { MenuItem } from '@material-ui/core';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateLoadingStepCreateLoadingTicket, generateLoadingStepReceive } from 'src/pages/TransferInventory/walkmeSteps';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen, fetchTransferInventoryData }) => {
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const {
@@ -58,7 +63,25 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
   }, []);
 
   const fetchFields = async () => {
-    const column = [];
+    const column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        minWidth: 100,
+        width: 100,
+        disabled: true,
+        Cell: ({ row }) => (
+          <div className="d-flex align-items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+            {row?.original?.loadingTicketId && (
+              <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                <LocalShippingIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            )}
+          </div>
+        )
+      }
+    ];
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -148,6 +171,23 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     setColumns([...column, ...extracolumns]);
   };
 
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (rows.length === 0) {
+      setWalkmeData([]);
+      return;
+    }
+    for (let i = 0; i < rows.length; i++) {
+      if (interPlantTransfer) return;
+      if (rows.length > 0 && !rows[i]?.loadingTicketId) {
+        setWalkmeData([generateLoadingStepCreateLoadingTicket(i)]);
+      } else if (rows[i]?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) {
+        setWalkmeData([generateLoadingStepReceive(i)]);
+      } else {
+        setWalkmeData([]);
+      }
+    }
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
@@ -179,8 +219,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
         rows.push(obj);
       });
 
-      products?.forEach((product) => {
+      products?.forEach((product, i) => {
         let obj = { ...product };
+        obj['index'] = i + 1;
         obj['productId'] = product?.product;
         obj['_id'] = product.product;
         obj['productName'] = product?.productDetail?.productName;
@@ -209,7 +250,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           }
         });
       });
-
+      handleAddWalkmeData(rows);
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       dispatch({ type: 'loading', loading: false });
     } catch (err) {
@@ -228,8 +269,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     data['pickupFromAddress'] = transferInventoryData?.transferFromPlant.address;
 
     data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-    data['deliveryTo'] = transferInventoryData?.transfertoPlant.optionValue;
-    data['deliveryToAddress'] = transferInventoryData?.transfertoPlant.address;
+    data['deliveryTo'] = transferInventoryData?.transfertoPlant?.optionValue;
+    data['deliveryToAddress'] = transferInventoryData?.transfertoPlant?.address;
 
     data['startDate'] = transferInventoryData?.estimateStartDate;
     data['endDate'] = transferInventoryData?.estimateStartDate;
@@ -274,7 +315,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
         });
         setShowConfirmInterPlantTransfer(false);
         setLoadingInterPlantTransfer(false);
-        fetchTransferInventoryData()
+        fetchTransferInventoryData();
       })
       .catch((error) => {
         setLoadingInterPlantTransfer(false);
@@ -284,11 +325,17 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
   const handelCancelDeliveredTicket = () => {
     setOkBtnLoading(true);
-    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    const loadingTicketId = uniq(
+      map(
+        selectedRecords?.filter((e) => e?.loadingTicketId),
+        'loadingTicketId'
+      )
+    );
     if (loadingTicketId.length) {
       let data = {};
       data['_ids'] = loadingTicketId;
-      axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
           setShowConformationCancleTicket(false);
@@ -298,7 +345,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
             message: `Cancelled Successfully`
           });
           fetchData();
-          fetchTransferInventoryData()
+          fetchTransferInventoryData();
         })
         .catch((error) => {
           setOkBtnLoading(false);
@@ -317,6 +364,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
               onClick={() => {
                 setShowConfirmInterPlantTransfer(true);
               }}
+              id="receive-interplant-menu-item"
             >
               {`Receive`}
             </MenuItem>
@@ -329,6 +377,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                 onClick={() => {
                   handleLoadingTicketDialog();
                 }}
+                id="create-loading-ticket-menu-item"
               >
                 {`Create Loading Ticket`}
               </MenuItem>
@@ -343,6 +392,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                     selectedRecords.length === 0 ||
                     selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
                   }
+                  id="receive-menu-item"
                 >
                   {`Receive`}
                 </MenuItem>
@@ -352,10 +402,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length &&
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
                       ? false
                       : true
                   }
+                  id="cancel-delivered-loading-ticket-menu-item"
                 >
                   Cancel Delivered Loading Ticket(s)
                 </MenuItem>
@@ -410,16 +461,20 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           assets={selectedRecords?.filter((e) => e.type === 'Asset')}
-          products={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => {
-            return {
-              ...e,
-              productSerialNumbers: e?.serialNumber?.map((e) => { return { serialNumber: e._id } })
-            }
-          })}
+          products={selectedRecords
+            ?.filter((e) => e.type === 'Product')
+            ?.map((e) => {
+              return {
+                ...e,
+                productSerialNumbers: e?.serialNumber?.map((e) => {
+                  return { serialNumber: e._id };
+                })
+              };
+            })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchData();
-            fetchTransferInventoryData()
+            fetchTransferInventoryData();
           }}
         />
       )}
@@ -431,7 +486,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           handleSucess={() => {
             setShowConfirmBoxReceive(false);
             fetchData();
-            fetchTransferInventoryData()
+            fetchTransferInventoryData();
           }}
           selectedRecords={selectedRecords}
           transferInventoryData={transferInventoryData}

@@ -25,13 +25,13 @@ import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/const
 import { FiExternalLink } from 'react-icons/fi';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
-  const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
+  const renderedFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
   const [condition, setCondition] = useState(null);
@@ -66,6 +66,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 : element.materialType === MATERIAL_TYPE.package
                   ? element.packageDetail?.packageName
                   : element.competencyDetail.competencyName
+          }`;
+          element.description = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productDescription
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceDescription
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageDescription
+                  : ''
           }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
@@ -215,6 +224,12 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       Header: 'Type',
       disabled: true,
       Cell: ({ row }) => (row?.original?.materialType ? <h5 className="text-truncate">{row?.original?.materialType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'description',
+      Header: 'Description',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
     },
     {
       accessor: 'conditionType',
@@ -497,7 +512,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={renderFrom}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchCondition}
           />
         ) : (

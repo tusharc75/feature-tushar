@@ -30,7 +30,9 @@ import {
   INVENTORY_OWNER_TYPE,
   repairJob,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  SYSTEM_ASSET_STATUS,
+  tabIndexValue
 } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import Alarms from '../IotChart/Alarms';
@@ -45,6 +47,9 @@ import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
+import VolumeData from 'src/pages/IotChart/VolumeData';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import WarningIcon from '@material-ui/icons/Warning';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -55,7 +60,6 @@ const SerializedAssetDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
 
@@ -63,7 +67,7 @@ const SerializedAssetDetailsPage = () => {
   const [fields, setFields] = useState([]);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null, updateStatus: null });
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [manualStatus, setManualStatus] = useState([]);
@@ -83,6 +87,7 @@ const SerializedAssetDetailsPage = () => {
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
+  const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -151,19 +156,11 @@ const SerializedAssetDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
-      setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([
-          routes.serializedAsset,
-          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-        ]);
+        setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''}` }]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
-        setCustomizedRoutes([
-          routes.iotChart,
-          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-        ]);
+        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }])
       }
-
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
       }
@@ -189,6 +186,7 @@ const SerializedAssetDetailsPage = () => {
         });
       }
       setLoading(false);
+      setRefreshAssetHistory(!refreshAssetHistory)
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -233,7 +231,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleOpenUpdateDialog = () => {
-    setOpenUpdateDialog(true);
+    setOpenUpdateDialog({ open: true, assetLogFields: null, updateStatus: null });
   };
 
   const handleDelete = () => {
@@ -267,13 +265,13 @@ const SerializedAssetDetailsPage = () => {
       o.optionValue === ASSET_STATUS.lost
     ) {
       if (statusPolicy) {
-        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy })
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
       } else {
         setShowReasonDialog(true);
       }
     } else {
       if (statusPolicy) {
-        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy })
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
       } else {
         handleStatusUpdate({ status: o.optionValue });
       }
@@ -334,41 +332,48 @@ const SerializedAssetDetailsPage = () => {
         if (!Object.values(ASSET_STATUS).includes(o.optionLabel)) {
           otherStatus.push(o.optionLabel);
         }
-      })
-
-      const systemStatus = [ASSET_STATUS.reserved, ASSET_STATUS.readyToShip, ASSET_STATUS.inTransit, ASSET_STATUS.inUse
-        , ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered, ASSET_STATUS.customer, ASSET_STATUS.supplier
-        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession, ASSET_STATUS.scrapRequested
-      ]
+      });
 
       let tempStatus = [];
-      if ([ASSET_STATUS.inTransit, ASSET_STATUS.delivered,
-      ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.scrapRequested]?.includes(assetDetails.status)) {
+      if (SYSTEM_ASSET_STATUS?.includes(assetDetails.status)) {
         tempStatus = [];
       }
-      else if (systemStatus?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      }
       else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview,
-        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
-      }
-      else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
+        tempStatus = [
+          ASSET_STATUS.new,
+          ASSET_STATUS.available,
+          ASSET_STATUS.underReview,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.lost,
+          ASSET_STATUS.needRepair,
+          ASSET_STATUS.needRecert,
+          ...otherStatus
+        ];
+      } else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
         tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
-      }
-      else if (assetDetails.status === ASSET_STATUS.scrap) {
+      } else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
         if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
           tempStatus.push(ASSET_STATUS.available);
         }
-      }
-      else if (otherStatus?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.underReview,
-        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
+      } else if (otherStatus?.includes(assetDetails.status)) {
+        tempStatus = [
+          ASSET_STATUS.available,
+          ASSET_STATUS.underReview,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.lost,
+          ASSET_STATUS.needRepair,
+          ASSET_STATUS.needRecert,
+          ...otherStatus
+        ];
       }
       setManualStatus(tempStatus);
     }
   }, [assetDetails, statusOptions]);
+
+  const openDataChange = () => {
+    return [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLogFields?.length;
+  }
 
   return (
     <Box className="main-container-v1">
@@ -419,6 +424,19 @@ const SerializedAssetDetailsPage = () => {
                           {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
+                    {openDataChange() && !resourceData?.policy?.dataChangeStatus ? (
+                      <HtmlTooltip title={'If you update data from this button it will add log in history'}>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          color="default"
+                          className="btn-outline-v1"
+                          size="small"
+                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })}
+                        >
+                          {'Edit Data'}
+                        </Button>
+                      </HtmlTooltip>
+                    ) : null}
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
@@ -475,7 +493,12 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              handleStatusChange(o);
+                              const { policy } = resourceData;
+                              if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o })
+                              } else {
+                                handleStatusChange(o);
+                              }
                             }}
                             value={o}
                           >
@@ -507,13 +530,22 @@ const SerializedAssetDetailsPage = () => {
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={1}>Current</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={2}>Performance Analysis</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={3}>Alarms</CustomTab>}
-          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Status</CustomTab>}
-          {resourceData && resourceData?.steps?.length && <CustomTab value={5}>Associations</CustomTab>}
-          <CustomTab value={6}>History</CustomTab>
-          {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={7}>Certification History</CustomTab>}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={8}>Depreciation History</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Volume Data</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={5}>Status</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+          <CustomTab value={tabIndexValue(resourceData, 6)}>History</CustomTab>
+          {user?.user?.brandPolicy?.serializedAssetCertification && (
+            <CustomTab value={tabIndexValue(resourceData, 7)}>Certification History</CustomTab>
+          )}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 8)}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
+          {assetDetails?.currentLocationNotMatchWithGps &&
+            <Box className='flex items-center'>
+              <WarningIcon className='mr-3' fontSize="small" color="error" />
+              <h4>Asset location needs to be update in Equipt</h4>
+            </Box>
+          }
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
@@ -544,29 +576,45 @@ const SerializedAssetDetailsPage = () => {
           <Alarms deviceTemplate={deviceTemplate} assetId={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <Status assetId={id} dataPoints={dataPoints} />
+          <VolumeData assetId={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
-          <Step
+          <Status assetId={id} dataPoints={dataPoints} />
+        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 6}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.serializedAsset}
+                  data={assetDetails}
+                  allowedToEdit={permissions?.serializedAsset?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 6)}>
+          <AssetHistory
+            id={id}
+            refresh={refreshAssetHistory}
             resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.serializedAsset}
-            data={assetDetails}
-            allowedToEdit={permissions?.serializedAsset?.isUpdate}
+            fields={fields}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={6}>
-          <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
-        </TabPanel>
-        <TabPanel value={tabValue} index={7}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
             supplierAccount={null}
             assetDetails={assetDetails}
+            fetchAssetData={fetchData}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={8}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 8)}>
           <DepreciationHistory id={id} />
         </TabPanel>
       </Box>
@@ -592,15 +640,21 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-      {openUpdateDialog && (
+      {openUpdateDialog.open && (
         <ManageSerializedAsset
           isClone={false}
           productInventoryId={id}
-          onClose={() => setOpenUpdateDialog(false)}
+          onClose={() => {
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
+          }}
           onSuccess={() => {
-            setOpenUpdateDialog(false);
+            if (openUpdateDialog.updateStatus) {
+              handleStatusChange(openUpdateDialog.updateStatus)
+            }
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
             fetchData();
           }}
+          assetLogFields={openUpdateDialog.assetLogFields}
         />
       )}
       {showReasonDialog && (
@@ -633,7 +687,7 @@ const SerializedAssetDetailsPage = () => {
           onClose={() => setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null })}
           onSuccess={(values) => {
             handleStatusUpdate({ status: status, assetData: values });
-            setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null })
+            setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null });
           }}
         />
       )}

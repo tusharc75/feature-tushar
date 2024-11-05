@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, Fragment } from 'react';
+import { useContext, useState, useEffect, Fragment,useRef } from 'react';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -16,6 +16,7 @@ import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, selectedRecords, showSaveAndNext, isBulkedit, data }) {
 
@@ -25,6 +26,17 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const toastConfig = useContext(CustomToastContext);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   useEffect(() => {
     if (isBulkedit) {
@@ -241,6 +253,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                       setSaveAndNext(false);
                       submitForm();
                     }}
+                    id={"dialog-save-button"}
                   >
                     Save
                   </CustomButton>

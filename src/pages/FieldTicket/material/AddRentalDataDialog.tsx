@@ -3,7 +3,7 @@ import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -15,19 +15,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FiExternalLink } from 'react-icons/fi';
 
-const AddRentalDataDialog = ({
-  onSuccess,
-  onClose,
-  rentalId,
-  type,
-  isSubmitting = false,
-  currency,
-  ids = [],
-}) => {
-
+const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting = false, currency, ids = [] }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Rental_Material`;
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { search, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -52,7 +43,11 @@ const AddRentalDataDialog = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }),
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.map((e) => {
+        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+      }),
       null,
       false,
       currency
@@ -83,8 +78,7 @@ const AddRentalDataDialog = ({
               onClick={() => {
                 if (row.original['type'] === MATERIAL_TYPE.product) {
                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                }
-                else if (row.original['type'] === MATERIAL_TYPE.serializedAsset) {
+                } else if (row.original['type'] === MATERIAL_TYPE.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                 } else if (row.original['type'] === MATERIAL_TYPE.package) {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -114,15 +108,23 @@ const AddRentalDataDialog = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
-            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
-              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry
+                ? _subRow?.detail || ''
                 : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
-            : _subRow.description || '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.description || '';
       _subRow.qtyDisplay = _subRow.qty * parent.qtyDisplay;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.hideSelection = true;
@@ -138,8 +140,14 @@ const AddRentalDataDialog = ({
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
     data = response?.data?.data;
     if (type === MATERIAL_TYPE.product) {
-      rows = data?.material?.filter((e) => e?.status && e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved &&
-        e.type === MATERIAL_TYPE.product && !e?.productDetail?.serializedProduct && !ids?.some((ele) => ele === e.materialId));
+      rows = data?.material?.filter(
+        (e) =>
+          e?.status &&
+          e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved &&
+          e.type === MATERIAL_TYPE.product &&
+          !e?.productDetail?.serializedProduct &&
+          !ids?.some((ele) => ele === e.materialId)
+      );
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.type = MATERIAL_TYPE.product;
@@ -149,10 +157,12 @@ const AddRentalDataDialog = ({
       });
     } else if (type === MATERIAL_TYPE.serializedAsset) {
       let inventoryData = data?.inventory || [];
-      inventoryData = inventoryData?.filter((e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id))
+      inventoryData = inventoryData?.filter(
+        (e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id)
+      );
       inventoryData.forEach((parent, i) => {
         const product = data?.material?.find((e) => e._id === parent._id);
-        const obj: any = { ...product }
+        const obj: any = { ...product };
         const calValues = autoCalculateSpecificFields({ qty: 1 }, obj, allFields);
         Object.assign(obj, calValues);
         obj.index = i + 1;
@@ -189,14 +199,19 @@ const AddRentalDataDialog = ({
       fullWidth
       maxWidth="md"
       fullScreen={true}
+      TransitionComponent={CustomDialogTransition}
       open={true}
       onClose={onClose}
-      aria-labelledby="assign-roles-dialog">
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
-        title={type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental Packages` : `Add Rental Assets`}
+        title={
+          type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental Packages` : `Add Rental Assets`
+        }
         showManimizeMaximize={false}
         showRequiredLabel={false}
-        onClose={onClose} />
+        onClose={onClose}
+      />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
