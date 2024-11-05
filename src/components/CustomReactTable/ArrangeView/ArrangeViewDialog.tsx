@@ -341,7 +341,6 @@ const ArrangeViewDialog = ({
                 <div className="p-3 px-[20px] [border-bottom:1px_solid_var(--common-border-color)]">
                   <div className="flex items-center justify-between gap-2">
                     <SearchBox onChange={handeSearch} value={serchedValue} />
-                    {/* <SearchBox className="max-w-[350px] flex-grow" value={serchedValue} onChange={handeSearch} type="search" variant="outlined" /> */}
                     <span className="mr-[12px] flex-shrink-0">
                       <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
                     </span>
