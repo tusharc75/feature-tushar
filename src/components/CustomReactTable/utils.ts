@@ -60,7 +60,7 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
     }
   };
 
-  if (columnDef.sticky) {
+  if (['left', 'right'].includes(columnDef.sticky)) {
     const offset = addSizes(index);
     obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
   }
