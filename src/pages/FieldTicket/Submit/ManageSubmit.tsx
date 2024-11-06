@@ -86,6 +86,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         await insertUpdate(objectStore.fieldTicket, fieldTicketData?._id, { ...fieldTicket, status: FIELD_TICKET_STATUS.readyToInvoice });
       }
       const data: any = restoreObjKeysWithValues(values, initialData.fields);
+      data._id = new Date().getTime().toString();
       data.type = FIELD_TICKET_LOG_TYPE.readyToInvoice;
       data.fieldTicketId = fieldTicketData?._id;
       data.user = {
@@ -93,12 +94,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         optionValue: user._id
       };
       data.date = new Date();
-      const fieldTicketLogs = await findOne(objectStore.resourceData, 'fieldTicketLogs');
-      if (fieldTicketLogs?.length) {
-        await insertUpdate(objectStore.resourceData, 'fieldTicketLogs', [data, ...fieldTicketLogs]);
-      } else {
-        await insertUpdate(objectStore.resourceData, 'fieldTicketLogs', [data]);
-      }
+      await insertUpdate(objectStore.fieldTicketLogs, data._id, data);
       onSuccess();
     } else {
       await axiosInstance()

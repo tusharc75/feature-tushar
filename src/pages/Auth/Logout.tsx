@@ -4,6 +4,7 @@ import { SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { deleteDatabase } from 'src/constants/indexdbhelper';
 
 const Logout = () => {
   const history = useHistory();
@@ -12,6 +13,7 @@ const Logout = () => {
 
   useEffect(() => {
     const logoutUser = async () => {
+      deleteDatabase();
       await axiosInstance()
         .get('/user/logout')
         .then(() => {

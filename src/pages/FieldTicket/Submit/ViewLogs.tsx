@@ -15,7 +15,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findOne, objectStore } from 'src/constants/indexdbhelper';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
@@ -132,8 +132,8 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
     dispatch({ type: 'loading', loading: true });
     let rows = [];
     if (isOffline) {
-      rows = await findOne(objectStore.resourceData, 'fieldTicketLogs');
-      rows = rows?.filter((d) => d?.fieldTicketId === fieldTicketData?._id);
+      rows = await findAll(objectStore.fieldTicketLogs);
+      rows = rows?.filter((d) => d?.fieldTicketId === fieldTicketData?._id) ?.sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
     } else {
       const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
       rows = data?.data;

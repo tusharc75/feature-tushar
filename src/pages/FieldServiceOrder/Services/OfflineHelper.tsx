@@ -27,9 +27,9 @@ export const fieldServiceOrderAddOffline = async (ids) => {
             asyncForEach(data?.data?.fieldTicketCost, async (element) => {
                 insertUpdate(objectStore.fieldTicketMaterial, element._id, { ...element, type: MATERIAL_TYPE.manualEntry });
             })
-            insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
-            insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
-            insertUpdate(objectStore.resourceData, 'fieldTicketLogs', data?.data?.fieldTicketLogs);
+            asyncForEach(data?.data?.fieldTicketLogs, async (element) => {
+                insertUpdate(objectStore.fieldTicketLogs, element._id, element);
+            })
         });
         axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.fieldTicket, data);
@@ -63,9 +63,11 @@ export const fieldServiceOrderClearOffline = async (ids: any[] = []) => {
         clearAll(objectStore.fieldServiceOrder);
         clearAll(objectStore.fieldTicket);
         clearAll(objectStore.fieldTicketMaterial);
+        clearAll(objectStore.fieldTicketLogs);
     } else {
         const fieldTicketIdsToDelete = [];
         const fieldTicketMaterialIdsToDelete = [];
+        const fieldTicketLogsIdsToDelete = [];
         for (const id of ids) {
             const fieldServiceOrder = await findOne(objectStore.fieldServiceOrder, id);
             fieldServiceOrder?.fieldTickets?.forEach((fieldTicket: any) => {
@@ -75,9 +77,16 @@ export const fieldServiceOrderClearOffline = async (ids: any[] = []) => {
                 })
             })
         }
+        const fieldTicketLogs = await findAll(objectStore.fieldTicketLogs);
+        fieldTicketLogs?.forEach(e => {
+            if (fieldTicketIdsToDelete?.includes(e?.fieldTicketId)) {
+                fieldTicketLogsIdsToDelete.push(e?._id)
+            }
+        }) 
         deleteMany(objectStore.fieldServiceOrder, ids);
         deleteMany(objectStore.fieldTicket, fieldTicketIdsToDelete);
         deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterialIdsToDelete);
+        deleteMany(objectStore.fieldTicketLogs, fieldTicketLogsIdsToDelete);
     }
 }
 
