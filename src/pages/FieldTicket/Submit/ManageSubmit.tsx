@@ -14,7 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { useData } from 'src/StateProvider/Provider';
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
@@ -47,7 +47,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
         logData = data?.data;
       } else {
-        const data = await findOne(objectStore.resourceData, 'fieldTicketLogs');
+        const data = await findAll(objectStore.fieldTicketLogs);
         logData = data?.filter((d) => d?.fieldTicketId === fieldTicketData?._id);
       }
       for (const d of logData) {
