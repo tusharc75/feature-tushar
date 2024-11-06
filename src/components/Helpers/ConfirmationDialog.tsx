@@ -1,16 +1,13 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import { CircularProgress, Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import { CircularProgress, IconButton } from '@material-ui/core';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import { Typography } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import { makeStyles } from '@material-ui/core/styles';
+import React from 'react';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -8,6 +8,7 @@ import useCollapse from './useCollapse';
 import useDndSensors from './useDndSensors';
 import { useScrollController } from './useScrollController';
 import useFavorites from 'src/hooks/useFavourites';
+import useVoiceRecognition from './useVoiceRecognition';
 
 export {
   useClickdOutside,
@@ -19,5 +20,6 @@ export {
   useCollapse,
   useDndSensors,
   useScrollController,
-  useFavorites
+  useFavorites,
+  useVoiceRecognition
 };

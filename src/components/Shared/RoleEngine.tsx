@@ -82,7 +82,7 @@ const RoleEngine = ({
   // const [deepSearch, setDeepSearch] = useState(false);
   const [tableSearchFilterState, setTableSearchFilterState] = useState<TableSearchFilterState>({
     search: '',
-    sort: ''
+    sort: 'asc'
   });
 
   useEffect(() => {
@@ -97,8 +97,8 @@ const RoleEngine = ({
         };
         tableData.push(tableRow);
       }
-      setFilteredAndSortedData(tableData);
       setTableData(tableData);
+      handleSearchFilter(tableSearchFilterState);
     };
     generateTableData();
   }, [field, resource]);
