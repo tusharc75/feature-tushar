@@ -48,7 +48,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         logData = data?.data;
       } else {
         const data = await findAll(objectStore.fieldTicketLogs);
-        logData = data?.filter((d) => d?.fieldTicketId === fieldTicketData?._id);
+        logData = data?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
       }
       for (const d of logData) {
         if (d?.type === FIELD_TICKET_LOG_TYPE.readyToInvoice) {
