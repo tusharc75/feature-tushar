@@ -39,7 +39,7 @@ const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessage
         value={message}
         disabled={disabled}
         onChange={(e) => setMessage(e.target.value)}
-        className="w-full resize-none rounded-sm border-0 px-2 py-3 outline-none "
+        className="w-full resize-none rounded-sm border-0 bg-transparent px-2 py-3 outline-none dark:text-[white]"
         placeholder="Write a message..."
         autoCapitalize="off"
         autoComplete="off"
