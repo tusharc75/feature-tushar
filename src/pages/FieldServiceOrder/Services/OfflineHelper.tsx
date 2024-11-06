@@ -1,9 +1,19 @@
-import { objectStore, insertUpdate, clearAll, findOne, deleteMany } from '../../../constants/indexdbhelper';
+import { objectStore, insertUpdate, clearAll, findOne, deleteMany, findAll } from '../../../constants/indexdbhelper';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldServiceOrder, sidebarResource } from '../../../constants/helpers';
 
 export const fieldServiceOrderAddOffline = async (ids) => {
     try {
+        if (ids.length === 0) {
+            const fieldServiceOrder = await findAll(objectStore.fieldServiceOrder);
+            fieldServiceOrder?.forEach(e => {
+                ids.push(e?._id)
+            })
+            clearAll(objectStore.fieldServiceOrder);
+            clearAll(objectStore.fieldTicket);
+            clearAll(objectStore.fieldTicketMaterial);
+            clearAll(objectStore.resourceData);
+        }
         axiosInstance().post(`${fieldServiceOrder.api}/get-all-offline-data`, { ids: ids }).then(({ data }) => {
             asyncForEach(data?.data?.fieldServiceOrder, async (element) => {
                 insertUpdate(objectStore.fieldServiceOrder, element._id, element);
@@ -19,6 +29,7 @@ export const fieldServiceOrderAddOffline = async (ids) => {
             })
             insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
             insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
+            insertUpdate(objectStore.resourceData, 'fieldTicketLogs', data?.data?.fieldTicketLogs);
         });
         axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.fieldTicket, data);

@@ -6,6 +6,7 @@ import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOffli
 import { sortBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
+import { fieldServiceOrderAddOffline } from 'src/pages/FieldServiceOrder/Services/OfflineHelper';
 
 export const CustomOfflineContext = createContext(null);
 
@@ -110,7 +111,8 @@ export const CustomOfflineProvider = ({ children }) => {
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
           });
-          await rentalJobOfflineUpdate([]);
+          fieldServiceOrderAddOffline([]);
+          rentalJobOfflineUpdate([]);
           setIsSynch(false);
         } else {
           setIsSynch(false);
