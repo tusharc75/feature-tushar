@@ -94,7 +94,7 @@ export const CustomOfflineProvider = ({ children }) => {
             if (d?.type === 'fieldTicketMaterial') {
               if (d?.data?.length) {
                 await axiosInstance()
-                  .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
+                  .post(`${routes?.fieldTicket?.path}/${d.data[0]?.fieldTicketId}/material-offline-data-sync`, d.data)
                   .then(({ data: { data } }) => {
                     let ids = d?.data?.map((e) => e?._id);
                     deleteMany(objectStore.fieldTicketMaterial, ids);

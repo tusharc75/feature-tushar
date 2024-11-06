@@ -31,6 +31,8 @@ export const fieldServiceOrderAddOffline = async (ids) => {
             asyncForEach(data?.data?.fieldTicketLogs, async (element) => {
                 insertUpdate(objectStore.fieldTicketLogs, element._id, element);
             })
+            insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
+            insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
         });
         axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.fieldTicket, data);
