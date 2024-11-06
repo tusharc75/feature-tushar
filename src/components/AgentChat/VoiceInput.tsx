@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, IconButton } from '@material-ui/core';
 import { Mic } from '@material-ui/icons';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useVoiceRecognition } from 'src/hooks';
 
 type VoiceInputProps = {
@@ -10,7 +10,8 @@ type VoiceInputProps = {
 
 let timeout: NodeJS.Timeout;
 const VoiceInput = ({ setMessage }: VoiceInputProps) => {
-  const { browserSupportsSpeechRecognition, listening, resetTranscript, startListening, stopListening, transcript } = useVoiceRecognition();
+  const { browserSupportsSpeechRecognition, listening, resetTranscript, startListening, stopListening, transcript, voiceIntensity } =
+    useVoiceRecognition();
   const [open, setOpen] = useState(false);
 
   const openDialog = () => {
@@ -58,8 +59,16 @@ const VoiceInput = ({ setMessage }: VoiceInputProps) => {
         <DialogContent style={{ padding: 30, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div className="flex items-center justify-center gap-5">
             <p className="max-w-[min(100%,400px)] text-[20px] font-medium text-gray-500">{transcript ? transcript : 'Listening...'}</p>
-            <div className="mb-5 flex h-[70px] w-[70px] items-center justify-center rounded-full shadow-md md:h-[100px] md:w-[100px]">
-              <Mic className="text-[50px] text-red-500 md:!text-[60px]" />
+            <div className="relative isolate mb-5 flex h-[70px] w-[70px] md:h-[100px] md:w-[100px]">
+              <div
+                className={cn(
+                  'absolute inset-0 m-auto h-[calc(100%-3px)] w-[calc(100%-3px)] rounded-full bg-blue-500/30 transition-transform duration-300'
+                )}
+                style={{ transform: `scale(${voiceIntensity + 100}%)` }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-[var(--dark-secondary,white)] shadow-md">
+                <Mic className="text-[50px] text-red-500 md:!text-[60px]" />
+              </div>
             </div>
           </div>
         </DialogContent>

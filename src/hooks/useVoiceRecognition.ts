@@ -11,6 +11,7 @@ const useVoiceRecognition = (props?: UserVoiceRecognitionProps) => {
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [listening, setListening] = useState(false);
+  const [voiceIntensity, setVoiceIntensity] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const browserSupportsSpeechRecognition = 'webkitSpeechRecognition' in window;
@@ -31,6 +32,12 @@ const useVoiceRecognition = (props?: UserVoiceRecognitionProps) => {
       if (type === 'continuous' && recognitionRef.current) {
         recognitionRef.current.start();
       }
+    };
+    recognition.onaudiostart = () => {
+      setVoiceIntensity(80); // Simulate voice intensity when audio starts
+    };
+    recognition.onaudioend = () => {
+      setVoiceIntensity(0); // Reset voice intensity when audio ends
     };
     recognition.onresult = (event) => {
       let finalTranscript = '';
@@ -81,6 +88,7 @@ const useVoiceRecognition = (props?: UserVoiceRecognitionProps) => {
   return {
     transcript: transcript + interimTranscript,
     listening,
+    voiceIntensity,
     startListening,
     stopListening,
     resetTranscript,
