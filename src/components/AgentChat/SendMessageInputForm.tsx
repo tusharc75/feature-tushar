@@ -45,6 +45,7 @@ const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessage
         autoComplete="off"
         aria-autocomplete="both"
         spellCheck="false"
+        data-gramm="false"
         autoCorrect="off"
         onKeyDown={handleKeyDown}
         maxLength={4000}
