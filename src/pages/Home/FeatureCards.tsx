@@ -20,11 +20,7 @@ const FeatureCard = () => {
   const aiPermission = permissions?.equiptAi;
 
   if (!aiPermission?.isRead) return null;
-  return (
-    <div className="gap mb-4 grid grid-cols-1 gap-4">
-      {aiPermission?.isRead && <SingleCard {...equiptAiData} />}
-    </div>
-  );
+  return <div className="gap mb-4 grid grid-cols-1 gap-4">{aiPermission?.isRead && <SingleCard {...equiptAiData} />}</div>;
 };
 
 type SingleCardProps = {
