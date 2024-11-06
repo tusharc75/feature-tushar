@@ -77,6 +77,9 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
             for (const [key, values] of Object.entries(referenceData)) {
               if (fieldsDataForCreate?.find((e) => e.fieldName === key)) {
                 if (key === 'wellName' && isArray(values)) {
+                  if (values?.length === 1) {
+                    createValues[key] = values[0];
+                  }
                 }
                 else {
                   createValues[key] = values;
