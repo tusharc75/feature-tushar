@@ -13,6 +13,7 @@ export const fieldServiceOrderAddOffline = async (ids) => {
             clearAll(objectStore.fieldTicket);
             clearAll(objectStore.fieldTicketMaterial);
             clearAll(objectStore.resourceData);
+            clearAll(objectStore.fieldTicketLogs);
         }
         axiosInstance().post(`${fieldServiceOrder.api}/get-all-offline-data`, { ids: ids }).then(({ data }) => {
             asyncForEach(data?.data?.fieldServiceOrder, async (element) => {
