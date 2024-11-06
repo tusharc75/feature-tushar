@@ -78,7 +78,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
       <div
         className={cn(
           'absolute bottom-[calc(100%+10px)] right-0 z-10 flex w-[min(var(--chatbox-width),calc(100vw-24px))] max-w-[min(var(--chatbox-width),calc(100vw-24px))] items-end justify-end gap-2',
-          fullScreen ? '[--chat-container-h:calc(100vh-113px)] [--chatbox-width:100vw]' : '[--chat-container-h:500px] [--chatbox-width:500px]'
+          fullScreen ? '[--chat-container-h:100vh] [--chatbox-width:100vw]' : '[--chat-container-h:600px] [--chatbox-width:500px]'
         )}
       >
         <HtmlTooltip title={'New Chat'}>
@@ -92,7 +92,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
 
         <div
           className={cn(
-            'flex-grow rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)] ',
+            'flex h-[var(--chat-container-h)] max-h-[var(--chat-container-h)] flex-grow flex-col rounded-md bg-[var(--dark-secondary,white)] shadow-md [border:1px_solid_var(--common-border-color)] ',
             fullScreen && 'fixed inset-0 '
           )}
         >
@@ -107,10 +107,7 @@ const Chatbox = ({ isChatboxOpen, setIsChatboxOpen }: ChatboxProps) => {
               </IconButton>
             </div>
           </div>
-          <div
-            ref={scrollContainer}
-            className={cn('body h-[var(--chat-container-h)] max-h-[var(--chat-container-h)]  overflow-y-auto overscroll-contain scroll-smooth p-3')}
-          >
+          <div ref={scrollContainer} className={cn('body flex-grow overflow-y-auto overscroll-contain scroll-smooth p-3')}>
             <div className={cn('container', fullScreen ? '' : '!w-full')}>
               {messages.length > 0 &&
                 messages?.map((message, i) => {
