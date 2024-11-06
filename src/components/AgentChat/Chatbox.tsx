@@ -147,15 +147,14 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
   return (
     <>
       <div className={cn('py-[18px]', isUserMessage ? ' ml-auto' : 'flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
-        <h6 className="user mb-[6px] text-[14px] font-medium">
-          {isUserMessage ? (
-            ''
-          ) : (
+        {!isUserMessage && (
+          <span className="user mb-[6px] block text-[14px] font-medium" aria-hidden>
             <span className="flex h-10 w-10 items-center justify-center rounded-full [border:1px_solid_var(--common-border-color)]">
               <BsStars className="text-[var(--new-theme-color)]" />
             </span>
-          )}
-        </h6>
+          </span>
+        )}
+
         {loading ? (
           <div className="w-full">
             <Skeleton animation="wave" />
@@ -172,7 +171,7 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
             {message.content}
           </Typography>
         ) : (
-          <div className="whitespace-pre-wrap rounded-lg pt-[8px] text-sm text-[var(--primary)] dark:text-white">
+          <div className="prose rounded-lg pt-[8px] text-sm text-[var(--primary)] dark:text-white [&_pre]:whitespace-pre-wrap">
             <Markdown>{message.content}</Markdown>
           </div>
         )}
