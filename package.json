@@ -25,6 +25,7 @@
     "@react-google-maps/api": "2.7.0",
     "@sentry/react": "^6.8.0",
     "@sentry/tracing": "^6.8.0",
+    "@tailwindcss/typography": "^0.5.15",
     "@tanstack/match-sorter-utils": "^8.8.4",
     "@tanstack/react-table": "^8.10.7",
     "@tanstack/react-virtual": "^3.0.1",
