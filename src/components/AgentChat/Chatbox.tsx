@@ -147,15 +147,14 @@ const RenderSingleChat = ({ message, loading = false }: { message?: TMessage; lo
   return (
     <>
       <div className={cn('py-[18px]', isUserMessage ? ' ml-auto' : 'flex gap-2 text-base ', loading ? 'w-full' : 'w-fit max-w-fit')}>
-        <span className="user mb-[6px] block text-[14px] font-medium" aria-hidden>
-          {isUserMessage ? (
-            ''
-          ) : (
+        {!isUserMessage && (
+          <span className="user mb-[6px] block text-[14px] font-medium" aria-hidden>
             <span className="flex h-10 w-10 items-center justify-center rounded-full [border:1px_solid_var(--common-border-color)]">
               <BsStars className="text-[var(--new-theme-color)]" />
             </span>
-          )}
-        </span>
+          </span>
+        )}
+
         {loading ? (
           <div className="w-full">
             <Skeleton animation="wave" />
