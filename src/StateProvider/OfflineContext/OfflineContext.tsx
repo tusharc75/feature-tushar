@@ -85,6 +85,9 @@ export const CustomOfflineProvider = ({ children }) => {
               deleteOne(objectStore.fieldTicket, d.data._id);
               let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
               fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+              let fieldTicketLogs = await findAll(objectStore.fieldTicketLogs);
+              fieldTicketLogs = fieldTicketLogs?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+              deleteMany(objectStore.fieldTicketLogs, fieldTicketLogs);
               deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
