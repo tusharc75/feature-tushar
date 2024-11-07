@@ -1,9 +1,20 @@
-import { objectStore, insertUpdate, clearAll, findOne, deleteMany } from '../../../constants/indexdbhelper';
+import { objectStore, insertUpdate, clearAll, findOne, deleteMany, findAll } from '../../../constants/indexdbhelper';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldServiceOrder, sidebarResource } from '../../../constants/helpers';
 
 export const fieldServiceOrderAddOffline = async (ids) => {
     try {
+        if (ids.length === 0) {
+            const fieldServiceOrder = await findAll(objectStore.fieldServiceOrder);
+            fieldServiceOrder?.forEach(e => {
+                ids.push(e?._id)
+            })
+            clearAll(objectStore.fieldServiceOrder);
+            clearAll(objectStore.fieldTicket);
+            clearAll(objectStore.fieldTicketMaterial);
+            clearAll(objectStore.resourceData);
+            clearAll(objectStore.fieldTicketLogs);
+        }
         axiosInstance().post(`${fieldServiceOrder.api}/get-all-offline-data`, { ids: ids }).then(({ data }) => {
             asyncForEach(data?.data?.fieldServiceOrder, async (element) => {
                 insertUpdate(objectStore.fieldServiceOrder, element._id, element);
@@ -16,6 +27,9 @@ export const fieldServiceOrderAddOffline = async (ids) => {
             })
             asyncForEach(data?.data?.fieldTicketCost, async (element) => {
                 insertUpdate(objectStore.fieldTicketMaterial, element._id, { ...element, type: MATERIAL_TYPE.manualEntry });
+            })
+            asyncForEach(data?.data?.fieldTicketLogs, async (element) => {
+                insertUpdate(objectStore.fieldTicketLogs, element._id, element);
             })
             insertUpdate(objectStore.resourceData, sidebarResource.serviceMaster, data?.data?.serviceMaster);
             insertUpdate(objectStore.resourceData, sidebarResource.product, data?.data?.product);
@@ -52,9 +66,11 @@ export const fieldServiceOrderClearOffline = async (ids: any[] = []) => {
         clearAll(objectStore.fieldServiceOrder);
         clearAll(objectStore.fieldTicket);
         clearAll(objectStore.fieldTicketMaterial);
+        clearAll(objectStore.fieldTicketLogs);
     } else {
         const fieldTicketIdsToDelete = [];
         const fieldTicketMaterialIdsToDelete = [];
+        const fieldTicketLogsIdsToDelete = [];
         for (const id of ids) {
             const fieldServiceOrder = await findOne(objectStore.fieldServiceOrder, id);
             fieldServiceOrder?.fieldTickets?.forEach((fieldTicket: any) => {
@@ -64,9 +80,16 @@ export const fieldServiceOrderClearOffline = async (ids: any[] = []) => {
                 })
             })
         }
+        const fieldTicketLogs = await findAll(objectStore.fieldTicketLogs);
+        fieldTicketLogs?.forEach(e => {
+            if (fieldTicketIdsToDelete?.includes(e?.fieldTicketId)) {
+                fieldTicketLogsIdsToDelete.push(e?._id)
+            }
+        }) 
         deleteMany(objectStore.fieldServiceOrder, ids);
         deleteMany(objectStore.fieldTicket, fieldTicketIdsToDelete);
         deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterialIdsToDelete);
+        deleteMany(objectStore.fieldTicketLogs, fieldTicketLogsIdsToDelete);
     }
 }
 

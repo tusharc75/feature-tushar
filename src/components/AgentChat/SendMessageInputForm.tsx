@@ -50,7 +50,7 @@ const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessage
         onKeyDown={handleKeyDown}
         maxLength={4000}
       />
-      <VoiceInput setMessage={setMessage} />
+      <VoiceInput onInputEnd={sendMessage} disabled={loading || disabled} />
       <IconButton
         size="small"
         type="submit"

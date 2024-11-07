@@ -4,7 +4,6 @@ import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -307,7 +306,7 @@ const TransferAssetDetailPage = () => {
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              Views
             </CustomTab>
           )}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}

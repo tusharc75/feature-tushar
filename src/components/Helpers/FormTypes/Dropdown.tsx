@@ -2,7 +2,7 @@ import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, has, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -30,6 +30,7 @@ import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -272,6 +273,8 @@ function Dropdown({
     }
   };
 
+  const { isOffline } = useContext(CustomOfflineContext);
+
   // const [extraOptions, setExtraOptions] = useState([]);
   // const [loading, setLoading] = useState(false);
   // const [inputValue, setInputValue] = useState('');
@@ -497,420 +500,470 @@ function Dropdown({
             )}
           </InfoLabel>
         </Grid>
-        <div className="mt-2">
-          {rest?.hidelookupAddButton ? null : fieldData?.addBulkOptions ? (
-            <>
-              <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                <IconButton
-                  disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                  onClick={() => setLookupDialog(true)}
-                  size="small"
-                  color="primary"
-                  style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                >
-                  <AddCircleIcon />
-                </IconButton>
-              </HtmlTooltip>
-              {lookupDialog && (
-                <AddMultiple
-                  resource={fieldData?.lookupResource}
-                  referenceData={
-                    fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
-                      ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
-                      : null
-                  }
-                  onClose={() => setLookupDialog(false)}
-                  onSuccess={(data) => {
-                    setLookupDialog(false);
-                    if (data?.length) {
-                      const tempOptions = data?.map((item: any) => {
-                        let tempNewOption = {
-                          ...item,
-                          order: option.length
-                        };
-                        return tempNewOption;
-                      });
-                      setOptionsList([...tempOptions, ...option]);
-                      if (type === 'multiSelect') {
-                        handleChange(name, tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []);
-                      } else {
-                        handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
-                      }
+        {!isOffline && (
+          <div className="mt-2">
+            {rest?.hidelookupAddButton ? null : fieldData?.addBulkOptions ? (
+              <>
+                <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                  <IconButton
+                    disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                    onClick={() => setLookupDialog(true)}
+                    size="small"
+                    color="primary"
+                    style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                  >
+                    <AddCircleIcon />
+                  </IconButton>
+                </HtmlTooltip>
+                {lookupDialog && (
+                  <AddMultiple
+                    resource={fieldData?.lookupResource}
+                    referenceData={
+                      fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                        ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                        : null
                     }
-                  }}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.padMaster && permissions?.padMaster?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManagePadMaster
-                        referenceData={
-                          fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
-                            ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
-                            : null
+                    onClose={() => setLookupDialog(false)}
+                    onSuccess={(data) => {
+                      setLookupDialog(false);
+                      if (data?.length) {
+                        const tempOptions = data?.map((item: any) => {
+                          let tempNewOption = {
+                            ...item,
+                            order: option.length
+                          };
+                          return tempNewOption;
+                        });
+                        setOptionsList([...tempOptions, ...option]);
+                        if (type === 'multiSelect') {
+                          handleChange(name, tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []);
+                        } else {
+                          handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
                         }
-                        isRedirectToDetailPage={false}
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data.padName && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.padName,
-                              optionValue: data._id,
-                              order: option.length,
-                              customerAccount: data?.customerAccount,
-                              address: data?.address
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (fieldData.lookupDependentOn) {
-                              if (
-                                data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
-                                data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
-                              ) {
-                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                              }
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
+                      }
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.padMaster && permissions?.padMaster?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManagePadMaster
+                          referenceData={
+                            fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                              ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                              : null
                           }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageWellMaster
-                        referenceData={
-                          fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
-                            ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
-                            : null
-                        }
-                        isRedirectToDetailPage={false}
-                        isClone={false}
-                        wellMasterId={null}
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data.wellName && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.wellName,
-                              optionValue: data._id,
-                              order: option.length,
-                              customerAccount: data?.customerAccount,
-                              padName: data?.padName,
-                              address: data?.address
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (fieldData.lookupDependentOn) {
-                              if (
-                                data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
-                                data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
-                              ) {
-                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                              }
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
-
-                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                            if (filterFields?.length) {
-                              filterFields?.forEach((ele: any) => {
-                                if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && tempNewOption[ele?.lookupDependentOnField]) {
-                                  if (
-                                    Array.isArray(tempNewOption[ele?.lookupDependentOnField]) &&
-                                    tempNewOption[ele?.lookupDependentOnField]?.length === 1
-                                  ) {
-                                    setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
-                                  } else {
-                                    setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
-                                  }
-                                }
-                              });
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageWellNumber
-                        referenceData={
-                          fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
-                            ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
-                            : null
-                        }
-                        isRedirectToDetailPage={false}
-                        isClone={false}
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data.wellNumber && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.wellNumber,
-                              optionValue: data._id,
-                              order: option.length,
-                              wellMaster: data?.wellName,
-                              customerAccount: data?.customerAccount,
-                              address: data?.address
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (fieldData.lookupDependentOn) {
-                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
-                                if (type === 'multiSelect') {
-                                  handleChange(
-                                    name,
-                                    tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                                  );
-                                } else {
+                          isRedirectToDetailPage={false}
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data.padName && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.padName,
+                                optionValue: data._id,
+                                order: option.length,
+                                customerAccount: data?.customerAccount,
+                                address: data?.address
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (fieldData.lookupDependentOn) {
+                                if (
+                                  data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                                  data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                                ) {
                                   handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                 }
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                               }
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                             }
-
-                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                            if (filterFields?.length) {
-                              filterFields?.forEach((ele: any) => {
-                                if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && tempNewOption[ele?.lookupDependentOnField]) {
-                                  if (
-                                    Array.isArray(tempNewOption[ele?.lookupDependentOnField]) &&
-                                    tempNewOption[ele?.lookupDependentOnField]?.length === 1
-                                  ) {
-                                    setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
-                                  } else {
-                                    setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
-                                  }
-                                }
-                              });
-                            }
-                          }
-                        }}
-                      />
-                    )}
+                          }}
+                        />
+                      )}
+                    </>
                   </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
-                <>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
                   <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageWarehouse
-                        open={lookupDialog}
-                        warehouseId={null}
-                        close={() => setLookupDialog(false)}
-                        isClone={false}
-                        onSuccess={({ data }) => {
-                          setLookupDialog(false);
-                          if (data.warehouseName && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.warehouseName,
-                              optionValue: data._id,
-                              order: option.length
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (type === 'multiSelect') {
-                              handleChange(
-                                name,
-                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                              );
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageWellMaster
+                          referenceData={
+                            fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                              ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                              : null
                           }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageStorageLocation
-                        referenceData={{ warehouse: values[fieldData.lookupDependentOn] }}
-                        storageLocationId={null}
-                        onClose={() => setLookupDialog(false)}
-                        isClone={false}
-                        onSuccess={({ data }) => {
-                          setLookupDialog(false);
-                          if (data.storageLocationName && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.storageLocationName,
-                              optionValue: data._id,
-                              order: option.length,
-                              warehouse: data.warehouse
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageCompetencyType
-                        id={null}
-                        onClose={() => setLookupDialog(false)}
-                        isClone={false}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data.competencyType && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.competencyType,
-                              optionValue: data._id,
-                              order: option.length
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageCompetencies
-                        referenceData={{ competencyType: values[fieldData.lookupDependentOn] }}
-                        isClone={false}
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data.competencyName && data._id) {
-                            let tempNewOption = {
-                              default: false,
-                              optionLabel: data.competencyName,
-                              optionValue: data._id,
-                              order: option.length,
-                              competencyType: data.competencyType
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (fieldData.lookupDependentOn) {
-                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
-                                if (type === 'multiSelect') {
-                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
-                                } else {
+                          isRedirectToDetailPage={false}
+                          isClone={false}
+                          wellMasterId={null}
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data.wellName && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.wellName,
+                                optionValue: data._id,
+                                order: option.length,
+                                customerAccount: data?.customerAccount,
+                                padName: data?.padName,
+                                address: data?.address
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (fieldData.lookupDependentOn) {
+                                if (
+                                  data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                                  data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                                ) {
                                   handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                 }
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                               }
-                            } else {
+
+                              const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                              if (filterFields?.length) {
+                                filterFields?.forEach((ele: any) => {
+                                  if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && tempNewOption[ele?.lookupDependentOnField]) {
+                                    if (
+                                      Array.isArray(tempNewOption[ele?.lookupDependentOnField]) &&
+                                      tempNewOption[ele?.lookupDependentOnField]?.length === 1
+                                    ) {
+                                      setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
+                                    } else {
+                                      setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
+                                    }
+                                  }
+                                });
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageWellNumber
+                          referenceData={
+                            fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                              ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                              : null
+                          }
+                          isRedirectToDetailPage={false}
+                          isClone={false}
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data.wellNumber && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.wellNumber,
+                                optionValue: data._id,
+                                order: option.length,
+                                wellMaster: data?.wellName,
+                                customerAccount: data?.customerAccount,
+                                address: data?.address
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (fieldData.lookupDependentOn) {
+                                if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                                  data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])) {
+                                  if (type === 'multiSelect') {
+                                    handleChange(
+                                      name,
+                                      tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                    );
+                                  } else {
+                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                  }
+                                }
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+
+                              const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                              if (filterFields?.length) {
+                                filterFields?.forEach((ele: any) => {
+                                  if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && tempNewOption[ele?.lookupDependentOnField]) {
+                                    if (
+                                      Array.isArray(tempNewOption[ele?.lookupDependentOnField]) &&
+                                      tempNewOption[ele?.lookupDependentOnField]?.length === 1
+                                    ) {
+                                      setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
+                                    } else {
+                                      setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
+                                    }
+                                  }
+                                });
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageWarehouse
+                          open={lookupDialog}
+                          warehouseId={null}
+                          close={() => setLookupDialog(false)}
+                          isClone={false}
+                          onSuccess={({ data }) => {
+                            setLookupDialog(false);
+                            if (data.warehouseName && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.warehouseName,
+                                optionValue: data._id,
+                                order: option.length
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (type === 'multiSelect') {
+                                handleChange(
+                                  name,
+                                  tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                );
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageStorageLocation
+                          referenceData={{ warehouse: values[fieldData.lookupDependentOn] }}
+                          storageLocationId={null}
+                          onClose={() => setLookupDialog(false)}
+                          isClone={false}
+                          onSuccess={({ data }) => {
+                            setLookupDialog(false);
+                            if (data.storageLocationName && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.storageLocationName,
+                                optionValue: data._id,
+                                order: option.length,
+                                warehouse: data.warehouse
+                              };
+                              setOptionsList([tempNewOption, ...option]);
                               handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                             }
-                          }
-                        }}
-                      />
-                    )}
+                          }}
+                        />
+                      )}
+                    </>
                   </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerAccount && permissions?.customerAccount?.isCreate && (
-                <>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageCompetencyType
+                          id={null}
+                          onClose={() => setLookupDialog(false)}
+                          isClone={false}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data.competencyType && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.competencyType,
+                                optionValue: data._id,
+                                order: option.length
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageCompetencies
+                          referenceData={{ competencyType: values[fieldData.lookupDependentOn] }}
+                          isClone={false}
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data.competencyName && data._id) {
+                              let tempNewOption = {
+                                default: false,
+                                optionLabel: data.competencyName,
+                                optionValue: data._id,
+                                order: option.length,
+                                competencyType: data.competencyType
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (fieldData.lookupDependentOn) {
+                                if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                  if (type === 'multiSelect') {
+                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
+                                  } else {
+                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                  }
+                                }
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerAccount && permissions?.customerAccount?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageAccount
+                          open={lookupDialog}
+                          onClose={() => setLookupDialog(false)}
+                          accountResource={'customerAccount'}
+                          accountApi={customerAccount.accountApi}
+                          isClone={false}
+                          isRedirectToDetailPage={false}
+                          onSuccess={({ data }) => {
+                            setLookupDialog(false);
+                            if (data._id) {
+                              let tempNewOption = {
+                                default: true,
+                                optionLabel: data.accountName,
+                                optionValue: data._id,
+                                order: option.length,
+                                billingAddress: data?.billingAddress || [],
+                                shippingAddress: data?.shippingAddress || []
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (type === 'multiSelect') {
+                                handleChange(
+                                  name,
+                                  tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                );
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate && (
                   <>
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
@@ -927,8 +980,8 @@ function Dropdown({
                       <ManageAccount
                         open={lookupDialog}
                         onClose={() => setLookupDialog(false)}
-                        accountResource={'customerAccount'}
-                        accountApi={customerAccount.accountApi}
+                        accountResource={`supplierAccount`}
+                        accountApi={supplierAccount.accountApi}
                         isClone={false}
                         isRedirectToDetailPage={false}
                         onSuccess={({ data }) => {
@@ -956,252 +1009,8 @@ function Dropdown({
                       />
                     )}
                   </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate && (
-                <>
-                  <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                    <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                      onClick={() => setLookupDialog(true)}
-                      size="small"
-                      color="primary"
-                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                    >
-                      <AddCircleIcon />
-                    </IconButton>
-                  </HtmlTooltip>
-                  {lookupDialog && (
-                    <ManageAccount
-                      open={lookupDialog}
-                      onClose={() => setLookupDialog(false)}
-                      accountResource={`supplierAccount`}
-                      accountApi={supplierAccount.accountApi}
-                      isClone={false}
-                      isRedirectToDetailPage={false}
-                      onSuccess={({ data }) => {
-                        setLookupDialog(false);
-                        if (data._id) {
-                          let tempNewOption = {
-                            default: true,
-                            optionLabel: data.accountName,
-                            optionValue: data._id,
-                            order: option.length,
-                            billingAddress: data?.billingAddress || [],
-                            shippingAddress: data?.shippingAddress || []
-                          };
-                          setOptionsList([tempNewOption, ...option]);
-                          if (type === 'multiSelect') {
-                            handleChange(
-                              name,
-                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                            );
-                          } else {
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                          }
-                        }
-                      }}
-                    />
-                  )}
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerContact && permissions?.customerContact?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageContactDialog
-                        contactApi={customerContact.contactApi}
-                        contactResource={'customerContact'}
-                        isClone={false}
-                        contactId={null}
-                        onClose={() => setLookupDialog(false)}
-                        isRedirectToDetailPage={false}
-                        referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data?._id) {
-                            let tempNewOption = {
-                              default: true,
-                              email: data?.email,
-                              optionLabel: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
-                              optionValue: data?._id,
-                              order: option.length,
-                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (type === 'multiSelect') {
-                              handleChange(
-                                name,
-                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                              );
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierContact && permissions?.supplierContact?.isCreate && (
-                <Box>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageContactDialog
-                        onClose={() => setLookupDialog(false)}
-                        contactResource={'supplierContact'}
-                        contactApi={supplierContact.contactApi}
-                        isRedirectToDetailPage={false}
-                        isClone={false}
-                        contactId={null}
-                        referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data?._id) {
-                            let tempNewOption = {
-                              default: true,
-                              email: data?.email,
-                              optionLabel: data?.concatedName || data?.firstName + ' ' + data?.middleName + ' ' + data?.lastName,
-                              optionValue: data?._id,
-                              parentAccount: data?.accountName,
-                              order: option.length,
-                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (type === 'multiSelect') {
-                              handleChange(
-                                name,
-                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                              );
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </Box>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.address && permissions?.address?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageAddressDialog
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data?._id) {
-                            let tempNewOption = {
-                              optionLabel: data?.fullAddress,
-                              optionValue: data?._id,
-                              order: option.length,
-                              ...(fieldData.lookupDependentOn && {
-                                [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
-                              })
-                            };
-                            addFieldOption(data?._id);
-                            setOptionsList([tempNewOption, ...option]);
-                            setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
-                            if (type === 'multiSelect') {
-                              handleChange(
-                                name,
-                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                              );
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
-                          }
-                        }}
-                        referenceData={{ region: values['region'] }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate && (
-                <>
-                  <>
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                    {lookupDialog && (
-                      <ManageMarketSegmentDialog
-                        marketSegmentId={null}
-                        onClose={() => setLookupDialog(false)}
-                        onSuccess={(data) => {
-                          setLookupDialog(false);
-                          if (data?._id) {
-                            let tempNewOption = {
-                              default: true,
-                              optionLabel: data?.name,
-                              optionValue: data?._id,
-                              order: option.length,
-                              ...(fieldData.lookupDependentOn && {
-                                [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
-                              })
-                            };
-                            setOptionsList([tempNewOption, ...option]);
-                            if (type === 'multiSelect') {
-                              handleChange(
-                                name,
-                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                              );
-                            } else {
-                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                  </>
-                </>
-              )}
-              {fieldData?.lookup &&
-                !(camelCase(fieldData?.lookupResource) in routes) &&
-                permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.customerContact && permissions?.customerContact?.isCreate && (
                   <>
                     <>
                       <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
@@ -1216,22 +1025,167 @@ function Dropdown({
                         </IconButton>
                       </HtmlTooltip>
                       {lookupDialog && (
-                        <ManageDynamicForm
-                          resource={fieldData?.lookupResource}
-                          id={null}
+                        <ManageContactDialog
+                          contactApi={customerContact.contactApi}
+                          contactResource={'customerContact'}
                           isClone={false}
+                          contactId={null}
                           onClose={() => setLookupDialog(false)}
-                          redirected={false}
-                          onSuccess={(data, primaryField) => {
+                          isRedirectToDetailPage={false}
+                          referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
+                          onSuccess={(data) => {
                             setLookupDialog(false);
                             if (data?._id) {
                               let tempNewOption = {
                                 default: true,
-                                optionLabel: primaryField ? data?.[primaryField?.fieldName] : '',
+                                email: data?.email,
+                                optionLabel: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
+                                optionValue: data?._id,
+                                order: option.length,
+                                [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (type === 'multiSelect') {
+                                handleChange(
+                                  name,
+                                  tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                );
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierContact && permissions?.supplierContact?.isCreate && (
+                  <Box>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageContactDialog
+                          onClose={() => setLookupDialog(false)}
+                          contactResource={'supplierContact'}
+                          contactApi={supplierContact.contactApi}
+                          isRedirectToDetailPage={false}
+                          isClone={false}
+                          contactId={null}
+                          referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data?._id) {
+                              let tempNewOption = {
+                                default: true,
+                                email: data?.email,
+                                optionLabel: data?.concatedName || data?.firstName + ' ' + data?.middleName + ' ' + data?.lastName,
+                                optionValue: data?._id,
+                                parentAccount: data?.accountName,
+                                order: option.length,
+                                [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
+                              };
+                              setOptionsList([tempNewOption, ...option]);
+                              if (type === 'multiSelect') {
+                                handleChange(
+                                  name,
+                                  tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                );
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                    </>
+                  </Box>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.address && permissions?.address?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageAddressDialog
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data?._id) {
+                              let tempNewOption = {
+                                optionLabel: data?.fullAddress,
                                 optionValue: data?._id,
                                 order: option.length,
                                 ...(fieldData.lookupDependentOn && {
-                                  [fieldData.lookupDependentOn]: data?.parentCategory || values[fieldData?.lookupDependentOn] || ''
+                                  [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
+                                })
+                              };
+                              addFieldOption(data?._id);
+                              setOptionsList([tempNewOption, ...option]);
+                              setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
+                              if (type === 'multiSelect') {
+                                handleChange(
+                                  name,
+                                  tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                );
+                              } else {
+                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                              }
+                            }
+                          }}
+                          referenceData={{ region: values['region'] }}
+                        />
+                      )}
+                    </>
+                  </>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate && (
+                  <>
+                    <>
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => setLookupDialog(true)}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                      {lookupDialog && (
+                        <ManageMarketSegmentDialog
+                          marketSegmentId={null}
+                          onClose={() => setLookupDialog(false)}
+                          onSuccess={(data) => {
+                            setLookupDialog(false);
+                            if (data?._id) {
+                              let tempNewOption = {
+                                default: true,
+                                optionLabel: data?.name,
+                                optionValue: data?._id,
+                                order: option.length,
+                                ...(fieldData.lookupDependentOn && {
+                                  [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
                                 })
                               };
                               setOptionsList([tempNewOption, ...option]);
@@ -1250,9 +1204,61 @@ function Dropdown({
                     </>
                   </>
                 )}
-            </>
-          )}
-        </div>
+                {fieldData?.lookup &&
+                  !(camelCase(fieldData?.lookupResource) in routes) &&
+                  permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
+                    <>
+                      <>
+                        <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                          <IconButton
+                            disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                            onClick={() => setLookupDialog(true)}
+                            size="small"
+                            color="primary"
+                            style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                          >
+                            <AddCircleIcon />
+                          </IconButton>
+                        </HtmlTooltip>
+                        {lookupDialog && (
+                          <ManageDynamicForm
+                            resource={fieldData?.lookupResource}
+                            id={null}
+                            isClone={false}
+                            onClose={() => setLookupDialog(false)}
+                            redirected={false}
+                            onSuccess={(data, primaryField) => {
+                              setLookupDialog(false);
+                              if (data?._id) {
+                                let tempNewOption = {
+                                  default: true,
+                                  optionLabel: primaryField ? data?.[primaryField?.fieldName] : '',
+                                  optionValue: data?._id,
+                                  order: option.length,
+                                  ...(fieldData.lookupDependentOn && {
+                                    [fieldData.lookupDependentOn]: data?.parentCategory || values[fieldData?.lookupDependentOn] || ''
+                                  })
+                                };
+                                setOptionsList([tempNewOption, ...option]);
+                                if (type === 'multiSelect') {
+                                  handleChange(
+                                    name,
+                                    tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                  );
+                                } else {
+                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                      </>
+                    </>
+                  )}
+              </>
+            )}
+          </div>
+        )}
       </Grid>
     </Box>
   );

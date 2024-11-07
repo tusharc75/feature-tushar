@@ -1,10 +1,8 @@
 import { Box, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
-import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -136,14 +134,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
@@ -277,7 +275,6 @@ const ServiceOrderDetailsPage = () => {
           </CustomTab>
           {!(isMobile && !isTablet) && !isOffline && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" />
               Views
             </CustomTab>
           )}
