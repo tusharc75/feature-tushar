@@ -704,7 +704,8 @@ function Dropdown({
                             };
                             setOptionsList([tempNewOption, ...option]);
                             if (fieldData.lookupDependentOn) {
-                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                                data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])) {
                                 if (type === 'multiSelect') {
                                   handleChange(
                                     name,
