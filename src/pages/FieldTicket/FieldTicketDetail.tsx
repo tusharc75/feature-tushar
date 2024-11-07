@@ -203,7 +203,7 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && (
+            {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && !isOffline && (
               <ButtonWithPulse
                 variant={'outlined'}
                 color="default"
@@ -216,7 +216,7 @@ const FieldTicketDetail = () => {
                 Close
               </ButtonWithPulse>
             )}
-            {fieldTicketData?.versions?.length && (
+            {fieldTicketData?.versions?.length && !isOffline && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 color="primary"
