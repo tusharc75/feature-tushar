@@ -361,9 +361,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         material.push(element);
       }
       let updatedData;
-      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+      let result: any = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
       else updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
+      if (!result) result = { type: 'fieldTicketMaterial' };
       await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       setConsumablesDialog(false);
       fetchData();
@@ -500,7 +501,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     try {
       setUpdating(true);
       if (isOffline) {
-        const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+        let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
         const alreadyOfflineDataSyncStoredRows = result?.data || [];
         const toAddOfflineDataSyncStoreRows = [];
         for (const row of rows) {
@@ -518,6 +519,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         let updatedData;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
         else updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
+        if (!result) result = { type: 'fieldTicketMaterial' };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });

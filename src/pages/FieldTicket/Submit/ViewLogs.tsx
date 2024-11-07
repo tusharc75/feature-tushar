@@ -1,7 +1,7 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,6 +14,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
@@ -26,7 +28,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const [fullScreenAttachemnt, setFullScreenAttachemnt] = useState(false);
   const [columns, setColumns] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
-
+  const { isOffline } = useContext(CustomOfflineContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
@@ -128,9 +130,15 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
-    const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
-    data?.data.forEach((d) => {
+    let rows = [];
+    if (isOffline) {
+      rows = await findAll(objectStore.fieldTicketLogs);
+      rows = rows?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
+    } else {
+      const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
+      rows = data?.data;
+    }
+    rows?.forEach((d) => {
       const invoice = d?.invoice;
       const user = d?.user;
       d.invoice = invoice?.optionLabel;
@@ -139,7 +147,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
       d.userId = user?.optionValue;
     });
 
-    dispatch({ type: 'initialize', data: data?.data, count: data?.data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
