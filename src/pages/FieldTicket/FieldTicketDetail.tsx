@@ -82,14 +82,6 @@ const FieldTicketDetail = () => {
     }
   }, [id, isOffline]);
 
-  useEffect(() => {
-    if (!isOffline) {
-      if (!isNaN(id)) {
-        history.push(`${routes.fieldTicket.path}`);
-      }
-    }
-  }, [isOffline]);
-
   const fetchFields = async () => {
     try {
       let data;
