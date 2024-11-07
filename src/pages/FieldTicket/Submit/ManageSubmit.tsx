@@ -77,10 +77,11 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
       let updatedData;
       if (result && result?.type === 'fieldTicket') {
         updatedData = { ...result?.data, logs: [values] };
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicket', data: updatedData });
       } else {
         updatedData = { _id: fieldTicketData?._id, offlineSyncStatus: 'update', logs: [values] };
+        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_submit`, { type: 'fieldTicket', data: updatedData });
       }
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicket', data: updatedData });
       const fieldTicket = await findOne(objectStore.fieldTicket, fieldTicketData?._id);
       if (fieldTicket) {
         await insertUpdate(objectStore.fieldTicket, fieldTicketData?._id, { ...fieldTicket, status: FIELD_TICKET_STATUS.readyToInvoice });

@@ -82,6 +82,7 @@ export const CustomOfflineProvider = ({ children }) => {
             if (d?.type === 'fieldTicket') {
               await axiosInstance().post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data);
               deleteOne(objectStore.offlineDataSync, d.data._id);
+              deleteOne(objectStore.offlineDataSync, `${d.data._id}_submit`);
               deleteOne(objectStore.fieldTicket, d.data._id);
               let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
               fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
