@@ -5,7 +5,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -405,7 +404,7 @@ const RepairOrderDetails = () => {
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              Views
             </CustomTab>
           )}
           {resourceData &&
@@ -440,13 +439,13 @@ const RepairOrderDetails = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
             handlePrev={
               stepNames[currentStep] === 'Quotation' &&
-              allowedToEdit &&
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationVersionData?.status
-              )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                 ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                  setShowQuotationConfirmBox(true);
+                }
                 : null
             }
             updateStatus={(step: number) => {
@@ -485,8 +484,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }

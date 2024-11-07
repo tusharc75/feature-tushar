@@ -16,7 +16,7 @@ function SignatureCell({ base64 }) {
   return (
     <>
       <p
-        className="text-truncate -my-[2px] cursor-pointer dark:[filter:invert(1)]"
+        className="text-truncate -my-[2px] cursor-pointer dark:bg-white"
         role="button"
         onClick={() => {
           setImageDialogProps({
