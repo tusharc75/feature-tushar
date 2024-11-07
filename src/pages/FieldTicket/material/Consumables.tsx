@@ -47,7 +47,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const [isDeleting, setDeleting] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
-  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All', _id: null });
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -74,8 +74,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         };
       })
     ]);
-    if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
-      setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
+    if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?._id === selectedServiceOption?._id)) {
+      setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All', _id: null });
     }
   }, [services]);
 
@@ -304,12 +304,12 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         consumables = await findAll(objectStore.fieldTicketMaterial);
         consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && e?.type === MATERIAL_TYPE.product && !e?.isRental);
         if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue);
+          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue && e?.uniqueId === selectedServiceOption?._id);
         }
       } else if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.product}`;
         if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-          api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
+          api = `${api}&uniqueId=${selectedServiceOption?._id}`;
         }
         const response = await axiosInstance().get(api);
         consumables = response?.data?.data?.material;
@@ -339,14 +339,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         element.materialId = d._id;
         element.type = MATERIAL_TYPE.product;
         element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption : null;
+        element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
         element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        element.estimateJobDuration = 1;
-        if (calValues && calValues['estimateJobDuration']) element.estimateJobDuration = calValues['estimateJobDuration'];
+        Object.assign(element, calValues);
         let id = Math.floor(Math.random() * 1000000).toString();
         element.productDetail = {
           productName: d.productName,
@@ -386,16 +386,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         element.materialId = d._id;
         element.type = MATERIAL_TYPE.product;
         element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+        element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
         element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        element.estimateJobDuration = 1;
-        if (calValues && calValues['estimateJobDuration']) {
-          element.estimateJobDuration = calValues['estimateJobDuration'];
-        }
+        Object.assign(element, calValues);
         if (taxCodeData) {
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;

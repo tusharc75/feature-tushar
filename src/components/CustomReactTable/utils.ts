@@ -60,7 +60,7 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
     }
   };
 
-  if (columnDef.sticky) {
+  if (['left', 'right'].includes(columnDef.sticky)) {
     const offset = addSizes(index);
     obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
   }
@@ -445,13 +445,8 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   return formValues;
 };
 
-export function adjustSizes(
-  columns: TColType[],
-  original: TColType[],
-  visibleColumns: { [key: string]: boolean },
-  containerSize: number
-): TColType[] | null {
-  const visibleColumnsArray = columns.filter((col) => visibleColumns[col.id || col.accessor]);
+export function adjustSizes(original: TColType[], visibleColumns: { [key: string]: boolean }, containerSize: number): TColType[] | null {
+  const visibleColumnsArray = original.filter((col) => visibleColumns[col.id || col.accessor]);
   const totalSize = visibleColumnsArray.reduce((acc, size) => acc + (size.size || 200), 0);
 
   if (totalSize >= containerSize) {
@@ -465,8 +460,8 @@ export function adjustSizes(
   }
   const scrollerWidth = 2;
 
-  return columns.map((col) => {
-    const size = Math.floor(col.size * scaleFactor) - scrollerWidth;
-    return { ...col, size, width: size };
+  return original.map((col) => {
+    const size = Math.floor((col.size || 200) * scaleFactor) - scrollerWidth;
+    return { ...col, size };
   });
 }

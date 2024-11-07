@@ -17,7 +17,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { deleteMany, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
@@ -242,11 +242,15 @@ const FieldTicket = () => {
       for (let i = 0; i < ids.length; i++) {
         deleteOne(objectStore.fieldTicket, ids[i]);
         const data = await findOne(objectStore.offlineDataSync, ids[i]);
-        if (data.data.offlineSyncStatus === 'new') {
+        if (data?.data?.offlineSyncStatus === 'new') {
           deleteOne(objectStore.offlineDataSync, ids[i]);
         } else {
-          await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...data.data, offlineSyncStatus: 'delete' } });
+          await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...{ _id: ids[i] }, offlineSyncStatus: 'delete' } });
         }
+        let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
+        fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === ids[i])?.map((e) => e?._id);
+        deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
+        deleteMany(objectStore.offlineDataSync, fieldTicketMaterial);
       }
       fetchData();
       setShowDeleteConfirmBox(false);
@@ -356,9 +360,8 @@ const FieldTicket = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.fieldTicketNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldTicketNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

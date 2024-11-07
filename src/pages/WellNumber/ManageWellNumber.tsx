@@ -17,7 +17,7 @@ import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = false }) => {
@@ -76,14 +76,26 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
           if (referenceData) {
             for (const [key, values] of Object.entries(referenceData)) {
               if (fieldsDataForCreate?.find((e) => e.fieldName === key)) {
-                createValues[key] = values;
+                if (key === 'wellName' && isArray(values)) {
+                  if (values?.length === 1) {
+                    createValues[key] = values[0];
+                  }
+                }
+                else {
+                  createValues[key] = values;
+                }
               }
             }
             if (referenceData?.wellName) {
               fieldsDataForCreate?.forEach((e) => {
                 if (e.fieldName === 'wellName') {
-                  e.disableOnEdit = true;
-                  e.isUneditable = true;
+                  if (isArray(referenceData?.wellName)) {
+                    e.option = e.option?.filter((e) => referenceData?.wellName?.includes(e?.optionValue));
+                  }
+                  else {
+                    e.disableOnEdit = true;
+                    e.isUneditable = true
+                  }
                 }
               });
             }

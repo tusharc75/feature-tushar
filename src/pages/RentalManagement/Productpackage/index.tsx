@@ -595,7 +595,8 @@ const Productpackage = ({
         loadingTicketProducts
       );
     });
-    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
+
+    if ((subRows.length === 0 || (subRows?.filter((s)=>s.type===MATERIAL_TYPE.package && !s.isValid)?.length>0)) && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {

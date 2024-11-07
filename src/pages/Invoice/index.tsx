@@ -1,7 +1,7 @@
 import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -303,10 +303,22 @@ const Invoice = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = selectedRecords?.map((s) => s._id);
+    const isSameStatus = selectedRecords?.every((e)=> e.status===selectedRecords[0].status);
+    if(!isSameStatus){
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please select invoices with same status'
+      });
+      return;
+    }
+    const invoices = sortBy(selectedRecords, '_id').map((s) => ({
+      _id: s._id,
+      prevStatus: s.status
+    }));
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${invoice.api}/update-multiple-status`, { ids: ids, status: status })
+      .put(`${invoice.api}/update-status`, { invoices: invoices, status: status })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

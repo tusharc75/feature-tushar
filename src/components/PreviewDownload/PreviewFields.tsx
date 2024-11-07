@@ -12,6 +12,7 @@ import { ViewDialog } from './ViewDialog';
 import ArrangeView from './ArrangeView';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { startCase } from 'lodash';
+import { useData } from '../../StateProvider/Provider';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -61,12 +62,14 @@ export const PreviewFields = ({
             });
     };
 
+    const { state: { user: { user } } } = useData();
+
     const handleSelectView = (data) => {
         setSelectedView(data);
         if (data?.columns?.length > 0) {
             setVisibleColumns(data.columns?.map(e => {
                 const temp = allColumn.find(col => col.fieldName === e.name);
-                if(temp) return { ...temp, width: e.width, customLabel: e?.customLabel };
+                if (temp) return { ...temp, width: e.width, customLabel: e?.customLabel };
             }).filter(col => col !== undefined));
         }
         if (setSortBy && data?.sortBy) {
@@ -93,13 +96,13 @@ export const PreviewFields = ({
                             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
                                 <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
                                 <Box>
-                                    <HtmlTooltip title='Edit'>
-                                        <IconButton size="small" style={{ marginRight: '20px' }}>
+                                    <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
+                                        <IconButton size="small" style={{ marginRight: '20px' }} disabled={(user?._id !== option?.user)}>
                                             <AiFillEdit />
                                         </IconButton>
                                     </HtmlTooltip>
-                                    <HtmlTooltip title='Delete'>
-                                        <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
+                                    <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only delete' : 'Delete'}>
+                                        <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })} disabled={(user?._id !== option?.user)}>
                                             <RiDeleteBin6Fill />
                                         </IconButton>
                                     </HtmlTooltip>

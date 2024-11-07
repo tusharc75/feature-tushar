@@ -245,15 +245,23 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                     </>
                                   )}
                                 </span>
-                                <div className="flex gap-2">
-                                  <HtmlTooltip title={'Edit'}>
-                                    <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
-                                      <Edit fontSize="small" />
+                                <div className="flex cursor-auto gap-2">
+                                  <HtmlTooltip title={d?.user === user?.user?._id ? 'Edit' : 'You have not permission to edit'}>
+                                    <IconButton
+                                      size={'small'}
+                                      disabled={d?.user === user?.user?._id ? false : true}
+                                      onClick={(e) => openEditModal(e, d)}
+                                    >
+                                      <Edit fontSize="small" color={d?.user === user?.user?._id ? 'primary' : 'disabled'} />
                                     </IconButton>
                                   </HtmlTooltip>
-                                  <HtmlTooltip title={'Delete'}>
-                                    <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
-                                      <Delete fontSize="small" color="error" />
+                                  <HtmlTooltip title={d?.user === user?.user?._id ? 'Delete' : 'You have not permission to delete'}>
+                                    <IconButton
+                                      size={'small'}
+                                      disabled={d?.user === user?.user?._id ? false : true}
+                                      onClick={(e) => openDeleteConfirmationModal(e, d)}
+                                    >
+                                      <Delete fontSize="small" color={d?.user === user?.user?._id ? 'error' : 'disabled'} />
                                     </IconButton>
                                   </HtmlTooltip>
                                 </div>

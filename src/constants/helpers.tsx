@@ -3087,6 +3087,14 @@ export const FIELD_TICKET_STATUS = {
   closed: 'Closed'
 };
 
+export const FIELD_TICKET_LOG_TYPE = {
+  invoiceCancelled: 'Invoice Cancelled',
+  invoiceCreated: 'Invoice Created',
+  readyToInvoice: 'Ready to Invoice',
+  reOpen: 'Re-Open',
+  inProgress: 'In-Progress',
+};
+
 export const SUBCONTRACT_ASSEMBLY_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',

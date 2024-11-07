@@ -14,7 +14,7 @@ const AgentChat = () => {
   };
 
   return (
-    <div className="fixed bottom-2 right-3 z-[50] [--chat-container-h:500px] [--chatbox-width:500px]">
+    <div className="fixed bottom-2 right-3 z-[1300] ">
       <Chatbox isChatboxOpen={isChatboxOpen} setIsChatboxOpen={setIsChatboxOpen} />
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">

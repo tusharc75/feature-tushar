@@ -43,8 +43,7 @@ const AssignServiceDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [pricingConditionData, setPricingConditionData] = useState(null);
-  const [openConditionDetails, setOpenConditionDetails] = useState({anchorEl: null, materialCondition: null})
+  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null })
   const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
@@ -62,14 +61,8 @@ const AssignServiceDialog = ({
   ];
 
   useEffect(() => {
-    if (pricingCondition && !isOffline) {
-      fetchPricingCondition();
-    }
-  }, []);
-
-  useEffect(() => {
     fetchGridColumns();
-  }, [pricingConditionData]);
+  }, [tabValue])
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -79,17 +72,23 @@ const AssignServiceDialog = ({
 
   const fetchGridColumns = async () => {
     try {
-      let data;
+      setColumns(null)
+      let data, pricingConditionData;
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
       } else {
         const response = await axiosInstance().get('/field?resource=Service Master&view=true');
         data = response?.data?.data;
+        if (pricingCondition) {
+          const pricingData = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
+          pricingConditionData = pricingData?.data?.data?.condition;
+        }
       }
+
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
       columns = [...newColumns, ...getStaticFields()];
-      if (pricingCondition && !isOffline) {
+      if (pricingCondition && pricingConditionData && !isOffline && tabValue === 0) {
         columns?.forEach((column) => {
           if (column?.primaryField) {
             column.cell = ({ row }) => (
@@ -103,20 +102,20 @@ const AssignServiceDialog = ({
                     {row.original[column.accessor]}
                   </Link>
                   <HtmlTooltip title={'Pricing Information'}>
-                  <IconButton
-                    aria-label="info"
-                    size="small"
-                    color="primary"
-                    disabled={false}
-                    onClick={(e) => {
-                      const matchedPricingCondition = pricingConditionData?.find((ele)=> ele.materialId===row?.original?._id);
-                      if(matchedPricingCondition && matchedPricingCondition?.unit?.length && matchedPricingCondition?.pricingMethod?.length){
-                        setOpenConditionDetails({anchorEl: e.currentTarget, materialCondition: matchedPricingCondition });
-                      }
-                    }}
-                  >
-                    <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />
-                  </IconButton>
+                    <IconButton
+                      aria-label="info"
+                      size="small"
+                      color="primary"
+                      disabled={false}
+                      onClick={(e) => {
+                        const matchedPricingCondition = pricingConditionData?.find((ele) => ele.materialId === row?.original?._id);
+                        if (matchedPricingCondition && matchedPricingCondition?.unit?.length && matchedPricingCondition?.pricingMethod?.length) {
+                          setOpenConditionDetails({ anchorEl: e.currentTarget, materialCondition: matchedPricingCondition });
+                        }
+                      }}
+                    >
+                      <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />
+                    </IconButton>
                   </HtmlTooltip>
                 </div>
               </>
@@ -170,16 +169,6 @@ const AssignServiceDialog = ({
     } catch (error) {
       toastConfig.setToastConfig(error);
       dispatch({ type: 'loading', loading: false });
-    }
-  };
-
-  const fetchPricingCondition = async () => {
-    try {
-      const response = await axiosInstance().get(`${routes.pricingCondition.path}/${pricingCondition}`);
-      let data = response?.data?.data?.condition || [];
-      setPricingConditionData(data);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
     }
   };
 
@@ -345,38 +334,38 @@ const AssignServiceDialog = ({
         id={openConditionDetails.materialCondition?.materialId}
         open={Boolean(openConditionDetails.anchorEl)}
         anchorEl={openConditionDetails.anchorEl}
-        onClose={() => setOpenConditionDetails({anchorEl: null, materialCondition: null})}
+        onClose={() => setOpenConditionDetails({ anchorEl: null, materialCondition: null })}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'right'
         }}
       >
-    <div className="p-3 border-b overflow-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 px-4 py-2"></th>
-            {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
-              <th key={index} className="border border-gray-300 px-4 py-2 whitespace-nowrap">
-                {method}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
-            <tr key={rowIndex}>
-              <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
-              {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
-                <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                   <p>{formatAmountWithCurrency(currency, openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`] )?.fullFormatAmount || ''}</p>  
-                </td>
+        <div className="p-3 border-b overflow-auto">
+          <table className="min-w-full table-auto border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 px-4 py-2"></th>
+                {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
+                  <th key={index} className="border border-gray-300 px-4 py-2 whitespace-nowrap">
+                    {method}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
+                <tr key={rowIndex}>
+                  <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                  {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
+                    <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                      <p>{formatAmountWithCurrency(currency, openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`])?.fullFormatAmount || ''}</p>
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </tbody>
+          </table>
+        </div>
       </Popover>
     </Dialog>
   );

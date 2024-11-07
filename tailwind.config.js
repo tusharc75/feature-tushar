@@ -5,9 +5,21 @@ module.exports = {
     extend: {
       colors: {
         link: 'var(--link)'
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            a: {
+              color: 'var(--link)',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }
+          }
+        }
       }
     }
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
   darkMode: ['class', '[data-mode="dark"]']
 };

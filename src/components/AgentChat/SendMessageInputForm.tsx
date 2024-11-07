@@ -1,27 +1,60 @@
-import { IconButton, InputBase } from '@material-ui/core';
-import { FormEvent, useState } from 'react';
+import { IconButton, TextareaAutosize } from '@material-ui/core';
+import { FormEvent, KeyboardEvent, useState } from 'react';
 import { SendIcon } from 'src/assets/svg/svgIcons';
+import VoiceInput from 'src/components/AgentChat/VoiceInput';
 
 type SendMessageFormProps = {
   sendMessage: (query: string) => Promise<void>;
   loading: boolean;
+  disabled?: boolean;
 };
 
-const SendMessageForm = ({ sendMessage, loading }: SendMessageFormProps) => {
+const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessageFormProps) => {
   const [message, setMessage] = useState('');
+
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     sendMessage(message);
     setMessage('');
   };
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      if (!e.shiftKey && !loading && !disabled && message.trim().length > 1) {
+        // Send the message
+        e.preventDefault();
+        sendMessage(message);
+        setMessage('');
+      } else if (message.trim().length < 1 && !e.shiftKey) {
+        e.preventDefault();
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSendMessage} className="flex items-center">
-      <InputBase value={message} onChange={(e) => setMessage(e.target.value)} fullWidth placeholder="Write a message..." />
+      <TextareaAutosize
+        minRows={1}
+        maxRows={4}
+        value={message}
+        disabled={disabled}
+        onChange={(e) => setMessage(e.target.value)}
+        className="w-full resize-none rounded-sm border-0 bg-transparent px-2 py-3 outline-none dark:text-[white]"
+        placeholder="Write a message..."
+        autoCapitalize="off"
+        autoComplete="off"
+        aria-autocomplete="both"
+        spellCheck="false"
+        data-gramm="false"
+        autoCorrect="off"
+        onKeyDown={handleKeyDown}
+        maxLength={4000}
+      />
+      <VoiceInput setMessage={setMessage} />
       <IconButton
         size="small"
         type="submit"
-        disabled={!message || loading}
+        disabled={!message || loading || disabled}
         style={{ borderRadius: 10, background: 'var(--new-theme-color)', width: 32, height: 32 }}
         className="!ml-[5px]"
       >
