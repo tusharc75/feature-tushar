@@ -35,6 +35,7 @@ import {
 } from '../../../constants/helpers';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+import { flattenArray } from 'src/constants/columns';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -76,7 +77,6 @@ const Quotation = ({
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
-  const [allColumn, setAllColumn] = useState([]);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
 
@@ -311,9 +311,7 @@ const Quotation = ({
         );
       }
     });
-
     setColumns(column);
-    setAllColumn(column.map((d) => d.Header));
   };
 
   const fetchData = async () => {
@@ -417,40 +415,34 @@ const Quotation = ({
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-      delete element.productName;
-      delete element.productId;
-    });
     setUpdating(true);
-    axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
+    axiosInstance().put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
-        fetchData();
         if (saveAndNext) {
-          let data = dataRows;
-          let rowIndex;
-          if (rows[0].parentId) {
-            data = data?.filter((d) => d._id === rows[0]?.parentId)[0].subRows;
-            rowIndex = data?.findIndex((d) => d._id === rows[0]?._id);
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+
           } else {
-            rowIndex = data?.findIndex((d) => d._id === rows[0]?._id);
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
           }
-          setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: rowIndex + 1 < data?.length - 1 ? true : false });
-          setRecordToUpdate(data[rowIndex + 1]);
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
+        fetchData();
         setUpdating(false);
       })
       .catch((error) => {
@@ -833,6 +825,7 @@ const Quotation = ({
           quotationData={quotationData}
           rowData={!isProductEdit.isBulkedit ? recordToUpdate : selectedRecords}
           material={material}
+          loadingEdit={isUpdating}
           selectedProducts={selectedRecords}
           isInlineEdit={isInlineEdit}
           showSaveAndNext={isProductEdit.showSaveAndNext}

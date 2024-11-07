@@ -3,7 +3,6 @@ import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -233,7 +232,6 @@ const SubcontractAssemblyDetail = () => {
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" />
               Views
             </CustomTab>
           )}
