@@ -13,7 +13,6 @@ type GroupSignatureCellProps = {
 };
 
 function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSignatureCellProps) {
-
   const signatures = isArray(original?.[field.fieldName]) ? original?.[field.fieldName] : [];
 
   const NoData = enableDilaog ? <NoDataCell /> : <span className="block">-</span>;
@@ -36,7 +35,7 @@ function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSigna
       cell: (row) =>
         row?.signature ? (
           <img
-            className={cn(' object-contain dark:[filter:invert(1)]', enableDilaog ? 'h-[50px] w-[50px]' : 'h-[25px] w-[25px]')}
+            className={cn(' object-contain dark:bg-white', enableDilaog ? 'h-[50px] w-[50px]' : 'h-[25px] w-[25px]')}
             alt={row?.user?.concatedName}
             src={row?.signature}
           />

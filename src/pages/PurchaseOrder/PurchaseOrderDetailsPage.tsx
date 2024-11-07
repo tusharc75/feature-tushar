@@ -4,7 +4,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -264,7 +263,7 @@ const PurchaseOrderDetailsPage = () => {
           )}
           {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
             <CustomTab value={3}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              Views
             </CustomTab>
           )}
           {resourceData &&

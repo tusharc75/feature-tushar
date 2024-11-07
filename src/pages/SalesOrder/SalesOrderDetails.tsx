@@ -5,7 +5,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
@@ -247,7 +246,6 @@ const SalesOrderDetails = () => {
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
           {!(isMobile && !isTablet) && (
             <CustomTab value={tabIndexValue(resourceData, 2)}>
-              <RiFlowChart className="mr-1" fontSize="inherit" />
               Views
             </CustomTab>
           )}
