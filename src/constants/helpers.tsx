@@ -529,7 +529,7 @@ export const RESOURCE_LABEL = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   managedPackages: 'Managed Packages',
   integration: 'Integration',
-  equiptAi: 'Equipt Ai',
+  equiptAi: 'Equipt Genie',
   trainAiModel: 'Train Ai Model',
   workSpace: 'Work Space',
   workflow: 'Workflow',
@@ -2376,7 +2376,7 @@ export const ACTIVITY_RESOURCE = {
   irtTicket: 'irtTicket',
   subcontractAssembly: 'subcontractAssembly',
   assemblyOrder: 'assemblyOrder',
-  managedPackages: 'managedPackages',
+  managedPackages: 'managedPackages'
 };
 
 export const LOG_RESOURCE = {
@@ -3092,7 +3092,7 @@ export const FIELD_TICKET_LOG_TYPE = {
   invoiceCreated: 'Invoice Created',
   readyToInvoice: 'Ready to Invoice',
   reOpen: 'Re-Open',
-  inProgress: 'In-Progress',
+  inProgress: 'In-Progress'
 };
 
 export const SUBCONTRACT_ASSEMBLY_STATUS = {
@@ -3591,7 +3591,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3641,8 +3641,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

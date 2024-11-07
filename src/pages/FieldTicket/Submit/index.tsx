@@ -265,13 +265,11 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
             )}
           </Fragment>
         )}
-        {!isOffline && (
-          <HtmlTooltip title="View Logs">
-            <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
-              <HistoryIcon />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title="View Logs">
+          <IconButton size="small" aria-label="View-Logs" onClick={() => setViewLogsDialog(true)}>
+            <HistoryIcon />
+          </IconButton>
+        </HtmlTooltip>
       </>
     );
   };
