@@ -46,7 +46,7 @@ export const CustomOfflineProvider = ({ children }) => {
     try {
       if (!isOffline) {
         const canSynch = await checkIfSynching();
-        if(!canSynch) return;
+        if (!canSynch) return;
         await setUpindexDB();
         var data = await findAll(objectStore.offlineDataSync);
         if (data?.length) {
@@ -116,15 +116,14 @@ export const CustomOfflineProvider = ({ children }) => {
           });
           fieldServiceOrderAddOffline([]);
           rentalJobOfflineUpdate([]);
-          setIsSynch(false);
-        } else {
-          setIsSynch(false);
         }
+        setIsSynch(false);
         await checkIfSynching(true);
       }
     } catch (err) {
       await checkIfSynching(true);
-    } 
+      setIsSynch(false);
+    }
   };
 
   return (
