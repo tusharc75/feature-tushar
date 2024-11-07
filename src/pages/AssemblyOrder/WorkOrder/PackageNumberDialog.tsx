@@ -23,7 +23,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
         let material = [];
         material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.managedPackage);
         if(workOrderId){
-          material = material?.filter((m)=> m.workOrder.optionValue===workOrderId);
+          material = material?.filter((m)=> m?.workOrder?.optionValue===workOrderId);
         }
         setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
         setInitialValues({
