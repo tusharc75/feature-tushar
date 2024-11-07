@@ -9,6 +9,7 @@ export const objectStore = {
   fieldServiceOrder: 'fieldServiceOrder',
   fieldTicket: 'fieldTicket',
   fieldTicketMaterial: 'fieldTicketMaterial',
+  fieldTicketLogs: 'fieldTicketLogs',
   resource: 'resource',
   resourceData: 'resourceData'
 } as const;
@@ -101,4 +102,12 @@ export const ifExists = async (store, key) => {
     const result = await transaction.objectStore(store).get(key);
     return result;
   } catch (e) {}
+};
+
+export const deleteDatabase = () => {
+  const request = window.indexedDB.deleteDatabase(DB_NAME);
+
+  request.onsuccess = () => {};
+  request.onerror = () => {};
+  request.onblocked = () => {};
 };

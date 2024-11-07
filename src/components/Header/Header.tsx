@@ -32,6 +32,7 @@ import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
 import { SearchBar } from './SearchBar';
+import { deleteDatabase } from 'src/constants/indexdbhelper';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -233,6 +234,7 @@ const Header = () => {
       //   message: 'Need to logout from Azure'
       // });
     } finally {
+      deleteDatabase();
       await axiosInstance()
         .get('/user/logout')
         .then(() => {

@@ -6,6 +6,7 @@ import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOffli
 import { sortBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
+import { fieldServiceOrderAddOffline } from 'src/pages/FieldServiceOrder/Services/OfflineHelper';
 
 export const CustomOfflineContext = createContext(null);
 
@@ -45,7 +46,7 @@ export const CustomOfflineProvider = ({ children }) => {
     try {
       if (!isOffline) {
         const canSynch = await checkIfSynching();
-        if(!canSynch) return;
+        if (!canSynch) return;
         await setUpindexDB();
         var data = await findAll(objectStore.offlineDataSync);
         if (data?.length) {
@@ -84,13 +85,16 @@ export const CustomOfflineProvider = ({ children }) => {
               deleteOne(objectStore.fieldTicket, d.data._id);
               let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
               fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+              let fieldTicketLogs = await findAll(objectStore.fieldTicketLogs);
+              fieldTicketLogs = fieldTicketLogs?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+              deleteMany(objectStore.fieldTicketLogs, fieldTicketLogs);
               deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
             if (d?.type === 'fieldTicketMaterial') {
               if (d?.data?.length) {
                 await axiosInstance()
-                  .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
+                  .post(`${routes?.fieldTicket?.path}/${d.data[0]?.fieldTicketId}/material-offline-data-sync`, d.data)
                   .then(({ data: { data } }) => {
                     let ids = d?.data?.map((e) => e?._id);
                     deleteMany(objectStore.fieldTicketMaterial, ids);
@@ -110,16 +114,16 @@ export const CustomOfflineProvider = ({ children }) => {
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
           });
-          await rentalJobOfflineUpdate([]);
-          setIsSynch(false);
-        } else {
-          setIsSynch(false);
+          fieldServiceOrderAddOffline([]);
+          rentalJobOfflineUpdate([]);
         }
+        setIsSynch(false);
         await checkIfSynching(true);
       }
     } catch (err) {
       await checkIfSynching(true);
-    } 
+      setIsSynch(false);
+    }
   };
 
   return (
