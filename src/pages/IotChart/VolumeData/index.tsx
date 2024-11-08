@@ -50,7 +50,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'date',
         Header: 'Date',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
@@ -58,7 +57,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'TotalVolInBBLs',
         Header: 'Total Vol In BBLs',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.TotalVolInBBLs}</div>
@@ -66,7 +64,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'TotalVolOutBBLs',
         Header: 'Total Vol Out BBLs',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.TotalVolOutBBLs}</div>
@@ -74,7 +71,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'TotalMinutesRecycle',
         Header: 'Total Minutes Recycle',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.TotalMinutesRecycle}</div>
@@ -82,7 +78,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'TotalMinutesPurge',
         Header: 'Total Minutes Purge',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.TotalMinutesPurge}</div>
@@ -90,7 +85,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'TotalMinutesFill',
         Header: 'Total Minutes Fill',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.TotalMinutesFill}</div>
@@ -98,7 +92,6 @@ const VolumeData = ({ assetId }) => {
       {
         accessor: 'minid',
         Header: 'MINID',
-        width: 120,
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{row?.original?.minid}</div>
