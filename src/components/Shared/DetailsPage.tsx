@@ -35,6 +35,7 @@ import LocationOnIcon from '@material-ui/icons/LocationOn';
 import GoogleMaps from 'src/components/GoogleMap';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
+import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -450,6 +451,13 @@ const Details = (props: DetailProps) => {
               </Typography>
             )}
           </>
+        );
+      }
+      if (fieldData.type === 'freeStyleMultiSelect') {
+        return (
+          <div className={cn(classes.fieldText, ' flex !w-full items-center')}>
+            <FreeStyleMultiSelect value={value} mode="details" />
+          </div>
         );
       }
       return (
