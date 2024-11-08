@@ -428,37 +428,37 @@ const ReceivingTicket = ({
         records?.filter((e) => e.type === 'Asset'),
         '_id'
       );
- 
-      if(similarRecords?.length){
+
+      if (similarRecords?.length) {
         similarRecords?.forEach((ele: any) => {
           ele?.forEach((e: any) => {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.sameAssetsSelected });
           });
         });
       } else {
-      if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
-        if (
-          records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
-            ?.length !== records?.length
-        ) {
-          records?.forEach((e) => {
-            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
-          });
-        }
-      } else {
-        if (
-          records?.filter(
-            (e) =>
-              [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status) &&
-              [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e.rentalAssetStatus)
-          )?.length !== records?.length
-        ) {
-          records?.forEach((e) => {
-            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
-          });
+        if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
+          if (
+            records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
+              ?.length !== records?.length
+          ) {
+            records?.forEach((e) => {
+              errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
+            });
+          }
+        } else {
+          if (
+            records?.filter(
+              (e) =>
+                [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status) &&
+                [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e.rentalAssetStatus)
+            )?.length !== records?.length
+          ) {
+            records?.forEach((e) => {
+              errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
+            });
+          }
         }
       }
-    }
     }
     if (action === rentalManagementActions.updateStartDateEndDate) {
       if (selectedRecords?.find((e) => e?.isAllowedStartDate)) {
