@@ -580,7 +580,7 @@ export default function useColumns() {
       } else if (field.type === 'freeStyleMultiSelect') {
         column.push({
           ...commonFieldData,
-          editable: false,
+          disableFilters: true,
           cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.[field?.fieldName]} />
         });
       } else {
