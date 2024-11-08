@@ -430,7 +430,7 @@ const ProductTemplate = () => {
                       {!values['isStandard'] && (
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
-                          options={[{_id: 'All', name: 'All'},...productCategory]}
+                          options={[{_id: 'Select All', name: 'Select All'},...productCategory]}
                           multiple
                           getOptionLabel={(option: any) => (option ? option.name : '')}
                           getOptionSelected={(option: any, val) => option._id === val}
@@ -441,7 +441,7 @@ const ProductTemplate = () => {
                               : []
                           }
                           onChange={(e, val) => {
-                            if(val?.find((v)=> v._id==="All")){
+                            if(val?.find((v)=> v._id==="Select All")){
                               setFieldValue('productCategory', productCategory?.map((d) => d._id)); 
                             }else {
                               setFieldValue('productCategory', val && val?.map((d) => d._id));
