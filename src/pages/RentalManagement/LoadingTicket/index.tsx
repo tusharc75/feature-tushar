@@ -60,6 +60,7 @@ import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, next
 import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 import WarningIcon from '@material-ui/icons/Warning';
+import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -158,7 +159,7 @@ const LoadingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse', 'jobCount', 'currentGpsLocation']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames']
         }
       ]
     });
@@ -337,6 +338,15 @@ const LoadingTicket = ({
           }
         ]
         : []),
+      ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
+        ? [
+          {
+            accessor: 'currentGpsWellNames',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+          }
+        ]
+        : []),
       {
         accessor: 'productName',
         Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
@@ -498,6 +508,7 @@ const LoadingTicket = ({
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
           currentGpsLocation: u?.currentGpsLocation,
+          currentGpsWellNames: u?.currentGpsWellNames?.toString(),
           currentLocationNotMatchWithGps: u?.currentLocationNotMatchWithGps,
           rentalAssetStatus: u?.status
         }));
@@ -523,6 +534,7 @@ const LoadingTicket = ({
             wellNumber: d?.inventory?.wellNumber,
             position: d?.inventory?.position,
             currentGpsLocation: d?.inventory?.currentGpsLocation,
+            currentGpsWellNames: d?.inventory?.currentGpsWellNames?.toString(),
             currentLocationNotMatchWithGps: d?.inventory?.currentLocationNotMatchWithGps,
           }))
           .map((u) => ({
