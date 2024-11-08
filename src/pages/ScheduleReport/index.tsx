@@ -54,7 +54,6 @@ const ScheduleReport = () => {
       {
         accessor: 'scheduleName',
         Header: 'Schedule Name',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           row?.original?.scheduleName ? <p
@@ -67,47 +66,41 @@ const ScheduleReport = () => {
           >
             {row.original.scheduleName}
           </p>
-        : <NoDataCell />)
+            : <NoDataCell />)
       },
       {
         accessor: 'resource',
         Header: 'Report',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
         Header: 'Frequency',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row?.original?.frequency ? <p className="text-truncate">{row.original.frequency}</p> : <NoDataCell/>)
+        Cell: ({ row }) => (row?.original?.frequency ? <p className="text-truncate">{row.original.frequency}</p> : <NoDataCell />)
       },
       {
         accessor: 'day',
         Header: 'Day',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
       },
       {
         accessor: 'reportAction',
         Header: 'Report Action',
-        width: 150,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>( row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>)
+        Cell: ({ row }) => (row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>)
       },
       {
         accessor: 'time',
         Header: 'Time',
-        width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
       },
