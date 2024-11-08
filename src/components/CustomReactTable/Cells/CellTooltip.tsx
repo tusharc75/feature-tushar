@@ -1,35 +1,26 @@
 import { Popper } from '@material-ui/core';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
-import { cn, CustomDialogTransition } from 'src/constants/helpers';
-import { Dialog } from '@material-ui/core';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-// import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-// import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+type CellToltipProps = {
+  children: React.ReactNode;
+  more: number;
+  tooltipChildren: React.ReactNode;
+  title?: string;
+} & React.HTMLAttributes<HTMLSpanElement>;
 
-type CellTooltipProps = {
-  children: (view: 'tooltip' | 'expanded') => React.ReactNode;
-  text?: React.ReactNode;
-  onTextClick?: () => void;
-  className?: string;
-  enableExpandView?: boolean;
-  expandViewHead?: string;
-};
-
-const CellTooltip = ({
-  children,
-  text = 'View',
-  onTextClick = () => {},
-  className = '',
-  enableExpandView = true,
-  expandViewHead = 'View'
-}: CellTooltipProps) => {
+function CellTooltip({ children, more, tooltipChildren, title = '', ...rest }: CellToltipProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
-  const [arrowRef, setArrowRef] = useState<any | null>(null);
-  const [isExpandViewOpen, setIsExpandViewOpen] = useState(false);
 
+  const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    if (Boolean(anchorEl)) {
+      setAnchorEl(null);
+    } else {
+      setAnchorEl(event.currentTarget);
+    }
+  };
   const handleMouseOver = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     event.stopPropagation();
     event.preventDefault();
@@ -44,74 +35,45 @@ const CellTooltip = ({
 
   const open = Boolean(anchorEl);
 
-  const handleCloseExpandView = () => {
-    setIsExpandViewOpen(false);
-  };
-
-  const onTextClickWrapper = () => {
-    onTextClick();
-    if (enableExpandView) {
-      setAnchorEl(null);
-      setIsExpandViewOpen(true);
-    }
-  };
-
   return (
-    <div>
+    <span className="flex w-full items-center">
       <>
-        <span onMouseOver={handleMouseOver} onClick={onTextClickWrapper} className="link block !text-[var(--link)]">
-          {text}
-        </span>
-        <Popper
-          open={open}
-          anchorEl={anchorEl}
-          placement="top"
-          modifiers={{
-            flip: {
-              enabled: true
-            },
-            preventOverflow: {
-              enabled: false,
-              boundariesElement: 'scrollParent'
-            },
-            arrow: {
-              enabled: true,
-              element: arrowRef
-            }
-          }}
-        >
-          <div onMouseLeave={handleClose}>
-            <div className="filler absolute -bottom-[10px] -left-0 -right-0 z-[2] h-[48px]" onClick={onTextClickWrapper}>
-              <span className="link absolute -bottom-[8px] cursor-pointer opacity-0 [left:50%] [transform:translateX(-50%)] ">{text}</span>
-            </div>
-            <span className="absolute bottom-0 left-0 z-[1] -mb-[9px]" ref={setArrowRef}>
-              <IoCaretDown size={24} className="!stroke-[var(--common-border-color)] text-[var(--dark-primary,white)] " />
-            </span>
-            <div
-              className={cn(
-                'min-w-[200px] rounded-md bg-[var(--dark-primary,white)] p-[10px] drop-shadow-lg [border:1px_solid_var(--common-border-color)] [filter:drop-shadow(0_4px_3px_rgb(0_0_0_/_0.07))_drop-shadow(0_2px_2px_rgb(0_0_0_/_0.06))]',
-                className
-              )}
-              style={{ transform: 'translateY(-11px)' }}
+        <p title={title} {...rest}>
+          {children}
+        </p>
+        {more > 0 && (
+          <>
+            <span
+              className="createdAtTime badge-date hide-in-export max-w-fit flex-shrink-0 cursor-pointer select-none !p-[4px_6px] md:!p-[0_6px]"
+              onClick={(e) => {
+                handleClick(e);
+              }}
+              data-hide-in-export="true"
+              onMouseOver={handleMouseOver}
             >
-              <div className="translate-y-2 items-center text-center">{children('tooltip')}</div>
-              {enableExpandView && (
-                <span className="mt-2 block text-center text-[12px] text-gray-400 [border-top:1px_solid_var(--common-border-color)]">
-                  Click "{text}" to see in a expanded modal
-                </span>
-              )}
-            </div>
-          </div>
-        </Popper>
+              {`+${more} more..`}
+            </span>
+            <Popper open={open} anchorEl={anchorEl} placement="top">
+              <div
+                className="min-w-[100px] rounded-md bg-[var(--dark-primary,white)] p-[10px] drop-shadow-lg [border:1px_solid_var(--common-border-color)] [filter:drop-shadow(0_4px_3px_rgb(0_0_0_/_0.07))_drop-shadow(0_2px_2px_rgb(0_0_0_/_0.06))]"
+                style={{ transform: 'translateY(-11px)' }}
+                onMouseLeave={handleClose}
+              >
+                <div className="relative translate-y-2 items-center">
+                  <div className=" max-h-[200px] min-w-[100px] max-w-[300px] space-y-1 overflow-y-auto overflow-x-hidden">{tooltipChildren}</div>
+                  <div className="filler absolute -bottom-[45px] -left-[10px] -right-[10px] h-[48px] cursor-help "></div>
+                  <IoCaretDown
+                    size={24}
+                    className="absolute -bottom-[26px] left-0 right-0 z-10 mx-auto !stroke-[var(--common-border-color)] text-[var(--dark-primary,white)] "
+                  />
+                </div>
+              </div>
+            </Popper>
+          </>
+        )}
       </>
-      {enableExpandView && (
-        <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth open={isExpandViewOpen} onClose={handleCloseExpandView}>
-          <CustomDialogHeader title={expandViewHead} onClose={handleCloseExpandView} showRequiredLabel={false} />
-          <CustomDialogContent>{children('expanded')}</CustomDialogContent>
-        </Dialog>
-      )}
-    </div>
+    </span>
   );
-};
+}
 
 export default CellTooltip;
