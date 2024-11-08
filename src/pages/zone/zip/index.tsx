@@ -81,7 +81,6 @@ const Zipcode = (props: ConfigProps) => {
       {
         accessor: 'zipCode',
         Header: 'Zip Code',
-        width: 120,
         order: 1,
         Cell: ({ row }) => (
           <>
