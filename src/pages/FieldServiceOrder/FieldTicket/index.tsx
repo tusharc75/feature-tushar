@@ -110,14 +110,11 @@ const FieldTicket = ({
                 >
                   {row?.original?.fieldTicketNumber}
                 </h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
+                <a href={`${routes.fieldTicketDetail.path}/${row?.original?._id}`} target="_blank" rel="noreferrer">
+                  <IconButton size="small">
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </a>
               </div>
             ) : (
               <NoDataCell />
