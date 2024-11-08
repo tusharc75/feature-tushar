@@ -837,7 +837,7 @@ const WorkOrderDetails = () => {
             setOpenManagedPackageDialog(false);
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
-          workOrderId={id}
+          workOrderIds={[id]}
           onSuccess={() => {
             setOpenManagedPackageDialog(false);
             updateStatus(WORK_ORDER_STATUS.completed)

@@ -36,6 +36,19 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
+    const {
+      data: { data: managedPackageFieldData }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.managedPackages,
+          fieldNames: ['managedPackageName']
+        }
+      ]
+    });
+  
+    const managedPackageField = managedPackageFieldData?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -95,7 +108,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       },
       {
         accessor: 'managedPackageName',
-        Header: 'Managed Package Name',
+        Header: managedPackageField[0]?.fieldLabel || 'Managed Package Name',
         width: 200,
         show: false,
         Cell: ({ row }) => {

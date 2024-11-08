@@ -26,6 +26,7 @@ import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStati
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
+import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -54,6 +55,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
+  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState({ open: false, ids: [] });
 
   const { generateColumns } = useColumns();
 
@@ -486,15 +488,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
-  const handleAutoComplete = () => {
-    let ids = [];
-    if (autoCompleteData && autoCompleteData.length > 0) {
-      autoCompleteData.forEach((d) => {
-        if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-          if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
-        }
-      });
-    }
+  const handleAutoComplete = (ids) => {
     setCompleting(true);
     if (ids.length) {
       axiosInstance()
@@ -526,7 +520,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const checkParentProduct = (selectedRecords, parentId = null, rows = []) => {
     if (parentId && rows?.length > 0) {
-      return [MATERIAL_TYPE.product, MATERIAL_TYPE.package].includes(selectedRecords[0]?.type) && selectedRecords[0]?.parentId && !rows?.find((r) => r?.original?._id === parentId)?.original?.parentId;
+      return (
+        [MATERIAL_TYPE.product, MATERIAL_TYPE.package].includes(selectedRecords[0]?.type) &&
+        selectedRecords[0]?.parentId &&
+        !rows?.find((r) => r?.original?._id === parentId)?.original?.parentId
+      );
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
@@ -724,7 +722,36 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onClose={() => {
             setCompleteConfirmBox(false);
           }}
-          onOk={handleAutoComplete}
+          onOk={() => {
+            let ids = [];
+            let isPackage = false;
+            if (autoCompleteData && autoCompleteData.length > 0) {
+              autoCompleteData.forEach((d) => {
+                if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
+                  if(d?.type===MATERIAL_TYPE.package) isPackage = true;
+                  if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
+                }
+              });
+            }
+            
+            isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+          }}
+        />
+      )}
+
+      {openManagedPackageDialog.open && (
+        <PackageNumberDialog
+          onClose={() => {
+            setOpenManagedPackageDialog({open: false, ids: []});
+            setCompleteConfirmBox(false);
+          }}
+          assemblyOrderId={assemblyOrderData._id}
+          workOrderIds={openManagedPackageDialog.ids}
+          onSuccess={() => {
+            setCompleteConfirmBox(false);
+            handleAutoComplete(openManagedPackageDialog.ids)
+            setOpenManagedPackageDialog({open: false, ids: []});
+          }}
         />
       )}
 

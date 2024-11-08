@@ -60,7 +60,7 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, assemblyOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            rest.productionOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+            rest.assemblyOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(assemblyOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
