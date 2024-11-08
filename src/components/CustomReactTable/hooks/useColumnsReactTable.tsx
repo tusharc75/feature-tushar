@@ -29,6 +29,7 @@ import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
 import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
+import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -575,6 +576,12 @@ export default function useColumns() {
           ...commonFieldData,
           editable: false,
           cell: ({ row }) => <GpsLocationCell value={row?.original?.[field?.fieldName]} />
+        });
+      } else if (field.type === 'freeStyleMultiSelect') {
+        column.push({
+          ...commonFieldData,
+          disableFilters: true,
+          cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.[field?.fieldName]} />
         });
       } else {
         column.push({
