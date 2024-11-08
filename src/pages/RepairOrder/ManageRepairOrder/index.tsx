@@ -131,6 +131,15 @@ const ManageRepairOrder = ({
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
+          const disabledField = ['rentalJob', 'warehouse', 'customerAccount', 'type']
+          disabledField?.forEach((field: any) => {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === field && initialData[field]) {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          })
         }
         if (referenceType === sidebarResource.workOrderPlanning) {
           if (referenceData) {
@@ -284,7 +293,7 @@ const ManageRepairOrder = ({
                       ? `Create ${routes.repairOrder.title}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
                   }
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
@@ -421,8 +430,8 @@ const ManageRepairOrder = ({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                         />
