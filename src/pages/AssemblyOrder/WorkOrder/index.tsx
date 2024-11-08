@@ -352,7 +352,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       _subRow.qty = _subRow.qty;
       _subRow.workOrderId = _subRow?.workOrder?._id;
       _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
-      _subRow.status = _subRow?.workOrder?.serviceProcessStatus || '';
+      _subRow.status = _subRow?.workOrder?.status || '';
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
         _subRow.canAutoCompleteWorkOrder = true;
       }
