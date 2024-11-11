@@ -59,6 +59,16 @@ const Steps = ({
     });
   };
 
+  const goToPrevStepAtIndex = (index: number) => {
+    setCurrentStep(() => {
+      const newStep = index;
+      if (updateStatus) {
+        updateStatus(newStep);
+      }
+      return newStep;
+    });
+  };
+
   useEffect(() => {
     handleScroll();
   }, [activeStep]);
@@ -173,12 +183,19 @@ const Steps = ({
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
                     ${i === currentStep && !isStepEnded ? styles.currentStep : ''}
                     ${i > currentStep && !isStepEnded ? styles.inActiveStep : ''}
-                    single-step-item
+                    single-step-item transition-all 
+                    ${i < currentStep && !isStepEnded && isPrevStep ? 'cursor-pointer hover:shadow hover:[border:2px_solid_#f99336]' : ''}
+                    
                 `}
                     style={{ '--line-color': i < currentStep ? 'var(--new_theme_color)' : 'unset' } as React.CSSProperties}
                     key={step.name}
                     id={step.name}
                     aria-disabled={i > currentStep && !isStepEnded}
+                    onClick={() => {
+                      if (i < currentStep && !isStepEnded && isPrevStep) {
+                        goToPrevStepAtIndex(i);
+                      }
+                    }}
                   >
                     {(isStepEnded || i < currentStep) && (
                       <Box className={styles.stepCompleteIcon}>
