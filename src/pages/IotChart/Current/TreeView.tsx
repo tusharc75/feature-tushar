@@ -8,7 +8,7 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import moment from 'moment';
-import { CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Chart from '../Helper/Chart';
@@ -16,9 +16,10 @@ import FilterModel from '../Helper/FilterModel';
 
 const Accordion = withStyles({
   root: {
-    border: '0px',
     boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
-
+    borderRadius: '0.5rem !important',
+    border: '1px solid var(--common-border-color) !important',
+    overflow: 'hidden',
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -38,11 +39,13 @@ const AccordionSummary = withStyles({
     backgroundColor: 'var(--accordion-summary-bg, #fff)',
     padding: '0 8px',
     minHeight: 48,
-    borderRadius: '3.54532px',
+    // borderRadius: '0.5rem !important',
+    // border: '1px solid var(--common-border-color) !important',
     '&$expanded': {
       minHeight: 48,
-      backgroundColor: 'var(--accordion-expanded-summary-bg, #f1f5ff)',
-      borderRadius: '3.54532px 3.54532px 0px 0px'
+      // borderRadius: '0.5rem 0.5rem 0 0 !important',
+      backgroundColor: 'var(--dark-secondary, white)',
+      borderBottom: '0px !important'
     }
   },
   content: {
@@ -57,8 +60,8 @@ const AccordionDetails = withStyles((theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),
-    border: '1px solid var(--accordion-details-border)',
-    borderRadius: '0px 0px 6px 6px'
+    // border: '1px solid var(--accordion-details-border)',
+    borderRadius: '0px 0px 0.5rem 0.5rem'
   }
 }))(MuiAccordionDetails);
 
@@ -83,7 +86,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
     <>
       <Accordion
         expanded={expandedAccordition[category?._id]}
-        className={`omsAccordian w-full`}
+        className={`omsAccordian w-full !shadow-lg`}
         onChange={() => {
           setExpandedAccordition((prev) => ({
             ...prev,
@@ -91,7 +94,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
           }));
         }}
       >
-        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="![border:1px_solid_var(--commono-border-color)]">
           <Box display="flex">
             <Box>
               <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -109,54 +112,51 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
             </Box>
           </Box>
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails className="bg-gray-100 dark:bg-gray-800">
           {expandedAccordition[category?._id] && (
             <>
-              <Grid container spacing={1}>
+              <div>
                 {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
-                  <Box className="p-[10px] " width={'100%'} textAlign="end">
-                    {' '}
+                  <h6 className=" mb-3 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300">
                     Last Updated -{' '}
-                    <span className="text-[12px] text-gray-500 dark:text-gray-300">
+                    <span>
                       {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}
                     </span>
-                  </Box>
+                  </h6>
                 ) : null}
-                {currentData
-                  ?.filter((d) => d?.category?.optionValue === category?._id)
-                  ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
-                  ?.map((data) => {
-                    return (
-                      <Grid item xs={12} sm={6} lg={4} md={4}>
-                        <Box
-                          border="1px solid var(--common-border-color)"
-                          className={`min-h-full rounded-md p-[10px] ${data?.redAlert ? 'bg-red-300' : ''}`}
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
+                <div className="grid grid-cols-1 gap-2 rounded-lg  p-3  sm:grid-cols-2 md:grid-cols-3">
+                  {currentData
+                    ?.filter((d) => d?.category?.optionValue === category?._id)
+                    ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
+                    ?.map((data) => {
+                      return (
+                        <div
+                          key={data?.fieldLabel}
+                          className={cn(
+                            `flex min-h-full items-center justify-between rounded-lg bg-[var(--dark-primary,white)] p-[10px] shadow-lg`,
+                            data?.redAlert ? 'bg-red-300' : ''
+                          )}
                         >
-                          <p style={{ width: '100%' }} className="flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                            <strong className="line-clamp-1">{data?.fieldLabel} : </strong>
-                            <span className="font-medium">
+                          <div className="text">
+                            <p className="mb-2 text-xs font-semibold text-gray-600 dark:text-gray-400">{data?.fieldLabel}</p>
+                            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">
                               {data?.fieldValue || 0}
-                              {data?.unit && `(${data?.unit})`}
-                            </span>
-                          </p>
-                          <Box ml={1}>
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                setDataPoint(data);
-                              }}
-                            >
-                              <HistoryIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    );
-                  })}
-              </Grid>
+                              {data?.unit && ` (${data?.unit})`}
+                            </p>
+                          </div>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setDataPoint(data);
+                            }}
+                          >
+                            <HistoryIcon fontSize="small" />
+                          </IconButton>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
               <div className="grid gap-3">
                 {category?.child?.map((child: any) => (
                   <TreeView
