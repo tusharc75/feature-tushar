@@ -1352,13 +1352,12 @@ const Steps = ({
                             {stepData?.status &&
                             step?.isAllowToPerform &&
                             ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                            // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
                             isStepsAllowToPerform ? (
                               [
                                 WORKORDER_SERVICE_STEP_STATUS.passed,
                                 WORKORDER_SERVICE_STEP_STATUS.failed,
-                                WORKORDER_SERVICE_STEP_STATUS.completed,
-                                WORKORDER_SERVICE_STEP_STATUS.skipped
+                                WORKORDER_SERVICE_STEP_STATUS.completed
                               ]?.includes(stepData?.passFailStatus) ? (
                                 <>
                                   <Button
