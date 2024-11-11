@@ -36,6 +36,19 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     const data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
 
+    const {
+      data: { data: managedPackageFieldData }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.managedPackages,
+          fieldNames: ['managedPackageName']
+        }
+      ]
+    });
+  
+    const managedPackageField = managedPackageFieldData?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -95,7 +108,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       },
       {
         accessor: 'managedPackageName',
-        Header: 'Managed Package Name',
+        Header: managedPackageField[0]?.fieldLabel || 'Managed Package Name',
         width: 200,
         show: false,
         Cell: ({ row }) => {
@@ -168,7 +181,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.subRows = generateNestedData(data, parent);
     });
 
-    if (rows?.every((r) => r?.managedPackageId)) {
+    if (rows?.every((r) => r?.isValid && r?.managedPackageId)) {
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -184,12 +197,25 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           ? _subRow.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.assetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
             : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
+      if (_subRow.type === MATERIAL_TYPE.package) {
+        _subRow.managedPackageId = _subRow?.managedPackageDetail?._id;
+        _subRow.managedPackageName = _subRow?.managedPackageDetail?.managedPackageName;
+      }
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    const subPackages = subRows?.filter((s) => s.type === MATERIAL_TYPE.package);
+    parent.isValid = subPackages?.length > 0 ? subPackages?.every((s) => s?.managedPackageId) : true;
     return subRows;
   };
 

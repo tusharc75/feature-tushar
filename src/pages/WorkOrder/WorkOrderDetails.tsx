@@ -45,6 +45,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import WorkOrderCostDialog from './WorkOrderCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -110,6 +111,7 @@ const WorkOrderDetails = () => {
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
+  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState(false);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -445,6 +447,8 @@ const WorkOrderDetails = () => {
           } else {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
+        } else if(workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package){
+            setOpenManagedPackageDialog(true);
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
         }
@@ -826,6 +830,20 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+
+       {openManagedPackageDialog && (
+        <PackageNumberDialog
+          onClose={() => {
+            setOpenManagedPackageDialog(false);
+          }}
+          assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
+          workOrderIds={[id]}
+          onSuccess={() => {
+            setOpenManagedPackageDialog(false);
+            updateStatus(WORK_ORDER_STATUS.completed)
+          }}
+          />
+        )}
     </Box>
   );
 };

@@ -9,26 +9,56 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, MATERIAL_TYPE } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 
-const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
+const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ managedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
+  const [managedPackagedLabel, setManagedPackagedLabel] = useState(null);
+
+  useEffect(() => {
+    fetchFieldLabel();
+  }, []);
 
   useEffect(() => {
     axiosInstance()
       .get(`${routes.assemblyOrder.path}/material/${assemblyOrderId}`)
       .then(({ data: { data } }) => {
-        const material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId && !m?.managedPackage);
+        let material = [];
+        material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.managedPackage);
+        if (workOrderIds?.length) {
+          material = material?.filter((m) => m.parentId && [...workOrderIds].includes(m?.workOrder?.optionValue));
+        } else {
+          material = material?.filter((m) => !m.parentId);
+        }
         setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
-
         setInitialValues({
-          managedPackages: material?.map((m) => ({ package: m?.materialId, managedPackageName: '', uniqueId: m?._id }))
+          managedPackages: material?.map((m) => ({
+            package: m?.materialId,
+            managedPackageName: '',
+            uniqueId: m?._id,
+            isSubPackage: m?.parentId ? true : false
+          }))
         });
       })
       .catch((error) => {});
   }, [assemblyOrderId]);
+
+  const fetchFieldLabel = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.managedPackages,
+          fieldNames: ['managedPackageName']
+        }
+      ]
+    });
+    const managedPackageField = data?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
+    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel)
+  };
 
   const validate = (values) => {
     const errors: any = {};
@@ -99,12 +129,12 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
                               <Grid item md={6} lg={6} sm={6} xs={12}>
                                 <TextField
                                   fullWidth
-                                  label="Package Number"
+                                  label={managedPackagedLabel || 'Managed Package Name'}
                                   variant="outlined"
                                   type="text"
                                   size="small"
                                   name="managedPackageName"
-                                  placeholder="Package Number"
+                                  placeholder={managedPackagedLabel || 'Managed Package Name'}
                                   margin="dense"
                                   value={data.message}
                                   required
@@ -131,6 +161,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess }) => {
                               <Grid item md={6} lg={6} sm={6} xs={12}>
                                 <Autocomplete
                                   id="package"
+                                  disabled
                                   options={packageOptions}
                                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                                   getOptionSelected={(option: any, val) => option?.optionValue === val}
