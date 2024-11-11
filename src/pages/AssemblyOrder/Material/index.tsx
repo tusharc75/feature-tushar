@@ -96,13 +96,14 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             ) : (
               <h5 className="text-truncate">{row.original?.detail}</h5>
             )}
-            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
+            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && !row.original.parentId && (
               <>
                 <Box>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
                 <Box>
-                  <HtmlTooltip title="Add Existing Products">
+                  {!row?.original?.parentId && (
+                    <HtmlTooltip title="Add Existing Products">
                     <IconButton
                       onClick={() => {
                         setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
@@ -112,6 +113,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                       <Add fontSize="small" color="primary" />
                     </IconButton>
                   </HtmlTooltip>
+                )}
                 </Box>
               </>
             )}
@@ -121,8 +123,10 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
+                  } else if(row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }else {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -225,8 +229,18 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            :  '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageDescription
+            : '';
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
