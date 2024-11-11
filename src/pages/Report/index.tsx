@@ -149,7 +149,7 @@ const Report = () => {
         )
       });
     }
-    if (resourceStartCase === sidebarResource.invoice) {
+    if ([sidebarResource.invoice, sidebarResource.fieldTicket].includes(resourceStartCase)) {
       const extraColumns = [
         {
           accessor: 'amount',
