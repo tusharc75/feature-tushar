@@ -1,5 +1,5 @@
 import { IconButton, Menu, MenuItem, makeStyles, useMediaQuery } from '@material-ui/core';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -26,6 +26,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+function addArrayToQueryParams(array, paramName) {
+  const params = new URLSearchParams();
+  array.forEach((item) => params.append(paramName, item));
+  return params.toString();
+}
+
 export default function ImportExportLinks({
   ids = [],
   permissions,
@@ -46,7 +52,8 @@ export default function ImportExportLinks({
   title = '',
   headers = null,
   hideDefaultImportExport = false,
-  small = false
+  small = false,
+  visibleColumns = {}
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -55,6 +62,16 @@ export default function ImportExportLinks({
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
+
+  const exportColumn = useMemo(() => {
+    const columns = [];
+    for (const key in visibleColumns) {
+      if (visibleColumns[key]) {
+        columns.push(key);
+      }
+    }
+    return columns;
+  }, [visibleColumns]);
 
   const handleOpenMenu = (e, action) => {
     setImptExptDnldMenuDta({ action, anchorEl: e.currentTarget, open: true });
@@ -141,6 +158,14 @@ export default function ImportExportLinks({
         additionalParams = additionalParams?.replace(`?`, `&`);
       }
       exportApi = `${exportApi}${additionalParams}`;
+    }
+
+    if (exportColumn.length > 0) {
+      if (exportApi?.includes('?')) {
+        exportApi = `${exportApi}&exportColumn=${JSON.stringify(exportColumn)}`;
+      } else {
+        exportApi = `${exportApi}?exportColumn=${JSON.stringify(exportColumn)}`;
+      }
     }
 
     if (recordsToExport > 0) {
@@ -434,7 +459,7 @@ export default function ImportExportLinks({
       {isMobile && (
         <>
           <RenderMobileMenu />
-          <div className="flex items-center gap-[6px] flex-wrap">
+          <div className="flex flex-wrap items-center gap-[6px]">
             {isDownloadExcel && !onlyExport && !hideDefaultImportExport && (
               <IconButton
                 size="small"
@@ -458,7 +483,7 @@ export default function ImportExportLinks({
               <MobileExportIcon size={18} color={'var(--primary-text)'} />
             </IconButton>
             {permissions?.isCreate && !onlyExport && !hideDefaultImportExport && (
-              <IconButton size="small" className="relative mobileIconButton primary border">
+              <IconButton size="small" className="mobileIconButton primary relative border">
                 {ImportInput}
                 <label htmlFor="importFromExcel" className="absolute inset-0 grid place-items-center">
                   <MobileImportIcon size={18} color={'var(--primary-text)'} />
