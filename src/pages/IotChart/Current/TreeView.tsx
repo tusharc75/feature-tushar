@@ -36,14 +36,10 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'var(--accordion-summary-bg, #fff)',
     padding: '0 8px',
     minHeight: 48,
-    // borderRadius: '0.5rem !important',
-    // border: '1px solid var(--common-border-color) !important',
     '&$expanded': {
       minHeight: 48,
-      // borderRadius: '0.5rem 0.5rem 0 0 !important',
       backgroundColor: 'var(--dark-secondary, white)',
       borderBottom: '0px !important'
     }
@@ -60,7 +56,6 @@ const AccordionDetails = withStyles((theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),
-    // border: '1px solid var(--accordion-details-border)',
     borderRadius: '0px 0px 0.5rem 0.5rem'
   }
 }))(MuiAccordionDetails);
