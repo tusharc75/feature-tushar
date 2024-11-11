@@ -26,12 +26,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function addArrayToQueryParams(array, paramName) {
-  const params = new URLSearchParams();
-  array.forEach((item) => params.append(paramName, item));
-  return params.toString();
-}
-
 export default function ImportExportLinks({
   ids = [],
   permissions,
