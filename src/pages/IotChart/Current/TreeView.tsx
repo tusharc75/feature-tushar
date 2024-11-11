@@ -90,67 +90,61 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
         }}
       >
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="![border:1px_solid_var(--commono-border-color)]">
-          <Box display="flex">
-            <Box>
-              <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-            </Box>
-            <Box padding="5px">
-              <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+          <div className="flex w-full items-center">
+            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            <div className="flex flex-grow justify-between gap-2 p-[5px]">
+              <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }} className="truncate">
                 {category?.iotDataPointsCategoryName}
               </Typography>
               {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) && (
-                <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px]`}>
+                <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px] `}>
                   <span className="absolute -left-[3px] -top-[3px] inline-flex h-3 w-3 animate-ping rounded-full bg-red-400 opacity-75"></span>
                   <span className="inline-flex h-full w-full rounded-full bg-red-500"></span>
                 </span>
               )}
-            </Box>
-          </Box>
+              {expandedAccordition[category?._id] && currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
+                <h6 className="line-clamp-1 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300 max-sm:text-xs">
+                  <span className="max-md:sr-only">Last Updated -</span>
+                  <span>{moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}</span>
+                </h6>
+              ) : null}
+            </div>
+          </div>
         </AccordionSummary>
         <AccordionDetails className="bg-gray-100 dark:bg-gray-800">
           {expandedAccordition[category?._id] && (
             <>
-              <div>
-                {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
-                  <h6 className=" mb-3 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300">
-                    Last Updated -{' '}
-                    <span>
-                      {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}
-                    </span>
-                  </h6>
-                ) : null}
-                <div className="grid grid-cols-1 gap-2 rounded-lg  p-3  sm:grid-cols-2 md:grid-cols-3">
-                  {currentData
-                    ?.filter((d) => d?.category?.optionValue === category?._id)
-                    ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
-                    ?.map((data) => {
-                      return (
-                        <div
-                          key={data?.fieldLabel}
-                          className={cn(
-                            `flex min-h-full items-center justify-between rounded-lg bg-[var(--dark-primary,white)] p-[10px] shadow-lg`,
-                            data?.redAlert ? 'bg-red-300' : ''
-                          )}
-                        >
-                          <div className="text">
-                            <p className="mb-2 text-xs font-semibold text-gray-600 dark:text-gray-400">{data?.fieldLabel}</p>
-                            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">
-                              {data?.fieldValue || 0}
-                              {data?.unit && ` (${data?.unit})`}
-                            </p>
-                          </div>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              setDataPoint(data);
-                            }}
-                          >
-                            <HistoryIcon fontSize="small" />
-                          </IconButton>
+              <div className="grid grid-cols-1 gap-2 rounded-lg sm:grid-cols-2 md:grid-cols-3">
+                {currentData
+                  ?.filter((d) => d?.category?.optionValue === category?._id)
+                  ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
+                  ?.map((data) => {
+                    return (
+                      <div
+                        key={data?.fieldLabel}
+                        className={cn(
+                          `flex min-h-full items-center justify-between rounded-lg bg-[var(--dark-primary,white)] p-[10px] shadow-lg`,
+                          data?.redAlert ? 'bg-red-300' : ''
+                        )}
+                      >
+                        <div className="text">
+                          <p className="mb-2 text-xs text-gray-600 dark:text-gray-400">{data?.fieldLabel}</p>
+                          <p className="text-md font-medium text-gray-700 dark:text-gray-200">
+                            {data?.fieldValue || 0}
+                            {data?.unit && ` (${data?.unit})`}
+                          </p>
                         </div>
-                      );
-                    })}
-                </div>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setDataPoint(data);
+                          }}
+                        >
+                          <HistoryIcon fontSize="small" />
+                        </IconButton>
+                      </div>
+                    );
+                  })}
               </div>
               <div className="grid gap-3">
                 {category?.child?.map((child: any) => (
