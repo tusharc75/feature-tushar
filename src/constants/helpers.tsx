@@ -2609,6 +2609,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.fieldTicket,
+    permission: 'fieldTicket',
+    key: 'fieldTicket',
+    type: 'dynamic'
+  },
+  {
     title: 'Invoice Details',
     permission: 'invoice',
     key: 'standardReport',
