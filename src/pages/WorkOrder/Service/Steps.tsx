@@ -1370,8 +1370,6 @@ const Steps = ({
                                       e.stopPropagation();
                                       if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
                                         setReOpenServiceDialog({ open: true, type: null, step: step });
-                                      } else if (WORKORDER_SERVICE_STEP_STATUS.skipped === stepData?.passFailStatus) {
-                                        handleStartEnd('unSkipped', step);
                                       } else {
                                         handleStartEnd('reopen', step);
                                       }
