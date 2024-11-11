@@ -1352,12 +1352,13 @@ const Steps = ({
                             {stepData?.status &&
                             step?.isAllowToPerform &&
                             ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
                             isStepsAllowToPerform ? (
                               [
                                 WORKORDER_SERVICE_STEP_STATUS.passed,
                                 WORKORDER_SERVICE_STEP_STATUS.failed,
-                                WORKORDER_SERVICE_STEP_STATUS.completed
+                                WORKORDER_SERVICE_STEP_STATUS.completed,
+                                WORKORDER_SERVICE_STEP_STATUS.skipped
                               ]?.includes(stepData?.passFailStatus) ? (
                                 <>
                                   <Button
@@ -1370,6 +1371,8 @@ const Steps = ({
                                       e.stopPropagation();
                                       if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
                                         setReOpenServiceDialog({ open: true, type: null, step: step });
+                                      } else if (WORKORDER_SERVICE_STEP_STATUS.skipped === stepData?.passFailStatus) {
+                                        handleStartEnd('unSkipped', step);
                                       } else {
                                         handleStartEnd('reopen', step);
                                       }

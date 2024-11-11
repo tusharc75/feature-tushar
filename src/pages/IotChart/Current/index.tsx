@@ -136,30 +136,29 @@ export default function Current({ deviceTemplate, assetId }) {
         </Grid>
         <Grid item lg={4} md={4} sm={12} xs={12}>
           {errorData ? (
-            <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
-              <Table stickyHeader id={'table_' + '1'} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    {['alert'].map((_k: any, index) => (
-                      <TableCell key={_k + ' ' + index + 1} align="left">
-                        {startCase(_k)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+            <div className="rounded-lg border shadow-lg">
+              <div className="head pb-2 pt-4 md:p-6 md:pb-3">
+                <h5 className="text-[18px] font-semibold leading-[1.5]">Alert</h5>
+              </div>
+              <div className="body h-[calc(100vh-200px)] overflow-y-auto p-[16px] pt-[8px] md:p-6 md:pt-3">
+                <ul>
                   {errorData?.map((data: any, index) => (
-                    <TableRow key={'row ' + index + 1}>
-                      <TableCell key={'cell ' + index + 1} align="left">
-                        {data?.message}
-                        <br />
-                        {moment(data?.time).format(dateTimeFormat24Hours)}
-                      </TableCell>
-                    </TableRow>
+                    <li key={'cell ' + index + 1} className="flex min-h-[70px] list-none">
+                      <div className="flex flex-col items-center [flex:0_1_0%]">
+                        <span className="my-[10px] h-3 w-3 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                        <span className="w-[1px] flex-grow bg-gray-300 dark:bg-gray-800"></span>
+                      </div>
+                      <div className=" px-4 py-[6px]">
+                        <p className="text-[0.875rem] font-semibold leading-[1.5714]">{data?.message}</p>
+                        <p className="text-[0.75rem] font-normal leading-[1.5] text-gray-500 dark:text-gray-400">
+                          {moment(data?.time).format(dateTimeFormat24Hours)}
+                        </p>
+                      </div>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </ul>
+              </div>
+            </div>
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
