@@ -160,7 +160,7 @@ export default function ImportExportLinks({
       exportApi = `${exportApi}${additionalParams}`;
     }
 
-    if (exportColumn) {
+    if (exportColumn.length > 0) {
       if (exportApi?.includes('?')) {
         exportApi = `${exportApi}&exportColumn=${JSON.stringify(exportColumn)}`;
       } else {
