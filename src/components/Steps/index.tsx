@@ -183,7 +183,7 @@ const Steps = ({
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
                     ${i === currentStep && !isStepEnded ? styles.currentStep : ''}
                     ${i > currentStep && !isStepEnded ? styles.inActiveStep : ''}
-                    single-step-item transition-all 
+                    single-step-item transition-[shadow]
                     ${i < currentStep && !isStepEnded && isPrevStep ? 'cursor-pointer hover:shadow hover:[border:2px_solid_#f99336]' : ''}
                     
                 `}
