@@ -39,7 +39,7 @@ const SideCard = ({
       onClick={handleCLick}
       role={onClick ? 'button' : href ? 'link' : 'article'}
       aria-label={onClick ? `open ${heading} modal` : href ? `Open the ${heading} ${external && 'site in a new tab'}` : `${heading}`}
-      className={cn('min-h-[130px] rounded-xl ', (onClick || href) && 'cursor-pointer')}
+      className={cn('rounded-xl min-[900px]:min-h-[144px] ', (onClick || href) && 'cursor-pointer')}
       style={{ background: `linear-gradient(180deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
     >
       <div className="group relative ml-1 min-h-full rounded-xl bg-[var(--dark-primary,white)]  p-[40px_18px_28px_18px] shadow-[0px_3.3px_40px_0px_#00000014]">
