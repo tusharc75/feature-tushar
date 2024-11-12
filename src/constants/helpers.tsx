@@ -3589,17 +3589,6 @@ export const getFileIconSrc = (file) => {
   return FileIcon;
 };
 
-export const checkIfSynching = async (setToFalse = false) => {
-  try {
-    let api = `user/update-synching-status`;
-    if (setToFalse) {
-      api += `?setToFalse=true`;
-    }
-    const { data } = await axiosInstance().post(api);
-    return data?.data;
-  } catch (error) {}
-};
-
 export const columnSize = (type) => {
   if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
     return 'col-span-12';
