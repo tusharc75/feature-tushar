@@ -1,29 +1,17 @@
 import { Typography } from '@material-ui/core';
-import { Star } from '@material-ui/icons';
 import { useEffect, useMemo, useState } from 'react';
-import { HiArrowRight } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
-import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
 import { useFavorites } from 'src/hooks';
-import { getAllData, getColors, handleRoutes } from 'src/pages/Home/helpers';
+import { getAllData, handleRoutes } from 'src/pages/Home/helpers';
 import { ItemData } from 'src/pages/Home/types';
 
+import userFavoriteImage from 'src/assets/dashboard_images/sidebar/user-favorite.png';
+
+import SideCard from 'src/pages/Home/SideCard';
 import { useData } from 'src/StateProvider/Provider';
 import styles from './Dashboard.module.scss';
-import './style.scss';
-
-const colors = getColors(2);
-
-export const UserFavIcon = () => (
-  <div
-    className="custom grid place-items-center"
-    style={{ width: '50px', height: '50px', background: `linear-gradient(129deg, ${colors.icon[0]}, ${colors.icon[1]})` }}
-  >
-    <Star className="custom_svg text-white" />
-  </div>
-);
 
 const UserFavouriteCard = () => {
   const {
@@ -50,11 +38,7 @@ const UserFavouriteCard = () => {
     setModalContent({
       items: stateFavourites,
       title: 'Your Favorites',
-      icon: (
-        <span className="[&>div]:!h-[32px] [&>div]:!w-[32px] [&>div]:rounded [&_.custom_svg]:!h-[18px] [&_.custom_svg]:!w-[18px]">
-          <UserFavIcon />
-        </span>
-      )
+      icon: <img src={userFavoriteImage} alt={'User Favourite Logo'} className="max-w-full" />
     });
   };
 
@@ -65,32 +49,21 @@ const UserFavouriteCard = () => {
   return (
     <>
       {stateFavourites.length === 0 ? null : (
-        <DashBoardCardShell
-          key={'User Favorites'}
+        <SideCard
           id={`user-favorite-card`}
-          role="button"
+          heading="Your Favorites"
+          description="This is a collection of your favorite items, selected by you."
+          icon={
+            <div className="max-w-[60px]">
+              <img src={userFavoriteImage} alt={'User Favourite Logo'} className="max-w-full" />
+            </div>
+          }
           className={'group mb-4'}
-          // background={'#fff'}
-          gradientColors={colors.gradient}
+          gradientColors={['#6621ba', '#f98a17']}
           style={{ background: 'linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200))' }}
           aria-label={`open User Favorite`}
           onClick={() => handleFavouriteModal()}
-        >
-          <div className={'rounded-xl bg-[var(--dark-primary,white)] p-[23px_18px_18px]'}>
-            <div className={'mb-[20px] flex justify-between'}>
-              <div className={'overflow-hidden rounded-full'}>
-                <UserFavIcon />
-              </div>
-              <div className={'transition-all duration-300 group-hover:[transform:translateX(-10px)]'}>
-                <HiArrowRight />
-              </div>
-            </div>
-            <h2 className={'mb-[10px] text-[16px] font-bold leading-[22px]'}>Your Favorites</h2>
-            <p className={' text-[14px] font-normal leading-[22px] text-[#737373] dark:text-[#bebebe]'}>
-              This is a collection of your favorite items, selected by you.
-            </p>
-          </div>
-        </DashBoardCardShell>
+        />
       )}
 
       <DashboardModal

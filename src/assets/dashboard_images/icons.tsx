@@ -1,8 +1,6 @@
 import Hero from './eQuip-t_dashboard.svg';
 import HeroTextIcon from './heroTextIcon.svg';
 import SidebarCogIcon from './sidebarCogIcon.svg';
-import ColabIcon from './colab.svg';
-import SetupsIcon from './setups.svg';
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from 'src/assets/dashboard_images';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -331,20 +329,7 @@ const SIDEBAR_COG_ICON = () => {
     </>
   );
 };
-const COLABORATION_TOOL = () => {
-  return (
-    <>
-      <ColabIcon />
-    </>
-  );
-};
-const SETUPS_ICON = () => {
-  return (
-    <>
-      <SetupsIcon />
-    </>
-  );
-};
+
 const SALES_MANAGEMENT = ({ colors = ['#FC5757', '#C60707'] }) => {
   const hash = getHash();
   return (
@@ -731,8 +716,6 @@ const allIcons = {
   GEN_ICON,
   HERO_TEXT_ICON,
   SIDEBAR_COG_ICON,
-  COLABORATION_TOOL,
-  SETUPS_ICON,
   SALES_MANAGEMENT,
   RENTAL_MANAGEMENT,
   ECOMMERCE,

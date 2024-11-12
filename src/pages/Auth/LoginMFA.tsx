@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
@@ -89,7 +89,7 @@ const LoginMFA = () => {
       });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     axiosInstance()
       .post('/user/mfa-auth/verify-otp', {
@@ -146,7 +146,13 @@ const LoginMFA = () => {
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
-  };
+  }, [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]);
+
+  useEffect(() => {
+    if (otp.length === 6) {
+      handleSubmit();
+    }
+  }, [otp, handleSubmit]);
 
   return (
     <>
@@ -193,7 +199,12 @@ const LoginMFA = () => {
                     <OtpInput
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={otp}
-                      onChange={(value) => setOtp(value)}
+                      onChange={(value) => {
+                        setOtp(value);
+                        if (otp.length === 6) {
+                          handleSubmit();
+                        }
+                      }}
                       TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
                       autoFocus
                     />
