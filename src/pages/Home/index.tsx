@@ -24,7 +24,7 @@ function Dashboard() {
   const {
     state: { user, selectedEntity, permissions }
   } = useData();
-  const formPermission = permissions.formBuilder;
+  const formPermission = permissions?.formBuilder;
   const aiPermission = permissions?.equiptAi;
 
   const [sections, setSections] = useState([]);
