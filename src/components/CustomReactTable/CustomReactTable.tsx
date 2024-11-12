@@ -291,6 +291,8 @@ const CustomReactTable = ({
       } else {
         setNewColumns([...hookColumns]);
       }
+    } else {
+      setNewColumns([...hookColumns]);
     }
   }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes, hookColumns.length]);
 
