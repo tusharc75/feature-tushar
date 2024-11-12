@@ -16,6 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import { Table } from '@tanstack/react-table';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 export type GridViewSavedData = {
   _id: string;
@@ -50,6 +51,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const walkmeInstance = useGetWalkmeInstance();
   const { loading, resized } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const {
     state: { user },
@@ -169,20 +171,22 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top" arrow>
-        <IconButton
-          aria-describedby="columnSelection"
-          size="small"
-          color="primary"
-          disabled={loading}
-          className="refresh-arrange-button"
-          onClick={(e) => {
-            setAnchorEl(e.currentTarget);
-          }}
-        >
-          <SwapHoriz />
-        </IconButton>
-      </HtmlTooltip>
+      {!isOffline && (
+        <HtmlTooltip title="Arrange View" placement="top" arrow>
+          <IconButton
+            aria-describedby="columnSelection"
+            size="small"
+            color="primary"
+            disabled={loading}
+            className="refresh-arrange-button"
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            <SwapHoriz />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       <Menu
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
