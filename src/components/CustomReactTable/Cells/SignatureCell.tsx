@@ -16,7 +16,7 @@ function SignatureCell({ base64 }) {
   return (
     <>
       <p
-        className="text-truncate -my-[2px] cursor-pointer dark:bg-white"
+        className="text-truncate -my-[2px] cursor-pointer"
         role="button"
         onClick={() => {
           setImageDialogProps({
@@ -26,7 +26,7 @@ function SignatureCell({ base64 }) {
           });
         }}
       >
-        <img src={base64} width={65} className="block max-h-[38px] w-full max-w-[65px] object-contain  dark:invert" alt={`Signature`} />
+        <img src={base64} width={65} className="mx-auto block max-h-[38px] w-fit max-w-[65px] object-contain dark:bg-white" alt={`Signature`} />
       </p>
       <ImageDialog onClose={onClose} {...imageDialogProps} />
     </>
@@ -54,7 +54,7 @@ function ImageDialog(props: ImageDialogProps) {
       BackdropProps={{ style: { backdropFilter: 'blur(5px)' } }}
     >
       {src ? (
-        <img src={src} alt={alt || ''} className="mx-auto block h-full w-full max-w-[500px] object-contain p-2 dark:[filter:invert(1)]" />
+        <img src={src} alt={alt || ''} className="mx-auto block h-full w-full max-w-[500px] bg-white object-contain p-2" />
       ) : (
         <div className="grid h-[278px] w-[444px] place-items-center p-2">
           <p className="text-lg text-gray-500">No image to display</p>

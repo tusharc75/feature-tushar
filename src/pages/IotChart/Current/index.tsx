@@ -21,9 +21,9 @@ export default function Current({ deviceTemplate, assetId }) {
   const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
-    // fetchCategory();
-    // fetchData();
-    // fetchErrorData();
+    fetchCategory();
+    fetchData();
+    fetchErrorData();
   }, [assetId]);
 
   const fetchCategory = async () => {
