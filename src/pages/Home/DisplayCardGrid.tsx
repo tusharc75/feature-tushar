@@ -9,7 +9,6 @@ import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
 import { Item, Section } from 'src/pages/Home/types';
 import styles from './Dashboard.module.scss';
 import { getColors } from './helpers';
-import './style.scss';
 
 type DisplayCardGridProps = {
   sections: Section[];

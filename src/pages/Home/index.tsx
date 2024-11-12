@@ -2,17 +2,18 @@ import { kebabCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import styles from './Dashboard.module.scss';
-import './style.scss';
-
 import routes from 'src/components/Helpers/Routes';
 import { cn } from 'src/constants/helpers';
 import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import DisplaySideCard from 'src/pages/Home/DisplaySideCard';
-import FeatureCard from 'src/pages/Home/FeatureCards';
 import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Chart from './Chart';
 import { assignIconAndText, getAllData, groupByKey } from './helpers';
+import SideCard from 'src/pages/Home/SideCard';
+import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
+
+import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -21,8 +22,11 @@ export const userManual = {
 
 function Dashboard() {
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions }
   } = useData();
+  const formPermission = permissions.formBuilder;
+  const aiPermission = permissions?.equiptAi;
+
   const [sections, setSections] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -52,12 +56,39 @@ function Dashboard() {
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             {!isOffline && <Chart />}
           </div>
-          <div className={styles.rightContainer}>
-            <FeatureCard />
-            <UserFavouriteCard />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+          <div>
+            <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
+              {aiPermission && (
+                <SideCard
+                  heading={routes.equiptAi.title}
+                  href={routes.equiptAi.path}
+                  icon={
+                    <div className="max-w-[60px]">
+                      <img src={equiptGenieImage} alt={'Equipt AI Logo'} className="max-w-full" />
+                    </div>
+                  }
+                  description="Enhances productivity by automating tasks and providing insights through advanced machine learning."
+                  gradientColors={['#3e7fff', '#65b9ff']}
+                />
+              )}
+              <UserFavouriteCard />
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
+              {formPermission && (
+                <SideCard
+                  heading="Dynamic Form"
+                  href={`${routes.formBuilder.path}?dynamicResource=true`}
+                  icon={
+                    <div className="max-w-[60px]">
+                      <img src={dynamicFormImage} alt={'Setups & Administration Logo'} className="max-w-full" />
+                    </div>
+                  }
+                  description="Design and customize forms effortlessly, capturing data dynamically."
+                  gradientColors={['#ffd064', '#f4fbff']}
+                />
+              )}
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+            </div>
           </div>
         </div>
       </div>
