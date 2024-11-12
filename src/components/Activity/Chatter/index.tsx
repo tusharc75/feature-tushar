@@ -112,7 +112,7 @@ const Chatter = (props: any) => {
     <div className="overflow-hidden rounded-[10px] shadow-lg [border:1px_solid_var(--common-border-color)]" id="chatList">
       <div className="flex min-h-[53px] items-center gap-[18px] px-[26px] py-[9px] [border-bottom:1px_solid_var(--common-border-color)]">
         <ChatBoxIcon />
-        <h6 className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">Chatter</h6>
+        <h6 className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">Collaborate</h6>
       </div>
       <div className="chat-box-body">
         <div className="chat-logs relative" style={{ height: 250 }}>
