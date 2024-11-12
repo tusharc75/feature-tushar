@@ -1,6 +1,7 @@
 import { Box, Button } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import queryString from 'query-string';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -27,6 +28,7 @@ const FormBuilder = () => {
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
+  let { dynamicResource }: any = queryString.parse(history.location.search);
 
   const {
     state: { permissions, user }
@@ -96,8 +98,12 @@ const FormBuilder = () => {
 
   const fetchGetBrandResource = () => {
     dispatch({ type: 'loading', loading: true });
+    let api = `/sa-formbuilder/resource?allResource=true`;
+    if (dynamicResource) {
+      api = `${api}&dynamicResource=${dynamicResource}`;
+    }
     axiosInstance()
-      .get(`/sa-formbuilder/resource?allResource=true`)
+      .get(api)
       .then(({ data: { data } }) => {
         data.forEach((d) => {
           d['_id'] = d.id;
