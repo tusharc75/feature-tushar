@@ -140,77 +140,83 @@ const FieldServiceTechnician = () => {
     setColumns(newColumns);
   };
 
-  const handleChangeFieldServiceOrderStatus = (fieldServiceOrderId, status) => {
-    if (isOfflineRef.current) return;
-    axiosInstance()
-      .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
-      .then(() => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
+  const handleChangeFieldServiceOrderStatus = useCallback(
+    (fieldServiceOrderId, status) => {
+      if (isOfflineRef.current) return;
+      axiosInstance()
+        .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
+        .then(() => {})
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    },
+    [toastConfig]
+  );
 
-  const handleCreateFieldTicket = async (fieldServiceOrderData, fieldServiceOrderFields) => {
-    setIsSubmitting(true);
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: 'Field Ticket Creation In-Progress...'
-    });
-    var fieldTicketField: any = [];
-    if (isOfflineRef.current) {
-      fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
-    } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
-      fieldTicketField = response?.data?.data;
-    }
-    fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-
-    const tempInitialData = getObjKeys('', fieldTicketField);
-    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, fieldServiceOrderData, user.user?.brandCurrency);
-    for (const key in referenceData) {
-      tempInitialData[key] = referenceData[key];
-    }
-    if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
-      tempInitialData['currency'] = user.user?.brandCurrency;
-    }
-    tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
-
-    if (isOfflineRef.current) {
-      const _id: any = Math.floor(Math.random() * 1000000).toString();
-      const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
-      data['_id'] = _id;
-      await insertUpdate(objectStore.fieldTicket, _id, data);
-      await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
+  const handleCreateFieldTicket = useCallback(
+    async (fieldServiceOrderData, fieldServiceOrderFields) => {
+      setIsSubmitting(true);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Field Ticket Created Successfully'
+        message: 'Field Ticket Creation In-Progress...'
       });
-      history.push(`${routes.fieldTicketDetail.path}/${_id}`);
-      setIsSubmitting(false);
-    } else {
-      axiosInstance()
-        .post(`${routes.fieldTicket?.path}`, tempInitialData)
-        .then(({ data }) => {
-          if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-            handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress);
-          }
-          window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setIsSubmitting(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsSubmitting(false);
+      var fieldTicketField: any = [];
+      if (isOfflineRef.current) {
+        fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
+      } else {
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
+        fieldTicketField = response?.data?.data;
+      }
+      fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+
+      const tempInitialData = getObjKeys('', fieldTicketField);
+      tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
+      const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, fieldServiceOrderData, user.user?.brandCurrency);
+      for (const key in referenceData) {
+        tempInitialData[key] = referenceData[key];
+      }
+      if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
+        tempInitialData['currency'] = user.user?.brandCurrency;
+      }
+      tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
+
+      if (isOfflineRef.current) {
+        const _id: any = Math.floor(Math.random() * 1000000).toString();
+        const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
+        data['_id'] = _id;
+        await insertUpdate(objectStore.fieldTicket, _id, data);
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Field Ticket Created Successfully'
         });
-    }
-  };
+        history.push(`${routes.fieldTicketDetail.path}/${_id}`);
+        setIsSubmitting(false);
+      } else {
+        axiosInstance()
+          .post(`${routes.fieldTicket?.path}`, tempInitialData)
+          .then(({ data }) => {
+            if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress);
+            }
+            window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
+            setIsSubmitting(false);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+            setIsSubmitting(false);
+          });
+      }
+    },
+    [handleChangeFieldServiceOrderStatus, history, toastConfig, user.user?.brandCurrency]
+  );
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
@@ -310,8 +316,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     } else {
       setSelectedData(null);
@@ -354,8 +360,8 @@ const FieldServiceTechnician = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-[400px_1fr]">
               <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
                 <CustomReactTable
-                  height={'calc(100vh - 200px)'}
                   showOnlyMobileView={true}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   state={state}
                   dispatch={dispatch}
@@ -377,12 +383,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
+                    setNextStep={() => {}}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
+                    handleChangeStatus={() => {}}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => { }}
+                    fetchServiceOrderData={() => {}}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
