@@ -1,14 +1,14 @@
-import React, { memo, useEffect, useState } from 'react';
-import { Typography, Box, Button, ButtonGroup, IconButton, Dialog, DialogTitle } from '@material-ui/core';
+import { Box, IconButton, Typography } from '@material-ui/core';
 import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MapView from '../Map';
 import ActivityList from './ActivityList';
 import Calendar from './Calendar';
 import CalendarList from './CalendarList';
-import MapView from '../Map';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MobileRoadmap from './MobileRoadmap';
 
 function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, handleUnAssignTechnician }) {
