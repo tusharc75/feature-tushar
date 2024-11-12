@@ -45,10 +45,10 @@ export const CustomOfflineProvider = ({ children }) => {
   const synchronizationData = async () => {
     try {
       if (!isOffline) {
-        history.push('/');
         await setUpindexDB();
         var data = await findAll(objectStore.offlineDataSync);
         if (data?.length) {
+          history.push('/');
           setIsSynch(true);
           var OrderBy = ['Loading', 'Receiving'];
           data = sortBy(data, function (item: any) {
