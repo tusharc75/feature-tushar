@@ -388,7 +388,7 @@ const Details = (props: DetailProps) => {
                     newItem.innerHTML = '--';
                     target.parentNode.replaceChild(newItem, target);
                   }}
-                  className="block h-auto max-h-[50px] w-full max-w-[50px] dark:[filter:invert(100%)]"
+                  className="block h-auto max-h-[50px] w-full max-w-[50px] "
                   alt="Signature"
                 />
               ) : (
