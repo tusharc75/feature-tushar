@@ -1,7 +1,7 @@
 import { IconButton, TextareaAutosize } from '@material-ui/core';
 import { FormEvent, KeyboardEvent, useState } from 'react';
 import { SendIcon } from 'src/assets/svg/svgIcons';
-import VoiceInput from 'src/components/AgentChat/VoiceInput';
+import VoiceInput from 'src/components/AiChatbox/VoiceInput';
 
 type SendMessageFormProps = {
   sendMessage: (query: string) => Promise<void>;
@@ -39,7 +39,7 @@ const SendMessageForm = ({ sendMessage, loading, disabled = false }: SendMessage
         value={message}
         disabled={disabled}
         onChange={(e) => setMessage(e.target.value)}
-        className="w-full resize-none rounded-sm border-0 bg-transparent px-2 py-3 outline-none dark:text-[white]"
+        className="w-full resize-none rounded-[18px] border-0 bg-gray-100 px-4 py-3 outline-none disabled:opacity-60 dark:bg-gray-800 dark:text-[white]"
         placeholder="Write a message..."
         autoCapitalize="off"
         autoComplete="off"
