@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, MenuItem, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -357,7 +357,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         };
         element.fieldTicketId = fieldTicketData?._id;
         element._id = id;
-        await insertUpdate(objectStore.fieldTicketMaterial, id, element);
+        await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         material.push(element);
       }
       let updatedData;
@@ -508,7 +508,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.product;
           const existingRow = await findOne(objectStore.fieldTicketMaterial, row._id);
-          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...row });
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...(restoreObjKeysWithValues(row, allFields)) });
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = { ...existingRow, ...row };
