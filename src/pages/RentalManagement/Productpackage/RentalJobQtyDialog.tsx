@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { isArray, unionBy, uniqBy } from 'lodash';
+import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -19,11 +19,10 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import {
+  bulkUpdate,
   calculatePrice,
   calculateRowsField,
   fetch_rental_product_fields,
-  resetValueZero,
-  sumOnParent
 } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
@@ -265,86 +264,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
-      for (const x in values) {
-        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0) || values[x] === 0) {
-          delete values[x];
-        }
-      }
-      let rows: any = [];
-      let priceData: any = [];
-      const priceFieldName = `price_${currency}`;
-      const fieldAll: any = allFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
-
-      if ((values['unit'] || values['pricingMethod']) && !values[priceFieldName]) {
-        const material: any = [];
-        selectedProducts.forEach((d) => {
-          const element: any = {};
-          element.materialId = d.materialId;
-          element.type = d.type;
-          element.unit = values['unit'] || d.unit;
-          element.pricingMethod = values['pricingMethod'] || d.pricingMethod;
-          element.qty = d.qty;
-          material.push(element);
-        });
-        priceData = await calculatePrice(rentalManagementData, material);
-      }
-
-      selectedProducts?.filter((d) => !selectedProducts.some((obj) => obj._id === d.parentId))?.forEach((element) => {
-        const rateResult = priceData?.filter(
-          (e) =>
-            e.materialId === element.materialId &&
-            e.materialType === element.type &&
-            e.unit === (values['unit'] || element.unit) &&
-            e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
-        );
-
-        const tempRate = {};
-        if (rateResult.length && rateResult[0].mrp) {
-          tempRate[priceFieldName] = rateResult[0].mrp;
-        }
-
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
-        rows.push({ ...element, ...calValues });
-
-        if (calValues?.[`finalPrice_${currency}`]) {
-          const child: any = resetValueZero(material, allFields, element._id);
-          rows = [...rows, ...child];
-          if (element.parentId) {
-            var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
-            const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
-            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
-            rows = [...rows, ...parent];
-          }
-        }
-      });
-
-      //Code for Bulk Update Only Product in Packages
-      let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some((f) => f._id === ele.parentId));
-      if (packageProducts.length) {
-        const packageIds = uniq(map(packageProducts, 'parentId'));
-        packageIds.forEach((_packageId) => {
-          var packages: any = material.filter((e) => e._id === _packageId);
-          const product: any = material.filter((e) => e.parentId === _packageId);
-          product.forEach((element) => {
-            if (packageProducts.filter((e) => element._id === e._id).length) {
-              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, fieldAll);
-              rows.push({ ...element, ...calValues });
-              for (var key in calValues) {
-                element[key] = calValues[key];
-              }
-            }
-          });
-          packages = sumOnParent(packages, product, allFields, currency);
-          rows = [...rows, ...packages];
-        });
-      }
-      const updatedRows: any = [];
-      rows?.forEach((ele) => {
-        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) });
-      });
-      handleSaveData(updatedRows);
+      const rows = bulkUpdate(values, selectedProducts, material, allFields, rentalManagementData?.currency);
+      handleSaveData(rows);
     } else {
       if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
         setShowConfirmationDialog(true);
