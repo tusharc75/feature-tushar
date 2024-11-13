@@ -58,7 +58,7 @@ const PackageInventory = () => {
 
     const packagesFields = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&view=true`);
 
-    let newColumns = generateColumns(renderedFrom, packagesFields?.data?.data, routes.packagesDetail.path);
+    const newColumns = generateColumns(renderedFrom, packagesFields?.data?.data, routes.packagesDetail.path);
 
     const defaultColumns = [
       {
@@ -70,7 +70,12 @@ const PackageInventory = () => {
       }
     ];
 
-    setColumns([...newColumns, ...defaultColumns, ActionsRenderer]);
+    setColumns([
+      ...newColumns?.filter((c) => c?.accessor === 'packageName'),
+      ...defaultColumns,
+      ...newColumns?.filter((c) => c?.accessor != 'packageName'),
+      ActionsRenderer
+    ]);
   };
 
   const ActionsRenderer = {
