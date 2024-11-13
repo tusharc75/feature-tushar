@@ -1,7 +1,7 @@
 import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
@@ -3504,7 +3504,7 @@ export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | str
 }
 
 export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-  const obj = { ...dataObj };
+  const obj = cloneDeep(dataObj);
   fields.forEach((field) => {
     if (field.type === 'dropDown' && field.lookup) {
       let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
@@ -3528,7 +3528,7 @@ export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
       }
     } else if (field.type === 'date') {
       obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-    } else {
+    } else if (dataObj[field.fieldName]) {
       obj[field.fieldName] = dataObj[field.fieldName];
     }
   });
