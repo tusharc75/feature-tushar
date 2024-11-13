@@ -6,13 +6,87 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+
+const ASSET_HISTORY_RESOURCE = [
+  {
+    key: 'all',
+    resource: 'All',
+    title: 'All',
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.rental,
+    resource: sidebarResource.rentalManagement,
+    title: routes.rentalManagementDetail.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.repair,
+    resource: sidebarResource.repairOrder,
+    title: routes.repairOrder.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.deliveryTicket,
+    resource: sidebarResource.deliveryTicket,
+    title: routes.deliveryTicket.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.purchaseOrder,
+    resource: sidebarResource.purchaseOrder,
+    title: routes.purchaseOrder.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.serializedAssets,
+    resource: sidebarResource.serializedAsset,
+    title: routes.serializedAsset.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.transferAssets,
+    resource: sidebarResource.transferAsset,
+    title: routes.transferAsset.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.salesOrder,
+    resource: sidebarResource.salesOrder,
+    title: routes.salesOrder.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.sublease,
+    resource: sidebarResource.sublease,
+    title: routes.sublease.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
+    resource: sidebarResource.bulkAssetCreation,
+    title: routes.bulkAssetCreation.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.transferAssets,
+    resource: sidebarResource.transferInventory,
+    title: routes.transferInventory.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
+    resource: sidebarResource.inventoryToAsset,
+    title: routes.inventoryToAsset.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.quotation,
+    resource: sidebarResource.quotation,
+    title: routes.quotation.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.invoice,
+    resource: sidebarResource.invoice,
+    title: routes.invoice.title,
+  },
+];
 
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,6 +99,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     to: null
   });
   const [column, setColumn] = useState([]);
+  const [tabValue, setTabValue] = useState(0);
 
   const {
     state: { permissions }
@@ -333,12 +408,29 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     if (id) {
       fetchData();
     }
-  }, [id, refresh, page, limit, filters, sorting, duration]);
+  }, [id, refresh, page, limit, filters, sorting, duration, tabValue]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { deepFilters } = gridFilterParser(filters);
-
+    
+    if(tabValue!==0){
+      const filterKey = ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key=='all')?.find((ele, idx)=> idx==tabValue);
+      const tabFilters = {
+        [INVENTORY_HISTORY_TYPE.deliveryTicket]: [
+          INVENTORY_HISTORY_TYPE.deliveryTicket,
+          INVENTORY_HISTORY_TYPE.loadingTicket,
+          INVENTORY_HISTORY_TYPE.receivingTicket,
+          INVENTORY_HISTORY_TYPE.returnTicket
+        ],
+        [INVENTORY_HISTORY_TYPE.serializedAssets]: [
+          INVENTORY_HISTORY_TYPE.inventory,
+          INVENTORY_HISTORY_TYPE.serializedAssets
+        ]
+      };
+    const filterTerms = tabFilters[filterKey.key] || filterKey.key;
+    deepFilters.push({ field: 'type', term: filterTerms });
+    }
     if (duration && duration?.from && duration?.to) {
       deepFilters.push({
         field: 'date',
@@ -382,6 +474,10 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       });
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box>
       <Box className="flex flex-wrap items-center justify-between gap-3">
@@ -398,7 +494,11 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           onlyExport={true}
         />
       </Box>
-
+      <Box>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginTop: '10px', marginBottom: -1 }}>
+              {ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key==='all')?.map((res, idx)=> <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
+            </CustomTabs>
+      </Box>
       {column ? (
         <CustomReactTable
           height={'calc(100vh - 250px)'}
