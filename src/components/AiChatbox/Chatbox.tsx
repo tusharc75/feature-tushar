@@ -29,7 +29,7 @@ type ChatboxDefaultProps = {
   state: TInitialChatboxState;
   setState: Dispatch<TChatboxActions>;
 };
-let timeout: Nodejs.timeout;
+let timeout: NodeJS.Timeout;
 
 type ChatboxProps = ChatboxDefaultProps | ChatboxPopupProps;
 
