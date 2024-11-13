@@ -22,6 +22,11 @@ const ASSET_HISTORY_RESOURCE = [
     title: 'All',
   },
   {
+    key: INVENTORY_HISTORY_TYPE.serializedAssets,
+    resource: sidebarResource.serializedAsset,
+    title: routes.serializedAsset.title,
+  },
+  {
     key: INVENTORY_HISTORY_TYPE.rental,
     resource: sidebarResource.rentalManagement,
     title: routes.rentalManagementDetail.title,
@@ -42,90 +47,80 @@ const ASSET_HISTORY_RESOURCE = [
     title: routes.deliveryTicket.title,
   },
   {
-    key: INVENTORY_HISTORY_TYPE.purchaseOrder,
-    resource: sidebarResource.purchaseOrder,
-    title: routes.purchaseOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.serializedAssets,
-    resource: sidebarResource.serializedAsset,
-    title: routes.serializedAsset.title,
-  },
-  {
     key: INVENTORY_HISTORY_TYPE.transferAssets,
     resource: sidebarResource.transferAsset,
     title: routes.transferAsset.title,
   },
-  {
-    key: INVENTORY_HISTORY_TYPE.salesOrder,
-    resource: sidebarResource.salesOrder,
-    title: routes.salesOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.sublease,
-    resource: sidebarResource.sublease,
-    title: routes.sublease.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
-    resource: sidebarResource.bulkAssetCreation,
-    title: routes.bulkAssetCreation.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.transferAssets,
-    resource: sidebarResource.transferInventory,
-    title: routes.transferInventory.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
-    resource: sidebarResource.inventoryToAsset,
-    title: routes.inventoryToAsset.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.quotation,
-    resource: sidebarResource.quotation,
-    title: routes.quotation.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.invoice,
-    resource: sidebarResource.invoice,
-    title: routes.invoice.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.productionOrder,
-    resource: sidebarResource.productionOrder,
-    title: routes.productionOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
-    resource: sidebarResource.fieldServiceOrder,
-    title: routes.fieldServiceOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.fieldTicket,
-    resource: sidebarResource.fieldTicket,
-    title: routes.fieldTicket.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.job,
-    resource: sidebarResource.job,
-    title: routes.job.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.planning,
-    resource: sidebarResource.planning,
-    title: routes.planning.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.deals,
-    resource: sidebarResource.deals,
-    title: routes.deals.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.assemblyOrder,
-    resource: sidebarResource.assemblyOrder,
-    title: routes.assemblyOrder.title,
-  },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
+  //   resource: sidebarResource.purchaseOrder,
+  //   title: routes.purchaseOrder.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.salesOrder,
+  //   resource: sidebarResource.salesOrder,
+  //   title: routes.salesOrder.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.sublease,
+  //   resource: sidebarResource.sublease,
+  //   title: routes.sublease.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
+  //   resource: sidebarResource.bulkAssetCreation,
+  //   title: routes.bulkAssetCreation.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
+  //   resource: sidebarResource.inventoryToAsset,
+  //   title: routes.inventoryToAsset.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.quotation,
+  //   resource: sidebarResource.quotation,
+  //   title: routes.quotation.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.invoice,
+  //   resource: sidebarResource.invoice,
+  //   title: routes.invoice.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.productionOrder,
+  //   resource: sidebarResource.productionOrder,
+  //   title: routes.productionOrder.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
+  //   resource: sidebarResource.fieldServiceOrder,
+  //   title: routes.fieldServiceOrder.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.fieldTicket,
+  //   resource: sidebarResource.fieldTicket,
+  //   title: routes.fieldTicket.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.job,
+  //   resource: sidebarResource.job,
+  //   title: routes.job.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.planning,
+  //   resource: sidebarResource.planning,
+  //   title: routes.planning.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.deals,
+  //   resource: sidebarResource.deals,
+  //   title: routes.deals.title,
+  // },
+  // {
+  //   key: INVENTORY_HISTORY_TYPE.assemblyOrder,
+  //   resource: sidebarResource.assemblyOrder,
+  //   title: routes.assemblyOrder.title,
+  // },
 ];
 
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
@@ -158,9 +153,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -453,9 +448,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { deepFilters } = gridFilterParser(filters);
-    
-    if(tabValue!==0){
-      const filterKey = ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key=='all')?.find((ele, idx)=> idx==tabValue);
+
+    if (tabValue !== 0) {
+      const filterKey = ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key == 'all')?.find((ele, idx) => idx == tabValue);
       const tabFilters = {
         [INVENTORY_HISTORY_TYPE.deliveryTicket]: [
           INVENTORY_HISTORY_TYPE.deliveryTicket,
@@ -468,8 +463,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           INVENTORY_HISTORY_TYPE.serializedAssets
         ]
       };
-    const filterTerms = tabFilters[filterKey.key] || filterKey.key;
-    deepFilters.push({ field: 'type', term: filterTerms });
+      const filterTerms = tabFilters[filterKey.key] || filterKey.key;
+      deepFilters.push({ field: 'type', term: filterTerms });
     }
     if (duration && duration?.from && duration?.to) {
       deepFilters.push({
@@ -520,11 +515,10 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
-      <Box>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              {ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key==='all')?.map((res, idx)=> <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
-            </CustomTabs>
-      </Box>
+      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+        {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) =>
+          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
+      </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
           <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
@@ -533,15 +527,15 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />
       </Box>
       {column ? (
         <CustomReactTable
-          height={'calc(100vh - 250px)'}
+          height={'calc(100vh - 300px)'}
           columns={column}
           state={state}
           dispatch={dispatch}
