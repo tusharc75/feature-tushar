@@ -385,7 +385,8 @@ export const sidebarResource = {
   subcontractAssembly: 'Subcontract Assembly',
   managedPackages: 'Managed Packages',
   trainAiModel: 'Train Ai Model',
-  assemblyOrder: 'Assembly Order'
+  assemblyOrder: 'Assembly Order',
+  packageInventory: 'Package Inventory'
 };
 
 export const primaryFields = {
@@ -413,6 +414,7 @@ export const RESOURCE_LABEL = {
   field: 'Fields',
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
+  packageInventory: 'Package Inventory',
   serializedAsset: 'Serialized Assets',
   serializedAssetsCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',

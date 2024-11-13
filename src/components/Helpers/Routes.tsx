@@ -253,6 +253,13 @@ const routes = {
         : RESOURCE_LABEL.productInventory,
     path: '/product-inventory'
   },
+  packageInventory: {
+    title:
+      storedRoutes && storedRoutes.packageInventory && storedRoutes.packageInventory.title
+        ? storedRoutes.packageInventory?.title
+        : RESOURCE_LABEL.packageInventory,
+    path: '/package-inventory'
+  },
   serializedAsset: {
     title:
       storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
