@@ -32,6 +32,11 @@ const ASSET_HISTORY_RESOURCE = [
     title: routes.repairOrder.title,
   },
   {
+    key: INVENTORY_HISTORY_TYPE.workOrder,
+    resource: sidebarResource.workOrder,
+    title: routes.workOrder.title,
+  },
+  {
     key: INVENTORY_HISTORY_TYPE.deliveryTicket,
     resource: sidebarResource.deliveryTicket,
     title: routes.deliveryTicket.title,
@@ -85,6 +90,41 @@ const ASSET_HISTORY_RESOURCE = [
     key: INVENTORY_HISTORY_TYPE.invoice,
     resource: sidebarResource.invoice,
     title: routes.invoice.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.productionOrder,
+    resource: sidebarResource.productionOrder,
+    title: routes.productionOrder.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
+    resource: sidebarResource.fieldServiceOrder,
+    title: routes.fieldServiceOrder.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.fieldTicket,
+    resource: sidebarResource.fieldTicket,
+    title: routes.fieldTicket.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.job,
+    resource: sidebarResource.job,
+    title: routes.job.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.planning,
+    resource: sidebarResource.planning,
+    title: routes.planning.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.deals,
+    resource: sidebarResource.deals,
+    title: routes.deals.title,
+  },
+  {
+    key: INVENTORY_HISTORY_TYPE.assemblyOrder,
+    resource: sidebarResource.assemblyOrder,
+    title: routes.assemblyOrder.title,
   },
 ];
 
@@ -480,6 +520,11 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
 
   return (
     <Box>
+      <Box>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              {ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key==='all')?.map((res, idx)=> <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
+            </CustomTabs>
+      </Box>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
           <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
@@ -493,11 +538,6 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           additionalParams={getQueryString()}
           onlyExport={true}
         />
-      </Box>
-      <Box>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginTop: '10px', marginBottom: -1 }}>
-              {ASSET_HISTORY_RESOURCE?.filter((f)=> permissions[camelCase(f.resource)]?.isRead || f.key==='all')?.map((res, idx)=> <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
-            </CustomTabs>
       </Box>
       {column ? (
         <CustomReactTable

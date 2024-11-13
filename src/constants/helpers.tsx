@@ -2169,6 +2169,7 @@ export const ASSET_NUMBER_TYPE = {
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
   repair: 'Repair',
+  workOrder: 'Work Order',
   deliveryTicket: 'Delivery Ticket',
   loadingTicket: 'Loading Ticket',
   receivingTicket: 'Receiving Ticket',
@@ -2183,7 +2184,14 @@ export const INVENTORY_HISTORY_TYPE = {
   transferInventory: 'Transfer Inventory',
   inventoryToAsset: 'Inventory to Asset',
   quotation: 'Quotation',
-  invoice: 'Invoice'
+  invoice: 'Invoice',
+  productionOrder: 'Production Order',
+  fieldServiceOrder: 'Field Service Order',
+  fieldTicket: 'Field Ticket',
+  job: 'Job',
+  planning: 'Planning',
+  deals: 'Deals',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const DELIVERY_TICKET_STATUS = {
