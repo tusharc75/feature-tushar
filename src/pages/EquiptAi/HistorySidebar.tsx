@@ -35,7 +35,7 @@ const HistorySidebar = ({
   getOneChatHistory,
   handleDelete,
   chatId,
-  isMobile,
+  isMobile
 }: HistorySidebarProps) => {
   const [selectedChatHistory, setSelectedChatHistory] = useState<string>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -107,7 +107,6 @@ const HistorySidebar = ({
   useEffect(() => {
     groupHistory(chatHistory);
   }, [chatHistory, groupHistory]);
-
 
   return (
     <aside

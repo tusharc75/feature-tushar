@@ -14,10 +14,9 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
-import { ContactlessOutlined } from '@material-ui/icons';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -221,7 +220,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedProducts, material, allFields, invoiceData?.currency);
       handleSaveData(rows);
     } else {
-      if(isEqual(ref?.current?.values, initialData.values)){
+      if (isEqual(ref?.current?.values, initialData.values)) {
         handleSaveData([rowData], saveAndNext, true);
         return;
       }
@@ -537,32 +536,32 @@ const MaterialDialog: FC<EditDialogProps> = ({
                 {isBulkedit === false && showSaveAndNext && (
                   isEqual(ref?.current?.values, initialData.values) ? (
                     <CustomButton
-                    loading={loading}
-                    disabled={loading}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {'Next'}
-                  </CustomButton>
+                      loading={loading}
+                      disabled={loading}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {'Next'}
+                    </CustomButton>
                   ) : (
-                  <CustomButton
-                    loading={loadingEdit}
-                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {'Save & Next'}
-                  </CustomButton>
+                    <CustomButton
+                      loading={loadingEdit}
+                      disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {'Save & Next'}
+                    </CustomButton>
                   )
                 )}
 
