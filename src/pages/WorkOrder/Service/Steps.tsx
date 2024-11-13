@@ -1560,7 +1560,12 @@ const Steps = ({
                       ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                         selectedService?.status
                       ) &&
-                      getFields(selectedStep)?.stepData?.status !== WORKORDER_SERVICE_STEP_STATUS.skipped
+                      ![
+                        WORKORDER_SERVICE_STEP_STATUS.skipped,
+                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                        WORKORDER_SERVICE_STEP_STATUS.end,
+                        WORKORDER_SERVICE_STEP_STATUS.passed
+                      ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
