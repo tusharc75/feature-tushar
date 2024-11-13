@@ -1,21 +1,32 @@
-import { Button } from '@material-ui/core';
+import { Button, Grow } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { useState } from 'react';
 import { RiBrainLine } from 'react-icons/ri';
-import Chatbox from 'src/components/AgentChat/Chatbox';
+import { useLocation } from 'react-router-dom';
+import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
 import { AI_AGENT } from 'src/config';
+
+const excludedPaths = ['/', routes.equiptAi.path];
 
 const AgentChat = () => {
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
-
+  const [state, setState] = useChatboxReducer();
+  const { pathname } = useLocation();
   const toggleChatbox = () => {
     setIsChatboxOpen((prev) => !prev);
   };
 
+  if (excludedPaths.includes(pathname)) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-2 right-3 z-[1300] ">
-      <Chatbox isChatboxOpen={isChatboxOpen} setIsChatboxOpen={setIsChatboxOpen} />
+      <Grow in={isChatboxOpen} unmountOnExit>
+        <Chatbox state={state} setState={setState} mode="popup" handleClose={() => setIsChatboxOpen(false)} />
+      </Grow>
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">
           <Button
