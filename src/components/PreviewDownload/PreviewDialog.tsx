@@ -177,14 +177,14 @@ export const PreviewDialog = ({
         </CustomDialogContent>
         <CustomDialogFooter>
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
-            <HtmlTooltip title={user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
+            <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
               <>
                 <CustomButton
                   id={'show-column-dialog-save-update-button'}
                   onClick={() => {
                     setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
                   }}
-                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (user?._id !== selectedPdfView?.user)}
+                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
                   size="small"
                   className="yellow-button"
                 >
