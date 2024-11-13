@@ -172,10 +172,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       const data: any = restoreObjKeysWithValues(values, initialData.fields);
       data._id = _id;
       await insertUpdate(objectStore.fieldTicket, _id, data);
-      if (id) {
-        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'update' } });
+      const offlineData = await findOne(objectStore.offlineDataSync, _id);
+      if (/^[0-9a-fA-F]{24}$/.test(_id)) {
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...(offlineData?.data), ...values, _id, offlineSyncStatus: 'update' } });
       } else {
-        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'new' } });
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...(offlineData?.data), ...values, _id, offlineSyncStatus: 'new' } });
       }
       onSuccess();
       setSubmitting(false);
