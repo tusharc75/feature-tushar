@@ -7,6 +7,7 @@ import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
 import { AI_AGENT } from 'src/config';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.png';
 
 const excludedPaths = ['/', routes.equiptAi.path];
 
@@ -29,14 +30,11 @@ const AgentChat = () => {
       </Grow>
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">
-          <Button
-            onClick={toggleChatbox}
-            variant="contained"
-            color="primary"
-            style={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: 8 }}
-          >
-            {isChatboxOpen ? <Close /> : <RiBrainLine size={50} />}
-          </Button>
+          <div className="rounded-full bg-[var(--dark-secondary,white)]">
+            <Button onClick={toggleChatbox} variant="outlined" style={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: 8 }}>
+              {isChatboxOpen ? <Close /> : <img src={genieImage} className="max-w-full" alt="" />}
+            </Button>
+          </div>
         </HtmlTooltip>
       )}
     </div>
