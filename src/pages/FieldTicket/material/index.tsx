@@ -18,7 +18,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, treeToFlatArray } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, treeToFlatArray } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';
@@ -386,7 +386,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         };
         element.fieldTicketId = fieldTicketData?._id;
         material.push(element);
-        await insertUpdate(objectStore.fieldTicketMaterial, id, element);
+        await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         fetchMaterial();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
@@ -510,7 +510,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         d._id = id;
         d.fieldTicketId = fieldTicketData?._id;
         d.type = MATERIAL_TYPE.manualEntry;
-        await insertUpdate(objectStore.fieldTicketMaterial, id, d);
+        await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(d, allFields));
         fetchMaterial();
         fetchData();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
@@ -548,7 +548,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         for (const row of rows) {
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.manualEntry;
-          await insertUpdate(objectStore.fieldTicketMaterial, row._id, row);
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, restoreObjKeysWithValues(row, allFields));
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = row;
@@ -665,7 +665,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.service;
           const existingRow = await findOne(objectStore.fieldTicketMaterial, row._id);
-          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...row });
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...(restoreObjKeysWithValues(row, allFields)) });
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = { ...existingRow, ...row };
