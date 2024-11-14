@@ -197,10 +197,10 @@ const Activity = (props) => {
               {tabs.map((data, index) => (
                 <Fragment key={index}>
                   <div
-                    className="flex cursor-pointer items-center gap-2 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
+                    className="flex cursor-pointer items-center gap-3 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
                     onClick={(event) => handleChangeType(event, data)}
                   >
-                    <div className="icon-container max-w-[30px] [&_svg]:block">{IconEventMap[data]}</div>
+                    <div className="icon-container max-w-[25px] [&_svg]:block">{IconEventMap[data]}</div>
                     <div className="text-container flex flex-grow">
                       <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
                         {data}
@@ -274,10 +274,12 @@ const Activity = (props) => {
 
               {resourceId && resource ? (
                 <button
-                  className="flex w-full cursor-pointer items-center gap-[10px] rounded-[10px] bg-transparent px-[23px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
+                  className="flex w-full cursor-pointer items-center gap-[10px] rounded-[10px] bg-transparent px-[20px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
                   onClick={() => setShowHistory(true)}
                 >
-                  <HistoryIcon className="max-w-[25px]" />
+                  <span className="max-h-[25px] max-w-[25px]">
+                    <HistoryIcon />
+                  </span>
                   <span className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">History</span>
                 </button>
               ) : null}
