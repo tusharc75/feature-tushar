@@ -10,6 +10,7 @@ export const IconEventMap = {
   Attachment: <AttachmentIcon />,
   Calendar: <CalendarIcon />,
   [routes.workSpace.title]: <WorkSpaceIcon />,
+  Collaborate: <WorkSpaceIcon />,
   Reminder: <ReminderIcon />
 } as const;
 
