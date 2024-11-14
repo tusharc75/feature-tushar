@@ -21,7 +21,7 @@ import { DragHandle, Info } from '@material-ui/icons';
 import { Formik, FormikErrors } from 'formik';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
@@ -48,7 +48,7 @@ type ArrangeViewDialogProps = {
   hideSelection: boolean;
   expander: boolean;
   table: Table<any>;
-  resized: boolean;
+  oldSerializedSizes: React.MutableRefObject<string>;
 };
 
 const formSchema = object().shape({
@@ -82,9 +82,17 @@ const ArrangeViewDialog = ({
   hideSelection,
   expander,
   table,
-  resized
+  oldSerializedSizes
 }: ArrangeViewDialogProps) => {
+  const [resized, setResized] = useState(false);
   const { stickyColumns } = useMemo(() => getStickyColumnNames({ allColumn: columns, expander, hideSelection }), [columns, expander, hideSelection]);
+
+  useEffect(() => {
+    if (oldSerializedSizes.current !== JSON.stringify(getCurrentColumnSizes(table))) {
+      setResized(true);
+      oldSerializedSizes.current = JSON.stringify(getCurrentColumnSizes(table));
+    }
+  }, [oldSerializedSizes, table]);
 
   const applySearchMatchProperty = (column, matched: boolean) => {
     return { ...column, searchMatched: matched };
