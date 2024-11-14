@@ -166,6 +166,11 @@ const Report = () => {
         });
         columns = [...newColumns];
       } else if (resourceCamelCase === 'volumeReport') {
+        newColumns?.forEach((o) => {
+          if(o.type==="number"){
+            o.cell = ({ row }) => (row?.original[o?.accessor] ? <div>{row?.original[o?.accessor]}</div> : <div>0</div>);
+          }
+        })
         columns = [...newColumns, ActionsRenderer];
       } else {
         columns = [...newColumns];
