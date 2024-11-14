@@ -1,4 +1,4 @@
-import { AttachmentIcon, CaseIcon, EmailIcon, EventIcon, NoteIcon, TaskIcon } from './icons';
+import { AttachmentIcon, CalendarIcon, CaseIcon, EmailIcon, EventIcon, NoteIcon, ReminderIcon, TaskIcon, WorkSpaceIcon } from './icons';
 
 export const IconEventMap = {
   Task: <TaskIcon />,
@@ -6,7 +6,10 @@ export const IconEventMap = {
   Case: <CaseIcon />,
   Note: <NoteIcon />,
   Email: <EmailIcon />,
-  Attachment: <AttachmentIcon />
+  Attachment: <AttachmentIcon />,
+  Calendar: <CalendarIcon />,
+  'Work Space': <WorkSpaceIcon />,
+  Reminder: <ReminderIcon />
 } as const;
 
 export const getCollaborateIconBasedOnName = (name: string) => {
