@@ -30,17 +30,7 @@ import MailIcon from '@material-ui/icons/Mail';
 import { isEmpty } from 'lodash';
 import { CollaborateIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from '../CustomTooltipTitle';
-
-import { AttachmentIcon, CaseIcon, EmailIcon, EventIcon, HistoryIcon, NoteIcon, TaskIcon } from 'src/assets/svg/collaboratorSidebar';
-
-const IconEventMap = {
-  Task: <TaskIcon />,
-  Event: <EventIcon />,
-  Case: <CaseIcon />,
-  Note: <NoteIcon />,
-  Email: <EmailIcon />,
-  Attachment: <AttachmentIcon />
-};
+import { HistoryIcon, IconEventMap } from 'src/assets/svg/CollaborateSidebar';
 
 const Activity = (props) => {
   const {
@@ -52,7 +42,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => { }
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -207,23 +197,19 @@ const Activity = (props) => {
               {tabs.map((data, index) => (
                 <Fragment key={index}>
                   <div
-                    className="flex cursor-pointer items-center gap-4 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
+                    className="flex cursor-pointer items-center gap-2 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
                     onClick={(event) => handleChangeType(event, data)}
                   >
-                    <div className="icon-container [&_svg]:block">{IconEventMap[data]}</div>
+                    <div className="icon-container [&>*]:h-auto [&>*]:max-w-[30px] [&_svg]:block">{IconEventMap[data]}</div>
                     <div className="text-container flex flex-grow">
-                      <div className="flex flex-grow flex-wrap items-center">
-                        <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
-                          {data}
-                          <span className="cursor-pointer">
-                            {type === data ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-                          </span>
-                        </h6>
-                        <p className="text-[14px] font-medium leading-[17px] text-[#767676]">
-                          {totalCount[data]} {data}
-                          {totalCount[data] > 1 ? 's' : ''}
-                        </p>
-                      </div>
+                      <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
+                        {data}
+                        <span className="ml-[2px] text-[12px] text-gray-500">({totalCount[data]})</span>
+                        <span className="cursor-pointer">
+                          {type === data ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                        </span>
+                      </h6>
+
                       {data === 'Event' || permissions[data?.toLowerCase()]?.isCreate ? (
                         restrictedAddActivities.indexOf(data) >= 0 ? null : (
                           <div className="flex items-center">
@@ -288,10 +274,10 @@ const Activity = (props) => {
 
               {resourceId && resource ? (
                 <button
-                  className="flex w-full cursor-pointer items-center gap-[20px] rounded-[10px] bg-transparent px-[27px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
+                  className="flex w-full cursor-pointer items-center gap-[10px] rounded-[10px] bg-transparent px-[23px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
                   onClick={() => setShowHistory(true)}
                 >
-                  <HistoryIcon />
+                  <HistoryIcon className="max-w-[25px]" />
                   <span className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">History</span>
                 </button>
               ) : null}

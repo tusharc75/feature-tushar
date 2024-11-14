@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { ChatBoxIcon } from 'src/assets/svg/collaboratorSidebar';
+import { ChatBoxIcon } from 'src/assets/svg/CollaborateSidebar';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
@@ -29,7 +29,6 @@ const Chatter = (props: any) => {
   const [chatterId, setChatterId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
-  const [isFocused, setFocused] = useState(false);
   const [isSending, setSending] = useState(false);
 
   const getChatter = () => {
@@ -166,8 +165,6 @@ const Chatter = (props: any) => {
             onChange={(e) => setMessage(e.target.value)}
             fullWidth
             placeholder="Type here..."
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
           />
           <IconButton
             size="small"

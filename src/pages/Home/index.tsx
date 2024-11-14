@@ -14,6 +14,7 @@ import SideCard from 'src/pages/Home/SideCard';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
 
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
+import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -72,7 +73,7 @@ function Dashboard() {
                 />
               )}
               <UserFavouriteCard />
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
+              <WorkspaceCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} />
               {formPermission && (
                 <SideCard
                   heading="Dynamic Form"
