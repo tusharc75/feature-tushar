@@ -24,6 +24,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
 
@@ -41,6 +42,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false);
+  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
@@ -52,6 +55,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   useEffect(() => {
     fetchFields();
+    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -362,7 +366,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setIsDateApplying(false);
   };
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = (invoiceData = null) => {
     if (progressiveBilling) {
       setUpdating(true);
       rowsApplied?.forEach((element) => {
@@ -394,7 +398,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         });
     } else {
       axiosInstance()
-        .post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id) })
+        .post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id), extraInvoiceData: invoiceData })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -406,6 +410,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+        if (data) {
+          setInvoiceResourceData(data);
+        }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -524,7 +541,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 color="primary"
                 type="button"
                 onClick={() => {
-                  handleCreateInvoice();
+                  if (resource===sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
+                    setOpenInvoiceDataDialog(true);
+                  } else {
+                    handleCreateInvoice();
+                  }
                 }}
               >
                 Create Invoice
@@ -533,6 +554,17 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           </HtmlTooltip>
         </CustomDialogFooter>
       </Dialog>
+      {openInvoiceDataDialog && (
+        <InvoiceDataDialog
+          onClose={() => {
+            setOpenInvoiceDataDialog(false);
+          }}
+          invoiceFields={invoiceResourceData?.policy?.fieldTicketInvoiceFields}
+          onSuccess={(data) => {
+            handleCreateInvoice(data);
+          }}
+        />
+      )}
     </Fragment>
   );
 };

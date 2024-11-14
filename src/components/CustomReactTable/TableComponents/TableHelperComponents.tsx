@@ -439,11 +439,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           {...{
             onMouseDown: (e) => {
               header.getResizeHandler()(e);
-              dispatch({ type: 'setResized', resized: true });
             },
             onTouchStart: (e) => {
               header.getResizeHandler()(e);
-              dispatch({ type: 'setResized', resized: true });
             },
             className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
           }}
