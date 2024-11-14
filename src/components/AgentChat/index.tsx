@@ -30,7 +30,7 @@ const AgentChat = () => {
       </Grow>
       {AI_AGENT && localStorage.getItem('token') && (
         <HtmlTooltip title={isChatboxOpen ? '' : 'Equipt Genie'} className="block">
-          <div className="rounded-full bg-[var(--dark-secondary,white)]">
+          <div className="rounded-full bg-[var(--dark-primary,white)]">
             <Button onClick={toggleChatbox} variant="outlined" style={{ borderRadius: 999, width: 40, height: 40, minWidth: 'unset', padding: 8 }}>
               {isChatboxOpen ? <Close /> : <img src={genieImage} className="max-w-full" alt="" />}
             </Button>
