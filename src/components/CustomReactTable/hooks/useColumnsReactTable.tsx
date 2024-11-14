@@ -479,7 +479,7 @@ export default function useColumns() {
           editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
-              <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original[field?.fieldName] || row.original[field?.fieldName]===0 ? row.original[field?.fieldName] : <NoDataCell />}</h5>
             </div>
           )
         });
