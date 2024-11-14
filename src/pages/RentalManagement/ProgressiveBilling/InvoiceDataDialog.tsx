@@ -12,7 +12,7 @@ import { CustomDialogTransition, getObjKeys, sidebarResource, yupSchema } from '
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 
-const InvoiceDataDialog = ({ onClose, onSuccess, rentalInvoiceFields }) => {
+const InvoiceDataDialog = ({ onClose, onSuccess, invoiceFields }) => {
 	const toastConfig = useContext(CustomToastContext);
 
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet)
@@ -27,7 +27,7 @@ const InvoiceDataDialog = ({ onClose, onSuccess, rentalInvoiceFields }) => {
 			let fieldData;
 			const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}`);
 			fieldData = response?.data?.data;
-			const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate && rentalInvoiceFields?.includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+			const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate && invoiceFields?.includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
 			setInitialData({
 				fields: fieldsDataForCreate,
 				values: getObjKeys('', fieldsDataForCreate)
