@@ -77,7 +77,7 @@ function Dashboard() {
               {formPermission && (
                 <SideCard
                   heading="Dynamic Form"
-                  href={`${routes.formBuilder.path}?dynamicResource=true`}
+                  href={`${routes.formBuilder.path}`}
                   icon={
                     <div className="max-w-[60px]">
                       <img src={dynamicFormImage} alt={'Setups & Administration Logo'} className="max-w-full" />
