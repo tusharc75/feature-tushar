@@ -2,8 +2,8 @@ import { Form, Formik } from 'formik';
 
 import moment from 'moment';
 import { Dispatch, Fragment, useEffect, useMemo, useState } from 'react';
-import { TChatboxActions, TInitialChatboxState } from 'src/components/AgentChat/chatboxReducer';
-import { Field } from 'src/components/AgentChat/types';
+import { TChatboxActions, TInitialChatboxState } from 'src/components/AiChatbox/chatboxReducer';
+import { Field } from 'src/components/AiChatbox/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { cn, dateFormat, yupSchema } from 'src/constants/helpers';
@@ -19,9 +19,10 @@ type RenderFieldsProps = {
   disabled?: boolean;
   setState?: Dispatch<TChatboxActions>;
   state: TInitialChatboxState;
+  isDefaultMode: boolean;
 };
 
-const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state }: RenderFieldsProps) => {
+const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state, isDefaultMode }: RenderFieldsProps) => {
   const { fullScreen } = state;
   const updatedFields = useMemo(() => {
     return fields
@@ -70,7 +71,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state 
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Fragment>
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <div className={cn('grid gap-3', fullScreen ? 'grid-cols-1 md:grid-cols-2 md:gap-4' : 'grid-cols-1')}>
+              <div className={cn('grid gap-3', fullScreen || isDefaultMode ? 'grid-cols-1 md:grid-cols-2 md:gap-4' : 'grid-cols-1')}>
                 {updatedFields.map((field) => (
                   <div>
                     <FormTypes
