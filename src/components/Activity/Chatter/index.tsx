@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { ChatBoxIcon } from 'src/assets/svg/collaboratorSidebar';
+import { ChatBoxIcon } from 'src/assets/svg/CollaborateSidebar';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
@@ -29,7 +29,6 @@ const Chatter = (props: any) => {
   const [chatterId, setChatterId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
-  const [isFocused, setFocused] = useState(false);
   const [isSending, setSending] = useState(false);
 
   const getChatter = () => {
@@ -110,8 +109,10 @@ const Chatter = (props: any) => {
 
   return (
     <div className="overflow-hidden rounded-[10px] shadow-lg [border:1px_solid_var(--common-border-color)]" id="chatList">
-      <div className="flex min-h-[53px] items-center gap-[18px] px-[26px] py-[9px] [border-bottom:1px_solid_var(--common-border-color)]">
-        <ChatBoxIcon />
+      <div className="flex min-h-[53px] items-center gap-[18px] px-[20px] py-[9px] [border-bottom:1px_solid_var(--common-border-color)]">
+        <span className="max-h-[25px] max-w-[25px]">
+          <ChatBoxIcon />
+        </span>
         <h6 className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">Collaborate</h6>
       </div>
       <div className="chat-box-body">
@@ -166,8 +167,6 @@ const Chatter = (props: any) => {
             onChange={(e) => setMessage(e.target.value)}
             fullWidth
             placeholder="Type here..."
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
           />
           <IconButton
             size="small"
