@@ -170,6 +170,11 @@ const Report = () => {
       } else {
         columns = [...newColumns];
       }
+      columns?.forEach((o) => {
+        if(o.type==="number"){
+          o.cell = ({ row }) => (row?.original[o?.accessor] ? <div>{row?.original[o?.accessor]}</div> : <div>0</div>);
+        }
+      })
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
         setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
