@@ -548,7 +548,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (
             <div>
-              {row?.original?.[field?.fieldName] ? (
+              {row?.original?.[field?.fieldName] || row?.original?.[field?.fieldName]===0 ? (
                 <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
                   {row?.original?.[field?.fieldName]}
                 </h5>
