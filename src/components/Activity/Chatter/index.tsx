@@ -109,8 +109,10 @@ const Chatter = (props: any) => {
 
   return (
     <div className="overflow-hidden rounded-[10px] shadow-lg [border:1px_solid_var(--common-border-color)]" id="chatList">
-      <div className="flex min-h-[53px] items-center gap-[18px] px-[26px] py-[9px] [border-bottom:1px_solid_var(--common-border-color)]">
-        <ChatBoxIcon />
+      <div className="flex min-h-[53px] items-center gap-[18px] px-[20px] py-[9px] [border-bottom:1px_solid_var(--common-border-color)]">
+        <span className="max-h-[30px] max-w-[30px]">
+          <ChatBoxIcon />
+        </span>
         <h6 className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">Collaborate</h6>
       </div>
       <div className="chat-box-body">

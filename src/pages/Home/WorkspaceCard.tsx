@@ -38,13 +38,14 @@ const WorkspaceCard = ({ handleRoutes, objBySectionName }) => {
         modalHead={modalContent}
         handleClose={() => setModalContent(null)}
         handleRoutes={handleRoutes}
+        contentMaxHeight="300px"
       >
-        <ul className={'grid grid-cols-2 gap-2 sm:grid-cols-3 '}>
+        <ul className={'grid grid-cols-2 gap-2'}>
           {modalContent?.items
             ?.filter((item) => !item?.isHidden)
             .map((item) => (
               <li key={item.name} className="list-none rounded-md border shadow-md transition-shadow hover:shadow-lg">
-                <Link to={handleRoutes(item)} className={'flex items-center gap-x-2 gap-y-3 px-2 py-4'}>
+                <Link to={handleRoutes(item)} className={'flex items-center gap-2 px-2 py-4'}>
                   <span className="block max-h-[20px] max-w-[20px] flex-shrink-0 [&>*]:h-[auto] [&>*]:max-w-full">
                     {getCollaborateIconBasedOnName(item.resourceLabel || item.name)}
                   </span>

@@ -176,7 +176,7 @@ const Activity = (props) => {
         >
           <div className="flex items-center gap-[14px]">
             <div
-              className="icon grid h-[34px] w-[37px] place-items-center rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)]"
+              className="icon grid h-[30px] w-[30px] place-items-center rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)]"
               style={{ backgroundImage: 'linear-gradient(to right, #FAC94B, rgb(255,155,4))' }}
             >
               <CollaborateIcon />
@@ -200,7 +200,7 @@ const Activity = (props) => {
                     className="flex cursor-pointer items-center gap-2 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
                     onClick={(event) => handleChangeType(event, data)}
                   >
-                    <div className="icon-container [&>*]:h-auto [&>*]:max-w-[30px] [&_svg]:block">{IconEventMap[data]}</div>
+                    <div className="icon-container max-w-[30px] [&_svg]:block">{IconEventMap[data]}</div>
                     <div className="text-container flex flex-grow">
                       <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
                         {data}
