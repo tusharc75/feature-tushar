@@ -16,16 +16,17 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const TECHNICIAN_RESOURCE = [
   {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    title: routes.fieldTicketDetail.title
+  },
+  {
     key: 'rentalManagement',
     resource: sidebarResource.rentalManagement,
     title: routes.rentalManagementDetail.title
   },
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    title: routes.fieldTicketDetail.title
-  }
 ];
+
 const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {

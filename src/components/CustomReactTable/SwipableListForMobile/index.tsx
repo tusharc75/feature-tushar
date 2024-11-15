@@ -1,14 +1,9 @@
-import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { CircularProgress } from '@material-ui/core';
 import { Error } from '@material-ui/icons';
-import { Row, flexRender } from '@tanstack/react-table';
 import React, { FC, useMemo } from 'react';
-import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
-import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
-import RenderCellWithHeader from './RenderCellWithHeader';
-import RenderFooter from './RenderFooter';
-import RenderSubCard from './RenderSubCard';
-import type { TSwipableListInputProps } from './types';
 import VirtualSwipableList from 'src/components/CustomReactTable/SwipableListForMobile/VirtualSwipableList';
+import RenderFooter from './RenderFooter';
+import type { TSwipableListInputProps } from './types';
 
 export const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
 

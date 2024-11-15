@@ -13,9 +13,9 @@ function TechnicianScheduler() {
   const [refresh, setRefresh] = useState(false);
 
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const updateSelectedRecord = (records)=>{
-    setSelectedRecords(records)
-  }
+  const updateSelectedRecord = (records) => {
+    setSelectedRecords(records);
+  };
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -47,7 +47,7 @@ function TechnicianScheduler() {
             setAssignTechnicianDialog({ open: false, data: null });
             setUnAssignTechnicianDialog({ open: false, data: null });
           }}
-          updateSelectedRecord = {updateSelectedRecord}
+          updateSelectedRecord={updateSelectedRecord}
         />
       </Box>
     </Box>

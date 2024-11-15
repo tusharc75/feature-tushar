@@ -269,6 +269,7 @@ import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
+import PackageInventory from 'src/pages/PackageInventory';
 
 var notificationInterval: any = null;
 
@@ -1206,6 +1207,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.assemblyOrderDetail.path}/:id`}>
               <AssemblyOrderDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.packageInventory.path}`}>
+              <PackageInventory />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

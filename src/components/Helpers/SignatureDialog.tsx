@@ -94,10 +94,10 @@ export default function SignatureDialog(props) {
             </Box>
           </>
         )}
-        <div style={{ display: activeStep === 1 ? 'none' : 'block' }} className="dark:[filter:invert(1)]">
+        <div style={{ display: activeStep === 1 ? 'none' : 'block' }} className="bg-white">
           <SignaturePad ref={signCanvas1} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
         </div>
-        <div style={{ display: activeStep === 0 ? 'none' : 'block' }} className="dark:[filter:invert(1)]">
+        <div style={{ display: activeStep === 0 ? 'none' : 'block' }} className="bg-white">
           <SignaturePad ref={signCanvas2} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
         </div>
         <Button

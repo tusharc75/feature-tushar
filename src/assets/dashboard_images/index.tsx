@@ -10,17 +10,11 @@ import genIcon from './gen_icon.svg';
 import invIcon from './inventoryManagement.svg';
 import heroTextIcon from './heroTextIcon.svg';
 import sidebarCogIcon from './sidebarCogIcon.svg';
-import colabIcon from './colab.svg';
-import setupsIcon from './setups.svg';
-import docksIcon from './docksIcon.svg';
-
 import salesManagement from './salesManagement.svg';
 import rentalManagement from './rentalManagement.svg';
 import ecommerceIcon from './ecommerce.svg';
 import repairMaintenanceManagement from './repairMaintenanceManagement.svg';
 import serviceManagement from './serviceManagement.svg';
-
-import { FcViewDetails } from 'react-icons/fc';
 
 export const IconConst = {
   HERO: 'Hero',
@@ -35,14 +29,11 @@ export const IconConst = {
   GEN_ICON: 'GenIcon',
   HERO_TEXT_ICON: 'HeroTextIcon',
   SIDEBAR_COG_ICON: 'SidebarCog',
-  COLABORATION_TOOL: 'Workspace',
-  SETUPS_ICON: 'Setups & Administration',
   SALES_MANAGEMENT: 'Sales Management',
   RENTAL_MANAGEMENT: 'Rental Management',
   ECOMMERCE: 'eCommerce',
   REPAIR_AND_MAINTENANCE_MANAGEMENT: 'Repair & Maintenance Management',
-  SERVICE_MANAGEMENT: 'Service Management',
-  DOCKS: 'User Manual'
+  SERVICE_MANAGEMENT: 'Service Management'
 };
 
 export const IMAGE_HEIGHT = 50;
@@ -74,10 +65,7 @@ export const SVGImages = (name) => {
       return heroTextIcon;
     case IconConst.SIDEBAR_COG_ICON:
       return sidebarCogIcon;
-    case IconConst.COLABORATION_TOOL:
-      return colabIcon;
-    case IconConst.SETUPS_ICON:
-      return setupsIcon;
+
     case IconConst.SALES_MANAGEMENT:
       return salesManagement;
     case IconConst.RENTAL_MANAGEMENT:
@@ -88,8 +76,7 @@ export const SVGImages = (name) => {
       return repairMaintenanceManagement;
     case IconConst.SERVICE_MANAGEMENT:
       return serviceManagement;
-    case IconConst.DOCKS:
-      return docksIcon;
+
     default:
       return crm;
   }

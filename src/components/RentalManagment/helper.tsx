@@ -182,7 +182,9 @@ export const resetValueZero = (material, fields, parentId, bulkUpdateValues = nu
     const result = [];
     material?.filter((e) => e.parentId === parentId)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
-            child[fieldName] = 0;
+            if (bulkUpdateValues?.hasOwnProperty(fieldName)) {
+                child[fieldName] = 0;
+            }
         })
         if (bulkUpdateValues && updateFields?.length) {
             updateFields.forEach((fieldName) => {
@@ -192,7 +194,9 @@ export const resetValueZero = (material, fields, parentId, bulkUpdateValues = nu
         result.push(child)
         material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
             resetFields.forEach((fieldName) => {
-                subChild[fieldName] = 0;
+                if (bulkUpdateValues?.hasOwnProperty(fieldName)) {
+                    subChild[fieldName] = 0;
+                }
             })
             if (bulkUpdateValues && updateFields?.length) {
                 updateFields.forEach((fieldName) => {

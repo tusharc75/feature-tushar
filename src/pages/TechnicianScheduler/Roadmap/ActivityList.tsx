@@ -56,8 +56,12 @@ export default function ActivityList(props) {
             </Avatar>
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
               <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <p style={{ fontSize: '0.8rem', color: 'grey' }}>{`${data?.competencyType?.optionLabel || ''}`}</p>
-              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}</p>
+              <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
+                {`${data?.competencyType?.optionLabel || ''}`}
+              </p>
+              <p className="line-clamp-1 text-[0.6rem] text-gray-500" title={`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}>
+                {`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+              </p>
             </Box>
           </Box>
           <Box width={'20%'} className="d-flex align-items-center">

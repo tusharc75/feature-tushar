@@ -152,8 +152,9 @@ const SignatureDialog = ({ onSave, open, close }) => {
       />
       <CustomDialogContent className="px-[15px]">
         {usePad ? (
-          <div className="flex min-h-full items-center justify-center dark:[filter:invert(1)]">
+          <div className="flex min-h-full items-center justify-center bg-white">
             <SignaturePad
+              className=""
               ref={signCanvas}
               canvasProps={{ width: fullScreen ? window.innerWidth - 30 : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
             />
@@ -223,14 +224,10 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
             alignItems: 'center',
             justifyContent: 'center'
           }}
+          className="bg-white"
         >
           {values[name] ? (
-            <img
-              src={values[name]}
-              className="dark:[filter:invert(1)]"
-              style={{ maxWidth: 70, maxHeight: 70, width: '100%', height: 'auto' }}
-              alt="Signature"
-            />
+            <img src={values[name]} className="" style={{ maxWidth: 70, maxHeight: 70, width: '100%', height: 'auto' }} alt="Signature" />
           ) : (
             <FaSignature style={{ width: 70, height: 70, color: '#5b5b5b' }} />
           )}

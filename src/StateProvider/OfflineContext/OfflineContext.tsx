@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
-import { deliveryTicket, rentalManagement, asyncForEach, checkIfSynching } from '../../constants/helpers';
+import { deliveryTicket, rentalManagement, asyncForEach } from '../../constants/helpers';
 import { objectStore, findAll, deleteOne, setUpindexDB, deleteMany } from '../../constants/indexdbhelper';
 import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOfflineHelper';
 import { sortBy } from 'lodash';
@@ -45,8 +45,6 @@ export const CustomOfflineProvider = ({ children }) => {
   const synchronizationData = async () => {
     try {
       if (!isOffline) {
-        const canSynch = await checkIfSynching();
-        if (!canSynch) return;
         await setUpindexDB();
         var data = await findAll(objectStore.offlineDataSync);
         if (data?.length) {
@@ -119,10 +117,8 @@ export const CustomOfflineProvider = ({ children }) => {
           rentalJobOfflineUpdate([]);
         }
         setIsSynch(false);
-        await checkIfSynching(true);
       }
     } catch (err) {
-      await checkIfSynching(true);
       setIsSynch(false);
     }
   };

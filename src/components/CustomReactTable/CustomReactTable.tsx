@@ -41,6 +41,22 @@ import {
   useSkipper
 } from './utils';
 
+const handleApplySavedSize = (columns, columnSavedSizes) => {
+  if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
+    const newData = columns?.map((column) => {
+      if (columnSavedSizes[column.id]) {
+        column.size = columnSavedSizes[column.id];
+      } else {
+        column.size = column.width || 200;
+      }
+      return column;
+    });
+    return newData;
+  } else {
+    return columns?.map((c) => ({ ...c, size: c.width }));
+  }
+};
+
 let exportTimeout;
 
 const CustomReactTable = ({
@@ -261,26 +277,10 @@ const CustomReactTable = ({
   });
 
   useLayoutEffect(() => {
-    const handleApplySavedSize = (columns) => {
-      if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
-        const newData = columns?.map((column) => {
-          if (columnSavedSizes[column.id]) {
-            column.size = columnSavedSizes[column.id];
-          } else {
-            column.size = column.width || 200;
-          }
-          return column;
-        });
-        return newData;
-      } else {
-        return columns?.map((c) => ({ ...c, size: c.width }));
-      }
-    };
-
     if (tableContainerRef.current) {
       const container = tableContainerRef.current;
       const { clientWidth } = container;
-      const updatedColumns = adjustSizes(handleApplySavedSize(hookColumns ? [...hookColumns] : []), visibleColumns, clientWidth);
+      const updatedColumns = adjustSizes(handleApplySavedSize(hookColumns ? [...hookColumns] : [], columnSavedSizes), visibleColumns, clientWidth);
 
       if (updatedColumns) {
         setNewColumns(updatedColumns);
@@ -291,8 +291,10 @@ const CustomReactTable = ({
       } else {
         setNewColumns([...hookColumns]);
       }
+    } else {
+      setNewColumns([...hookColumns]);
     }
-  }, [tableContainerRef, newColumns.length, visibleColumns, columnSavedSizes, hookColumns.length]);
+  }, [visibleColumns, columnSavedSizes, hookColumns, table]);
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 

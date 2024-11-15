@@ -26,6 +26,7 @@ import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStati
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
+import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -54,6 +55,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
+  const [openManagedPackageDialog, setOpenManagedPackageDialog] = useState({ open: false, ids: [] });
 
   const { generateColumns } = useColumns();
 
@@ -276,7 +278,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                   }}
                   disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-                  {row.original['status'] === 'Completed' ? (
+                  {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
                     <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                   ) : (
                     <AutoCompleteIcon size={18} />
@@ -285,7 +287,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               </HtmlTooltip>
             )}
 
-            {row?.original?.type != MATERIAL_TYPE.package && (
+            {row?.original?.parentId && (
               <HtmlTooltip title="Delete">
                 <span>
                   <IconButton
@@ -337,19 +339,33 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageDescription
+            : '';
       _subRow.qty = _subRow.qty;
       _subRow.workOrderId = _subRow?.workOrder?._id;
       _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
-      _subRow.status = _subRow?.workOrder?.serviceProcessStatus || '';
+      _subRow.status = _subRow?.workOrder?.status || '';
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.new) {
         _subRow.canAutoCompleteWorkOrder = true;
+      }
+      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+        _subRow.hideSelection = true;
+        _subRow.workOrderStatus = WORK_ORDER_STATUS.completed;
       }
       _subRow.subRows = generateNestedData(material, _subRow);
 
       _subRow.canDelete = false;
-      if (_subRow?.status !== WORK_ORDER_STATUS.completed) {
+      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
@@ -382,6 +398,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
             ? _subRow?.productDetail?.productDescription
             : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
+      _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderId = parent?.workOrderId;
       _subRow.workOrderNumber = parent?.workOrderNumber;
       _subRow.hideSelection = false;
@@ -471,15 +488,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
   };
 
-  const handleAutoComplete = () => {
-    let ids = [];
-    if (autoCompleteData && autoCompleteData.length > 0) {
-      autoCompleteData.forEach((d) => {
-        if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-          if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
-        }
-      });
-    }
+  const handleAutoComplete = (ids) => {
     setCompleting(true);
     if (ids.length) {
       axiosInstance()
@@ -511,7 +520,11 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
 
   const checkParentProduct = (selectedRecords, parentId = null, rows = []) => {
     if (parentId && rows?.length > 0) {
-      return selectedRecords[0]?.type === MATERIAL_TYPE.product && !rows?.find((r) => r?.original?._id === parentId)?.original?.parentId;
+      return (
+        [MATERIAL_TYPE.product, MATERIAL_TYPE.package].includes(selectedRecords[0]?.type) &&
+        selectedRecords[0]?.parentId &&
+        !rows?.find((r) => r?.original?._id === parentId)?.original?.parentId
+      );
     } else if (parentId && rows?.length === 0) {
       return selectedRecords[0]?.type === MATERIAL_TYPE.product && !material?.find((m) => m?._id === parentId)?.parentId;
     }
@@ -709,7 +722,36 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
           onClose={() => {
             setCompleteConfirmBox(false);
           }}
-          onOk={handleAutoComplete}
+          onOk={() => {
+            let ids = [];
+            let isPackage = false;
+            if (autoCompleteData && autoCompleteData.length > 0) {
+              autoCompleteData.forEach((d) => {
+                if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
+                  if(d?.type===MATERIAL_TYPE.package) isPackage = true;
+                  if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
+                }
+              });
+            }
+            
+            isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
+          }}
+        />
+      )}
+
+      {openManagedPackageDialog.open && (
+        <PackageNumberDialog
+          onClose={() => {
+            setOpenManagedPackageDialog({open: false, ids: []});
+            setCompleteConfirmBox(false);
+          }}
+          assemblyOrderId={assemblyOrderData._id}
+          workOrderIds={openManagedPackageDialog.ids}
+          onSuccess={() => {
+            setCompleteConfirmBox(false);
+            handleAutoComplete(openManagedPackageDialog.ids)
+            setOpenManagedPackageDialog({open: false, ids: []});
+          }}
         />
       )}
 

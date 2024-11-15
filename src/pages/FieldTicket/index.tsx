@@ -246,6 +246,7 @@ const FieldTicket = () => {
           deleteOne(objectStore.offlineDataSync, ids[i]);
         } else {
           await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...{ _id: ids[i] }, offlineSyncStatus: 'delete' } });
+          deleteOne(objectStore.offlineDataSync, `${ids[i]}_submit`);
         }
         let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
         fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === ids[i])?.map((e) => e?._id);

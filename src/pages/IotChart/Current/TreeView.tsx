@@ -8,7 +8,7 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import moment from 'moment';
-import { CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Chart from '../Helper/Chart';
@@ -16,9 +16,10 @@ import FilterModel from '../Helper/FilterModel';
 
 const Accordion = withStyles({
   root: {
-    border: '0px',
     boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.06)',
-
+    borderRadius: '0.5rem !important',
+    border: '1px solid var(--common-border-color) !important',
+    overflow: 'hidden',
     '&:not(:last-child)': {
       borderBottom: 0
     },
@@ -35,14 +36,12 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: 'var(--accordion-summary-bg, #fff)',
     padding: '0 8px',
     minHeight: 48,
-    borderRadius: '3.54532px',
     '&$expanded': {
       minHeight: 48,
-      backgroundColor: 'var(--accordion-expanded-summary-bg, #f1f5ff)',
-      borderRadius: '3.54532px 3.54532px 0px 0px'
+      backgroundColor: 'var(--dark-secondary, white)',
+      borderBottom: '0px !important'
     }
   },
   content: {
@@ -57,8 +56,7 @@ const AccordionDetails = withStyles((theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),
-    border: '1px solid var(--accordion-details-border)',
-    borderRadius: '0px 0px 6px 6px'
+    borderRadius: '0px 0px 0.5rem 0.5rem'
   }
 }))(MuiAccordionDetails);
 
@@ -83,7 +81,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
     <>
       <Accordion
         expanded={expandedAccordition[category?._id]}
-        className={`omsAccordian w-full`}
+        className={`omsAccordian w-full !shadow-lg`}
         onChange={() => {
           setExpandedAccordition((prev) => ({
             ...prev,
@@ -91,72 +89,63 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
           }));
         }}
       >
-        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Box display="flex">
-            <Box>
-              <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-            </Box>
-            <Box padding="5px">
-              <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="![border:1px_solid_var(--commono-border-color)]">
+          <div className="flex w-full items-center">
+            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            <div className="flex flex-grow justify-between gap-2 p-[5px]">
+              <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }} className="truncate">
                 {category?.iotDataPointsCategoryName}
               </Typography>
               {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) && (
-                <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px]`}>
+                <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px] `}>
                   <span className="absolute -left-[3px] -top-[3px] inline-flex h-3 w-3 animate-ping rounded-full bg-red-400 opacity-75"></span>
                   <span className="inline-flex h-full w-full rounded-full bg-red-500"></span>
                 </span>
               )}
-            </Box>
-          </Box>
+              {expandedAccordition[category?._id] && currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
+                <h6 className="line-clamp-1 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300 max-sm:text-xs">
+                  <span className="max-md:sr-only">Last Updated -</span>
+                  <span>{moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}</span>
+                </h6>
+              ) : null}
+            </div>
+          </div>
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails className="bg-gray-100 dark:bg-gray-800">
           {expandedAccordition[category?._id] && (
             <>
-              <Grid container spacing={1}>
-                {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
-                  <Box className="p-[10px] " width={'100%'} textAlign="end">
-                    {' '}
-                    Last Updated -{' '}
-                    <span className="text-[12px] text-gray-500 dark:text-gray-300">
-                      {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}
-                    </span>
-                  </Box>
-                ) : null}
+              <div className="grid grid-cols-1 gap-2 rounded-lg sm:grid-cols-2 md:grid-cols-3">
                 {currentData
                   ?.filter((d) => d?.category?.optionValue === category?._id)
                   ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
                   ?.map((data) => {
                     return (
-                      <Grid item xs={12} sm={6} lg={4} md={4}>
-                        <Box
-                          border="1px solid var(--common-border-color)"
-                          className={`min-h-full rounded-md p-[10px] ${data?.redAlert ? 'bg-red-300' : ''}`}
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <p style={{ width: '100%' }} className="flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                            <strong className="line-clamp-1">{data?.fieldLabel} : </strong>
-                            <span className="font-medium">
-                              {data?.fieldValue || 0}
-                              {data?.unit && `(${data?.unit})`}
-                            </span>
+                      <div
+                        key={data?.fieldLabel}
+                        className={cn(
+                          `flex min-h-full items-center justify-between rounded-lg bg-[var(--dark-primary,white)] p-[10px] shadow-lg`,
+                          data?.redAlert ? 'bg-red-300' : ''
+                        )}
+                      >
+                        <div className="text">
+                          <p className="mb-2 text-xs text-gray-600 dark:text-gray-400">{data?.fieldLabel}</p>
+                          <p className="text-md font-medium text-gray-700 dark:text-gray-200">
+                            {data?.fieldValue || 0}
+                            {data?.unit && ` (${data?.unit})`}
                           </p>
-                          <Box ml={1}>
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                setDataPoint(data);
-                              }}
-                            >
-                              <HistoryIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                      </Grid>
+                        </div>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setDataPoint(data);
+                          }}
+                        >
+                          <HistoryIcon fontSize="small" />
+                        </IconButton>
+                      </div>
                     );
                   })}
-              </Grid>
+              </div>
               <div className="grid gap-3">
                 {category?.child?.map((child: any) => (
                   <TreeView

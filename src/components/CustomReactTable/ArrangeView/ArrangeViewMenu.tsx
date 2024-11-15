@@ -1,6 +1,6 @@
 import { Divider, IconButton, List, ListItem, Menu } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
-import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -16,6 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import { Table } from '@tanstack/react-table';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 export type GridViewSavedData = {
   _id: string;
@@ -46,10 +47,15 @@ type ArrangeViewMenuProps = {
   appliedView?: { hide: string[]; order: string[]; sizes: { [key: string]: number }; name?: string; id?: string };
   table: Table<any>;
 };
+
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander, appliedView, table }: ArrangeViewMenuProps) => {
+  const oldSerializedSizes = useRef(JSON.stringify(getCurrentColumnSizes(table)));
   const walkmeInstance = useGetWalkmeInstance();
-  const { loading, resized } = state;
+
+  const { loading } = state;
+
   const { gridMetaData, setGridMetaData } = useGridMetaData();
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const {
     state: { user },
@@ -115,7 +121,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         data: { data }
       } = await axiosInstance().get('/user/grid-view');
       setSavedData(data.filter((d) => d.key === renderedFrom));
-      dispatch({ type: 'setResized', resized: false });
       contextDispatch({ type: SET_USER, payload: { ...user, sizes, gridViews: data } });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -169,20 +174,22 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top" arrow>
-        <IconButton
-          aria-describedby="columnSelection"
-          size="small"
-          color="primary"
-          disabled={loading}
-          className="refresh-arrange-button"
-          onClick={(e) => {
-            setAnchorEl(e.currentTarget);
-          }}
-        >
-          <SwapHoriz />
-        </IconButton>
-      </HtmlTooltip>
+      {!isOffline && (
+        <HtmlTooltip title="Arrange View" placement="top" arrow>
+          <IconButton
+            aria-describedby="columnSelection"
+            size="small"
+            color="primary"
+            disabled={loading}
+            className="refresh-arrange-button"
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget);
+            }}
+          >
+            <SwapHoriz />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       <Menu
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
@@ -308,7 +315,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           hideSelection={hideSelection}
           expander={expander}
           table={table}
-          resized={resized}
+          oldSerializedSizes={oldSerializedSizes}
         />
       )}
       {confirmationDialog.open && (

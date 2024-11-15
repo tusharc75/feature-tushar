@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import { useMemo } from 'react';
-import { getPathTitleFromPath } from 'src/components/AgentChat/utils';
+import { getPathTitleFromPath } from 'src/components/AiChatbox/utils';
 
 type SuggetionsProps = {
   pathname: string;

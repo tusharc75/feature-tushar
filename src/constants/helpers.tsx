@@ -1,7 +1,7 @@
 import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
@@ -385,7 +385,8 @@ export const sidebarResource = {
   subcontractAssembly: 'Subcontract Assembly',
   managedPackages: 'Managed Packages',
   trainAiModel: 'Train Ai Model',
-  assemblyOrder: 'Assembly Order'
+  assemblyOrder: 'Assembly Order',
+  packageInventory: 'Package Inventory'
 };
 
 export const primaryFields = {
@@ -413,6 +414,7 @@ export const RESOURCE_LABEL = {
   field: 'Fields',
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
+  packageInventory: 'Package Inventory',
   serializedAsset: 'Serialized Assets',
   serializedAssetsCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
@@ -2169,6 +2171,7 @@ export const ASSET_NUMBER_TYPE = {
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
   repair: 'Repair',
+  workOrder: 'Work Order',
   deliveryTicket: 'Delivery Ticket',
   loadingTicket: 'Loading Ticket',
   receivingTicket: 'Receiving Ticket',
@@ -2183,7 +2186,14 @@ export const INVENTORY_HISTORY_TYPE = {
   transferInventory: 'Transfer Inventory',
   inventoryToAsset: 'Inventory to Asset',
   quotation: 'Quotation',
-  invoice: 'Invoice'
+  invoice: 'Invoice',
+  productionOrder: 'Production Order',
+  fieldServiceOrder: 'Field Service Order',
+  fieldTicket: 'Field Ticket',
+  job: 'Job',
+  planning: 'Planning',
+  deals: 'Deals',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const DELIVERY_TICKET_STATUS = {
@@ -2606,6 +2616,12 @@ export const REPORT_LIST = [
     title: sidebarResource.invoice,
     permission: 'invoice',
     key: 'invoice',
+    type: 'dynamic'
+  },
+  {
+    title: sidebarResource.fieldTicket,
+    permission: 'fieldTicket',
+    key: 'fieldTicket',
     type: 'dynamic'
   },
   {
@@ -3498,7 +3514,7 @@ export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | str
 }
 
 export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-  const obj = { ...dataObj };
+  const obj = cloneDeep(dataObj);
   fields.forEach((field) => {
     if (field.type === 'dropDown' && field.lookup) {
       let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
@@ -3522,7 +3538,7 @@ export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
       }
     } else if (field.type === 'date') {
       obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-    } else {
+    } else if (dataObj[field.fieldName]) {
       obj[field.fieldName] = dataObj[field.fieldName];
     }
   });
@@ -3581,17 +3597,6 @@ export const getFileIconSrc = (file) => {
     if (data && data?.icon) return data.icon;
   }
   return FileIcon;
-};
-
-export const checkIfSynching = async (setToFalse = false) => {
-  try {
-    let api = `user/update-synching-status`;
-    if (setToFalse) {
-      api += `?setToFalse=true`;
-    }
-    const { data } = await axiosInstance().post(api);
-    return data?.data;
-  } catch (error) {}
 };
 
 export const columnSize = (type) => {

@@ -1,43 +1,40 @@
 import { Chip, IconButton, useMediaQuery } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import { FaArrowUp } from 'react-icons/fa6';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import Chatbox, { Topics, useChatboxReducer } from 'src/components/AiChatbox';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 import { Chat } from '@material-ui/icons';
+import { isArray } from 'lodash';
 import { FiSidebar } from 'react-icons/fi';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 import HistorySidebar from 'src/pages/EquiptAi/HistorySidebar';
-import xlsx from 'xlsx-js-style';
-import DisplayMessages from 'src/pages/EquiptAi/DisplayMessages';
-import { useData } from 'src/StateProvider/Provider';
 import SelectTopicModal from 'src/pages/EquiptAi/SelectTopicModal';
-import { isArray } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
+import xlsx from 'xlsx-js-style';
 
 const EquiptAi = () => {
   const {
     state: { permissions }
   }: any = useData();
+  const [state, setState] = useChatboxReducer();
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width:768px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const { chats, chatId, selectedTopics } = state;
 
-  const [question, setQuestion] = useState('');
   const [chatHistory, setChatHistory] = useState(null);
-  const [chatId, setChatId] = useState(null);
-  const [chats, setChats] = useState(null);
   const [chatTitle, setChatTitle] = useState('');
   const [topics, setTopics] = useState<any[]>(null);
-  const [selectedTopics, setSelectedTopics] = useState<any[]>([]);
   const [selectTopicModalOpen, setSelectTopicModalOpen] = useState(false);
 
-  const fetchTopics = async () => {
+  const fetchTopics = useCallback(async () => {
     try {
       const {
         data: { data }
@@ -50,74 +47,53 @@ const EquiptAi = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
+  }, [toastConfig]);
 
   useEffect(() => {
     if (permissions?.aiModelTopic?.isRead) {
       fetchTopics();
     }
-  }, []);
+  }, [fetchTopics, permissions?.aiModelTopic?.isRead]);
 
-  useEffect(() => {
-    fetchChatHistory();
-  }, []);
-
-  const fetchChatHistory = () => {
+  const fetchChatHistory = useCallback(() => {
     axiosInstance()
       .get('/generative-ai/chat')
       .then(({ data: { data } }) => {
         setChatHistory(data);
-        setChatId(null);
-        setChats([]);
+        setState({ type: 'reset' });
       });
-  };
+  }, [setState]);
+
+  useEffect(() => {
+    fetchChatHistory();
+  }, [fetchChatHistory]);
 
   const getOneChatHistory = (chatId) => {
-    setChatId(chatId);
+    setState({ type: 'setGlobalLoading', payload: true });
     axiosInstance()
       .get(`/generative-ai/chat/${chatId}`)
       .then(({ data: { data } }) => {
-        setSelectedTopics(
+        const selectedTopics =
           isArray(data?.topics) && data?.topics?.length
             ? data?.topics?.map((e) => {
                 return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
               })
-            : []
-        );
-        setChats(data?.history);
+            : [];
+        setState({ type: 'setSelectedTopics', payload: selectedTopics });
+        setState({ type: 'setMessageFromHistory', payload: data });
         setChatTitle(data?.title);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      });
-  };
-
-  const askQuestion = () => {
-    const tempChat = [...chats];
-    setChats([...chats, { message: question, content: null }]);
-    const body: any = { question: question, topicIds: selectedTopics.map((d) => d._id) };
-    setQuestion('');
-    if (chatId) {
-      body._id = chatId;
-    }
-    axiosInstance()
-      .post('/generative-ai/chat/ask', body)
-      .then(({ data: { data } }) => {
-        if (data) {
-          setChatId(data?._id);
-          const message = data?.history;
-          setChats([...tempChat, message]);
-        }
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      .finally(() => {
+        setState({ type: 'setGlobalLoading', payload: false });
       });
   };
 
   const handleDelete = (id: string) => {
     if (chatId === id) {
-      setChatId(null);
-      setChats([]);
+      setState({ type: 'reset' });
     }
     axiosInstance()
       .put(`/generative-ai/chat/remove`, { ids: [id] })
@@ -130,9 +106,7 @@ const EquiptAi = () => {
   };
 
   const hadleNewChat = () => {
-    setChatId(null);
-    setChats([]);
-    setSelectedTopics([]);
+    setState({ type: 'reset' });
     if (topics?.length) {
       handleOpenTopicModal();
     }
@@ -183,6 +157,10 @@ const EquiptAi = () => {
     setSelectTopicModalOpen(false);
   };
 
+  const setSelectedTopics = (topics: Topics[]) => {
+    setState({ type: 'setSelectedTopics', payload: topics });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -202,7 +180,7 @@ const EquiptAi = () => {
           />
           <div
             className={cn(
-              'relative min-h-full min-w-0 flex-grow p-[15px] transition-all duration-300 md:p-[25px]',
+              'relative flex min-h-full min-w-0 flex-grow flex-col p-[15px] transition-all duration-300 md:p-[25px]',
               isSidebarOpen && !isMobile ? '' : 'ml-[calc(var(--sidebar-w)_*_-1_-_11px)] w-[calc(100%_+_var(--sidebar-w))]'
             )}
           >
@@ -230,6 +208,7 @@ const EquiptAi = () => {
               )}
               <div className="flex min-w-0 gap-2 overflow-x-auto py-1">
                 {selectedTopics?.map((t) => <Chip size="small" key={t._id} color="primary" label={t?.aiModelTopicName} />)}
+                {/* <Chip size="small" color="primary" label={'hi'} /> */}
               </div>
               <div className="ml-auto">
                 {chats?.length ? (
@@ -241,37 +220,10 @@ const EquiptAi = () => {
                 ) : null}
               </div>
             </div>
-            <DisplayMessages chats={chats} chatId={chatId} selectedTopics={selectedTopics} />
-            <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
-              <div className="flex rounded-full bg-[#f2f2f2] p-2 [border:1px_solid_var(--common-border-color)]">
-                <input
-                  type="text"
-                  name="question"
-                  className="w-full border-0 bg-transparent px-4 text-[var(--primery-text)] outline-none"
-                  placeholder="Message Equipt AI"
-                  value={question}
-                  onChange={(e) => {
-                    setQuestion(e?.target?.value);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      askQuestion();
-                    }
-                  }}
-                  autoComplete="off"
-                />
-                <IconButton
-                  style={{ borderRadius: 999, padding: 10 }}
-                  size="small"
-                  disabled={question ? false : true}
-                  onClick={askQuestion}
-                  className={cn(question ? '!bg-[var(--new-theme-color)]' : '!bg-gray-300 dark:!bg-gray-800')}
-                >
-                  <FaArrowUp className="text-white" />
-                </IconButton>
-              </div>
-              <span className="mx-auto block pt-2 text-center text-[12px] text-gray-400">Equipt AI can make mistakes. Check important info.</span>
-            </div>
+            <Chatbox state={state} setState={setState} />
+            <p className="absolute bottom-1 left-0 right-0 mx-auto block select-none pt-2 text-center text-[11px] text-gray-400">
+              {routes.equiptAi.title} can make mistakes. Check important info.
+            </p>
           </div>
         </div>
       </CustomContainer>

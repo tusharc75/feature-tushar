@@ -1,6 +1,7 @@
 import { Chip, TextField } from '@material-ui/core';
 import React, { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Topics } from 'src/components/AiChatbox';
 import DashboardModal from 'src/components/DashboardModal';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -8,7 +9,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 type SelectTopicModalProps = {
   handleClose: () => void;
   topics: any[];
-  setSelectedTopics: React.Dispatch<React.SetStateAction<any[]>>;
+  setSelectedTopics: (topics: Topics[]) => void;
   selectedTopics: any[];
 };
 

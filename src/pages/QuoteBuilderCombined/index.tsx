@@ -39,7 +39,6 @@ import axios, { CancelTokenSource } from 'axios';
 import './style.scss';
 
 const QuoteBuilders = () => {
-
   const types = [
     {
       key: `My ${routes.quote.title}`,
@@ -54,6 +53,7 @@ const QuoteBuilders = () => {
   const renderedFrom = camelCase(routes?.quoteBuilder.title);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { visibleColumns } = state;
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -306,40 +306,42 @@ const QuoteBuilders = () => {
     if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
-      axiosInstance().get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-        let clonedData = {};
-        let rows = data.map((u) => {
-          clonedData = {
-            ...clonedData,
-            [u.quoteName]: u
-          };
-          let versionCount = Object.keys(u.versions).length;
-          let tempStatus = 'Building Quote';
-          let versionArray = [];
-          Object.keys(u.versions).forEach((key) => {
-            versionArray.push(u.versions[key]);
-          });
+      axiosInstance()
+        .get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data, count } }) => {
+          let clonedData = {};
+          let rows = data.map((u) => {
+            clonedData = {
+              ...clonedData,
+              [u.quoteName]: u
+            };
+            let versionCount = Object.keys(u.versions).length;
+            let tempStatus = 'Building Quote';
+            let versionArray = [];
+            Object.keys(u.versions).forEach((key) => {
+              versionArray.push(u.versions[key]);
+            });
 
-          const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
-          if (updatedVersion) {
-            tempStatus = updatedVersion.status;
-          }
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['relatedOpportunity'] = u.opportunity?.optionLabel;
-          finalObject['relatedOpportunityId'] = u.opportunity?.optionValue;
-          finalObject['status'] = tempStatus;
-          finalObject['versionCount'] = versionCount;
-          finalObject['versionData'] = versionArray;
-          finalObject['canDelete'] = checkIsAllowedToDelete(user, sidebarResource.quoteBuilder, u?.owner?.optionValue);
-          return finalObject;
-        });
-        setClonedData(data);
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+            const updatedVersion = versionArray.find((v) => v.status !== tempStatus);
+            if (updatedVersion) {
+              tempStatus = updatedVersion.status;
+            }
+            let finalObject = prepareDataForGrid(u, user);
+            finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+            finalObject['relatedOpportunity'] = u.opportunity?.optionLabel;
+            finalObject['relatedOpportunityId'] = u.opportunity?.optionValue;
+            finalObject['status'] = tempStatus;
+            finalObject['versionCount'] = versionCount;
+            finalObject['versionData'] = versionArray;
+            finalObject['canDelete'] = checkIsAllowedToDelete(user, sidebarResource.quoteBuilder, u?.owner?.optionValue);
+            return finalObject;
+          });
+          setClonedData(data);
+          dispatch({ type: 'initialize', data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
         .catch((error) => {
           dispatch({ type: 'loading', loading: false });
           toastConfig.setToastConfig(error);
@@ -499,6 +501,7 @@ const QuoteBuilders = () => {
           afterImportCompleted={() => {
             fetchData();
           }}
+          visibleColumns={visibleColumns}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -530,7 +533,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -610,7 +613,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => { }}
+          fetchQuoteData={() => {}}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,
