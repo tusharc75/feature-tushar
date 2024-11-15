@@ -47,7 +47,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     fetchData();
   }, []);
 
-  const fetchInvoiceFields = async () =>{
+  const fetchInvoiceFields = async () => {
     try {
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
@@ -258,7 +258,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: invoiceColumns,
-    isSendEmail: true,
+    isSendEmail: false,
     extraQueryParams: { isCreditMemo: true },
     defaultColumns: [
       'type',
@@ -286,24 +286,23 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           </Button>
         )}
         <div className="flex gap-2 items-center">
-       {invoiceColumns && <PreviewDownload {...previewDownloadProps} />}
-        {allowedToEdit && (
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            disabled={selectedRecords.length === 0}
-            size="small"
-            onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
-            className="new-dropdown-v1"
-          >
-            {'Actions'}
-          </Button>
-        )}
+          {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
+          {allowedToEdit && (
+            <Button
+              variant={'outlined'}
+              color="primary"
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              disabled={selectedRecords.length === 0}
+              size="small"
+              onClick={handleClick}
+              endIcon={<ArrowDropDownIcon />}
+              className="new-dropdown-v1"
+            >
+              {'Actions'}
+            </Button>
+          )}
         </div>
-       
         <Menu
           anchorEl={anchorActionEl}
           keepMounted

@@ -191,8 +191,11 @@ const MaterialDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    if ((invoiceData?.taxCode || (invoiceData?.billingAddress &&
-      (invoiceData?.billingAddress?.zipCode || invoiceData?.billingAddress?.state || invoiceData?.billingAddress?.county)))) {
+    if (
+      invoiceData?.taxCode ||
+      (invoiceData?.billingAddress &&
+        (invoiceData?.billingAddress?.zipCode || invoiceData?.billingAddress?.state || invoiceData?.billingAddress?.county))
+    ) {
       const taxCodeOptions = await fetchTaxRate(invoiceData?.billingAddress, invoiceData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -204,7 +207,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   };
 
   const getTitle = () => {
-    if (rowData) {
+    if (rowData && !isBulkedit) {
       let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
         editTitle = `Edit - ${rowData.detail}(${rowData.subRows.length})`;
@@ -246,9 +249,9 @@ const MaterialDialog: FC<EditDialogProps> = ({
         }
       ]);
       setPriceConditionListConst(priceData || []);
-      updateRateChangeState(values, priceData, pricingMethodOptions)
+      updateRateChangeState(values, priceData, pricingMethodOptions);
     }
-  };
+  }
 
   const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
     var tempPriceCondition = [...priceData];
@@ -266,24 +269,26 @@ const MaterialDialog: FC<EditDialogProps> = ({
         };
       }),
       'optionValue'
-    )
+    );
     setPriceConditionList(tempPriceCondition);
     var tempPricingMethod = pricingMethodOptions;
     if (values['pricingCondition'] && values['pricingCondition'] !== '') {
       tempPricingMethod = uniqBy(
-        priceData?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)?.map((d) => {
-          return {
-            optionLabel: d?.pricingMethod,
-            optionValue: d?.pricingMethod
-          };
-        }),
+        priceData
+          ?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)
+          ?.map((d) => {
+            return {
+              optionLabel: d?.pricingMethod,
+              optionValue: d?.pricingMethod
+            };
+          }),
         'optionValue'
-      )
+      );
     }
-    setPricingMethodList(tempPricingMethod)
+    setPricingMethodList(tempPricingMethod);
 
-    return { tempPriceCondition, tempPricingMethod }
-  }
+    return { tempPriceCondition, tempPricingMethod };
+  };
 
   function validate(values) {
     const errors = {};
@@ -386,15 +391,24 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? pricingMethodList
+                                                : field.option
+                                          }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const isPricingMethodField = allFields?.find((e) => e.fieldName === 'pricingMethod')
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const isPricingMethodField = allFields?.find((e) => e.fieldName === 'pricingMethod');
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -406,21 +420,39 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
                                               if (isPricingMethodField) {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.unit === values['unit'] && d.pricingMethod === values['pricingMethod']);
-                                              }
-                                              else {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.unit === values['unit']);
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) =>
+                                                    d.conditionId === value &&
+                                                    d.unit === values['unit'] &&
+                                                    d.pricingMethod === values['pricingMethod']
+                                                );
+                                              } else {
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) => d.conditionId === value && d.unit === values['unit']
+                                                );
                                               }
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === values['unit'] && d.pricingMethod === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.unit === values['unit'] &&
+                                                  d.pricingMethod === value
+                                              );
                                             } else {
                                               if (isPricingMethodField) {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === value && d.pricingMethod === values['pricingMethod']);
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) =>
+                                                    d.conditionId === values['pricingCondition'] &&
+                                                    d.unit === value &&
+                                                    d.pricingMethod === values['pricingMethod']
+                                                );
                                               } else {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === value);
+                                                priceValue = priceConditionListConst?.find(
+                                                  (d) => d.conditionId === values['pricingCondition'] && d.unit === value
+                                                );
                                               }
                                             }
                                             let priceFieldName = 'price_' + invoiceData?.currency?.toLowerCase();
@@ -533,8 +565,9 @@ const MaterialDialog: FC<EditDialogProps> = ({
                   {'Close'}
                 </Button>
 
-                {isBulkedit === false && showSaveAndNext && (
-                  isEqual(ref?.current?.values, initialData.values) ? (
+                {isBulkedit === false &&
+                  showSaveAndNext &&
+                  (isEqual(ref?.current?.values, initialData.values) ? (
                     <CustomButton
                       loading={loading}
                       disabled={loading}
@@ -562,8 +595,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                     >
                       {'Save & Next'}
                     </CustomButton>
-                  )
-                )}
+                  ))}
 
                 <CustomButton
                   loading={loading}
