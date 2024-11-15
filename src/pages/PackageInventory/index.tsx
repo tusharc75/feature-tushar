@@ -15,13 +15,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import ShowAvailableInventory from 'src/pages/PackageInventory/ShowAvailableInventory';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const PackageInventory = () => {
   const renderedFrom = camelCase(routes?.packageInventory.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { generateColumns } = useColumns();
 
@@ -180,6 +181,19 @@ const PackageInventory = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.packageInventory]} />
+        <ImportExportLinks
+          additionalParams={getQueryString(true)}
+          permissions={{}}
+          module={routes.packageInventory.title}
+          onlyExport={true}
+          api={routes.packageInventory.path}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={() => {}}
+        />
       </div>
       <CustomContainer>
         <ListingPageHeader
