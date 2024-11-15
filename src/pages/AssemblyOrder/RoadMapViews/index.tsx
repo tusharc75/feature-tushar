@@ -320,16 +320,16 @@ const AssemblyOrderViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'product':
-        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'workOrder':
-        history.push(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
         break;
       case 'managedPackage':
-        history.push(`${routes.managedPackagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.managedPackagesDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
