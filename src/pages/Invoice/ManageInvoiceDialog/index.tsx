@@ -39,7 +39,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
 
-
   useEffect(() => {
     setLoading(true);
     fetchFields();
@@ -178,7 +177,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                   title={
                     !invoiceId ? `Create ${routes.invoice.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`
                   }
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
                     } else {
