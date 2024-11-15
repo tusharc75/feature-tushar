@@ -1,10 +1,10 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { camelCase, set } from 'lodash';
+import { camelCase, set, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Add } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -16,6 +16,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
@@ -32,6 +35,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [invoiceColumns, setInvoiceColumns] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -39,8 +43,66 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 
   useEffect(() => {
     fetchFields();
+    fetchInvoiceFields();
     fetchData();
   }, []);
+
+  const fetchInvoiceFields = async () =>{
+    try {
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
+      let coloum: any = [
+        {
+          accessor: 'index',
+          Header: 'Index',
+          width: 70,
+          sticky: 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          sticky: isMobile || isTablet ? 'none' : 'left',
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{startCase(row.original?.type)}</p>
+            </div>
+          )
+        },
+        {
+          accessor: 'detail',
+          Header: 'Detail',
+          disabled: true,
+          minWidth: 300,
+          sticky: isMobile || isTablet ? 'none' : 'left',
+          width: 300,
+          Cell: ({ row }) =>
+            row?.original?.type ? (
+              <div className="flex items-center gap-2">
+                {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'description',
+          Header: 'Description',
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          }
+        }
+      ];
+      coloum = [...coloum, ...newColumns];
+      setInvoiceColumns(coloum);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const fetchFields = async () => {
     try {
@@ -191,6 +253,30 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     setAnchorActionEl(null);
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: invoiceColumns,
+    isSendEmail: true,
+    extraQueryParams: { isCreditMemo: true },
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ]
+  };
+
   return (
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
@@ -199,6 +285,8 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             Create
           </Button>
         )}
+        <div className="flex gap-2 items-center">
+        <PreviewDownload {...previewDownloadProps} />
         {allowedToEdit && (
           <Button
             variant={'outlined'}
@@ -214,6 +302,8 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             {'Actions'}
           </Button>
         )}
+        </div>
+       
         <Menu
           anchorEl={anchorActionEl}
           keepMounted
