@@ -207,7 +207,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   };
 
   const getTitle = () => {
-    if (rowData) {
+    if (rowData && !isBulkedit) {
       let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
         editTitle = `Edit - ${rowData.detail}(${rowData.subRows.length})`;
