@@ -286,7 +286,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           </Button>
         )}
         <div className="flex gap-2 items-center">
-        <PreviewDownload {...previewDownloadProps} />
+       {invoiceColumns && <PreviewDownload {...previewDownloadProps} />}
         {allowedToEdit && (
           <Button
             variant={'outlined'}
