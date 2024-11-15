@@ -212,7 +212,11 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
 
   return (
     <Fragment>
-      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
+        hasXpadding />
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5}>

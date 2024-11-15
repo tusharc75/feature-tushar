@@ -1104,7 +1104,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           onClose={() => {
             setOpenInvoiceDataDialog(false);
           }}
-          rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
+          invoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
           onSuccess={(data) => {
             handleCreateBill(data);
           }}

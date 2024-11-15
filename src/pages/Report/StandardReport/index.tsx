@@ -170,6 +170,7 @@ const Report = () => {
       } else {
         columns = [...newColumns];
       }
+
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
         setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));

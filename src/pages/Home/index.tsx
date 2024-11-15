@@ -14,6 +14,7 @@ import SideCard from 'src/pages/Home/SideCard';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
 
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
+import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -72,11 +73,11 @@ function Dashboard() {
                 />
               )}
               <UserFavouriteCard />
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
+              <WorkspaceCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} />
               {formPermission && (
                 <SideCard
                   heading="Dynamic Form"
-                  href={`${routes.formBuilder.path}?dynamicResource=true`}
+                  href={`${routes.formBuilder.path}`}
                   icon={
                     <div className="max-w-[60px]">
                       <img src={dynamicFormImage} alt={'Setups & Administration Logo'} className="max-w-full" />

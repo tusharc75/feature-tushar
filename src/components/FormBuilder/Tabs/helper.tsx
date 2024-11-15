@@ -225,6 +225,12 @@ export const resourcePolicy = [
         defaultValue: []
       },
       {
+        fieldName: 'fieldTicketInvoiceFields',
+        fieldLabel: 'Field Ticket Invoice Fields',
+        type: 'multiSelect',
+        defaultValue: []
+      },
+      {
         fieldName: 'rentalInvoiceStatus',
         fieldLabel: 'Rental Invoice Status',
         type: 'dropDown',
