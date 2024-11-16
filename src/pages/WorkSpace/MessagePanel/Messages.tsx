@@ -301,7 +301,7 @@ export const DisplaySingleMessage = ({
 
   const downloadFile = (attachment) => {
     axiosInstance()
-      .get(`user/download?fileName=${attachment}`, { responseType: 'blob' })
+      .get(`user/download?fileName=${encodeURIComponent(attachment)}`, { responseType: 'blob' })
       .then(({ data }) => {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');

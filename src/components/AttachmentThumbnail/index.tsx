@@ -55,7 +55,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     setDownloadProgress(0);
     setIsDownloading(true);
     axiosInstance()
-      .get(`user/download?fileName=${file}`, {
+      .get(`user/download?fileName=${encodeURIComponent(file)}`, {
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
           let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
@@ -107,7 +107,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
       setIsDownloading(false);
     } else if (file.url) {
       axiosInstance()
-        .get(`user/download?fileName=${file.url}`, {
+        .get(`user/download?fileName=${encodeURIComponent(file.url)}`, {
           responseType: 'blob',
           onDownloadProgress: (progressEvent) => {
             let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);

@@ -30,7 +30,7 @@ const ShowPdf = ({ data }) => {
   useEffect(() => {
     setLoading(true);
     axiosInstance()
-      .get(`user/download?fileName=${data?.url}`, {
+      .get(`user/download?fileName=${encodeURIComponent(data?.url)}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {
