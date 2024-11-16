@@ -36,6 +36,7 @@ import WorkOrder from 'src/pages/AssemblyOrder/WorkOrder';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
+import RoadmapViews from './RoadMapViews';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(routes?.assemblyOrder.title);
@@ -206,7 +207,8 @@ const AssemblyOrderDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          <CustomTab value={2}>View</CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -274,11 +276,18 @@ const AssemblyOrderDetail = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Box>
+            {assemblyOrderData && (
+              <RoadmapViews assemblyOrderNumber={assemblyOrderData?.assemblyOrderNumber} id={id} />
+            )}
+          </Box>
+        </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 2}>
+              <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
                   resourcePolicyId={resourceData?._id}
