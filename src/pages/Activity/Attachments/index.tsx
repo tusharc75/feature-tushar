@@ -340,7 +340,7 @@ export default function Attachment() {
     setIsDownloading(true);
     if (file?.length === 1) {
       axiosInstance()
-        .get(`user/download?fileName=${file[0].url}`, {
+        .get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
           responseType: 'blob'
         })
         .then(({ data }) => {
@@ -358,7 +358,7 @@ export default function Attachment() {
           setIsDownloading(false);
         });
     } else {
-      const fileUrl = file.map((f) => f.url);
+      const fileUrl = file.map((f) => encodeURIComponent(f.url));
       axiosInstance()
         .put(
           `user/download`,
@@ -391,7 +391,7 @@ export default function Attachment() {
       await Promise.all(
         data?.file.map(async (file) => {
           try {
-            const response = await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' });
+            const response = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
             const data = response.data;
 
             let reader = new FileReader();
@@ -463,7 +463,7 @@ export default function Attachment() {
     file?.forEach((ele) => {
       setIsDownloading(true);
       axiosInstance()
-        .get(`user/download?fileName=${ele.url}`, {
+        .get(`user/download?fileName=${encodeURIComponent(ele.url)}`, {
           responseType: 'blob',
           onDownloadProgress: (progressEvent) => {
             let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
