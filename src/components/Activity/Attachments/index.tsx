@@ -263,7 +263,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     Promise.all(
       data?.file.map(async (file) => {
         await axiosInstance()
-          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
+          .get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' })
           .then(({ data }) => {
             let reader = new FileReader();
             reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
@@ -325,7 +325,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     const file = attachmentData?.file;
     if (file?.length === 1) {
       axiosInstance()
-        .get(`user/download?fileName=${file[0].url}`, {
+        .get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
           responseType: 'blob'
         })
         .then(({ data }) => {
@@ -341,7 +341,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     } else {
-      const fileUrl = file.map((f) => f.url);
+      const fileUrl = file.map((f) => encodeURIComponent(f.url));
       axiosInstance()
         .put(`user/download`, { files: fileUrl }, { responseType: 'blob' })
         .then(({ data }) => {

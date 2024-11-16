@@ -209,7 +209,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
 
   const handleDownload = () => {
     axiosInstance()
-      .get(`/user/download?fileName=${data?.url}`, { responseType: 'blob' })
+      .get(`/user/download?fileName=${encodeURIComponent(data?.url)}`, { responseType: 'blob' })
       .then((res) => {
         const blobData = new Blob([res.data], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blobData);
