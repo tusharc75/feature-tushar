@@ -374,32 +374,3 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
 };
 
 export default ManagedPackagesView;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
