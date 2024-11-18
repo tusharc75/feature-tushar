@@ -50,6 +50,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   }, [managedPackagesData]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const allAssetsResponse = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
       const assets = allAssetsResponse?.data?.data || [];
@@ -114,7 +115,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
               <HtmlTooltip arrow placement="top" title={'Managed Packages'}>
                 <div>
                   <Typography variant="body2">Managed Packages</Typography>
-                  <Typography variant="subtitle2">{managedPackagesData?.managedPackageName}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{managedPackagesData?.managedPackageName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -166,7 +167,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
             <HtmlTooltip arrow placement="top" title={nodeType}>
               <div>
                 <Typography variant="body2">{nodeType}</Typography>
-                <Typography variant="subtitle2">{nodeLabel}</Typography>
+                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{nodeLabel}</Typography>
               </div>
             </HtmlTooltip>
           )
