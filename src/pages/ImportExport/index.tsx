@@ -74,7 +74,6 @@ const ImportExport = () => {
       {
         accessor: 'type',
         Header: 'Type',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
         }
@@ -82,7 +81,6 @@ const ImportExport = () => {
       {
         accessor: 'resource',
         Header: 'Resource',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />;
         }
@@ -90,7 +88,6 @@ const ImportExport = () => {
       {
         accessor: 'date',
         Header: 'Date & Time',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
         }
@@ -98,7 +95,6 @@ const ImportExport = () => {
       {
         accessor: 'status',
         Header: 'Status',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.status ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
         }
