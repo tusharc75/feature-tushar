@@ -8,36 +8,42 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { MATERIAL_TYPE,COLOUR_MASTER } from 'src/constants/helpers';
+import { MATERIAL_TYPE,COLOUR_MASTER, serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import _ from 'lodash';
+import { useAppTheme } from 'src/constants/AppConfig';
 
-const customNodeStyles = {
-  managedPackages: {
-    name: 'Managed Packages',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
-  },
-  product: {
-    name: 'Product',
-    ...COLOUR_MASTER.product
-  },
-  package: {
-    name: 'Package',
-    ...COLOUR_MASTER.package
-  },
-  serializedAsset: {
-    name: 'Serialized Asset',
-    ...COLOUR_MASTER.assets
-  },
-};
 
 const ManagedPackagesView = ({ managedPackagesData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
+  const [themeColor] = useAppTheme();
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
+
+
+  const customNodeStyles = {
+    managedPackage: {
+      name: 'Managed Package',
+      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
+      borderColor: '#9789F0'
+    },
+    product: {
+      name: 'Product',
+      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
+      borderColor: '#8BCBDF'
+    },
+    serializedAsset: {
+      name: 'Serialized Asset',
+      ...COLOUR_MASTER.assets
+    },
+    package: {
+      name: 'Package',
+      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
+      borderColor: '#66CDB7'
+    },
+  };
 
   useEffect(() => {
     fetchData();
@@ -59,6 +65,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           if (!packages.has(parent?.package?.optionValue)) {
             row.index = index;
             row._id = parent?.package?.optionValue;
+            row.productId = parent?.package?.optionValue;
             row.type = MATERIAL_TYPE.package;
             row.detail = parent.package.optionLabel;
             row.qty = parent?.package?.qty;
@@ -112,8 +119,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
               </HtmlTooltip>
             )
           },
-          position: { x: xPosition, y: 0 },
-          style: customNodeStyles.managedPackages
+          position: { x: xPosition, y: 60 },
+          style: customNodeStyles.managedPackage
         }
       ];
       const flowEdge = [];
@@ -131,7 +138,9 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
       );
   
       setFlowData([...flow, ...flowEdge]);
+      setLoading(false);
     } catch (err) {
+      setLoading(false);
       setToastConfig(err);
     }
   };
@@ -141,7 +150,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   
     parentNode.forEach((node, index) => {
       const nodeId = `${node?._id}-${level}-${index}-${yPosition}`;
-      const nodeType = node.type === 'product' ? 'product' : node.type === 'package' ? 'Package' : 'serializedAsset';
+      const nodeType = _.startCase(_.camelCase(node.type));
       const nodeLabel = node.detail;
   
       flow.push({
@@ -152,7 +161,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
         targetPosition: 'left',
         data: {
           ref_type: node.type,
-          ref_id: node._id,
+          ref_id: node.productId,
           label: (
             <HtmlTooltip arrow placement="top" title={nodeType}>
               <div>
@@ -176,10 +185,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
         });
       }
   
-      let nodeHeight = 100;
-  
       if (node.subRows?.length) {
-        let childYPosition = yPosition + 100;
+        let childYPosition = yPosition;
   
         const childHeight = generateFlowData(
           node.subRows,
@@ -190,8 +197,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           childYPosition,
           level + 1
         );
-  
-        nodeHeight += childHeight;
+
         yPosition += childHeight;
       }
   
@@ -259,11 +265,12 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     }
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => {
-        return e.product.optionValue === parent.productId;
+        return e.product.optionValue === parent.productId && (parent.package ? parent.package.optionValue===e.package.optionValue : true);
       });
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
         _subRow.type = MATERIAL_TYPE.serializedAsset;
+        _subRow.productId = _subRow.asset,
         _subRow.detail = _subRow?.assetNumber;
         _subRow.description = _subRow?.description;
         _subRow.productCategory = _subRow?.productCategory?.optionLabel;
@@ -282,16 +289,16 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
 
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'managedPackages') {
-      history.push(`${routes.managedPackagesDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.managedPackagesDetail.path}/${element?.data?.ref_id}`);
     }
     if (element?.data?.ref_type === 'product') {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     }
     if (element?.data.ref_type === 'package') {
-      history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+      window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
     }
     if (element?.data.ref_type === 'serializedAsset') {
-      history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+      window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
     }
   };
 
