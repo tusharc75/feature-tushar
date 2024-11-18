@@ -98,17 +98,15 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
       await insertUpdate(objectStore.fieldTicketLogs, data._id, data);
       onSuccess();
     } else {
-      await axiosInstance()
-        .put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values)
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data?.message
-          });
-          setSubmitting(false);
-          onSuccess();
-        })
+      await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setSubmitting(false);
+        onSuccess();
+      })
         .catch((err) => {
           setSubmitting(false);
           toastConfig.setToastConfig(err);
@@ -139,7 +137,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
         >
-          {({ values, errors, setFieldValue, touched, setFieldTouched, submitForm }) => (
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
@@ -186,11 +184,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
                   size="small"
                   type="submit"
                   onClick={() => {
-                    if (isEmpty(errors)) {
-                      submitForm();
-                    } else {
-                      setFieldTouched('files', true);
-                    }
+                    submitForm();
                   }}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
