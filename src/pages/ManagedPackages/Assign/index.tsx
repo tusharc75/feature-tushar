@@ -317,9 +317,8 @@ const Assign = ({ managedPackagesData }) => {
       subRows = [...subRows, ...childSubRows];
     }
     if (assets?.length > 0) {
-      console.log(parent)
       const assetsSubRows = assets.filter((e) => {
-        return e.product.optionValue === parent.productId && (parent.package ? parent.package.optionValue===e.package.optionValue : true);
+        return e.product.optionValue === parent.productId && (parent.package ? parent.package.optionValue === e.package.optionValue : true);
       });
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
