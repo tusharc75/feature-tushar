@@ -663,6 +663,11 @@ function Dropdown({
                                   }
                                 });
                               }
+
+                              const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                              fieldChange?.forEach((val: any) => {
+                                setFieldValue(val.fieldName, val.value);
+                              });
                             }
                           }}
                         />
