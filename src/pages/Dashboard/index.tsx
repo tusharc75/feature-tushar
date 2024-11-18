@@ -18,11 +18,10 @@ import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers'
 import { camelCase, set } from 'lodash';
 
 const Dashboard = () => {
-
   const {
     state: { user, userLoading }
   } = useData();
-  
+
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [filtersOptions, setFilterOptions] = React.useState(null);
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
@@ -33,7 +32,9 @@ const Dashboard = () => {
   const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
   const [selectedChart, setSelectedChart] = React.useState(null);
 
-  const [globalFilters, setGlobalFilters] = React.useState<any>(() => { return { currency: user?.user?.currency } });
+  const [globalFilters, setGlobalFilters] = React.useState<any>(() => {
+    return { currency: user?.user?.currency };
+  });
 
   const [selectedDashboardId, setSelectedDashboardId] = React.useState(null);
 
@@ -61,7 +62,7 @@ const Dashboard = () => {
           country: countriesData,
           period: periodOption,
           businessUnit: businessUnitOptions,
-          frequency: frequencyData,
+          frequency: frequencyData
         });
       } catch (error) {
         alert(JSON.stringify(error));
@@ -72,34 +73,37 @@ const Dashboard = () => {
 
   const fetchDashboards = () => {
     setDashboardLoading(true);
-    axiosInstance().get('/dashboard-master').then(({ data: { data } }) => {
-      if (data?.length) {
-        const savedSelected = localStorage.getItem('selectedDashboard');
-        if (savedSelected && data.find((d) => d.name === savedSelected)) {
-          const selectedDashboard = data.find((d) => d.name === savedSelected);
-          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected, timeFrame: selectedDashboard?.defaultDuration || 'current-year' }));
-          setCharts(selectedDashboard?.charts || []);
-          setKpis(selectedDashboard?.charts?.map((chart) => {
-            if (chart?.hasFilters) {
-              return camelCase(chart?.kpi?.name);
-            }
-          }))
-          setSelectedDashboardId(selectedDashboard?._id);
+    axiosInstance()
+      .get('/dashboard-master')
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          const savedSelected = localStorage.getItem('selectedDashboard');
+          if (savedSelected && data.find((d) => d.name === savedSelected)) {
+            const selectedDashboard = data.find((d) => d.name === savedSelected);
+            setGlobalFilters((prevState) => ({
+              ...prevState,
+              dashboardType: savedSelected,
+              timeFrame: selectedDashboard?.defaultDuration || 'current-year'
+            }));
+            setCharts(selectedDashboard?.charts || []);
+            setKpis(selectedDashboard?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
+            setSelectedDashboardId(selectedDashboard?._id);
+          } else {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
+            setCharts(data[0]?.charts);
+            setKpis(
+              data[0]?.charts
+                ?.filter((chart) => chart?.hasFilters)
+                ?.map((chart) => {
+                  camelCase(chart?.kpi?.name);
+                })
+            );
+            setSelectedDashboardId(data[0]?._id);
+          }
+          setDashboardList(data);
         }
-        else {
-          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
-          setCharts(data[0]?.charts);
-          setKpis(data[0]?.charts?.map((chart) => {
-            if (chart?.hasFilters) {
-              return camelCase(chart?.kpi?.name);
-            }
-          }))       
-          setSelectedDashboardId(data[0]?._id);
-        }
-        setDashboardList(data);
-      }
-      setDashboardLoading(false);
-    })
+        setDashboardLoading(false);
+      })
       .catch((err) => {
         setToastConfig(err);
         setDashboardLoading(false);
@@ -107,12 +111,15 @@ const Dashboard = () => {
   };
 
   const fetchKpiFilters = () => {
-    axiosInstance().get(`kpi/filters?kpi=${kpis.join(',')}`).then(({ data }) => {
-      setKpiFilters(data?.data || []);
-    }).catch((err) => {
-      setToastConfig(err);
-    });
-  }
+    axiosInstance()
+      .get(`kpi/filters?kpi=${kpis.join(',')}`)
+      .then(({ data }) => {
+        setKpiFilters(data?.data || []);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
     if (kpis?.length) fetchKpiFilters();
