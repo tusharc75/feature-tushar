@@ -133,7 +133,7 @@ const ManagedPackagedDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'Products'} />
-          <CustomTab value={2} label={'Views'} />
+          {!(isMobile && !isTablet) && (<CustomTab value={2} label={'Views'} />)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
