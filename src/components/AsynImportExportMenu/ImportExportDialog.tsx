@@ -88,7 +88,6 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         disableSortBy: true,
         accessor: 'date',
         Header: 'Date & Time',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
         }
@@ -96,7 +95,6 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
       {
         accessor: 'user',
         Header: 'User',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.user ? (
             <div>
@@ -112,7 +110,6 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
       {
         accessor: 'status',
         Header: 'Status',
-        width: 120,
         Cell: ({ row }) => {
           return row.original?.status ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
         }
