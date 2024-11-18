@@ -21,8 +21,6 @@ const History = ({ id, status }) => {
     {
       accessor: 'reference',
       Header: 'Reference',
-      minWidth: 150,
-      width: 150,
       primaryField: true,
       disabled: true,
       Cell: ({ row }) => (
@@ -44,8 +42,6 @@ const History = ({ id, status }) => {
     {
       accessor: 'referenceType',
       Header: 'Type',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.referenceType ? (
@@ -61,8 +57,6 @@ const History = ({ id, status }) => {
     {
       accessor: 'date',
       Header: 'Date & Time',
-      minWidth: 150,
-      width: 150,
       disableFilters: true,
       Cell: ({ row }) => (
         <>
@@ -79,8 +73,6 @@ const History = ({ id, status }) => {
     {
       accessor: 'status',
       Header: 'Status',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.status ? (
@@ -96,8 +88,6 @@ const History = ({ id, status }) => {
     {
       accessor: 'comments',
       Header: 'Comment',
-      minWidth: 150,
-      width: 150,
       Cell: ({ row }) => (
         <>
           {row?.original?.comments ? (

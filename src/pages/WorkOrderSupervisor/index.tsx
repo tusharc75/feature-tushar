@@ -41,6 +41,8 @@ import { KeyboardArrowDown } from '@material-ui/icons';
 import ProductFrequencyDialog from './ProductFrequencyDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 
 const LIMIT = 25;
 
@@ -101,7 +103,7 @@ const WorkOrderSupervisor = () => {
     filterById: [],
     deepFilter: []
   });
-  const [viewType, setViewType] = useState(1);
+  const [viewType, setViewType] = useState(3);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
@@ -395,7 +397,7 @@ const WorkOrderSupervisor = () => {
         <div className="main-container">
           <div className="header-panel">
             <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
-              {viewType == 1 ? (
+              {[1, 3].includes(viewType) ? (
                 isMobile ? (
                   <>
                     <div className="relative mr-auto max-w-fit">
@@ -498,6 +500,13 @@ const WorkOrderSupervisor = () => {
                   </HtmlTooltip>
                 </div>
                 <div className="pt-[4px]">
+                  <HtmlTooltip title={'Table View'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small" onClick={() => setViewType(3)}>
+                      <ViewListIcon color={viewType === 3 ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <div className="pt-[4px]">
                   <HtmlTooltip title={'Refresh'}>
                     <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
                       <RefreshIcon />
@@ -528,6 +537,7 @@ const WorkOrderSupervisor = () => {
               setOpen={setOpen}
             />
           )}
+          {viewType === 3 && <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} />}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog

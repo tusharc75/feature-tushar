@@ -225,7 +225,7 @@ const ManagePurchaseOrder = ({
     >
       {initialData && initialData.fields.length ? (
         <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, handleSubmit }) => (
+          {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
                 title={

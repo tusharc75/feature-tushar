@@ -9,6 +9,9 @@ import useDndSensors from './useDndSensors';
 import { useScrollController } from './useScrollController';
 import useFavorites from 'src/hooks/useFavourites';
 import useVoiceRecognition from './useVoiceRecognition';
+import useDropZone from 'src/hooks/useDropzone';
+
+export * from './useDropzone';
 
 export {
   useClickdOutside,
@@ -21,5 +24,6 @@ export {
   useDndSensors,
   useScrollController,
   useFavorites,
-  useVoiceRecognition
+  useVoiceRecognition,
+  useDropZone
 };
