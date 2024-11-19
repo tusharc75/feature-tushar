@@ -1,5 +1,5 @@
 import { Box, IconButton } from '@material-ui/core';
-import { camelCase, upperFirst } from 'lodash';
+import { camelCase, isArray, upperFirst } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -182,8 +182,8 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                       oldValue = oldValue?.label;
                       newValue = newValue?.label;
                     } else if (e?.type === 'multiSelect' && e?.lookup) {
-                      oldValue = oldValue?.map((e) => e?.label)?.toString();
-                      newValue = newValue?.map((e) => e?.label)?.toString();
+                      oldValue = isArray(oldValue) ? oldValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
+                      newValue = isArray(newValue) ? newValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
                     }
                     if (oldValue && newValue) {
                       changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
@@ -213,7 +213,6 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
             u.key = selectedResource?.key || camelCase(selectedResource);
             return u;
           });
-
           rows = rows.filter((e) => e);
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {

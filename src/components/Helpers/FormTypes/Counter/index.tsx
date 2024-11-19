@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
-import { getObjKeys } from 'src/constants/helpers';
+import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
 
 const Counter = ({ label, values, name, setFieldValue, fieldData, touched, errors }) => {
   const [error, setError] = useState({});
   const [touch, setTouch] = useState({});
+  const [formsData, setFormsData] = useState([]);
 
   const handleAddRemove = (type = 'add') => {
     let data = values[name] || [];
@@ -20,8 +21,8 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
   };
 
   useEffect(() => {
-    validate();
-  }, values[name]);
+    setFormsData(setFieldsInAscendingOrder(fieldData?.subFields));
+  }, [fieldData?.subFields]);
 
   useEffect(() => {
     if (touched[name] && Boolean(errors[name])) {
@@ -45,6 +46,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
     setError(err);
     setTouch(tch);
   };
+
 
   return (
     <Box>
@@ -88,44 +90,59 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
           <div className="mt-3 space-y-3">
             {values[name]?.map((value, index) => {
               return (
-                <div className={` ${values[name].length - 1 === index ? '' : 'pb-3 [border-bottom:2px_dashed_var(--common-border-color)]'} `}>
+                <div className={`${values[name].length - 1 === index ? '' : 'pb-3 [border-bottom:2px_dashed_var(--common-border-color)]'} `}>
                   <Grid container spacing={1}>
-                    {fieldData?.subFields?.map((field) => {
-                      return (
-                        <Grid item xs={12} md={6}>
-                          <FormTypes
-                            {...field}
-                            fieldData={field}
-                            values={value}
-                            errors={error[`${index}`] || {}}
-                            touched={touch[`${index}`] || {}}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={(n, v) => {
-                              setFieldValue(
-                                name,
-                                values[name]?.map((_v, i) => {
-                                  if (index === i) {
-                                    return {
-                                      ..._v,
-                                      [n]: v
-                                    };
-                                  }
-                                  return _v;
-                                })
-                              );
-                            }}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={field?.isTooltip || false}
-                            tooltipMessage={field?.tooltipMessage}
-                            size="small"
-                          />
-                        </Grid>
-                      );
-                    })}
+                    {formsData.length > 0 &&
+                      formsData?.map((form, index1) => {
+                        return form?.name ? (
+                          <Grid key={index1} item xs={12} sm={12} md={12} lg={12} xl={12}>
+                            <Typography variant='body2'>{form.name}</Typography>
+                            <Box marginY={2}>
+                              <Grid container spacing={1}>
+                                {form?.sectionFields?.map((field, index2) => (
+                                  <Grid key={index2} item
+                                    xs={12}
+                                    sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                    md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                    lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                    xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}>
+                                    <FormTypes
+                                      {...field}
+                                      fieldData={field}
+                                      values={value}
+                                      errors={error[`${index}`] || {}}
+                                      touched={touch[`${index}`] || {}}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(n, v) => {
+                                        setFieldValue(
+                                          name,
+                                          values[name]?.map((_v, i) => {
+                                            if (index === i) {
+                                              return {
+                                                ..._v,
+                                                [n]: v
+                                              };
+                                            }
+                                            return _v;
+                                          })
+                                        );
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </Grid>
+                        ) : null;
+                      })}
                   </Grid>
                 </div>
               );
