@@ -319,10 +319,10 @@ const AssemblyOrderViews = (props) => {
 
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
-      case 'product':
+      case MATERIAL_TYPE.product:
         window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
-      case 'package':
+      case MATERIAL_TYPE.package:
         window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'workOrder':

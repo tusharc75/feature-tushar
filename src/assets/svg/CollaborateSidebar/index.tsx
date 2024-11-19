@@ -21,7 +21,6 @@ export const getCollaborateIconBasedOnName = (name: string) => {
     const lowercase = key.toLocaleLowerCase();
     const singularAndPlural = [`${lowercase}`, `${lowercase}s`];
     if (singularAndPlural.includes(name.toLocaleLowerCase())) {
-      console.log('name', name);
       icon = IconEventMap[key];
     }
   });
