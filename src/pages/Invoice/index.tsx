@@ -282,7 +282,7 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s)=> s.status==='Closed') && (
+        {permissions?.invoice?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') && (
           <>
             {statusOptions?.map((status) => {
               return (
@@ -303,8 +303,8 @@ const Invoice = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const isSameStatus = selectedRecords?.every((e)=> e.status===selectedRecords[0].status);
-    if(!isSameStatus){
+    const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
+    if (!isSameStatus) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -343,7 +343,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={fetchData}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
