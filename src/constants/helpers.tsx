@@ -1437,8 +1437,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
             validationFields?.map((f) => f?.fieldName),
             {
               is: validation,
-              then: dateValidation,
-              otherwise: dateValidation
+              then: string().required(`${input.fieldLabel} is required`).nullable(),
+              otherwise: string().nullable()
             }
           )
           : dateValidation
