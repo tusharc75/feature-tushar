@@ -226,6 +226,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
+            ele.entity = values.entity?.length > 0 ? values.entity : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
             ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
