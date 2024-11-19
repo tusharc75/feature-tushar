@@ -1,16 +1,15 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { useHistory } from 'react-router-dom';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { MATERIAL_TYPE,COLOUR_MASTER, serializedAsset } from 'src/constants/helpers';
+import { MATERIAL_TYPE, COLOUR_MASTER, } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import _ from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 
@@ -21,7 +20,6 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   const [colorInfo, setColorInfo] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-
 
   const customNodeStyles = {
     managedPackage: {
@@ -54,55 +52,11 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     try {
       const allAssetsResponse = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
       const assets = allAssetsResponse?.data?.data || [];
-      const { data: { data: { material, childProduct } } } = await axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`);
-  
-      const rows = [];
-      let index = 1;
-      const packages = new Set();
 
-      material?.forEach((parent) => {
-        let row: any = {};
-        if (parent?.package?.optionValue) {
-          if (!packages.has(parent?.package?.optionValue)) {
-            row.index = index;
-            row._id = parent?.package?.optionValue;
-            row.productId = parent?.package?.optionValue;
-            row.type = MATERIAL_TYPE.package;
-            row.detail = parent.package.optionLabel;
-            row.qty = parent?.package?.qty;
-            row.subRows = generateNestedData(material, [], assets, row);
-            packages.add(row._id);
-            row.parentId = null;
-            rows.push(row);
-            index++;
-          }
-        } else {
-          row = { ...parent };
-          row.index = index;
-          row.productId = parent?._id;
-          row.type = MATERIAL_TYPE.product;
-          row.detail = parent?.productName;
-          row.description = parent?.productDescription;
-          row.productNumber = parent?.productNumber;
-          row.productCategory = parent?.productCategory?.optionLabel;
-          row.qty = parent?.qty;
-          row.assetQty =
-            assets?.filter((i: any) => {
-              if (i?.package) {
-                return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
-              } else {
-                return i.product.optionValue === row.productId && !row?.package;
-              }
-            })?.length || 0;
-          row.subRows = generateNestedData([], childProduct, assets, row);
-          row.parentId = null;
-          rows.push(row);
-          index++;
-        }
-      });
-  
+      const { data: { data: { material } } } = await axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`);
+
       let xPosition = 0;
-      const flow = [
+      let flow = [
         {
           id: managedPackagesData?._id,
           type: 'input',
@@ -112,9 +66,9 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
             ref_type: 'managedPackages',
             ref_id: managedPackagesData?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={'Managed Packages'}>
+              <HtmlTooltip arrow placement="top" title={routes.managedPackages.title}>
                 <div>
-                  <Typography variant="body2">Managed Packages</Typography>
+                  <Typography variant="body2">{routes.managedPackages.title}</Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{managedPackagesData?.managedPackageName}</Typography>
                 </div>
               </HtmlTooltip>
@@ -124,11 +78,20 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           style: customNodeStyles.managedPackage
         }
       ];
-      const flowEdge = [];
-  
-      if (rows?.length) xPosition += 300;
-      var yPrev=0;
-  
+      let flowEdge = [];
+
+      if (material?.length) xPosition += 300;
+      var yPrev = 0;
+
+      let rows = material.filter((e) => !e.parentId);
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail = parent.type === MATERIAL_TYPE.product ?
+          parent?.productName : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageName
+            : '';
+        parent.subRows = generateNestedData(material, assets, parent);
+      });
       generateFlowData(
         rows,
         xPosition,
@@ -137,7 +100,6 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
         managedPackagesData._id,
         yPrev
       );
-  
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (err) {
@@ -148,138 +110,80 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
 
   const generateFlowData = (parentNode, xPosition, flow, flowEdge, sourceId = null, yPrev, level = 0) => {
     let yPosition = yPrev;
-  
-    parentNode.forEach((node, index) => {
-      const nodeId = `${node?._id}-${level}-${index}-${yPosition}`;
-      const nodeType = _.startCase(_.camelCase(node.type));
-      const nodeLabel = node.detail;
-  
+
+    parentNode.forEach((node) => {
       flow.push({
-        id: nodeId,
+        id: node?._id,
         type: 'default',
         className: 'dark-node',
         sourcePosition: 'right',
         targetPosition: 'left',
         data: {
           ref_type: node.type,
-          ref_id: node.productId,
+          ref_id: MATERIAL_TYPE.serializedAsset === node?.type ? node.asset : node._id,
           label: (
-            <HtmlTooltip arrow placement="top" title={nodeType}>
+            <HtmlTooltip arrow placement="top" title={startCase(camelCase(node.type))}>
               <div>
-                <Typography variant="body2">{nodeType}</Typography>
-                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{nodeLabel}</Typography>
+                <Typography variant="body2">{startCase(camelCase(node.type))}</Typography>
+                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.detail}</Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: yPosition },
-        style:
-          node.type === 'product' ? customNodeStyles.product : node.type === 'package' ? customNodeStyles.package : customNodeStyles.serializedAsset,
+        style: node.type === MATERIAL_TYPE.product ?
+          customNodeStyles.product : node.type === MATERIAL_TYPE.package ?
+            customNodeStyles.package : customNodeStyles.serializedAsset,
       });
-  
+
       if (sourceId) {
         flowEdge.push({
-          id: `${sourceId}-${nodeId}-edge`,
+          id: `${sourceId}-${node?._id}-edge`,
           source: sourceId,
-          target: nodeId,
+          target: node?._id,
           arrowHeadType: 'arrow',
         });
       }
-  
       if (node.subRows?.length) {
         let childYPosition = yPosition;
-  
         const childHeight = generateFlowData(
           node.subRows,
           xPosition + 300,
           flow,
           flowEdge,
-          nodeId,
+          node?._id,
           childYPosition,
           level + 1
         );
-
         yPosition += childHeight;
       }
-  
       yPosition += 100;
     });
-  
     return yPosition - yPrev;
   };
 
-  const generateNestedData = (material, childProduct, assets, parent) => {
-    let subRows: any = [];
-    if (material?.length > 0 && parent.type === MATERIAL_TYPE.package) {
-      const packageSubRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
-      packageSubRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
-        _subRow.productId = _subRow._id;
-        _subRow._id = parent._id + _subRow._id;
-        _subRow.type = MATERIAL_TYPE.product;
-        _subRow.detail = _subRow?.productName;
-        _subRow.description = _subRow?.productDescription;
-        _subRow.productNumber = _subRow?.productNumber;
-        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-        _subRow.qty = parent.qty * _subRow.qty;
-        _subRow.parentId = parent?._id;
-        _subRow.assetQty =
-          assets?.filter((i: any) => {
-            if (i?.package) {
-              return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
-            } else {
-              return i.product.optionValue === _subRow.productId && !_subRow?.package;
-            }
-          })?.length || 0;
-        _subRow.subRows = generateNestedData([], childProduct, assets, _subRow);
-      });
-
-      subRows = [...subRows, ...packageSubRows];
-    }
-    if (childProduct?.length > 0) {
-      let childSubRows = childProduct?.filter((e) => {
-        return e.product === parent.productId;
-      });
-
-      childSubRows = childSubRows?.map((_subRow, j) => {
-        const data: any = {
-          index: parent.index + '.' + (j + 1 + (subRows?.length || 0)),
-          _id: _subRow?._id,
-          type: MATERIAL_TYPE.product,
-          detail: _subRow?.childProductDetail?.productName,
-          productId: _subRow?.childProductDetail?._id,
-          description: _subRow?.childProductDetail?.productDescription,
-          productCategory: _subRow?.childProductDetail?.productCategory?.optionLabel,
-          productNumber: _subRow?.childProductDetail?.productNumber,
-          parentId: parent?._id,
-          qty: _subRow?.qty,
-          assetQty:
-            assets?.filter((i: any) => {
-              return i.product.optionValue === _subRow?.childProductDetail?._id;
-            })?.length || 0,
-          serializedProduct: _subRow?.childProductDetail?.serializedProduct
-        };
-        return { ...data, subRows: generateNestedData([], [], assets, data) };
-      });
-
-      subRows = [...subRows, ...childSubRows];
-    }
+  const generateNestedData = (material, assets, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.package
+        ? _subRow?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productName
+          : '';
+      _subRow.subRows = generateNestedData(material, assets, _subRow);
+    });
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => {
-        return e.product.optionValue === parent.productId && (parent.package ? parent.package.optionValue===e.package.optionValue : true);
+        return e.product === parent._id && (parent.package ? parent._id === e.package : true);
       });
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
         _subRow.type = MATERIAL_TYPE.serializedAsset;
-        _subRow.productId = _subRow.asset,
-        _subRow.detail = _subRow?.assetNumber;
-        _subRow.description = _subRow?.description;
-        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-        _subRow.position = _subRow?.position;
-        _subRow.parentId = _subRow?.product?.optionValue;
-        _subRow.qty = parent.qty;
+        _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.parentId = _subRow?.product;
+        subRows.push(_subRow)
       });
-      subRows = [...subRows, ...assetsSubRows];
     }
     return subRows;
   };
@@ -292,13 +196,13 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     if (element?.data?.ref_type === 'managedPackages') {
       window.open(`${routes.managedPackagesDetail.path}/${element?.data?.ref_id}`);
     }
-    if (element?.data?.ref_type === 'product') {
+    if (element?.data?.ref_type === MATERIAL_TYPE.product) {
       window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     }
-    if (element?.data.ref_type === 'package') {
+    if (element?.data.ref_type === MATERIAL_TYPE.package) {
       window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
     }
-    if (element?.data.ref_type === 'serializedAsset') {
+    if (element?.data.ref_type === MATERIAL_TYPE.serializedAsset) {
       window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
     }
   };
