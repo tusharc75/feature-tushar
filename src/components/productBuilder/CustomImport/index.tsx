@@ -79,26 +79,28 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   }, []);
 
   const handleChangeCategory = () => {
-    const value = values['productCategory'];
+    setProductTemplate([]);
+    let value = values['productCategory'];
     const label = productCategory?.find((p) => p?.optionValue === value)?.optionLabel || '';
-    if (value && value !== '') {
-      axiosInstance()
-        .post(`/product-template/template/` + value, { entity: null })
-        .then(({ data: { data } }) => {
-          setProductTemplate(data.data);
-          if (data.data.length) {
-            var defaultproductTemplate = data.data[0].optionValue;
-            data.data.forEach((_f) => {
-              let re = new RegExp(_f.optionLabel);
-              if (label.match(re)) {
-                defaultproductTemplate = _f.optionValue;
-                return;
-              }
-            });
-            setValues({ ...values, productTemplate: defaultproductTemplate });
-          }
-        });
+    if (!value || value === '') {
+      value = 'standard';
     }
+    axiosInstance()
+      .post(`/product-template/template/` + value, { entity: null })
+      .then(({ data: { data } }) => {
+        setProductTemplate(data.data);
+        if (data.data.length && value != 'standard') {
+          var defaultproductTemplate = data.data[0].optionValue;
+          data.data.forEach((_f) => {
+            let re = new RegExp(_f.optionLabel);
+            if (label.match(re)) {
+              defaultproductTemplate = _f.optionValue;
+              return;
+            }
+          });
+          setValues({ ...values, productTemplate: defaultproductTemplate });
+        }
+      });
   };
 
   useEffect(() => {
@@ -110,6 +112,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   }, [values?.productTemplate]);
 
   const handleChangeProductTemplate = () => {
+    setPriceTemplate([]);
     const value = values['productTemplate'];
     if (value) {
       axiosInstance()
@@ -153,7 +156,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   };
 
   useEffect(() => {
-    if (values?.productCategory && values?.productTemplate && values?.priceTemplate) {
+    if (values?.productTemplate && values?.priceTemplate) {
       fetchTemplate();
     }
   }, [values]);
@@ -435,7 +438,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       : ''
                   }
                   onChange={(e, val) => {
-                    setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                    if (values['productCategory']) {
+                      setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                    } else {
+                      setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '', priceTemplate: '' });
+                    }
                   }}
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
@@ -467,7 +474,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   onClick={(e: any) => (e.target.value = null)}
                   type="file"
                   accept=".xlsx,.csv"
-                  disabled={_.some(_.values(values), (v) => v === '')}
+                  // disabled={_.some(_.values(values), (v) => v === '')}
+                  disabled={!(values?.productTemplate && values?.priceTemplate)}
                 />
                 <label htmlFor={`customImportFile`}>
                   <HtmlTooltip title={'Import File'}>
@@ -478,7 +486,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                         size="small"
                         className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
                         component="span"
-                        disabled={_.some(_.values(values), (v) => v === '')}
+                        // disabled={_.some(_.values(values), (v) => v === '')}
+                        disabled={!(values?.productTemplate && values?.priceTemplate)}
                         startIcon={isMobile ? null : <AiOutlineImport />}
                       >
                         {isMobile ? <AiOutlineImport /> : 'Import File'}
@@ -654,7 +663,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               color="primary"
               disabled={
                 loading ||
-                !values?.productCategory ||
+                // !values?.productCategory ||
                 !values?.productTemplate ||
                 !values?.priceTemplate ||
                 templateImportHeader?.length === 0 ||
