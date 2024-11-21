@@ -51,7 +51,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     try {
       let fieldData;
       const response: any = await axiosInstance().get('/field?resource=Quotation');
-      fieldData = response?.data?.data?.filter((obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(obj?.fieldData?.fieldName));
+      fieldData = response?.data?.data?.filter((obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(obj?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
