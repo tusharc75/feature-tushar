@@ -424,7 +424,7 @@ const FormTypes = (props) => {
         }
         fetch({ input: values[name]?.locationName }, (results) => {
           if (active) {
-            setOptions(results);
+            setOptions(results ?? []);
           }
         });
       } else {
@@ -433,7 +433,7 @@ const FormTypes = (props) => {
         }
         fetch({ input: values[name] }, (results) => {
           if (active) {
-            setOptions(results);
+            setOptions(results ?? []);
           }
         });
       }
