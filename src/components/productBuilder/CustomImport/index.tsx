@@ -38,6 +38,7 @@ import ImportedDataDialog from 'src/components/productBuilder/CustomImport/Impoe
 import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
+import { AddAllColumnDialog } from 'src/components/productBuilder/CustomImport/AddAllColumnDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -56,7 +57,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [files, setFiles] = useState();
   const [file, setFile] = useState();
   const [addSystemColumn, setAddSystemColumn] = useState(false);
-  const [addImportedColumn, setAddImportedColumn] = useState(false);
+  const [addImportedColumn, setAddImportedColumn] = useState({ open: false, type: '' });
   const [addedField, setAddedField] = useState([]);
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -546,10 +547,19 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       button
                       onClick={(e) => {
                         setAddAnchorEl(null);
-                        setAddImportedColumn(true);
+                        setAddImportedColumn({ open: true, type: 'single' });
                       }}
                     >
                       Add From Imported Excel Column
+                    </MenuItem>
+                    <MenuItem
+                      button
+                      onClick={(e) => {
+                        setAddAnchorEl(null);
+                        setAddImportedColumn({ open: true, type: 'all' });
+                      }}
+                    >
+                      Add From Imported Excel Column {`(All)`}
                     </MenuItem>
                   </Menu>
                 </>
@@ -699,11 +709,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
             />
           )}
-          {addImportedColumn && (
+          {addImportedColumn.open && addImportedColumn?.type === 'single' && (
             <AddColumnDialog
               fieldLabelOptions={fieldLabelOptions?.filter((e) => !keyValue?.map((e) => e?.importedColumn)?.includes(e?.fieldLabel))}
               handleClose={() => {
-                setAddImportedColumn(false);
+                setAddImportedColumn({ open: false, type: '' });
               }}
               handleAddField={(_data) => {
                 _data.leval = 'price-builder-custom';
@@ -718,7 +728,26 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
                 ]);
                 setKeyValue([...keyValue, { importedColumn: _data?.fieldLabel, systemColumn: _data?.fieldLabel }]);
-                setAddImportedColumn(false);
+                setAddImportedColumn({ open: false, type: '' });
+              }}
+              fields={fields}
+              section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
+            />
+          )}
+          {addImportedColumn.open && addImportedColumn?.type === 'all' && (
+            <AddAllColumnDialog
+              fieldLabelOptions={fieldLabelOptions?.filter((e) => !keyValue?.map((e) => e?.importedColumn)?.includes(e?.fieldLabel))}
+              handleClose={() => {
+                setAddImportedColumn({ open: false, type: '' });
+              }}
+              handleAddField={(_data) => {
+                setAddedField([...addedField, ..._data]);
+                setTemplateImportHeader([
+                  ...templateImportHeader,
+                  ..._data?.map((d) => ({ value: d?.fieldLabel?.toUpperCase(), label: d?.fieldLabel?.toUpperCase() }))
+                ]);
+                setKeyValue([...keyValue, ..._data?.map((d) => ({ importedColumn: d?.fieldLabel, systemColumn: d?.fieldLabel }))]);
+                setAddImportedColumn({ open: false, type: '' });
               }}
               fields={fields}
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
