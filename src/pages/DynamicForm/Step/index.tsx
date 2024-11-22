@@ -26,7 +26,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
   const findSteps = () => {
     setStepLoading(true);
     let api = `/dynamic-form/steps?resourcePolicyId=${resourcePolicyId}&tabId=${tab?._id}`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}` 
+    if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
     axiosInstance()
       .get(api)
       .then((res) => {
@@ -43,7 +43,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
   };
 
   useEffect(() => {
-    if ((tab?._id && (resourcePolicyId || workflowId))) {
+    if (tab?._id && (resourcePolicyId || workflowId)) {
       findSteps();
     }
   }, [tab, resourcePolicyId, workflowId]);
@@ -73,6 +73,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
             <ContentFullScreen title={steps[currentStep]?.stepName} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               <View
                 step={steps[currentStep]}
+                tabId={tab?._id}
                 allowedToEdit={allowedToEdit}
                 data={data}
                 resource={resource}
@@ -121,6 +122,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
               <div className={`container-with-border overflow-y-auto overflow-x-hidden  p-[20px]`}>
                 <View
                   step={index}
+                  tabId={tab?._id}
                   allowedToEdit={allowedToEdit}
                   data={data}
                   resource={resource}
@@ -161,6 +163,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
                         {expended[`${step?._id}`] && (
                           <View
                             step={step}
+                            tabId={tab?._id}
                             allowedToEdit={allowedToEdit}
                             data={data}
                             resource={resource}
