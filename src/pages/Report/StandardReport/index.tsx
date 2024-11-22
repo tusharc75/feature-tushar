@@ -127,7 +127,7 @@ const Report = () => {
           o.disableFilters = true;
           o.disableSortBy = true;
         }
-        if (type === 'number-of-assets-by-status' && (o?.accessor === 'productName' || o?.accessor === 'product')) {
+        if ((o?.accessor === 'productName' || o?.accessor === 'product')) {
           o.cell = ({ row }) => ProductRenderer(row);
         }
         if (o?.accessor === 'serviceName') {
@@ -248,7 +248,7 @@ const Report = () => {
           <Link
             className="link"
             title={row?.original?.productName}
-            to={`${routes.productDetail.path}/${row?.original?.productId || row?.original?._id}`}
+            to={`${routes.productDetail.path}/${row?.original?.materialId || row?.original?.productId || row?.original?._id}`}
             target="_blank"
           >
             {row?.original?.productName}
@@ -267,7 +267,7 @@ const Report = () => {
           <Link
             className="link"
             title={row?.original?.serviceName}
-            to={`${routes.serviceMasterDetail.path}/${row?.original?.serviceId}`}
+            to={`${routes.serviceMasterDetail.path}/${row?.original?.materialId || row?.original?.serviceId}`}
             target="_blank"
           >
             {row?.original?.serviceName}
