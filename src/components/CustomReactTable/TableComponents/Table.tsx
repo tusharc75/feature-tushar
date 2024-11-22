@@ -55,7 +55,8 @@ const TableComponent = forwardRef(function (
   ref: ForwardedRef<HTMLTableElement>
 ) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
-  const columns = table.getVisibleFlatColumns()?.map((d) => d?.columnDef);
+  const tableColumns = table.getVisibleFlatColumns();
+  const columns = tableColumns?.map((d) => d?.columnDef);
 
   const stickyColumns = useMemo(() => {
     const stickyData = getStickyColumnNames({ allColumn: columns as TColType[], expander, hideSelection });
@@ -127,6 +128,7 @@ const TableComponent = forwardRef(function (
       ) : (
         <>
           <VirtualTable
+            columns={tableColumns}
             state={state}
             setWholeRowsCellColor={setWholeRowsCellColor}
             table={table}
