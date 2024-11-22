@@ -14,6 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageCreditMemo from './ManageCreditMemo';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Material from './Material';
 
 const creditMemoDetail = () => {
   const { id } = useParams();
@@ -140,8 +141,9 @@ const creditMemoDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0} label={'Details'} />
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          <CustomTab value={0} label={'Header'} />
+          <CustomTab value={1} label={'Details'} />
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -154,11 +156,16 @@ const creditMemoDetail = () => {
             )}
           </Box>
         </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Box>
+            <Material creditMemoData={creditMemoData} allowedToEdit={permissions?.creditMemo?.isUpdate }/>
+          </Box>
+        </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 3}>
+              <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
                   resourcePolicyId={resourceData?._id}

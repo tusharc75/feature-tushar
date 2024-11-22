@@ -19,6 +19,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { isMobile, isTablet } from 'react-device-detect';
+import MaterialDialog from './MaterialDialog';
 
 const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
@@ -27,6 +28,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 
   const [columns, setColumns] = useState(null);
   const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
+  const [creditMemoMaterialDialog, setCreditMemoMaterialDialog] = useState({ open: false, data: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
@@ -121,22 +123,23 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       );
       columns?.forEach((e) => {
         if (e.accessor === 'creditMemoNumber') {
-          e.Cell = ({ row }) =>
+          e.cell = ({ row }) =>
             row.original['creditMemoNumber'] ? (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                {allowedToEdit ? (
-                  <p
-                    onClick={() => {
-                      setCreditMemoDialog({ open: true, id: row.original._id });
-                    }}
-                    className="link text-truncate"
-                    title={row.original['creditMemoNumber']}
-                  >
-                    {row.original['creditMemoNumber']}
-                  </p>
-                ) : (
+                {/* {allowedToEdit ? ( */}
+                <p
+                  onClick={() => {
+                    setCreditMemoMaterialDialog({ open: true, data: row.original });
+                    // setCreditMemoDialog({ open: true, id: row.original._id });
+                  }}
+                  className="link text-truncate"
+                  title={row.original['creditMemoNumber']}
+                >
+                  {row.original['creditMemoNumber']}
+                </p>
+                {/* ) : (
                   <p className="text-truncate">{row.original['creditMemoNumber']}</p>
-                )}
+                )} */}
               </div>
             ) : (
               <NoDataCell />
@@ -365,6 +368,13 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             currency: invoiceData?.currency
           }}
           isRedirectToDetailPage={false}
+        />
+      )}
+      {creditMemoMaterialDialog.open && (
+        <MaterialDialog
+          creditMemoDetail={creditMemoMaterialDialog.data}
+          handleClose={() => setCreditMemoMaterialDialog({ open: false, data: null })}
+          allowedToEdit={allowedToEdit}
         />
       )}
       {showDeleteConfirmBox.open && (
