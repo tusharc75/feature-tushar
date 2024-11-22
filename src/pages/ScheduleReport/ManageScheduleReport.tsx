@@ -71,9 +71,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     setResourceOption(options);
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchSharepointSiteData();
-  },[])
+  }, [])
 
   useEffect(() => {
     if (id) {
@@ -105,7 +105,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             subscribeUsers: data?.subscribeUsers,
             reportAction: data?.reportAction,
             sharepointSite: data?.sharepointSite,
-            fileType: data?.fileType
+            fileType: data?.fileType || 'xslx'
           };
           setScheduleData(newData);
         } catch (err) {
@@ -126,7 +126,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         week: '',
         day: new Date().getDay().toString(),
         hour: '',
-        fileType: ''
+        fileType: 'xslx'
       });
     }
   }, [id]);
@@ -257,11 +257,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const fetchSharepointSiteData = ()=>{
+  const fetchSharepointSiteData = () => {
     axiosInstance()
       .get(`/sharepoint-configuration/share-point-site`)
       .then(({ data: { data } }) => {
-        if(data?.sharepointConfiguration){
+        if (data?.sharepointConfiguration) {
           setSharepointOptions(data?.sharepointSites)
         }
       })
@@ -278,26 +278,26 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!values.resource) {
       errors['resource'] = 'Report is required';
     }
-    if(!values.reportAction){
+    if (!values.reportAction) {
       errors['reportAction'] = 'Report Action is required';
     }
-    if(!values.fileType){
+    if (!values.fileType) {
       errors['fileType'] = 'File Type is required';
     }
-    if(values.reportAction){
-      if(values.reportAction==='Email'){
+    if (values.reportAction) {
+      if (values.reportAction === 'Email') {
         if (values?.subscribeUsers?.length === 0) {
           errors['subscribeUsers'] = 'Users is required';
         }
       }
 
-      if(values.reportAction==='Sharepoint Upload'){
-         if(!values.sharepointSite || values.sharepointSite===''){
+      if (values.reportAction === 'Sharepoint Upload') {
+        if (!values.sharepointSite || values.sharepointSite === '') {
           errors['sharepointSite'] = 'Sharepoint Site is required';
-         }
+        }
       }
     }
-    
+
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
     } else {
@@ -323,7 +323,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     values?.filters?.forEach((v) => {
       if (selectedData && Object.keys(selectedData)?.includes(v?.fieldName)) {
         data[v?.fieldName] = selectedData[v?.fieldName];
-      }else {
+      } else {
         data[v?.fieldName] = [];
       }
     });
@@ -610,7 +610,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   <Box my={2}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
-                      <Autocomplete
+                        <Autocomplete
                           options={sharepointOptions ? ['Email', 'Sharepoint Upload'] : ['Email']}
                           fullWidth
                           size="small"
@@ -630,9 +630,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             />
                           )}
                         />
-                      </Grid> 
+                      </Grid>
                       <Grid item xs={12} sm={6}>
-                      <Autocomplete
+                        <Autocomplete
                           options={['xslx', 'csv']}
                           fullWidth
                           size="small"
@@ -652,66 +652,66 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             />
                           )}
                         />
-                      </Grid>     
+                      </Grid>
                     </Grid>
                   </Box>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                    {values?.reportAction==='Email' && (
-                      <Grid item xs={12} sm={6}>
-                        <Autocomplete
-                          options={usersList}
-                          fullWidth
-                          multiple
-                          size="small"
-                          getOptionLabel={(option) => option.name}
-                          getOptionSelected={(option, value) => option.userId === value.userId}
-                          value={values.subscribeUsers}
-                          onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
-                              helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
-                              label="Users"
-                              name="subscribeUsers"
-                              required
-                              variant="outlined"
-                            />
-                          )}
-                        />
-                      </Grid>
-                    )}
-                    {values?.reportAction==='Sharepoint Upload' && sharepointOptions && (
-                    <Grid item xs={12} sm={6}>  
-                     <Autocomplete
-                          options={sharepointOptions}
-                          fullWidth
-                          size="small"
-                          getOptionLabel={(option) => option.optionLabel}
-                          getOptionSelected={(option, value) => option.optionValue == value}
-                          value={sharepointOptions?.find((ops)=> ops?.optionValue===values?.sharepointSite) || {}}
-                          onChange={(_, newVal) => 
-                            setFieldValue('sharepointSite', newVal?.optionValue || '')}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={touched['sharepointSite'] && Boolean(errors['sharepointSite'])}
-                              helperText={touched['sharepointSite'] && errors['sharepointSite']}
-                              label="Sharepoint Site"
-                              name="sharepointSite"
-                              required
-                              variant="outlined"
-                            />
-                          )}
-                        />
-                  </Grid>
-                  )}
-                  </Grid>
+                      {values?.reportAction === 'Email' && (
+                        <Grid item xs={12} sm={6}>
+                          <Autocomplete
+                            options={usersList}
+                            fullWidth
+                            multiple
+                            size="small"
+                            getOptionLabel={(option) => option.name}
+                            getOptionSelected={(option, value) => option.userId === value.userId}
+                            value={values.subscribeUsers}
+                            onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
+                                helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
+                                label="Users"
+                                name="subscribeUsers"
+                                required
+                                variant="outlined"
+                              />
+                            )}
+                          />
+                        </Grid>
+                      )}
+                      {values?.reportAction === 'Sharepoint Upload' && sharepointOptions && (
+                        <Grid item xs={12} sm={6}>
+                          <Autocomplete
+                            options={sharepointOptions}
+                            fullWidth
+                            size="small"
+                            getOptionLabel={(option) => option.optionLabel}
+                            getOptionSelected={(option, value) => option.optionValue == value}
+                            value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
+                            onChange={(_, newVal) =>
+                              setFieldValue('sharepointSite', newVal?.optionValue || '')}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={touched['sharepointSite'] && Boolean(errors['sharepointSite'])}
+                                helperText={touched['sharepointSite'] && errors['sharepointSite']}
+                                label="Sharepoint Site"
+                                name="sharepointSite"
+                                required
+                                variant="outlined"
+                              />
+                            )}
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
                   </Box>
                   <Box my={2}>
-                  <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
                         <Box>
                           <Typography color="textPrimary">Schedule Frequency</Typography>
                           <Box mt={1} />
@@ -788,8 +788,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             </Box>
                           )}
                         </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
                         <Autocomplete
                           options={getTimeOption()}
                           fullWidth
@@ -813,7 +813,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         />
                       </Grid>
-                  </Grid>
+                    </Grid>
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
