@@ -33,6 +33,7 @@ type ValueTypes = {
   sharepointSite?: string;
   sharepointclientId?: string;
   sharepointclientSecret?: string;
+  fileType?: string;
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
@@ -104,6 +105,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             subscribeUsers: data?.subscribeUsers,
             reportAction: data?.reportAction,
             sharepointSite: data?.sharepointSite,
+            fileType: data?.fileType
           };
           setScheduleData(newData);
         } catch (err) {
@@ -123,7 +125,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         time: '',
         week: '',
         day: new Date().getDay().toString(),
-        hour: ''
+        hour: '',
+        fileType: ''
       });
     }
   }, [id]);
@@ -277,6 +280,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     }
     if(!values.reportAction){
       errors['reportAction'] = 'Report Action is required';
+    }
+    if(!values.fileType){
+      errors['fileType'] = 'File Type is required';
     }
     if(values.reportAction){
       if(values.reportAction==='Email'){
@@ -619,6 +625,28 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               helperText={touched['reportAction'] && errors['reportAction']}
                               label="Report Action"
                               name="reportAction"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid> 
+                      <Grid item xs={12} sm={6}>
+                      <Autocomplete
+                          options={['xslx', 'csv']}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => option}
+                          getOptionSelected={(option, value) => option === value}
+                          value={values.fileType}
+                          onChange={(_, newVal) => setFieldValue('fileType', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['fileType'] && Boolean(errors['fileType'])}
+                              helperText={touched['fileType'] && errors['fileType']}
+                              label="File type"
+                              name="fileType"
                               required
                               variant="outlined"
                             />
