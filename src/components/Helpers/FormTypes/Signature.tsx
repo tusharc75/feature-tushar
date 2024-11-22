@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Typography, Box, Button, IconButton, Dialog } from '@material-ui/core';
-import { AddCircle, Delete, Info } from '@material-ui/icons';
+import { AddCircle, CameraAlt, Delete, Info, Publish } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -9,11 +9,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Webcam from 'react-webcam';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ErrorType, useDropZone } from 'src/hooks';
 
-const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => {
+const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen }) => {
   const [cameraCount, setCameraCount] = useState(0);
   const [facingMode, setFacingMode] = useState(isMobile || isTablet ? 'environment' : 'user');
   const [cameraPermission, setCameraPermission] = useState('prompt');
@@ -68,7 +69,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => 
                 Switch Camera
               </Button>
             )}
-            <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
+            <Button size="small" variant="contained" color="primary" onClick={handleToggleMode}>
               Close Camera
             </Button>
           </Box>
@@ -130,13 +131,64 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture, isFullScreen }) => 
 };
 
 const SignatureDialog = ({ onSave, open, close }) => {
-  const signCanvas: any = React.useRef(null);
+  const signCanvas = React.useRef<SignaturePad>(null);
   const { setToastConfig } = React.useContext(CustomToastContext);
-
   const [picture, setPicture] = useState('');
-
   const [usePad, setUsePad] = useState(true);
   const [fullScreen, setFullScreen] = useState(isMobile && !isTablet ? true : false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+
+  const handleShowDropDownError = (error: ErrorType) => {
+    const fileNames = Object.keys(error);
+    for (let index = 0; index < fileNames.length; index++) {
+      const fileName = fileNames[index];
+      const errorMessage = error[fileName].message;
+      setToastConfig({ open: true, type: 'error', message: `${fileName} : ${errorMessage}` });
+    }
+  };
+
+  const { rootProps, isHovering } = useDropZone({
+    accept: 'image/*',
+    multiple: false,
+    onError: handleShowDropDownError,
+    onDrop(e, files) {
+      handleDrop(files);
+    }
+  });
+
+  const handleEnd = () => {
+    if (!signCanvas.current?.isEmpty()) {
+      const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+      setPicture(picture);
+    } else {
+      setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
+    }
+  };
+
+  const handleDrop = (files: File[]) => {
+    if (!files || !files.length) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(files[0]);
+    reader.onload = () => {
+      const image = reader.result as string;
+      setPicture(image);
+      setUploadedFile(image);
+    };
+    reader.onerror = (error) => {
+      setToastConfig({ open: true, type: 'warning', message: 'Something went wrong' });
+    };
+  };
+
+  const handleToggleMode = () => {
+    clearAllData();
+    setUsePad((prev) => !prev);
+  };
+  const clearAllData = () => {
+    setPicture('');
+    setUploadedFile(null);
+    signCanvas.current?.clear();
+  };
 
   return (
     <Dialog TransitionComponent={CustomDialogTransition} fullScreen={fullScreen} open={open} onClose={close}>
@@ -151,20 +203,62 @@ const SignatureDialog = ({ onSave, open, close }) => {
         showRequiredLabel={false}
       />
       <CustomDialogContent className="px-[15px]">
-        {usePad ? (
-          <div className="flex min-h-full items-center justify-center bg-white">
-            <SignaturePad
-              className=""
-              ref={signCanvas}
-              canvasProps={{ width: fullScreen ? window.innerWidth - 30 : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
-            />
-          </div>
-        ) : (
-          <UseCamera isFullScreen={fullScreen} setUsePad={setUsePad} usePad={usePad} setPicture={setPicture} picture={picture} />
-        )}
+        <input
+          type="file"
+          className="sr-only"
+          title="Upload signature"
+          name="signature"
+          accept="image/*"
+          onChange={(e) => {
+            e.target.files && handleDrop(Array.from(e.target.files));
+            e.target.value = '';
+          }}
+          id={'signature-pad-file-input'}
+          ref={inputRef}
+          multiple={false}
+        />
+        <div
+          {...rootProps}
+          className={cn('relative', isHovering ? 'rounded-16px outline-dashed outline-4 outline-[var(--common-border-color)]' : '')}
+        >
+          {isHovering && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+              <p className="text-[40px] font-bold text-gray-400">Drop here</p>
+            </div>
+          )}
+          {uploadedFile ? (
+            <div
+              className="flex items-center justify-center"
+              style={{ width: fullScreen ? window.innerWidth - 30 : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
+            >
+              <div className="max-w-fit">
+                <img src={uploadedFile} className="h-auto w-full" alt="Signature" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {usePad ? (
+                <div className="flex min-h-full items-center justify-center bg-white">
+                  <SignaturePad
+                    onEnd={handleEnd}
+                    ref={signCanvas}
+                    canvasProps={{ width: fullScreen ? window.innerWidth - 30 : 500, height: fullScreen ? window.innerHeight - 118 : 400 }}
+                  />
+                </div>
+              ) : (
+                <UseCamera isFullScreen={fullScreen} handleToggleMode={handleToggleMode} usePad={usePad} setPicture={setPicture} picture={picture} />
+              )}
+            </>
+          )}
+        </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="contained" size="small" color="primary" onClick={() => setUsePad(!usePad)}>
+        <HtmlTooltip title={'Upload Signature'}>
+          <Button variant="contained" size="small" color="primary" onClick={() => inputRef?.current.click()} startIcon={<Publish />}>
+            Upload
+          </Button>
+        </HtmlTooltip>
+        <Button variant="contained" size="small" color="primary" onClick={handleToggleMode} startIcon={usePad ? <CameraAlt /> : <FaSignature />}>
           {usePad ? 'Use Camera' : 'Use Sign Pad'}
         </Button>
         <Button variant="contained" size="small" color="primary" onClick={close}>
@@ -175,20 +269,10 @@ const SignatureDialog = ({ onSave, open, close }) => {
           size="small"
           color="primary"
           onClick={() => {
-            //check if user is in camera mode or pad mode
-            if (usePad) {
-              if (!signCanvas.current?.isEmpty()) {
-                const dataURL = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
-                onSave(dataURL);
-              } else {
-                setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
-              }
+            if (picture !== '') {
+              onSave(picture);
             } else {
-              if (picture !== '') {
-                onSave(picture);
-              } else {
-                setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty (no picture clicked)!' });
-              }
+              setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty' });
             }
           }}
         >

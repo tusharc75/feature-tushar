@@ -17,6 +17,7 @@ import { Edit } from '@material-ui/icons';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ManagedPackagesView from './View';
 
 const ManagedPackagedDetail = () => {
   const { id } = useParams();
@@ -132,6 +133,7 @@ const ManagedPackagedDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'Products'} />
+          {!(isMobile && !isTablet) && (<CustomTab value={2} label={'Views'} />)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -146,6 +148,9 @@ const ManagedPackagedDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Assign managedPackagesData={managedPackagesData} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          {managedPackagesData && <ManagedPackagesView managedPackagesData={managedPackagesData} />}
         </TabPanel>
       </Box>
       {showConfirmBox && (

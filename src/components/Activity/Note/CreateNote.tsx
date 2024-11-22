@@ -256,7 +256,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
 
   return !initialValues ? (
     <>
-      <CustomDialogHeader title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
+      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
       <CustomDialogContent>
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
@@ -271,7 +271,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
     </>
   ) : (
     <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
-      {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched, setFieldError }) => (
+      {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched }) => (
         <>
           <CustomDialogHeader
             onClose={() => {

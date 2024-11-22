@@ -293,20 +293,6 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        {permissions?.iotChart?.isRead && row?.original?.iotUnit && (
-          <HtmlTooltip title="View IOT Data">
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  history.push(`${routes.iotChartDetail.path}/${row?.original?._id}`);
-                }}
-              >
-                <VisibilityIcon fontSize="small" color="primary" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
       </>
     )
   };

@@ -35,6 +35,7 @@ const Workspace = () => {
   const fetchChannels = async () => {
     const { data } = await axiosInstance().get('/work-space/channel');
     setChannels(data.data || []);
+    if(data?.data?.length) setSelectedChannel(data?.data[0]);
   };
 
   const handleDeleteChannels = async (channelIds: string[]) => {

@@ -38,6 +38,7 @@ import ImportedDataDialog from 'src/components/productBuilder/CustomImport/Impoe
 import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
+import { AddAllColumnDialog } from 'src/components/productBuilder/CustomImport/AddAllColumnDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -56,7 +57,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [files, setFiles] = useState();
   const [file, setFile] = useState();
   const [addSystemColumn, setAddSystemColumn] = useState(false);
-  const [addImportedColumn, setAddImportedColumn] = useState(false);
+  const [addImportedColumn, setAddImportedColumn] = useState({ open: false, type: '' });
   const [addedField, setAddedField] = useState([]);
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -79,26 +80,28 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   }, []);
 
   const handleChangeCategory = () => {
-    const value = values['productCategory'];
+    setProductTemplate([]);
+    let value = values['productCategory'];
     const label = productCategory?.find((p) => p?.optionValue === value)?.optionLabel || '';
-    if (value && value !== '') {
-      axiosInstance()
-        .post(`/product-template/template/` + value, { entity: null })
-        .then(({ data: { data } }) => {
-          setProductTemplate(data.data);
-          if (data.data.length) {
-            var defaultproductTemplate = data.data[0].optionValue;
-            data.data.forEach((_f) => {
-              let re = new RegExp(_f.optionLabel);
-              if (label.match(re)) {
-                defaultproductTemplate = _f.optionValue;
-                return;
-              }
-            });
-            setValues({ ...values, productTemplate: defaultproductTemplate });
-          }
-        });
+    if (!value || value === '') {
+      value = 'standard';
     }
+    axiosInstance()
+      .post(`/product-template/template/` + value, { entity: null })
+      .then(({ data: { data } }) => {
+        setProductTemplate(data.data);
+        if (data.data.length && value != 'standard') {
+          var defaultproductTemplate = data.data[0].optionValue;
+          data.data.forEach((_f) => {
+            let re = new RegExp(_f.optionLabel);
+            if (label.match(re)) {
+              defaultproductTemplate = _f.optionValue;
+              return;
+            }
+          });
+          setValues({ ...values, productTemplate: defaultproductTemplate });
+        }
+      });
   };
 
   useEffect(() => {
@@ -110,6 +113,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   }, [values?.productTemplate]);
 
   const handleChangeProductTemplate = () => {
+    setPriceTemplate([]);
     const value = values['productTemplate'];
     if (value) {
       axiosInstance()
@@ -153,7 +157,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   };
 
   useEffect(() => {
-    if (values?.productCategory && values?.productTemplate && values?.priceTemplate) {
+    if (values?.productTemplate && values?.priceTemplate) {
       fetchTemplate();
     }
   }, [values]);
@@ -435,7 +439,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       : ''
                   }
                   onChange={(e, val) => {
-                    setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                    if (values['productCategory']) {
+                      setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                    } else {
+                      setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '', priceTemplate: '' });
+                    }
                   }}
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
@@ -467,7 +475,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   onClick={(e: any) => (e.target.value = null)}
                   type="file"
                   accept=".xlsx,.csv"
-                  disabled={_.some(_.values(values), (v) => v === '')}
+                  // disabled={_.some(_.values(values), (v) => v === '')}
+                  disabled={!(values?.productTemplate && values?.priceTemplate)}
                 />
                 <label htmlFor={`customImportFile`}>
                   <HtmlTooltip title={'Import File'}>
@@ -478,7 +487,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                         size="small"
                         className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
                         component="span"
-                        disabled={_.some(_.values(values), (v) => v === '')}
+                        // disabled={_.some(_.values(values), (v) => v === '')}
+                        disabled={!(values?.productTemplate && values?.priceTemplate)}
                         startIcon={isMobile ? null : <AiOutlineImport />}
                       >
                         {isMobile ? <AiOutlineImport /> : 'Import File'}
@@ -537,10 +547,19 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       button
                       onClick={(e) => {
                         setAddAnchorEl(null);
-                        setAddImportedColumn(true);
+                        setAddImportedColumn({ open: true, type: 'single' });
                       }}
                     >
                       Add From Imported Excel Column
+                    </MenuItem>
+                    <MenuItem
+                      button
+                      onClick={(e) => {
+                        setAddAnchorEl(null);
+                        setAddImportedColumn({ open: true, type: 'all' });
+                      }}
+                    >
+                      Add From Imported Excel Column {`(All)`}
                     </MenuItem>
                   </Menu>
                 </>
@@ -654,7 +673,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               color="primary"
               disabled={
                 loading ||
-                !values?.productCategory ||
+                // !values?.productCategory ||
                 !values?.productTemplate ||
                 !values?.priceTemplate ||
                 templateImportHeader?.length === 0 ||
@@ -690,11 +709,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
             />
           )}
-          {addImportedColumn && (
+          {addImportedColumn.open && addImportedColumn?.type === 'single' && (
             <AddColumnDialog
               fieldLabelOptions={fieldLabelOptions?.filter((e) => !keyValue?.map((e) => e?.importedColumn)?.includes(e?.fieldLabel))}
               handleClose={() => {
-                setAddImportedColumn(false);
+                setAddImportedColumn({ open: false, type: '' });
               }}
               handleAddField={(_data) => {
                 _data.leval = 'price-builder-custom';
@@ -709,7 +728,26 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
                 ]);
                 setKeyValue([...keyValue, { importedColumn: _data?.fieldLabel, systemColumn: _data?.fieldLabel }]);
-                setAddImportedColumn(false);
+                setAddImportedColumn({ open: false, type: '' });
+              }}
+              fields={fields}
+              section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
+            />
+          )}
+          {addImportedColumn.open && addImportedColumn?.type === 'all' && (
+            <AddAllColumnDialog
+              fieldLabelOptions={fieldLabelOptions?.filter((e) => !keyValue?.map((e) => e?.importedColumn)?.includes(e?.fieldLabel))}
+              handleClose={() => {
+                setAddImportedColumn({ open: false, type: '' });
+              }}
+              handleAddField={(_data) => {
+                setAddedField([...addedField, ..._data]);
+                setTemplateImportHeader([
+                  ...templateImportHeader,
+                  ..._data?.map((d) => ({ value: d?.fieldLabel?.toUpperCase(), label: d?.fieldLabel?.toUpperCase() }))
+                ]);
+                setKeyValue([...keyValue, ..._data?.map((d) => ({ importedColumn: d?.fieldLabel, systemColumn: d?.fieldLabel }))]);
+                setAddImportedColumn({ open: false, type: '' });
               }}
               fields={fields}
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}

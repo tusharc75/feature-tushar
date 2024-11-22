@@ -423,9 +423,16 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
+          if(d?.wellNumber){
+            element.wellNumber = [d?.wellNumber?.optionValue]|| [];
+          }
           element['tax_' + currency] = d['tax_' + currency] || 0;
+          element['discount_' + currency] = d['discount_' + currency] || 0;
           element['price_' + currency] = d['price_' + currency] || 0;
           element.taxPercentage = d.taxPercentage;
+          if (d?.taxCode) {
+            element.taxCode = d?.taxCode?.optionValue;
+          }
           element.discountPercentage = d.discountPercentage;
           element['totalPrice_' + currency] = d['totalPrice_' + currency] || 0;
           element['finalPrice_' + currency] = d['finalPrice_' + currency] || 0;

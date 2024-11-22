@@ -299,7 +299,7 @@ function PricingConditionsDetailsPage() {
             innerRef={ref}
             onSubmit={onSubmit}
           >
-            {({ submitForm, values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+            {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Form>
                 <Grid container>
                   <Grid item md={6} sm={6} xs={6}>
@@ -594,7 +594,7 @@ function PricingConditionsDetailsPage() {
                                                   style={{ margin: 0 }}
                                                   value={
                                                     values[
-                                                      'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                                                    'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                                                     ]
                                                   }
                                                   onChange={(e) =>

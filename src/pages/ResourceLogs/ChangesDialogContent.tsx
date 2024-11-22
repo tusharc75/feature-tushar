@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
-import { camelCase, capitalize, isString } from 'lodash';
+import { camelCase, capitalize, isArray, isString } from 'lodash';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -52,7 +52,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                             >
                               {data?.oldValue?.label}
                             </p>
-                          ) : data?.type === 'multiSelect' && data?.lookup ? (
+                          ) : data?.type === 'multiSelect' && data?.lookup && isArray(data?.oldValue) ? (
                             data?.oldValue?.map((oldValue) => {
                               return (
                                 <p
@@ -91,11 +91,11 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                             >
                               {data?.newValue?.label}
                             </p>
-                          ) : data?.type === 'multiSelect' && data?.lookup ? (
+                          ) : data?.type === 'multiSelect' && data?.lookup && isArray(data?.oldValue) ? (
                             data?.newValue?.map((newValue) => {
                               return (
                                 <p
-                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''}text-truncate`}
+                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                   title={newValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)

@@ -93,7 +93,7 @@ const Assign = ({ managedPackagesData }) => {
                 size="small"
                 onClick={() => {
                   if (row?.original?.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                    window.open(`${routes.productDetail.path}/${row.original._id}`);
                   } else if (row?.original?.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original._id}`);
                   } else {
@@ -163,38 +163,37 @@ const Assign = ({ managedPackagesData }) => {
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+              <HtmlTooltip title="Delete">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <Delete color="error" fontSize='small' />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </>
+        )
       }
     ];
-    setColumns([...coloum, ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <Delete color="error" fontSize='small' />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
+    setColumns(coloum);
   };
 
   const fetchData = async () => {
@@ -204,52 +203,26 @@ const Assign = ({ managedPackagesData }) => {
     const assets = allAssetsResponse?.data?.data || [];
 
     axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`).then(
-      ({
-        data: {
-          data: { material, childProduct }
-        }
-      }) => {
-        const rows = [];
-        const packages = new Set();
-        let index = 1;
-        material?.forEach((parent) => {
-          let row: any = {};
-          if (parent?.package?.optionValue) {
-            if (!packages.has(parent?.package?.optionValue)) {
-              row.index = index;
-              row._id = parent?.package?.optionValue;
-              row.type = MATERIAL_TYPE.package;
-              row.detail = parent.package.optionLabel;
-              row.qty = parent?.package?.qty;
-              row.subRows = generateNestedData(material, [], assets, row);
-              packages.add(row._id);
-              row.parentId = null;
-              rows.push(row);
-              index++;
-            }
-          } else {
-            row = { ...parent };
-            row.index = index;
-            row.productId = parent?._id;
-            row.type = MATERIAL_TYPE.product;
-            row.detail = parent?.productName;
-            row.description = parent?.productDescription;
-            row.productNumber = parent?.productNumber;
-            row.productCategory = parent?.productCategory?.optionLabel;
-            row.qty = parent?.qty;
-            row.assetQty =
-              assets?.filter((i: any) => {
-                if (i?.package) {
-                  return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
-                } else {
-                  return i.product.optionValue === row.productId && !row?.package;
-                }
-              })?.length || 0;
-            row.subRows = generateNestedData([], childProduct, assets, row);
-            row.parentId = null;
-            rows.push(row);
-            index++;
-          }
+      ({ data: { data } }) => {
+        let rows = data?.material.filter((e) => !e.parentId);
+        rows.forEach((parent, i) => {
+          parent.index = i + 1;
+          parent.detail = parent.type === MATERIAL_TYPE.product ?
+            parent?.productName : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageName
+              : '';
+          parent.description = parent.type === MATERIAL_TYPE.product ?
+            parent?.productDescription : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDescription
+              : '';
+          parent.productNumber = parent.type === MATERIAL_TYPE.product ?
+            parent?.productNumber : '';
+          parent.productCategory = parent.type === MATERIAL_TYPE.product ?
+            parent?.productCategory?.optionLabel || '' : '';
+          parent.assetQty = parent.type === MATERIAL_TYPE.product ? assets.filter((e) => {
+            return e.product === parent._id && (parent.package ? parent._id === e.package : true);
+          })?.length : 0;
+          parent.subRows = generateNestedData(data.material, assets, parent);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
@@ -260,77 +233,42 @@ const Assign = ({ managedPackagesData }) => {
       });
   };
 
-  const generateNestedData = (material, childProduct, assets, parent) => {
-    let subRows: any = [];
-    if (material?.length > 0 && parent.type === MATERIAL_TYPE.package) {
-      const packageSubRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
-      packageSubRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
-        _subRow.productId = _subRow._id;
-        _subRow._id = parent._id + _subRow._id;
-        _subRow.type = MATERIAL_TYPE.product;
-        _subRow.detail = _subRow?.productName;
-        _subRow.description = _subRow?.productDescription;
-        _subRow.productNumber = _subRow?.productNumber;
-        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-        _subRow.qty = parent.qty * _subRow.qty;
-        _subRow.parentId = parent?._id;
-        _subRow.assetQty =
-          assets?.filter((i: any) => {
-            if (i?.package) {
-              return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
-            } else {
-              return i.product.optionValue === _subRow.productId && !_subRow?.package;
-            }
-          })?.length || 0;
-        _subRow.subRows = generateNestedData([], childProduct, assets, _subRow);
-      });
+  const generateNestedData = (material, assets, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.package
+        ? _subRow?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productName
+          : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDescription || ''
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDescription || ''
+          : '';
+      _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ?
+        _subRow?.productNumber : '';
+      _subRow.productCategory = _subRow.type === MATERIAL_TYPE.product ?
+        _subRow?.productCategory?.optionLabel || '' : '';
 
-      subRows = [...subRows, ...packageSubRows];
-    }
-    if (childProduct?.length > 0) {
-      let childSubRows = childProduct?.filter((e) => {
-        return e.product === parent.productId;
-      });
+      _subRow.assetQty = _subRow.type === MATERIAL_TYPE.product ? assets.filter((e) => {
+        return e.product === _subRow._id && (_subRow.package ? _subRow._id === e.package : true);
+      })?.length : 0;
+      _subRow.subRows = generateNestedData(material, assets, _subRow);
+    });
 
-      childSubRows = childSubRows?.map((_subRow, j) => {
-        const data: any = {
-          index: parent.index + '.' + (j + 1 + (subRows?.length || 0)),
-          _id: _subRow?._id,
-          type: MATERIAL_TYPE.product,
-          detail: _subRow?.childProductDetail?.productName,
-          productId: _subRow?.childProductDetail?._id,
-          description: _subRow?.childProductDetail?.productDescription,
-          productCategory: _subRow?.childProductDetail?.productCategory?.optionLabel,
-          productNumber: _subRow?.childProductDetail?.productNumber,
-          parentId: parent?._id,
-          qty: _subRow?.qty,
-          assetQty:
-            assets?.filter((i: any) => {
-              return i.product.optionValue === _subRow?.childProductDetail?._id;
-            })?.length || 0,
-          serializedProduct: _subRow?.childProductDetail?.serializedProduct
-        };
-        return { ...data, subRows: generateNestedData([], [], assets, data) };
-      });
-
-      subRows = [...subRows, ...childSubRows];
-    }
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => {
-        return e.product.optionValue === parent.productId;
+        return e.product === parent._id && (parent.package ? parent._id === e.package : true);
       });
       assetsSubRows.forEach((_subRow, j) => {
         _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
         _subRow.type = MATERIAL_TYPE.serializedAsset;
-        _subRow.detail = _subRow?.assetNumber;
-        _subRow.description = _subRow?.description;
-        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-        _subRow.position = _subRow?.position;
-        _subRow.parentId = _subRow?.product?.optionValue;
-        _subRow.qty = parent.qty;
+        _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.parentId = _subRow?.product;
+        subRows.push(_subRow)
       });
-      subRows = [...subRows, ...assetsSubRows];
     }
     return subRows;
   };
@@ -387,25 +325,24 @@ const Assign = ({ managedPackagesData }) => {
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
               const productsMap = new Map();
-              selectedRecords
-                .filter((i) => i.type === MATERIAL_TYPE.product)
+              selectedRecords.filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
                 ?.forEach((e) => {
                   let diff = e?.qty - e?.assetQty;
                   if (diff > 0) {
-                    if (productsMap.has(e.productId)) {
-                      const existingProduct = productsMap.get(e.productId);
+                    if (productsMap.has(e._id)) {
+                      const existingProduct = productsMap.get(e._id);
                       existingProduct.qty += diff;
-                      if (e?.package?.optionValue) {
-                        existingProduct.packages = [...existingProduct.packages, e.package.optionValue];
+                      if (e?.parentId) {
+                        existingProduct.packages = [...existingProduct.packages, e.parentId];
                       }
                     } else {
                       const productDetail = {
-                        product: e.productId,
+                        product: e._id,
                         qty: diff,
                         productName: e?.detail,
-                        packages: e?.package?.optionValue ? [e?.package?.optionValue] : []
+                        packages: e?.parentId ? [e?.parentId] : []
                       };
-                      productsMap.set(e.productId, productDetail);
+                      productsMap.set(e._id, productDetail);
                     }
                   }
                 });
