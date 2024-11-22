@@ -1,7 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -20,7 +18,6 @@ const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCo
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchFields();
