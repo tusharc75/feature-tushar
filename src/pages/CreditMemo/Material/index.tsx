@@ -587,9 +587,32 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
     }
   };
 
+  const handleAddInvoiceLineItems = () => {
+    axiosInstance().put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const addButtonMenuItems = () => {
     return (
       <>
+        <MenuItem
+          color="primary"
+          onClick={() => {
+            handleAddInvoiceLineItems()
+          }}
+        >
+          {`Add Invoice Line Items`}
+        </MenuItem>
         {permissions?.product?.isRead && (
           <MenuItem
             color="primary"
@@ -600,7 +623,6 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
             {`Add Existing Products`}
           </MenuItem>
         )}
-
         {permissions?.packages?.isRead && (
           <MenuItem
             color="primary"
