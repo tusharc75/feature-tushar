@@ -4,7 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, sidebarResource, CustomDialogTransition } from 'src/constants/helpers';
+import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, sidebarResource, CustomDialogTransition, gridSize } from 'src/constants/helpers';
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
@@ -327,10 +327,10 @@ const StepFieldsDialog = ({
                           fieldData?.formsData?.map((form, index1) => {
                             return form?.name ? (
                               <div key={index1}>
-                                <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white', justifyContent: 'space-between' }}>
-                                  <div className='flex items-center'>
-                                    <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
-                                    <h5 className='text-[16px]'>{form?.name}</h5>
+                                <div className={'detail-box-new'}>
+                                  <div className={'detail-box-content-new'}>
+                                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
                                   </div>
                                   <IconButton
                                     style={{ padding: '0px', marginTop: '-5px' }}
@@ -344,7 +344,12 @@ const StepFieldsDialog = ({
                                 <Box marginY={2}>
                                   <Grid spacing={2} container>
                                     {form?.sectionFields?.map((field, index2) => (
-                                      <Grid key={index2} item xs={12} sm={6} md={6}>
+                                      <Grid key={index2} item
+                                        xs={12}
+                                        sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                        md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                        lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                        xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}>
                                         <FormTypes
                                           {...field}
                                           row={field.type === 'radio'}

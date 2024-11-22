@@ -1457,8 +1457,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
                 validationFields?.map((f) => f?.fieldName),
                 {
                   is: validation,
-                  then: dateValidation,
-                  otherwise: dateValidation
+                  // then: dateValidation,
+                  // otherwise: dateValidation
+                  then: string().required(`${input.fieldLabel} is required`).nullable(),
+                  otherwise: string().nullable()
                 }
               )
             : dateValidation
@@ -3669,8 +3671,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

@@ -6,7 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
@@ -22,6 +22,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
 
 const OPERATOR = [
   {
@@ -43,6 +45,10 @@ const OPERATOR = [
   {
     optionLabel: 'Greater than or equals',
     optionValue: 'greaterThanOrEquals'
+  },
+  {
+    optionLabel: 'Equal to Current Date',
+    optionValue: 'equalToCurrentDate'
   }
 ];
 
@@ -146,7 +152,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     const fieldsData = fields.data?.data;
     const assetFields = fieldsData
-      .filter((field) => ['number', 'decimal'].includes(field.fieldData.type))
+      .filter((field) => ['number', 'decimal'].includes(field.fieldData.type) || field.fieldData.fieldName === "recertDate")
       ?.map((ele) => {
         return {
           optionValue: ele.fieldData.fieldName,
@@ -251,6 +257,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
 
   return (
     <Fragment>
+      <MuiPickersUtilsProvider utils={MomentUtils}>
       <Dialog
         fullWidth
         maxWidth="md"
@@ -362,7 +369,28 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                           />
                                         </Box>
                                         <Box>
-                                          <TextField
+                                      {cnd.field==="recertDate" ? 
+                                         <KeyboardDatePicker
+                                         autoOk
+                                         fullWidth
+                                         size="small"
+                                         variant="inline"
+                                         inputVariant="outlined"
+                                         value={ values?.condition[i]?.value ? new Date(values?.condition[i]?.value) : null}
+                                         name="value"
+                                         label="Value"
+                                         onChange={(date: any) => {
+                                          setFieldValue(`condition.${i}.value`, date);
+                                         }}
+                                         error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
+                                         helperText={touched?.condition && errors[`condition.${i}.value`]}
+                                         format={dateFormat}
+                                         InputLabelProps={{
+                                           shrink: true
+                                         }}
+                                         margin="dense"
+                                       />
+                                         : <TextField
                                             margin="none"
                                             size="small"
                                             type="number"
@@ -377,6 +405,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                               setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
                                             }}
                                           />
+                                          }
                                         </Box>
                                         <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
                                           <HtmlTooltip title="Remove">
@@ -475,8 +504,10 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
           onOk={handleDelete}
         />
       )}
+      </MuiPickersUtilsProvider>
     </Fragment>
   );
 };
 
 export default ManageServiceConditional;
+

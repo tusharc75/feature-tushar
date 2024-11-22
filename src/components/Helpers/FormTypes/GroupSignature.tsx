@@ -69,32 +69,33 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched
         <div className="flex flex-col flex-wrap gap-2">
           {values[name]?.length
             ? values[name]?.map((value) => {
-                const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
-                return (
-                  <Box className="flex items-center justify-between">
-                    <Typography>{userName}</Typography>
-                    <Signature
-                      label={''}
-                      name={`signature`}
-                      touched={{}}
-                      errors={{}}
-                      values={value ?? {}}
-                      isTooltip={false}
-                      tooltipMessage={''}
-                      setFieldValue={(_, dataUrl: string) => {
-                        const updatedData = [...(values[name] ?? [])];
-                        updatedData.forEach((data) => {
-                          if (data.user === value.user) {
-                            data.signature = dataUrl;
-                          }
-                        });
-                        setFieldValue(name, updatedData);
-                      }}
-                      disable={user?.user?._id !== value.user}
-                    />
-                  </Box>
-                );
-              })
+              const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
+              return (
+                <Box className="flex items-center justify-between">
+                  <Typography>{userName}</Typography>
+                  <Signature
+                    label={''}
+                    name={`signature`}
+                    touched={{}}
+                    errors={{}}
+                    values={value ?? {}}
+                    isTooltip={false}
+                    required={false}
+                    tooltipMessage={''}
+                    setFieldValue={(_, dataUrl: string) => {
+                      const updatedData = [...(values[name] ?? [])];
+                      updatedData.forEach((data) => {
+                        if (data.user === value.user) {
+                          data.signature = dataUrl;
+                        }
+                      });
+                      setFieldValue(name, updatedData);
+                    }}
+                    disable={user?.user?._id !== value.user}
+                  />
+                </Box>
+              );
+            })
             : null}
         </div>
       </div>
