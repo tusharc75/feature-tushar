@@ -11,7 +11,7 @@ export const useGridMetaData = () => {
 
 export const getCurrentColumnSizes = (table: Table<any>) => {
   const newSizes: { [key: string]: number } = {};
-  table.getAllColumns().forEach((c) => {
+  table?.getAllColumns().forEach((c) => {
     const colDef = c.columnDef as TColType;
     const originalSize = colDef.width || 200;
     const newSize = c.getSize();

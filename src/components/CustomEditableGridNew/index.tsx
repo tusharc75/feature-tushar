@@ -179,6 +179,7 @@ const CustomEditableGrid = ({
           </IconWithPulse>
         )}
         <ArrangeView
+          table={null}
           columns={columns}
           hideSelection={true}
           renderedFrom={renderedFrom}
