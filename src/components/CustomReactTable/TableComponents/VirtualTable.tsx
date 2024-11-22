@@ -18,6 +18,7 @@ let virtualPaddingRight: number | undefined;
 export const VirtualTable = forwardRef(function (
   {
     columns,
+    sizes,
     state,
     setWholeRowsCellColor,
     table,
@@ -43,7 +44,7 @@ export const VirtualTable = forwardRef(function (
     excludedColumns,
     footerRowFound,
     stickyColumns
-  }: RnderTableProps & { columns: Column<any, unknown>[] },
+  }: RnderTableProps & { columns: Column<any, unknown>[]; sizes: number[] },
   ref: ForwardedRef<HTMLTableElement>
 ) {
   // console.count('virtual');
@@ -61,7 +62,7 @@ export const VirtualTable = forwardRef(function (
 
   const columnVirtualizer = useVirtualizer({
     count: columns?.length || 1,
-    estimateSize: (index) => columns[index]?.getSize(),
+    estimateSize: (index) => sizes[index] || 200,
     getScrollElement: () => parentRef.current,
     horizontal: true,
     overscan: 3,

@@ -63,6 +63,8 @@ const TableComponent = forwardRef(function (
     return stickyData;
   }, [expander, hideSelection, columns]);
 
+  const sizes = tableColumns?.map((c) => c.getSize()) || [];
+
   const tableRef = useRef<HTMLTableElement | null>(null);
 
   useImperativeHandle(
@@ -129,6 +131,7 @@ const TableComponent = forwardRef(function (
         <>
           <VirtualTable
             columns={tableColumns}
+            sizes={sizes}
             state={state}
             setWholeRowsCellColor={setWholeRowsCellColor}
             table={table}
