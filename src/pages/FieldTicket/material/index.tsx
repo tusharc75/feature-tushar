@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, isArray, isObject } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -412,7 +412,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       const material: any = [];
       if (isRental) {
         const currency = fieldTicketData?.currency?.toLowerCase();
-        rows?.forEach((d) => {
+        rows?.forEach((d: any) => {
           const element: any = {};
           element.materialId = d.materialId;
           element.type = type;
@@ -423,17 +423,33 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
-          if(d?.wellNumber){
-            element.wellNumber = [d?.wellNumber?.optionValue]|| [];
+          const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber')
+          if (wellNumberField && d?.wellNumber) {
+            if (wellNumberField?.type === 'multiSelect') {
+              if (isArray(d?.wellNumber)) {
+                element.wellNumber = d?.wellNumber?.map((e) => e.optionValue);
+              }
+              else if (isObject(d?.wellNumber)) {
+                element.wellNumber = [d?.wellNumber?.optionValue];
+              }
+            }
+            else {
+              if (isArray(d?.wellNumber)) {
+                element.wellNumber = d?.wellNumber[0]?.optionValue;
+              }
+              else if (isObject(d?.wellNumber)) {
+                element.wellNumber = d?.wellNumber?.optionValue;
+              }
+            }
           }
           element['tax_' + currency] = d['tax_' + currency] || 0;
           element['discount_' + currency] = d['discount_' + currency] || 0;
           element['price_' + currency] = d['price_' + currency] || 0;
           element.taxPercentage = d.taxPercentage;
-          if (d?.taxCode) {
+          element.discountPercentage = d.discountPercentage;
+          if (d?.taxCode && allFields?.find((e) => e?.fieldName === 'taxCode')) {
             element.taxCode = d?.taxCode?.optionValue;
           }
-          element.discountPercentage = d.discountPercentage;
           element['totalPrice_' + currency] = d['totalPrice_' + currency] || 0;
           element['finalPrice_' + currency] = d['finalPrice_' + currency] || 0;
           element.isRental = true;
