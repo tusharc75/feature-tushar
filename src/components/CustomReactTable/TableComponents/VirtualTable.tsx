@@ -2,7 +2,7 @@ import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortabl
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
 import MaUTable from '@material-ui/core/Table';
 import { Error } from '@material-ui/icons';
-import { flexRender } from '@tanstack/react-table';
+import { Column, flexRender } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
 import React, { ForwardedRef, forwardRef, Fragment, memo, useEffect, useMemo } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
@@ -10,12 +10,15 @@ import { getStickyPosition } from '../utils';
 import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 
 const MemoizedCellRenderer = memo(CellRenderer);
+const MemoizedHeaderRenderer = memo(DraggableHeader);
 
 let virtualPaddingLeft: number | undefined;
 let virtualPaddingRight: number | undefined;
 
 export const VirtualTable = forwardRef(function (
   {
+    columns,
+    sizes,
     state,
     setWholeRowsCellColor,
     table,
@@ -41,9 +44,10 @@ export const VirtualTable = forwardRef(function (
     excludedColumns,
     footerRowFound,
     stickyColumns
-  }: RnderTableProps,
+  }: RnderTableProps & { columns: Column<any, unknown>[]; sizes: number[] },
   ref: ForwardedRef<HTMLTableElement>
 ) {
+  // console.count('virtual');
   // virtualization
   const parentRef = React.useRef();
 
@@ -53,20 +57,15 @@ export const VirtualTable = forwardRef(function (
     count: isFooterVisible ? rows.length + 2 : rows.length + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
-    overscan: 10
+    overscan: 2
   });
-  const columns = table.getVisibleFlatColumns();
-
-  const visibleColumns = useMemo(() => {
-    return columns;
-  }, [columns]);
 
   const columnVirtualizer = useVirtualizer({
-    count: visibleColumns?.length || 1,
-    estimateSize: (index) => columns[index]?.getSize(),
+    count: columns?.length || 1,
+    estimateSize: (index) => sizes[index] || 200,
     getScrollElement: () => parentRef.current,
     horizontal: true,
-    overscan: 5,
+    overscan: 3,
     rangeExtractor: React.useCallback(
       (range: Range, ...rest) => {
         const next = new Set([...defaultRangeExtractor(range), ...stickyColumns.stickyIndexes]);
@@ -76,13 +75,13 @@ export const VirtualTable = forwardRef(function (
     )
   });
 
-  useEffect(() => {
-    columnVirtualizer.measure();
-  }, [visibleColumns?.length]);
+  // useEffect(() => {
+  //   columnVirtualizer.measure();
+  // }, [columns.length]);
 
-  useEffect(() => {
-    rowVirtualizer.measure();
-  }, [rows.length]);
+  // useEffect(() => {
+  //   rowVirtualizer.measure();
+  // }, [rows.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const virtualrows = rowVirtualizer.getVirtualItems();
@@ -151,50 +150,17 @@ export const VirtualTable = forwardRef(function (
           className="tableWrap sticky table"
           style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: `max(${totalColumnSize}px, 100%)` }}
         >
-          <TableHead
-            style={{
-              overflowY: 'auto',
-              overflowX: 'hidden'
-            }}
-            className="header sticky top-0 z-[11] bg-[var(--dark-primary,_white)]"
-          >
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
-                <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
-                  {virtualPaddingLeft && left.length === 0 ? (
-                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
-                  ) : null}
-                  {virtualColumns.map((vc) => {
-                    const header = headerGroup.headers[vc?.index];
-                    if (!header) return null;
-                    return (
-                      <Fragment key={vc.index}>
-                        {right.length && header.id === right[0] && virtualPaddingRight ? (
-                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-                        ) : null}
-                        <DraggableHeader
-                          virtualization={virtualization}
-                          table={table}
-                          customFilters={customFilters}
-                          dispatch={dispatch}
-                          isClientSideGrid={isClientSideGrid}
-                          header={header}
-                          key={header.id}
-                          resource={resource}
-                        />
-                        {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
-                          <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
-                        ) : null}
-                      </Fragment>
-                    );
-                  })}
-                  {virtualPaddingRight && right.length === 0 ? (
-                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
-                  ) : null}
-                </SortableContext>
-              </TableRow>
-            ))}
-          </TableHead>
+          <VirtualTableHead
+            table={table}
+            virtualColumns={virtualColumns}
+            right={right}
+            left={left}
+            virtualization={virtualization}
+            customFilters={customFilters}
+            dispatch={dispatch}
+            isClientSideGrid={isClientSideGrid}
+            resource={resource}
+          />
           <TableBody
             style={{
               overflow: 'hidden'
@@ -263,6 +229,53 @@ export const VirtualTable = forwardRef(function (
     </>
   );
 });
+
+const VirtualTableHead = ({ table, virtualColumns, right, left, virtualization, customFilters, dispatch, isClientSideGrid, resource }) => {
+  return (
+    <TableHead
+      style={{
+        overflowY: 'auto',
+        overflowX: 'hidden'
+      }}
+      className="header sticky top-0 z-[11] bg-[var(--dark-primary,_white)]"
+    >
+      {table.getHeaderGroups().map((headerGroup) => (
+        <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
+          <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
+            {virtualPaddingLeft && left.length === 0 ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+            {virtualColumns.map((vc) => {
+              const header = headerGroup.headers[vc?.index];
+              if (!header) return null;
+              return (
+                <Fragment key={vc.index}>
+                  {right.length && header.id === right[0] && virtualPaddingRight ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                  ) : null}
+                  <MemoizedHeaderRenderer
+                    virtualization={virtualization}
+                    table={table}
+                    customFilters={customFilters}
+                    dispatch={dispatch}
+                    isClientSideGrid={isClientSideGrid}
+                    header={header}
+                    key={header.id}
+                    resource={resource}
+                  />
+                  {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
+                    <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                  ) : null}
+                </Fragment>
+              );
+            })}
+            {virtualPaddingRight && right.length === 0 ? (
+              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+            ) : null}
+          </SortableContext>
+        </TableRow>
+      ))}
+    </TableHead>
+  );
+};
 
 const VirtualTableBody = ({
   onRowClick,

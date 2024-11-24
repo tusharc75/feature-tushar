@@ -365,10 +365,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
 
   return (
     <TableCell
-      {...{
-        key: header.id,
-        colSpan: header.colSpan
-      }}
+      key={header.id}
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
       className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
