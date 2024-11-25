@@ -168,6 +168,10 @@ export const PreviewDialog = ({
                     resource={resource}
                     type={'Excel'}
                     defaultColumns={defaultColumns}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    orderBy={orderBy}
+                    setOrderBy={setOrderBy}
                   />
                 </Box>
               )}

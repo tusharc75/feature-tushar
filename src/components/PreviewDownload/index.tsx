@@ -86,10 +86,10 @@ function PreviewDownload({
         } else {
           api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
         }
-        if (sortBy && orderBy) {
-          api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
-        }
       }
+    }
+    if (sortBy && orderBy) {
+      api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
     }
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
@@ -252,7 +252,7 @@ function PreviewDownload({
                 handleView('PDF', 'base64', 'Detail', visibleColumnsPdf, sortBy, orderBy);
               }
               if (isExcelDownload) {
-                handleView('Excel', 'base64', '', visibleColumnsExcel);
+                handleView('Excel', 'base64', '', visibleColumnsExcel, sortBy, orderBy);
               }
               setSendEmail(true);
             } else {
