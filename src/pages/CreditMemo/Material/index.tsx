@@ -21,8 +21,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition } from '../../../constants/helpers';
-import MaterialDialog from './MaterialDialog';
-import AdditionalCostDialog from './AdditionalCostDialog';
+import MaterialDialog from '../../Invoice/Material/MaterialDialog';
+import AdditionalCostDialog from '../..//Invoice/Material/AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -587,9 +587,32 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
     }
   };
 
+  const handleAddInvoiceLineItems = () => {
+    axiosInstance().put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const addButtonMenuItems = () => {
     return (
       <>
+        <MenuItem
+          color="primary"
+          onClick={() => {
+            handleAddInvoiceLineItems()
+          }}
+        >
+          {`Add Invoice Line Items`}
+        </MenuItem>
         {permissions?.product?.isRead && (
           <MenuItem
             color="primary"
@@ -600,7 +623,6 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
             {`Add Existing Products`}
           </MenuItem>
         )}
-
         {permissions?.packages?.isRead && (
           <MenuItem
             color="primary"
@@ -678,24 +700,22 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
         hasXpadding
       />
       {columns ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={'calc(100vh - 150px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              expander={true}
-              refreshGrid={fetchData}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              onSaveEdit={onSaveInlineEdit}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-            />
-          </Box>
-        </>
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            expander={true}
+            refreshGrid={fetchData}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -721,7 +741,7 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
           rowData={materialEdit.data}
           material={material}
           selectedProducts={selectedRecords}
-          creditMemoData={creditMemoData}
+          invoiceData={creditMemoData}
           loadingEdit={isUpdating}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
@@ -843,6 +863,7 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
           costData={addCostDialog.data}
           loadingEdit={isUpdating}
           showSaveAndNext={addCostDialog.showSaveAndNext}
+          invoiceData={creditMemoData}
         />
       )}
     </Fragment>
