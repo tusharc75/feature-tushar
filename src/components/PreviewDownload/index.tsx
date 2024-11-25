@@ -170,26 +170,23 @@ function PreviewDownload({
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
         <Box display="flex" flexWrap={'wrap'} gridGap={8}>
-          {
-            <ThemeButton
-              size="small"
-              id={'details-page-preview-button'}
-              tooltip="Preview"
-              iconForMobile={<VisibilityIcon />}
-              startIcon={<VisibilityIcon />}
-              disabled={btnLoading === 'Preview'}
-              onClick={(e) => {
-                if (hideDialog) {
-                  handleView('PDF', 'Preview', 'Regular', []);
-                } else {
-                  setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
-                }
-              }}
-            >
-              {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-            </ThemeButton>
-          }
-
+          <ThemeButton
+            size="small"
+            id={'details-page-preview-button'}
+            tooltip="Preview"
+            iconForMobile={<VisibilityIcon />}
+            startIcon={<VisibilityIcon />}
+            disabled={btnLoading === 'Preview'}
+            onClick={(e) => {
+              if (hideDialog) {
+                handleView('PDF', 'Preview', 'Regular', []);
+              } else {
+                setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
+              }
+            }}
+          >
+            {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+          </ThemeButton>
           <ThemeButton
             iconForMobile={<DownloadIcon />}
             id={'details-page-download-button'}
@@ -250,9 +247,9 @@ function PreviewDownload({
           handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy = '', orderBy = '') => {
             if (showColumnsDialog.operation === 'Send Email') {
               setLoadingType('email');
-              handleView('PDF', 'base64', 'Regular', visibleColumnsPdf);
+              handleView('PDF', 'base64', 'Regular', visibleColumnsPdf, sortBy, orderBy);
               if (!hideDetailButton) {
-                handleView('PDF', 'base64', 'Detail', visibleColumnsPdf);
+                handleView('PDF', 'base64', 'Detail', visibleColumnsPdf, sortBy, orderBy);
               }
               if (isExcelDownload) {
                 handleView('Excel', 'base64', '', visibleColumnsExcel);
