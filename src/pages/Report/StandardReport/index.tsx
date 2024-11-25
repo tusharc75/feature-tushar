@@ -604,7 +604,7 @@ const Report = () => {
           } else {
             deepFilter.push({
               field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
+              term: selectedData[key].value?.map((d: any) => d?.optionValue || d)
             });
           }
         });
