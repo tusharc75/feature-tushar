@@ -38,8 +38,6 @@ export const NormalTable = forwardRef(function (
   }: RnderTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  // virtualization
-
   return (
     <>
       <div

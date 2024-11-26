@@ -21,142 +21,13 @@ export const useCreateColumns = ({
   const { dataRows: allRows } = state;
   const isMobile = useMediaQuery('(max-width:768px)');
 
-  const fetchChildAttachmentWrapper = async (row) => {
-    if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-    dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
-    try {
-      if (row?.original[childrenProperty]?.length > 0 || row[childrenProperty]?.length > 0) {
-        row?.toggleExpanded();
-        dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
-        return;
-      }
-
-      let subRows = await fetchChildAttachment(row.original._id);
-      if (!subRows || subRows?.length === 0) {
-        row.original.canExpand = false;
-        row.canExpand = false;
-        return;
-      }
-      insertChildRowIntoTable({ existingRows: allRows, subRowsToInsert: subRows, parentId: row.original._id, dispatch });
-
-      setTimeout(() => {
-        row?.toggleExpanded();
-      }, 50);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
-    }
-  };
-
-  const expanderColumn = {
-    id: 'expander',
-    enableResizing: false,
-    header: ({ table }) =>
-      typeof fetchChildAttachment === 'function' ? null : (
-        <IconButton
-          size="small"
-          {...{
-            onClick: table.getToggleAllRowsExpandedHandler()
-          }}
-        >
-          {table.getIsAllRowsExpanded() ? (
-            <FaAngleDown className="cursor-pointer text-[var(--primary-text)]" />
-          ) : (
-            <FaAngleRight className="cursor-pointer text-[var(--primary-text)]" />
-          )}
-        </IconButton>
-      ),
-    sticky: 'left',
-    size: 70,
-    maxSize: 70,
-    disableFilters: true,
-    disableSortBy: true,
-    filterFn: null,
-    sortingFn: null,
-    canDrag: false,
-    cell: ({ row }) => (
-      <div
-        style={{
-          marginLeft: isMobile ? 0 : `${row.depth * 15}px`
-        }}
-      >
-        {row.original.canExpand === true || row.getCanExpand() ? (
-          <IconButton
-            size="small"
-            style={{ fontSize: 13 }}
-            onClick={async () => {
-              row.getToggleExpandedHandler()();
-              fetchChildAttachmentWrapper(row);
-              toggleExpandChange();
-            }}
-          >
-            {row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
-          </IconButton>
-        ) : null}
-      </div>
-    )
-  };
-
-  const selectionColumn = useMemo(
-    () => ({
-      id: 'selection',
-      enableResizing: false,
-      size: 50,
-      minSize: 50,
-      maxSize: 50,
-      minWidth: 50,
-      width: 50,
-      sticky: 'left',
-      maxWidth: 50,
-      disableFilters: true,
-      disableSortBy: true,
-      filterFn: null,
-      sortingFn: null,
-      canDrag: false,
-      header: ({ table }) => (
-        <IndeterminateCheckbox
-          {...{
-            checked: table.getIsAllRowsSelected() ? true : false,
-            indeterminate: table.getIsSomeRowsSelected(),
-            onChange: table.getToggleAllRowsSelectedHandler(),
-            id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
-          }}
-          className="mx-auto text-center [&_svg]:[font-size:20px] "
-        />
-      ),
-      cell: ({ row }) => (
-        <div
-          className="mx-auto justify-center text-center"
-          key={`${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`}
-        >
-          {row.original.hideSelection ? (
-            <></>
-          ) : (
-            <IndeterminateCheckbox
-              {...{
-                checked: row.getIsSelected() ? true : false,
-                value: row.getIsSelected() ? true : false,
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
-                id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
-              }}
-              className="[&_svg]:[font-size:20px_!important]"
-            />
-          )}
-        </div>
-      )
-    }),
-    []
-  );
-
   const newColumns: TColType[] = useMemo(() => {
     const updatedColumn = [];
     if (expander) {
-      updatedColumn.push(expanderColumn);
+      updatedColumn.push(expanderColumn({ fetchChildAttachment, isMobile, fetchChildAttachmentWrapper, toggleExpandChange, allRows, dispatch }));
     }
     if (!hideSelection) {
-      updatedColumn.push(selectionColumn);
+      updatedColumn.push(selectionColumn({ resource, renderedFrom }));
     }
 
     columns
@@ -223,7 +94,130 @@ export const useCreateColumns = ({
     }
 
     return updatedColumn;
-  }, [columns, expander, selectionColumn, hideSelection]);
+  }, [columns, expander, hideSelection]);
 
   return newColumns;
+};
+
+const selectionColumn = ({ resource, renderedFrom }) => ({
+  id: 'selection',
+  enableResizing: false,
+  size: 50,
+  minSize: 50,
+  maxSize: 50,
+  minWidth: 50,
+  width: 50,
+  sticky: 'left',
+  maxWidth: 50,
+  disableFilters: true,
+  disableSortBy: true,
+  filterFn: null,
+  sortingFn: null,
+  canDrag: false,
+  header: ({ table }) => (
+    <IndeterminateCheckbox
+      {...{
+        checked: table.getIsAllRowsSelected() ? true : false,
+        indeterminate: table.getIsSomeRowsSelected(),
+        onChange: table.getToggleAllRowsSelectedHandler(),
+        id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
+      }}
+      className="mx-auto text-center [&_svg]:[font-size:20px] "
+    />
+  ),
+  cell: ({ row }) => (
+    <div className="mx-auto justify-center text-center" key={`${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`}>
+      {row.original.hideSelection ? (
+        <></>
+      ) : (
+        <IndeterminateCheckbox
+          {...{
+            checked: row.getIsSelected() ? true : false,
+            value: row.getIsSelected() ? true : false,
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+            id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
+          }}
+          className="[&_svg]:[font-size:20px_!important]"
+        />
+      )}
+    </div>
+  )
+});
+
+const expanderColumn = ({ fetchChildAttachment, isMobile, fetchChildAttachmentWrapper, toggleExpandChange, dispatch, allRows }) => ({
+  id: 'expander',
+  enableResizing: false,
+  header: ({ table }) =>
+    typeof fetchChildAttachment === 'function' ? null : (
+      <IconButton
+        size="small"
+        {...{
+          onClick: table.getToggleAllRowsExpandedHandler()
+        }}
+      >
+        {table.getIsAllRowsExpanded() ? (
+          <FaAngleDown className="cursor-pointer text-[var(--primary-text)]" />
+        ) : (
+          <FaAngleRight className="cursor-pointer text-[var(--primary-text)]" />
+        )}
+      </IconButton>
+    ),
+  sticky: 'left',
+  size: 70,
+  maxSize: 70,
+  disableFilters: true,
+  disableSortBy: true,
+  filterFn: null,
+  sortingFn: null,
+  canDrag: false,
+  cell: ({ row }) => (
+    <div
+      style={{
+        marginLeft: isMobile ? 0 : `${row.depth * 15}px`
+      }}
+    >
+      {row.original.canExpand === true || row.getCanExpand() ? (
+        <IconButton
+          size="small"
+          style={{ fontSize: 13 }}
+          onClick={async () => {
+            row.getToggleExpandedHandler()();
+            fetchChildAttachmentWrapper({ row, fetchChildAttachment, dispatch, allRows });
+            toggleExpandChange();
+          }}
+        >
+          {row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+        </IconButton>
+      ) : null}
+    </div>
+  )
+});
+
+const fetchChildAttachmentWrapper = async ({ row, fetchChildAttachment, dispatch, allRows }) => {
+  if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+  dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
+  try {
+    if (row?.original[childrenProperty]?.length > 0 || row[childrenProperty]?.length > 0) {
+      row?.toggleExpanded();
+      dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
+      return;
+    }
+
+    let subRows = await fetchChildAttachment(row.original._id);
+    if (!subRows || subRows?.length === 0) {
+      row.original.canExpand = false;
+      row.canExpand = false;
+      return;
+    }
+    insertChildRowIntoTable({ existingRows: allRows, subRowsToInsert: subRows, parentId: row.original._id, dispatch });
+
+    setTimeout(() => {
+      row?.toggleExpanded();
+    }, 50);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
+  }
 };

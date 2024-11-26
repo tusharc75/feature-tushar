@@ -3,8 +3,9 @@ import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
-import { getStickyColumnNames } from '../utils';
+import { getStickyColumnNames, getStickyColumnNamesFromTableColumns } from '../utils';
 import { TColType } from './TableHelperComponents';
+import VirtualTableWithReactVirtual from 'src/components/CustomReactTable/TableComponents/VirtualTableWithReactVirtual';
 
 type StickyColumns = ReturnType<typeof getStickyColumnNames>;
 
@@ -58,11 +59,18 @@ const TableComponent = forwardRef(function (
   const tableColumns = table.getVisibleFlatColumns();
   const columns = tableColumns?.map((d) => d?.columnDef);
   const sizes = tableColumns?.map((c) => c.getSize()) || [];
+  const headers = table.getHeaderGroups()[0].headers;
+  const footers = table.getFooterGroups()[0].headers;
 
   const stickyColumns = useMemo(() => {
     const stickyData = getStickyColumnNames({ allColumn: columns as TColType[], expander, hideSelection });
     return stickyData;
   }, [expander, hideSelection, columns]);
+
+  const tableData = useMemo(() => {
+    const newCol = getStickyColumnNamesFromTableColumns({ allColumn: tableColumns, expander, hideSelection, sizes: sizes, headers, footers });
+    return newCol;
+  }, [expander, hideSelection, sizes, tableColumns, headers, footers]);
 
   const tableRef = useRef<HTMLTableElement | null>(null);
 
@@ -128,7 +136,35 @@ const TableComponent = forwardRef(function (
         </>
       ) : (
         <>
-          <VirtualTable
+          <VirtualTableWithReactVirtual
+            state={state}
+            setWholeRowsCellColor={setWholeRowsCellColor}
+            table={table}
+            dispatch={dispatch}
+            setCellValue={setCellValue}
+            submitInput={submitInput}
+            cellValue={cellValue}
+            resetField={resetField}
+            isClientSideGrid={isClientSideGrid}
+            loading={loading}
+            error={error}
+            height={height}
+            exportTableView={exportTableView}
+            virtualization={virtualization}
+            onRowClick={onRowClick}
+            resource={resource}
+            pagination={pagination}
+            isFooterVisible={isFooterVisible}
+            rows={rows}
+            initialDataLoaded={initialDataLoaded}
+            customFilters={customFilters}
+            tableRef={tableRef}
+            excludedColumns={excludedColumns}
+            footerRowFound={footerRowFound}
+            stickyColumns={stickyColumns}
+            tableData={tableData}
+          />
+          {/* <VirtualTable
             columns={tableColumns}
             sizes={sizes}
             state={state}
@@ -156,7 +192,7 @@ const TableComponent = forwardRef(function (
             excludedColumns={excludedColumns}
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
-          />
+          /> */}
         </>
       )}
     </>
