@@ -229,7 +229,14 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     let estimateStartDate = moment(values?.estimateStartDate);
     let estimateEndDate = moment(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
-      errors['estimateEndDate'] = 'Please enter valid end date';
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
+    let actualStartDate = moment(values?.actualStartDate);
+    let actualEndDate = moment(values?.actualEndDate);
+    if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
+      if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
+        errors['actualEndDate'] = 'Please enter valid actual end date';
+      }
     }
     return errors;
   }
