@@ -37,7 +37,8 @@ const ManageRentalManagementDialog = ({
   onSuccess,
   open,
   referenceData = null,
-  isDisableCustomerAccount = false
+  isDisableCustomerAccount = false,
+  isAutomated = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -147,6 +148,10 @@ const ManageRentalManagementDialog = ({
 
   const handleSubmit = (values) => {
     setLoading(true);
+    if(isAutomated){
+      onSuccess(values);
+      return;
+    }
     if (rentalManagementId && isClone === false) {
       values._id = rentalManagementId;
       axiosInstance()
