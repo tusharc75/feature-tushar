@@ -30,20 +30,19 @@ const ManageWorkAutomation = () => {
   const handleSave = () => {
     setLoading(true);
     const values = {
-      ...rentalManagementData,
       assets: selectedAssets || [],
       material: selectedServices || [],
       technicians: selectedTechnicians || []
     };
     axiosInstance()
-      .post(`${rentalManagement.api}/workAutomation`, values)
+      .post(`${rentalManagement.api}/workAutomation/${rentalManagementData?._id}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
-        history.push(`${routes.rentalManagementDetail?.path}/${data?.data?._id}`);
+        history.push(`${routes.rentalManagementDetail?.path}/${rentalManagementData?._id}`);
         setLoading(false);
       })
       .catch((error) => {
@@ -64,24 +63,9 @@ const ManageWorkAutomation = () => {
             />
           </Box>
         </Box>
-        <Box className={`detail-container-v1 relative`}>
-          <div className="grid grid-cols-[4fr_1fr] items-start gap-4">
-            <div className="mt-2 flex w-full flex-col gap-6 overflow-auto">
-              <div>
-                <AddSerializedAsset rentalManagementData={rentalManagementData} setSelectedAssets={setSelectedAssets} />
-              </div>
-              <div>
-                <AddServices rentalManagementData={rentalManagementData} setSelectedServices={setSelectedServices} selectedAssets={selectedAssets} />
-              </div>
-              <div>
-                <AddTechnicians
-                  rentalManagementData={rentalManagementData}
-                  selectedServices={selectedServices}
-                  setSelectedTechnicians={setSelectedTechnicians}
-                />
-              </div>
-            </div>
-            <div className="mt-2 flex justify-end">
+        <Box className={`detail-container-v1 h-full flex flex-col justify-between`}>
+          <div className="mt-2 flex w-full flex-col gap-6">
+            <div>
               <Button
                 variant="contained"
                 color="primary"
@@ -89,11 +73,24 @@ const ManageWorkAutomation = () => {
                   setOpenRentalJobDialog(true);
                 }}
               >
-                {`Add ${routes.rentalManagement.title}`}
+                {`Add ${routes.rentalManagement.title} Data`}
               </Button>
             </div>
+            <div>
+              <AddSerializedAsset rentalManagementData={rentalManagementData} setSelectedAssets={setSelectedAssets} />
+            </div>
+            <div>
+              <AddServices rentalManagementData={rentalManagementData} setSelectedServices={setSelectedServices} selectedAssets={selectedAssets} />
+            </div>
+            <div>
+              <AddTechnicians
+                rentalManagementData={rentalManagementData}
+                selectedServices={selectedServices}
+                setSelectedTechnicians={setSelectedTechnicians}
+              />
+            </div>
           </div>
-          <div className="absolute bottom-5 right-5 flex gap-2">
+          <div className="flex gap-2 justify-end mt-3">
             <CustomButton
               variant="contained"
               color="primary"
@@ -169,7 +166,7 @@ const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, isExpande
             <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
               <RenderTable
                 resource={sidebarResource.serializedAsset}
-                warehouse={rentalManagementData?.warehouse?.optionValue}
+                warehouse={rentalManagementData?.warehouse}
                 handleAdd={handleAdd}
               />
             </div>
@@ -289,25 +286,29 @@ const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selected
   };
   const handleAdd = async (rows) => {
     const technician: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.technician = d?._id;
-      element.uniqueId = '';
-      element.materialId = d?.competenciesId;
-      element.type = 'competency';
-      element.competence = d?.competenciesId;
-      element.service = null;
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
-      element.status = 'Assigned';
-      element.warehouse = rentalManagementData?.warehouse;
-      element.startDate = rentalManagementData?.estimateStartDate || new Date();
-      element.endDate = rentalManagementData?.estimateEndDate || new Date();
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.duration = 1;
-      if (calValues && calValues['duration']) {
-        element.duration = calValues['duration'];
+    selectedServices?.map((s, idx) => {
+      const d = rows[idx];
+      if (d) {
+        const element: any = {};
+        element.technician = d?._id;
+        // element.uniqueId = '';
+        element.materialId = d?.competenciesId;
+        element.type = 'competency';
+        element.competence = d?.competenciesId;
+        element.service = s?.materialId;
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
+        element.status = 'Assigned';
+        element.rentalJob = rentalManagementData?._id;
+        element.warehouse = rentalManagementData?.warehouse;
+        element.startDate = rentalManagementData?.estimateStartDate || new Date();
+        element.endDate = rentalManagementData?.estimateEndDate || new Date();
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        element.duration = 1;
+        if (calValues && calValues['duration']) {
+          element.duration = calValues['duration'];
+        }
+        technician.push(element);
       }
-      technician.push(element);
     });
 
     const priceData = (await calculatePrice(rentalManagementData, technician)) || [];
@@ -458,11 +459,6 @@ const RenderTable = ({ handleAdd, resource, warehouse }) => {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button disabled={!selectedRecords.length} variant="contained" size="small" color="primary" onClick={() => handleAdd(selectedRecords)}>
-          Save
-        </Button>
-      </div>
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -478,6 +474,11 @@ const RenderTable = ({ handleAdd, resource, warehouse }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+      <div className="mt-3 flex justify-end">
+        <Button disabled={!selectedRecords.length} variant="contained" size="small" color="primary" onClick={() => handleAdd(selectedRecords)}>
+          Save
+        </Button>
+      </div>
     </>
   );
 };

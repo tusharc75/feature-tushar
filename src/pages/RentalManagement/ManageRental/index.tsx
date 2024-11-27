@@ -148,10 +148,7 @@ const ManageRentalManagementDialog = ({
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if(isAutomated){
-      onSuccess(values);
-      return;
-    }
+
     if (rentalManagementId && isClone === false) {
       values._id = rentalManagementId;
       axiosInstance()
@@ -178,7 +175,7 @@ const ManageRentalManagementDialog = ({
             type: 'success',
             message: message
           });
-          if (referenceData) {
+          if (referenceData || isAutomated) {
             onSuccess(data);
           } else {
             history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
