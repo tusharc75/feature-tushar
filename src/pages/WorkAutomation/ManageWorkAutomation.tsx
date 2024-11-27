@@ -46,6 +46,7 @@ const ManageWorkAutomation = () => {
         setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
