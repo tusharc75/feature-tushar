@@ -16,6 +16,8 @@ import { displayDateTime, fieldTicket, prepareDataForGrid } from 'src/constants/
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
@@ -25,6 +27,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
 
   const {
     state: { user }
@@ -47,7 +50,23 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+        Cell: ({ row }) => (
+          <div className="d-flex align-items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+            <HtmlTooltip title={'View Logs'}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setViewStartStopLog({ open: true, _id: row?.original?._id });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </div>
+        )
       },
       {
         accessor: 'technicianName',
@@ -219,6 +238,22 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
+  const handleUpdateStartEndDate = (type) => {
+    axiosInstance()
+      .put(`${fieldTicket.api}/technician/start-end-date`, { type, _id: selectedRecords?.map((r) => r?._id), referenceId: fieldTicketData?._id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -238,6 +273,22 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             Delete
           </MenuItem>
         </HtmlTooltip>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => r?.endDate) ? false : true}
+          onClick={() => {
+            handleUpdateStartEndDate('start');
+          }}
+        >
+          Start
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
+          onClick={() => {
+            handleUpdateStartEndDate('stop');
+          }}
+        >
+          Stop
+        </MenuItem>
       </>
     );
   };
@@ -300,6 +351,16 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+
+      {viewStartStopLog?.open && (
+        <StartStopLogsDialog
+          onClose={() => {
+            setViewStartStopLog({ open: false, _id: null });
+          }}
+          referenceId={fieldTicketData?._id}
+          _id={viewStartStopLog?._id}
         />
       )}
     </>
