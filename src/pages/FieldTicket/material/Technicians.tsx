@@ -12,7 +12,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { displayDate, fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import { displayDateTime, fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -96,7 +96,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         disableFilters: true,
         disableSortBy: true,
         width: 250,
-        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDateTime(row.original?.startDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'endDate',
@@ -104,7 +104,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         disableFilters: true,
         disableSortBy: true,
         width: 250,
-        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDateTime(row.original?.endDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'action',
