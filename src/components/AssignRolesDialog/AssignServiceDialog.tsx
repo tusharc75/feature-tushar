@@ -141,6 +141,9 @@ const AssignServiceDialog = ({
       if (isOffline) {
         data = await findOne(objectStore.resourceData, sidebarResource.serviceMaster);
         data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        if (showFilteredRecordsOnly) {
+          data = data?.filter((d: any) => selectedRecords?.find((s) => s._id === d._id));
+        }
         count = data?.length;
       } else {
         const queryString = getQueryString();
