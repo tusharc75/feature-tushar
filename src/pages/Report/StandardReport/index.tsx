@@ -250,14 +250,14 @@ const Report = () => {
   const ProductRenderer = (row) => {
     return (
       <div>
-        {row?.original?.productName ? (
+        {row?.original?.productName || row?.original?.product ? (
           <Link
             className="link"
-            title={row?.original?.productName}
+            title={row?.original?.productName || row?.original?.product}
             to={`${routes.productDetail.path}/${row?.original?.materialId || row?.original?.productId || row?.original?._id}`}
             target="_blank"
           >
-            {row?.original?.productName}
+            {row?.original?.productName || row?.original?.product}
           </Link>
         ) : (
           <NoDataCell />
