@@ -10,7 +10,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, minDate }) {
-  const [initialValues, setInitialValues] = useState({ date: new Date() });
+  const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
 
   useEffect(() => {
     if (minDate) {
@@ -18,12 +18,12 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
       const currentTime = moment();
 
       date = date.set('hour', currentTime.hour()).set('minute', currentTime.minute());
-      setInitialValues({ date: date.toDate() });
+      setInitialValues({ startDate: date.toDate(), endDate: date.toDate() });
     }
   }, [minDate]);
 
   const onSubmit = (values) => {
-    handleSubmit(values?.date);
+    handleSubmit(values);
   };
 
   return (
@@ -47,29 +47,51 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
       >
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
-            <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : 'End'} Date`} onClose={onClose} />
+            <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
             <CustomDialogContent>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Box p={2}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12}>
-                      <KeyboardDateTimePicker
-                        inputVariant="outlined"
-                        variant="inline"
-                        fullWidth
-                        size="small"
-                        margin="none"
-                        autoOk
-                        format={dateFormatForInputControl + ' HH:mm'}
-                        minDate={minDate}
-                        label={`${type === 'start' ? 'Start' : 'End'} Date`}
-                        views={['year', 'month', 'date']}
-                        value={values.date}
-                        onChange={(date) => {
-                          setFieldValue('date', date);
-                        }}
-                      />
-                    </Grid>
+                    {type !== 'stop' && (
+                      <Grid item xs={12} sm={12}>
+                        <KeyboardDateTimePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          margin="none"
+                          autoOk
+                          format={dateFormatForInputControl + ' HH:mm'}
+                          {...(minDate ? { minDate: minDate } : {})}
+                          label={`Start Date`}
+                          views={['year', 'month', 'date']}
+                          value={values.startDate}
+                          onChange={(date) => {
+                            setFieldValue('startDate', date);
+                          }}
+                        />
+                      </Grid>
+                    )}
+                    {(type === 'startStop' || type === 'stop') && (
+                      <Grid item xs={12} sm={12}>
+                        <KeyboardDateTimePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          margin="none"
+                          autoOk
+                          format={dateFormatForInputControl + ' HH:mm'}
+                          minDate={values.startDate}
+                          label={`'End' Date`}
+                          views={['year', 'month', 'date']}
+                          value={values.endDate}
+                          onChange={(date) => {
+                            setFieldValue('endDate', date);
+                          }}
+                        />
+                      </Grid>
+                    )}
                   </Grid>
                 </Box>
               </MuiPickersUtilsProvider>
