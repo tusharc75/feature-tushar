@@ -262,10 +262,7 @@ export const isSectionVisible = (section, fieldsData, values, fromDetailsPage = 
   return true;
 };
 
-export const isFieldVisible = (fieldData, fields, values, selectedEntity) => {
-  if (fieldData?.entity && fieldData?.entity?.length > 0 && !fieldData?.entity?.includes(selectedEntity)) {
-    return false;
-  }
+export const isFieldVisible = (fieldData, fields, values) => {
   if (fieldData?.visibilityCondition?.length > 0) {
     let visible = false;
     let show = true;
@@ -381,7 +378,7 @@ const FormTypes = (props) => {
   const inputNumberRef = useRef(null);
 
   const {
-    state: { user, selectedEntity }
+    state: { user }
   }: any = useData();
 
   useEffect(() => {
@@ -881,7 +878,7 @@ const FormTypes = (props) => {
     return isArray(label) ? label?.map((e) => e?.optionLabel)?.toString() : label?.optionLabel || label;
   };
 
-  return fieldData?.hiddenField ? null : !fieldData || isFieldVisible(fieldData, fields, values, selectedEntity) ? (
+  return fieldData?.hiddenField ? null : !fieldData || isFieldVisible(fieldData, fields, values) ? (
     type === 'singleLine' || (type === 'lookUpDisplay' && fromFilter) ? (
       <InfoLabel
         info={tooltipMessage}
