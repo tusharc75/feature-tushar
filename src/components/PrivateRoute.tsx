@@ -75,8 +75,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
       setError(true);
     }
   };
-  console.log({...rest});
-  console.log(access);
   return (
     <Route
       {...rest}
