@@ -270,9 +270,7 @@ import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
-
-import Docs from './pages/Docs';
-
+import UserManual from './pages/UserManual';
 import WorkAutomation from 'src/pages/WorkAutomation';
 import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
 
@@ -346,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -548,8 +546,8 @@ function App() {
             <PrivateRoute exact path="/user">
               <User />
             </PrivateRoute>
-            <PrivateRoute exact path="/docs" docs = {true}> 
-              <Docs/>
+            <PrivateRoute exact path="/user-manual" userManual={true}>
+              <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />
