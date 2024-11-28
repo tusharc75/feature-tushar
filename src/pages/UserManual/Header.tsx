@@ -19,7 +19,7 @@ const HeaderDocs: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <MenuIcon style={{ color: 'black' }} />
         </IconButton>
         <Typography variant="h6" style={{ color: '#389996' }}>
-          Equipt User Manual 
+          Equipt User Manual
         </Typography>
       </Toolbar>
     </AppBar>

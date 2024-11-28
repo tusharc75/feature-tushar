@@ -5,7 +5,7 @@ import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
 import NotFound from 'src/pages/NotFound';
-import LayoutDocs from '../pages/Docs/LayoutDocs';
+import UserManual from '../pages/UserManual';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'dashboards',
         'case',
         'task',
-        'docs',
+        'user-manual',
         'attachment',
         'note',
         'event',
@@ -88,8 +88,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
             >
               <p>Checking Credentials...</p>
             </div>
-          ) :  (access && rest?.docs)? (
-            <LayoutDocs></LayoutDocs>
+          ) : (access && rest?.userManual) ? (
+            <UserManual />
           ) : access ? (
             <Layout>{children}</Layout>
           ) : error ? (
