@@ -133,6 +133,12 @@ const Report = () => {
         if (o?.accessor === 'serviceName') {
           o.cell = ({ row }) => ServiceRenderer(row);
         }
+        if (o?.accessor === 'packageName') {
+          o.cell = ({ row }) => PackageRenderer(row);
+        }
+        if (o?.accessor === 'assetNumber') {
+          o.cell = ({ row }) => SerializedAssetRenderer(row);
+        }
         o.editable = false;
       });
       if (resourceCamelCase === 'inventoryEvaluation') {
@@ -244,14 +250,14 @@ const Report = () => {
   const ProductRenderer = (row) => {
     return (
       <div>
-        {row?.original?.productName ? (
+        {row?.original?.productName || row?.original?.product ? (
           <Link
             className="link"
-            title={row?.original?.productName}
+            title={row?.original?.productName || row?.original?.product}
             to={`${routes.productDetail.path}/${row?.original?.materialId || row?.original?.productId || row?.original?._id}`}
             target="_blank"
           >
-            {row?.original?.productName}
+            {row?.original?.productName || row?.original?.product}
           </Link>
         ) : (
           <NoDataCell />
@@ -278,6 +284,44 @@ const Report = () => {
       </div>
     );
   };
+
+  const PackageRenderer = (row) => {
+    return (
+      <div>
+        {row?.original?.packageName ? (
+          <Link
+            className="link"
+            title={row?.original?.packageName}
+            to={`${routes.packagesDetail.path}/${row?.original?.materialId || row?.original?.packageId || row?.original?._id}`}
+            target="_blank"
+          >
+            {row?.original?.packageName}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    )
+  }
+
+  const SerializedAssetRenderer = (row) => {
+    return (
+      <div>
+        {row?.original?.assetNumber ? (
+          <Link
+            className="link"
+            title={row?.original?.assetNumber}
+            to={`${routes.serializedAssetDetail.path}/${row?.original?.materialId || row?.original?.asset?._id}`}
+            target="_blank"
+          >
+            {row?.original?.assetNumber}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    );
+  }
 
   const ReferenceRenderer = (row) => {
     return (
