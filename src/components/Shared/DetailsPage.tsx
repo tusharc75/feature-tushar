@@ -105,7 +105,7 @@ interface DetailProps {
 const Details = (props: DetailProps) => {
   const classes = useStyles();
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user }
   }: any = useData();
   const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null } = props;
 
@@ -570,7 +570,7 @@ const Details = (props: DetailProps) => {
                   </div>
                   <div className="formdata-v1 grid grid-cols-12">
                     {form.sectionFields.map((field, i) => {
-                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals, selectedEntity)) return null;
+                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
                       return (
                         <div
                           className={cn(

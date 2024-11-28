@@ -1,28 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, TextField, Typography, makeStyles } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, Typography, makeStyles } from '@material-ui/core';
 import ConditionDialog from './ConditionDialog';
 import { MoreHoriz, Settings } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { useData } from 'src/StateProvider/Provider';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+
 
 const useStyles = makeStyles({
   group: {
     paddingTop: '2px',
     paddingBottom: '2px',
     paddingLeft: '10px',
-    paddingRight: '10px'
-  }
+    paddingRight: '10px',
+  },
 });
+
 
 const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
   const classes = useStyles();
-
-  const {
-    state: { user }
-  }: any = useData();
-
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
   const [anchorElSetting, setAnchorElSetting] = useState({});
@@ -96,23 +92,6 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
     <Box>
       <Box pl={0.5}>
         <Typography variant="subtitle2">ONLY SHOW WHEN...</Typography>
-      </Box>
-      <Box>
-        <Autocomplete
-          multiple
-          options={user?.entity}
-          style={{ maxWidth: '350px' }}
-          getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-          value={
-            user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-              ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-              : []
-          }
-          onChange={(e, val) => {
-            setFieldValue('entity', val && val?.map((d) => d._id));
-          }}
-          renderInput={(params) => <TextField {...params} margin="dense" size="small" name="entity" label="Entity" variant="outlined" fullWidth />}
-        />
       </Box>
       {values &&
         values?.visibilityCondition?.map((c) => (
@@ -188,16 +167,15 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
                 alignItems={'center'}
                 mt={1}
               >
-                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${
-                  fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                  ? data[_f?.fieldName]
                     ? data[_f?.fieldName]
-                      ? data[_f?.fieldName]
-                          ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
-                          ?.map((v) => v?.optionLabel)
-                          ?.join(', ')
-                      : ''
-                    : _f?.value
-                }`}</Typography>
+                      ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
+                      ?.map((v) => v?.optionLabel)
+                      ?.join(', ')
+                    : ''
+                  : _f?.value
+                  }`}</Typography>
                 <Box>
                   <IconButton
                     aria-label="setting"

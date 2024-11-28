@@ -27,7 +27,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const View = ({
   step,
-  tabId,
   allowedToEdit,
   data,
   resource,
@@ -77,52 +76,52 @@ const View = ({
       },
       ...(step?.linkWithMaterial
         ? [
-            {
-              accessor: 'type',
-              Header: 'Type',
-              disableFilters: true,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              width: 200,
-              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-              accessor: 'detail',
-              Header: 'Details',
-              minWidth: 300,
-              width: 300,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.detail}>
-                    {row.original.detail}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.package) {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            },
-            {
-              accessor: 'description',
-              Header: 'Description',
-              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'type',
+            Header: 'Type',
+            disableFilters: true,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            width: 200,
+            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+          },
+          {
+            accessor: 'detail',
+            Header: 'Details',
+            minWidth: 300,
+            width: 300,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate" title={row.original.detail}>
+                  {row.original.detail}
+                </p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            )
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
@@ -177,7 +176,7 @@ const View = ({
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`/dynamic-form/step/${resourceId}/${tabId}/${step?._id}`, {
+      .get(`/dynamic-form/step/${resourceId}/${step?._id}`, {
         headers: {
           Resource: resource
         }
@@ -254,14 +253,12 @@ const View = ({
   };
 
   const handleAdd = (rows) => {
-    const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty }));
+    const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
     setIsSubmitting(true);
     axiosInstance()
       .post(`/dynamic-form/step/${resourceId}`, values, {
         headers: {
-          Resource: resource,
-          TabId: tabId,
-          StepId: step?._id
+          Resource: resource
         }
       })
       .then(({ data }) => {
@@ -319,12 +316,10 @@ const View = ({
     axiosInstance()
       .put(
         `/dynamic-form/step/${resourceId}`,
-        { ...rows[0] },
+        { ...rows[0], stepId: step?._id },
         {
           headers: {
-            Resource: resource,
-            TabId: tabId,
-            StepId: step?._id
+            Resource: resource
           }
         }
       )
@@ -352,8 +347,8 @@ const View = ({
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-        ))
+        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+      ))
       : null;
   };
 
@@ -447,7 +442,6 @@ const View = ({
               resource={resource}
               resourceId={resourceId}
               stepId={step?._id}
-              tabId={tabId}
               id={open?.id}
               fields={step?.fields || []}
             />

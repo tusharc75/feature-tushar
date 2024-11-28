@@ -6,7 +6,6 @@ import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import FormTypes, { isFieldVisible, isSectionVisible } from './FormTypes';
-import { useData } from 'src/StateProvider/Provider';
 
 const InputField = (props) => {
   const {
@@ -21,10 +20,6 @@ const InputField = (props) => {
     collaborateTools = false,
     ...rest
   } = props;
-
-  const {
-    state: { selectedEntity }
-  }: any = useData();
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -83,7 +78,7 @@ const InputField = (props) => {
                           fieldData={field}
                           disabled={Boolean(referenceId) && field.disableOnEdit}
                         />
-                      ) : isFieldVisible(field, fieldsData, values, selectedEntity) ? (
+                      ) : isFieldVisible(field, fieldsData, values) ? (
                         <Grid
                           key={field.fieldName}
                           item
@@ -111,23 +106,23 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                    if (val && val.currencyCode) {
-                                      setFieldValue(field.fieldName, val.currencyCode);
-                                      setCurrencySymbol(val.symbolNative);
-                                    } else {
-                                      setFieldValue(field.fieldName, '');
-                                      setCurrencySymbol(null);
-                                    }
+                                  if (val && val.currencyCode) {
+                                    setFieldValue(field.fieldName, val.currencyCode);
+                                    setCurrencySymbol(val.symbolNative);
+                                  } else {
+                                    setFieldValue(field.fieldName, '');
+                                    setCurrencySymbol(null);
                                   }
+                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                    if (onImageUploadCompletePercentage) {
-                                      onImageUploadCompletePercentage(completePercentage);
-                                    }
+                                  if (onImageUploadCompletePercentage) {
+                                    onImageUploadCompletePercentage(completePercentage);
                                   }
+                                }
                                 : null
                             }
                             fields={fieldsData}
