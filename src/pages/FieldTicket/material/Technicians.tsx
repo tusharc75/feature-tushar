@@ -19,6 +19,7 @@ import routes from '../../../components/Helpers/Routes';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
@@ -80,9 +81,19 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Header: 'Name',
         width: 250,
         Cell: ({ row }) => (
-          <a className="link text-truncate" href={`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`} target="_blank">
-            {row.original?.technicianName}
-          </a>
+          <div className="flex items-center gap-2">
+            <p className="text-truncate" title={row.original.technicianName}>
+              {row.original.technicianName}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.employeeMasterDetail.path}/${row.original.technicianId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
         )
       },
       {
@@ -91,9 +102,19 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         width: 250,
         Cell: ({ row }) =>
           row.original?.service ? (
-            <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`} target="_blank">
-              {row.original?.service}
-            </a>
+            <div className="flex items-center gap-2">
+              <p className="text-truncate" title={row.original.service}>
+                {row.original.service}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -149,7 +170,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setDeleteData([{ id: row.original._id }]);
+                    setDeleteData([{ rowId: row.original.rowId }]);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={'error'} />
@@ -245,17 +266,18 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
-  const handleUpdateStartEndDate = (date, type) => {
+  const handleUpdateStartEndDate = (values, type) => {
     const value: any = {
       type: type,
       referenceId: fieldTicketData?._id,
       rowId: selectedRecords?.map((r) => r?.rowId)
     };
     setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
-    if (type === 'start') {
-      value.startDate = date;
-    } else if (type === 'stop') {
-      value.endDate = date;
+    if (type != 'stop') {
+      value.startDate = values?.startDate;
+    }
+    if (type === 'stop' || type === 'startStop') {
+      value.endDate = values?.endDate;
     }
     axiosInstance()
       .put(`${fieldTicket.api}/technician/start-end-date`, value)
@@ -277,35 +299,19 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const actionButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting}
-            onClick={() => {
-              setDeleteData(
-                selectedRecords?.map((d) => {
-                  return {
-                    id: d?._id
-                  };
-                })
-              );
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
         <MenuItem
           disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
-              dates.push(new Date(d?.endDate));
+              if (d?.endDate) {
+                dates.push(new Date(d?.endDate));
+              }
             });
             let date = null;
             if (dates?.length) {
               date = new Date(Math.max(...dates));
               date.setDate(date.getDate() + 1);
-            } else {
-              date = new Date();
             }
             setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date });
           }}
@@ -322,14 +328,47 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             let date = null;
             if (dates?.length) {
               date = new Date(Math.max(...dates));
-            } else {
-              date = new Date();
             }
             setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date });
           }}
         >
           Stop
         </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => (r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) ? false : true}
+          onClick={() => {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              if (d?.endDate) {
+                dates.push(new Date(d?.endDate));
+              }
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+              date.setDate(date.getDate() + 1);
+            }
+            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDate: date });
+          }}
+        >
+          Start/Stop
+        </MenuItem>
+        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+          <MenuItem
+            disabled={isDeleting}
+            onClick={() => {
+              setDeleteData(
+                selectedRecords?.map((d) => {
+                  return {
+                    rowId: d?.rowId
+                  };
+                })
+              );
+            }}
+          >
+            Delete
+          </MenuItem>
+        </HtmlTooltip>
       </>
     );
   };
@@ -401,8 +440,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           onClose={() => {
             setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
           }}
-          handleSubmit={(date) => {
-            handleUpdateStartEndDate(date, startEndDateConfermationDialog.type);
+          handleSubmit={(value) => {
+            handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
           }}
           loading={startEndDateConfermationDialog.loading}
           minDate={startEndDateConfermationDialog.minDate}
