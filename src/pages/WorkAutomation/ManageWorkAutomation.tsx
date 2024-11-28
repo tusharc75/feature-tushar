@@ -1,38 +1,50 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { Box, Button, CircularProgress, Collapse, Grid, IconButton } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
-import ManageRentalJob from '../RentalManagement/ManageRental/index';
 import { ASSET_STATUS, gridLoadingTimeout, MATERIAL_TYPE, prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import axios, { CancelTokenSource } from 'axios';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice, fetch_rental_product_fields, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
 const ManageWorkAutomation = () => {
   const toastConfig = useContext(CustomToastContext);
-  const [openRentalJobDialog, setOpenRentalJobDialog] = useState(false);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedTechnicians, setSelectedTechnicians] = useState([]);
+  const [isExpand, setIsExpand] = useState({ asset: false, service: false, technician: false });
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const { id } = useParams();
 
-  const handleSave = () => {
+  useEffect(() => {
+    axiosInstance()
+      .get(`${rentalManagement.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setRentalManagementData(data);
+        setIsExpand({ asset: true, service: false, technician: false });
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
+
+  const handleSave = (technicians) => {
     setLoading(true);
     const values = {
       assets: selectedAssets || [],
-      material: selectedServices || [],
-      technicians: selectedTechnicians || []
+      services: selectedServices || [],
+      technicians: technicians || []
     };
     axiosInstance()
       .post(`${rentalManagement.api}/workAutomation/${rentalManagementData?._id}`, values)
@@ -57,93 +69,68 @@ const ManageWorkAutomation = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workAutomation, { title: 'New' }]}
+              routes={[routes.workAutomation, { title: rentalManagementData ? rentalManagementData?.rentalJobName : '' }]}
               onBreadCrumbClick={(path) => {
                 history.push(path);
               }}
             />
           </Box>
         </Box>
-        <Box className={`detail-container-v1 h-full flex flex-col justify-between`}>
-          <div className="mt-2 flex w-full flex-col gap-6">
-            <div>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setOpenRentalJobDialog(true);
-                }}
-              >
-                {`Add ${routes.rentalManagement.title} Data`}
-              </Button>
+        {rentalManagementData ? (
+          <Box className={`detail-container-v1`}>
+            <div className="mt-2 flex w-full flex-col gap-6">
+              <div>
+                <AddSerializedAsset
+                  rentalManagementData={rentalManagementData}
+                  setSelectedAssets={setSelectedAssets}
+                  selectedAssets={selectedAssets}
+                  isExpand={isExpand}
+                  setIsExpand={setIsExpand}
+                />
+              </div>
+              <div>
+                <AddServices
+                  rentalManagementData={rentalManagementData}
+                  setSelectedServices={setSelectedServices}
+                  selectedAssets={selectedAssets}
+                  isExpand={isExpand}
+                  setIsExpand={setIsExpand}
+                />
+              </div>
+              <div>
+                <AddTechnicians
+                  rentalManagementData={rentalManagementData}
+                  selectedServices={selectedServices}
+                  setSelectedTechnicians={setSelectedTechnicians}
+                  isExpand={isExpand}
+                  setIsExpand={setIsExpand}
+                  handleSave={handleSave}
+                  loading={loading}
+                />
+              </div>
             </div>
-            <div>
-              <AddSerializedAsset rentalManagementData={rentalManagementData} setSelectedAssets={setSelectedAssets} />
-            </div>
-            <div>
-              <AddServices rentalManagementData={rentalManagementData} setSelectedServices={setSelectedServices} selectedAssets={selectedAssets} />
-            </div>
-            <div>
-              <AddTechnicians
-                rentalManagementData={rentalManagementData}
-                selectedServices={selectedServices}
-                setSelectedTechnicians={setSelectedTechnicians}
-              />
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end mt-3">
-            <CustomButton
-              variant="contained"
-              color="primary"
-              startIcon={loading && <CircularProgress size={20} color="inherit" />}
-              onClick={handleSave}
-              disabled={loading || !rentalManagementData || !selectedAssets?.length}
-            >
-              Save
-            </CustomButton>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => {
-                history.push(routes?.workAutomation?.path);
-              }}
-            >
-              Close
-            </Button>
-          </div>
-        </Box>
+          </Box>
+        ) : (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        )}
       </Box>
-
-      {openRentalJobDialog && (
-        <ManageRentalJob
-          open={openRentalJobDialog}
-          isClone={false}
-          rentalManagementId={null}
-          onClose={() => {
-            setOpenRentalJobDialog(false);
-          }}
-          onSuccess={(data) => {
-            setRentalManagementData(data);
-            setOpenRentalJobDialog(false);
-          }}
-          isAutomated={true}
-        />
-      )}
     </Fragment>
   );
 };
 
 export default ManageWorkAutomation;
 
-const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, isExpanded: defaultExpanded = false }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const handleAdd = (rows) => {
-    const tempMaterial = rows?.map((e) => {
+const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedAssets, isExpand, setIsExpand }) => {
+  const [records, setRecords] = useState(null);
+  const handleAdd = () => {
+    const tempMaterial = records?.map((e) => {
       return {
         asset: e?._id
       };
     });
-    setIsExpanded(false);
+    setIsExpand({ asset: false, service: true, technician: false });
     setSelectedAssets(tempMaterial);
   };
   const disabled = !rentalManagementData;
@@ -152,220 +139,151 @@ const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, isExpande
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4 ">
           <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.serializedAsset.title}`}</h3>
-          <div className="flex min-w-fit gap-3">
-            <IconButton size="small" disabled={!rentalManagementData} onClick={() => setIsExpanded((prev) => !prev)}>
-              {isExpanded ? (
+          {/* <div className="flex min-w-fit gap-3">
+            <IconButton size="small" disabled={!rentalManagementData} onClick={() => {}}>
+              {isExpand.asset ? (
                 <ExpandLess fontSize="small" color={disabled ? 'disabled' : 'primary'} />
               ) : (
                 <ExpandMore fontSize="small" color={disabled ? 'disabled' : 'primary'} />
               )}
             </IconButton>
-          </div>
+          </div> */}
         </div>
-        <Collapse in={isExpanded}>
-          {rentalManagementData ? (
-            <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <RenderTable
-                resource={sidebarResource.serializedAsset}
-                warehouse={rentalManagementData?.warehouse}
-                handleAdd={handleAdd}
-              />
+        <Collapse in={isExpand.asset}>
+          <div className="flex flex-col gap-2 p-3 [border-top:1px_solid_var(--common-border-color)]">
+            <RenderTable
+              resource={sidebarResource.serializedAsset}
+              warehouse={rentalManagementData?.warehouse?.optionValue}
+              setRecords={setRecords}
+            />
+            <div className="flex justify-end">
+              <Button disabled={!records?.length} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
+                Save & Next
+              </Button>
             </div>
-          ) : null}
+          </div>
         </Collapse>
       </div>
     </>
   );
 };
 
-const AddServices = ({ rentalManagementData, setSelectedServices, selectedAssets, isExpanded: defaultExpanded = false }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [allFields, setAllFields] = useState(null);
+const AddServices = ({ rentalManagementData, setSelectedServices, selectedAssets, isExpand, setIsExpand }) => {
+  const [records, setRecords] = useState(null);
 
-  useEffect(() => {
-    fetchFields();
-  }, []);
-
-  const fetchFields = async () => {
-    try {
-      var data = await fetch_rental_product_fields(rentalManagementData?.currency, false);
-      setAllFields(JSON.parse(JSON.stringify(data)));
-    } catch (e) {}
-  };
-  const handleAdd = async (rows) => {
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = MATERIAL_TYPE.service;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
-      element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-      element.actualStartDate = '';
-      element.actualEndDate = '';
-      element.actualJobDuration = '';
-      element.parentId = null;
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
-      if (calValues && calValues['estimateJobDuration']) {
-        element.estimateJobDuration = calValues['estimateJobDuration'];
-      }
-      material.push(element);
-    });
-    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
-      AddMaterial(material, []);
-    } else {
-      const priceData: any = await calculatePrice(rentalManagementData, material);
-      AddMaterial(material, priceData);
-    }
-  };
-
-  const AddMaterial = async (material, priceData) => {
-    const tempMaterial = [...material];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = element.listPrice;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-        Object.assign(element, calValues);
-      } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
+  const handleAdd = () => {
+    const tempMaterial = records?.map((e) => e?._id) || [];
+    setIsExpand({ asset: false, service: false, technician: true });
     setSelectedServices(tempMaterial);
-    setIsExpanded(false);
   };
 
-  const disabled = !rentalManagementData || !selectedAssets?.length;
   return (
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4">
           <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add Services`}</h3>
-          <div className="flex min-w-fit gap-3">
-            <IconButton size="small" disabled={disabled} onClick={() => setIsExpanded((prev) => !prev)}>
-              {isExpanded ? (
-                <ExpandLess fontSize="small" color={disabled ? 'disabled' : 'primary'} />
-              ) : (
-                <ExpandMore fontSize="small" color={disabled ? 'disabled' : 'primary'} />
-              )}
+          {/* <div className="flex min-w-fit gap-3">
+            <IconButton size="small" disabled={true} onClick={() => {}}>
+              {isExpand.service ? <ExpandLess fontSize="small" color={'disabled'} /> : <ExpandMore fontSize="small" color={'disabled'} />}
             </IconButton>
-          </div>
+          </div> */}
         </div>
-        <Collapse in={isExpanded}>
-          {!disabled ? (
-            <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <RenderTable resource={sidebarResource.serviceMaster} warehouse={rentalManagementData?.warehouse} handleAdd={handleAdd} />
+        <Collapse in={isExpand.service}>
+          <div className="flex flex-col gap-2 p-3 [border-top:1px_solid_var(--common-border-color)]">
+            {selectedAssets?.length ? (
+              <RenderTable
+                resource={sidebarResource.serviceMaster}
+                warehouse={rentalManagementData?.warehouse?.optionValue}
+                setRecords={setRecords}
+              />
+            ) : null}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                onClick={() => setIsExpand({ asset: true, service: false, technician: false })}
+              >
+                Back
+              </Button>
+              <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
+                Save & Next
+              </Button>
             </div>
-          ) : null}
+          </div>
         </Collapse>
       </div>
     </>
   );
 };
 
-const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpanded: defaultExpanded = false }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [allFields, setAllFields] = useState(null);
-  useEffect(() => {
-    fetchFields();
-  }, []);
+const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading }) => {
+  const [records, setRecords] = useState(null);
 
-  const fetchFields = async () => {
-    try {
-      var data = await fetch_rental_technician_fields(rentalManagementData?.currency, false);
-      setAllFields(JSON.parse(JSON.stringify(data)));
-    } catch (e) {}
-  };
-  const handleAdd = async (rows) => {
-    const technician: any = [];
-    selectedServices?.map((s, idx) => {
-      const d = rows[idx];
-      if (d) {
-        const element: any = {};
-        element.technician = d?._id;
-        // element.uniqueId = '';
-        element.materialId = d?.competenciesId;
-        element.type = 'competency';
-        element.competence = d?.competenciesId;
-        element.service = s?.materialId;
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
-        element.status = 'Assigned';
-        element.rentalJob = rentalManagementData?._id;
-        element.warehouse = rentalManagementData?.warehouse;
-        element.startDate = rentalManagementData?.estimateStartDate || new Date();
-        element.endDate = rentalManagementData?.estimateEndDate || new Date();
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        element.duration = 1;
-        if (calValues && calValues['duration']) {
-          element.duration = calValues['duration'];
-        }
-        technician.push(element);
-      }
-    });
-
-    const priceData = (await calculatePrice(rentalManagementData, technician)) || [];
-    AddMaterial(technician, priceData);
-  };
-
-  const AddMaterial = async (technician, priceData) => {
-    const tempMaterial = [...technician];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
-      if (rateResult?.length && rateResult[0]?.mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element['pricingCondition'] = rateResult[0].conditionId;
-        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields(
-          { [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod },
-          element,
-          allFields
-        );
-        Object.assign(element, calValues);
-      }
-      delete element.materialId;
-    });
+  const handleAdd = () => {
+    const tempMaterial = records?.map((e) => e?._id) || [];
+    setIsExpand({ asset: false, service: false, technician: true });
     setSelectedTechnicians(tempMaterial);
-    setIsExpanded(false);
+    handleSave(tempMaterial);
   };
-  const disabled = !rentalManagementData || !selectedServices?.length;
+
+  useEffect(() => {
+    if (!selectedServices?.length) {
+      setSelectedTechnicians([]);
+      setRecords([]);
+    }
+  }, [selectedServices]);
+
   return (
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4">
           <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.employeeMaster.title}`}</h3>
-          <div className="flex min-w-fit gap-3">
-            <IconButton size="small" disabled={disabled} onClick={() => setIsExpanded((prev) => !prev)}>
-              {isExpanded ? (
-                <ExpandLess fontSize="small" color={disabled ? 'disabled' : 'primary'} />
-              ) : (
-                <ExpandMore fontSize="small" color={disabled ? 'disabled' : 'primary'} />
-              )}
+          {/* <div className="flex min-w-fit gap-3">
+            <IconButton size="small" disabled={true} onClick={() => {}}>
+              {isExpand.technician ? <ExpandLess fontSize="small" color={'disabled'} /> : <ExpandMore fontSize="small" color={'disabled'} />}
             </IconButton>
-          </div>
+          </div> */}
         </div>
-        <Collapse in={isExpanded}>
-          {rentalManagementData && selectedServices?.length ? (
-            <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <RenderTable resource={sidebarResource.employeeMaster} warehouse={rentalManagementData?.warehouse} handleAdd={handleAdd} />
+        <Collapse in={isExpand.technician}>
+          <div className="flex flex-col gap-2 p-3 [border-top:1px_solid_var(--common-border-color)]">
+            {selectedServices?.length ? (
+              <RenderTable
+                resource={sidebarResource.employeeMaster}
+                warehouse={rentalManagementData?.warehouse?.optionValue}
+                setRecords={setRecords}
+              />
+            ) : null}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                onClick={() => setIsExpand({ asset: false, service: true, technician: false })}
+              >
+                Back
+              </Button>
+              <CustomButton
+                disabled={false}
+                variant="contained"
+                size="small"
+                color="primary"
+                startIcon={loading && <CircularProgress size={20} color="inherit" />}
+                onClick={() => {
+                  handleAdd();
+                }}
+              >
+                Save
+              </CustomButton>
             </div>
-          ) : null}
+          </div>
         </Collapse>
       </div>
     </>
   );
 };
 
-const RenderTable = ({ handleAdd, resource, warehouse }) => {
+const RenderTable = ({ resource, warehouse, setRecords }) => {
   const renderedFrom = `${routes.workAutomation.title}_${resource}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -390,6 +308,11 @@ const RenderTable = ({ handleAdd, resource, warehouse }) => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setRecords(selectedRecords);
+  }, [selectedRecords]);
+
   const fetchGridColumns = async () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
@@ -475,11 +398,6 @@ const RenderTable = ({ handleAdd, resource, warehouse }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      <div className="mt-3 flex justify-end">
-        <Button disabled={!selectedRecords.length} variant="contained" size="small" color="primary" onClick={() => handleAdd(selectedRecords)}>
-          Save
-        </Button>
-      </div>
     </>
   );
 };

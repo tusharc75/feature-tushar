@@ -1323,12 +1323,12 @@ const routes = {
         : RESOURCE_LABEL.workAutomation,
     path: '/work-automation'
   },
-  workAutomationCreate: {
+  workAutomationDetail: {
     title:
       storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
         ? storedRoutes.workAutomation?.title
         : RESOURCE_LABEL.workAutomation,
-    path: '/:id'
+    path: '/work-automation/detail'
   },
 };
 
