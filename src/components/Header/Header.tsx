@@ -38,7 +38,6 @@ const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
   const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
-
   const isMobile = useMediaQuery('(max-width:960px)');
   const is768 = useMediaQuery('(max-width: 768px)');
 

@@ -5,6 +5,7 @@ import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
 import NotFound from 'src/pages/NotFound';
+import LayoutDocs from '../pages/Docs/LayoutDocs';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -39,6 +40,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'dashboards',
         'case',
         'task',
+        'docs',
         'attachment',
         'note',
         'event',
@@ -73,7 +75,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
       setError(true);
     }
   };
-
   return (
     <Route
       {...rest}
@@ -87,6 +88,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
             >
               <p>Checking Credentials...</p>
             </div>
+          ) :  (access && rest?.docs)? (
+            <LayoutDocs></LayoutDocs>
           ) : access ? (
             <Layout>{children}</Layout>
           ) : error ? (
