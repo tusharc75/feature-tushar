@@ -101,7 +101,7 @@ export const CustomOfflineProvider = ({ children }) => {
                   .catch((error) => { });
                 await new Promise((resolve) => setTimeout(resolve, 2000));
               }
-              deleteOne(objectStore.offlineDataSync, d._id);
+              deleteOne(objectStore.offlineDataSync, `${d.data[0]?.fieldTicketId}_material`);
             }
             if (d?.type === 'fieldTicketMaterialDelete') {
               await axiosInstance()
