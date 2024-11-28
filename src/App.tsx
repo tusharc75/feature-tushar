@@ -1216,7 +1216,7 @@ function App() {
             <PrivateRoute exact path={`${routes.workAutomation.path}`}>
               <WorkAutomation />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomation.path}${routes.workAutomationCreate.path}`}>
+            <PrivateRoute exact path={`${routes.workAutomationDetail.path}/:id`}>
               <ManageWorkAutomation />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
