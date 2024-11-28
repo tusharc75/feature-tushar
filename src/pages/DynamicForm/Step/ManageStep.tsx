@@ -16,7 +16,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = null, fields = [] }) => {
+const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, tabId, id = null, fields = [] }) => {
   const {
     state: { user }
   }: any = useData();
@@ -34,19 +34,21 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   }, []);
 
   const fetchFields = () => {
-    setLoading(true)
+    setLoading(true);
     if (id) {
-      axiosInstance().get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
-        headers: {
-          Resource: resource
-        }
-      }).then(({ data: { data } }) => {
-        setInitialData({
-          fields: fields,
-          values: getObjKeysWithValues(data, fields)
-        });
-        setLoading(false)
-      })
+      axiosInstance()
+        .get(`/dynamic-form/step/detail/${resourceId}/${tabId}/${stepId}/${id}`, {
+          headers: {
+            Resource: resource
+          }
+        })
+        .then(({ data: { data } }) => {
+          setInitialData({
+            fields: fields,
+            values: getObjKeysWithValues(data, fields)
+          });
+          setLoading(false);
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -56,7 +58,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
         fields: fields,
         values: tempInitialData
       });
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -67,43 +69,53 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   const handleSubmit = async (values) => {
     setSubmitting(true);
     if (id) {
-      axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...values, _id: id, stepId },
-        {
-          headers: {
-            Resource: resource
+      axiosInstance()
+        .put(
+          `/dynamic-form/step/${resourceId}`,
+          { ...values, _id: id },
+          {
+            headers: {
+              Resource: resource,
+              TabId: tabId,
+              StepId: stepId
+            }
           }
-        }
-      ).then(({ data }) => {
-        onSuccess();
-        setSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        )
+        .then(({ data }) => {
+          onSuccess();
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
-      axiosInstance().post(`/dynamic-form/step/${resourceId}`, [{ ...values, stepId }],
-        {
+      axiosInstance()
+        .post(`/dynamic-form/step/${resourceId}`, [{ ...values }], {
           headers: {
-            Resource: resource
+            Resource: resource,
+            TabId: tabId,
+            StepId: stepId
           }
-        }
-      ).then(({ data }) => {
-        onSuccess();
-        setSubmitting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        })
+        .then(({ data }) => {
+          onSuccess();
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -168,8 +180,8 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                           : null
                                       }
                                       required={field.required}
