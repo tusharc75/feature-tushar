@@ -55,7 +55,7 @@ const TableComponent = forwardRef(function (
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
-  const { filters: customFilters, initialDataLoaded }: TInitialState = state;
+  const { filters: customFilters, initialDataLoaded, columnOrder }: TInitialState = state;
   const tableColumns = table.getVisibleFlatColumns();
   const columns = tableColumns?.map((d) => d?.columnDef);
   const sizes = tableColumns?.map((c) => c.getSize()) || [];
@@ -68,9 +68,17 @@ const TableComponent = forwardRef(function (
   }, [expander, hideSelection, columns]);
 
   const tableData = useMemo(() => {
-    const newCol = getStickyColumnNamesFromTableColumns({ allColumn: tableColumns, expander, hideSelection, sizes: sizes, headers, footers });
+    const newCol = getStickyColumnNamesFromTableColumns({
+      allColumn: tableColumns,
+      expander,
+      hideSelection,
+      sizes: sizes,
+      headers,
+      footers,
+      columnOrder
+    });
     return newCol;
-  }, [expander, hideSelection, sizes, tableColumns, headers, footers]);
+  }, [expander, hideSelection, sizes, tableColumns, headers, footers, columnOrder]);
 
   const tableRef = useRef<HTMLTableElement | null>(null);
 

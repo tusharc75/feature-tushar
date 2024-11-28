@@ -201,7 +201,8 @@ export const getStickyColumnNamesFromTableColumns = ({
   hideSelection,
   sizes: propSizes = [],
   headers,
-  footers
+  footers,
+  columnOrder
 }: {
   allColumn: Column<any, unknown>[];
   expander: boolean;
@@ -209,14 +210,15 @@ export const getStickyColumnNamesFromTableColumns = ({
   sizes?: number[];
   headers: Header<any, unknown>[];
   footers: Header<any, unknown>[];
+  columnOrder: string[];
 }) => {
   if (!allColumn || !Array.isArray(allColumn) || allColumn.length === 0) return;
-
-  const columns = {
-    left: [],
-    right: [],
-    normal: []
-  };
+  const sortedColumns = allColumn.sort((a, b) => columnOrder.indexOf(a.id) - columnOrder.indexOf(b.id));
+  // const columns = {
+  //   left: [],
+  //   right: [],
+  //   normal: []
+  // };
   const sizes = {
     left: [],
     right: [],
@@ -240,7 +242,7 @@ export const getStickyColumnNamesFromTableColumns = ({
   let leftTotlaSize = 0;
   let rightTotalSize = 0;
   for (let i = 0; i < allColumn.length; i++) {
-    const col = allColumn[i];
+    const col = sortedColumns[i];
     const header = headers[i];
     const footer = footers[i];
     const colDef = col.columnDef as TColType;
@@ -248,7 +250,7 @@ export const getStickyColumnNamesFromTableColumns = ({
     const colSize = propSizes[i] || 200;
 
     if (colName === 'expander' && expander) {
-      columns.left.push(colDef);
+      // columns.left.push(colDef);
       sizes.left.push(colSize);
       leftTotlaSize += colSize;
       columnIndexes.left.push(i);
@@ -257,7 +259,7 @@ export const getStickyColumnNamesFromTableColumns = ({
       continue;
     }
     if (colName === 'selection' && !hideSelection) {
-      columns.left.push(colDef);
+      // columns.left.push(colDef);
       sizes.left.push(colSize);
       leftTotlaSize += colSize;
       columnIndexes.left.push(i);
@@ -266,7 +268,7 @@ export const getStickyColumnNamesFromTableColumns = ({
       continue;
     }
     if (colDef.sticky === 'left') {
-      columns.left.push(colDef);
+      // columns.left.push(colDef);
       sizes.left.push(colSize);
       leftTotlaSize += colSize;
       columnIndexes.left.push(i);
@@ -275,7 +277,7 @@ export const getStickyColumnNamesFromTableColumns = ({
       continue;
     }
     if (colDef.sticky === 'right') {
-      columns.right.push(colDef);
+      // columns.right.push(colDef);
       sizes.right.push(colSize);
       rightTotalSize += colSize;
       columnIndexes.right.push(i);
@@ -283,14 +285,22 @@ export const getStickyColumnNamesFromTableColumns = ({
       footerData.right.push(footer);
       continue;
     }
-    columns.normal.push(colDef);
+    // columns.normal.push(colDef);
     sizes.normal.push(colSize);
     headersData.normal.push(header);
     footerData.normal.push(footer);
     columnIndexes.normal.push(i);
   }
 
-  return { columns, sizes, leftTotlaSize, rightTotalSize, headers: headersData, columnIndexes, footerData };
+  return {
+    // columns,
+    sizes,
+    leftTotlaSize,
+    rightTotalSize,
+    headers: headersData,
+    columnIndexes,
+    footerData
+  };
 };
 
 export const getUniqueRows = (rows: any[], key = '_id') => {
@@ -569,7 +579,7 @@ export function adjustSizes(original: TColType[], visibleColumns: { [key: string
   if (scaleFactor === Infinity) {
     return null;
   }
-  const scrollerWidth = 2;
+  const scrollerWidth = 0;
 
   return original.map((col) => {
     const size = Math.floor((col.size || 200) * scaleFactor) - scrollerWidth;

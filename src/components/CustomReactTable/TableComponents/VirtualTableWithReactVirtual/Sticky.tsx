@@ -1,5 +1,5 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { Header, Column as TColumn } from '@tanstack/react-table';
+import { Header } from '@tanstack/react-table';
 import scrollbarSize from 'dom-helpers/scrollbarSize';
 import { useEffect, useRef } from 'react';
 import { Grid } from 'react-virtualized';
@@ -14,7 +14,7 @@ const Sticky = ({
   mode,
   rowHeight,
   height,
-  columns,
+
   dispatch,
   table,
   resource,
@@ -41,7 +41,6 @@ const Sticky = ({
   width: number;
   mode: 'left' | 'right';
   height: number;
-  columns: TColumn<any, unknown>[];
   headers: Header<any, unknown>[];
   dispatch: any;
   table: any;
@@ -101,7 +100,7 @@ const Sticky = ({
             rowHeight={headerHeight}
             columnWidth={({ index }) => sizes[index]}
             rowCount={1}
-            columnCount={columns.length}
+            columnCount={columnIndexes.length}
           />
         </SortableContext>
       </div>
@@ -141,7 +140,7 @@ const Sticky = ({
             );
           }}
           columnWidth={({ index }) => sizes[index]}
-          columnCount={columns.length}
+          columnCount={columnIndexes.length}
           height={height - (headerHeight + scrollbarSize())}
           rowHeight={rowHeight}
           rowCount={rows.length}

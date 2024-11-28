@@ -1,7 +1,7 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { CircularProgress } from '@material-ui/core';
 import { Error } from '@material-ui/icons';
-import { Header, Column as TColumn } from '@tanstack/react-table';
+import { Header } from '@tanstack/react-table';
 import scrollbarSize from 'dom-helpers/scrollbarSize';
 import { memo, useEffect, useRef } from 'react';
 import { Grid, OnScrollParams } from 'react-virtualized';
@@ -10,12 +10,11 @@ import RenderBody from 'src/components/CustomReactTable/TableComponents/VirtualT
 import RenderHeader from 'src/components/CustomReactTable/TableComponents/VirtualTableWithReactVirtual/RenderHeader';
 
 const MemoIzedBody = memo(RenderBody, areEqual);
-let timeout: NodeJS.Timeout;
+const MemoizedHead = memo(RenderHeader, areEqual);
 
 const Body = ({
   height,
   width,
-  columns,
   scrollLeft,
   sizes,
   onScroll,
@@ -48,7 +47,6 @@ const Body = ({
   sizes: number[];
   rowHeight: number;
   scrollLeft: number;
-  columns: TColumn<any, unknown>[];
   width: number;
   headers: Header<any, unknown>[];
   height: number;
@@ -77,8 +75,8 @@ const Body = ({
   const bodyRef = useRef<Grid>(null);
 
   useEffect(() => {
-    headRef.current?.recomputeGridSize();
-    bodyRef.current?.recomputeGridSize();
+    headRef.current?.recomputeGridSize({ columnIndex: 0 });
+    bodyRef.current?.recomputeGridSize({ columnIndex: 0 });
   }, [sizes]);
 
   return (
@@ -95,11 +93,11 @@ const Body = ({
             ref={headRef}
             className="!overflow-hidden focus-visible:outline-0 "
             columnWidth={({ index }) => sizes[index] || 50}
-            columnCount={columns.length}
+            columnCount={columnIndexes.length}
             height={headerHeight}
             overscanColumnCount={overscanColumnCount}
             cellRenderer={({ columnIndex, isScrolling, isVisible, key, parent, rowIndex, style }) => (
-              <RenderHeader
+              <MemoizedHead
                 columnIndex={columnIndex}
                 key={key}
                 style={style}
@@ -156,7 +154,7 @@ const Body = ({
           columnWidth={({ index }) => sizes[index]}
           ref={bodyRef}
           className={'focus-visible:outline-0'}
-          columnCount={columns.length}
+          columnCount={columnIndexes.length}
           height={height - headerHeight}
           onScroll={onScroll}
           scrollLeft={scrollLeft}

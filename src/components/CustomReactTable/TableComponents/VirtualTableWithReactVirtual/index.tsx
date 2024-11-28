@@ -10,7 +10,7 @@ const rowHeight = 45;
 const headerHeight = 45;
 const footerHeight = 45;
 const overscanColumnCount = 3;
-const overscanRowCount = 7;
+const overscanRowCount = 6;
 
 const VirtualTableWithReactVirtual = ({
   state,
@@ -33,11 +33,6 @@ const VirtualTableWithReactVirtual = ({
   initialDataLoaded,
   customFilters,
   tableData = {
-    columns: {
-      left: [],
-      normal: [],
-      right: []
-    },
     sizes: {
       left: [],
       normal: [],
@@ -70,7 +65,7 @@ const VirtualTableWithReactVirtual = ({
             {({ clientHeight, clientWidth, onScroll, scrollHeight, scrollLeft, scrollTop, scrollWidth }) => {
               return (
                 <div>
-                  {tableData.columns.left.length > 0 && (
+                  {tableData.columnIndexes.left.length > 0 && (
                     <Sticky
                       onRowClick={onRowClick}
                       headers={tableData.headers.left}
@@ -78,7 +73,6 @@ const VirtualTableWithReactVirtual = ({
                       height={isFooterVisible ? height - footerHeight : height}
                       mode="left"
                       rows={rows}
-                      columns={tableData.columns.left}
                       rowHeight={rowHeight}
                       scrollTop={scrollTop}
                       sizes={tableData.sizes?.left || []}
@@ -107,7 +101,6 @@ const VirtualTableWithReactVirtual = ({
                       error={error}
                       initialDataLoaded={initialDataLoaded}
                       headers={tableData.headers.normal}
-                      columns={tableData.columns.normal}
                       height={isFooterVisible ? height - (footerHeight + scrollbarSize()) : height}
                       rowHeight={rowHeight}
                       width={width - (tableData.leftTotlaSize + tableData.rightTotalSize)}
@@ -133,7 +126,7 @@ const VirtualTableWithReactVirtual = ({
                       overscanRowCount={overscanRowCount}
                     />
                   </div>
-                  {tableData.columns.right.length > 0 && (
+                  {tableData.columnIndexes.right.length > 0 && (
                     <Sticky
                       onRowClick={onRowClick}
                       headers={tableData.headers.right}
@@ -142,7 +135,6 @@ const VirtualTableWithReactVirtual = ({
                       rowHeight={rowHeight}
                       mode="right"
                       rows={rows}
-                      columns={tableData.columns.right}
                       scrollTop={scrollTop}
                       sizes={tableData.sizes?.right || []}
                       customFilters={customFilters}
