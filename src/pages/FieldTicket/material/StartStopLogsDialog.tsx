@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const StartStopLogsDialog = ({ onClose, referenceId, _id }) => {
+const StartStopLogsDialog = ({ onClose, referenceId, rowId }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -20,11 +20,12 @@ const StartStopLogsDialog = ({ onClose, referenceId, _id }) => {
 
   useEffect(() => {
     fetchData();
-  }, [_id, referenceId]);
+  }, [rowId, referenceId]);
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&_id=${_id}`)
+      .get(`${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&rowId=${rowId}`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });

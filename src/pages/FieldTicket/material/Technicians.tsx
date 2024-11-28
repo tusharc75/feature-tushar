@@ -32,9 +32,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     open: false,
     type: null,
     loading: false,
-    minStartDate: null
+    minDate: null
   });
-  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, rowId: null });
 
   const {
     state: { user }
@@ -65,7 +65,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setViewStartStopLog({ open: true, _id: row?.original?._id });
+                    setViewStartStopLog({ open: true, rowId: row?.original?.rowId });
                   }}
                 >
                   <VisibilityIcon fontSize="small" color="primary" />
@@ -248,8 +248,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const handleUpdateStartEndDate = (date, type) => {
     const value: any = {
       type: type,
-      _id: selectedRecords?.map((r) => r?._id),
-      referenceId: fieldTicketData?._id
+      referenceId: fieldTicketData?._id,
+      rowId: selectedRecords?.map((r) => r?.rowId)
     };
     setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
     if (type === 'start') {
@@ -265,11 +265,11 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           type: 'success',
           message: data?.message
         });
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minStartDate: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
         fetchData();
       })
       .catch((error) => {
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minStartDate: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
         toastConfig.setToastConfig(error);
       });
   };
@@ -298,9 +298,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
-              d?.startStopLogs?.forEach((l: any) => {
-                if (l?.endDate) dates.push(new Date(l.endDate));
-              });
+              dates.push(new Date(d?.endDate));
             });
             let date = null;
             if (dates?.length) {
@@ -309,7 +307,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             } else {
               date = new Date();
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minStartDate: date });
+            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDate: date });
           }}
         >
           Start
@@ -319,14 +317,15 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
-              const logEntry = d?.startStopLogs?.find((log: any) => !log.endDate);
-              dates.push(new Date(logEntry?.startDate));
+              dates.push(new Date(d?.startDate));
             });
             let date = null;
             if (dates?.length) {
               date = new Date(Math.max(...dates));
+            } else {
+              date = new Date();
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minStartDate: date });
+            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDate: date });
           }}
         >
           Stop
@@ -400,23 +399,23 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         <StartStopDate
           type={startEndDateConfermationDialog.type}
           onClose={() => {
-            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minStartDate: null });
+            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDate: null });
           }}
           handleSubmit={(date) => {
             handleUpdateStartEndDate(date, startEndDateConfermationDialog.type);
           }}
           loading={startEndDateConfermationDialog.loading}
-          minDate={startEndDateConfermationDialog.minStartDate}
+          minDate={startEndDateConfermationDialog.minDate}
         />
       )}
 
       {viewStartStopLog?.open && (
         <StartStopLogsDialog
           onClose={() => {
-            setViewStartStopLog({ open: false, _id: null });
+            setViewStartStopLog({ open: false, rowId: null });
           }}
           referenceId={fieldTicketData?._id}
-          _id={viewStartStopLog?._id}
+          rowId={viewStartStopLog?.rowId}
         />
       )}
     </>
