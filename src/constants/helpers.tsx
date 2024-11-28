@@ -536,7 +536,8 @@ export const RESOURCE_LABEL = {
   workSpace: 'Work Space',
   workflow: 'Workflow',
   workflowReport: 'Workflow Report',
-  assemblyOrder: 'Assembly Order'
+  assemblyOrder: 'Assembly Order',
+  workAutomation: 'Work Automation'
 };
 
 export const CHILD_RESOURCE = {
