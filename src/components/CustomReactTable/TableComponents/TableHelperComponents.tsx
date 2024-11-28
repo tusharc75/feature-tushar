@@ -11,6 +11,7 @@ import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 import DataList from './DataList';
+import { cn } from 'src/constants/helpers';
 
 let cellId = null;
 
@@ -272,6 +273,7 @@ interface DraggableHeaderProps {
   resource: string;
   overlayMode?: boolean;
   virtualTable?: boolean;
+  className?: string;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -282,7 +284,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   virtualization,
   resource,
   overlayMode,
-  virtualTable = true
+  virtualTable = true,
+  className = ''
 }) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
@@ -365,15 +368,16 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
 
   return (
     <TableCell
-      {...{
-        key: header.id,
-        colSpan: header.colSpan
-      }}
+      key={header.id}
+      component={'th'}
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
-      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
-        overlayMode ? 'border text-[13px] font-semibold' : ''
-      } `}
+      className={cn(
+        `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
+          overlayMode ? 'border text-[13px] font-semibold' : ''
+        } `,
+        className
+      )}
       ref={setNodeRef}
       style={{
         minWidth: `${colSize}px`,
@@ -471,22 +475,20 @@ const CellShell = ({
     <TableCell
       id={cell.id}
       key={cell.id}
-      className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
-      ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
-      ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
+      className={cn(
+        `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
+    ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
+     ${stickyClassName}`,
+        className,
+        setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
+      )}
       style={{
         minWidth: cell.column.getSize(),
         maxWidth: cell.column.getSize(),
         ...(virtualization ? { ...virtualStyles } : { ...style })
       }}
       onClick={() => {
-        if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
-          if (cellId !== cell.id) {
-            handleCellClick({ cell, dispatch, row, setCellValue });
-          }
-        } else {
-          handleCellClick({ cell, dispatch, row, setCellValue });
-        }
+        handleCellClick({ cell, dispatch, row, setCellValue });
         cellId = cell.id;
       }}
       {...others}
@@ -496,8 +498,189 @@ const CellShell = ({
   );
 };
 
+const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField, currentEditingCellPosition, setCellValue }) => {
+  return (
+    <div className="w-full">
+      {columnDef?.type === 'singleLine' ? (
+        <input
+          autoFocus
+          id={`${cell.column.id}-input-${row.index || 0}`}
+          type="text"
+          onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+          value={cellValue}
+          onKeyDown={(e) => {
+            const target = e.target as HTMLInputElement;
+            if (!currentEditingCellPosition) return;
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              target.blur();
+            }
+          }}
+          className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
+          onChange={(e) => {
+            setCellValue(e.target.value || '');
+          }}
+        />
+      ) : columnDef?.dataList && columnDef?.dataListId ? (
+        <DataList
+          columnDef={columnDef}
+          cellValue={cellValue}
+          setCellValue={setCellValue}
+          cell={cell}
+          currentEditingCellPosition={currentEditingCellPosition}
+          onBlur={() => {
+            if (
+              (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
+              (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
+            ) {
+              submitInput();
+            } else {
+              resetField();
+            }
+            cellId = null;
+          }}
+        />
+      ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
+        <Autocomplete
+          fullWidth
+          onKeyDown={(e) => {
+            const target = e.target as HTMLInputElement;
+            if (!currentEditingCellPosition) return;
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              target.blur();
+            }
+          }}
+          options={columnDef?.option || []}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            columnDef?.option?.filter((data) => data.optionValue === cellValue).length
+              ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setCellValue(val?.optionValue || '');
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              id={`${cell.column.id}-input-${row.index || 0}`}
+              autoFocus
+              onBlur={() => {
+                if (getCellValue(cell) !== cellValue) {
+                  submitInput();
+                } else {
+                  resetField();
+                }
+                cellId = null;
+              }}
+            />
+          )}
+        />
+      ) : columnDef?.type === 'multiSelect' && !columnDef?.dataList ? (
+        <Autocomplete
+          fullWidth
+          multiple
+          disableCloseOnSelect
+          limitTags={2}
+          onKeyDown={(e) => {
+            const target = e.target as HTMLInputElement;
+            if (!currentEditingCellPosition) return;
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              target.blur();
+            }
+          }}
+          selectOnFocus
+          options={columnDef?.option || []}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          value={
+            columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue)).length
+              ? columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue))
+              : []
+          }
+          onChange={(e, val) => {
+            setCellValue(val ? val?.map((v) => v?.optionValue) : []);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              id={`${cell.column.id}-input-${row.index || 0}`}
+              autoFocus
+              onBlur={() => {
+                if (!isEqual(getCellValue(cell), cellValue)) {
+                  submitInput();
+                } else {
+                  resetField();
+                }
+                cellId = null;
+              }}
+            />
+          )}
+        />
+      ) : columnDef?.type === 'date' ? (
+        <input
+          type="date"
+          id={`${cell.column.id}-input-${row.index || 0}`}
+          className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
+          value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
+          onKeyDown={(e) => {
+            const target = e.target as HTMLInputElement;
+            if (!currentEditingCellPosition) return;
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              target.blur();
+            }
+          }}
+          autoFocus
+          onBlur={() => {
+            if (!eq(getCellValue(cell), cellValue)) {
+              submitInput();
+            } else {
+              resetField();
+            }
+            cellId = null;
+          }}
+          onChange={(e) => {
+            const date = new Date();
+            const time = date.toTimeString().split(' ')[0];
+            setCellValue(`${e.target.value}T${time}.000Z`);
+          }}
+        />
+      ) : (
+        <input
+          autoFocus
+          type="number"
+          id={`${cell.column.id}-input-${row.index || 0}`}
+          min="0"
+          onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+          value={cellValue}
+          onKeyDown={(e) => {
+            const target = e.target as HTMLInputElement;
+            if (!currentEditingCellPosition) return;
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              target.blur();
+            }
+          }}
+          className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
+          onChange={(e) => {
+            let value: any = e.target.value;
+            value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
+            setCellValue(value);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
 // Cells
 export const CellRenderer = ({
+  className = '',
   state,
   cell,
   setWholeRowsCellColor,
@@ -516,6 +699,7 @@ export const CellRenderer = ({
   const columnDef: TColType = cell.column.columnDef as TColType;
 
   const { currentEditingCellPosition, loadingExpanderRowId } = state;
+  const CellDef = cell.column.columnDef.cell;
 
   const { style: stickyStyle, className: stickyClassName } = getStickyPosition(columnDef, index, table);
   let style = { position: 'static', ...stickyStyle };
@@ -527,6 +711,7 @@ export const CellRenderer = ({
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
         <CellShell
+          className={className}
           cell={cell}
           columnDef={columnDef}
           setWholeRowsCellColor={setWholeRowsCellColor}
@@ -549,6 +734,7 @@ export const CellRenderer = ({
       currentEditingCellPosition?.columnName === cell?.column.id:
       return (
         <CellShell
+          className={className}
           cell={cell}
           columnDef={columnDef}
           setWholeRowsCellColor={setWholeRowsCellColor}
@@ -561,187 +747,23 @@ export const CellRenderer = ({
           style={style}
           virtualTable={virtualTable}
         >
-          <div className="w-full">
-            {columnDef?.type === 'singleLine' ? (
-              <input
-                autoFocus
-                id={`${cell.column.id}-input-${row.index || 0}`}
-                type="text"
-                onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
-                value={cellValue}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (!currentEditingCellPosition) return;
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    target.blur();
-                  }
-                }}
-                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
-                onChange={(e) => {
-                  setCellValue(e.target.value || '');
-                }}
-              />
-            ) : columnDef?.dataList && columnDef?.dataListId ? (
-              <DataList
-                columnDef={columnDef}
-                cellValue={cellValue}
-                setCellValue={setCellValue}
-                cell={cell}
-                currentEditingCellPosition={currentEditingCellPosition}
-                onBlur={() => {
-                  if (
-                    (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
-                    (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
-                  ) {
-                    submitInput();
-                  } else {
-                    resetField();
-                  }
-                  cellId = null;
-                }}
-              />
-            ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
-              <Autocomplete
-                fullWidth
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (!currentEditingCellPosition) return;
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    target.blur();
-                  }
-                }}
-                options={columnDef?.option || []}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  columnDef?.option?.filter((data) => data.optionValue === cellValue).length
-                    ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setCellValue(val?.optionValue || '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    id={`${cell.column.id}-input-${row.index || 0}`}
-                    autoFocus
-                    onBlur={() => {
-                      if (getCellValue(cell) !== cellValue) {
-                        submitInput();
-                      } else {
-                        resetField();
-                      }
-                      cellId = null;
-                    }}
-                  />
-                )}
-              />
-            ) : columnDef?.type === 'multiSelect' && !columnDef?.dataList ? (
-              <Autocomplete
-                fullWidth
-                multiple
-                disableCloseOnSelect
-                limitTags={2}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (!currentEditingCellPosition) return;
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    target.blur();
-                  }
-                }}
-                selectOnFocus
-                options={columnDef?.option || []}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                value={
-                  columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue)).length
-                    ? columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue))
-                    : []
-                }
-                onChange={(e, val) => {
-                  setCellValue(val ? val?.map((v) => v?.optionValue) : []);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    id={`${cell.column.id}-input-${row.index || 0}`}
-                    autoFocus
-                    onBlur={() => {
-                      if (!isEqual(getCellValue(cell), cellValue)) {
-                        submitInput();
-                      } else {
-                        resetField();
-                      }
-                      cellId = null;
-                    }}
-                  />
-                )}
-              />
-            ) : columnDef?.type === 'date' ? (
-              <input
-                type="date"
-                id={`${cell.column.id}-input-${row.index || 0}`}
-                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
-                value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (!currentEditingCellPosition) return;
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    target.blur();
-                  }
-                }}
-                autoFocus
-                onBlur={() => {
-                  if (!eq(getCellValue(cell), cellValue)) {
-                    submitInput();
-                  } else {
-                    resetField();
-                  }
-                  cellId = null;
-                }}
-                onChange={(e) => {
-                  const date = new Date();
-                  const time = date.toTimeString().split(' ')[0];
-                  setCellValue(`${e.target.value}T${time}.000Z`);
-                }}
-              />
-            ) : (
-              <input
-                autoFocus
-                type="number"
-                id={`${cell.column.id}-input-${row.index || 0}`}
-                min="0"
-                onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
-                value={cellValue}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (!currentEditingCellPosition) return;
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    target.blur();
-                  }
-                }}
-                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
-                onChange={(e) => {
-                  let value: any = e.target.value;
-                  value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
-                  setCellValue(value);
-                }}
-              />
-            )}
-          </div>
+          <RenderInputs
+            cell={cell}
+            cellValue={cellValue}
+            columnDef={columnDef}
+            currentEditingCellPosition={currentEditingCellPosition}
+            resetField={resetField}
+            row={row}
+            setCellValue={setCellValue}
+            submitInput={submitInput}
+          />
         </CellShell>
       );
 
     case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
         <CellShell
+          className={className}
           cell={cell}
           columnDef={columnDef}
           setWholeRowsCellColor={setWholeRowsCellColor}
@@ -766,6 +788,7 @@ export const CellRenderer = ({
     case columnDef?.editable:
       return (
         <CellShell
+          className={className}
           id={`${cell?.column.id}-${row.index}`}
           value={row.original[cell?.column.id]}
           cell={cell}
@@ -782,7 +805,7 @@ export const CellRenderer = ({
         >
           <div className="w-full">
             <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
-              <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
+              <p>{flexRender(CellDef, cell.getContext())}</p>
               <span>
                 <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
               </span>
@@ -793,6 +816,7 @@ export const CellRenderer = ({
     case cell.column.id === 'action':
       return (
         <CellShell
+          className={className}
           cell={cell}
           columnDef={columnDef}
           setWholeRowsCellColor={setWholeRowsCellColor}
@@ -805,13 +829,16 @@ export const CellRenderer = ({
           style={style}
           virtualTable={virtualTable}
         >
-          <div className="action-cell">{flexRender(cell.column.columnDef.cell, cell.getContext())}</div>
+          <div className="action-cell">{flexRender(CellDef, cell.getContext())}</div>
         </CellShell>
       );
     default:
       return (
         <CellShell
-          className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 "
+          className={cn(
+            ' [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 ',
+            className
+          )}
           cell={cell}
           columnDef={columnDef}
           setWholeRowsCellColor={setWholeRowsCellColor}
@@ -824,7 +851,7 @@ export const CellRenderer = ({
           style={style}
           virtualTable={virtualTable}
         >
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {flexRender(CellDef, cell.getContext())}
         </CellShell>
       );
   }

@@ -37,7 +37,8 @@ const ManageRentalManagementDialog = ({
   onSuccess,
   open,
   referenceData = null,
-  isDisableCustomerAccount = false
+  isDisableCustomerAccount = false,
+  isAutomated = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -147,6 +148,7 @@ const ManageRentalManagementDialog = ({
 
   const handleSubmit = (values) => {
     setLoading(true);
+
     if (rentalManagementId && isClone === false) {
       values._id = rentalManagementId;
       axiosInstance()
@@ -173,7 +175,7 @@ const ManageRentalManagementDialog = ({
             type: 'success',
             message: message
           });
-          if (referenceData) {
+          if (referenceData || isAutomated) {
             onSuccess(data);
           } else {
             history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);

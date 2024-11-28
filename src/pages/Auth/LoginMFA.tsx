@@ -143,6 +143,7 @@ const LoginMFA = () => {
         setIsSubmitting(false);
       })
       .catch((error) => {
+        setOtp('');
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
