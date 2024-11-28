@@ -62,7 +62,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
                           margin="none"
                           autoOk
                           format={dateFormatForInputControl + ' HH:mm'}
-                          minDate={minDate ? minDate : new Date()}
+                          {...(minDate ? { minDate: minDate } : {})}
                           label={`Start Date`}
                           views={['year', 'month', 'date']}
                           value={values.startDate}
