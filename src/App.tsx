@@ -270,6 +270,7 @@ import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
+import Docs from './pages/Docs';
 
 var notificationInterval: any = null;
 
@@ -541,6 +542,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/user">
               <User />
+            </PrivateRoute>
+            <PrivateRoute exact path="/docs" docs = {true}> 
+              <Docs/>
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />
