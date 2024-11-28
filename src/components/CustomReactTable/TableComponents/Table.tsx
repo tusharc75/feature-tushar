@@ -57,13 +57,13 @@ const TableComponent = forwardRef(function (
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
   const tableColumns = table.getVisibleFlatColumns();
   const columns = tableColumns?.map((d) => d?.columnDef);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sizes = tableColumns?.map((c) => c.getSize()) || [];
 
   const stickyColumns = useMemo(() => {
     const stickyData = getStickyColumnNames({ allColumn: columns as TColType[], expander, hideSelection });
     return stickyData;
   }, [expander, hideSelection, columns]);
-
-  const sizes = tableColumns?.map((c) => c.getSize()) || [];
 
   const tableRef = useRef<HTMLTableElement | null>(null);
 
