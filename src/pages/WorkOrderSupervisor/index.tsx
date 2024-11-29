@@ -404,14 +404,12 @@ const WorkOrderSupervisor = () => {
                       {isFilterPresent ? (
                         <>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -456,7 +454,7 @@ const WorkOrderSupervisor = () => {
                 )
               ) : (
                 <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {routes.workOrder.title}
                     </ToggleButton>
@@ -716,7 +714,7 @@ const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog,
             handleClose();
           }}
         >
-          Set Product Frequency
+          Work Order Scheduling
         </MenuItem>
       </Menu>
     </>
