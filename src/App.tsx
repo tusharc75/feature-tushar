@@ -270,8 +270,10 @@ import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
+import UserManual from './pages/UserManual';
 import WorkAutomation from 'src/pages/WorkAutomation';
 import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
+
 
 var notificationInterval: any = null;
 
@@ -342,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -543,6 +545,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/user">
               <User />
+            </PrivateRoute>
+            <PrivateRoute exact path="/user-manual" userManual={true}>
+              <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />
@@ -1216,7 +1221,7 @@ function App() {
             <PrivateRoute exact path={`${routes.workAutomation.path}`}>
               <WorkAutomation />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomation.path}${routes.workAutomationCreate.path}`}>
+            <PrivateRoute exact path={`${routes.workAutomationDetail.path}/:id`}>
               <ManageWorkAutomation />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>

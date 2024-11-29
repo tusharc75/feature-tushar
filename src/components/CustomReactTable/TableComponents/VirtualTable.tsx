@@ -77,7 +77,6 @@ export const VirtualTable = forwardRef(function (
 
   useEffect(() => {
     columnVirtualizer.measure();
-    console.log('hi');
   }, [columns.length]);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();

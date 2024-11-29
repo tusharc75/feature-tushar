@@ -39,7 +39,7 @@ import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
 const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
 
-const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
+const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -74,8 +74,8 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
-    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderCost, salesOrderData?.currency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, allowedToEdit);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderCost, salesOrderData?.currency, allowedToEdit);
     setCostFields(c_fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
@@ -114,19 +114,20 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
             {row.original?.detail ? (
-              <p
-                onClick={() => {
-                  handleOpen(row, table.getRowModel().rows);
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </p>
+              allowedToEdit ?
+                <p
+                  onClick={() => {
+                    handleOpen(row, table.getRowModel().rows);
+                  }}
+                  className="link text-truncate"
+                  title={row.original?.detail}
+                >
+                  {row.original?.detail}
+                </p> : <p className=" text-truncate">{row.original?.detail}</p>
             ) : (
               <NoDataCell />
             )}
-            {![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
+            {allowedToEdit && ![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
               <>
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -261,15 +262,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -298,13 +298,12 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -688,9 +687,9 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={true}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           tooltip: Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete',
@@ -700,7 +699,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         rightSideContents
         hasXpadding
       />
-
       {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
@@ -714,6 +712,8 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               renderedFrom={renderedFrom}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
               isClientSideGrid={true}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
             />
           </Box>
         </>
