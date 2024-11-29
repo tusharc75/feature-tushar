@@ -27,7 +27,7 @@ const reducer = (state: UseManualState, action: ManualActions) => {
       const pageData = getPageDataByUrl(state.manualData, action.payload);
       const updatedState = { ...state, currentRoute: action.payload };
       const sections = getSectionFromUrl(action.payload);
-      document.title = `${sections[1] ? sections[1] + ' | ' : ''} ${pageTitle}`;
+      document.title = `${sections?.[1] ? sections[1] + ' | ' : ''} ${pageTitle}`;
       if (pageData) {
         updatedState.pageData = [...pageData];
       }
