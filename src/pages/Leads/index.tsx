@@ -45,6 +45,10 @@ const Leads = () => {
     {
       key: `All ${routes.lead.title}`,
       value: 2
+    },
+    {
+      key: `Converted ${routes.lead.title}`,
+      value: 3
     }
   ];
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -186,6 +190,19 @@ const Leads = () => {
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (selectedType === 3) {
+      deepFilters.push({
+        field: 'staticData.convertedToOpportunity',
+        term: "Yes"
+      });
+    }
+    else {
+      deepFilters.push({
+        field: 'staticData.convertedToOpportunity',
+        term: "No"
+      });
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
