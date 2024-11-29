@@ -71,7 +71,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
       {initialData?.fields?.length ? (
         <>
           <CustomDialogHeader
-            title={`Edit Frequency`}
+            title={`Edit`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);

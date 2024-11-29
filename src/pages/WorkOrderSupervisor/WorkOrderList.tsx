@@ -1,9 +1,10 @@
-import { Box, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
@@ -114,7 +115,20 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       {
         accessor: 'workOrderNumber',
         Header: 'Work Order Number',
-        Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['workOrderNumber'] ?
+          <div className="flex items-center gap-1">
+            <h5 className=" text-truncate">{row.original.workOrderNumber}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workOrderDetail.path}/${row.original._id}`);
+
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+          : <NoDataCell />)
       },
       {
         accessor: 'assignedWorkStations',

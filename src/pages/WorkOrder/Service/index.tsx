@@ -3,7 +3,6 @@ import { Add, ExpandMore, LowPriority } from '@material-ui/icons';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { FailIcon, PassIcon } from 'src/assets/svg/svgIcons';
@@ -727,8 +726,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                      isAllowedToServiceEdit &&
+                      selectedService?.clickable
                       ? false
                       : true
                   }
@@ -744,8 +743,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                      !completed
                       ? false
                       : true
                   }
@@ -800,8 +799,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -815,8 +814,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
