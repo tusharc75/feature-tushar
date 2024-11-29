@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useReducer } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { pageTitle } from 'src/pages/UserManual/constants';
 import { ManualActions, UseManualState } from 'src/pages/UserManual/type';
-import { createURl, getCurrentManualUrl, getPageDataByUrl } from 'src/pages/UserManual/utils';
+import { createURl, getCurrentManualUrl, getPageDataByUrl, getSectionFromUrl } from 'src/pages/UserManual/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const initialState: UseManualState = {
@@ -26,6 +26,8 @@ const reducer = (state: UseManualState, action: ManualActions) => {
     case 'setCurrentRoute': {
       const pageData = getPageDataByUrl(state.manualData, action.payload);
       const updatedState = { ...state, currentRoute: action.payload };
+      const sections = getSectionFromUrl(action.payload);
+      document.title = `${sections[1] ? sections[1] + ' | ' : ''} ${pageTitle}`;
       if (pageData) {
         updatedState.pageData = [...pageData];
       }
@@ -92,11 +94,12 @@ const useManual = () => {
     if (manualData) {
       const url = getCurrentManualUrl();
       setState({ type: 'setCurrentRoute', payload: url });
+    } else {
+      document.title = pageTitle;
     }
   }, [manualData]);
 
   useEffect(() => {
-    document.title = pageTitle;
     fetchData();
   }, []);
 
