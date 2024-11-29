@@ -7,7 +7,7 @@ import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
   return (
-    <main className="relative flex min-h-screen flex-grow bg-gray-100 dark:bg-[#1b1b1d]">
+    <main className="relative flex min-h-screen flex-grow bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
         <div className="absolute inset-0 left-1/2 top-1/2 z-10 h-fit w-fit [transform:translate(-50%,-50%)]">
           <CircularProgress className="!text-gray-400" />
