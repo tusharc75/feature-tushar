@@ -110,7 +110,6 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
   const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
@@ -473,7 +472,6 @@ const WorkOrderSupervisor = () => {
                   <RenderActionOptions
                     permissions={permissions}
                     setShowProductFreqDialog={setShowProductFreqDialog}
-                    setShowManageWorkOrder={setShowManageWorkOrder}
                   />
                 </div>
 
@@ -577,18 +575,6 @@ const WorkOrderSupervisor = () => {
             }}
           />
         )}
-        {showManageWorkOrder && (
-          <ManageWorkOrder
-            isClone={false}
-            workOrderId={null}
-            onClose={() => setShowManageWorkOrder(false)}
-            onSuccess={() => {
-              onClickRefreshIcon();
-              setShowManageWorkOrder(false);
-            }}
-            isRedirectToDetailPage={false}
-          />
-        )}
         {showProductFreqDialog && (
           <ProductFrequencyDialog
             onClose={() => setShowProductFreqDialog(false)}
@@ -663,7 +649,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
   );
 };
 
-const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog, permissions }) => {
+const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
