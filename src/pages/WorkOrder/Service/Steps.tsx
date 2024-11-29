@@ -1159,18 +1159,19 @@ const Steps = ({
                                     <Info fontSize="inherit" />
                                   </IconButton>
                                 )}
-
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  aria-label="delete"
-                                  disabled={!allowedToEdit}
-                                  onClick={(event) => {
-                                    handleOpenMenu(event, step);
-                                  }}
-                                >
-                                  <MoreHoriz />
-                                </IconButton>
+                                <HtmlTooltip title='Actions'>
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    aria-label="delete"
+                                    disabled={!allowedToEdit}
+                                    onClick={(event) => {
+                                      handleOpenMenu(event, step);
+                                    }}
+                                  >
+                                    <MoreHoriz />
+                                  </IconButton>
+                                </HtmlTooltip>
                                 {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) ? (
                                   <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                                     <IconButton

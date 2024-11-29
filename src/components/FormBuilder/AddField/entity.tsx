@@ -17,7 +17,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
   }, []);
 
   return (
-    <Box mt={2}>
+    <Box>
       <Box>
         <FormControlLabel
           control={

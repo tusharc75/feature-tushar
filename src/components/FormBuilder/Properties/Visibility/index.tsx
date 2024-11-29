@@ -89,11 +89,15 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
 
   return (
     <Box>
-      <Box pl={0.5}>
+      <Entity
+        values={values}
+        setFieldValue={setFieldValue}
+        errors={errors}
+        touched={touched}
+      />
+      <Box pl={0.5} pt={2}>
         <Typography variant="subtitle2">ONLY SHOW WHEN...</Typography>
       </Box>
-      <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />
-
       {values &&
         values?.visibilityCondition?.map((c) => (
           <Box border={1} borderColor="var(--common-border-color)" mt={1} p={1}>
@@ -168,16 +172,15 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
                 alignItems={'center'}
                 mt={1}
               >
-                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${
-                  fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                  ? data[_f?.fieldName]
                     ? data[_f?.fieldName]
-                      ? data[_f?.fieldName]
-                          ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
-                          ?.map((v) => v?.optionLabel)
-                          ?.join(', ')
-                      : ''
-                    : _f?.value
-                }`}</Typography>
+                      ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
+                      ?.map((v) => v?.optionLabel)
+                      ?.join(', ')
+                    : ''
+                  : _f?.value
+                  }`}</Typography>
                 <Box>
                   <IconButton
                     aria-label="setting"
