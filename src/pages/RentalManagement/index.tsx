@@ -80,7 +80,7 @@ const RentalManagement = () => {
   useEffect(() => {
     setUpindexDB();
     fetchGridColumns();
-  }, []);
+  }, [selectedEntity]);
 
   useEffect(() => {
     if (renderCount > 0) {
