@@ -533,7 +533,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           let updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
           await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData });
         } else {
-          let updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
+          let updatedData = { ...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
           await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
         }
       } else {
