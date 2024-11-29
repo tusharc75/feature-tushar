@@ -134,7 +134,7 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') }]);
+        setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
