@@ -691,7 +691,7 @@ const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
               handleClose();
             }}
           >
-            {`Create ${routes?.workOrder.title}`}
+            {`${routes?.workOrder.title}`}
           </MenuItem>
         )}
         {permissions?.repairOrder?.isCreate && (
@@ -701,7 +701,7 @@ const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
               handleClose();
             }}
           >
-            {`Create ${routes?.repairOrder.title}`}
+            {`${routes?.repairOrder.title}`}
           </MenuItem>
         )}
         {permissions?.productionOrder?.isCreate && (
@@ -711,7 +711,7 @@ const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
               handleClose();
             }}
           >
-            {`Create ${routes?.productionOrder.title}`}
+            {`${routes?.productionOrder.title}`}
           </MenuItem>
         )}
         {permissions?.assemblyOrder?.isCreate && (
@@ -721,7 +721,7 @@ const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
               handleClose();
             }}
           >
-            {`Create ${routes?.assemblyOrder.title}`}
+            {`${routes?.assemblyOrder.title}`}
           </MenuItem>
         )}
         <MenuItem
