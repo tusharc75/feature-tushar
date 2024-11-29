@@ -9,7 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import { AI_AGENT } from 'src/config';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.png';
 
-const excludedPaths = ['/', routes.equiptAi.path];
+const excludedPaths = ['/', routes.equiptAi.path, '/user-manual'];
 
 const AgentChat = () => {
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
@@ -19,7 +19,7 @@ const AgentChat = () => {
     setIsChatboxOpen((prev) => !prev);
   };
 
-  if (excludedPaths.includes(pathname)) {
+  if (excludedPaths.includes(pathname) || pathname.includes('/user-manual')) {
     return null;
   }
 
