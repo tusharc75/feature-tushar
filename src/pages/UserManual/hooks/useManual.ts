@@ -2,6 +2,7 @@ import { useMediaQuery } from '@material-ui/core';
 import { uniq } from 'lodash';
 import { useCallback, useContext, useEffect, useReducer } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { pageTitle } from 'src/pages/UserManual/constants';
 import { ManualActions, UseManualState } from 'src/pages/UserManual/type';
 import { createURl, getCurrentManualUrl, getPageDataByUrl } from 'src/pages/UserManual/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -95,6 +96,7 @@ const useManual = () => {
   }, [manualData]);
 
   useEffect(() => {
+    document.title = pageTitle;
     fetchData();
   }, []);
 
