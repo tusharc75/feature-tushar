@@ -18,7 +18,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
             {pageData?.map((e, i) => (
               <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="scroll-m-[calc(var(--manual-head-height)+20px)]">
                 <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
-                <div className="prose mt-4 dark:prose-invert [&_img]:max-w-full " dangerouslySetInnerHTML={{ __html: e.content }}></div>
+                <div className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full " dangerouslySetInnerHTML={{ __html: e.content }}></div>
               </div>
             ))}
           </div>
