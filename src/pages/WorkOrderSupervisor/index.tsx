@@ -701,11 +701,41 @@ const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog,
         {permissions?.workOrder?.isCreate && (
           <MenuItem
             onClick={() => {
-              setShowManageWorkOrder(true);
+              window.open(`${routes.workOrder.path}`);
               handleClose();
             }}
           >
             {`Create ${routes?.workOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.repairOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.repairOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`Create ${routes?.repairOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.productionOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.productionOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`Create ${routes?.productionOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.assemblyOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.assemblyOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`Create ${routes?.assemblyOrder.title}`}
           </MenuItem>
         )}
         <MenuItem
