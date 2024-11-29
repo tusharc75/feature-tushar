@@ -36,6 +36,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
 const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
 
@@ -687,13 +688,17 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
+        isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
         isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           tooltip: Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete',
           disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
+        }}
+        addButtonProps={{
+          disabled: !allowedToEdit,
+          tooltip: salesOrderData?.quotation ? `Converted from Quotation you can not perform this action` : !allowedToEdit ? ownerAndColaborator : ``,
         }}
         leftSideContents
         rightSideContents
