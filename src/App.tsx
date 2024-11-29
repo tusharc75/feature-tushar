@@ -274,7 +274,6 @@ import UserManual from './pages/UserManual';
 import WorkAutomation from 'src/pages/WorkAutomation';
 import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
 
-
 var notificationInterval: any = null;
 
 function App() {
@@ -344,7 +343,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -546,7 +545,7 @@ function App() {
             <PrivateRoute exact path="/user">
               <User />
             </PrivateRoute>
-            <PrivateRoute exact path="/user-manual" userManual={true}>
+            <PrivateRoute exact path="/user-manual*" userManual={true}>
               <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
