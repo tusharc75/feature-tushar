@@ -241,7 +241,8 @@ const AssignPackageDialog = ({
             disabled: isSubmitting || selectedRecords?.length === 0,
             loading: isSubmitting,
             iconsEnabled: false,
-            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            textAddShow: true
           }}
           addButtonOnclick={() => {
             if (selectedRecords?.some((r) => r?.qty > 1)) {

@@ -84,7 +84,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
         Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
       }
     ];
-    const newColumns = generateColumns(renderedFrom, data);
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, false);
     setColumns([...coloum, ...newColumns]);
   };
 
