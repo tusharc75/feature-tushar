@@ -30,6 +30,7 @@ import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from '
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import Filter from 'src/components/Filter';
 
 let cancelTokenSource = null;
 
@@ -58,6 +59,8 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [deepFilters, setDeepFilters] = React.useState([]);
+  const [filterByIds, setFilterByIds] = React.useState([]);
 
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
@@ -108,6 +111,33 @@ const Report = () => {
         isRead: true,
         isUpdate: true
       });
+    }
+    if (resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status')) {
+      const index = resourceColumns?.findIndex((r) => r?.fieldData?.fieldName === 'status');
+      if (index != -1) {
+        resourceColumns?.splice(index + 1, 0, {
+          fieldData: {
+            _id: '630dc2429ec41869052355b1',
+            fieldLabel: 'Status Period',
+            type: 'date',
+            option: [],
+            required: false,
+            isTooltip: false,
+            tooltipMessage: '',
+            editAble: true,
+            deletAble: true,
+            order: 71,
+            fieldName: 'statusPeriod',
+            sectionName: 'Product Inventory',
+            resource: 'Serialized Asset',
+            brand: data[0]?.fieldData?.brand,
+            timeFrame: 'custom'
+          },
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
+      }
     }
     setResourceColumns(resourceColumns);
     setLoadingColumns(false);
@@ -368,6 +398,46 @@ const Report = () => {
       });
     }
 
+    if (filterByIds?.length > 0) {
+      const filterById = filterByIds
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          return {
+            field: f?.field,
+            term: {
+              $in: f?.term.map((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+      }
+    }
+
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
+    if (deepFilters?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFilters?.filter((d) => {
+          const hasTermLength = d?.term?.length ? true : false;
+          if (isStatusPeriod) {
+            return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+          }
+          return hasTermLength;
+        })
+      ];
+    }
+
+    if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
+      deepFilters
+        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+        ?.forEach((ele) => {
+          filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
+        });
+    }
+
     if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
@@ -428,7 +498,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => { }}
+                        afterImportCompleted={() => {}}
                         onlyExport={true}
                       />
                     )}
@@ -462,12 +532,12 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{`${showGrid ? selectedReportView?.name ?? 'Reports' : 'Reports'}`}</span>
+                    <span className="listingHeader">{`${showGrid ? (selectedReportView?.name ?? 'Reports') : 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
             </div>
-            {!showGrid && (
+            {/* {!showGrid && (
               <Dialog
                 open={true}
                 maxWidth="md"
@@ -517,6 +587,20 @@ const Report = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+            )} */}
+            {!showGrid && (
+              <Filter
+                onClose={() => {
+                  setShowGrid(true);
+                }}
+                resource={sidebarResource[resourceCamelCase]}
+                columns={resourceColumns}
+                onApplyFilter={fetchResourceData}
+                deepFilters={deepFilters}
+                setDeepFilters={setDeepFilters}
+                filterByIds={filterByIds}
+                setFilterByIds={setFilterByIds}
+              />
             )}
             <div>
               {columns ? (

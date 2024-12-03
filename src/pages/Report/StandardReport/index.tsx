@@ -43,6 +43,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import { isMobile, isTablet } from 'react-device-detect';
 import SendMailMenu from './SendMailMenu';
+import Filter from 'src/components/Filter';
 
 let cancelTokenSource = null;
 
@@ -92,6 +93,8 @@ const Report = () => {
   const [htmlContent, setHtmlContent] = React.useState(null);
 
   const [isProcessing, setIsProcessing] = React.useState(null);
+  const [deepFilters, setDeepFilters] = React.useState([]);
+  const [filterByIds, setFilterByIds] = React.useState([]);
 
   const fetchGridColumns = async () => {
     try {
@@ -127,7 +130,7 @@ const Report = () => {
           o.disableFilters = true;
           o.disableSortBy = true;
         }
-        if ((o?.accessor === 'productName' || o?.accessor === 'product')) {
+        if (o?.accessor === 'productName' || o?.accessor === 'product') {
           o.cell = ({ row }) => ProductRenderer(row);
         }
         if (o?.accessor === 'serviceName') {
@@ -179,7 +182,8 @@ const Report = () => {
 
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
-        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        // setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData));
         setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
       }
       setColumns(columns);
@@ -301,8 +305,8 @@ const Report = () => {
           <NoDataCell />
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const SerializedAssetRenderer = (row) => {
     return (
@@ -321,7 +325,7 @@ const Report = () => {
         )}
       </div>
     );
-  }
+  };
 
   const ReferenceRenderer = (row) => {
     return (
@@ -686,6 +690,47 @@ const Report = () => {
         });
       });
     }
+
+    if (filterByIds?.length > 0) {
+      const filterById = filterByIds
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          return {
+            field: f?.field,
+            term: {
+              $in: f?.term.map((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+      }
+    }
+
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
+    if (deepFilters?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFilters?.filter((d) => {
+          const hasTermLength = d?.term?.length ? true : false;
+          if (isStatusPeriod) {
+            return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+          }
+          return hasTermLength;
+        })
+      ];
+    }
+
+    if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
+      deepFilters
+        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+        ?.forEach((ele) => {
+          filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
+        });
+    }
+
     if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
@@ -740,7 +785,8 @@ const Report = () => {
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
     if (processType === 'sendMail' && exportType === 'html') {
-      axiosInstance().get(`${api}${filterQuery}&html=true`)
+      axiosInstance()
+        .get(`${api}${filterQuery}&html=true`)
         .then((res) => {
           setHtmlContent(res.data);
           setIsProcessing(null);
@@ -842,20 +888,19 @@ const Report = () => {
     }
   }, [columns?.length, type, footerData]);
 
-
   const getFilteredColumn = (column) => {
     if (resourceCamelCase === 'dailyVolumeReport') {
       let tempColumn = column;
       if (!selectedData?.dayWise?.value) {
-        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date')
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
       if (selectedData?.padWise?.value) {
-        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor))
+        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
       }
       return tempColumn;
     }
     return column;
-  }
+  };
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -872,7 +917,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -881,9 +926,7 @@ const Report = () => {
                 />
               ) : (
                 <div className="flex items-center gap-1">
-                  {reportConfig?.isSendMail && (
-                    <SendMailMenu exportData={exportData} isProcessing={isProcessing} />
-                  )}
+                  {reportConfig?.isSendMail && <SendMailMenu exportData={exportData} isProcessing={isProcessing} />}
                   {reportConfig?.isExportPdf && (
                     <Button
                       variant="outlined"
@@ -938,7 +981,7 @@ const Report = () => {
               </Grid>
             </Grid>
           </div>
-          {!showGrid && (
+          {/* {!showGrid && (
             <Dialog
               open={true}
               maxWidth="md"
@@ -998,6 +1041,22 @@ const Report = () => {
                 </DialogContent>
               </div>
             </Dialog>
+          )} */}
+          {!showGrid && (
+            <Filter
+              onClose={() => {
+                setShowGrid(true);
+              }}
+              resource={sidebarResource[resourceCamelCase]}
+              columns={resourceColumns}
+              onApplyFilter={fetchResourceData}
+              deepFilters={deepFilters}
+              setDeepFilters={setDeepFilters}
+              filterByIds={filterByIds}
+              setFilterByIds={setFilterByIds}
+              defaultColumns={defaultColumns}
+              reportConfig={reportConfig}
+            />
           )}
           <div>
             {columns ? (
