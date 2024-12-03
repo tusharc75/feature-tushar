@@ -20,10 +20,17 @@ export type AtedBy = {
   date: Date;
 };
 
+export type SubSection = {
+  _id: string;
+  sectionName: string;
+  content: string;
+};
+
 export type Section = {
   _id: string;
   sectionName: string;
   content: string;
+  subSections?: SubSection[];
 };
 
 export type ComponentCommonProps = {
