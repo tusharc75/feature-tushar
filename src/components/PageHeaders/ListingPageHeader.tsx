@@ -17,6 +17,7 @@ type ButtonPropsWithExtraData = {
   loading?: boolean;
   iconsEnabled?: boolean;
   text?: string;
+  textAddShow?: boolean
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -86,6 +87,7 @@ const ListingPageHeader = ({
     disabled: addButtonDisabled,
     iconsEnabled: addButtonIconsEnabled = true,
     text: addButtonText = '',
+    textAddShow = false,
     ...restOfAddButtonProps
   } = addButtonProps;
 
@@ -228,7 +230,7 @@ const ListingPageHeader = ({
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                     >
                       {renderButtonText({
-                        text: `Create`,
+                        text: textAddShow ? 'Add' : `Create`,
                         loading: addButtonLoading,
                         iconText: addButtonText,
                         mobileIcon: <AddOutlined />
