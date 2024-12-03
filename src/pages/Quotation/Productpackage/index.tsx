@@ -954,6 +954,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           costData={recordToUpdate}
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
+          quotationData={quotationData}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
