@@ -81,7 +81,9 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                       ? routes.workOrderDetail.path
                       : e.referenceType === sidebarResource.subcontractAssembly
                         ? routes.subcontractAssemblyDetail.path
-                        : '',
+                        : e.referenceType === sidebarResource.rentalManagement
+                          ? routes.rentalManagementDetail.path
+                          : '',
             inventory: e?.qty,
             referenceNumber: e?.reference?.optionLabel,
             referenceNumberId: e?.reference?.optionValue,
