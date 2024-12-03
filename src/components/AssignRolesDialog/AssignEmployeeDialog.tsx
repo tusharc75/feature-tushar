@@ -267,7 +267,8 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
                 iconsEnabled: false,
                 disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0,
                 loading: isAssigning,
-                text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+                text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+                textAddShow: true
               }}
               addButtonOnclick={handleSubmit}
               isAddButtonVisible

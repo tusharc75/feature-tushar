@@ -48,6 +48,10 @@ const Opportunities = () => {
     {
       key: `All ${routes.opportunity.title}`,
       value: 2
+    },
+    {
+      key: `Closed ${routes.opportunity.title}`,
+      value: 3
     }
   ];
 
@@ -177,6 +181,16 @@ const Opportunities = () => {
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({ field: 'supplierAccount', term: { $in: [accountDetails.accountId] } });
       }
+    }
+
+    if (selectedType === 3) {
+      deepFilters.push({
+        field: 'outcome',
+        term: ['Won', 'Lost']
+      });
+    }
+    else {
+      deepFilter = `${deepFilter}&pendingOutcome=1`;
     }
 
     if (filterByIds?.length) {
@@ -363,9 +377,8 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${
-              deleteRecord.opportunityName || ''
-            }?`}
+            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${deleteRecord.opportunityName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
