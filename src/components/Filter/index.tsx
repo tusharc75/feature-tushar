@@ -1,5 +1,5 @@
 import { Dialog } from '@material-ui/core';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -59,7 +59,9 @@ const Filter = ({
 
   const getLabel = (field) => {
     if (field?.type === 'singleLine' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length > 0) {
-      return deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length;
+      return isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
+        ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
+        : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
     }
     if (field?.type === 'checkBox' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term) {
       return deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
@@ -70,6 +72,15 @@ const Filter = ({
       filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length > 0
     ) {
       return filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length;
+    }
+    if (
+      ['dropDown', 'multiSelect']?.includes(field?.type) &&
+      !field?.lookup &&
+      deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
+    ) {
+      return isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
+        ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
+        : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
     }
     return '';
   };
