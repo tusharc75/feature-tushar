@@ -216,7 +216,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             disabled: disableSave,
             loading: isAdding,
             iconsEnabled: false,
-            text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : ''
+            text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : '',
+            textAddShow: true
           }}
           setQueryString={false}
           showSearchInMobile={true}

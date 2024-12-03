@@ -290,7 +290,8 @@ const AssignServiceDialog = ({
             disabled: isSubmitting || selectedRecords?.length === 0,
             loading: isSubmitting,
             iconsEnabled: false,
-            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            textAddShow: true
           }}
           addButtonOnclick={() => {
             onSuccess(selectedRecords);
