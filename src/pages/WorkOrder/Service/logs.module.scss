@@ -8,13 +8,13 @@
   --icon-size: 20px;
   --icon-text-space: 20px;
 
-  & * {
-    font-family: 'Poppins', sans-serif, 'Inter', sans-serif;
-  }
-
   display: grid;
   gap: 50px;
   margin-block: 20px;
+
+  & * {
+    font-family: 'Poppins', sans-serif, 'Inter', sans-serif;
+  }
 
   .date {
     font-style: normal;
