@@ -8,6 +8,7 @@ import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents
 import { VirtualTableBody } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Body';
 import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Head';
 import { TColType } from '../TableHelperComponents';
+import { getStickyPosition } from 'src/components/CustomReactTable/utils';
 
 let virtualPaddingLeft: number | undefined;
 let virtualPaddingRight: number | undefined;
@@ -203,7 +204,7 @@ export const VirtualTable = forwardRef(function (
                         if (!header) return null;
                         if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
                         const columnDef = header.column.columnDef as TColType;
-                        const { style } = vtableData[vc.index];
+                        const { style } = vtableData && vtableData[vc.index] ? vtableData[vc.index] : getStickyPosition(columnDef, vc.index, table);
                         const colSize = header.getSize();
                         return (
                           <th
