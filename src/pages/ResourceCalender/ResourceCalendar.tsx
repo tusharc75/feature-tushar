@@ -9,6 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import { Box } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { filterDataByDateIntersection } from 'src/constants/helpers';
 
 const localizer = momentLocalizer(moment);
 
@@ -30,6 +31,7 @@ const MyCalendar = (props: Props) => {
     estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
+  const [isDataPresent, setIsDataPresent] = useState(true);
 
   useEffect(() => {
     const deepFilter = [
@@ -59,10 +61,15 @@ const MyCalendar = (props: Props) => {
   }, [resource, dateRange]);
 
   const onRangeChange = useCallback(
-    (range) => {
+    (range, view) => {
       setRange(range);
+      if (view === 'day') {
+        setIsDataPresent(!!filterDataByDateIntersection(range, events)?.length);
+      } else {
+        setIsDataPresent(true);
+      }
     },
-    [setRange]
+    [setRange, events]
   );
 
   const onView = useCallback(
@@ -86,30 +93,37 @@ const MyCalendar = (props: Props) => {
         />
       </div>
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
-        <Calendar
-          defaultDate={moment().toDate()}
-          defaultView="day"
-          events={events}
-          localizer={localizer}
-          formats={formats}
-          popup={true}
-          onNavigate={(date) => {
-            if (view === 'month') {
-              setDateRange({
-                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-              });
-            }
-          }}
-          views={{ month: true, week: true, day: true }}
-          eventPropGetter={(obj) => ({})}
-          onSelectEvent={(event: any) => {
-            history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
-          }}
-          onRangeChange={onRangeChange}
-          onView={onView}
-          view={view}
-        />
+        <div className="relative">
+          <Calendar
+            defaultDate={moment().toDate()}
+            defaultView="day"
+            events={events}
+            localizer={localizer}
+            formats={formats}
+            popup={true}
+            onNavigate={(date) => {
+              if (view === 'month') {
+                setDateRange({
+                  estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                  estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+                });
+              }
+            }}
+            views={{ month: true, week: true, day: true }}
+            eventPropGetter={(obj) => ({})}
+            onSelectEvent={(event: any) => {
+              history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
+            }}
+            onRangeChange={onRangeChange}
+            onView={onView}
+            view={view}
+          />
+          {!isDataPresent && (
+            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
+              No data available for the selected date range.
+            </div>
+          )}
+        </div>
       </CustomContainer>
     </>
   );

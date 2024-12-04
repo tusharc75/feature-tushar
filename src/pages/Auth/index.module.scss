@@ -143,10 +143,12 @@
     }
   }
   .right {
+    padding: var(--right-padding);
+
     @media all and (max-width: 768px) {
       display: none;
     }
-    padding: var(--right-padding);
+
     .illustration {
       margin-bottom: scaleFunc(46px);
       max-width: max-content;

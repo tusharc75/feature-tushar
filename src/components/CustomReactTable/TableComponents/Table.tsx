@@ -1,9 +1,9 @@
 import { Row, Table } from '@tanstack/react-table';
-import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef, useState, useEffect } from 'react';
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
-import { getStickyColumnNames } from '../utils';
+import { getStickyColumnNames, getStickyPosition } from '../utils';
 import { TColType } from './TableHelperComponents';
 
 type StickyColumns = ReturnType<typeof getStickyColumnNames>;
@@ -56,12 +56,13 @@ const TableComponent = forwardRef(function (
 ) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
   const tableColumns = table.getVisibleFlatColumns();
-  const columns = tableColumns?.map((d) => d?.columnDef);
+  const columns = useMemo(() => tableColumns?.map((d) => d?.columnDef) as TColType[], [tableColumns]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sizes = tableColumns?.map((c) => c.getSize()) || [];
+  const [vtableData, setVTableData] = useState(null);
 
   const stickyColumns = useMemo(() => {
-    const stickyData = getStickyColumnNames({ allColumn: columns as TColType[], expander, hideSelection });
+    const stickyData = getStickyColumnNames({ allColumn: columns, expander, hideSelection });
     return stickyData;
   }, [expander, hideSelection, columns]);
 
@@ -75,6 +76,11 @@ const TableComponent = forwardRef(function (
     []
   );
 
+  useEffect(() => {
+    if (!columns || columns.length === 0) return;
+    setVTableData(columns?.map((d, i) => getStickyPosition(d, i, table)));
+  }, [columns, table]);
+
   let rows: Row<any>[];
   if (exportTableView) {
     rows = table.getExpandedRowModel().flatRows;
@@ -84,8 +90,6 @@ const TableComponent = forwardRef(function (
 
   const excludedColumns = ['action', 'selection', 'expander'];
 
-  // const footers;
-
   const footerRowFound = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
 
   const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
@@ -94,6 +98,16 @@ const TableComponent = forwardRef(function (
     () => isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero,
     [footerRowFound, isClientSideGrid, tableRowsLengthGreterThanZero]
   );
+
+  const handleChangeCurrentEditingCellPosition = (rowid: string, columnId: string) => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: {
+        rowId: rowid,
+        columnName: columnId
+      }
+    });
+  };
 
   return (
     <>
@@ -157,6 +171,8 @@ const TableComponent = forwardRef(function (
             excludedColumns={excludedColumns}
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
+            handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
+            vtableData={vtableData}
           />
         </>
       )}
