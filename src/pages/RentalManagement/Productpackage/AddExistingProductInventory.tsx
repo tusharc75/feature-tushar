@@ -184,7 +184,8 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
               disabled: !selectedRecords?.length || isSubmitting,
               loading: isSubmitting,
               iconsEnabled: false,
-              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+              textAddShow: true
             }}
             addButtonOnclick={() => {
               addMaterial(selectedRecords);

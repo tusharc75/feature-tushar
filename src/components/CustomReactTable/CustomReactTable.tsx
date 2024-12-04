@@ -588,7 +588,7 @@ const CustomReactTable = ({
           ) : null}
           {(!isClientSideGrid || data?.length > 25) && pagination && (
             <Pagination
-              count={isClientSideGrid ? table.getExpandedRowModel().rows.length : rowCount ?? data.length}
+              count={isClientSideGrid ? table.getExpandedRowModel().rows.length : (rowCount ?? data.length)}
               page={page}
               onPageChange={(event, newPage) => {
                 dispatch({ type: 'pageChange', page: newPage });

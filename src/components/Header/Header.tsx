@@ -8,7 +8,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
@@ -38,7 +38,6 @@ const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
   const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
-
   const isMobile = useMediaQuery('(max-width:960px)');
   const is768 = useMediaQuery('(max-width: 768px)');
 
@@ -61,7 +60,6 @@ const Header = () => {
   }: any = useData();
 
   const history = useHistory();
-  const { pathname } = useLocation();
   const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -312,20 +310,21 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+              window.location.reload();
+            }}
+          >
+            <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -465,9 +464,8 @@ const Header = () => {
         <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
-              styles.flexAlignCenter
-            } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
+              } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton

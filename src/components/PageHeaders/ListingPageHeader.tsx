@@ -17,6 +17,7 @@ type ButtonPropsWithExtraData = {
   loading?: boolean;
   iconsEnabled?: boolean;
   text?: string;
+  textAddShow?: boolean
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -86,6 +87,7 @@ const ListingPageHeader = ({
     disabled: addButtonDisabled,
     iconsEnabled: addButtonIconsEnabled = true,
     text: addButtonText = '',
+    textAddShow = false,
     ...restOfAddButtonProps
   } = addButtonProps;
 
@@ -186,9 +188,8 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -213,7 +214,6 @@ const ListingPageHeader = ({
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
               <div className="flex min-w-fit flex-wrap items-center gap-[8px]">
-                {/* <HideWhenOffline> */}
                 {isAddButtonVisible ? (
                   <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
                     <Button
@@ -230,7 +230,7 @@ const ListingPageHeader = ({
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                     >
                       {renderButtonText({
-                        text: `Add`,
+                        text: textAddShow ? 'Add' : `Create`,
                         loading: addButtonLoading,
                         iconText: addButtonText,
                         mobileIcon: <AddOutlined />

@@ -2,7 +2,6 @@ import { Box, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, R
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
-import { Entity } from '../../AddField/entity';
 import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
@@ -677,7 +676,6 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} brandId={brandId} />
       <Box mt={1}>
         <FormControl component="fieldset">
           <FormLabel component="legend">Column Size</FormLabel>

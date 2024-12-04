@@ -103,6 +103,9 @@ const AssignProductDialog = ({
       if (isOffline) {
         data = await findOne(objectStore.resourceData, sidebarResource.product);
         data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        if (showFilteredRecordsOnly) {
+          data = data?.filter((d: any) => selectedRecords?.find((s) => s._id === d._id));
+        }
         count = data?.length;
       } else {
         const queryString = getQueryString();
@@ -257,7 +260,8 @@ const AssignProductDialog = ({
               iconsEnabled: false,
               disabled: isSubmitting || selectedRecords?.length === 0,
               loading: isSubmitting,
-              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+              textAddShow: true
             }}
             addButtonOnclick={() => {
               onSuccess(selectedRecords);

@@ -1,10 +1,12 @@
-import { Box, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase } from 'lodash';
+import { camelCase, uniqBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -12,7 +14,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, WORKORDER_SERVICE_STATUS, workOrderSupervisor } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  MATERIAL_SUB_TYPE,
+  MATERIAL_TYPE,
+  prepareDataForGrid,
+  sidebarResource,
+  workOrder,
+  WORKORDER_SERVICE_STATUS,
+  workOrderSupervisor
+} from 'src/constants/helpers';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
@@ -38,7 +49,8 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     fetchGridColumns(cancelToken);
@@ -114,7 +126,22 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       {
         accessor: 'workOrderNumber',
         Header: 'Work Order Number',
-        Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row.original['workOrderNumber'] ? (
+            <div className="flex items-center gap-1">
+              <h5 className=" text-truncate">{row.original.workOrderNumber}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrder}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'assignedWorkStations',
@@ -147,6 +174,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   };
 
   const fetchData = (cancelToken?: CancelTokenSource) => {
+    dispatch({ type: 'selection', selectedRecords: [] });
     const queryString = getQueryString();
     axiosInstance()
       .get(`${workOrderSupervisor.api}/work-order-service${queryString}`, { cancelToken: cancelToken?.token })
@@ -213,6 +241,44 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     setTabValue(newValue);
   };
 
+  const handleAddConsumables = (rows, records = []) => {
+    setSubmitting(true);
+    const data: any = [];
+    const workOrderId: any = uniqBy(records, 'workOrder').map(record => record.workOrder);
+  
+    records?.forEach((s) => {
+      rows?.forEach((e) => {
+        data.push({
+          product: e._id,
+          qty: parseInt(e.qty) || 1,
+          service: s?.serviceId,
+          subType: MATERIAL_SUB_TYPE.consumable,
+          uniqueId: s?.uniqueId,
+          stepId: null,
+          parentId: null
+        });
+      });
+    });
+
+setSubmitting(false);
+    axiosInstance()
+      .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+        setConsumablesDialog(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -230,6 +296,14 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
             }}
           >{`Assign ${routes.workStations.title}`}</MenuItem>
         )}
+        <MenuItem
+          onClick={() => {
+            setConsumablesDialog(true);
+          }}
+          id="add-consumables"
+        >
+          Add Products/Consumables
+        </MenuItem>
       </>
     );
   };
@@ -279,7 +353,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       {assignTechnicianDialog && (
         <AssignUserDialog
           warehouse={selectedRecords[0]?.warehouseId}
-          workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?._id }))}
+          workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
           assignedUsers={
             selectedRecords?.length === 1
               ? [{ optionLabel: selectedRecords[0]?.assignedUsers, optionValue: selectedRecords[0]?.assignedUsersId }]
@@ -299,7 +373,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       {workStationAssignDialog && (
         <AssignWorkStationDialog
           warehouse={selectedRecords[0]?.warehouseId}
-          workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?._id }))}
+          workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
           workStations={
             selectedRecords?.length === 1
               ? [{ optionLabel: selectedRecords[0]?.assignedWorkStations, optionValue: selectedRecords[0]?.assignedWorkStationsId }]
@@ -312,6 +386,18 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
             setWorkStationAssignDialog(false);
             fetchData();
           }}
+        />
+      )}
+      {consumablesDialog && (
+        <AssignProductDialog
+          handleCloseDialog={() => setConsumablesDialog(false)}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAddConsumables(rows, selectedRecords);
+          }}
+          serialized={false}
+          isSubmitting={submitting}
+          extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
         />
       )}
     </>
