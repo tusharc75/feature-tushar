@@ -405,10 +405,11 @@ $isAppliedBillDark: #234623;
     }
   }
   & .table {
+    --last-child-fallback-width: 100px;
     @media all and (min-width: 768px) {
       --last-child-width: 115px;
     }
-    --last-child-fallback-width: 100px;
+
     .td {
       &:last-of-type {
         min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;

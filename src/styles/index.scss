@@ -247,6 +247,11 @@ body {
 }
 
 .poppins {
+  font-family:
+    'Poppins',
+    sans-serif,
+    Nunito Sans,
+    sans-serif !important;
   & * {
     font-family:
       'Poppins',
@@ -254,12 +259,6 @@ body {
       Nunito Sans,
       sans-serif !important;
   }
-
-  font-family:
-    'Poppins',
-    sans-serif,
-    Nunito Sans,
-    sans-serif !important;
 }
 
 body > iframe {
@@ -758,14 +757,14 @@ body::-webkit-scrollbar-thumb {
 }
 
 .header-panel {
-  @media all and (min-width: 600px) {
-    --padding: 0 0 18px;
-  }
-
   color: var(--secondary);
   padding: var(--padding, 0 0 15px);
   border-radius: 6px 6px 0 0;
   row-gap: 5px;
+
+  @media all and (min-width: 600px) {
+    --padding: 0 0 18px;
+  }
 
   & .MuiButton-outlinedSizeSmall {
     padding: 2px 9px !important;
@@ -2800,16 +2799,15 @@ svg.MuiSvgIcon-root {
 .headerbox {
   align-items: center;
   left: 0;
-
-  @media all and (min-width: 960px) {
-    left: 66px;
-  }
-
   z-index: 1;
   // background: var(--primary);
   // background-blend-mode: overlay;
   padding-block: 10px;
   padding-inline: 0;
+
+  @media all and (min-width: 960px) {
+    left: 66px;
+  }
 
   .expand-icon-v1 {
     padding: 3px;
@@ -2856,11 +2854,6 @@ svg.MuiSvgIcon-root {
 }
 
 .new-headerbox-button-v1 {
-  @media all and (min-width: 1200px) {
-    --padding: 9px 16px;
-    --spacing: 18px;
-  }
-
   color: #232529;
   cursor: pointer;
   font-weight: 400;
@@ -2868,15 +2861,24 @@ svg.MuiSvgIcon-root {
   line-height: 117%;
   padding: var(--padding, 7px 10px);
 
-  &.small {
-    padding: 7px 10px;
-  }
-
   background: #ffffff;
   border: 1px solid #e2e2e2;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   margin-right: 8px;
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  transition: all 0.3s;
+
+  @media all and (min-width: 1200px) {
+    --padding: 9px 16px;
+    --spacing: 18px;
+  }
+
+  &.small {
+    padding: 7px 10px;
+  }
 
   [data-mode='dark'] & {
     color: #fff;
@@ -2888,15 +2890,9 @@ svg.MuiSvgIcon-root {
     margin-right: 0;
   }
 
-  transition: all 0.3s;
-
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);
   }
-
-  display: inline-flex;
-  gap: 12px;
-  align-items: center;
 
   svg {
     font-size: 19px;
@@ -2971,12 +2967,11 @@ svg.MuiSvgIcon-root {
 }
 
 .main-container-v1 {
+  margin-bottom: 20px;
   @media all and (min-width: 768px) {
     --header-mb: 35px;
     --container-padding: 26px;
   }
-
-  margin-bottom: 20px;
 
   .new-content-head-v1 {
     max-width: 100%;
@@ -3071,14 +3066,6 @@ svg.MuiSvgIcon-root {
   }
 
   .activity-new-v1 {
-    @media all and (min-width: 500px) {
-      --width: 450px;
-    }
-
-    @media all and (min-width: 768px) {
-      --top: 64px;
-    }
-
     position: fixed;
     width: var(--width, 100vw);
     right: calc(var(--width, 100vw) * -1);
@@ -3089,6 +3076,13 @@ svg.MuiSvgIcon-root {
     overflow: auto;
     background-color: var(--dark-secondary, white);
     border-radius: 7px 0 0 7px;
+    @media all and (min-width: 500px) {
+      --width: 450px;
+    }
+
+    @media all and (min-width: 768px) {
+      --top: 64px;
+    }
 
     .close-icon-v1 {
       position: absolute;
@@ -3139,14 +3133,13 @@ svg.MuiSvgIcon-root {
   .details-full-height-v1 {
     & > div:only-child {
       min-height: 500px;
+      border: 1px solid #f7f7f7;
+      box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.03);
+      border-radius: 0px 0px 3.98281px 3.98281px;
 
       @media all and (min-width: 960px) {
         height: calc(100vh + 34px);
       }
-
-      border: 1px solid #f7f7f7;
-      box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.03);
-      border-radius: 0px 0px 3.98281px 3.98281px;
 
       & > div:last-of-type {
         border: 0px;
