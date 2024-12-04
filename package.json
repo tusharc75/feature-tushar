@@ -130,7 +130,6 @@
     "react-signature-canvas": "^1.0.3",
     "react-table": "^7.8.0",
     "react-table-sticky": "^1.1.3",
-    "react-virtualized": "^9.22.5",
     "react-webcam": "^7.1.1",
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.9",
@@ -168,6 +167,7 @@
     "prebuild": "node -r dotenv/config src/prebuild/prebuild.js",
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
+    "pdev": "pnpm install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev:prebuild": "yarn prebuild && yarn dev",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
     "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
@@ -217,7 +217,6 @@
     "@types/prop-types": "^15.7.12",
     "@types/react-big-calendar": "^0.31.0",
     "@types/react-signature-canvas": "^1.0.6",
-    "@types/react-virtualized": "^9.22.0",
     "@types/react-window-infinite-loader": "^1.0.9",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^4.0.0",
@@ -308,7 +307,6 @@
     "@types/react": "17.0.40",
     "@types/web": "0.0.61",
     "@types/serviceworker": "0.0.41",
-    "@types/react-dom": "17.0.1",
-    "react-virtualized": "git+https://git@github.com/remorses/react-virtualized-fixed-import.git#9.22.3"
+    "@types/react-dom": "17.0.1"
   }
 }

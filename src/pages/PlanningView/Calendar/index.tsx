@@ -26,7 +26,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, sidebarResource } from 'src/constants/helpers';
+import { cn, filterDataByDateIntersection, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
@@ -151,6 +151,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const defaultDate = useMemo(() => moment().toDate(), []);
 
   const [staticEvents, setStaticEvents] = useState([]);
+  const [isDataPresent, setIsDataPresent] = useState(true);
+
+  const handleRangeChange = (dates, view) => {
+    if (view === 'day' || view === 'agenda') {
+      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
+    } else {
+      setIsDataPresent(true);
+    }
+  };
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -786,7 +795,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               />
             </>
           ) : (
-            <>
+            <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
               <Calendar
                 defaultDate={defaultDate}
                 key={mobileView ? 'mobile' : 'desktop'}
@@ -798,6 +807,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 messages={{
                   agenda: 'List'
                 }}
+                onRangeChange={handleRangeChange}
                 views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
@@ -827,7 +837,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   }
                 }}
               />
-            </>
+              {!isDataPresent && (
+                <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
+                  No data available for the selected date range.
+                </div>
+              )}
+            </div>
           )}
           {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
