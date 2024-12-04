@@ -340,13 +340,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    if (new Date(fieldTicketData?.estimateStartDate) > new Date(values?.estimateStartDate)) {
-      errors['estimateStartDate'] = 'Please enter valid estimate start date';
-    }
-    if (new Date(fieldTicketData?.estimateEndDate) < new Date(values?.estimateEndDate)) {
-      errors['estimateEndDate'] = 'Please enter valid estimate end date';
-    }
-
     if (referenceType === 'consumables') {
       if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty>0) {
         errors['qty'] = 'Quantity can not be change in bulk edit once consumed';
