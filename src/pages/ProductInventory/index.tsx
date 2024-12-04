@@ -34,7 +34,7 @@ const InventoryProduct = () => {
 
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, visibleColumns } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -497,6 +497,7 @@ const InventoryProduct = () => {
           onExportToExcelSuccess={() => {
             fetchData();
           }}
+          visibleColumns={visibleColumns}
         />
       </div>
       <CustomContainer>
