@@ -438,23 +438,6 @@ const SerializedAsset = () => {
       });
   };
 
-  const updateQueryParams = (field) => {
-    const queryParams = new URLSearchParams(history.location.search);
-    if(field==='status'){
-      queryParams.delete('assetStatus');
-      assetStatus = queryParams.get('assetStatus');
-    }else {
-      queryParams.delete('currentLocation');
-      queryParams.delete('currentLocationId');
-      currentLocation = queryParams.get('currentLocation');
-      currentLocationId = queryParams.get('currentLocationId');
-    }
-    history.replace({
-      search: queryParams.toString()
-    });
-    fetchData();
-  };
-
   const handleStatusChange = (status) => {
     if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
       setStatus(status);
