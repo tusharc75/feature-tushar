@@ -213,12 +213,12 @@ const MapView = (props: MapViewProps) => {
                 <Box my={1} />
                 <Typography color="textPrimary" variant="body2">
                   <strong>Total Asset: </strong>
-                  {selectedBase?.count}
+                  {selectedBase?.count?.toLocaleString('en-US')}
                 </Typography>
                 {selectedAsset.map((d: { count: number; status: string }) => (
                   <Typography key={d.status} color="textPrimary" variant="body2">
                     <strong>{`${d.status}: `}</strong>
-                    {d.count}
+                    {d.count?.toLocaleString('en-US')}
                   </Typography>
                 ))}
               </Box>
