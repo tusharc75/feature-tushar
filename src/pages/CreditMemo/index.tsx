@@ -12,7 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { checkIsAllowedToDelete, gridLoadingTimeout, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCreditMemo from './ManageCreditMemo';
@@ -23,6 +23,18 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@material-ui/icons';
 
 const CreditMemo = () => {
+
+  const types = [
+    {
+      key: `My ${routes.creditMemo.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.creditMemo.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.creditMemo.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,7 +46,7 @@ const CreditMemo = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.creditMemo));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -113,6 +125,11 @@ const CreditMemo = () => {
     if (isExport) {
       deepFilter = `?`;
     }
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -195,6 +212,10 @@ const CreditMemo = () => {
     } else {
       setShowDeleteConfirmBox(true);
     }
+  };
+
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
   };
 
   const ActionMenuItems = () => {
@@ -282,6 +303,10 @@ const CreditMemo = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={permissions?.creditMemo?.isDelete}
