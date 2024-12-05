@@ -1,7 +1,7 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -12,12 +12,15 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCreditMemo from './ManageCreditMemo';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { Delete } from '@material-ui/icons';
 
 const CreditMemo = () => {
   const renderedFrom = camelCase(routes?.creditMemo.title);
@@ -38,7 +41,8 @@ const CreditMemo = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusOptions, setStatusOptions] = useState(null);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -54,6 +58,12 @@ const CreditMemo = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
     data = response?.data?.data;
+    data?.forEach((d) => {
+      if (d?.fieldData?.fieldName === 'status') {
+        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
+        setStatusOptions(statusOps);
+      }
+    });
     let newColumns = generateColumns(renderedFrom, data, routes.creditMemoDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -69,39 +79,31 @@ const CreditMemo = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.creditMemo?.isCreate ? (
-          <HtmlTooltip title="Clone">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {permissions?.creditMemo?.isDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title={permissions?.creditMemo?.isCreate ? 'Clone' : cloneDisable}>
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+            }}
+            disabled={permissions?.creditMemo?.isCreate ? false : true}
+          >
+            <FileCopyIcon fontSize="small" color={permissions?.creditMemo?.isCreate ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+            disabled={row?.original?.canDelete ? false : true}
+          >
+            <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -142,10 +144,10 @@ const CreditMemo = () => {
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.creditMemo?.isUpdate;
-          finalObject['canDelete'] = permissions?.creditMemo?.isDelete;
+          finalObject['canDelete'] = permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -179,7 +181,6 @@ const CreditMemo = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -188,12 +189,73 @@ const CreditMemo = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const showConfirmBox = () => {
+    if (selectedRecords?.find((d) => d.canDelete === false)) {
+      setShowDeleteWarningConfirmBox(true);
+    } else {
+      setShowDeleteConfirmBox(true);
+    }
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!selectedRecords?.every((d) => d?.canDelete)}
+          onClick={() => {
+            showConfirmBox();
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+        {permissions?.creditMemo?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') && (
+          <>
+            {statusOptions?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusUpdate(status?.optionValue);
+                  }}
+                  disabled={false}
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
+          </>
+        )}
+      </>
+    );
+  };
+
+  const handleStatusUpdate = (status) => {
+    const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
+    if (!isSameStatus) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please select Credit Memo with same status'
+      });
+      return;
+    }
+    const creditMemos = sortBy(selectedRecords, '_id').map((s) => ({ _id: s._id, prevStatus: s.status }));
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${routes.creditMemo.path}/update-status`, { creditMemos: creditMemos, status: status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   return (
@@ -220,20 +282,15 @@ const CreditMemo = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
-          isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
-          // addButtonProps
-          // addButtonOnclick
-          isAddButtonVisible={false}
+          isActionButtonVisible={permissions?.creditMemo?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.creditMemo?.isCreate}
         />
         {columns ? (
           <CustomReactTable
@@ -246,7 +303,6 @@ const CreditMemo = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.creditMemo}
-            hideAction={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -254,6 +310,13 @@ const CreditMemo = () => {
           </Box>
         )}
       </CustomContainer>
+      {showDeleteWarningConfirmBox ? (
+        <MessageDialog
+          open={showDeleteWarningConfirmBox}
+          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+          onClose={() => setShowDeleteWarningConfirmBox(false)}
+        />
+      ) : null}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
