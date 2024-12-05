@@ -498,7 +498,6 @@ const InventoryProduct = () => {
           onExportToExcelSuccess={() => {
             fetchData();
           }}
-          visibleColumns={visibleColumns}
         />
       </div>
       <CustomContainer>
