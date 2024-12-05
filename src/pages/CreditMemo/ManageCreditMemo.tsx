@@ -68,7 +68,10 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
             toastConfig.setToastConfig(error);
           });
       } else {
-        const tempInitialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
+        const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
+          tempInitialData['currency'] = user.user?.brandCurrency;
+        }
         tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           for (const key in referenceData) {
