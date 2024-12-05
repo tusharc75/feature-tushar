@@ -153,6 +153,7 @@ const Invoice = () => {
               onClick={() => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
+              disabled={permissions?.invoice?.isCreate ? false : true}
             >
               <FileCopyIcon fontSize="small" color={permissions?.invoice?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>

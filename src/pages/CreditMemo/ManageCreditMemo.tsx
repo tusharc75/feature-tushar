@@ -56,7 +56,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               fields = fieldsDataForCreate;
               const { ...rest } = data;
               rest.creditMemoNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-              setCloneHeading(rest.creditMemoNumber);
+              setCloneHeading(rest.creditMemoNumber || data?.creditMemoNumber);
               tempData = rest;
             }
             setInitialData({
