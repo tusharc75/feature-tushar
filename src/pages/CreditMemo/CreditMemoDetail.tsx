@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
-import { sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, INVOICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -15,6 +15,11 @@ import ManageCreditMemo from './ManageCreditMemo';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Edit, ExpandMore } from '@material-ui/icons';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { RiExchangeBoxFill } from 'react-icons/ri';
+import { Skeleton } from '@material-ui/lab';
 
 const creditMemoDetail = () => {
   const { id } = useParams();
@@ -29,8 +34,15 @@ const creditMemoDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -45,6 +57,11 @@ const creditMemoDetail = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.creditMemo}`)
       .then(({ data }) => {
+        data?.data.forEach((o: any) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option]);
+          }
+        });
         setFields(data.data?.filter((field) => field.isRead));
       })
       .catch((err) => {
@@ -60,6 +77,8 @@ const creditMemoDetail = () => {
       } = await axiosInstance().get(`${routes.creditMemo.path}/${id}`);
       setCreditMemoData(data);
       setCustomizedRoutes([routes.creditMemo, { title: data?.creditMemoNumber }]);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.creditMemo, data));
+      setAllowedToDelete(permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -116,6 +135,47 @@ const creditMemoDetail = () => {
     }
   };
 
+  const handleChangeStatus = (status) => {
+    setUpdateLoading(true);
+    const creditMemos = [
+      {
+        _id: creditMemoData._id,
+        prevStatus: creditMemoData?.status
+      }
+    ];
+    axiosInstance()
+      .put(`${routes.creditMemo.path}/update-status`, { status: status, creditMemos: creditMemos })
+      .then(({ data: { data } }) => {
+        fetchData();
+        setShowReOpenConfirmBox(false);
+        setUpdateLoading(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        setUpdateLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === creditMemoData.status);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -123,20 +183,84 @@ const creditMemoDetail = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Box>
         <Box className="controls-v1">
-          {/* <Box className="control-buttons-v1">
-            <>
-              {permissions?.creditMemo?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
+          <Box className="control-buttons-v1">
+            {creditMemoData ? (
+              <>
+                {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className="btn-outline-v1"
+                    disabled={updateLoading}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+                  </Button>
+                )}
+                {permissions?.creditMemo?.isUpdate &&
+                  allowedToEdit &&
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      className={'btn-outline-v1'}
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    </Button>
+                  )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
                 >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.creditMemo?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
-          </Box> */}
+                  {statusOptions
+                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
+                    .map((o) => {
+                      return (
+                        <MenuItem
+                          key={o?.optionValue}
+                          disabled={validateStatus(o?.optionValue)}
+                          onClick={() => {
+                            closeActions();
+                            handleChangeStatus(o?.optionValue);
+                          }}
+                          value={o}
+                        >
+                          {o?.optionLabel}
+                        </MenuItem>
+                      );
+                    })}
+                </Menu>
+                {permissions?.creditMemo?.isUpdate && allowedToEdit && creditMemoData?.status === INVOICE_STATUS.closed && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setShowReOpenConfirmBox(true);
+                    }}
+                  >
+                    Re-Open
+                  </Button>
+                )}
+              </>
+            ) : (
+              <Skeleton variant="text" width="150px" height="32px" />
+            )}
+          </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
@@ -158,7 +282,7 @@ const creditMemoDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box>
-            <Material creditMemoData={creditMemoData} allowedToEdit={permissions?.creditMemo?.isUpdate }/>
+            <Material creditMemoData={creditMemoData} allowedToEdit={permissions?.creditMemo?.isUpdate} fetchCreditMemoData={fetchData} />
           </Box>
         </TabPanel>
         {resourceData &&
@@ -172,7 +296,7 @@ const creditMemoDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.creditMemo}
                   data={creditMemoData}
-                  allowedToEdit={permissions?.creditMemo?.isUpdate }
+                  allowedToEdit={permissions?.creditMemo?.isUpdate}
                 />
               </TabPanel>
             );
@@ -186,6 +310,18 @@ const creditMemoDetail = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showReOpenConfirmBox && (
+        <ConfirmationDialog
+          open={showReOpenConfirmBox}
+          message={`Are you sure you want to re-open ${creditMemoData?.creditMemoNumber} ?`}
+          onClose={() => {
+            setShowReOpenConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(INVOICE_STATUS.invoiced);
+          }}
         />
       )}
       {openUpdateDialog && (
