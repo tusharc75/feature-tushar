@@ -190,102 +190,47 @@ const History = ({ product, warehouse, storageLocation }) => {
         <div>
           <p title={row.original.reference}>{row.original.reference}</p>
           {row?.original?.reference ? (
-            row?.original?.referenceType === sidebarResource.purchaseOrder ? (
-              <IconButton
+            <IconButton
               size="small"
               onClick={() => {
+                if(row?.original?.referenceType === sidebarResource.purchaseOrder){
                   window.open(`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.transferInventory ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.transferInventory){
                   window.open(`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.transferAsset ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.transferAsset){
                   window.open(`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.salesOrder ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.salesOrder){
                   window.open(`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.bulkAssetCreation ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.bulkAssetCreation){
                   window.open(`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.serializedAsset ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.serializedAsset){
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === 'Rental Job' ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === 'Rental Job'){
                   window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.workOrder ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.workOrder){
                   window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.fieldTicket){
                   window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : row?.original?.referenceType === sidebarResource.subcontractAssembly ? (
-              <IconButton
-              size="small"
-              onClick={() => {
+                }
+                else if(row?.original?.referenceType === sidebarResource.subcontractAssembly){
                   window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
+                }
+                else if(row?.original?.referenceType === sidebarResource.productInventory){
+                  <h5 className="text-truncate">Manual Entry</h5>
+                }
               }}
             >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            ) : (
-              row?.original?.reference
-            )
-          ) : row?.original?.referenceType === sidebarResource.productInventory ? (
-            <h5 className="text-truncate">Manual Entry</h5>
-          ) : (
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+          ):(
             <NoDataCell />
           )}
         </div>
