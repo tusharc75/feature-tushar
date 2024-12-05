@@ -444,7 +444,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
           }}
           loading={startEndDateConfermationDialog.loading}
-          minDate={startEndDateConfermationDialog.minDate}
+          minStartDate={startEndDateConfermationDialog.minDate}
         />
       )}
 
@@ -455,6 +455,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           }}
           referenceId={fieldTicketData?._id}
           rowId={viewStartStopLog?.rowId}
+          fetchRecords={fetchData}
         />
       )}
     </>
