@@ -187,50 +187,50 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <div>
+        <div className="flex items-center gap-1">
           <p title={row.original.reference}>{row.original.reference}</p>
           {row?.original?.reference ? (
             <IconButton
               size="small"
               onClick={() => {
-                if(row?.original?.referenceType === sidebarResource.purchaseOrder){
+                if (row?.original?.referenceType === sidebarResource.purchaseOrder) {
                   window.open(`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.transferInventory){
+                else if (row?.original?.referenceType === sidebarResource.transferInventory) {
                   window.open(`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.transferAsset){
+                else if (row?.original?.referenceType === sidebarResource.transferAsset) {
                   window.open(`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.salesOrder){
+                else if (row?.original?.referenceType === sidebarResource.salesOrder) {
                   window.open(`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.bulkAssetCreation){
+                else if (row?.original?.referenceType === sidebarResource.bulkAssetCreation) {
                   window.open(`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.serializedAsset){
+                else if (row?.original?.referenceType === sidebarResource.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === 'Rental Job'){
+                else if (row?.original?.referenceType === 'Rental Job') {
                   window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.workOrder){
+                else if (row?.original?.referenceType === sidebarResource.workOrder) {
                   window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.fieldTicket){
+                else if (row?.original?.referenceType === sidebarResource.fieldTicket) {
                   window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.subcontractAssembly){
+                else if (row?.original?.referenceType === sidebarResource.subcontractAssembly) {
                   window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
                 }
-                else if(row?.original?.referenceType === sidebarResource.productInventory){
+                else if (row?.original?.referenceType === sidebarResource.productInventory) {
                   <h5 className="text-truncate">Manual Entry</h5>
                 }
               }}
             >
-            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-          </IconButton>
-          ):(
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          ) : (
             <NoDataCell />
           )}
         </div>
@@ -363,18 +363,18 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <div>
+        <div className="flex items-center gap-1">
           <p title={row.original.warehouse}>{row.original.warehouse}</p>
-            {
-              <IconButton
+          {
+            <IconButton
               size="small"
               onClick={() => {
-                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
-            }
+          }
         </div>
       )
     },
@@ -386,17 +386,17 @@ const History = ({ product, warehouse, storageLocation }) => {
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
-            <div>
+            <div className="flex items-center gap-1">
               <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
               {
                 <IconButton
-                size="small"
-                onClick={() => {
+                  size="small"
+                  onClick={() => {
                     window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               }
             </div>
           )
@@ -457,18 +457,18 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Transacted By',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <div>
+        <div className="flex items-center gap-1">
           <p title={row.original.user}>{row.original.user}</p>
-            {
-              <IconButton
+          {
+            <IconButton
               size="small"
               onClick={() => {
-                  window.open(`${routes.userDetail.path}/${row?.original?.userId}`);
+                window.open(`${routes.userDetail.path}/${row?.original?.userId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
-            }
+          }
         </div>
       )
     },
