@@ -489,6 +489,7 @@ const InventoryProduct = () => {
           afterImportCompleted={() => {
             fetchData();
           }}
+          visibleColumns={visibleColumns}
           isDownloadExcel={true}
           isExportAllOrSomeFeature={true}
           total={rowCount}

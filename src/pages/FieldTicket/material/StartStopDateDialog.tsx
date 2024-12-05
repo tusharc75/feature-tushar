@@ -7,23 +7,43 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatForInputControl, displayDate, normalizeDate } from 'src/constants/helpers';
 
-export default function StartStopDate({ onClose, type, loading, handleSubmit, minDate }) {
+export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
   const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
 
   useEffect(() => {
-    if (minDate) {
-      let date = moment(new Date(minDate));
-      const currentTime = moment();
-
-      date = date.set('hour', currentTime.hour()).set('minute', currentTime.minute());
-      setInitialValues({ startDate: date.toDate(), endDate: date.toDate() });
+    if (data) {
+      setInitialValues({
+        startDate: new Date(data.startDate),
+        ...(data.endDate && { endDate: new Date(data.endDate) })
+      });
+    } else {
+      if (minStartDate) {
+        let date = moment(new Date(minStartDate));
+        const currentTime = moment();
+        date = date.set('hour', currentTime.hour()).set('minute', currentTime.minute());
+        setInitialValues({ startDate: date.toDate(), endDate: date.toDate() });
+      }
     }
-  }, [minDate]);
+  }, [data, type]);
 
   const onSubmit = (values) => {
-    handleSubmit(values);
+    handleSubmit(values, data?._id);
+  };
+
+  const validate = (values) => {
+    const errors = {};
+    if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
+      errors['endDate'] = `Please enter valid end date`;
+    }
+    if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
+      errors['startDate'] = `Start Date can't be less than ${displayDate(minStartDate)}`;
+    }
+    if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
+      errors['endDate'] = `End Date can't be greater than ${displayDate(maxEndDate)}`;
+    }
+    return errors;
   };
 
   return (
@@ -44,6 +64,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
           onSubmit(val);
         }}
         enableReinitialize={true}
+        validate={validate}
       >
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
@@ -62,13 +83,15 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
                           margin="none"
                           autoOk
                           format={dateFormatForInputControl + ' HH:mm'}
-                          {...(minDate ? { minDate: minDate } : {})}
+                          {...(minStartDate ? { minDate: minStartDate } : {})}
                           label={`Start Date`}
                           views={['year', 'month', 'date']}
                           value={values.startDate}
                           onChange={(date) => {
                             setFieldValue('startDate', date);
                           }}
+                          error={touched['startDate'] && Boolean(errors['startDate'])}
+                          helperText={touched['startDate'] && errors['startDate']}
                         />
                       </Grid>
                     )}
@@ -89,6 +112,9 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, mi
                           onChange={(date) => {
                             setFieldValue('endDate', date);
                           }}
+                          {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                          error={touched['endDate'] && Boolean(errors['endDate'])}
+                          helperText={touched['endDate'] && errors['endDate']}
                         />
                       </Grid>
                     )}
