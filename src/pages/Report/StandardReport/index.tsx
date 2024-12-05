@@ -871,7 +871,7 @@ const Report = () => {
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
           {showGrid && (
             <div id="importExportLinks" style={{ minWidth: 80 }}>
-              {resourceCamelCase === 'inUsedSerializedAsset' ? (
+              {['inUsedSerializedAsset','lostAssets'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={type}
