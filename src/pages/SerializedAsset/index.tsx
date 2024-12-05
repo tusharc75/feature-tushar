@@ -6,6 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import queryString from 'query-string';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -46,6 +47,7 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
+  let { assetStatus, currentLocation, currentLocationId }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -359,6 +361,12 @@ const SerializedAsset = () => {
     if (fromPurchaseOrder?.productId) {
       filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
+    if(assetStatus){
+      deepFilters.push({ field: 'status', term: [assetStatus] });
+    }
+    if(currentLocation && currentLocationId){
+      filterByIds.push({field: 'currentLocation', term: {"$in":[`${currentLocationId}`]}})
+    }
     if (productCategory && productCategory !== '') {
       filterByIds.push({ field: 'productCategory', term: productCategory });
     }
@@ -412,6 +420,23 @@ const SerializedAsset = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const updateQueryParams = (field) => {
+    const queryParams = new URLSearchParams(history.location.search);
+    if(field==='status'){
+      queryParams.delete('assetStatus');
+      assetStatus = queryParams.get('assetStatus');
+    }else {
+      queryParams.delete('currentLocation');
+      queryParams.delete('currentLocationId');
+      currentLocation = queryParams.get('currentLocation');
+      currentLocationId = queryParams.get('currentLocationId');
+    }
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchData();
   };
 
   const handleStatusChange = (status) => {
@@ -520,7 +545,10 @@ const SerializedAsset = () => {
                 subleaseAsset,
                 setSubleaseAsset,
                 showScrapAsset,
-                setShowScrapAsset
+                setShowScrapAsset,
+                assetStatus,
+                currentLocation,
+                updateQueryParams
               }}
             />
           }
@@ -643,7 +671,10 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  setShowScrapAsset
+  assetStatus,
+  currentLocation,
+  setShowScrapAsset,
+  updateQueryParams
 }) => {
   return (
     <>
@@ -778,6 +809,26 @@ const LeftSideContent = ({
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
             label={`Scrap ${routes.serializedAsset.title}`}
           />
+          {assetStatus && (
+             <Chip
+             className="ml-3"
+             color="primary"
+             label={`Status : ${assetStatus}`}
+             onDelete={() => {
+              updateQueryParams('status');
+             }}
+           />
+          )}
+          {currentLocation && (
+             <Chip
+             className="ml-3"
+             color="primary"
+             label={`Current Location : ${currentLocation}`}
+             onDelete={() => {
+              updateQueryParams('currentLocation');
+             }}
+           />
+          )}
         </Fragment>
       )}
     </>
