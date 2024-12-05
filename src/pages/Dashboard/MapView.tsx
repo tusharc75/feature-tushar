@@ -4,6 +4,7 @@ import { GoogleMap, Marker, MarkerClusterer, InfoWindow, GoogleMapProps } from '
 
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
+import routes from 'src/components/Helpers/Routes';
 
 type locationType = {
   count: number;
@@ -181,7 +182,7 @@ const MapView = (props: MapViewProps) => {
                     <Marker
                       key={asset._id}
                       label={{
-                        text: asset.count.toString(),
+                        text: asset.count.toLocaleString(),
                         fontWeight: 'bold',
                         color: 'black',
                         fontSize: '14px'
@@ -213,12 +214,12 @@ const MapView = (props: MapViewProps) => {
                 <Box my={1} />
                 <Typography color="textPrimary" variant="body2">
                   <strong>Total Asset: </strong>
-                  {selectedBase?.count?.toLocaleString()}
+                  <span className="link" onClick={()=> window.open(`${routes.serializedAsset.path}?currentLocation=${selectedBase?.location.concatedName}&currentLocationId=${selectedBase?.location?._id}`)}>{selectedBase?.count?.toLocaleString()}</span>
                 </Typography>
                 {selectedAsset.map((d: { count: number; status: string }) => (
                   <Typography key={d.status} color="textPrimary" variant="body2">
                     <strong>{`${d.status}: `}</strong>
-                    {d.count?.toLocaleString()}
+                    <span className="link" onClick={()=> window.open(`${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${selectedBase?.location.concatedName}&currentLocationId=${selectedBase?.location?._id}`)}>{d.count?.toLocaleString()}</span>
                   </Typography>
                 ))}
               </Box>
