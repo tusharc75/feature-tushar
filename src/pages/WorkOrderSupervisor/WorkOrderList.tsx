@@ -163,6 +163,15 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
                 {row.original.assignedUsers}
                 {row.original?.restassignedUsers?.length > 0 && row?.original?.restassignedUsers?.map((e) => `,${' '}${e?.optionLabel}`)}
               </h5>
+              <IconButton
+                size="medium"
+                onClick={() => {
+                  //`${routes.employeeMasterDetail.path}/${row.original.assignedUsersId}`
+                  window.open(`${routes.employeeMaster.path}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
