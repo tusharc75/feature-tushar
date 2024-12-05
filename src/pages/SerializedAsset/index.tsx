@@ -91,6 +91,27 @@ const SerializedAsset = () => {
   }, [permissions, selectedEntity]);
 
   useEffect(() => {
+    if (assetStatus || currentLocation) {
+      const filterVal = {};
+  
+      if (assetStatus) {
+        filterVal['status'] = { filter: [assetStatus] };
+      }
+  
+      if (currentLocation) {
+        filterVal['currentLocation'] = {
+          operator: 'OR',
+          condition1: {
+            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }],
+          },
+        };
+      }
+  
+      dispatch({ type: 'filter', filters: filterVal });
+    }
+  }, []);
+
+  useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
@@ -361,12 +382,7 @@ const SerializedAsset = () => {
     if (fromPurchaseOrder?.productId) {
       filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
-    if(assetStatus){
-      deepFilters.push({ field: 'status', term: [assetStatus] });
-    }
-    if(currentLocation && currentLocationId){
-      filterByIds.push({field: 'currentLocation', term: {"$in":[`${currentLocationId}`]}})
-    }
+
     if (productCategory && productCategory !== '') {
       filterByIds.push({ field: 'productCategory', term: productCategory });
     }
@@ -546,9 +562,6 @@ const SerializedAsset = () => {
                 setSubleaseAsset,
                 showScrapAsset,
                 setShowScrapAsset,
-                assetStatus,
-                currentLocation,
-                updateQueryParams
               }}
             />
           }
@@ -671,10 +684,7 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  assetStatus,
-  currentLocation,
   setShowScrapAsset,
-  updateQueryParams
 }) => {
   return (
     <>
@@ -809,26 +819,6 @@ const LeftSideContent = ({
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
             label={`Scrap ${routes.serializedAsset.title}`}
           />
-          {assetStatus && (
-             <Chip
-             className="ml-3"
-             color="primary"
-             label={`Status : ${assetStatus}`}
-             onDelete={() => {
-              updateQueryParams('status');
-             }}
-           />
-          )}
-          {currentLocation && (
-             <Chip
-             className="ml-3"
-             color="primary"
-             label={`Current Location : ${currentLocation}`}
-             onDelete={() => {
-              updateQueryParams('currentLocation');
-             }}
-           />
-          )}
         </Fragment>
       )}
     </>
