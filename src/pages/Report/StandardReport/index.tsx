@@ -127,7 +127,7 @@ const Report = () => {
           o.disableFilters = true;
           o.disableSortBy = true;
         }
-        if ((o?.accessor === 'productName' || o?.accessor === 'product')) {
+        if (o?.accessor === 'productName' || o?.accessor === 'product') {
           o.cell = ({ row }) => ProductRenderer(row);
         }
         if (o?.accessor === 'serviceName') {
@@ -301,8 +301,8 @@ const Report = () => {
           <NoDataCell />
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const SerializedAssetRenderer = (row) => {
     return (
@@ -321,7 +321,7 @@ const Report = () => {
         )}
       </div>
     );
-  }
+  };
 
   const ReferenceRenderer = (row) => {
     return (
@@ -556,6 +556,7 @@ const Report = () => {
           setColumns(newColumns);
           setLoadingColumns(false);
         }
+
         data = data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
@@ -740,7 +741,8 @@ const Report = () => {
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
     if (processType === 'sendMail' && exportType === 'html') {
-      axiosInstance().get(`${api}${filterQuery}&html=true`)
+      axiosInstance()
+        .get(`${api}${filterQuery}&html=true`)
         .then((res) => {
           setHtmlContent(res.data);
           setIsProcessing(null);
@@ -842,20 +844,25 @@ const Report = () => {
     }
   }, [columns?.length, type, footerData]);
 
-
   const getFilteredColumn = (column) => {
+    let tempColumn = column;
     if (resourceCamelCase === 'dailyVolumeReport') {
-      let tempColumn = column;
       if (!selectedData?.dayWise?.value) {
-        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date')
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
       if (selectedData?.padWise?.value) {
-        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor))
+        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
+      }
+      return tempColumn;
+    }
+    if (resourceCamelCase === 'volumeReport') {
+      if (!selectedData?.unitWise?.value) {
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'asset');
       }
       return tempColumn;
     }
     return column;
-  }
+  };
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -872,7 +879,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -881,9 +888,7 @@ const Report = () => {
                 />
               ) : (
                 <div className="flex items-center gap-1">
-                  {reportConfig?.isSendMail && (
-                    <SendMailMenu exportData={exportData} isProcessing={isProcessing} />
-                  )}
+                  {reportConfig?.isSendMail && <SendMailMenu exportData={exportData} isProcessing={isProcessing} />}
                   {reportConfig?.isExportPdf && (
                     <Button
                       variant="outlined"
