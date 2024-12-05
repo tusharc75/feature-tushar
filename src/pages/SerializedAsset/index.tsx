@@ -98,7 +98,7 @@ const SerializedAsset = () => {
         filterVal['status'] = { filter: [assetStatus] };
       }
   
-      if (currentLocation) {
+      if (currentLocation && currentLocationId) {
         filterVal['currentLocation'] = {
           operator: 'OR',
           condition1: {
