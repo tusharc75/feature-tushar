@@ -28,6 +28,7 @@ import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Autocomplete } from '@material-ui/lab';
 import { Autorenew } from '@material-ui/icons';
+import { FiExternalLink } from 'react-icons/fi';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const renderedFrom = `${camelCase(routes.productInventory.title)}_history`;
@@ -187,97 +188,98 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableSortBy: true,
       Cell: ({ row }) => (
         <div>
+          <p title={row.original.reference}>{row.original.reference}</p>
           {row?.original?.reference ? (
             row?.original?.referenceType === sidebarResource.purchaseOrder ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.transferInventory ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.transferAsset ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.salesOrder ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.bulkAssetCreation ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.serializedAsset ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === 'Rental Job' ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.workOrder ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : row?.original?.referenceType === sidebarResource.subcontractAssembly ? (
-              <Link
-                className="link"
-                target="_blank"
-                title={row?.original?.reference}
-                to={`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`}
-              >
-                {row?.original?.reference}
-              </Link>
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
             ) : (
               row?.original?.reference
             )
@@ -417,18 +419,17 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableSortBy: true,
       Cell: ({ row }) => (
         <div>
-          {row?.original?.warehouse ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.warehouse}
-              to={`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`}
+          <p title={row.original.warehouse}>{row.original.warehouse}</p>
+            {
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+              }}
             >
-              {row?.original?.warehouse}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )}
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+            }
         </div>
       )
     },
@@ -441,18 +442,17 @@ const History = ({ product, warehouse, storageLocation }) => {
           disableSortBy: true,
           Cell: ({ row }) => (
             <div>
-              {row?.original?.storageLocation ? (
-                <Link
-                  className="link"
-                  target="_blank"
-                  title={row?.original?.storageLocation}
-                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                >
-                  {row?.original?.storageLocation}
-                </Link>
-              ) : (
-                <NoDataCell />
-              )}
+              <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
+              {
+                <IconButton
+                size="small"
+                onClick={() => {
+                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+              }
             </div>
           )
         }
@@ -513,13 +513,17 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableSortBy: true,
       Cell: ({ row }) => (
         <div>
-          {row?.original?.user ? (
-            <Link className="link" target="_blank" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
-              {row?.original?.user}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )}
+          <p title={row.original.user}>{row.original.user}</p>
+            {
+              <IconButton
+              size="small"
+              onClick={() => {
+                  window.open(`${routes.userDetail.path}/${row?.original?.userId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+            }
         </div>
       )
     },
