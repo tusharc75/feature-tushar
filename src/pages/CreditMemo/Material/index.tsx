@@ -28,7 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
-const Material = ({ creditMemoData, allowedToEdit }) => {
+const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(routes?.creditMemo.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -386,6 +386,7 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        fetchCreditMemoData();
         setIsAdding(false);
       })
       .catch((error) => {
@@ -510,6 +511,7 @@ const Material = ({ creditMemoData, allowedToEdit }) => {
         .then(() => {
           setDeleting(false);
           fetchData();
+          fetchCreditMemoData();
           setDeleteData(null);
         })
         .catch((error) => {
