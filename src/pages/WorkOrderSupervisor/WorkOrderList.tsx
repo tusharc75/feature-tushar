@@ -8,6 +8,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -149,7 +150,17 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
+          row.original['assignedWorkStations'] ?
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedWorkStations',
+                lookupResource: sidebarResource.workStations
+              }}
+              original={row?.original}
+            />
+            : <NoDataCell />
       },
       {
         accessor: 'assignedUsers',
@@ -158,12 +169,15 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         disableSortBy: true,
         Cell: ({ row }) =>
           row?.original['assignedUsers'] ? (
-            <div>
-              <h5 className="text-truncate">
-                {row.original.assignedUsers}
-                {row.original?.restassignedUsers?.length > 0 && row?.original?.restassignedUsers?.map((e) => `,${' '}${e?.optionLabel}`)}
-              </h5>
-            </div>
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedUsers',
+                lookupResource: sidebarResource.user
+              }}
+              original={row?.original}
+            />
           ) : (
             <NoDataCell />
           )
@@ -245,7 +259,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     setSubmitting(true);
     const data: any = [];
     const workOrderId: any = uniqBy(records, 'workOrder').map(record => record.workOrder);
-  
+
     records?.forEach((s) => {
       rows?.forEach((e) => {
         data.push({
@@ -260,7 +274,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       });
     });
 
-setSubmitting(false);
+    setSubmitting(false);
     axiosInstance()
       .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
       .then(({ data }) => {
