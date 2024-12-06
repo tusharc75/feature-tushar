@@ -117,21 +117,6 @@ export default function AccountHierarchy({
                   data-hide-in-export={true}
                 />
               )}
-              <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
-                <IconButton size="small" aria-label="Edit" disabled={!canUpdate || !row.original?.canEdit} onClick={() => handleUpdate(row.original)}>
-                  <EditIcon fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
-                </IconButton>
-              </HtmlTooltip>
-              <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
-                <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
-                  <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
-                </IconButton>
-              </HtmlTooltip>
-              <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
-                <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
-                  <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
-                </IconButton>
-              </HtmlTooltip>
             </div>
           ) : (
             <NoDataCell />
@@ -178,7 +163,37 @@ export default function AccountHierarchy({
         }
       ];
     }
-    setColumns([...newColumns, ...getStaticFields()]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
+          <IconButton size="small" aria-label="Edit" disabled={!canUpdate || !row.original?.canEdit} onClick={() => handleUpdate(row.original)}>
+            <EditIcon fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
+          <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
+            <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
+          <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
+            <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   return (
@@ -193,7 +208,6 @@ export default function AccountHierarchy({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
-            hideAction={true}
             hideSelection={true}
           />
         </Box>
