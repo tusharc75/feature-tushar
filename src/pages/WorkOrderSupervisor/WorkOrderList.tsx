@@ -104,7 +104,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
                 <h5
                   className="link text-truncate"
                   onClick={() => {
-                    setServiceOpen({ open: true, id: row?.original?._id });
+                    setServiceOpen({ open: true, id: row?.original?.workOrder });
                   }}
                 >
                   {row.original.service}

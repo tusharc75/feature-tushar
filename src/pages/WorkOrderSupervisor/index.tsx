@@ -178,7 +178,7 @@ const WorkOrderSupervisor = () => {
         accessor: 'workOrderNumber',
         type: 'link',
         title: 'Work Order',
-        link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
+        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
         target: '_blank'
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
@@ -520,7 +520,7 @@ const WorkOrderSupervisor = () => {
               passFailStatus={true}
               passFailAccessor="serviceStatus"
               cardOnClick={(e, data) => {
-                setOpen({ open: true, id: data._id });
+                setOpen({ open: true, id: data.workOrder });
               }}
             />
           )}

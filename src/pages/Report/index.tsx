@@ -399,7 +399,6 @@ const Report = () => {
       });
     }
 
-    console.log('ffffffff', filterByIds, deepFilters);
     if (filterByIds?.length > 0) {
       const filterById = filterByIds
         ?.filter((f) => f?.term?.length > 0)

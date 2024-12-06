@@ -369,13 +369,14 @@ const AssignSerialNumbersDialog = ({
   };
 
   const handleTransferSerialNumber = (transferInventoryId) => {
+    const data = products?.map((product) => ({
+      product: product?.id,
+      qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
+      serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
+    }))
     axiosInstance()
       .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
-        products: products?.map((product) => ({
-          product: product?.id,
-          qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
-          serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
-        }))
+        products: data?.filter((e) => e?.qty)
       })
       .then(({ data }) => {
         fetchData();

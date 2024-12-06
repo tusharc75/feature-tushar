@@ -95,6 +95,7 @@ const Report = () => {
   const [isProcessing, setIsProcessing] = React.useState(null);
   const [deepFilters, setDeepFilters] = React.useState([]);
   const [filterByIds, setFilterByIds] = React.useState([]);
+  const [filterTerm, setFilterTerm] = React.useState({});
 
   const fetchGridColumns = async () => {
     try {
@@ -560,6 +561,7 @@ const Report = () => {
           setColumns(newColumns);
           setLoadingColumns(false);
         }
+
         data = data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
@@ -695,10 +697,11 @@ const Report = () => {
       const filterById = filterByIds
         ?.filter((f) => f?.term?.length > 0)
         ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
           return {
             field: f?.field,
             term: {
-              $in: f?.term.map((d: any) => d.optionValue)
+              [term]: f?.term.map((d: any) => d.optionValue)
             }
           };
         });
@@ -713,13 +716,23 @@ const Report = () => {
     if (deepFilters?.length > 0) {
       deepFilter = [
         ...deepFilter,
-        ...deepFilters?.filter((d) => {
-          const hasTermLength = d?.term?.length ? true : false;
-          if (isStatusPeriod) {
-            return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
-          }
-          return hasTermLength;
-        })
+        ...deepFilters
+          ?.filter((d) => {
+            const hasTermLength = d?.term?.length ? true : false;
+            if (isStatusPeriod) {
+              return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+            }
+            return hasTermLength;
+          })
+          ?.map((d) => {
+            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
+              return {
+                ...d,
+                term: { $nin: d?.term }
+              };
+            }
+            return d;
+          })
       ];
     }
 
@@ -889,13 +902,19 @@ const Report = () => {
   }, [columns?.length, type, footerData]);
 
   const getFilteredColumn = (column) => {
+    let tempColumn = column;
     if (resourceCamelCase === 'dailyVolumeReport') {
-      let tempColumn = column;
       if (!selectedData?.dayWise?.value) {
         tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
       if (selectedData?.padWise?.value) {
         tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
+      }
+      return tempColumn;
+    }
+    if (resourceCamelCase === 'volumeReport') {
+      if (!selectedData?.unitWise?.value) {
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'asset');
       }
       return tempColumn;
     }
@@ -909,7 +928,7 @@ const Report = () => {
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
           {showGrid && (
             <div id="importExportLinks" style={{ minWidth: 80 }}>
-              {resourceCamelCase === 'inUsedSerializedAsset' ? (
+              {['inUsedSerializedAsset', 'lostAssets'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={type}
@@ -1054,6 +1073,8 @@ const Report = () => {
               setDeepFilters={setDeepFilters}
               filterByIds={filterByIds}
               setFilterByIds={setFilterByIds}
+              filterTerm={filterTerm}
+              setFilterTerm={setFilterTerm}
               defaultColumns={defaultColumns}
               reportConfig={reportConfig}
             />

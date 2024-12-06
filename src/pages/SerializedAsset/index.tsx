@@ -6,6 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import queryString from 'query-string';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -46,6 +47,7 @@ const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
+  let { assetStatus, currentLocation, currentLocationId }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -87,6 +89,27 @@ const SerializedAsset = () => {
     };
     fetch();
   }, [permissions, selectedEntity]);
+
+  useEffect(() => {
+    if (assetStatus || currentLocation) {
+      const filterVal = {};
+  
+      if (assetStatus) {
+        filterVal['status'] = { filter: [assetStatus] };
+      }
+  
+      if (currentLocation && currentLocationId) {
+        filterVal['currentLocation'] = {
+          operator: 'OR',
+          condition1: {
+            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }],
+          },
+        };
+      }
+  
+      dispatch({ type: 'filter', filters: filterVal });
+    }
+  }, []);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -359,6 +382,7 @@ const SerializedAsset = () => {
     if (fromPurchaseOrder?.productId) {
       filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
+
     if (productCategory && productCategory !== '') {
       filterByIds.push({ field: 'productCategory', term: productCategory });
     }
@@ -520,7 +544,7 @@ const SerializedAsset = () => {
                 subleaseAsset,
                 setSubleaseAsset,
                 showScrapAsset,
-                setShowScrapAsset
+                setShowScrapAsset,
               }}
             />
           }
@@ -643,7 +667,7 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  setShowScrapAsset
+  setShowScrapAsset,
 }) => {
   return (
     <>
