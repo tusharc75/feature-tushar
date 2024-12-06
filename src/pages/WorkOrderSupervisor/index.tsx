@@ -3,16 +3,12 @@ import {
   Box,
   Button,
   FormControl,
-  Grid,
   IconButton,
   InputLabel,
-  List,
   Menu,
   MenuItem,
   Popover,
   Select,
-  Switch,
-  TextField,
   useMediaQuery
 } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -36,8 +32,6 @@ import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
-import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
-import { KeyboardArrowDown } from '@material-ui/icons';
 import ProductFrequencyDialog from './ProductFrequencyDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
@@ -387,12 +381,53 @@ const WorkOrderSupervisor = () => {
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
+          <div className="flex items-center gap-1">
+            {permissions?.workOrder?.isCreate &&
+              <Button
+                variant="outlined"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  window.open(`${routes.workOrder.path}`);
+                }}> {`${routes?.workOrder.title}`}
+              </Button>}
+            {permissions?.repairOrder?.isCreate &&
+              <Button
+                variant="outlined"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  window.open(`${routes.repairOrder.path}`);
+                }}> {`${routes?.repairOrder.title}`}
+              </Button>}
+            {permissions?.productionOrder?.isCreate &&
+              <Button
+                variant="outlined"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  window.open(`${routes.productionOrder.path}`);
+                }}> {`${routes?.productionOrder.title}`}
+              </Button>}
+            {permissions?.assemblyOrder?.isCreate &&
+              <Button
+                variant="outlined"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  window.open(`${routes.assemblyOrder.path}`);
+                }}> {`${routes?.assemblyOrder.title}`}
+              </Button>}
+            {permissions?.product?.isCreate &&
+              <Button
+                variant="outlined"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  setShowProductFreqDialog(true);
+
+                }}>Scheduling
+              </Button>}
+          </div>
+        </div>
         <div className="main-container">
           <div className="header-panel">
             <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
@@ -468,13 +503,6 @@ const WorkOrderSupervisor = () => {
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
-                <div className="pt-[4px]">
-                  <RenderActionOptions
-                    permissions={permissions}
-                    setShowProductFreqDialog={setShowProductFreqDialog}
-                  />
-                </div>
-
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
@@ -594,8 +622,8 @@ const WorkOrderSupervisor = () => {
             canPerform={false}
           />
         )}
-      </Fragment>
-    </MuiPickersUtilsProvider>
+      </section>
+    </MuiPickersUtilsProvider >
   );
 };
 
@@ -645,94 +673,6 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
           )}
         </Menu>
       )}
-    </>
-  );
-};
-
-const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const handleOpenMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  return (
-    <>
-      <span>
-        <Button
-          variant="outlined"
-          color="primary"
-          size="small"
-          disabled={false}
-          onClick={handleOpenMenu}
-          endIcon={<KeyboardArrowDown fontSize="small" />}
-          className="new-dropdown-v1"
-        >
-          Actions
-        </Button>
-      </span>
-      <Menu
-        anchorEl={anchorEl}
-        keepMounted
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        {permissions?.workOrder?.isCreate && (
-          <MenuItem
-            onClick={() => {
-              window.open(`${routes.workOrder.path}`);
-              handleClose();
-            }}
-          >
-            {`${routes?.workOrder.title}`}
-          </MenuItem>
-        )}
-        {permissions?.repairOrder?.isCreate && (
-          <MenuItem
-            onClick={() => {
-              window.open(`${routes.repairOrder.path}`);
-              handleClose();
-            }}
-          >
-            {`${routes?.repairOrder.title}`}
-          </MenuItem>
-        )}
-        {permissions?.productionOrder?.isCreate && (
-          <MenuItem
-            onClick={() => {
-              window.open(`${routes.productionOrder.path}`);
-              handleClose();
-            }}
-          >
-            {`${routes?.productionOrder.title}`}
-          </MenuItem>
-        )}
-        {permissions?.assemblyOrder?.isCreate && (
-          <MenuItem
-            onClick={() => {
-              window.open(`${routes.assemblyOrder.path}`);
-              handleClose();
-            }}
-          >
-            {`${routes?.assemblyOrder.title}`}
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setShowProductFreqDialog(true);
-            handleClose();
-          }}
-        >
-          Work Order Scheduling
-        </MenuItem>
-      </Menu>
     </>
   );
 };
