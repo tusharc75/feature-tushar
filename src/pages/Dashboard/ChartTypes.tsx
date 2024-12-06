@@ -421,8 +421,12 @@ const ChartTypes = ({
                                 if (chart?.percentage) {
                                   label += `${context.parsed}%`;
                                 } else {
-                                  if (context.parsed.y !== null) {
-                                    label +=  chart?.currency ? formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace : context.parsed.y;
+                                  let parseValue = context?.parsed?.y;
+                                  if (chart?.kpi?.horizontalBar) {
+                                    parseValue = context?.parsed?.x;
+                                  }
+                                  if (parseValue !== null) {
+                                    label += chart?.currency ? formatAmountWithCurrency((globalFilters.currency || currency), Number(parseValue) ? parseValue : '00').fullFormatAmountWithoutSpace : parseValue;
                                   }
                                 }
                                 return label;
