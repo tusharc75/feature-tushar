@@ -11,9 +11,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   table,
   allColumns,
   allowSelection,
-  dataRows,
   dispatch,
-  loading,
   expander,
   backgroundColorClass = null,
   renderedFrom,
@@ -24,7 +22,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   isClientSideGrid,
   onRowClick
 }) => {
-  const { error } = state;
+  const { error, loading, initialDataLoaded } = state;
+  const dataRows = table.getRowModel().rows;
 
   const primaryField: any | null = React.useMemo(
     () => allColumns?.find((item) => item.primaryField || item.lockPosition) || allColumns[2],
@@ -63,7 +62,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     <>
       <div className="relative rounded-lg bg-[white] dark:bg-[var(--dark-primary)]">
         {/* Loader */}
-        {loading || error ? (
+        {loading || error || !initialDataLoaded ? (
           <div className=" absolute inset-0 z-10 flex items-center justify-center bg-[rgba(255,255,255,0.54)] [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] dark:bg-[rgba(5,9,19,0.54)] ">
             <div className="rounded-lg bg-[white] px-10 py-5 text-center shadow-md dark:bg-[var(--dark-secondary)]">
               {error ? (
@@ -71,7 +70,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   <Error className="mx-auto mb-2" />
                   <p>Something Went Wrong</p>
                 </>
-              ) : loading ? (
+              ) : loading || !initialDataLoaded ? (
                 <>
                   <CircularProgress />
                   <p>Loading...</p>
