@@ -857,7 +857,7 @@ const Report = () => {
     }
     if (resourceCamelCase === 'volumeReport') {
       if (!selectedData?.unitWise?.value) {
-        tempColumn = tempColumn?.filter((e) => e.accessor !== 'asset');
+        tempColumn = tempColumn?.filter((e) => !['asset', 'padName']?.includes(e.accessor));
       }
       return tempColumn;
     }
@@ -871,7 +871,7 @@ const Report = () => {
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
           {showGrid && (
             <div id="importExportLinks" style={{ minWidth: 80 }}>
-              {['inUsedSerializedAsset','lostAssets'].includes(resourceCamelCase) ? (
+              {['inUsedSerializedAsset', 'lostAssets'].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={type}
