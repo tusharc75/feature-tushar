@@ -1,90 +1,72 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { Checkbox, CircularProgress, FormControlLabel, Grid } from '@material-ui/core';
-import React from 'react';
-import { getEntity } from '../helper';
+import { Checkbox, FormControlLabel } from '@material-ui/core';
+import { useData } from 'src/StateProvider/Provider';
 
-export const Entity = ({ values, setFieldValue, touched, errors, brandId }) => {
+export const Entity = ({ values, setFieldValue, touched, errors }) => {
+  const {
+    state: { user }
+  }: any = useData();
 
-    const toastConfig = useContext(CustomToastContext)
-    const [entityOptions, setEntityOptions] = useState([]);
-    const [loadingEntity, setLoadingEntity] = useState(false);
+  const [entityOptions, setEntityOptions] = useState([]);
 
-    useEffect(() => {
-        getEntityList()
-    }, []);
+  useEffect(() => {
+    setEntityOptions(user?.entity?.map((e) => ({ optionLabel: e?.entityName, optionValue: e?._id })));
+  }, []);
 
-    const getEntityList = async () => {
-        setLoadingEntity(true)
-        try {
-            const data: any = await getEntity(brandId);
-            setEntityOptions(data);
-            setLoadingEntity(false);
-        } catch (e) {
-            setLoadingEntity(false);
-        }
-    };
-
-    return (<Box>
-        <Grid container>
-            <Grid item xs={12} md={6}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            name="isFieldEntityWise"
-                            checked={values['isFieldEntityWise']}
-                            onChange={(e) => {
-                                setFieldValue('isFieldEntityWise', e.target.checked);
-                                setFieldValue('fieldEntity', []);
-                            }}
-                            color="primary"
-                        />
-                    }
-                    label="Show Entity Wise "
-                />
-            </Grid>
-            <Grid item xs={12} md={6}>
-                {values['isFieldEntityWise'] &&
-                    <Autocomplete
-                        id="entity-dependent-on-field"
-                        multiple={true}
-                        options={entityOptions}
-                        disabled={!values['isFieldEntityWise']}
-                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option?.fieldName === val}
-                        value={
-                            values['fieldEntity']?.length > 0
-                                ? entityOptions.filter((option) => values['fieldEntity'].includes(option.optionValue))?.map((option) => option)
-                                : []
-                        }
-                        onChange={(e, val) => {
-                            setFieldValue('fieldEntity', val.map((option) => option.optionValue));
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                margin="dense"
-                                variant="outlined"
-                                label="Entites"
-                                InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                        <React.Fragment>
-                                            {loadingEntity ? <CircularProgress color="inherit" size={20} /> : null}
-                                            {params.InputProps.endAdornment}
-                                        </React.Fragment>
-                                    )
-                                }}
-                                error={touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
-                                helperText={touched['fieldEntity'] && errors['fieldEntity']}
-                            />
-                        )}
-                    />
-                }
-            </Grid>
-        </Grid>
-    </Box>);
-}
+  return (
+    <Box>
+      <Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="isFieldEntityWise"
+              checked={values['isFieldEntityWise']}
+              onChange={(e) => {
+                setFieldValue('isFieldEntityWise', e.target.checked);
+                setFieldValue('fieldEntity', []);
+              }}
+              color="primary"
+            />
+          }
+          label="Show Entity Wise "
+        />
+      </Box>
+      <Box>
+        {values['isFieldEntityWise'] && (
+          <Autocomplete
+            id="entity-dependent-on-field"
+            multiple={true}
+            options={entityOptions}
+            disabled={!values['isFieldEntityWise']}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option?.optionValue === val?.optionValue}
+            value={
+              values['fieldEntity']?.length > 0
+                ? entityOptions.filter((option) => values['fieldEntity'].includes(option.optionValue))?.map((option) => option)
+                : []
+            }
+            onChange={(e, val) => {
+              setFieldValue(
+                'fieldEntity',
+                val.map((option) => option.optionValue)
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                variant="outlined"
+                label="Entites"
+                error={touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
+                helperText={touched['fieldEntity'] && errors['fieldEntity']}
+              />
+            )}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+};

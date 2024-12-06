@@ -1,12 +1,13 @@
+import { Box, makeStyles } from '@material-ui/core';
+import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Calendar, momentLocalizer, View } from 'react-big-calendar';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import { Box, Grid, makeStyles } from '@material-ui/core';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { filterDataByDateIntersection } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const localizer = momentLocalizer(moment);
 
@@ -49,6 +50,8 @@ const CalendarView = (props: Props) => {
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
   const toastConfig = useContext(CustomToastContext);
 
+  const [isDataPresent, setIsDataPresent] = useState(true);
+
   useEffect(() => {
     axiosInstance()
       .get(`${routes?.planning.path}?entity=${selectedEntity}`)
@@ -69,10 +72,15 @@ const CalendarView = (props: Props) => {
   }, []);
 
   const onRangeChange = useCallback(
-    (range) => {
+    (range, view) => {
       setRange(range);
+      if (view === 'day') {
+        setIsDataPresent(!!filterDataByDateIntersection(range, events)?.length);
+      } else {
+        setIsDataPresent(true);
+      }
     },
-    [setRange]
+    [setRange, events]
   );
 
   const onView = useCallback(
@@ -103,50 +111,57 @@ const CalendarView = (props: Props) => {
             </>
           ))}
         </div>
-        <Calendar
-          defaultDate={moment().toDate()}
-          defaultView="day"
-          events={events}
-          localizer={localizer}
-          formats={formats}
-          popup={true}
-          onNavigate={(date) => {
-            // if (view === 'month') {
-            //   setDateRange({
-            //     estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-            //     estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-            //   });
-            // }
-          }}
-          views={{ month: true, week: true, day: true }}
-          eventPropGetter={(obj) => {
-            const newStyles = {
-              backgroundColor:
-                obj.type === 'Rental Job'
-                  ? 'rgba(255, 232, 204, 1)'
-                  : obj.type === 'Sales Order'
-                  ? 'rgba(234, 239, 254, 1)'
-                  : 'rgba(253, 220, 228, 1)',
-              color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
-              borderRadius: '4px',
-              border: 'none',
-              padding: '8px 16px'
-            };
+        <div className="relative">
+          <Calendar
+            defaultDate={moment().toDate()}
+            defaultView="day"
+            events={events}
+            localizer={localizer}
+            formats={formats}
+            popup={true}
+            onNavigate={(date) => {
+              // if (view === 'month') {
+              //   setDateRange({
+              //     estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+              //     estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+              //   });
+              // }
+            }}
+            views={{ month: true, week: true, day: true }}
+            eventPropGetter={(obj) => {
+              const newStyles = {
+                backgroundColor:
+                  obj.type === 'Rental Job'
+                    ? 'rgba(255, 232, 204, 1)'
+                    : obj.type === 'Sales Order'
+                      ? 'rgba(234, 239, 254, 1)'
+                      : 'rgba(253, 220, 228, 1)',
+                color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
+                borderRadius: '4px',
+                border: 'none',
+                padding: '8px 16px'
+              };
 
-            return {
-              style: newStyles
-            };
-          }}
-          onSelectEvent={(event: any) => {
-            setConvertPlanning({
-              open: true,
-              data: event
-            });
-          }}
-          onRangeChange={onRangeChange}
-          onView={onView}
-          view={view}
-        />
+              return {
+                style: newStyles
+              };
+            }}
+            onSelectEvent={(event: any) => {
+              setConvertPlanning({
+                open: true,
+                data: event
+              });
+            }}
+            onRangeChange={onRangeChange}
+            onView={onView}
+            view={view}
+          />
+          {!isDataPresent && (
+            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
+              No data available for the selected date range.
+            </div>
+          )}
+        </div>
       </div>
       {converPlanning.open && (
         <ConfirmationDialog

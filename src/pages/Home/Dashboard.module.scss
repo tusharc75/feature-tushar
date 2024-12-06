@@ -80,6 +80,13 @@
 
 .cardSection {
   .cardContainer {
+    display: grid;
+    isolation: isolate;
+    // grid-template-columns: var(--grid-columns, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+    column-gap: var(--ver-gap, 15px);
+    row-gap: var(--hor-gap, 15px);
+
     @media all and (min-width: 548px) {
       --ver-gap: 18px;
       --hor-gap: 18px;
@@ -104,12 +111,7 @@
       --grid-columns: repeat(3, 1fr);
       --card-padding: 23px 18px 28px 18px;
     }
-    display: grid;
-    isolation: isolate;
-    // grid-template-columns: var(--grid-columns, 1fr);
-    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
-    column-gap: var(--ver-gap, 15px);
-    row-gap: var(--hor-gap, 15px);
+
     .singlecard {
       .cardContent {
         padding: var(--card-padding, 15px);
@@ -187,6 +189,22 @@
   }
 }
 .rightInner {
+  text-align: left;
+  margin-bottom: var(--hor-gap, 10px);
+
+  background: var(--sideCardBg, #fffaee);
+  box-shadow:
+    0px 3.30055px 40px rgba(0, 0, 0, 0.08),
+    -3px 3px 6px rgba(220, 220, 220, 0.2),
+    3px -3px 6px rgba(220, 220, 220, 0.2),
+    -3px -3px 6px rgba(255, 255, 255, 0.9),
+    3px 3px 8px rgba(220, 220, 220, 0.9),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+    inset -1px -1px 2px rgba(220, 220, 220, 0.5);
+
+  border-radius: 12px;
+  padding: var(--padding, 20px);
+  cursor: pointer;
   @media all and (min-width: 548px) {
     --hor-gap: 18px;
   }
@@ -217,25 +235,10 @@
       }
     }
   }
-  text-align: left;
-  margin-bottom: var(--hor-gap, 10px);
+
   &::last-child {
     margin-bottom: 0;
   }
-
-  background: var(--sideCardBg, #fffaee);
-  box-shadow:
-    0px 3.30055px 40px rgba(0, 0, 0, 0.08),
-    -3px 3px 6px rgba(220, 220, 220, 0.2),
-    3px -3px 6px rgba(220, 220, 220, 0.2),
-    -3px -3px 6px rgba(255, 255, 255, 0.9),
-    3px 3px 8px rgba(220, 220, 220, 0.9),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.3),
-    inset -1px -1px 2px rgba(220, 220, 220, 0.5);
-
-  border-radius: 12px;
-  padding: var(--padding, 20px);
-  cursor: pointer;
   [data-mode='dark'] & {
     box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
     background: var(--dark-primary);
@@ -350,6 +353,10 @@
   }
 }
 .main {
+  padding: var(--seciton_padding, 20px 0);
+  display: grid;
+  grid-template-columns: var(--columns, 1fr);
+  gap: var(--gap, 20px);
   @media all and (min-width: 768px) {
     --gap: 25px;
     --seciton_padding: 25px 0;
@@ -359,10 +366,6 @@
     --gap: 36px;
     --seciton_padding: 25px 0 71px;
   }
-  padding: var(--seciton_padding, 20px 0);
-  display: grid;
-  grid-template-columns: var(--columns, 1fr);
-  gap: var(--gap, 20px);
 }
 
 .linkList {

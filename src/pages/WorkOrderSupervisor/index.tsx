@@ -110,7 +110,6 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
   const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
@@ -179,7 +178,7 @@ const WorkOrderSupervisor = () => {
         accessor: 'workOrderNumber',
         type: 'link',
         title: 'Work Order',
-        link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
+        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
         target: '_blank'
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
@@ -404,14 +403,12 @@ const WorkOrderSupervisor = () => {
                       {isFilterPresent ? (
                         <>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -456,7 +453,7 @@ const WorkOrderSupervisor = () => {
                 )
               ) : (
                 <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {routes.workOrder.title}
                     </ToggleButton>
@@ -475,7 +472,6 @@ const WorkOrderSupervisor = () => {
                   <RenderActionOptions
                     permissions={permissions}
                     setShowProductFreqDialog={setShowProductFreqDialog}
-                    setShowManageWorkOrder={setShowManageWorkOrder}
                   />
                 </div>
 
@@ -524,7 +520,7 @@ const WorkOrderSupervisor = () => {
               passFailStatus={true}
               passFailAccessor="serviceStatus"
               cardOnClick={(e, data) => {
-                setOpen({ open: true, id: data._id });
+                setOpen({ open: true, id: data.workOrder });
               }}
             />
           )}
@@ -577,18 +573,6 @@ const WorkOrderSupervisor = () => {
               setWorkStationAssignDialog(false);
               dispatch({ type: 'refreshData' });
             }}
-          />
-        )}
-        {showManageWorkOrder && (
-          <ManageWorkOrder
-            isClone={false}
-            workOrderId={null}
-            onClose={() => setShowManageWorkOrder(false)}
-            onSuccess={() => {
-              onClickRefreshIcon();
-              setShowManageWorkOrder(false);
-            }}
-            isRedirectToDetailPage={false}
           />
         )}
         {showProductFreqDialog && (
@@ -665,7 +649,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
   );
 };
 
-const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog, permissions }) => {
+const RenderActionOptions = ({ setShowProductFreqDialog, permissions }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -703,11 +687,41 @@ const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog,
         {permissions?.workOrder?.isCreate && (
           <MenuItem
             onClick={() => {
-              setShowManageWorkOrder(true);
+              window.open(`${routes.workOrder.path}`);
               handleClose();
             }}
           >
-            {`Create ${routes?.workOrder.title}`}
+            {`${routes?.workOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.repairOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.repairOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`${routes?.repairOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.productionOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.productionOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`${routes?.productionOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.assemblyOrder?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              window.open(`${routes.assemblyOrder.path}`);
+              handleClose();
+            }}
+          >
+            {`${routes?.assemblyOrder.title}`}
           </MenuItem>
         )}
         <MenuItem
@@ -716,7 +730,7 @@ const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog,
             handleClose();
           }}
         >
-          Set Product Frequency
+          Work Order Scheduling
         </MenuItem>
       </Menu>
     </>

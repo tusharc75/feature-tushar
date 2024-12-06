@@ -20,11 +20,10 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, workOrderSupervisor } from 'src/constants/helpers';
+import { cn, filterDataByDateIntersection, workOrderSupervisor } from 'src/constants/helpers';
 import '../PlanningView/Calendar/calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import { kebabCase } from 'lodash';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { ExpandMore } from '@material-ui/icons';
@@ -77,6 +76,15 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [openRepairPopup, setOpenRepairPopup] = useState({ open: false, data: null });
   const [anchor, setAnchor] = useState(null);
+  const [isDataPresent, setIsDataPresent] = useState(true);
+
+  const handleRangeChange = (dates, view) => {
+    if (view === 'day' || view === 'agenda') {
+      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
+    } else {
+      setIsDataPresent(true);
+    }
+  };
 
   useEffect(() => {
     if (view === 'month') {
@@ -233,7 +241,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
     <>
       <div>
         <Box display="flex" flexDirection="column"></Box>
-        <div className={cn('relative')}>
+        <div className={cn('relative min-h-[400px] [&_.rbc-agenda-empty]:hidden')}>
           <Calendar
             defaultDate={defaultDate}
             key={mobileView ? 'mobile' : 'desktop'}
@@ -248,6 +256,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
             views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
             onView={setView}
             view={view}
+            onRangeChange={handleRangeChange}
             eventPropGetter={(obj: any) => {
               const style = setEventStyle();
               return {
@@ -271,6 +280,11 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
               }
             }}
           />
+          {!isDataPresent && (
+            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
+              No data available for the selected date range.
+            </div>
+          )}
           {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />
@@ -290,7 +304,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
           <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
             {openRepairPopup.data?.length
               ? openRepairPopup.data?.map((d) => (
-                  <Accordion key={d._id} defaultExpanded >
+                  <Accordion key={d._id} defaultExpanded>
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <div className="flex items-center gap-2">
                         <p className="text-truncate" title={d.workOrderNumber}>

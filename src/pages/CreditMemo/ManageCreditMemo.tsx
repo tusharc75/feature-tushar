@@ -56,7 +56,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               fields = fieldsDataForCreate;
               const { ...rest } = data;
               rest.creditMemoNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-              setCloneHeading(rest.creditMemoNumber);
+              setCloneHeading(rest.creditMemoNumber || data?.creditMemoNumber);
               tempData = rest;
             }
             setInitialData({
@@ -69,6 +69,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
+          tempInitialData['currency'] = user.user?.brandCurrency;
+        }
         tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           for (const key in referenceData) {

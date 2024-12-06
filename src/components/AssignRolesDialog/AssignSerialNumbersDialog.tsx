@@ -132,7 +132,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -259,32 +259,31 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedProduct === d.id) {
-                      setSelectedProduct(null);
-                    } else {
-                      setSelectedProduct(d.id);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -370,13 +369,14 @@ const AssignSerialNumbersDialog = ({
   };
 
   const handleTransferSerialNumber = (transferInventoryId) => {
+    const data = products?.map((product) => ({
+      product: product?.id,
+      qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
+      serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
+    }))
     axiosInstance()
       .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
-        products: products?.map((product) => ({
-          product: product?.id,
-          qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
-          serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
-        }))
+        products: data?.filter((e) => e?.qty)
       })
       .then(({ data }) => {
         fetchData();
@@ -412,7 +412,8 @@ const AssignSerialNumbersDialog = ({
             iconsEnabled: false,
             disabled: isAssigning || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
             loading: isAssigning,
-            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+            textAddShow: true
           }}
           addButtonOnclick={handleAdd}
           isAddButtonVisible={referenceType === 'Rental Job' ? selectedWarehouse === filterByPlant?.optionValue : true}

@@ -359,13 +359,16 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         element._id = id;
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         material.push(element);
+      }      
+      if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
+        let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
+        let updatedData = [...(result?.data || []), ...material];
+        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData, type: 'fieldTicketMaterial' });
+      } else {
+        let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+        let updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       }
-      let updatedData;
-      let result: any = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-      if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
-      else updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
-      if (!result) result = { type: 'fieldTicketMaterial' };
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       setConsumablesDialog(false);
       fetchData();
       setSubmitting(false);
@@ -459,17 +462,21 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       setDeleting(true);
       if (isOffline) {
         const materialIdsToDelete = rows.map((d) => d.id);
-        await asyncForEach(materialIdsToDelete, async (id) => {
-          await deleteOne(objectStore.fieldTicketMaterial, id);
-        });
 
-        const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data?.material || result?.data || [];
-        let updatedData;
-        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id))
-          updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
-        else updatedData = { ...result?.data, material: alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id)) };
-        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        [...materialIdsToDelete].forEach((id) => { deleteOne(objectStore.fieldTicketMaterial, id) });
+
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
+          let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
+          const alreadyOfflineDataSyncStoredRows = result?.data || [];
+          let updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
+          await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData });
+        } else {
+          let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+          const material = result?.data?.material || [];
+          const updatedMaterial = material.filter((d: any) => !materialIdsToDelete.includes(d._id));
+          let updatedData = { ...result?.data, material: updatedMaterial };
+          await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        }
         //for onlineSync
         const deleteData = {
           cost: [],
@@ -501,8 +508,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     try {
       setUpdating(true);
       if (isOffline) {
-        let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data || [];
+        let alreadyOfflineDataSyncStoredRows = [], result;
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
+          result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
+          alreadyOfflineDataSyncStoredRows = result?.data || [];
+        } else {
+          result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+          alreadyOfflineDataSyncStoredRows = result?.data?.material || [];
+        }
         const toAddOfflineDataSyncStoreRows = [];
         for (const row of rows) {
           row.fieldTicketId = fieldTicketData?._id;
@@ -516,11 +529,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             toAddOfflineDataSyncStoreRows.push({ ...existingRow, ...row });
           }
         }
-        let updatedData;
-        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
-        else updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
-        if (!result) result = { type: 'fieldTicketMaterial' };
-        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
+          let updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
+          await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData });
+        } else {
+          let updatedData = { ...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
+          await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        }
       } else {
         const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
         toastConfig.setToastConfig({

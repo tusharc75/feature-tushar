@@ -1315,7 +1315,21 @@ const routes = {
         ? storedRoutes.assemblyOrder?.title
         : RESOURCE_LABEL.assemblyOrder,
     path: '/assembly-order/detail'
-  }
+  },
+  workAutomation: {
+    title:
+      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
+        ? storedRoutes.workAutomation?.title
+        : RESOURCE_LABEL.workAutomation,
+    path: '/work-automation'
+  },
+  workAutomationDetail: {
+    title:
+      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
+        ? storedRoutes.workAutomation?.title
+        : RESOURCE_LABEL.workAutomation,
+    path: '/work-automation/detail'
+  },
 };
 
 export default routes;

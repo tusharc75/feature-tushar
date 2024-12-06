@@ -556,7 +556,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
-                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
+                      <Visibility
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        fields={fields}
+                        fieldsToExclude={[fieldData?.fieldName]}
+                        touched={touched}
+                        errors={errors}
+                      />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       <Validation values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />

@@ -731,7 +731,19 @@ export const checkFormulaLoop = (fields) => {
 
     var duplicateList = [];
     fields.forEach((_f) => {
-      if (fields.filter((_d) => (_d?.fieldName || _d?.fieldLabel).toLowerCase() === (_f?.fieldName || _f?.fieldLabel).toLowerCase()).length > 1) {
+      const fFieldName = _f?.fieldName || _f?.fieldLabel;
+      if (fields.filter((_d) => { 
+        const dFieldName = _d?.fieldName || _d?.fieldLabel;
+        if (dFieldName === fFieldName) {
+          if (!_d?.fieldEntity?.length || !_f?.fieldEntity?.length) {
+            return true;
+          } else if (_f?.fieldEntity?.some((entity) => _d?.fieldEntity?.includes(entity))) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }).length > 1) {
         duplicateList.push(_f.fieldLabel);
       }
     });

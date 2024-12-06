@@ -5,6 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
+import { Column, Header, Table } from '@tanstack/react-table';
 
 export const childrenProperty = 'subRows';
 
@@ -149,6 +150,11 @@ export const getStickyColumnNames = ({
   const stickyIndexes: number[] = [];
   const leftIndexes: number[] = [];
   const rightIndexes: number[] = [];
+  const columns = {
+    left: [],
+    right: [],
+    normal: []
+  };
   for (let i = 0; i < allColumn.length; i++) {
     const col = allColumn[i];
     const colName = col?.id ?? col?.accessor;
@@ -157,6 +163,7 @@ export const getStickyColumnNames = ({
       leftIndexes.push(i);
       stickyColumns.push(colName);
       stickyIndexes.push(i);
+      columns.left.push(col);
       continue;
     }
     if (colName === 'selection' && !hideSelection) {
@@ -164,6 +171,7 @@ export const getStickyColumnNames = ({
       leftIndexes.push(i);
       stickyColumns.push(colName);
       stickyIndexes.push(i);
+      columns.left.push(col);
       continue;
     }
     if (col.sticky === 'left') {
@@ -171,15 +179,128 @@ export const getStickyColumnNames = ({
       leftIndexes.push(i);
       stickyColumns.push(colName);
       stickyIndexes.push(i);
+      columns.left.push(col);
+      continue;
     }
     if (col.sticky === 'right') {
       right.push(colName);
       rightIndexes.push(i);
       stickyColumns.push(colName);
       stickyIndexes.push(i);
+      columns.right.push(col);
+      continue;
     }
+    columns.normal.push(col);
   }
-  return { left, right, stickyColumns, stickyIndexes, leftIndexes, rightIndexes };
+  return { left, right, stickyColumns, stickyIndexes, leftIndexes, rightIndexes, columns };
+};
+
+export const getStickyColumnNamesFromTableColumns = ({
+  allColumn = [],
+  expander,
+  hideSelection,
+  sizes: propSizes = [],
+  headers,
+  footers,
+  columnOrder
+}: {
+  allColumn: Column<any, unknown>[];
+  expander: boolean;
+  hideSelection: boolean;
+  sizes?: number[];
+  headers: Header<any, unknown>[];
+  footers: Header<any, unknown>[];
+  columnOrder: string[];
+}) => {
+  if (!allColumn || !Array.isArray(allColumn) || allColumn.length === 0) return;
+  const sortedColumns = allColumn.sort((a, b) => columnOrder.indexOf(a.id) - columnOrder.indexOf(b.id));
+  // const columns = {
+  //   left: [],
+  //   right: [],
+  //   normal: []
+  // };
+  const sizes = {
+    left: [],
+    right: [],
+    normal: []
+  };
+  const headersData = {
+    left: [],
+    right: [],
+    normal: []
+  };
+  const footerData = {
+    left: [],
+    right: [],
+    normal: []
+  };
+  const columnIndexes = {
+    left: [],
+    right: [],
+    normal: []
+  };
+  let leftTotlaSize = 0;
+  let rightTotalSize = 0;
+  for (let i = 0; i < allColumn.length; i++) {
+    const col = sortedColumns[i];
+    const header = headers[i];
+    const footer = footers[i];
+    const colDef = col.columnDef as TColType;
+    const colName = colDef?.id ?? colDef?.accessor;
+    const colSize = propSizes[i] || 200;
+
+    if (colName === 'expander' && expander) {
+      // columns.left.push(colDef);
+      sizes.left.push(colSize);
+      leftTotlaSize += colSize;
+      columnIndexes.left.push(i);
+      headersData.left.push(header);
+      footerData.left.push(footer);
+      continue;
+    }
+    if (colName === 'selection' && !hideSelection) {
+      // columns.left.push(colDef);
+      sizes.left.push(colSize);
+      leftTotlaSize += colSize;
+      columnIndexes.left.push(i);
+      headersData.left.push(header);
+      footerData.left.push(footer);
+      continue;
+    }
+    if (colDef.sticky === 'left') {
+      // columns.left.push(colDef);
+      sizes.left.push(colSize);
+      leftTotlaSize += colSize;
+      columnIndexes.left.push(i);
+      headersData.left.push(header);
+      footerData.left.push(footer);
+      continue;
+    }
+    if (colDef.sticky === 'right') {
+      // columns.right.push(colDef);
+      sizes.right.push(colSize);
+      rightTotalSize += colSize;
+      columnIndexes.right.push(i);
+      headersData.right.push(header);
+      footerData.right.push(footer);
+      continue;
+    }
+    // columns.normal.push(colDef);
+    sizes.normal.push(colSize);
+    headersData.normal.push(header);
+    footerData.normal.push(footer);
+    columnIndexes.normal.push(i);
+  }
+
+  return {
+    // columns,
+    sizes,
+    leftTotlaSize,
+    rightTotalSize,
+    headers: headersData,
+    columnIndexes,
+    footerData
+  };
 };
 
 export const getUniqueRows = (rows: any[], key = '_id') => {
@@ -458,7 +579,7 @@ export function adjustSizes(original: TColType[], visibleColumns: { [key: string
   if (scaleFactor === Infinity) {
     return null;
   }
-  const scrollerWidth = 2;
+  const scrollerWidth = 0;
 
   return original.map((col) => {
     const size = Math.floor((col.size || 200) * scaleFactor) - scrollerWidth;

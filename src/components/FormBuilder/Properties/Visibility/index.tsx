@@ -5,19 +5,18 @@ import { MoreHoriz, Settings } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-
+import { Entity } from 'src/components/FormBuilder/AddField/entity';
 
 const useStyles = makeStyles({
   group: {
     paddingTop: '2px',
     paddingBottom: '2px',
     paddingLeft: '10px',
-    paddingRight: '10px',
-  },
+    paddingRight: '10px'
+  }
 });
 
-
-const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
+const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, errors }) => {
   const classes = useStyles();
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
@@ -90,7 +89,13 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
 
   return (
     <Box>
-      <Box pl={0.5}>
+      <Entity
+        values={values}
+        setFieldValue={setFieldValue}
+        errors={errors}
+        touched={touched}
+      />
+      <Box pl={0.5} pt={2}>
         <Typography variant="subtitle2">ONLY SHOW WHEN...</Typography>
       </Box>
       {values &&
