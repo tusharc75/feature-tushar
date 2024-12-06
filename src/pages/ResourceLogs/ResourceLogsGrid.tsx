@@ -187,7 +187,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     }
                     if (oldValue && newValue) {
                       changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
-                    } else {
+                    } else if (newValue) {
                       changeString.push(`${e.fieldLabel} changed to ${newValue}`);
                     }
                   } else if (e?.label) {
