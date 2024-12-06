@@ -20,6 +20,7 @@ import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sideb
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
 import axios, { CancelTokenSource } from 'axios';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const renderedFrom = camelCase(routes?.workOrderTechnician.title);
 
@@ -115,7 +116,16 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
+          row.original['assignedWorkStations'] ? <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'assignedWorkStations',
+              lookupResource: sidebarResource.workStations
+            }}
+            original={row?.original}
+          />
+            : <NoDataCell />
       }
     ];
     const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
@@ -203,7 +213,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
           finalObject['uniqueId'] = matchedTempMaterial?._id;
-          delete workOrderDetailData?._id;
+          delete workOrderDetailData?._id
           delete workOrderDetailData?.id;
           return { ...finalObject, ...workOrderDetailData };
         });
@@ -257,7 +267,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           }}
           disabled={
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true
           }
@@ -292,11 +302,10 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
                     fetchData();
                   }}
                   disabled={selectedRecords.length !== 1}
-                  additionalParams={`${
-                    selectedRecords[0]?.repairOrderId
-                      ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
-                      : `productionOrder=${selectedRecords[0]?.productionOrderId}`
-                  }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+                  additionalParams={`${selectedRecords[0]?.repairOrderId
+                    ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
+                    : `productionOrder=${selectedRecords[0]?.productionOrderId}`
+                    }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
                 />
               )
             }
