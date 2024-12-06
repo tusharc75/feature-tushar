@@ -61,7 +61,6 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
 export default ManualContent;
 
 const OnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
-  console.log(pageData);
   return (
     <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] ">
       {pageData?.map((e) => (
