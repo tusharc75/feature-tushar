@@ -2,11 +2,12 @@ import { Checkbox, FormControlLabel } from '@material-ui/core';
 import { uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { InNin } from 'src/components/Filter';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilterByIds, multiple = true }) => {
+const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilterByIds, multiple = true, filterTerm, setFilterTerm }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -86,7 +87,8 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
       <div className="flex items-center justify-between">
         <p>{fieldData?.fieldLabel}</p>
         {fieldData?.lookup && fieldData?.lookupResource && (
-          <div>
+          <div className="flex items-center justify-between">
+            <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
             <SearchBox
               onChange={(e) => {
                 setSearchVal(e?.target?.value);

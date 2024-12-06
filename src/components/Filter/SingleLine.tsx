@@ -4,8 +4,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import SearchBox from 'src/components/Helpers/SearchBox';
+import { InNin } from 'src/components/Filter';
 
-const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters }) => {
+const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterTerm, setFilterTerm }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -91,7 +92,8 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters }) => {
     <div>
       <div className="flex items-center justify-between">
         <p>{fieldData?.fieldLabel}</p>
-        <div>
+        <div className="flex items-center justify-between">
+          <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
           <SearchBox
             onChange={(e) => {
               setSearchVal(e?.target?.value);

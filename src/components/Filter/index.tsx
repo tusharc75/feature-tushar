@@ -1,4 +1,4 @@
-import { Dialog } from '@material-ui/core';
+import { Dialog, FormControl, MenuItem, Select } from '@material-ui/core';
 import _, { isArray } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -21,6 +21,8 @@ const Filter = ({
   setDeepFilters,
   filterByIds,
   setFilterByIds,
+  filterTerm,
+  setFilterTerm,
   defaultColumns = [],
   reportConfig = null
 }) => {
@@ -134,6 +136,8 @@ const Filter = ({
                 allFields={[]}
                 deepFilters={deepFilters}
                 setDeepFilters={setDeepFilters}
+                filterTerm={filterTerm}
+                setFilterTerm={setFilterTerm}
               />
             ) : ['dropDown', 'multiSelect']?.includes(selectedField?.type) ? (
               <DropDown
@@ -146,6 +150,8 @@ const Filter = ({
                 multiple={
                   reportConfig?.defaultColumn ? (reportConfig?.notMultiSelectFields?.includes(selectedField?.fieldName) ? false : true) : true
                 }
+                filterTerm={filterTerm}
+                setFilterTerm={setFilterTerm}
               />
             ) : selectedField?.type === 'checkBox' ? (
               <CheckBox key={selectedField._id} fieldData={selectedField} deepFilters={deepFilters} setDeepFilters={setDeepFilters} />
@@ -213,3 +219,25 @@ const Filter = ({
 };
 
 export default Filter;
+
+export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
+  return (
+    <div className="mr-2">
+      <FormControl fullWidth size="small" variant="outlined" margin="dense">
+        <Select
+          labelId={'filter-term'}
+          id={'filter-term'}
+          value={filterTerm[fieldName] || '$in'}
+          onChange={(e) => {
+            setFilterTerm((prev) => ({ ...prev, [fieldName]: e?.target?.value }));
+          }}
+          label="Select"
+          margin="dense"
+        >
+          <MenuItem value={'$in'}>Include</MenuItem>
+          <MenuItem value={'$nin'}>Exclude</MenuItem>
+        </Select>
+      </FormControl>
+    </div>
+  );
+};
