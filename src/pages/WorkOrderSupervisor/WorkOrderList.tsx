@@ -166,8 +166,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               <IconButton
                 size="medium"
                 onClick={() => {
-                  //`${routes.employeeMasterDetail.path}/${row.original.assignedUsersId}`
-                  window.open(`${routes.employeeMaster.path}`);
+                  window.open(`${routes.employeeMasterDetail.path}/${row.original.assignedUsersId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
