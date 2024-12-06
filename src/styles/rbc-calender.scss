@@ -8,9 +8,10 @@
   }
 }
 
-.rbc-month-header {
-  border-bottom: 3px solid var(--new_theme_color);
-}
+// .rbc-month-header {
+// border-bottom: 1px solid var(--new_theme_color);
+
+// }
 
 .rbc-off-range-bg {
   background: rgba(247, 249, 249, 1);
@@ -38,6 +39,16 @@
   .rbc-event {
     margin: 3px 2% 0 1% !important;
   }
+  // @media all and (max-width: 767px) {
+  //   min-height: 70px;
+  //   max-height: 70px;
+  //   height: 70px;
+  // }
+  // @media all and (max-width: 600px) {
+  //   min-height: 50px;
+  //   max-height: 50px;
+  //   height: 50px;
+  // }
 }
 
 .rbc-day-bg + .rbc-day-bg {

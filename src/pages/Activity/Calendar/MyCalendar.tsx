@@ -2,7 +2,8 @@ import moment from 'moment';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
 import React, { useRef, useState } from 'react';
-import { filterDataByDateIntersection } from 'src/constants/helpers';
+import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
+import CustomCalendar from 'src/components/CustomCalendar';
 
 const localizer = momentLocalizer(moment);
 
@@ -20,15 +21,6 @@ const MyCalendar = (props: Props) => {
   const { activities, setActivityData } = props;
   const mobileView = isMobile && !isTablet;
   const calendarRef = useRef<Calendar<any, object>>(null);
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, activities)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   return (
     <div className="relative">
@@ -42,7 +34,6 @@ const MyCalendar = (props: Props) => {
         style={{ height: 'calc(100vh - 200px)', borderRadius: '4px', overflow: 'auto' }}
         popup={!mobileView}
         ref={calendarRef}
-        onRangeChange={handleRangeChange}
         // views={{ month: !mobileView, week: !mobileView, day: true }}
         views={mobileView ? ['day'] : ['month', 'week', 'day']}
         eventPropGetter={(obj) => {
@@ -71,11 +62,6 @@ const MyCalendar = (props: Props) => {
           });
         }}
       />
-      {!isDataPresent && (
-        <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-          No data available for the selected date range.
-        </div>
-      )}
     </div>
   );
 };
