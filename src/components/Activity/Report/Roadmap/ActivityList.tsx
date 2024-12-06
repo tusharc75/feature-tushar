@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Button, Dialog } from '@material-ui/core';
+import { Typography, Box, Button, Dialog, useMediaQuery } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ActivityList(props) {
+  const isMobileDevices = useMediaQuery('(max-width:768px)');
   const classes = useStyles();
   const { type, fetchRoadmap, activity, expanded, selected, handleToggle, handleSelect } = props;
   const {
@@ -98,11 +99,11 @@ export default function ActivityList(props) {
           return node;
         })}
       </TreeView>
-      <Box padding={1} width="100%">
-        <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={<AddIcon />}>
+      <div className="py-2">
+        <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={isMobileDevices ? null : <AddIcon />}>
           Create {type}
         </Button>
-      </Box>
+      </div>
       {activityData && (
         <ActivityModelHandler
           fetchBoard={fetchRoadmap}

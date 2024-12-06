@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
+import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import moment from 'moment';
 import PropTypes from 'prop-types';
@@ -13,14 +13,16 @@ import Calendar from './Calendar';
 import CalendarList from './CalendarList';
 
 function Roadmap({ type, filter }) {
-  const scrollRef = React.useRef(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const scrollDayLinerContainer = React.useRef<HTMLDivElement>(null);
+  const dayLiner = React.useRef<HTMLDivElement>(null);
+  const isMobileDevices = useMediaQuery('(max-width:768px)');
+  const sidebarWidth = isMobileDevices ? 110 : 300;
   const executeScroll = () => {
-    var pageElement = document.getElementById('dayLiner');
-    var LeftPos = pageElement.offsetLeft;
-    document.getElementById('scrollDayLiner').scrollLeft = LeftPos - 200;
-    // if (scrollRef.current) {
-    //     scrollRef.current.scrollIntoView({ inline: "center" })
-    // }
+    const pageElement = dayLiner.current as HTMLDivElement;
+    const LeftPos = pageElement?.offsetLeft || 1;
+    const centerPos = LeftPos - (scrollDayLinerContainer.current.clientWidth || 1) * 0.5;
+    scrollDayLinerContainer.current.scrollLeft = centerPos;
   };
 
   const [calendarType, setCalendarType] = useState('week');
@@ -85,17 +87,11 @@ function Roadmap({ type, filter }) {
     <Box>
       <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-          <Box
-            minWidth={isMobile && !isTablet ? 110 : 300}
-            border={1}
-            borderColor="var(--common-border-color)"
-            style={{ position: 'relative', overflow: 'hidden' }}
-          >
+          <Box minWidth={sidebarWidth} border={1} borderColor="var(--common-border-color)" style={{ position: 'relative', overflow: 'hidden' }}>
             <Box height={60} display="flex" style={{ borderBottom: '1px solid var(--common-border-color)' }} className=" sticky top-0 z-[1]">
-              <Box p={2} display="flex" alignItems="center">
-                <Map />
-                <Box mr={1} />
-                <Typography variant="body1" display="block">
+              <Box className="flex items-center gap-1 p-2 md:gap-2 md:p-4">
+                <Map fontSize="small" />
+                <Typography variant="body1" display="block" style={isMobileDevices ? { fontSize: 13 } : {}}>
                   Roadmap
                 </Typography>
               </Box>
@@ -124,7 +120,7 @@ function Roadmap({ type, filter }) {
               </Box>
             </div>
           </Box>
-          <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="var(--common-border-color)" className="relative overflow-auto">
+          <div ref={scrollDayLinerContainer} onScroll={onscroll} className="relative overflow-auto border">
             <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
             <Box width="100%" height="calc(100% - 60px)" className="absolute inset-0 bottom-0 left-0 right-0 top-[60px] z-[1] w-full">
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
@@ -143,21 +139,21 @@ function Roadmap({ type, filter }) {
               </Box>
             </Box>
             <Box width={totalDay * dayPixel} height={'calc(100% - 60px)'} style={{ position: 'sticky', top: 60, bottom: 0 }}>
-              <div ref={scrollRef}>
-                <Box
-                  id="dayLiner"
-                  height={'100%'}
+              <div ref={scrollRef} id={'scrillRef'}>
+                <div
+                  ref={dayLiner}
                   style={{
                     position: 'absolute',
                     left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
                     width: dayPixel
                   }}
+                  className="h-full"
                 >
                   <Box style={{ margin: 'auto' }} width={2} border={2} className="!border-green-500" height={'100%'}></Box>
-                </Box>
+                </div>
               </div>
             </Box>
-          </Box>
+          </div>
         </Box>
       </Box>
       <Box display="flex" justifyContent="flex-end" className="mt-2">
