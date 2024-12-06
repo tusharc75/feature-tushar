@@ -857,7 +857,7 @@ const Report = () => {
     }
     if (resourceCamelCase === 'volumeReport') {
       if (!selectedData?.unitWise?.value) {
-        tempColumn = tempColumn?.filter((e) => !['asset', 'padName']?.includes(e.accessor));
+        tempColumn = tempColumn?.filter((e) => !['asset', 'padName', 'customerAccount']?.includes(e.accessor));
       }
       return tempColumn;
     }
