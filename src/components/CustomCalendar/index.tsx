@@ -76,7 +76,7 @@ const CustomCalendar = ({
             );
           },
           month: {
-            header: (props) => {
+            header: (props: any) => {
               const { label } = props;
               return (
                 <div>
