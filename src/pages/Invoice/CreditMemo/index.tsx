@@ -367,17 +367,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             fetchData();
           }}
           creditMemoId={creditMemoDialog.id}
-          referenceData={{
-            invoice: invoiceData?._id,
-            currency: invoiceData?.currency,
-            customerAccount: invoiceData?.customerAccount?.optionValue,
-            customerContact: invoiceData?.customerContact?.optionValue,
-            customerDepartment: invoiceData?.customerDepartment,
-            shippingAddress: invoiceData?.shippingAddress?.optionValue,
-            billingAddress: invoiceData?.billingAddress?.optionValue,
-            wellName: invoiceData?.wellName?.optionValue,
-            wellNumber: invoiceData?.wellNumber?.map((e) => e.optionValue),
-          }}
+          invoiceData={invoiceData}
           isRedirectToDetailPage={false}
         />
       )}
