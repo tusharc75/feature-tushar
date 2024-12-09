@@ -26,7 +26,7 @@ const MobileDayView = ({ onClose, date, calnedarProps, Component }: MobileDayVie
       }}
       fullWidth
     >
-      <CustomDialogHeader title={moment(date).format(dateFormat)} onClose={onClose} />
+      <CustomDialogHeader showRequiredLabel={false} title={moment(date).format(dateFormat)} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <Component
           {...calnedarProps}
