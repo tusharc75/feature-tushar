@@ -1,7 +1,9 @@
 import { useMediaQuery } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, CalendarProps } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
+import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
+import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
 
 type ViewType = 'month' | 'week' | 'day' | 'agenda';
@@ -9,11 +11,13 @@ type CustomCalendarProps = Omit<CalendarProps<any, any>, 'views'> & {
   views: ViewType[];
 };
 
-const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, views, ...rest }: CustomCalendarProps) => {
-  const mobileView = isMobile && !isTablet;
+const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, views, onSelectEvent, ...rest }: CustomCalendarProps) => {
   const isMobileView = useMediaQuery('(max-width: 767px)');
+  const mobileView = (isMobile && !isTablet) || isMobileView;
   const [isDataPresent, setIsDataPresent] = useState(true);
   const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
+  const [mobileEvents, setMobileEvents] = useState([]);
+  const [mobileViewData, setMobileViewData] = useState<{ open: boolean; date: string }>({ open: false, date: '' });
 
   const handleRangeChange = (dates, view) => {
     if (view === 'day') {
@@ -29,14 +33,28 @@ const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, view
     onView?.(view);
   };
 
+  useEffect(() => {
+    if (mobileView) {
+      setMobileEvents(parseEventForMobile(events));
+    }
+  }, [events, mobileView]);
+
+  const handleOpenMobileDayView = (data) => {
+    setMobileViewData({ open: true, date: data.start });
+  };
+
+  const handleCloseMobileDayView = () => {
+    setMobileViewData({ open: false, date: '' });
+  };
+
   return (
     <div className="relative">
       <Calendar
-        view={isMobileView ? 'month' : stateView}
-        events={events}
+        view={mobileView ? 'month' : stateView}
+        events={mobileView ? mobileEvents : events}
         onView={handleView}
         onRangeChange={handleRangeChange}
-        views={isMobileView ? ['month'] : views}
+        views={mobileView ? ['month'] : views}
         components={{
           event: (props) => {
             const { event } = props;
@@ -46,26 +64,6 @@ const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, view
               </div>
             );
           },
-          // dateCellWrapper: (props) => {
-          //   console.log(props);
-          //   return <div className="asdfasdfjasdklfjasdl;kfjas;kldf">{props.children}hi</div>;
-          // },
-          // dayColumnWrapper: (props) => {
-          //   console.log(props);
-          //   return <div className="aklsdjflak;sdjfla;ksdfjlaskdfj">hiasdfasdjf;lkajsdf;kl ajsd;lfkjasd lfkjasdf lkasjdf ;kl</div>;
-          // },
-          // eventContainerWrapper: (props) => {
-          //   console.log(props);
-          //   return <div className="test-class">hiasdfasdjf;lkajsdf;kl ajsd;lfkjasd lfkjasdf lkasjdf ;kl{props.children}</div>;
-          // },
-          // eventWrapper: (props) => {
-          //   console.log(props);
-          //   return <div className="test-class">{props.children}</div>;
-          // },
-          // dayColumnWrapper: (props) => {
-          //   console.log(props);
-          //   return <>hi</>;
-          // },
           month: {
             header: (props) => {
               const { label } = props;
@@ -76,19 +74,24 @@ const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, view
                 </div>
               );
             }
-            // important
-            // dateHeader: (props) => {
-            //   console.log(props);
-            //   return <div>{props.label}</div>;
-            // }
           }
         }}
+        onSelectEvent={(event, data) => (mobileView ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
         {...rest}
       />
       {!isDataPresent && (
         <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
           No data available for the selected date range.
         </div>
+      )}
+      {mobileViewData.open && (
+        <>
+          <MobileDayView
+            calnedarProps={{ onSelectEvent, events, view: 'day', views: ['day'], date: mobileViewData.date, ...rest }}
+            date={mobileViewData.date}
+            onClose={handleCloseMobileDayView}
+          />
+        </>
       )}
     </div>
   );

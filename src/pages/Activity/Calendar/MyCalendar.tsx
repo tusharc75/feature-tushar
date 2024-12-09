@@ -24,7 +24,7 @@ const MyCalendar = (props: Props) => {
 
   return (
     <div className="relative">
-      <Calendar
+      <CustomCalendar
         key={mobileView ? 'mobile' : 'desktop'}
         defaultDate={moment().toDate()}
         defaultView={mobileView ? 'day' : 'month'}
