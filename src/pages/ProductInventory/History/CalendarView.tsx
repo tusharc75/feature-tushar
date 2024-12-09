@@ -1,9 +1,9 @@
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import { uniq } from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { momentLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
-import { uniq } from 'lodash';
-import { filterDataByDateIntersection } from 'src/constants/helpers';
+import CustomCalendar from 'src/components/CustomCalendar';
 
 const localizer = momentLocalizer(moment);
 
@@ -13,16 +13,6 @@ const formats = {
 
 const CalendarView = ({ product, warehouse, storageLocation }) => {
   const [activities, setActivities] = useState([]);
-
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, activities)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   useEffect(() => {
     fetchRecords();
@@ -78,7 +68,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
 
   return (
     <div className="relative">
-      <Calendar
+      <CustomCalendar
         defaultDate={moment().toDate()}
         defaultView="month"
         events={activities}
@@ -86,8 +76,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
         formats={formats}
         showAllEvents
         style={{ minHeight: 'calc(100vh - 200px)', borderRadius: '4px' }}
-        views={{ month: true, week: true, day: true }}
-        onRangeChange={handleRangeChange}
+        views={['month', 'week', 'day']}
         eventPropGetter={(obj) => ({
           style: {
             backgroundColor: obj?.isFinalInventory ? '#D6F6F6' : obj.type === 'credit' ? '#DBF8DB' : '#FAEAE9',
@@ -99,11 +88,6 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
           }
         })}
       />
-      {!isDataPresent && (
-        <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-          No data available for the selected date range.
-        </div>
-      )}
     </div>
   );
 };
