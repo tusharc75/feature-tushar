@@ -116,7 +116,7 @@ const CustomCalendar = ({
               : {})
           }
         }}
-        onSelectEvent={(event, data) => (mobileView ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
+        onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
         {...rest}
       />
       {!isDataPresent && (
