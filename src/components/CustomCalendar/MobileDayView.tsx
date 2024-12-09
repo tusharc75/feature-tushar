@@ -1,6 +1,6 @@
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
-import { CustomCalendarProps } from 'src/components/CustomCalendar';
+import { CustomCalendarProps, ViewType } from 'src/components/CustomCalendar';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
@@ -8,7 +8,7 @@ import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
 type MobileDayViewProps = {
   onClose: () => void;
   date: string;
-  calnedarProps: CustomCalendarProps;
+  calnedarProps: CustomCalendarProps & { views: ViewType[] };
   Component: any;
 };
 

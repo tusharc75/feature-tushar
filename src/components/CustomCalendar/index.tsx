@@ -13,7 +13,7 @@ interface DragAndDropCalendarProps<TEvent extends object = Event, TResource exte
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
-type ViewType = 'month' | 'week' | 'day' | 'agenda';
+export type ViewType = 'month' | 'week' | 'day' | 'agenda';
 
 type CommonProps = {
   views: ViewType[];
