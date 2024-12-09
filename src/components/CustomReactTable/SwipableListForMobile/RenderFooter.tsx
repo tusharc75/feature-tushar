@@ -15,7 +15,7 @@ const RenderFooter = ({ table }) => {
       {table?.getFooterGroups().map((group, index) => {
         const indexCol = group?.headers?.find((g) => g.id === 'index');
         return (
-          <div key={index} className="[border:1px_solid_var(--common-border-color)] rounded-md items-center mt-4 ">
+          <div key={index} className="mt-4 items-center rounded-md [border:1px_solid_var(--common-border-color)] ">
             <Button
               fullWidth
               onClick={toggleFooter}
@@ -24,11 +24,11 @@ const RenderFooter = ({ table }) => {
               aria-label="show more"
               className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between [&_.MuiButton-label]:font-bold"
             >
-              <span>{indexCol?.isPlaceholder ? null : flexRender(indexCol?.column?.columnDef.footer, indexCol?.getContext())}</span>
+              <span>{indexCol?.isPlaceholder ? null : flexRender(indexCol?.column?.columnDef.footer, indexCol?.getContext()) || 'Total'}</span>
             </Button>
             <Collapse in={isFooterExpanded} timeout="auto">
               <div
-                className={`grid grid-cols-[5fr_3fr] py-2 gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
+                className={`grid grid-cols-[5fr_3fr] justify-between gap-2 px-2 py-2 text-[12px] font-semibold text-black [border-top:1px_solid_var(--common-border-color)] dark:text-gray-300
                   `}
               >
                 {group?.headers?.map((column) => {
@@ -38,7 +38,7 @@ const RenderFooter = ({ table }) => {
                       <span className="text-truncate">
                         {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.header, column?.getContext())}
                       </span>
-                      <span className="text-truncate font-normal text-right">
+                      <span className="text-truncate text-right font-normal">
                         {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.footer, column?.getContext())}
                       </span>
                     </Fragment>
