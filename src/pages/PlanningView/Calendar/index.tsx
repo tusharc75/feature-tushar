@@ -754,21 +754,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         <div className={cn('relative')}>
           {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
             <>
-              <DragAndDropCalendar
+              <CustomCalendar
+                dragAndDrop={true}
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
                 onEventDrop={moveEvent}
+                loading={isDataFetching}
                 onEventResize={resizeEvent}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
                 resizable
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -789,16 +790,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
               <CustomCalendar
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
+                loading={isDataFetching}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -829,11 +830,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               />
             </div>
           )}
-          {isDataFetching && (
+          {/* {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />
             </span>
-          )}
+          )} */}
         </div>
         {isOpen.open && (
           <Popover

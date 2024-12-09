@@ -29,7 +29,7 @@ const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
         formats={formats}
         style={{ height: 'calc(100vh - 200px)', borderRadius: '4px', overflow: 'auto' }}
         popup={!mobileView}
-        views={mobileView ? ['day'] : ['month', 'week', 'day']}
+        views={['month', 'week', 'day']}
         eventPropGetter={(obj) => {
           const newStyles = {
             backgroundColor:
