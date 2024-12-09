@@ -50,9 +50,8 @@ const BigCalendar = () => {
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState(null);
   const [activityData, setActivityData] = useState(null);
-  const [activities, setActivities] = useState([]);
+  const [activities, setActivities] = useState({ activities: [], loading: true });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -78,11 +77,9 @@ const BigCalendar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, referenceId]);
 
-  console.log(loading, activities);
-
   const fetchBoard = useCallback(
     (cancelTokenSource?: CancelTokenSource) => {
-      setLoading(true);
+      setActivities({ activities: [], loading: true });
       axiosInstance()
         .get(`/activity/board?type=${''}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
@@ -95,13 +92,10 @@ const BigCalendar = () => {
             allDay: true,
             type: d.type
           }));
-          setActivities(newData);
-          setTimeout(() => {
-            setLoading(false);
-          }, 500);
+          setActivities({ activities: newData, loading: false });
         })
         .catch(() => {
-          setLoading(false);
+          setActivities({ activities: [], loading: true });
         });
     },
     [type, filter]
@@ -223,7 +217,7 @@ const BigCalendar = () => {
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
               </div>
             </div>
-            <MyCalendar activities={activities} setActivityData={setActivityData} loading={loading} />
+            <MyCalendar activities={activities.activities} setActivityData={setActivityData} loading={activities.loading} />
           </>
         )}
         {activityData && (
