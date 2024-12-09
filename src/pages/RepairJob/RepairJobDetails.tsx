@@ -4,7 +4,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiAbstract055 } from 'react-icons/gi';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -233,7 +232,7 @@ const RepairJobDetails = () => {
             Details
           </CustomTab>
           <CustomTab value={2}>
-            <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
+            {routes.deliveryTicket.title}
           </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab value={3}>
