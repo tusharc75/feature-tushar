@@ -43,6 +43,7 @@ export const rentalManagementMessage = {
   validPrice: 'Enter Price to proceed',
   validServicePrice: 'Enter Service Price to proceed',
   acceptRejectQuotation: `Accept/Reject ${routes.quotation.title} to proceed`,
+  processQuotation: `Process ${routes.quotation.title} to proceed`,
   addProductInPackage: 'Add Product in package to proceed',
   addServiceInPackage: 'Add Service in package to proceed',
   assignAssets: 'Assign Assets to proceed',
