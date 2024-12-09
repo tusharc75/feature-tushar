@@ -1,15 +1,15 @@
-import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Calendar, View, momentLocalizer } from 'react-big-calendar';
-import './calendarView.scss';
-import moment from 'moment';
-import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
+import { Box, Checkbox, Grid, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import moment from 'moment';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { View, momentLocalizer } from 'react-big-calendar';
+import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomCalendar from 'src/components/CustomCalendar';
 import routes from 'src/components/Helpers/Routes';
+import { RESOURCE_LABEL, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, RESOURCE_LABEL, filterDataByDateIntersection } from 'src/constants/helpers';
-import { isArray } from 'lodash';
+import './calendarView.scss';
 
 const planningResource = [
   {
@@ -97,15 +97,6 @@ function CalendarView() {
   const [selectedWarehouse, setSelectedWarehouse] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState([]);
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -415,7 +406,7 @@ function CalendarView() {
         </Box>
       </Box>
       <div className="relative">
-        <Calendar
+        <CustomCalendar
           style={{ height: 'calc(100vh - 260px)' }}
           defaultDate={defaultDate}
           defaultView={'day'}
@@ -426,10 +417,9 @@ function CalendarView() {
           messages={{
             agenda: 'List'
           }}
-          views={{ month: true, week: true, day: true, agenda: true }}
+          views={['month', 'week', 'day', 'agenda']}
           onView={onView}
           view={view}
-          onRangeChange={handleRangeChange}
           eventPropGetter={(obj: any) => {
             const newStyles = {
               backgroundColor: 'rgba(234, 239, 254, 1)',
@@ -470,11 +460,6 @@ function CalendarView() {
             history.push(`${path}/${event.id}`);
           }}
         />
-        {!isDataPresent && (
-          <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-            No data available for the selected date range.
-          </div>
-        )}
       </div>
     </div>
   );

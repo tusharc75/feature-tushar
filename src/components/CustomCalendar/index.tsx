@@ -1,5 +1,5 @@
-import { useMediaQuery } from '@material-ui/core';
-import React, { useState, useEffect } from 'react';
+import { CircularProgress, useMediaQuery } from '@material-ui/core';
+import { useEffect, useState } from 'react';
 import { Calendar, CalendarProps } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
 import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
@@ -9,18 +9,29 @@ import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
 type ViewType = 'month' | 'week' | 'day' | 'agenda';
 type CustomCalendarProps = Omit<CalendarProps<any, any>, 'views'> & {
   views: ViewType[];
+  loading?: boolean;
 };
 
-const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, views, onSelectEvent, ...rest }: CustomCalendarProps) => {
+const CustomCalendar = ({
+  events,
+  onRangeChange,
+  view,
+  defaultView,
+  onView,
+  views,
+  onSelectEvent,
+  loading = false,
+  ...rest
+}: CustomCalendarProps) => {
   const isMobileView = useMediaQuery('(max-width: 767px)');
   const mobileView = (isMobile && !isTablet) || isMobileView;
-  const [isDataPresent, setIsDataPresent] = useState(true);
   const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
   const [mobileEvents, setMobileEvents] = useState([]);
   const [mobileViewData, setMobileViewData] = useState<{ open: boolean; date: string }>({ open: false, date: '' });
+  const [isDataPresent, setIsDataPresent] = useState(true);
 
   const handleRangeChange = (dates, view) => {
-    if (view === 'day') {
+    if (view === 'day' || view === 'agenda') {
       setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
     } else {
       setIsDataPresent(true);
@@ -84,10 +95,24 @@ const CustomCalendar = ({ events, onRangeChange, view, defaultView, onView, view
           No data available for the selected date range.
         </div>
       )}
+      {loading && (
+        <div className="absolute left-1/2 top-1/2 select-none bg-[var(--dark-primary,white)] text-center [transform:translate(-50%,-50%)]">
+          <CircularProgress />
+        </div>
+      )}
+
       {mobileViewData.open && (
         <>
           <MobileDayView
-            calnedarProps={{ onSelectEvent, events, view: 'day', views: ['day'], date: mobileViewData.date, ...rest }}
+            calnedarProps={{
+              onSelectEvent,
+              events,
+              view: 'day',
+              views: ['day'],
+              date: mobileViewData.date,
+              titleAccessor: rest.titleAccessor,
+              ...rest
+            }}
             date={mobileViewData.date}
             onClose={handleCloseMobileDayView}
           />

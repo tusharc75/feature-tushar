@@ -1,11 +1,11 @@
 import { Box, makeStyles } from '@material-ui/core';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Calendar, momentLocalizer, View } from 'react-big-calendar';
+import { momentLocalizer, View } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomCalendar from 'src/components/CustomCalendar';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
-import { filterDataByDateIntersection } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -50,8 +50,6 @@ const CalendarView = (props: Props) => {
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
   const toastConfig = useContext(CustomToastContext);
 
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
   useEffect(() => {
     axiosInstance()
       .get(`${routes?.planning.path}?entity=${selectedEntity}`)
@@ -74,13 +72,8 @@ const CalendarView = (props: Props) => {
   const onRangeChange = useCallback(
     (range, view) => {
       setRange(range);
-      if (view === 'day') {
-        setIsDataPresent(!!filterDataByDateIntersection(range, events)?.length);
-      } else {
-        setIsDataPresent(true);
-      }
     },
-    [setRange, events]
+    [setRange]
   );
 
   const onView = useCallback(
@@ -112,7 +105,7 @@ const CalendarView = (props: Props) => {
           ))}
         </div>
         <div className="relative">
-          <Calendar
+          <CustomCalendar
             defaultDate={moment().toDate()}
             defaultView="day"
             events={events}
@@ -127,7 +120,7 @@ const CalendarView = (props: Props) => {
               //   });
               // }
             }}
-            views={{ month: true, week: true, day: true }}
+            views={['month', 'week', 'day']}
             eventPropGetter={(obj) => {
               const newStyles = {
                 backgroundColor:
@@ -156,11 +149,6 @@ const CalendarView = (props: Props) => {
             onView={onView}
             view={view}
           />
-          {!isDataPresent && (
-            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-              No data available for the selected date range.
-            </div>
-          )}
         </div>
       </div>
       {converPlanning.open && (
