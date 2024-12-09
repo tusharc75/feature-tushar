@@ -96,8 +96,11 @@ const CustomCalendar = ({
         </div>
       )}
       {loading && (
-        <div className="absolute left-1/2 top-1/2 select-none bg-[var(--dark-primary,white)] text-center [transform:translate(-50%,-50%)]">
-          <CircularProgress />
+        <div className="absolute inset-0 z-20  flex select-none items-center justify-center text-center [backdrop-filter:blur(3px)]">
+          <div className="rounded-md bg-[var(--dark-primary,white)] p-8 shadow-md">
+            <CircularProgress />
+            <p className="text-center">Loading...</p>
+          </div>
         </div>
       )}
 
