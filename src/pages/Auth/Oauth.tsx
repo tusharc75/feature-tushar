@@ -33,7 +33,7 @@ const Oauth = () => {
       .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
-        window.location.href = `${userManual.link}/?token=${encodeURIComponent(data.token)}`;
+        window.location.href = `${userManual.link}`;
       })
       .catch((error) => {
         setSubmitting(false);
