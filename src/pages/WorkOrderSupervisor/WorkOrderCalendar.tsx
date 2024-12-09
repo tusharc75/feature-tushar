@@ -234,8 +234,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
         <div className={cn('relative min-h-[400px] [&_.rbc-agenda-empty]:hidden')}>
           <CustomCalendar
             defaultDate={defaultDate}
-            key={mobileView ? 'mobile' : 'desktop'}
-            defaultView={mobileView ? 'day' : 'month'}
+            defaultView={'month'}
             events={events}
             formats={formats}
             localizer={localizer}
@@ -243,7 +242,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
             messages={{
               agenda: 'List'
             }}
-            views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+            views={['month', 'week', 'day', 'agenda']}
             onView={setView}
             view={view}
             eventPropGetter={(obj: any) => {
