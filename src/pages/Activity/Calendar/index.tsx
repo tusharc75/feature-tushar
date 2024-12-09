@@ -94,9 +94,7 @@ const BigCalendar = () => {
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => {
-          setActivities({ activities: [], loading: true });
-        });
+        .catch(() => {});
     },
     [type, filter]
   );
