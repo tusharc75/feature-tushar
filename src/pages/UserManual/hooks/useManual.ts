@@ -73,12 +73,21 @@ const useManual = () => {
       });
   }, [toastConfig]);
 
-  const navigate = useCallback((url) => {
+  const navigate = useCallback((url, scrollKey = null) => {
     if (url) {
       const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
+      if (scrollKey) {
+        setTimeout(() => {
+          const element = document.querySelector(scrollKey);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 0);
+      }
     }
+
   }, []);
 
   useEffect(() => {
