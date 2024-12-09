@@ -43,6 +43,14 @@
     min-height: 70px;
     max-height: 70px;
     height: 70px;
+    .rbc-row-segment .rbc-event {
+      border-radius: 9px;
+      min-height: 8px;
+      background-color: #5dd879 !important;
+      [data-mode='dark'] & {
+        background-color: hsl(134, 27%, 31%) !important;
+      }
+    }
     .rbc-date-cell {
       text-align: center;
       padding: 5px;
@@ -174,7 +182,9 @@
       border-color: var(--dark-mode-border-color) !important;
     }
 
-    .rbc-today,
+    .rbc-today {
+      background-color: #1c1c30;
+    }
     .rbc-off-range-bg {
       background-color: #3a3a64;
     }

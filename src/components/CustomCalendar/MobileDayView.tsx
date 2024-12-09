@@ -1,17 +1,18 @@
 import Dialog from '@material-ui/core/Dialog';
-import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
+import moment from 'moment';
+import { CustomCalendarProps, ViewType } from 'src/components/CustomCalendar';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { Calendar, CalendarProps } from 'react-big-calendar';
-import moment from 'moment';
+import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
 
 type MobileDayViewProps = {
   onClose: () => void;
   date: string;
-  calnedarProps: CalendarProps;
+  calnedarProps: CustomCalendarProps & { views: ViewType[] };
+  Component: any;
 };
 
-const MobileDayView = ({ onClose, date, calnedarProps }: MobileDayViewProps) => {
+const MobileDayView = ({ onClose, date, calnedarProps, Component }: MobileDayViewProps) => {
   return (
     <Dialog
       maxWidth="md"
@@ -27,7 +28,7 @@ const MobileDayView = ({ onClose, date, calnedarProps }: MobileDayViewProps) => 
     >
       <CustomDialogHeader title={moment(date).format(dateFormat)} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
-        <Calendar
+        <Component
           {...calnedarProps}
           components={{ header: () => <></>, toolbar: () => <></> }}
           style={{ ...calnedarProps.style, height: 'calc(100vh - 90px)' }}

@@ -5,12 +5,29 @@ import { isMobile, isTablet } from 'react-device-detect';
 import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
 import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
+import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
 
-type ViewType = 'month' | 'week' | 'day' | 'agenda';
-type CustomCalendarProps = Omit<CalendarProps<any, any>, 'views'> & {
+interface DragAndDropCalendarProps<TEvent extends object = Event, TResource extends object = object>
+  extends Omit<CalendarProps<TEvent, TResource>, 'views'>,
+    withDragAndDropProps<TEvent, TResource> {}
+
+const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+
+export type ViewType = 'month' | 'week' | 'day' | 'agenda';
+
+type CommonProps = {
   views: ViewType[];
   loading?: boolean;
 };
+type NormalCalendarProps = {
+  dragAndDrop?: false;
+} & Omit<CalendarProps<any, any>, 'views'>;
+
+type DraggableCalendarProps = {
+  dragAndDrop?: true;
+} & DragAndDropCalendarProps;
+
+export type CustomCalendarProps = NormalCalendarProps | DraggableCalendarProps;
 
 const CustomCalendar = ({
   events,
@@ -21,8 +38,9 @@ const CustomCalendar = ({
   views,
   onSelectEvent,
   loading = false,
+  dragAndDrop = false,
   ...rest
-}: CustomCalendarProps) => {
+}: CustomCalendarProps & CommonProps) => {
   const isMobileView = useMediaQuery('(max-width: 767px)');
   const mobileView = (isMobile && !isTablet) || isMobileView;
   const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
@@ -58,25 +76,19 @@ const CustomCalendar = ({
     setMobileViewData({ open: false, date: '' });
   };
 
+  const Component = (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any;
+
   return (
     <div className="relative">
-      <Calendar
-        view={mobileView ? 'month' : stateView}
+      <Component
+        view={stateView}
         events={mobileView ? mobileEvents : events}
         onView={handleView}
         onRangeChange={handleRangeChange}
-        views={mobileView ? ['month'] : views}
+        views={views}
         components={{
-          event: (props) => {
-            const { event } = props;
-            return (
-              <div className="flex min-h-2 flex-col rounded-md">
-                <span className={cn('text-sm font-bold max-md:sr-only')}>{event.title}</span>
-              </div>
-            );
-          },
           month: {
-            header: (props) => {
+            header: (props: any) => {
               const { label } = props;
               return (
                 <div>
@@ -84,7 +96,24 @@ const CustomCalendar = ({
                   <span className="not-sr-only max-md:sr-only">{label}</span>
                 </div>
               );
-            }
+            },
+            ...(mobileView
+              ? {
+                  event: (props) => {
+                    const { event } = props;
+                    return (
+                      <div className="flex min-h-2 flex-col rounded-md ">
+                        <span
+                          className={cn('text-sm ', stateView === 'month' ? 'max-md:sr-only' : '')}
+                          {...rest.eventPropGetter(event, event.start, event.end, undefined)}
+                        >
+                          {event.title}
+                        </span>
+                      </div>
+                    );
+                  }
+                }
+              : {})
           }
         }}
         onSelectEvent={(event, data) => (mobileView ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
@@ -107,13 +136,13 @@ const CustomCalendar = ({
       {mobileViewData.open && (
         <>
           <MobileDayView
+            Component={Component}
             calnedarProps={{
               onSelectEvent,
               events,
               view: 'day',
               views: ['day'],
               date: mobileViewData.date,
-              titleAccessor: rest.titleAccessor,
               ...rest
             }}
             date={mobileViewData.date}
