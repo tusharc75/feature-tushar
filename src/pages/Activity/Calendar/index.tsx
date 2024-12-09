@@ -52,6 +52,7 @@ const BigCalendar = () => {
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [loading, setLoading] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -77,8 +78,11 @@ const BigCalendar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, referenceId]);
 
+  console.log(loading, activities);
+
   const fetchBoard = useCallback(
     (cancelTokenSource?: CancelTokenSource) => {
+      setLoading(true);
       axiosInstance()
         .get(`/activity/board?type=${''}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
@@ -92,8 +96,13 @@ const BigCalendar = () => {
             type: d.type
           }));
           setActivities(newData);
+          setTimeout(() => {
+            setLoading(false);
+          }, 500);
         })
-        .catch(() => {});
+        .catch(() => {
+          setLoading(false);
+        });
     },
     [type, filter]
   );
@@ -214,7 +223,7 @@ const BigCalendar = () => {
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
               </div>
             </div>
-            <MyCalendar activities={activities} setActivityData={setActivityData} />
+            <MyCalendar activities={activities} setActivityData={setActivityData} loading={loading} />
           </>
         )}
         {activityData && (
