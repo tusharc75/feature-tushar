@@ -27,7 +27,7 @@ import {
 } from 'src/constants/helpers';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
+import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -150,7 +150,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ?
+          row.original['assignedWorkStations'] ? (
             <DropdownCell
               permissions={permissions}
               permissionForLinks={{}}
@@ -160,7 +160,9 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               }}
               original={row?.original}
             />
-            : <NoDataCell />
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'assignedUsers',
@@ -258,7 +260,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const handleAddConsumables = (rows, records = []) => {
     setSubmitting(true);
     const data: any = [];
-    const workOrderId: any = uniqBy(records, 'workOrder').map(record => record.workOrder);
+    const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record.workOrder);
 
     records?.forEach((s) => {
       rows?.forEach((e) => {
@@ -355,13 +357,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         )}
       </Box>
       {serviceOpen.open && (
-        <TechnicianDialog
+        <WorkOrderDetailDialog
+          workOrderId={serviceOpen?.id}
           handleClose={() => {
             setServiceOpen({ open: false, id: null });
           }}
-          workOrderId={serviceOpen?.id}
-          uniqueId={null}
-          canPerform={false}
         />
       )}
       {assignTechnicianDialog && (
