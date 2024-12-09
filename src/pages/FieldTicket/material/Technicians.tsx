@@ -170,7 +170,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setDeleteData([{ _id: row.original._id }]);
+                    setDeleteData([row.original._id]);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={'error'} />
@@ -357,13 +357,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           <MenuItem
             disabled={isDeleting}
             onClick={() => {
-              setDeleteData(
-                selectedRecords?.map((d) => {
-                  return {
-                    _id: d?._id
-                  };
-                })
-              );
+              setDeleteData(selectedRecords?.map((d) => d?._id));
             }}
           >
             Delete
