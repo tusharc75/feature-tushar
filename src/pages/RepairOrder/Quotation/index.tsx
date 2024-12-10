@@ -428,7 +428,6 @@ const Quotation = ({
               isBulkedit: false,
               showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
             });
-
           } else {
             const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
