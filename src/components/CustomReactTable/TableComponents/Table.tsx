@@ -80,11 +80,6 @@ const TableComponent = forwardRef(function (
     []
   );
 
-  // useEffect(() => {
-
-  //   setVTableData();
-  // }, [columns, table]);
-
   let rows: Row<any>[];
   if (exportTableView) {
     rows = table.getExpandedRowModel().flatRows;
