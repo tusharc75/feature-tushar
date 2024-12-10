@@ -1329,7 +1329,7 @@ const routes = {
         ? storedRoutes.workAutomation?.title
         : RESOURCE_LABEL.workAutomation,
     path: '/work-automation/detail'
-  },
+  }
 };
 
 export default routes;

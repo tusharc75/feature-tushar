@@ -273,6 +273,7 @@ import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
 import WorkAutomation from 'src/pages/WorkAutomation';
 import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
+import ReportsCenter from 'src/pages/ReportsNew';
 
 var notificationInterval: any = null;
 
@@ -775,6 +776,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/reports-new`}>
+              <ReportsCenter />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
