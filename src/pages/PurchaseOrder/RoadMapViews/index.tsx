@@ -25,7 +25,7 @@ const customNodeStyles = {
     ...COLOUR_MASTER.service
   },
   manualEntry:{
-    name:'ManualEntry',
+    name:'Manual Entry',
     ...COLOUR_MASTER.scrapAssets
   },
   productAssets: {
