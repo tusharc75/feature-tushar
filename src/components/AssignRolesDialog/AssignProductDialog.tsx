@@ -151,7 +151,7 @@ const AssignProductDialog = ({
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (extraDeepFilter?.length > 0) {
@@ -165,6 +165,11 @@ const AssignProductDialog = ({
         term: 'Part'
       });
     }
+
+    if (serialized === false) {
+      updatedDeepFilters = updatedDeepFilters.filter((e) => e.field !== 'serializedProduct');
+    }
+
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
         updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
