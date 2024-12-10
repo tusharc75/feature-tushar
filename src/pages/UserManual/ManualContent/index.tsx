@@ -1,11 +1,18 @@
 import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
-import React from 'react';
+import { useState } from 'react';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
 
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
+  const [zoomedImage, setZoomedImage] = useState(null);
+  const handleClick = (e) => {
+    if (e.target.tagName === 'IMG') {
+      setZoomedImage(e.target);
+    }
+  };
+
   return (
     <main className="relative flex min-h-screen flex-grow bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
@@ -19,7 +26,11 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
               <>
                 <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="scroll-m-[calc(var(--manual-head-height)+20px)]">
                   <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
-                  <div className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full " dangerouslySetInnerHTML={{ __html: e.content }}></div>
+                  <div
+                    className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
+                    dangerouslySetInnerHTML={{ __html: e.content }}
+                    onClick={handleClick}
+                  ></div>
                 </div>
                 {e.subSections?.length > 0 &&
                   e.subSections.map((subSection, i) => (
@@ -30,7 +41,8 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                     >
                       <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
                       <div
-                        className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full"
+                        className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full &_img]:cursor-pointer"
+                        onClick={handleClick}
                         dangerouslySetInnerHTML={{ __html: subSection.content }}
                       ></div>
                     </div>
@@ -52,6 +64,11 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
               <OnThisPageImpl pageData={pageData} />
             )}
           </div>
+          {zoomedImage && (
+            <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setZoomedImage(null)}>
+              <img src={zoomedImage?.src} alt={zoomedImage?.alt} className="object-contain rounded-lg shadow-lg" />
+            </div>
+          )}
         </div>
       )}
     </main>
