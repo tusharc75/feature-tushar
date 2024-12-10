@@ -20,6 +20,14 @@ const customNodeStyles = {
     name: 'Product',
     ...COLOUR_MASTER.product
   },
+  service:{
+    name:'Service',
+    ...COLOUR_MASTER.service
+  },
+  manualEntry:{
+    name:'ManualEntry',
+    ...COLOUR_MASTER.scrapAssets
+  },
   productAssets: {
     name: 'Assets',
     ...COLOUR_MASTER.assets
@@ -53,11 +61,13 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
     try {
       const product = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData?._id}`);
       const assets = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData?._id}/assets`);
+      const service = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData?._id}`);
       const manualEntry = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData?._id}`);
       const allProducts = product?.data?.data;
       const allManualEntry = manualEntry?.data?.data;
       const allSerializedAssets = assets?.data?.data?.serializedAsset;
       const allSerialNumber = assets?.data?.data?.productSerialNumber;
+      const allService = service?.data?.data;
 
       var xPosition = 0;
       var flow: any[] = [
@@ -104,6 +114,29 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
         });
         yPosition += 80;
       });
+      allService?.map((item) => {
+        console.log(item);
+        flow.push({
+          id: `${item?.serviceId}`,
+          type: 'default',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'service',
+            ref_id: item?.serviceId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.serviceDetail?.serviceName}</div>
+          },
+          position: { x: xPosition, y: yPosition },
+          style: customNodeStyles.service
+        });
+        flowEdge.push({
+          id: `${purchaseOrderData?._id}_${item?.serviceId}_edge`,
+          source: `${purchaseOrderData?._id}`,
+          target: `${item?.serviceId}`
+        });
+        yPosition += 80;
+      });
       allManualEntry?.map((item) => {
         flow.push({
           id: `${item?._id}`,
@@ -117,7 +150,7 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.description}</div>
           },
           position: { x: xPosition, y: yPosition },
-          style: customNodeStyles.product
+          style: customNodeStyles.manualEntry
         });
         flowEdge.push({
           id: `${purchaseOrderData?._id}_${item?._id}_edge`,
@@ -212,6 +245,14 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           });
         });
 
+        allService?.map((item) => {
+          flowEdge.push({
+            id: `${purchaseOrderData?._id}_${item?.serviceId}_received_edge`,
+            source: `${item?.serviceId}`,
+            target: `${purchaseOrderData?._id}_received`
+          });
+        });
+
       allManualEntry?.map((item) => {
         flowEdge.push({
           id: `${purchaseOrderData?._id}_${item?._id}_received_edge`,
@@ -259,6 +300,9 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
         break;
       case 'package':
         history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'service':
+        history.push(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
