@@ -34,19 +34,17 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
             </Link>
           )
         ) : (
-          <>
-            <span
-              onClick={() => {
-                if (route?.hasOnClick) {
-                  onRouteClick();
-                }
-              }}
-              key={index}
-              className={lastLinkClassName}
-            >
-              {route.title}
-            </span>
-          </>
+          <span
+            onClick={() => {
+              if (route?.hasOnClick) {
+                onRouteClick();
+              }
+            }}
+            key={index}
+            className={lastLinkClassName}
+          >
+            {route.title}
+          </span>
         );
       })}
     </Breadcrumbs>

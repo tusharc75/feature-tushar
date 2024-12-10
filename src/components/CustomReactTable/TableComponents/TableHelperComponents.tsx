@@ -287,7 +287,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   virtualTable = true,
   className = '',
   vtableData
-}) => {
+}: any) => {
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
 

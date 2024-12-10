@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Button } from '@material-ui/core';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
-import { SiMicrosoftoffice } from 'react-icons/si';
 import { OfficeLogo } from 'src/assets/authenticationAssets';
 import axios from 'axios';
 import SSOLoginButton from 'src/pages/Auth/Buttons/SSOLoginButton';
@@ -14,8 +13,7 @@ const LogIn = () => {
   const azureLogin = async () => {
     try {
       await instance.loginPopup();
-    } catch (e) {
-    }
+    } catch (e) {}
   };
   return (
     <>
