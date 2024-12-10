@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   CircularProgress,
   IconButton,
   ListItem,
@@ -10,25 +9,25 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  TextField
+  TableRow
 } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import { kebabCase } from 'lodash';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Calendar, View, momentLocalizer } from 'react-big-calendar';
+import { View, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, filterDataByDateIntersection, workOrderSupervisor } from 'src/constants/helpers';
-import '../PlanningView/Calendar/calendarView.scss';
-import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import { kebabCase } from 'lodash';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import { ExpandMore } from '@material-ui/icons';
-import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import CustomCalendar from 'src/components/CustomCalendar';
+import routes from 'src/components/Helpers/Routes';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { cn, workOrderSupervisor } from 'src/constants/helpers';
+import '../PlanningView/Calendar/calendarView.scss';
 
 const localizer = momentLocalizer(moment);
 const formats = {
@@ -76,15 +75,6 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [openRepairPopup, setOpenRepairPopup] = useState({ open: false, data: null });
   const [anchor, setAnchor] = useState(null);
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day' || view === 'agenda') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   useEffect(() => {
     if (view === 'month') {
@@ -242,10 +232,9 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
       <div>
         <Box display="flex" flexDirection="column"></Box>
         <div className={cn('relative min-h-[400px] [&_.rbc-agenda-empty]:hidden')}>
-          <Calendar
+          <CustomCalendar
             defaultDate={defaultDate}
-            key={mobileView ? 'mobile' : 'desktop'}
-            defaultView={mobileView ? 'day' : 'month'}
+            defaultView={'month'}
             events={events}
             formats={formats}
             localizer={localizer}
@@ -253,10 +242,9 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
             messages={{
               agenda: 'List'
             }}
-            views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+            views={['month', 'week', 'day', 'agenda']}
             onView={setView}
             view={view}
-            onRangeChange={handleRangeChange}
             eventPropGetter={(obj: any) => {
               const style = setEventStyle();
               return {
@@ -280,11 +268,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
               }
             }}
           />
-          {!isDataPresent && (
-            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-              No data available for the selected date range.
-            </div>
-          )}
+
           {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />

@@ -1,43 +1,52 @@
-import { Breadcrumbs, Typography } from '@material-ui/core';
-import { Fragment } from 'react';
+import { Breadcrumbs } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import { HomeIconBreadcrumb } from 'src/assets/newSvgs';
+
+const linkClassName = 'cursor-pointer text-[--new-theme-color] font-semibold text-[12px] leading-[14.5px] text-truncate';
+const lastLinkClassName = 'text-[#777575] dark:text-[white] font-semibold text-[12px] leading-[14.5px] text-truncate';
 
 const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadCrumbClick = null, onRouteClick = null }) => {
   return (
-    <Breadcrumbs separator="›" aria-label="breadcrumb" className="new-custom-breadcrumb-v1">
+    <Breadcrumbs
+      separator={<span className="flex w-[24px] justify-center text-[#474747] dark:text-[white]">/</span>}
+      aria-label="breadcrumb"
+      className="site-breadcrumb"
+    >
       {isConfirmBeforeClick ? (
-        <Typography className={`${'cursor-pointer'} ${'setLink'}`} onClick={() => onBreadCrumbClick('/')}>
-          Home
-        </Typography>
+        <span className={`${linkClassName} flex items-center gap-[6px]`} onClick={() => onBreadCrumbClick('/')}>
+          <HomeIconBreadcrumb /> Home
+        </span>
       ) : (
-        <Link to="/" className={`${'cursor-pointer'} ${'setLink'}`}>
-          Home
+        <Link to="/" className={`${linkClassName}  flex items-center gap-[6px]`}>
+          <HomeIconBreadcrumb /> Home
         </Link>
       )}
 
       {routes.map((route, index) => {
         return index !== routes.length - 1 ? (
           isConfirmBeforeClick ? (
-            <Typography key={index} className="cursor-pointer setLink" onClick={() => onBreadCrumbClick(route.path)}>
+            <span key={index} className={linkClassName} onClick={() => onBreadCrumbClick(route.path)}>
               {route.title}
-            </Typography>
+            </span>
           ) : (
-            <Link key={index} to={route.path} className="cursor-pointer setLink">
+            <Link key={index} to={route.path} className={linkClassName}>
               {route.title}
             </Link>
           )
         ) : (
-          <Typography
-            onClick={() => {
-              if (route?.hasOnClick) {
-                onRouteClick();
-              }
-            }}
-            key={index}
-            className="setLink text-truncate detail-heading-bread-crumb"
-          >
-            {route.title}
-          </Typography>
+          <>
+            <span
+              onClick={() => {
+                if (route?.hasOnClick) {
+                  onRouteClick();
+                }
+              }}
+              key={index}
+              className={lastLinkClassName}
+            >
+              {route.title}
+            </span>
+          </>
         );
       })}
     </Breadcrumbs>

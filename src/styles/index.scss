@@ -2814,45 +2814,6 @@ svg.MuiSvgIcon-root {
   }
 }
 
-.new-custom-breadcrumb-v1 {
-  ol {
-    li {
-      color: #163340 !important;
-
-      [data-mode='dark'] & {
-        color: #fff !important;
-      }
-
-      a {
-        margin: 0px 4px;
-
-        &:first-of-type {
-          margin: 0;
-        }
-
-        font-size: 14px;
-        color: #163340 !important;
-        font-weight: 600;
-
-        [data-mode='dark'] & {
-          color: #fff !important;
-        }
-      }
-
-      p {
-        margin: 0px 4px;
-        font-size: 14px;
-        color: #163340 !important;
-        font-weight: 400;
-
-        [data-mode='dark'] & {
-          color: #c6c6c6 !important;
-        }
-      }
-    }
-  }
-}
-
 .new-headerbox-button-v1 {
   color: #232529;
   cursor: pointer;
@@ -4733,4 +4694,13 @@ td.google-visualization-orgchart-node {
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+.site-breadcrumb {
+  li[aria-hidden='true'] {
+    margin: 0 2px;
+  }
+  li {
+    display: flex;
+    align-items: center;
+  }
 }

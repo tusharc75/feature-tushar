@@ -9,28 +9,28 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  useMediaQuery
+  TextField
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
-import React, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import CustomCalendar from 'src/components/CustomCalendar';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, filterDataByDateIntersection, sidebarResource } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import { useData } from 'src/StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
@@ -151,15 +151,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const defaultDate = useMemo(() => moment().toDate(), []);
 
   const [staticEvents, setStaticEvents] = useState([]);
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day' || view === 'agenda') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -763,21 +754,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         <div className={cn('relative')}>
           {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
             <>
-              <DragAndDropCalendar
+              <CustomCalendar
+                dragAndDrop={true}
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
                 onEventDrop={moveEvent}
+                loading={isDataFetching}
                 onEventResize={resizeEvent}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
                 resizable
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -796,19 +788,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </>
           ) : (
             <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
-              <Calendar
+              <CustomCalendar
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
+                loading={isDataFetching}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
-                onRangeChange={handleRangeChange}
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -837,18 +828,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   }
                 }}
               />
-              {!isDataPresent && (
-                <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-                  No data available for the selected date range.
-                </div>
-              )}
             </div>
           )}
-          {isDataFetching && (
+          {/* {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />
             </span>
-          )}
+          )} */}
         </div>
         {isOpen.open && (
           <Popover

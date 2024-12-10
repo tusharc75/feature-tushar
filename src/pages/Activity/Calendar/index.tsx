@@ -50,7 +50,7 @@ const BigCalendar = () => {
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState(null);
   const [activityData, setActivityData] = useState(null);
-  const [activities, setActivities] = useState([]);
+  const [activities, setActivities] = useState({ activities: [], loading: true });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -79,6 +79,7 @@ const BigCalendar = () => {
 
   const fetchBoard = useCallback(
     (cancelTokenSource?: CancelTokenSource) => {
+      setActivities({ activities: [], loading: true });
       axiosInstance()
         .get(`/activity/board?type=${''}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
@@ -91,7 +92,7 @@ const BigCalendar = () => {
             allDay: true,
             type: d.type
           }));
-          setActivities(newData);
+          setActivities({ activities: newData, loading: false });
         })
         .catch(() => {});
     },
@@ -214,7 +215,7 @@ const BigCalendar = () => {
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
               </div>
             </div>
-            <MyCalendar activities={activities} setActivityData={setActivityData} />
+            <MyCalendar activities={activities.activities} setActivityData={setActivityData} loading={activities.loading} />
           </>
         )}
         {activityData && (
