@@ -46,7 +46,7 @@ const getProps = (mode: 'Workspace' | 'Setups & Administration' | 'User Manual',
     }
     default: {
       const token = localStorage.getItem('token');
-      const href = `${userManual.link}/?token=${encodeURIComponent(token)}`;
+      const href = `${userManual.link}`;
       return {
         heading: 'User Manual',
         description: 'View our user manual in just a click.',

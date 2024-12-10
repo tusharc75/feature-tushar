@@ -11,15 +11,15 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from 'src/constants/helpers';
+import { cloneResourceData, CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null,  referenceData = null, isRedirectToDetailPage = true }) => {
-  
+const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
+
   const history = useHistory();
   const {
     state: { user }
@@ -31,8 +31,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-  const [formsData, setFormsData] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -61,7 +59,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {
@@ -73,21 +71,29 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
         tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        if (referenceData) {
-          for (const key in referenceData) {
-            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-              tempInitialData[key] = referenceData[key];
-              const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
-              if (field) {
-                field.disableOnEdit = true;
-                field.isUneditable = true;
+
+        let referenceData: any = {}
+        if (invoiceData) {
+          const responseFieldResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource?.invoice}`);
+          const invoiceField = responseFieldResponce?.data?.data;
+          referenceData = cloneResourceData(invoiceField.map((d: any) => d.fieldData), fieldsDataForCreate, invoiceData, user.user?.brandCurrency);
+          referenceData.invoice = invoiceData?._id
+          if (referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                tempInitialData[key] = referenceData[key];
+                const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
+                if (field) {
+                  field.disableOnEdit = true;
+                  field.isUneditable = true;
+                }
               }
             }
           }
         }
         setInitialData({
           fields: fieldsDataForCreate,
-          values: tempInitialData
+          values: { ...tempInitialData, ...referenceData }
         });
       }
     } catch (error) {
@@ -175,17 +181,17 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource.creditMemo}
-                      referenceId={creditMemoId|| null}
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.creditMemo}
+                    referenceId={creditMemoId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -201,7 +207,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                   Cancel
                 </Button>
                 <Button
-                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
+                  disabled={loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"

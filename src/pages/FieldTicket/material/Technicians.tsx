@@ -35,13 +35,13 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     loading: false,
     minDate: null
   });
-  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, rowId: null });
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, _id: null });
 
   const {
     state: { user }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
@@ -66,7 +66,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setViewStartStopLog({ open: true, rowId: row?.original?.rowId });
+                    setViewStartStopLog({ open: true, _id: row?.original?._id });
                   }}
                 >
                   <VisibilityIcon fontSize="small" color="primary" />
@@ -170,7 +170,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setDeleteData([{ rowId: row.original.rowId }]);
+                    setDeleteData([row.original._id]);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={'error'} />
@@ -270,7 +270,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     const value: any = {
       type: type,
       referenceId: fieldTicketData?._id,
-      rowId: selectedRecords?.map((r) => r?.rowId)
+      _id: selectedRecords?.map((r) => r?._id)
     };
     setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
     if (type != 'stop') {
@@ -357,13 +357,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           <MenuItem
             disabled={isDeleting}
             onClick={() => {
-              setDeleteData(
-                selectedRecords?.map((d) => {
-                  return {
-                    rowId: d?.rowId
-                  };
-                })
-              );
+              setDeleteData(selectedRecords?.map((d) => d?._id));
             }}
           >
             Delete
@@ -421,6 +415,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             setTechnicianDialog(false);
           }}
           warehouse={fieldTicketData?.warehouse?.optionValue}
+          ids={dataRows?.map((d) => d?.technicianId)}
         />
       )}
 
@@ -451,10 +446,10 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       {viewStartStopLog?.open && (
         <StartStopLogsDialog
           onClose={() => {
-            setViewStartStopLog({ open: false, rowId: null });
+            setViewStartStopLog({ open: false, _id: null });
           }}
           referenceId={fieldTicketData?._id}
-          rowId={viewStartStopLog?.rowId}
+          _id={viewStartStopLog?._id}
           fetchRecords={fetchData}
         />
       )}
