@@ -19,7 +19,7 @@ export const VirtualTableHead = memo(
     vtableData,
     virtualPaddingLeft,
     virtualPaddingRight
-  }) => {
+  }: any) => {
     return (
       <TableHead
         style={{
@@ -66,7 +66,7 @@ const SingleRow = memo(
     resource,
     vtableData,
     left
-  }) => {
+  }: any) => {
     return (
       <TableRow className="tr sticky top-0 z-[11] !flex bg-[var(--dark-primary,_white)]" key={headerGroup.id}>
         <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
