@@ -30,6 +30,7 @@ import {
   REPAIR_JOB_STATUS,
   deliveryTicket,
   repairJob,
+  serializedAsset,
   sidebarResource
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -377,6 +378,30 @@ const SerializedAsset = ({
     }
   };
 
+  const handleUpdateStatus = () => {
+    axiosInstance()
+      .put(`${serializedAsset.api}/update-status`, {
+        comment: '',
+        assets: selectedRecords.map((m) => ({
+          _id: m?._id ?? m?.id,
+          currentStatus: m.status
+        })),
+        status: ASSET_STATUS.needRepair,
+        reference: {
+          _id: repairJobData._id,
+          type: 'Repair'
+        }
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        fetchRecords();
+        repairedAssetStatus([]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const rightSideContents = () => {
     return (
       <>
@@ -410,6 +435,15 @@ const SerializedAsset = ({
                 horizontal: 'right'
               }}
             >
+              <MenuItem
+                disabled={checkUniqcurrentOwnerType()}
+                onClick={() => {
+                  setAnchorEl(null);
+                  handleUpdateStatus();
+                }}
+              >
+                {ASSET_STATUS.needRepair}
+              </MenuItem>
               <MenuItem
                 disabled={checkUniqcurrentOwnerType()}
                 onClick={() => {
