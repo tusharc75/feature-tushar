@@ -93,20 +93,20 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (assetStatus || currentLocation) {
       const filterVal = {};
-  
+
       if (assetStatus) {
         filterVal['status'] = { filter: [assetStatus] };
       }
-  
+
       if (currentLocation && currentLocationId) {
         filterVal['currentLocation'] = {
           operator: 'OR',
           condition1: {
-            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }],
-          },
+            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }]
+          }
         };
       }
-  
+
       dispatch({ type: 'filter', filters: filterVal });
     }
   }, []);
@@ -332,14 +332,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -544,7 +544,7 @@ const SerializedAsset = () => {
                 subleaseAsset,
                 setSubleaseAsset,
                 showScrapAsset,
-                setShowScrapAsset,
+                setShowScrapAsset
               }}
             />
           }
@@ -607,8 +607,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -667,7 +668,7 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  setShowScrapAsset,
+  setShowScrapAsset
 }) => {
   return (
     <>
@@ -836,9 +837,14 @@ const ActionMenuItems = ({
             }}
             disabled={
               selectedRecords?.filter(
-                (o) => [ASSET_STATUS.underReview, ASSET_STATUS.new,
-                ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords?.length
+                (o) =>
+                  [
+                    ASSET_STATUS.underReview,
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.needRepair,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -850,15 +856,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [
-                    ASSET_STATUS.new,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.needRecert,
-                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -871,14 +876,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.scrap,
                   ASSET_STATUS.needRepair,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -891,14 +896,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.needRepair,
                   ASSET_STATUS.needRecert,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -911,15 +916,15 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.lost);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.scrap,
                   ASSET_STATUS.needRepair,
                   ASSET_STATUS.needRecert,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
