@@ -63,7 +63,7 @@ const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {
             }
           ></CustomDialogHeader>
           <Box p={2}>
-            <WorkOrderDetailContent id={workOrderId} tab={1} />
+            <WorkOrderDetailContent id={workOrderId} tab={1} renderedFrom={routes.workOrderSupervisor.title} />
           </Box>
         </>
       ) : (

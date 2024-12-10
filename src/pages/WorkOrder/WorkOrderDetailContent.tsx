@@ -74,7 +74,7 @@ type ToolbarButton = {
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
-const WorkOrderDetailContent = ({ id, tab }) => {
+const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -244,7 +244,9 @@ const WorkOrderDetailContent = ({ id, tab }) => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    history.push(`?tab=${newValue}`);
+    if (renderedFrom === routes.workOrder.title) {
+      history.push(`?tab=${newValue}`);
+    }
     if (newValue === 0) {
       fetchWorkOrderData();
     }
