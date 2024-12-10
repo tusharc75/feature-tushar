@@ -1,9 +1,9 @@
 import { Row, Table } from '@tanstack/react-table';
-import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef, useState, useEffect } from 'react';
+import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
-import { getStickyColumnNames, getStickyPosition } from '../utils';
+import { getStickyColumnNames, getStickyPosition2 } from '../utils';
 import { TColType } from './TableHelperComponents';
 
 type StickyColumns = ReturnType<typeof getStickyColumnNames>;
@@ -59,7 +59,11 @@ const TableComponent = forwardRef(function (
   const columns = useMemo(() => tableColumns?.map((d) => d?.columnDef) as TColType[], [tableColumns]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const sizes = tableColumns?.map((c) => c.getSize()) || [];
-  const [vtableData, setVTableData] = useState(null);
+
+  const vtableData = useMemo(() => {
+    if (!columns || columns.length === 0) return null;
+    return columns?.map((d, i) => getStickyPosition2(d, i, sizes));
+  }, [columns, sizes]);
 
   const stickyColumns = useMemo(() => {
     const stickyData = getStickyColumnNames({ allColumn: columns, expander, hideSelection });
@@ -76,10 +80,10 @@ const TableComponent = forwardRef(function (
     []
   );
 
-  useEffect(() => {
-    if (!columns || columns.length === 0) return;
-    setVTableData(columns?.map((d, i) => getStickyPosition(d, i, table)));
-  }, [columns, table]);
+  // useEffect(() => {
+
+  //   setVTableData();
+  // }, [columns, table]);
 
   let rows: Row<any>[];
   if (exportTableView) {

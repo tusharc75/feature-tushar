@@ -65,6 +65,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'custom-report',
         'user-download-request',
         'trigger-notification-history',
+        'reports-new'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -88,7 +89,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
             >
               <p>Checking Credentials...</p>
             </div>
-          ) : (access && rest?.userManual) ? (
+          ) : access && rest?.userManual ? (
             <UserManual />
           ) : access ? (
             <Layout>{children}</Layout>

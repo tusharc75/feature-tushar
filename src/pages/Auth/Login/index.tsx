@@ -7,17 +7,17 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
-import { SiMicrosoftoffice } from 'react-icons/si';
+import { TbBrandOffice } from 'react-icons/tb';
 import { Link, useHistory } from 'react-router-dom';
 import { Logo } from 'src/assets/authenticationAssets';
 import axiosInstance from 'src/axios/axiosInstance';
 import { AzureLogin } from 'src/components/Azure/Azure';
 import getAzureAcessToken from 'src/components/Azure/getAzureAccessToken';
+import { getSubdomain } from 'src/constants/helpers';
 import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
-import { getSubdomain } from 'src/constants/helpers';
 
 export type BrandData = {
   companyName: string;
@@ -227,7 +227,7 @@ const Login = () => {
                             className="logo-bg-color"
                             variant="contained"
                             fullWidth
-                            startIcon={<SiMicrosoftoffice />}
+                            startIcon={<TbBrandOffice />}
                             disabled={isSubmitting}
                             onClick={() => instance.logoutPopup()}
                           >
