@@ -20,7 +20,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from '../../Invoice/Material/MaterialDialog';
 import AdditionalCostDialog from '../..//Invoice/Material/AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -602,7 +602,31 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.creditMemo.title}-${creditMemoData?.invoiceNumber}`,
+    resource: sidebarResource.creditMemo,
+    referenceId: creditMemoData?._id,
+    columns: columns,
+    isSendEmail: false,
+    extraQueryParams: { isCreditMemo: true },
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${creditMemoData?.currency?.toLowerCase()}`,
+      `totalPrice_${creditMemoData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${creditMemoData?.currency?.toLowerCase()}`,
+      `finalPrice_${creditMemoData?.currency?.toLowerCase()}`
+    ]
+  };
 
   const addButtonMenuItems = () => {
     return (
@@ -700,6 +724,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
           tooltip: Boolean(selectedRecords && selectedRecords.length) ? '' : 'Select records to edit'
         }}
         hasXpadding
+        previewDownloadProps={previewDownloadProps}
       />
       {columns ? (
         <Box zIndex={5} width={'100%'}>
