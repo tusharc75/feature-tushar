@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
 const customNodeStyles = {
@@ -19,6 +19,14 @@ const customNodeStyles = {
   product: {
     name: 'Product',
     ...COLOUR_MASTER.product
+  },
+  service:{
+    name:'Service',
+    ...COLOUR_MASTER.service
+  },
+  manualEntry:{
+    name:'ManualEntry',
+    ...COLOUR_MASTER.scrapAssets
   },
   productAssets: {
     name: 'Assets',
@@ -53,11 +61,13 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
     try {
       const product = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData?._id}`);
       const assets = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData?._id}/assets`);
+      const service = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData?._id}`);
       const manualEntry = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData?._id}`);
       const allProducts = product?.data?.data;
       const allManualEntry = manualEntry?.data?.data;
       const allSerializedAssets = assets?.data?.data?.serializedAsset;
       const allSerialNumber = assets?.data?.data?.productSerialNumber;
+      const allService = service?.data?.data;
 
       var xPosition = 0;
       var flow: any[] = [
@@ -69,7 +79,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'purchaseOrder',
             ref_id: purchaseOrderData?._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{purchaseOrderData?.purchaseOrderNumber}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                     <Typography variant="subtitle2">Purchase Order</Typography>
+                     <Typography variant="body2">
+                       {purchaseOrderData?.purchaseOrderNumber}
+                     </Typography>
+                   </div>
           },
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.purchaseOrder
@@ -92,7 +107,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'product',
             ref_id: item?.productId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.productDetail?.productName}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                     <Typography variant="subtitle2">Product</Typography>
+                     <Typography variant="body2">
+                       {item?.productDetail?.productName}
+                     </Typography>
+                   </div>
           },
           position: { x: xPosition, y: yPosition },
           style: customNodeStyles.product
@@ -101,6 +121,33 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           id: `${purchaseOrderData?._id}_${item?.productId}_${item?._id}_edge`,
           source: `${purchaseOrderData?._id}`,
           target: `${item?.productId}_${item?._id}`
+        });
+        yPosition += 80;
+      });
+      allService?.map((item) => {
+        flow.push({
+          id: `${item?.serviceId}`,
+          type: 'default',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'service',
+            ref_id: item?.serviceId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography variant="subtitle2">Service</Typography>
+                     <Typography variant="body2">
+                     {item?.serviceDetail?.serviceName}
+                     </Typography>
+                   </div>
+          },
+          position: { x: xPosition, y: yPosition },
+          style: customNodeStyles.service
+        });
+        flowEdge.push({
+          id: `${purchaseOrderData?._id}_${item?.serviceId}_edge`,
+          source: `${purchaseOrderData?._id}`,
+          target: `${item?.serviceId}`
         });
         yPosition += 80;
       });
@@ -114,10 +161,15 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'manualEntry',
             ref_id: item?._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.description}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                     <Typography variant="subtitle2">Manual Entry</Typography>
+                     <Typography variant="body2">
+                       {item?.description}
+                     </Typography>
+                   </div>
           },
           position: { x: xPosition, y: yPosition },
-          style: customNodeStyles.product
+          style: customNodeStyles.manualEntry
         });
         flowEdge.push({
           id: `${purchaseOrderData?._id}_${item?._id}_edge`,
@@ -144,7 +196,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
               ref_id: item?._id,
               label: (
                 <HtmlTooltip arrow placement="top" title={item?.status}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.assetNumber}</div>
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                   <Typography variant="subtitle2">Asset</Typography>
+                     <Typography variant="body2">
+                     {item?.assetNumber}
+                    </Typography>
+                  </div>
                 </HtmlTooltip>
               )
             },
@@ -169,7 +226,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             data: {
               ref_type: 'serialNumber',
               ref_id: item?._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.serialNumber}</div>
+              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography variant="subtitle2">Serial Number</Typography>
+                      <Typography variant="body2">
+                      {item?.serialNumber}
+                      </Typography>
+                   </div>
             },
             position: { x: xPosition, y: assetYIdx * 80 },
             style: customNodeStyles.serialNumber
@@ -195,7 +257,10 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           ref_id: purchaseOrderData?._id,
           label: (
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {purchaseOrderData?.status}
+              <Typography variant="subtitle2">Status</Typography>
+                <Typography variant="body2">
+                {purchaseOrderData?.status}
+                </Typography>
             </div>
           )
         },
@@ -208,6 +273,14 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           flowEdge.push({
             id: `${purchaseOrderData?._id}_${item}_received_edge`,
             source: `${item?.productId}_${item?._id}`,
+            target: `${purchaseOrderData?._id}_received`
+          });
+        });
+
+        allService?.map((item) => {
+          flowEdge.push({
+            id: `${purchaseOrderData?._id}_${item?.serviceId}_received_edge`,
+            source: `${item?.serviceId}`,
             target: `${purchaseOrderData?._id}_received`
           });
         });
@@ -259,6 +332,9 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
         break;
       case 'package':
         history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'service':
+        history.push(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);

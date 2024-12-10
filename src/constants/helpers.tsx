@@ -2841,12 +2841,16 @@ export const COLOUR_MASTER = {
     borderColor: '#81afb8'
   },
   product: {
-    background: '#97c9bf',
-    borderColor: '#70948d'
+    background: '#E2F8FF',
+    borderColor: '#8BCBDF'
+  },
+  service:{
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
   },
   assets: {
-    background: '#ffd65b',
-    borderColor: '#f5c431'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   lostAssets: {
     background: 'var(--error-bg)',
@@ -2857,16 +2861,16 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   purchaseOrder: {
-    background: '#FFA500',
-    borderColor: '#6c89a6'
+    background:'#E6E8F5',
+    borderColor:'#9789F0'
   },
   sublease: {
     background: '#FFE4C0',
     borderColor: '#FFE4C0'
   },
   transferAsset: {
-    background: 'var(--transferAsset-bg)',
-    borderColor: '#d98298'
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
   },
   bulkAsset: {
     background: '#FFA500',
