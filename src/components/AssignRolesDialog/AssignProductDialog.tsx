@@ -166,16 +166,13 @@ const AssignProductDialog = ({
       });
     }
 
-    if (serialized === false) {
-      updatedDeepFilters = updatedDeepFilters.filter((e) => e.field !== 'serializedProduct');
-    }
-
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
         updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
       if (serialized != null) {
+        updatedDeepFilters = updatedDeepFilters.filter((e) => e.field !== 'serializedProduct');
         updatedDeepFilters.push({
           field: 'serializedProduct',
           term: `${serialized === true ? 'Yes' : 'No'}`
