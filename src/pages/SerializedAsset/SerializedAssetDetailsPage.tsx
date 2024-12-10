@@ -159,7 +159,7 @@ const SerializedAssetDetailsPage = () => {
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
         setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''}` }]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
-        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }])
+        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
       }
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
@@ -186,7 +186,7 @@ const SerializedAssetDetailsPage = () => {
         });
       }
       setLoading(false);
-      setRefreshAssetHistory(!refreshAssetHistory)
+      setRefreshAssetHistory(!refreshAssetHistory);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -281,7 +281,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -337,8 +337,7 @@ const SerializedAssetDetailsPage = () => {
       let tempStatus = [];
       if (SYSTEM_ASSET_STATUS?.includes(assetDetails.status)) {
         tempStatus = [];
-      }
-      else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
+      } else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
         tempStatus = [
           ASSET_STATUS.new,
           ASSET_STATUS.available,
@@ -349,7 +348,16 @@ const SerializedAssetDetailsPage = () => {
           ASSET_STATUS.needRecert,
           ...otherStatus
         ];
-      } else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
+      } else if ([ASSET_STATUS.needRepair]?.includes(assetDetails.status)) {
+        tempStatus = [
+          ASSET_STATUS.available,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.lost,
+          ASSET_STATUS.needRecert,
+          ASSET_STATUS.needRepair,
+          ...otherStatus
+        ];
+      } else if ([ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
         tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
       } else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
@@ -372,8 +380,11 @@ const SerializedAssetDetailsPage = () => {
   }, [assetDetails, statusOptions]);
 
   const openDataChange = () => {
-    return [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) && resourceData?.policy?.dataChangeAssetLogFields?.length;
-  }
+    return (
+      [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) &&
+      resourceData?.policy?.dataChangeAssetLogFields?.length
+    );
+  };
 
   return (
     <Box className="main-container-v1">
@@ -431,7 +442,9 @@ const SerializedAssetDetailsPage = () => {
                           color="default"
                           className="btn-outline-v1"
                           size="small"
-                          onClick={() => setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })}
+                          onClick={() =>
+                            setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })
+                          }
                         >
                           {'Edit Data'}
                         </Button>
@@ -495,7 +508,7 @@ const SerializedAssetDetailsPage = () => {
                               closeActions();
                               const { policy } = resourceData;
                               if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
-                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o })
+                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
                               } else {
                                 handleStatusChange(o);
                               }
@@ -540,12 +553,12 @@ const SerializedAssetDetailsPage = () => {
           {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 8)}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {assetDetails?.currentLocationNotMatchWithGps &&
-            <Box className='flex items-center'>
-              <WarningIcon className='mr-3' fontSize="small" color="error" />
+          {assetDetails?.currentLocationNotMatchWithGps && (
+            <Box className="flex items-center">
+              <WarningIcon className="mr-3" fontSize="small" color="error" />
               <h4>Asset location needs to be update in Equipt</h4>
             </Box>
-          }
+          )}
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
@@ -598,12 +611,7 @@ const SerializedAssetDetailsPage = () => {
             );
           })}
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 6)}>
-          <AssetHistory
-            id={id}
-            refresh={refreshAssetHistory}
-            resourceData={resourceData}
-            fields={fields}
-          />
+          <AssetHistory id={id} refresh={refreshAssetHistory} resourceData={resourceData} fields={fields} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
           <CertificationHistory
@@ -645,13 +653,13 @@ const SerializedAssetDetailsPage = () => {
           isClone={false}
           productInventoryId={id}
           onClose={() => {
-            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null });
           }}
           onSuccess={() => {
             if (openUpdateDialog.updateStatus) {
-              handleStatusChange(openUpdateDialog.updateStatus)
+              handleStatusChange(openUpdateDialog.updateStatus);
             }
-            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null })
+            setOpenUpdateDialog({ open: false, assetLogFields: null, updateStatus: null });
             fetchData();
           }}
           assetLogFields={openUpdateDialog.assetLogFields}
