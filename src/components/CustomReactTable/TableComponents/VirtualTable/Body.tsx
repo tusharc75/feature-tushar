@@ -24,7 +24,7 @@ export const VirtualTableBody = memo(
     vtableData,
     virtualPaddingRight,
     virtualPaddingLeft
-  }) => {
+  }: any) => {
     return (
       <>
         {virtualrows.map((virtualRow, index) => {
@@ -90,7 +90,7 @@ export const MemoizedSingleRow = memo(
     vtableData,
     virtualPaddingRight,
     virtualPaddingLeft
-  }) => {
+  }: any) => {
     return (
       <>
         {virtualPaddingLeft && left.length === 0 ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}

@@ -69,6 +69,43 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
   return obj;
 };
 
+export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
+  const obj = {
+    className: columnDef.sticky ? `sticky-cell-${columnDef.sticky}` : '',
+    style: {}
+  };
+
+  if (columnDef.sticky === undefined) return obj;
+
+  const addSizes = (index: number) => {
+    if (columnDef.sticky === 'left') {
+      let sum = 0;
+      for (let i = 0; i < index; i++) {
+        sum += colSizes[i];
+      }
+      return sum;
+    }
+    if (columnDef.sticky === 'right') {
+      if (columnDef.id === 'action') {
+        return 0;
+      }
+      let sum = 0;
+      for (let i = colSizes.length - 1; i > index; i--) {
+        sum += colSizes[i];
+      }
+
+      return sum;
+    }
+  };
+
+  if (['left', 'right'].includes(columnDef.sticky)) {
+    const offset = addSizes(index);
+    obj.style = { position: 'sticky', [columnDef.sticky]: offset } as React.CSSProperties;
+  }
+
+  return obj;
+};
+
 export function useSkipper() {
   const shouldSkipRef = React.useRef(true);
   const shouldSkip = shouldSkipRef.current;
