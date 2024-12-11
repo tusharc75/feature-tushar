@@ -19,6 +19,12 @@
     right: var(--card-padding, 8px);
     cursor: pointer;
   }
+  .checkBox {
+    position: absolute;
+    top: 18px;
+    left: 13px;
+  }
+
   .cardTitle {
     h5 {
       font-size: 15px;

@@ -1,8 +1,9 @@
-import { BoxProps, Typography } from '@material-ui/core';
+import { BoxProps, Checkbox, Typography } from '@material-ui/core';
 import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
 import styles from './index.module.scss';
+import { uniqBy } from 'lodash';
 
 export * from './hooks/useCardReducer';
 
@@ -78,7 +79,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { count, columnOrder, visibleColumns } = state;
+  const { data, selectedRecords, count, columnOrder, visibleColumns } = state;
 
   // sort columns
   const columns = useMemo(() => {
@@ -110,7 +111,19 @@ const CardColTimeline: React.FC<CardColInterface> = ({
             >
               <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px]">
                 <Typography className={styles.colTitle}>
-                  <span></span>
+                  <span>
+                    <Checkbox
+                      size="small"
+                      checked={selectedRecords?.length && data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length}
+                      onChange={(e) => {
+                        if (e?.target?.checked) {
+                          dispatch({ type: 'selection', selectedRecords: [...uniqBy([...selectedRecords, ...data[col]], '_id')] });
+                        } else {
+                          dispatch({ type: 'selection', selectedRecords: selectedRecords?.filter((r) => r?.status != col) });
+                        }
+                      }}
+                    />
+                  </span>
                   {col} ({count[col] || 0})
                 </Typography>
                 <RenderColumns

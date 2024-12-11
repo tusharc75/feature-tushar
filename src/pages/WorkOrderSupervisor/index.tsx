@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Box, Button, FormControl, IconButton, InputLabel, Menu, MenuItem, Popover, Select, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControl, IconButton, InputLabel, Menu, MenuItem, Popover, Select, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -26,6 +26,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
+import { ExpandMore } from '@material-ui/icons';
 
 const LIMIT = 25;
 
@@ -69,7 +70,7 @@ const FIELD_TO_FILTER = [
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
-  const { limit } = state;
+  const { limit, selectedRecords } = state;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -77,8 +78,8 @@ const WorkOrderSupervisor = () => {
   }: any = useData();
 
   const [selectedUser, setSelectedUser] = useState(null);
-  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
@@ -198,9 +199,9 @@ const WorkOrderSupervisor = () => {
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
-      setAssignTechnicianDialog(true);
+      setAssignTechnicianDialog({ open: true, multiple: false });
     } else {
-      setWorkStationAssignDialog(true);
+      setWorkStationAssignDialog({ open: true, multiple: false });
     }
   };
 
@@ -275,6 +276,7 @@ const WorkOrderSupervisor = () => {
   const isMobile = useMediaQuery('(max-width: 800px)');
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -518,6 +520,49 @@ const WorkOrderSupervisor = () => {
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
+                <div className="ml-[10px] pt-[4px]">
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={(e) => setAnchorActionEl(e.currentTarget)}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length === 0}
+                    endIcon={<ExpandMore />}
+                    id={'work-order-superviser-page-action-button'}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorActionEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorActionEl)}
+                    onClose={() => setAnchorActionEl(null)}
+                  >
+                    <MenuItem
+                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                      onClick={() => {
+                        setAssignTechnicianDialog({ open: true, multiple: true });
+                        setAnchorActionEl(null);
+                      }}
+                    >
+                      Assign Technician
+                    </MenuItem>
+                    <MenuItem
+                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                      onClick={() => {
+                        setWorkStationAssignDialog({ open: true, multiple: true });
+                        setAnchorActionEl(null);
+                      }}
+                    >{`Assign ${routes.workStations.title}`}</MenuItem>
+                  </Menu>
+                </div>
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
@@ -578,42 +623,62 @@ const WorkOrderSupervisor = () => {
           )}
           {viewType === 3 && <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} />}
         </div>
-        {assignTechnicianDialog && (
+        {assignTechnicianDialog.open && (
           <AssignUserDialog
-            warehouse={selectedServiceData?.warehouse}
-            workOrderData={[
-              {
-                uniqueId: selectedServiceData?.uniqueId,
-                workOrderId: selectedServiceData?._id
-              }
-            ]}
-            assignedUsers={selectedServiceData?.assignedUsers}
+            warehouse={assignTechnicianDialog.multiple ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+            workOrderData={
+              assignTechnicianDialog.multiple
+                ? selectedRecords?.map((r) => ({
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
+                : [
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
+            }
+            assignedUsers={
+              assignTechnicianDialog.multiple
+                ? selectedRecords?.length === 1
+                  ? selectedRecords[0]?.assignedUsers
+                  : []
+                : selectedServiceData?.assignedUsers
+            }
             reference={'service'}
             handleClose={() => {
-              setAssignTechnicianDialog(false);
+              setAssignTechnicianDialog({ open: false, multiple: false });
             }}
             handleSucess={() => {
-              setAssignTechnicianDialog(false);
+              setAssignTechnicianDialog({ open: false, multiple: false });
               dispatch({ type: 'refreshData' });
             }}
-            competencies={selectedServiceData?.competencies}
+            competencies={assignTechnicianDialog.multiple ? selectedRecords[0]?.competencies : selectedServiceData?.competencies}
           />
         )}
-        {workStationAssignDialog && (
+        {workStationAssignDialog.open && (
           <AssignWorkStationDialog
-            warehouse={selectedServiceData?.warehouse}
-            workOrderData={[
-              {
-                uniqueId: selectedServiceData?.uniqueId,
-                workOrderId: selectedServiceData?._id
-              }
-            ]}
-            workStations={selectedServiceData?.assignedWorkStations}
+            warehouse={workStationAssignDialog.open ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+            workOrderData={
+              workStationAssignDialog.multiple
+                ? selectedRecords?.map((r) => ({
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
+                : [
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
+            }
+            workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {
-              setWorkStationAssignDialog(false);
+              setWorkStationAssignDialog({ open: false, multiple: false });
             }}
             handleSucess={() => {
-              setWorkStationAssignDialog(false);
+              setWorkStationAssignDialog({ open: false, multiple: false });
               dispatch({ type: 'refreshData' });
             }}
           />
