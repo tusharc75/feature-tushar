@@ -11,12 +11,12 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, RESOURCE_LABEL, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
-  const renderedFrom = `${camelCase(RESOURCE_LABEL.salesOrder)}_Invoice`;
+  const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Invoice`;
 
   const {
     state: { resources }
