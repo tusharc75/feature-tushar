@@ -1,6 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 import moment from 'moment';
-import React from 'react';
+import React, { useRef } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { FaCheckCircle } from 'react-icons/fa';
 import { FiExternalLink } from 'react-icons/fi';
@@ -30,6 +30,25 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
   if (Boolean(tooltip)) paddingRight += 29;
   if (isSelected) marginLeft += 25;
 
+  const clickTimeout = useRef(null);
+
+  const handleClick = (e) => {
+    clearTimeout(clickTimeout.current);
+
+    clickTimeout.current = setTimeout(() => {
+      if (cardOnSelect) {
+        cardOnSelect(data);
+      }
+    }, 250);
+  };
+
+  const handleDoubleClick = (e) => {
+    clearTimeout(clickTimeout.current);
+    if (cardOnClick) {
+      cardOnClick(e, data);
+    }
+  };
+
   return (
     <Box className={styles.singleCard} style={{ backgroundColor: isSelected ? '#d5d2f7' : '' }}>
       {isSelected && (
@@ -37,19 +56,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
           <FaCheckCircle size={18} color="green" />
         </Box>
       )}
-      <div
-        onDoubleClick={(e) => {
-          if (cardOnClick) {
-            cardOnClick(e, data);
-          }
-        }}
-        onClick={(e) => {
-          if (cardOnSelect) {
-            cardOnSelect(data);
-          }
-        }}
-        style={{ cursor: cardOnClick ? 'pointer' : 'default' }}
-      >
+      <div onClick={handleClick} onDoubleClick={handleDoubleClick} style={{ cursor: cardOnClick ? 'pointer' : 'default' }}>
         {rowDef.map((item, index) => {
           if (item.type === 'tooltip') return null;
           if (item.type === 'title') {

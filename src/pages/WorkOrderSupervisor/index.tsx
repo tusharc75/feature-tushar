@@ -196,10 +196,6 @@ const WorkOrderSupervisor = () => {
       });
   }, []);
 
-  useEffect(() => {
-    console.log('selectedRecords', selectedRecords);
-  }, [selectedRecords]);
-
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
