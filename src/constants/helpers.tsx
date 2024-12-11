@@ -2884,9 +2884,17 @@ export const COLOUR_MASTER = {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
+  accepted:{
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  rejected:{
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
+  },
   receivingTicket: {
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   deliveredReceivingTicket: {
     background: '#cfdb7f',

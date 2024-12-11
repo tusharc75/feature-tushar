@@ -8,38 +8,32 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { COLOUR_MASTER, IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 const customNodeStyles = {
   irtTicketNumber: {
     name: 'Irt Ticket Number',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.purchaseOrder
   },
   purchaseOrder: {
     name: 'Purchase Order',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
+    ...COLOUR_MASTER.product
   },
   product: {
     name: 'Product',
-    background: '#FFF7D9',
-    borderColor: '#FDD33E'
+    ...COLOUR_MASTER.service
   },
   send: {
     name: 'Approver-Send',
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    ...COLOUR_MASTER.loadingTicket
   },
   approve: {
     name: 'Approver-Approved',
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+    ...COLOUR_MASTER.accepted
   },
   decline: {
     name: 'Approver-Declined',
-    background: '#FFEAEA',
-    borderColor: '#FFA0A0'
+    ...COLOUR_MASTER.rejected
   }
 };
 
@@ -76,7 +70,7 @@ const IrtTicketView = ({ id }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'IRT Ticket'}>
               <div>
-                <Typography variant="body2">IRT Ticket</Typography>
+                <Typography variant="body2">{customNodeStyles.irtTicketNumber.name}</Typography>
                 <Typography variant="subtitle2">{irtTicketData?.irtTicketNumber}</Typography>
               </div>
             </HtmlTooltip>
@@ -101,7 +95,7 @@ const IrtTicketView = ({ id }) => {
         label: (
           <HtmlTooltip arrow placement="top" title={'Purchase Order'}>
             <div>
-              <Typography variant="body2">Purchase Order</Typography>
+              <Typography variant="body2">{customNodeStyles.purchaseOrder.name}</Typography>
               <Typography variant="subtitle2">{irtTicketData?.purchaseOrder?.optionLabel}</Typography>
             </div>
           </HtmlTooltip>
@@ -130,7 +124,7 @@ const IrtTicketView = ({ id }) => {
         label: (
           <HtmlTooltip arrow placement="top" title={'Product'}>
             <div>
-              <Typography variant="body2">Product/Part</Typography>
+              <Typography variant="body2">{customNodeStyles.product.name}/Part</Typography>
               <Typography variant="subtitle2">{irtTicketData?.product?.optionLabel}</Typography>
               <Typography variant="body2">{`Qty : ${irtTicketData?.qty}`}</Typography>
               <Typography variant="body2">{`PO Amount : $ ${irtTicketData?.amount}`}</Typography>
