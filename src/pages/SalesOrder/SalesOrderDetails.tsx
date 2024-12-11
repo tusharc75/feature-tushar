@@ -23,6 +23,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   INVOICE_STATUS,
+  RESOURCE_LABEL,
   SALES_ORDER_STATUS,
   checkIsAllowedToEdit,
   salesOrder,
@@ -41,14 +42,14 @@ import Step from 'src/pages/DynamicForm/Step';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.salesOrder.title);
+  const renderedFrom = camelCase(RESOURCE_LABEL.salesOrder);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -177,7 +178,7 @@ const SalesOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.salesOrder, { title: `${salesOrderData?.salesOrderNo}` }]} />
+          <CustomBreadCrumbs routes={[{...routes.salesOrder, title: resources.salesOrder.titleSingular}, { title: `${salesOrderData?.salesOrderNo}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

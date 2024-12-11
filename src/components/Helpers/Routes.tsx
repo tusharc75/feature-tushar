@@ -441,11 +441,9 @@ const routes = {
     path: '/repair-job/detail'
   },
   salesOrder: {
-    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order'
   },
   salesOrderDetail: {
-    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order/detail'
   },
   packages: {

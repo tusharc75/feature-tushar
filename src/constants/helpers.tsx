@@ -1606,7 +1606,20 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+interface IRoutesAndTitle {
+  [key: string] : {
+    title: string;
+    titlePlural: string;
+    titleSingular: string;
+  }; 
+}
+
+interface IGetPermissionsReturn {
+  permissions: IPermission;
+  resources: IRoutesAndTitle;
+}
+
+export const getPermissions = (user, selectedEntity = undefined): IGetPermissionsReturn | null => {
   if (user) {
     try {
       let permissions = {};
@@ -1645,7 +1658,9 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             }
             permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
             routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-              title: d.resourceLabel || d.name
+              title: d.homePageLabel || d.resourceLabel || d.name,
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           } else {
             let permission = {
@@ -1660,14 +1675,16 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             const k = lowerFirst(d.name.replace(/ /g, ''));
             permissions[k] = permission;
             routesAndTitle[k] = {
-              title: d.resourceLabel || d.name
+              title: d.homePageLabel || d.resourceLabel || d.name,
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           }
         });
       }
 
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-      return permissions;
+      return { permissions, resources: routesAndTitle };
     } catch (e) {
       console.log(e);
     }

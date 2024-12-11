@@ -22,6 +22,7 @@ import {
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
+  RESOURCE_LABEL,
   salesOrder,
   sidebarResource,
   supplierAccount
@@ -32,16 +33,21 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const SalesOrder = () => {
-  const renderedFrom = camelCase(routes?.salesOrder.title);
+  const renderedFrom = camelCase(RESOURCE_LABEL.salesOrder);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
 
   const types = [
     {
-      key: `My ${routes?.salesOrder.title}`,
+      key: `My ${resources.salesOrder.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes?.salesOrder.title}`,
+      key: `All ${resources.salesOrder.titlePlural}`,
       value: 2
     }
   ];
@@ -51,9 +57,6 @@ const SalesOrder = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
 
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.salesOrder));
   const [columns, setColumns] = useState(null);
@@ -318,10 +321,10 @@ const SalesOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.salesOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.salesOrder, title: resources.salesOrder.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.salesOrder}
-          module={routes.salesOrder.title}
+          module={resources.salesOrder.titlePlural}
           api={salesOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -386,7 +389,7 @@ const SalesOrder = () => {
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${routes?.salesOrder?.title?.toLowerCase()} ${deleteRecord?.salesOrderName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.salesOrder?.titleSingular?.toLowerCase()} ${deleteRecord?.salesOrderName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setIsConformDialogVisible(false);
