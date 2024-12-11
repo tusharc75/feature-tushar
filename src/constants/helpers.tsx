@@ -2817,8 +2817,8 @@ export const PDF_RESOURCE_LIST = [
 
 export const COLOUR_MASTER = {
   rentalJob: {
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    background:'#E6E8F5',
+    borderColor:'#9789F0'
   },
   cancelledRentalJob: {
     background: '#00FF00',

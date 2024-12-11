@@ -9,43 +9,36 @@ import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { lowerFirst, startCase } from 'lodash';
-import { MATERIAL_TYPE } from 'src/constants/helpers';
+import { COLOUR_MASTER, MATERIAL_TYPE } from 'src/constants/helpers';
 
 const customNodeStyles = {
   salesOrder: {
     name: 'Sales Order',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.purchaseOrder
   },
   package: {
     name: 'Package',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
+    ...COLOUR_MASTER.package
   },
   product: {
     name: 'Product',
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    ...COLOUR_MASTER.product
   },
   service: {
     name: 'Service',
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+    ...COLOUR_MASTER.service
   },
   demandOrder: {
     name: 'Demand Order',
-    background: '#fad8b6',
-    borderColor: '#ff8000'
+    ...COLOUR_MASTER.repairJob
   },
   productionOrder: {
     name: 'Production Order',
-    background: '#fcecc0',
-    borderColor: '#ffbb00'
+    ...COLOUR_MASTER.assets
   },
   purchaseRequisition: {
     name: 'Purchase Requisition',
-    background: '#f0c9f5',
-    borderColor: '#e200ff'
+    ...COLOUR_MASTER.bulkAsset
   }
   // decline: {
   //   name: 'Approver-Declined',
@@ -89,7 +82,7 @@ const IrtTicketView = ({ salesOrderData }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'Sales Order'}>
               <div>
-                <Typography variant="body2">Sales Order</Typography>
+                <Typography variant="body2">{customNodeStyles.salesOrder.name}</Typography>
                 <Typography variant="subtitle2">{salesOrderData?.salesOrderNo}</Typography>
               </div>
             </HtmlTooltip>

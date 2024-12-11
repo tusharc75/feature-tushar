@@ -8,28 +8,24 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE,deliveryTicket} from 'src/constants/helpers';
+import { COLOUR_MASTER, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE,deliveryTicket} from 'src/constants/helpers';
 
 const customNodeStyles = {
   subcontractAssembly: {
     name: 'Subcontract Assembly',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.purchaseOrder
   },
   product: {
     name: 'Product',
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    ...COLOUR_MASTER.product
   },
   loadingTicket: {
     name: 'Loading Ticket',
-    background: '#e6c6e6',
-    borderColor: '#b38fb3'
+    ...COLOUR_MASTER.loadingTicket
   },
   receivingTicket: {
     name: 'Receiving Ticket',
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    ...COLOUR_MASTER.receivingTicket
   },
 };
 
@@ -69,7 +65,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'Subcontract Assembly'}>
               <div>
-                <Typography variant="body2">Subcontract Assembly</Typography>
+                <Typography variant="body2">{customNodeStyles.subcontractAssembly.name}</Typography>
                 <Typography variant="subtitle2">{subcontractAssemblyData?.subcontractAssemblyNumber}</Typography>
               </div>
             </HtmlTooltip>
@@ -153,20 +149,26 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
                 title={
                   <>
                     <p>
-                      From: <b>{obj?.pickupFrom?.optionLabel}</b>
+                       <Typography variant="body2">From:</Typography>
+                       <Typography variant="subtitle2">
+                        {obj?.pickupFrom?.optionLabel}
+                       </Typography>
                     </p>
                     <p>
-                      To: <b>{obj?.deliveryTo?.optionLabel}</b>
+                       <Typography variant="body2">To:</Typography>
+                       <Typography variant="subtitle2">
+                       {obj?.deliveryTo?.optionLabel}
+                       </Typography>
                     </p>
                   </>
                 }
               >
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <Typography variant="body2">
-                  {obj.ticketName}
+                {obj.ticketType} Ticket
                 </Typography>
                 <Typography variant="subtitle2">
-                  {obj.ticketType} Ticket
+                {obj.ticketName}
                 </Typography>
               </div>
             </HtmlTooltip>
