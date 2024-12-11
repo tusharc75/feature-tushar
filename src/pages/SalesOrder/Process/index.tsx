@@ -12,7 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${routes.salesOrder.title}_Process`;
+const renderedFrom = `${sidebarResource.salesOrder}_Process`;
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const [columns, setColumns] = useState(null);

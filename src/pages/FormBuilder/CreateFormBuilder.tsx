@@ -181,7 +181,11 @@ const CreateFormBuilder = () => {
 
   const handleSave = async () => {
     if (resourceLabel === '') {
-      alert('Please enter resource label');
+      alert('Please enter Resource label');
+      return;
+    }
+    if (homePageLabel === '') {
+      alert('Please enter Home Page label');
       return;
     }
     let data = [];
@@ -390,7 +394,7 @@ const CreateFormBuilder = () => {
                     <TextField
                       variant="outlined"
                       type="text"
-                      label="Resource Label"
+                      label="Resource Label (Singular)"
                       required={true}
                       name="name"
                       fullWidth
@@ -405,7 +409,8 @@ const CreateFormBuilder = () => {
                     <TextField
                       variant="outlined"
                       type="text"
-                      label="Home Page Label"
+                      label="Resource Label (Plural)"
+                      required={true}
                       name="homePageLabel"
                       fullWidth
                       margin="dense"

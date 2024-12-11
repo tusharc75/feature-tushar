@@ -16,10 +16,10 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
-  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
+  const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Invoice`;
 
   const {
-    state: { permissions }
+    state: { resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -197,7 +197,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`,
+    fileName: `${resources?.salesOrder?.titleSingular}-${salesOrderData?.salesOrderNo}`,
     resource: sidebarResource.salesOrder,
     referenceId: salesOrderData._id,
     columns: columns,
