@@ -24,13 +24,11 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   const customNodeStyles = {
     managedPackage: {
       name: 'Managed Package',
-      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
-      borderColor: '#9789F0'
+      ...COLOUR_MASTER.purchaseOrder
     },
     product: {
       name: 'Product',
-      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
-      borderColor: '#8BCBDF'
+      ...COLOUR_MASTER.product
     },
     serializedAsset: {
       name: 'Serialized Asset',
@@ -38,8 +36,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     },
     package: {
       name: 'Package',
-      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
-      borderColor: '#66CDB7'
+      ...COLOUR_MASTER.package
     },
   };
 

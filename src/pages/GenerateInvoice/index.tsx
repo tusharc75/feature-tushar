@@ -21,59 +21,11 @@ import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const GENERATE_RESOURCE = [
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    fieldName: 'rentalJobName',
-    invoiceFieldName: 'rentalJob',
-    progressiveBilling: true,
-    path: routes.rentalManagementDetail.path,
-    title: routes.rentalManagement.title
-  },
-  {
-    key: 'sublease',
-    resource: sidebarResource.sublease,
-    fieldName: 'subleaseName',
-    invoiceFieldName: 'sublease',
-    progressiveBilling: true,
-    path: routes.subleaseDetail.path,
-    title: routes.sublease.title
-  },
-  {
-    key: 'repairOrder',
-    resource: sidebarResource.repairOrder,
-    fieldName: 'repairOrderNumber',
-    invoiceFieldName: 'repairOrder',
-    progressiveBilling: false,
-    path: routes.repairOrderDetail.path,
-    title: routes.repairOrder.title
-  },
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    fieldName: 'fieldTicketNumber',
-    invoiceFieldName: 'fieldTicket',
-    progressiveBilling: false,
-    path: routes.fieldTicketDetail.path,
-    title: routes.fieldTicket.title
-  },
-  {
-    key: 'salesOrder',
-    resource: sidebarResource.salesOrder,
-    fieldName: 'salesOrderNumber',
-    invoiceFieldName: 'salesOrder',
-    progressiveBilling: false,
-    path: routes.salesOrderDetail.path,
-    title: routes.salesOrder.title
-  }
-];
-
 const GenerateInvoice = ({ resourceRendered = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedResource, setSelectedResource] = useState(null);
@@ -93,6 +45,53 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const GENERATE_RESOURCE = [
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      fieldName: 'rentalJobName',
+      invoiceFieldName: 'rentalJob',
+      progressiveBilling: true,
+      path: routes.rentalManagementDetail.path,
+      title: routes.rentalManagement.title
+    },
+    {
+      key: 'sublease',
+      resource: sidebarResource.sublease,
+      fieldName: 'subleaseName',
+      invoiceFieldName: 'sublease',
+      progressiveBilling: true,
+      path: routes.subleaseDetail.path,
+      title: routes.sublease.title
+    },
+    {
+      key: 'repairOrder',
+      resource: sidebarResource.repairOrder,
+      fieldName: 'repairOrderNumber',
+      invoiceFieldName: 'repairOrder',
+      progressiveBilling: false,
+      path: routes.repairOrderDetail.path,
+      title: routes.repairOrder.title
+    },
+    {
+      key: 'fieldTicket',
+      resource: sidebarResource.fieldTicket,
+      fieldName: 'fieldTicketNumber',
+      invoiceFieldName: 'fieldTicket',
+      progressiveBilling: false,
+      path: routes.fieldTicketDetail.path,
+      title: routes.fieldTicket.title
+    },
+    {
+      key: 'salesOrder',
+      resource: sidebarResource.salesOrder,
+      fieldName: 'salesOrderNumber',
+      invoiceFieldName: 'salesOrder',
+      progressiveBilling: false,
+      path: routes.salesOrderDetail.path,
+      title: resources?.salesOrder?.titleSingular
+    }
+  ];
 
   useEffect(() => {
     const options: any = [];

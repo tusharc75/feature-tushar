@@ -1606,11 +1606,24 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+interface IRoutesAndTitle {
+  [key: string] : {
+    titlePlural: string;
+    titleSingular: string;
+  }; 
+}
+
+interface IGetPermissionsReturn {
+  permissions: IPermission;
+  resources: IRoutesAndTitle;
+}
+
+export const getPermissions = (user, selectedEntity = undefined): IGetPermissionsReturn | null => {
   if (user) {
     try {
       let permissions = {};
       let routesAndTitle = {};
+      let resources = {};
 
       let data = [...user?.role?.sideBar];
 
@@ -1647,6 +1660,10 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
               title: d.resourceLabel || d.name
             };
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
+            };
           } else {
             let permission = {
               isCreate: d.isCreate,
@@ -1662,12 +1679,16 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             routesAndTitle[k] = {
               title: d.resourceLabel || d.name
             };
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
+            };
           }
         });
       }
 
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-      return permissions;
+      return { permissions, resources };
     } catch (e) {
       console.log(e);
     }
@@ -2817,8 +2838,8 @@ export const PDF_RESOURCE_LIST = [
 
 export const COLOUR_MASTER = {
   rentalJob: {
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    background:'#E6E8F5',
+    borderColor:'#9789F0'
   },
   cancelledRentalJob: {
     background: '#00FF00',
@@ -2884,9 +2905,21 @@ export const COLOUR_MASTER = {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
+  accepted:{
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  rejected:{
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
+  },
+  skipped:{
+    background: '#ffd65b',
+    borderColor: 'grey'
+  },
   receivingTicket: {
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   deliveredReceivingTicket: {
     background: '#cfdb7f',
@@ -2903,6 +2936,14 @@ export const COLOUR_MASTER = {
   replaceAssetColor: {
     background: 'var(--replaceAsset-bg)',
     borderColor: 'var(--replaceAsset-bg)'
+  },
+  preWork:{
+    background:'rgba(254, 249, 230, 1)',
+    borderColor: '#C0C0C0'
+  },
+  postWork:{
+    background:'rgba(222, 249, 255, 1)',
+    borderColor: 'green'
   }
 };
 

@@ -36,7 +36,7 @@ export const defaultIcons = [
   'Master Data',
   'Rental Management',
   'Service Management',
-  'Setups & Administration',
+  'Setup & Administration',
   'Activities',
   'Collaboration Tools',
   'Fleet Management',

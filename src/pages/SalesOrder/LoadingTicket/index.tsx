@@ -21,12 +21,13 @@ import {
   DELIVERY_TICKET_TYPE,
   MATERIAL_TYPE,
   deliveryTicket,
-  salesOrder
+  salesOrder,
+  sidebarResource
 } from 'src/constants/helpers';
 import { salesOrderActions, salesOrderMessage } from 'src/constants/messageHelpers';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 
-const renderedFrom = `${routes.salesOrder.title}_LoadingTicket`;
+const renderedFrom = `${sidebarResource.salesOrder}_LoadingTicket`;
 
 const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);

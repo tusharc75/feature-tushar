@@ -35,7 +35,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -185,7 +185,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
               <CustomDialogHeader
                 title={
                   !salesOrderId
-                    ? `Create ${routes.salesOrder.title}`
+                    ? `Create ${resources?.salesOrder?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                 }
                 onClose={() => {

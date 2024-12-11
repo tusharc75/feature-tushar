@@ -250,13 +250,13 @@ const QuotationViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'product':
-        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'serializedAsset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
