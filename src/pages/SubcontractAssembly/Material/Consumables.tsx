@@ -32,7 +32,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 
 const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen, productFields }) => {
-  const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Consumables`;
+  const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Consumables`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);

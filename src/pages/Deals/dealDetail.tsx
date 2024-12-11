@@ -13,6 +13,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import Material from './Material';
 import Units from './Units';
+import { useData } from 'src/StateProvider/Provider';
 
 const DealDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,10 @@ const DealDetail = () => {
   const [dealData, setDealData] = useState(null);
   const [fields, setFields] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -76,7 +81,7 @@ const DealDetail = () => {
                         value={1}
                     ><BiFoodMenu className="mr-1" fontSize="inherit" /> Material</CustomTab> */}
           <CustomTab value={2}>
-            {routes.units.title}
+            {resources?.units?.titleSingular}
           </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>

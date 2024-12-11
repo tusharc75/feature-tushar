@@ -386,7 +386,8 @@ export const sidebarResource = {
   managedPackages: 'Managed Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
-  packageInventory: 'Package Inventory'
+  packageInventory: 'Package Inventory',
+  workAutomation:'Work Automation'
 };
 
 export const primaryFields = {

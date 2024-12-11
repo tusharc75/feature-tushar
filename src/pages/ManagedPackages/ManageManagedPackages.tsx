@@ -21,7 +21,7 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null, 
   
   const history = useHistory();
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -157,7 +157,7 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null, 
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update - ${initialData.values?.managedPackageName ? `${initialData.values?.managedPackageName}` : ''}`
-                  : `Create ${routes?.managedPackages?.title}`
+                  : `Create ${resources?.managedPackages?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

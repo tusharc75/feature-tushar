@@ -55,11 +55,11 @@ const getWarningList = (row?: any) => {
 };
 
 const Units = () => {
-  const renderedFrom = camelCase(routes?.units.title);
+  const renderedFrom = camelCase(sidebarResource?.units);
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity,resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -291,10 +291,10 @@ const Units = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.units.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.units?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions.units}
-          module={routes.units.title}
+          module={resources?.units?.titlePlural}
           api={'units'}
           afterImportCompleted={() => {
             fetchData();
@@ -355,7 +355,7 @@ const Units = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.units.title?.toLowerCase()} ${deleteRecord?.unitNumber || ''} ?`}
+            message={`Are you sure you want to delete ${resources?.units?.titleSingular?.toLowerCase()} ${deleteRecord?.unitNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

@@ -1158,31 +1158,15 @@ const routes = {
     path: '/payroll-policy/detail'
   },
   triggerNotificationMaster: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
-        ? storedRoutes.triggerNotificationMaster?.title
-        : RESOURCE_LABEL.triggerNotificationMaster,
     path: '/trigger-notification-master'
   },
   triggerNotificationMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
-        ? storedRoutes.triggerNotificationMaster?.title
-        : RESOURCE_LABEL.triggerNotificationMaster,
     path: '/trigger-notification-master/detail'
   },
   triggerNotificationHistory: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationHistory && storedRoutes.triggerNotificationHistory.title
-        ? storedRoutes.triggerNotificationHistory?.title
-        : RESOURCE_LABEL.triggerNotificationHistory,
     path: '/trigger-notification-history'
   },
   userAttendance: {
-    title:
-      storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title
-        ? storedRoutes.userAttendance?.title
-        : RESOURCE_LABEL.userAttendance,
     path: '/user-attendance'
   },
   dataList: {
@@ -1212,53 +1196,27 @@ const routes = {
     path: '/serialized-asset-status-change-request'
   },
   units: {
-    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
     path: '/units'
   },
   unitDetail: {
-    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
     path: '/units/detail'
   },
   workOrderPlanning: {
-    title:
-      storedRoutes && storedRoutes.workOrderPlanning && storedRoutes.workOrderPlanning.title
-        ? storedRoutes.workOrderPlanning?.title
-        : sidebarResource.workOrderPlanning,
     path: '/work-order-planning'
   },
   resourceDoaRequest: {
-    title:
-      storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title
-        ? storedRoutes.resourceDoaRequest?.title
-        : sidebarResource.resourceDoaRequest,
     path: '/resource-doa-request'
   },
   subcontractAssembly: {
-    title:
-      storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title
-        ? storedRoutes.subcontractAssembly?.title
-        : sidebarResource.subcontractAssembly,
     path: '/subcontract-assembly'
   },
   subcontractAssemblyDetail: {
-    title:
-      storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title
-        ? storedRoutes.subcontractAssembly?.title
-        : sidebarResource.subcontractAssembly,
     path: '/subcontract-assembly/detail'
   },
   managedPackages: {
-    title:
-      storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages?.title
-        ? storedRoutes.managedPackages?.title
-        : RESOURCE_LABEL.managedPackages,
     path: '/managed-packages'
   },
   managedPackagesDetail: {
-    title:
-      storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages.title
-        ? storedRoutes.managedPackages?.title
-        : RESOURCE_LABEL.managedPackages,
     path: '/managed-packages/detail'
   },
   integration: {
@@ -1315,17 +1273,9 @@ const routes = {
     path: '/assembly-order/detail'
   },
   workAutomation: {
-    title:
-      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
-        ? storedRoutes.workAutomation?.title
-        : RESOURCE_LABEL.workAutomation,
     path: '/work-automation'
   },
   workAutomationDetail: {
-    title:
-      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
-        ? storedRoutes.workAutomation?.title
-        : RESOURCE_LABEL.workAutomation,
     path: '/work-automation/detail'
   }
 };
