@@ -85,11 +85,11 @@ const customDeliveredNodeStyle = {
   },
   cancelledRentalJob: {
     name: 'Return Ticket',
-    ...COLOUR_MASTER.cancelledRentalJob
+    ...COLOUR_MASTER.rejected
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    ...COLOUR_MASTER.closedRentalJob
+    ...COLOUR_MASTER.accepted
   }
 };
 
