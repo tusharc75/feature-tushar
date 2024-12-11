@@ -31,7 +31,7 @@ export const initialState = {
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_USER:
-      const { permissions, resources } = getPermissions(state.user, action.payload);
+      const { permissions, resources } = getPermissions(action.payload);
       return { ...state, user: action.payload, permissions, resources };
 
     case SET_SEARCH:
