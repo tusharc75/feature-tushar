@@ -28,7 +28,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
         {sections.map((section, index) => {
           if (
             section.head === 'Setups' ||
-            section.head === 'Setups & Administration' ||
+            section.head === 'Setup & Administration' ||
             section.head === 'Collaboration Tools' ||
             section.head === 'Workspace' ||
             section.head === 'Activities'

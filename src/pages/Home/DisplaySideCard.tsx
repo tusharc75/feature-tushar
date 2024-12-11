@@ -13,10 +13,10 @@ import SideCard, { SideCardProps } from 'src/pages/Home/SideCard';
 interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
   objBySectionName: any;
   handleRoutes: any;
-  mode: 'Workspace' | 'Setups & Administration' | 'User Manual';
+  mode: 'Workspace' | 'Setup & Administration' | 'User Manual';
 }
 
-const getProps = (mode: 'Workspace' | 'Setups & Administration' | 'User Manual', handleClick: () => void): SideCardProps => {
+const getProps = (mode: 'Workspace' | 'Setup & Administration' | 'User Manual', handleClick: () => void): SideCardProps => {
   switch (mode) {
     case 'Workspace': {
       return {
@@ -31,13 +31,13 @@ const getProps = (mode: 'Workspace' | 'Setups & Administration' | 'User Manual',
         gradientColors: ['#925cb4', '#64b9fc']
       };
     }
-    case 'Setups & Administration': {
+    case 'Setup & Administration': {
       return {
-        heading: 'Setups & Administration',
+        heading: 'Setup & Administration',
         description: 'List of all product and category setups',
         icon: (
           <div className="max-w-[60px]">
-            <img src={adminSetupImage} alt={'Setups & Administration Logo'} className="max-w-full" />
+            <img src={adminSetupImage} alt={'Setup & Administration Logo'} className="max-w-full" />
           </div>
         ),
         onClick: handleClick,
@@ -71,7 +71,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', .
     if (objBySectionName) {
       if (mode === 'Workspace')
         setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || objBySectionName['Workspace'] || null);
-      else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
+      else setColabData(objBySectionName['Setup & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [mode, objBySectionName]);
 
