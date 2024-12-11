@@ -43,6 +43,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import { isMobile, isTablet } from 'react-device-detect';
 import SendMailMenu from './SendMailMenu';
+import Filter from 'src/components/Filter';
 
 let cancelTokenSource = null;
 
@@ -92,6 +93,9 @@ const Report = () => {
   const [htmlContent, setHtmlContent] = React.useState(null);
 
   const [isProcessing, setIsProcessing] = React.useState(null);
+  const [deepFilters, setDeepFilters] = React.useState([]);
+  const [filterByIds, setFilterByIds] = React.useState([]);
+  const [filterTerm, setFilterTerm] = React.useState({});
 
   const fetchGridColumns = async () => {
     try {
@@ -179,7 +183,8 @@ const Report = () => {
 
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
-        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        // setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData));
         setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
       }
       setColumns(columns);
@@ -687,6 +692,58 @@ const Report = () => {
         });
       });
     }
+
+    if (filterByIds?.length > 0) {
+      const filterById = filterByIds
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          return {
+            field: f?.field,
+            term: {
+              [term]: f?.term.map((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+      }
+    }
+
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
+    if (deepFilters?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFilters
+          ?.filter((d) => {
+            const hasTermLength = d?.term?.length ? true : false;
+            if (isStatusPeriod) {
+              return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+            }
+            return hasTermLength;
+          })
+          ?.map((d) => {
+            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
+              return {
+                ...d,
+                term: { $nin: d?.term }
+              };
+            }
+            return d;
+          })
+      ];
+    }
+
+    if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
+      deepFilters
+        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+        ?.forEach((ele) => {
+          filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
+        });
+    }
+
     if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
@@ -943,7 +1000,7 @@ const Report = () => {
               </Grid>
             </Grid>
           </div>
-          {!showGrid && (
+          {/* {!showGrid && (
             <Dialog
               open={true}
               maxWidth="md"
@@ -1003,6 +1060,24 @@ const Report = () => {
                 </DialogContent>
               </div>
             </Dialog>
+          )} */}
+          {!showGrid && (
+            <Filter
+              onClose={() => {
+                setShowGrid(true);
+              }}
+              resource={sidebarResource[resourceCamelCase]}
+              columns={resourceColumns}
+              onApplyFilter={fetchResourceData}
+              deepFilters={deepFilters}
+              setDeepFilters={setDeepFilters}
+              filterByIds={filterByIds}
+              setFilterByIds={setFilterByIds}
+              filterTerm={filterTerm}
+              setFilterTerm={setFilterTerm}
+              defaultColumns={defaultColumns}
+              reportConfig={reportConfig}
+            />
           )}
           <div>
             {columns ? (
