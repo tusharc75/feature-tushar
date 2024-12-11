@@ -248,11 +248,11 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
 
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'product') {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'subcontractAssembly') {
-      history.push(`${routes.subcontractAssemblyDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.subcontractAssemblyDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data.ref_type === 'Delivery') {
-      history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+      window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
     }
   };
 

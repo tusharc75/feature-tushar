@@ -894,37 +894,37 @@ const RentalManagementViews = (props) => {
       case 'rentalJob':
         break;
       case 'product':
-        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'service':
-        history.push(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'loading':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'receiving':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'return':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'purchaseOrder':
-        history.push(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);
         break;
       case 'sublease':
-        history.push(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
         break;
       case 'transferAsset':
-        history.push(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'bulkAsset':
-        history.push(`${routes.bulkAssetCreationDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.bulkAssetCreationDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

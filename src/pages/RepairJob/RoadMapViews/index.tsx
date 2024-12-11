@@ -14,7 +14,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 const customNodeStyles = {
   repairJob: {
     name: 'Repair Job',
-    ...COLOUR_MASTER.repairJob
+    ...COLOUR_MASTER.purchaseOrder
   },
   asset: {
     name: 'Assets',
@@ -263,10 +263,10 @@ const RepairJobViews = (props) => {
       case 'repairJob':
         break;
       case 'deliveryTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

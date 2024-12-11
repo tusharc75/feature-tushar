@@ -200,19 +200,19 @@ const IrtTicketView = ({ salesOrderData }) => {
 
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'product') {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'package') {
-      history.push(`${routes.packagesDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.packagesDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'service') {
-      history.push(`${routes.serviceMasterDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.serviceMasterDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'salesOrder') {
-      history.push(`${routes.salesOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.salesOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'demandOrder') {
-      history.push(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'productionOrder') {
-      history.push(`${routes.productionOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productionOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'purchaseRequisition') {
-      history.push(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
     }
   };
 

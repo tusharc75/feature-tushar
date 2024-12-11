@@ -222,11 +222,11 @@ const IrtTicketView = ({ id }) => {
 
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'purchaseOrder') {
-      history.push(`${routes.purchaseOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.purchaseOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'product') {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'user') {
-      history.push(`${routes.userDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.userDetail.path}/${element?.data?.ref_id}`);
     }
   };
 

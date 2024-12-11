@@ -13,7 +13,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 const customNodeStyles = {
   repairOrder: {
     name: routes.repairOrder.title,
-    ...COLOUR_MASTER.repairJob
+    ...COLOUR_MASTER.purchaseOrder
   },
   productAssets: {
     name: 'Assets',

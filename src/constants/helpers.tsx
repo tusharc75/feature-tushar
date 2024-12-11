@@ -2892,6 +2892,10 @@ export const COLOUR_MASTER = {
     background: '#FFEAEA',
     borderColor: '#FFA0A0'
   },
+  skipped:{
+    background: '#ffd65b',
+    borderColor: 'grey'
+  },
   receivingTicket: {
     background: '#EDFFE1',
     borderColor: '#86DB71'
@@ -2911,6 +2915,14 @@ export const COLOUR_MASTER = {
   replaceAssetColor: {
     background: 'var(--replaceAsset-bg)',
     borderColor: 'var(--replaceAsset-bg)'
+  },
+  preWork:{
+    background:'rgba(254, 249, 230, 1)',
+    borderColor: '#C0C0C0'
+  },
+  postWork:{
+    background:'rgba(222, 249, 255, 1)',
+    borderColor: 'green'
   }
 };
 
