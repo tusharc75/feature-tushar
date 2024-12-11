@@ -76,18 +76,18 @@ function Dashboard() {
               <WorkspaceCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} />
               {formPermission && (
                 <SideCard
-                  heading="Dynamic Form"
+                  heading="Dynamic Forms"
                   href={`${routes.formBuilder.path}`}
                   icon={
                     <div className="max-w-[60px]">
-                      <img src={dynamicFormImage} alt={'Setups & Administration Logo'} className="max-w-full" />
+                      <img src={dynamicFormImage} alt={'Setup & Administration Logo'} className="max-w-full" />
                     </div>
                   }
                   description="Design and customize forms effortlessly, capturing data dynamically."
                   gradientColors={['#ffd064', '#f4fbff']}
                 />
               )}
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setup & Administration" />
               <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
             </div>
           </div>
