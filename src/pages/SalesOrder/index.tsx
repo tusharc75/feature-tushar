@@ -22,7 +22,6 @@ import {
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
-  RESOURCE_LABEL,
   salesOrder,
   sidebarResource,
   supplierAccount
@@ -33,7 +32,7 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const SalesOrder = () => {
-  const renderedFrom = camelCase(RESOURCE_LABEL.salesOrder);
+  const renderedFrom = camelCase(sidebarResource.salesOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -43,11 +42,11 @@ const SalesOrder = () => {
 
   const types = [
     {
-      key: `My ${resources.salesOrder.titlePlural}`,
+      key: `My ${resources?.salesOrder?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${resources.salesOrder.titlePlural}`,
+      key: `All ${resources?.salesOrder?.titlePlural}`,
       value: 2
     }
   ];
@@ -321,10 +320,10 @@ const SalesOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.salesOrder, title: resources.salesOrder.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.salesOrder, title: resources?.salesOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.salesOrder}
-          module={resources.salesOrder.titlePlural}
+          module={resources?.salesOrder?.titlePlural}
           api={salesOrder.api}
           afterImportCompleted={() => {
             fetchData();

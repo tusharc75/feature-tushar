@@ -3,7 +3,7 @@ import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { CHILD_RESOURCE, MATERIAL_TYPE, RESOURCE_LABEL, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, salesOrder, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
@@ -12,7 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${RESOURCE_LABEL.salesOrder}_Process`;
+const renderedFrom = `${sidebarResource.salesOrder}_Process`;
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const [columns, setColumns] = useState(null);

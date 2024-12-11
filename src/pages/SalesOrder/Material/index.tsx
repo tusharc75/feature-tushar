@@ -25,7 +25,6 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
-  RESOURCE_LABEL,
   SALES_ORDER_STATUS,
   pricingCondition,
   salesOrder,
@@ -39,7 +38,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
-const renderedFrom = `${camelCase(RESOURCE_LABEL.salesOrder)}_Material`;
+const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);

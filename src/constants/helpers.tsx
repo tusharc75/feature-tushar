@@ -1608,7 +1608,6 @@ interface IPermission {
 
 interface IRoutesAndTitle {
   [key: string] : {
-    title: string;
     titlePlural: string;
     titleSingular: string;
   }; 
@@ -1624,6 +1623,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
     try {
       let permissions = {};
       let routesAndTitle = {};
+      let resources = {};
 
       let data = [...user?.role?.sideBar];
 
@@ -1658,7 +1658,9 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
             }
             permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
             routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-              title: d.homePageLabel || d.resourceLabel || d.name,
+              title: d.resourceLabel || d.name
+            };
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
               titlePlural: d.homePageLabel || d.resourceLabel || d.name,
               titleSingular: d.resourceLabel || d.name
             };
@@ -1675,7 +1677,9 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
             const k = lowerFirst(d.name.replace(/ /g, ''));
             permissions[k] = permission;
             routesAndTitle[k] = {
-              title: d.homePageLabel || d.resourceLabel || d.name,
+              title: d.resourceLabel || d.name
+            };
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
               titlePlural: d.homePageLabel || d.resourceLabel || d.name,
               titleSingular: d.resourceLabel || d.name
             };
@@ -1684,7 +1688,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
       }
 
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-      return { permissions, resources: routesAndTitle };
+      return { permissions, resources };
     } catch (e) {
       console.log(e);
     }

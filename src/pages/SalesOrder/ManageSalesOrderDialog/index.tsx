@@ -185,7 +185,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
               <CustomDialogHeader
                 title={
                   !salesOrderId
-                    ? `Create ${resources.salesOrder.titleSingular}`
+                    ? `Create ${resources?.salesOrder?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.salesOrderNo}`}`
                 }
                 onClose={() => {

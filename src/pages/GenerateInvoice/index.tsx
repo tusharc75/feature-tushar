@@ -89,7 +89,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'salesOrder',
       progressiveBilling: false,
       path: routes.salesOrderDetail.path,
-      title: resources.salesOrder.titleSingular
+      title: resources?.salesOrder?.titleSingular
     }
   ];
 
