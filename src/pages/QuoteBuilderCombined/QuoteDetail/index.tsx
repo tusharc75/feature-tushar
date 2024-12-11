@@ -114,7 +114,7 @@ export default function QuoteDetail() {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom: '' });
   const [quoteData, setQuoteData] = useState(null);
@@ -793,6 +793,7 @@ export default function QuoteDetail() {
                   permissions={permissions}
                   isAddProjectSale={true}
                   isAllowedToEdit={allowedToEdit}
+                  resources={resources}
                 />
               </div>
             )}

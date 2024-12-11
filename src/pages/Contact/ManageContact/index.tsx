@@ -34,7 +34,7 @@ export default function ManageContactDialog({
 }) {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [contactData, setContactData] = useState<any>({
     fields: [],
@@ -199,8 +199,8 @@ export default function ManageContactDialog({
                     ? `Clone - ${cloneHeading}`
                     : isNew
                       ? contactResource === 'customerContact'
-                        ? `Add ${routes?.customerContact?.title}`
-                        : `Add ${routes?.supplierContact?.title}`
+                        ? `Add ${resources?.customerContact?.titleSingular}`
+                        : `Add ${resources?.supplierContact?.titleSingular}`
                       : `Edit ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
                 }
                 isMinimized={!fullScreen}

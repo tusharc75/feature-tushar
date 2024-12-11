@@ -292,7 +292,7 @@ function App() {
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user },
+    state: { user, resources },
     dispatch
   }: any = useData();
 
@@ -514,28 +514,28 @@ function App() {
               <CreateContact />
           </PrivateRoute> */}
             <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
-              <Account account={customerAccount} accountBreadcrumb={routes.customerAccount} />
+              <Account account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
-              <AccountDetailPage account={customerAccount} contact={customerContact} accountBreadcrumb={routes.customerAccount} />
+              <AccountDetailPage account={customerAccount} contact={customerContact} accountBreadcrumb={{...routes.customerAccount, title: resources?.customerAccount?.titlePlural }} />
             </PrivateRoute>
             <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
-              <Contact contact={customerContact} account={customerAccount} contactBreadcrumb={routes.customerContact} />
+              <Contact contact={customerContact} account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
-              <ContactDetailPage account={customerAccount} contact={customerContact} contactBreadcrumb={routes.customerContact} />
+              <ContactDetailPage account={customerAccount} contact={customerContact} contactBreadcrumb={{...routes.customerContact, title: resources?.customerContact?.titlePlural }} />
             </PrivateRoute>
             <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
-              <Account account={supplierAccount} accountBreadcrumb={routes.supplierAccount} />
+              <Account account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
-              <AccountDetailPage account={supplierAccount} contact={supplierContact} accountBreadcrumb={routes.supplierAccount} />
+              <AccountDetailPage account={supplierAccount} contact={supplierContact} accountBreadcrumb={{...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }} />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
-              <Contact contact={supplierContact} account={supplierAccount} contactBreadcrumb={routes.supplierContact} />
+              <Contact contact={supplierContact} account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
-              <ContactDetailPage account={supplierAccount} contact={supplierContact} contactBreadcrumb={routes.supplierContact} />
+              <ContactDetailPage account={supplierAccount} contact={supplierContact} contactBreadcrumb={{...routes.supplierContact, title: resources?.supplierContact?.titlePlural }} />
             </PrivateRoute>
             <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
               <ProjectSales />

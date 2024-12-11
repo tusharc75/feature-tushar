@@ -41,7 +41,7 @@ const formats = {
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const FILTERS = [
@@ -84,7 +84,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.customerAccount?.isRead
       ? [
           {
-            label: routes.customerAccount.title,
+            label: resources?.customerAccount?.titlePlural,
             value: 'Customer Account',
             key: 'customerAccount'
           }
@@ -852,7 +852,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} />
+                    <RenderTable data={d.items} resources={resources}/>
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -866,7 +866,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data }) => {
+const RenderTable = ({ data, resources }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -875,7 +875,7 @@ const RenderTable = ({ data }) => {
             <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
             <TableCell>{routes.warehouse.title}</TableCell>
-            <TableCell>{routes.customerAccount.title}</TableCell>
+            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
             {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>

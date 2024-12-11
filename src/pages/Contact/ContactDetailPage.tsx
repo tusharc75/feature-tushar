@@ -56,7 +56,7 @@ const ContactDetailsPage = (props) => {
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity, tour },
+    state: { user, permissions, selectedEntity, tour, resources },
     dispatch
   }: any = useData();
 
@@ -677,6 +677,7 @@ const ContactDetailsPage = (props) => {
                 accountId={contactData?.accountName?.optionValue}
                 accountName={contactData?.accountName?.optionLabel}
                 resource={accountResource}
+                resources={resources}
               />
             </Box>
           )}

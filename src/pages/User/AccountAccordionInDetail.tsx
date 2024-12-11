@@ -35,7 +35,7 @@ import DisplayData from 'src/components/CardDisplayData';
 
 export default function AccountAccordionDetail({ accounts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -89,7 +89,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? routes.customerAccount.title : routes.supplierAccount.title} ({accounts?.length ?? 0})
+                    {type === 'customer' ? resources?.customerAccount?.titlePlural : resources?.supplierAccount?.titlePlural} ({accounts?.length ?? 0})
                   </Typography>
                 </Box>
               </Box>

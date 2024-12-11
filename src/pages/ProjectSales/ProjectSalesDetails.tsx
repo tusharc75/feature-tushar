@@ -34,7 +34,7 @@ const ProjectSalesDetails = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [copyOfProjectSalesData, setCopyOfProjectSalesData] = useState(null);
@@ -55,7 +55,7 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.projectSales, title: resources?.projectSales?.titleSingular}]);
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [resourceData, setResourceData] = useState(null);
@@ -126,7 +126,7 @@ const ProjectSalesDetails = () => {
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
-      setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
+      setCustomizedRoutes([{...routes.projectSales, title: resources?.projectSales?.titleSingular}, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
@@ -347,7 +347,7 @@ const ProjectSalesDetails = () => {
               <CustomTab value={0}>Header</CustomTab>
               <CustomTab value={1}>OM-Neurons</CustomTab>
               <CustomTab value={2}>Project Team</CustomTab>
-              <CustomTab value={3}>{routes.customerAccount.title}</CustomTab>
+              <CustomTab value={3}>{resources?.customerAccount?.titlePlural}</CustomTab>
               {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
@@ -433,6 +433,7 @@ const ProjectSalesDetails = () => {
                   fetchProjectData={getSalesData}
                   projectId={id}
                   users={teamUsers}
+                  resources={resources}
                 />
               </Box>
             </TabPanel>

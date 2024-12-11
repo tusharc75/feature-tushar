@@ -147,7 +147,7 @@ export default function Contact(props) {
     }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };

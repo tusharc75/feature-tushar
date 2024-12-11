@@ -32,7 +32,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 
 export default function ContactAccordionInDetailPage({ contacts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -86,7 +86,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? routes.customerContact.title : routes.supplierContact.title} ({contacts?.length ?? 0})
+                    {type === 'customer' ? resources?.customerContact?.titlePlural : resources?.supplierContact?.titlePlural} ({contacts?.length ?? 0})
                   </Typography>
                 </Box>
               </Box>
