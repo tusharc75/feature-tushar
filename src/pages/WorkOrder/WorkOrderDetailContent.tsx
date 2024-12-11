@@ -548,9 +548,11 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
-        </Box>
+        {renderedFrom === routes.workOrder.title && (
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
+          </Box>
+        )}
         <Box className="controls-v1 ml-auto">
           <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
