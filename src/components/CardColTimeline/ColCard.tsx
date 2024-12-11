@@ -46,7 +46,20 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
             return (
               <div className={`${styles.cardTitle}`}>
                 <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight }} title={data[item.accessor] || '--'}>
-                  {data[item.accessor] || '--'}
+                  <span>{data[item.accessor] || '--'}</span>
+                  {item?.link && (
+                    <span style={{ marginLeft: '10px' }}>
+                      <Link
+                        className={`${styles.cardDetailsLink} min-w-0 `}
+                        onClick={(e) => e.stopPropagation()}
+                        target={item.target || '_blank'}
+                        to={() => item.link(data)}
+                        title={''}
+                      >
+                        <FiExternalLink size={16} />
+                      </Link>
+                    </span>
+                  )}
                 </h5>
               </div>
             );

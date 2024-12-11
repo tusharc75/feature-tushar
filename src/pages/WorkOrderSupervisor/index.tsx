@@ -142,7 +142,13 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
-      { accessor: 'workOrderNumber', title: 'Work Order', type: 'title' },
+      {
+        accessor: 'workOrderNumber',
+        title: 'Work Order',
+        type: 'title',
+        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
       {
         accessor: 'serviceName',
         title: routes.serviceMaster.title,
