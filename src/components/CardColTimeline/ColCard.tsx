@@ -2,6 +2,7 @@ import { Box, Typography } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
+import { FaCheckCircle } from 'react-icons/fa';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
@@ -13,23 +14,38 @@ import styles from './index.module.scss';
 type IColCard = {
   data: any[];
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
+  cardOnSelect?: (data: any) => void | null;
   passFailStatus?: boolean;
   passFailAccessor?: string;
   rowDef: datarowInterface[];
+  selectedRecords?: any[];
 };
 
-const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
+const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, passFailStatus, passFailAccessor, selectedRecords }) => {
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
+  const isSelected = selectedRecords?.map((r) => r?._id)?.includes(data['_id']);
   let paddingRight = 0;
+  let marginLeft = 0;
   if (passFailStatus) paddingRight += 29;
   if (Boolean(tooltip)) paddingRight += 29;
+  if (isSelected) marginLeft += 25;
 
   return (
-    <Box className={styles.singleCard}>
+    <Box className={styles.singleCard} style={{ backgroundColor: isSelected ? '#d5d2f7' : '' }}>
+      {isSelected && (
+        <Box className={`${styles.checkBox}`}>
+          <FaCheckCircle size={18} color="green" />
+        </Box>
+      )}
       <div
-        onClick={(e) => {
+        onDoubleClick={(e) => {
           if (cardOnClick) {
             cardOnClick(e, data);
+          }
+        }}
+        onClick={(e) => {
+          if (cardOnSelect) {
+            cardOnSelect(data);
           }
         }}
         style={{ cursor: cardOnClick ? 'pointer' : 'default' }}
@@ -45,7 +61,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
               );
             return (
               <div className={`${styles.cardTitle}`}>
-                <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight }} title={data[item.accessor] || '--'}>
+                <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight, marginLeft }} title={data[item.accessor] || '--'}>
                   <span>{data[item.accessor] || '--'}</span>
                   {item?.link && (
                     <span style={{ marginLeft: '10px' }}>

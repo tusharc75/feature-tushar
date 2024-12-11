@@ -299,6 +299,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
           onClick={() => {
             setAssignTechnicianDialog(true);
           }}
@@ -307,6 +308,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         </MenuItem>
         {permissions?.workStations?.isRead && (
           <MenuItem
+            disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
