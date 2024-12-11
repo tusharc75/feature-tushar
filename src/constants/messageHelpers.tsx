@@ -158,3 +158,7 @@ export const subcontractAssemblyMessage = {
   loadingAlreadyDelivered: 'Loading Ticket is already delivered',
   assemblyProductAlreadyReceived: 'Assembly product already received'
 };
+
+export const repairJobMessage = {
+  repairProcess: 'Please enter the price to proceed on the next step'
+};
