@@ -52,12 +52,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
     }
   }, []);
 
-  console.log(deepFilters?.find((d) => d?.field === `from_${fieldData?.fieldName}`)?.term);
-
   return (
     <>
-      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
-        <p>{fieldData?.fieldLabel}</p>
+      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
+        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
       </div>
       <div className="mt-5 w-1/2">
         <div>
