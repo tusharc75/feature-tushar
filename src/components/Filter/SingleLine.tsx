@@ -109,6 +109,7 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
               <FormControlLabel
                 control={
                   <Checkbox
+                    size={'small'}
                     name={o}
                     checked={(deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term || [])?.includes(o)}
                     onChange={(e) => {
@@ -124,10 +125,10 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
                         setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                       }
                     }}
-                    color="primary"
+                    className="!text-[--new-theme-color] dark:!text-gray-200"
                   />
                 }
-                label={o}
+                label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o}</span>}
               />
             </div>
           );

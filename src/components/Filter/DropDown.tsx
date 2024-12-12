@@ -108,6 +108,7 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
                     control={
                       <Checkbox
                         name={o}
+                        size="small"
                         checked={(filterByIds?.find((d) => d?.field === fieldData?.fieldName)?.term || [])
                           ?.map((t) => t?.optionValue)
                           ?.includes(o?.optionValue)}
@@ -124,10 +125,12 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
                             setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                           }
                         }}
-                        color="primary"
+                        className="!text-[--new-theme-color] dark:!text-gray-200"
                       />
                     }
-                    label={o?.optionLabel || ''}
+                    label={
+                      <span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o?.optionLabel || ''}</span>
+                    }
                   />
                 </div>
               );
@@ -143,6 +146,7 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
                   <FormControlLabel
                     control={
                       <Checkbox
+                        size="small"
                         name={o?.optionLabel || ''}
                         checked={
                           multiple
@@ -175,10 +179,12 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
                             }
                           }
                         }}
-                        color="primary"
+                        className="!text-[--new-theme-color] dark:!text-gray-200"
                       />
                     }
-                    label={o?.optionLabel || ''}
+                    label={
+                      <span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o?.optionLabel || ''}</span>
+                    }
                   />
                 </div>
               );
