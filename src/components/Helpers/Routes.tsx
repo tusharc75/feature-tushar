@@ -4,95 +4,53 @@ const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.ge
 
 const routes = {
   customerAccount: {
-    title:
-      storedRoutes && storedRoutes.customerAccount && storedRoutes.customerAccount.title
-        ? storedRoutes.customerAccount?.title
-        : RESOURCE_LABEL.customerAccount,
     path: '/customer-account'
   },
   customerAccountDetail: {
-    title:
-      storedRoutes && storedRoutes.customerAccount && storedRoutes.customerAccount.title
-        ? storedRoutes.customerAccount?.title
-        : RESOURCE_LABEL.customerAccount,
     path: '/customer-account/detail'
   },
   supplierAccount: {
-    title:
-      storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
-        ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.account,
     path: '/supplier-account'
   },
   supplierAccountDetail: {
-    title:
-      storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
-        ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.account,
     path: '/supplier-account/detail'
   },
   customerContact: {
-    title:
-      storedRoutes && storedRoutes.customerContact && storedRoutes.customerContact.title
-        ? storedRoutes.customerContact?.title
-        : RESOURCE_LABEL.customerContact,
     path: '/customer-contact'
   },
   customerContactDetail: {
-    title:
-      storedRoutes && storedRoutes.customerContact && storedRoutes.customerContact.title
-        ? storedRoutes.customerContact?.title
-        : RESOURCE_LABEL.customerContact,
     path: '/customer-contact/detail'
   },
   supplierContact: {
-    title:
-      storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
-        ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.contact,
     path: '/supplier-contact'
   },
   supplierContactDetail: {
-    title:
-      storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
-        ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.contact,
     path: '/supplier-contact/detail'
   },
   lead: {
-    title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead',
     data: {}
   },
   resourceLogs: {
-    title:
-      storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
     path: '/resource-logs',
     data: {}
   },
   leadDetail: {
-    title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead/detail',
     data: {}
   },
   opportunity: {
-    title: storedRoutes && storedRoutes.opportunity && storedRoutes.opportunity.title ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: '/opportunity',
     data: {}
   },
   opportunityDetail: {
-    title: storedRoutes && storedRoutes.opportunity && storedRoutes.opportunity.title ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: '/opportunity/detail',
     data: {}
   },
   projectSales: {
-    title:
-      storedRoutes && storedRoutes.projectSales && storedRoutes.projectSales.title ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectSales,
     path: '/project-sales'
   },
   projectSalesDetail: {
-    title:
-      storedRoutes && storedRoutes.projectSales && storedRoutes.projectSales.title ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectSales,
     path: '/project-sales/detail'
   },
   user: {

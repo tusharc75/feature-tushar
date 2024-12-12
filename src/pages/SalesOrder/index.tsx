@@ -88,7 +88,7 @@ const SalesOrder = () => {
     let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };

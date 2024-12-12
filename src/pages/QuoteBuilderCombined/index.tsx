@@ -152,7 +152,7 @@ const QuoteBuilders = () => {
     ];
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      columns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...columns, ActionsRenderer]);
   };

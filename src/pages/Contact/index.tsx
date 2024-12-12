@@ -54,7 +54,7 @@ export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity, permissions, resources },
     dispatch: entityDispatch
   }: any = useData();
   const {
@@ -147,7 +147,7 @@ export default function Contact(props) {
     }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };
@@ -445,7 +445,7 @@ export default function Contact(props) {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources[contactResource]?.titlePlural }]} />
         <ImportExportLinks
           permissions={contactPermissions}
           module="contact(s)"

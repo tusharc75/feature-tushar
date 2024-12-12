@@ -46,7 +46,7 @@ export default function ManageAccount(props) {
   } = props;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
@@ -153,8 +153,8 @@ export default function ManageAccount(props) {
                         ? `Clone - ${accountNameForClone}`
                         : isNew
                           ? accountResource === 'customerAccount'
-                            ? `Add ${routes?.customerAccount?.title}`
-                            : `Add ${routes?.supplierAccount?.title}`
+                            ? `Add ${resources?.customerAccount?.titleSingular}`
+                            : `Add ${resources?.supplierAccount?.titleSingular}`
                           : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
                     }
                   />

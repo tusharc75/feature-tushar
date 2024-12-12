@@ -14,7 +14,7 @@ const ResourceLogs = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [option, setOption] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
@@ -80,7 +80,7 @@ const ResourceLogs = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.resourceLogs]} />
+        <CustomBreadCrumbs routes={[{...routes.resourceLogs, title: resources?.resourceLogs?.titlePlural}]} />
       </div>
       <CustomContainer>
         <div className="header-panel">

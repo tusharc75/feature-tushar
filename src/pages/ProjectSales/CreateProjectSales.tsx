@@ -43,7 +43,7 @@ const CreateProjectSales = ({
   const {
     state: {
       user: { user },
-      permissions
+      resources
     }
   } = useData();
   const toastConfig = useContext(CustomToastContext);
@@ -230,8 +230,7 @@ const CreateProjectSales = ({
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
-                  }`}
+                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${resources?.projectSales?.titleSingular}`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

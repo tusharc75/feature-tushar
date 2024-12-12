@@ -99,7 +99,7 @@ export default function AccountDetailPage(props) {
   } = props;
 
   const {
-    state: { user, permissions, selectedEntity, tour },
+    state: { user, permissions, selectedEntity, tour, resources },
     dispatch
   }: any = useData();
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
@@ -761,6 +761,7 @@ export default function AccountDetailPage(props) {
                         accountId={accountData._id}
                         accountName={accountData.accountName}
                         resource={accountResource}
+                        resources={resources}
                       />
                     </Box>
                   )}

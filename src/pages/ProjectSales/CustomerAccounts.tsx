@@ -116,7 +116,8 @@ const CustomerAccounts = (props) => {
     currency = null,
     marketSegmentId = null,
     subMarketSegmentId = null,
-    estimatedAmount = null
+    estimatedAmount = null,
+    resources
   } = props;
 
   const classes = useStyles();
@@ -451,7 +452,7 @@ const CustomerAccounts = (props) => {
               })}
             ></Box>
             <Typography variant="subtitle1" className={classes.cusName}>
-              {routes.customerAccount.title}
+              {resources?.customerAccount?.titlePlural}
             </Typography>
             {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
               <>
@@ -548,7 +549,7 @@ const CustomerAccounts = (props) => {
                                   </IconButton>
                                   <Box>
                                     <Typography variant="subtitle2">
-                                      {routes.customerContact.title} ({customerContacts.filter((ca) => ca.accountName === c._id).length})
+                                      {resources?.customerContact?.titlePlural} ({customerContacts.filter((ca) => ca.accountName === c._id).length})
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -678,7 +679,7 @@ const CustomerAccounts = (props) => {
                 </>
               </Box>
             ) : (
-              <Typography>{`No ${routes.customerAccount.title}`}</Typography>
+              <Typography>{`No ${resources?.customerAccount?.titlePlural}`}</Typography>
             )}
           </AccordionDetails>
         </div>
