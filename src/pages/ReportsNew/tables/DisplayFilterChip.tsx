@@ -83,7 +83,7 @@ const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDee
   );
 
   return (
-    <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-200px)]">
+    <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-100px)]">
       {filters.otherData?.map((d) => {
         if (typeof d.term === 'string') {
           return <RenderSringType data={d as Dates} handleClearFilter={handleClearFilter} />;
