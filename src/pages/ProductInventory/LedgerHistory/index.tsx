@@ -147,7 +147,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                   <Link
                     className="link"
                     title={row?.original?.storageLocation}
-                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                    to={`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`}
                   >
                     {row?.original?.storageLocation}
                   </Link>

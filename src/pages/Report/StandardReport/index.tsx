@@ -53,7 +53,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { selectedEntity, permissions }
+    state: { selectedEntity, permissions, resources }
   } = useData();
   const { type } = useParams();
   const history = useHistory();
@@ -934,7 +934,7 @@ const Report = () => {
                   subResource={type}
                   referenceId={null}
                   permissions={permissions?.report}
-                  module={routes.productionOrder.title}
+                  module={resources?.productionOrder?.titleSingular}
                   api={`/report/${type}`}
                   afterImportCompleted={() => {}}
                   isExportCount={true}

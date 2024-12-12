@@ -98,7 +98,7 @@ const FieldServiceTechnician = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [colData, setColData] = useState(null);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -135,7 +135,7 @@ const FieldServiceTechnician = () => {
       }
     }
     setColData(data);
-    const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    const newColumns = [...generateColumns(renderedFrom, data, routes?.fieldServiceOrderDetail?.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
     setColumns(newColumns);
   };
@@ -144,7 +144,7 @@ const FieldServiceTechnician = () => {
     (fieldServiceOrderId, status) => {
       if (isOfflineRef.current) return;
       axiosInstance()
-        .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
+        .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
         .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -300,7 +300,7 @@ const FieldServiceTechnician = () => {
     return (
       <>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${routes.fieldServiceOrder.title} Offline`}
+          {`Add ${resources?.fieldServiceOrder?.titleSingular} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}

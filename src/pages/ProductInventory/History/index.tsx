@@ -392,7 +392,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                    window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

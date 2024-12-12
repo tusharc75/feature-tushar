@@ -75,7 +75,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serviceMaster?.isRead
       ? [
           {
-            label: routes.serviceMaster.title,
+            label: resources?.serviceMaster?.titleSingular,
             value: 'Service Master',
             key: 'service'
           }
@@ -892,11 +892,11 @@ const RenderTable = ({ data, resources }) => {
                     } else if (row?.resource === sidebarResource.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.demandOrder) {
                       window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairJob) {
                       window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.salesOrder) {

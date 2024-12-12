@@ -210,7 +210,7 @@ const IrtTicketView = ({ salesOrderData }) => {
     } else if (element?.data?.ref_type === 'demandOrder') {
       window.open(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'productionOrder') {
-      window.open(`${routes.productionOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes?.productionOrderDetail?.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'purchaseRequisition') {
       window.open(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
     }

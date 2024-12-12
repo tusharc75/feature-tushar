@@ -16,7 +16,7 @@ const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 
 const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -305,7 +305,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'}>
           <PreviewDownload
-            fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
+            fileName={`${resources?.productionOrder?.titleSingular}-${productionOrderData?.productionOrderNumber}`}
             resource={sidebarResource.productionOrder}
             referenceId={productionOrderData._id}
             referenceLabel={productionOrderData?.productionOrderNumber}

@@ -30,7 +30,7 @@ const AssignServiceDialog = ({
   pricingCondition = null,
   currency = null
 }) => {
-  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -38,7 +38,7 @@ const AssignServiceDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions, selectedEntity, user, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -275,7 +275,7 @@ const AssignServiceDialog = ({
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${routes.serviceMaster.title}`}
+        title={`Assign ${resources?.serviceMaster?.titleSingular}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

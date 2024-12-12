@@ -46,7 +46,7 @@ const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -804,7 +804,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           subResource={`material`}
           referenceId={productionOrderData._id}
           permissions={permissions?.productionOrder}
-          module={routes.productionOrder.title}
+          module={resources?.productionOrder?.titleSingular}
           api={`${productionOrder.api}/material/${productionOrderData._id}`}
           afterImportCompleted={() => {
             fetchData();

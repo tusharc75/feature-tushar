@@ -350,10 +350,10 @@ const QuotationDetails = () => {
           window.open(`${routes.salesOrderDetail.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          window.open(`${routes.repairOrderDetail.path}/${data?._id}`);
+          window.open(`${routes?.repairOrderDetail?.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+          window.open(`${routes?.fieldServiceOrderDetail?.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
           window.open(`${routes.assemblyOrderDetail.path}/${data?._id}`);

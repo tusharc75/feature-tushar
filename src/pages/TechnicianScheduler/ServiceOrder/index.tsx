@@ -123,7 +123,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                    window.open(`${routes?.fieldServiceOrderDetail?.path}/${row.original.fieldServiceOrderId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

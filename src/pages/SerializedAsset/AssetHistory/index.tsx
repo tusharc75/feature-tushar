@@ -33,8 +33,8 @@ const ASSET_HISTORY_RESOURCE = [
   },
   {
     key: INVENTORY_HISTORY_TYPE.repair,
-    resource: sidebarResource.repairOrder,
-    title: routes.repairOrder.title,
+    resource: sidebarResource?.repairOrder,
+    title: sidebarResource?.repairOrder,
   },
   {
     key: INVENTORY_HISTORY_TYPE.workOrder,
@@ -189,7 +189,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               <Link
                 className="link"
                 title={row.original.reference}
-                to={`${routes.repairOrderDetail.path}/${row.original.referenceId}`}
+                to={`${routes?.repairOrderDetail.path}/${row.original.referenceId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

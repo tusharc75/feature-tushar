@@ -23,7 +23,7 @@ const CardView = (props, ref) => {
   const { workOrder, uniqueId } = parsed;
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const { state, dispatch } = useCardReducer();
@@ -52,9 +52,9 @@ const CardView = (props, ref) => {
     return [
       { accessor: 'serviceName', type: 'title' },
       { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-      { accessor: 'productionOrderNumber', title: routes.productionOrder.title, type: 'text' },
+      { accessor: 'productionOrderNumber', title: resources?.productionOrder?.titleSingular, type: 'text' },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
-      { accessor: 'repairOrderNumber', title: routes.repairOrder.title, type: 'text' },
+      { accessor: 'repairOrderNumber', title: resources?.repairOrder?.titleSingular, type: 'text' },
       { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {

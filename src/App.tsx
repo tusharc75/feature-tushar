@@ -882,22 +882,22 @@ function App() {
             <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
               <ServiceMasterDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrder.path}>
+            <PrivateRoute exact path={routes?.repairOrder?.path}>
               <RepairOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.repairOrderDetail?.path}/:id`}>
               <RepairOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productionOrder.path}>
+            <PrivateRoute exact path={routes?.productionOrder?.path}>
               <ProductionOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.productionOrderDetail?.path}/:id`}>
               <ProductionOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.fieldServiceOrder.path}>
+            <PrivateRoute exact path={routes?.fieldServiceOrder?.path}>
               <FieldServiceOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldServiceOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
               <FieldServiceOrderDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
@@ -1017,7 +1017,7 @@ function App() {
             <PrivateRoute exact path={`${routes.storageLocation.path}`}>
               <StorageLocation />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.storageLocationDetail?.path}/:id`}>
               <StorageLocationDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transactionLock.path}`}>
@@ -1140,7 +1140,7 @@ function App() {
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrderInvoice.path}>
+            <PrivateRoute exact path={routes?.repairOrderInvoice?.path}>
               <GenerateInvoice resourceRendered="repairOrder" />
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementInvoice.path}>

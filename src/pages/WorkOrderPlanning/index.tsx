@@ -236,7 +236,7 @@ const WorkOrderPlanning = () => {
             setOpenRepairOrderDialog(true);
           }}
         >
-          {`Create ${routes.repairOrder.title}`}
+          {`Create ${resources?.repairOrder?.titleSingular}`}
         </MenuItem>
       </>
     );
