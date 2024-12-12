@@ -12,12 +12,12 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
 
-let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
+let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_version`;
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const [tabValue, setTabValue] = useState(0);

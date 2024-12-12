@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -144,9 +144,9 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
                     ? `Clone - ${cloneHeading}`
                     : inventoryCycleId
                     ? !isUpdateDisabled
-                      ? 'Update ' + routes.inventoryCycle.title
+                      ? 'Update ' + resources?.inventoryCycle?.titleSingular
                       : values['name']
-                    : 'Create ' + routes.inventoryCycle.title
+                    : 'Create ' + resources?.inventoryCycle?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

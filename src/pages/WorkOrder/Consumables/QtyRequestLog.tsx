@@ -104,7 +104,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
               return row?.original['storageLocation'] ? (
                 <a
                   className="link text-truncate"
-                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                  href={`${routes?.storageLocationDetail?.path}/${row?.original['storageLocationId']}`}
                   target="_blank"
                 >
                   {row?.original['storageLocation']}

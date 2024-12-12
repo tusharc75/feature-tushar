@@ -1,5 +1,7 @@
 import routes from 'src/components/Helpers/Routes';
+
 import { sidebarResource } from 'src/constants/helpers';
+
 
 export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
 
@@ -43,8 +45,8 @@ export const rentalManagementMessage = {
   addServicePackage: 'Add Services or Packages to proceed',
   validPrice: 'Enter Price to proceed',
   validServicePrice: 'Enter Service Price to proceed',
-  acceptRejectQuotation: `Accept/Reject ${routes.quotation.title} to proceed`,
-  processQuotation: `Process ${routes.quotation.title} to proceed`,
+  acceptRejectQuotation: `Accept/Reject ${sidebarResource?.quotation}} to proceed`,
+  processQuotation: `Process ${sidebarResource?.quotation} to proceed`,
   addProductInPackage: 'Add Product in package to proceed',
   addServiceInPackage: 'Add Service in package to proceed',
   assignAssets: 'Assign Assets to proceed',

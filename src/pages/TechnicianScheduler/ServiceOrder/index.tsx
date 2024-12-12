@@ -113,17 +113,12 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       },
       ...(selectedType === 'fieldTicket'
         ? [
-            {
-              accessor: 'fieldServiceOrderNumber',
-              Header: 'Field Service Order',
-              width: 200,
-              Cell: ({ row }) => (
                 <div className="flex items-center gap-1">
                   <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                      window.open(`${routes?.fieldServiceOrderDetail?.path}/${row.original.fieldServiceOrderId}`);
                     }}
                   >
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

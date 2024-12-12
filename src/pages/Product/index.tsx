@@ -576,7 +576,7 @@ const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setSh
             setOpenAddDialog(true);
           }}
         >
-          {`Assign ${routes?.repairType?.title} (${selectedRecords.length})`}
+          {`Assign ${sidebarResource?.repairType} (${selectedRecords.length})`}
         </MenuItem>
       )}
     </>

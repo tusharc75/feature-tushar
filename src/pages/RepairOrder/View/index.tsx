@@ -12,7 +12,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 
 const customNodeStyles = {
   repairOrder: {
-    name: routes.repairOrder.title,
+    name: sidebarResource?.repairOrder,
     ...COLOUR_MASTER.purchaseOrder
   },
   productAssets: {
@@ -20,7 +20,7 @@ const customNodeStyles = {
     ...COLOUR_MASTER.assets
   },
   workOrder: {
-    name: routes.workOrder.title,
+    name: sidebarResource?.workOrder,
     ...COLOUR_MASTER.service
   },
   loadingTicket: {
@@ -28,7 +28,7 @@ const customNodeStyles = {
     ...COLOUR_MASTER.loadingTicket
   },
   repairOrderClosed: {
-    name: `${routes.repairOrder.title} Closed`,
+    name: `${sidebarResource?.repairOrder} Closed`,
     ...COLOUR_MASTER.closedRepairJob
   },
 };
@@ -73,7 +73,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: repairOrderId,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="body2">{routes.repairOrder.title}</Typography>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
                 <Typography  variant="subtitle2">
                   {repairOrderNumber}
                 </Typography>
@@ -205,7 +205,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: repairOrderId,
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="body2">{routes.repairOrder.title}</Typography>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
                 <Typography variant="subtitle2">
                   {repairOrderNumber}
                 </Typography>
@@ -251,7 +251,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'workorder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
         window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);

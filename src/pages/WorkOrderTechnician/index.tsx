@@ -18,29 +18,29 @@ const FIELD_TO_FILTER = [
   {
     key: 'serviceMaster',
     fieldName: 'service',
-    fieldLabel: routes.serviceMaster.title,
+    fieldLabel: sidebarResource.serviceMaster,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
     key: 'workOrder',
     fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
   {
     key: 'repairOrder',
     fieldName: 'repairOrder',
-    fieldLabel: routes.repairOrder.title,
-    resource: sidebarResource.repairOrder,
+    fieldLabel: sidebarResource?.repairOrder,
+    resource: sidebarResource?.repairOrder,
     type: 'dropDown'
   },
   {
     key: 'productionOrder',
     fieldName: 'productionOrder',
-    fieldLabel: routes.productionOrder.title,
-    resource: sidebarResource.productionOrder,
+    fieldLabel: sidebarResource?.productionOrder,
+    resource: sidebarResource?.productionOrder,
     type: 'dropDown'
   }
 ];

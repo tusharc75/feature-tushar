@@ -16,6 +16,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 import Parts from '../Parts';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles(() => ({
   mainDetail: {
@@ -96,6 +97,10 @@ const ProductDetails = () => {
   });
   const [hoverImage, setHoverImage] = useState('');
   const imageRef = useRef<HTMLImageElement>(null);
+
+  const {
+    state: { user,resources }
+  }:any = useData();
 
   useEffect(() => {
     if (id) {
@@ -221,7 +226,7 @@ const ProductDetails = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.pos, { title: productData?.productName }]} />
+        <CustomBreadCrumbs routes={[{...routes.pos,title:resources?.pos?.titlePlural}, { title: productData?.productName }]} />
       </Grid>
       <Grid container spacing={1} className="detail-container">
         <Grid item xs={12} sm={12} md={12} lg={12}>

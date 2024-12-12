@@ -70,8 +70,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       fieldName: 'repairOrderNumber',
       invoiceFieldName: 'repairOrder',
       progressiveBilling: false,
-      path: routes.repairOrderDetail.path,
-      title: routes.repairOrder.title
+      path: routes?.repairOrderDetail?.path,
+      title: resources?.repairOrder?.titleSingular
     },
     {
       key: 'fieldTicket',

@@ -13,17 +13,17 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cycleCountPhysicalInventory, prepareDataForGrid } from 'src/constants/helpers';
+import { cycleCountPhysicalInventory, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { gridLoadingTimeout } from '../../constants/helpers';
 import ManageCycleCountPInventory from './ManageCycleCountPInventory';
 import Products from './Products';
 import axios, { CancelTokenSource } from 'axios';
 
 const CycleCountPInventory = () => {
-  const renderedFrom = camelCase(`${routes.cycleCountPhysicalInventory.title}`);
+  const renderedFrom = camelCase(`${sidebarResource?.cycleCountPhysicalInventory}`);
   const [cycleCountPInventoryDialog, setCycleCountPInventoryDialog] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
@@ -132,7 +132,7 @@ const CycleCountPInventory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.cycleCountPhysicalInventory]} />
+        <CustomBreadCrumbs routes={[{...routes.cycleCountPhysicalInventory,title:resources?.cycleCountPhysicalInventory?.titleSingular}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

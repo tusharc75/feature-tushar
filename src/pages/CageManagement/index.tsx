@@ -7,7 +7,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cageManagement } from 'src/constants/helpers';
+import { cageManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import CustomContainer from '../../components/CustomContainer';
@@ -19,7 +19,7 @@ import ProductGridLayout from './Product';
 import QuantityDialog from './QuantityDialog';
 
 const CageManagement = () => {
-  const renderedFrom = camelCase(routes?.cageManagement.title);
+  const renderedFrom = camelCase(sidebarResource?.cageManagement);
 
   const toastConfig = useContext(CustomToastContext);
   const [searchVal, setSearchVal] = useState('');

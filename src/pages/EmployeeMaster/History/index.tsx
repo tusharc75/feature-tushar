@@ -14,6 +14,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
+
 const renderedFrom = `${camelCase(routes?.employeeMaster.title)}_History`;
 
 const History = ({ id }) => {
@@ -38,7 +39,7 @@ const History = ({ id }) => {
       key: 'workOrder',
       resource: sidebarResource.workOrder,
       path: routes.workOrderDetail.path,
-      title: routes.workOrder.title
+      title: resources?.workOrder?.titlePlural
     },
     {
       key: 'rentalManagement',

@@ -23,7 +23,7 @@ export default function QuotationInAccordion({
 }) {
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions, resources },
   }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -85,7 +85,7 @@ export default function QuotationInAccordion({
                 <IconButton size="small">{expandQuotation === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 <Box padding="5px">
                   <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    {routes.quotation.title} ({quotations?.length || 0})
+                    {resources?.quotation?.titleSingular} ({quotations?.length || 0})
                   </Typography>
                 </Box>
               </Box>
@@ -166,7 +166,7 @@ export default function QuotationInAccordion({
                   </Grid>
                 ) : (
                   <Typography variant="subtitle1" color="primary">
-                    {`No ${routes.quotation.title} To Show`}
+                    {`No ${resources?.quotation?.titleSingular} To Show`}
                   </Typography>
                 )}
               </>

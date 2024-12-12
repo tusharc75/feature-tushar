@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageStorageLocation from './ManageStorageLocation';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.storageLocation.title);
+const renderedFrom = camelCase(sidebarResource?.storageLocation);
 
 const StorageLocation = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const StorageLocation = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,7 +54,7 @@ const StorageLocation = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.storageLocation}`);
     data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.storageLocationDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes?.storageLocationDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -206,10 +206,10 @@ const StorageLocation = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.storageLocation]} />
+        <CustomBreadCrumbs routes={[{...routes.storageLocation,title:resources?.storageLocation?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.storageLocation}
-          module={routes.storageLocation.title}
+          module={resources?.storageLocation?.titleSingular}
           api={storageLocation.api}
           afterImportCompleted={() => {
             fetchData();
@@ -257,7 +257,7 @@ const StorageLocation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.storageLocation?.title} ${deleteRecord?.storageLocationName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.storageLocation?.titleSingular} ${deleteRecord?.storageLocationName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -30,7 +30,7 @@ const IrtTicket = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -274,7 +274,7 @@ const IrtTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productionOrder?.title} ${deleteRecord?.productionOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.productionOrder?.titleSingular} ${deleteRecord?.productionOrderNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

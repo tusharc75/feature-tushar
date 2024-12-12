@@ -181,7 +181,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
 
   const fetchWorkOrderData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${id}`)
+      .get(`${routes?.workOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
@@ -220,7 +220,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
 
   const fetchTotalConsumablesCost = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/total-consumables-cost/${id}`)
+      .get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`)
       .then(({ data: { data } }) => {
         setTotalConsumablesCost(data?.totalConsumablesCost);
       })
@@ -234,7 +234,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       .put(`${workOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.workOrder.path}`);
+        history.push(`${routes?.workOrder?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -244,7 +244,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    if (renderedFrom === routes.workOrder.title) {
+    if (renderedFrom === resources?.workOrder?.titleSingular) {
       history.push(`?tab=${newValue}`);
     }
     if (newValue === 0) {
@@ -514,7 +514,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       type: 'element',
       component: (
         <PreviewDownload
-          fileName={`${routes.workOrder.title}-${workOrderData?.workOrderNumber}`}
+          fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
           resource={sidebarResource.workOrder}
           referenceId={id}
           columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
@@ -548,9 +548,9 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        {renderedFrom === routes.workOrder.title && (
+        {renderedFrom === resources?.workOrder?.titleSingular && (
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
+            <CustomBreadCrumbs routes={[{...routes?.workOrder,title:resources?.workOrder?.titleSingular}, { title: workOrderData?.workOrderNumber }]} />
           </Box>
         )}
         <Box className="controls-v1 ml-auto">

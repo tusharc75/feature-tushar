@@ -24,7 +24,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -178,7 +178,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                     ? isClone
                       ? 'Clone'
                       : `Update ${storageLocationData?.storageLocationName}`
-                    : 'Create ' + routes.storageLocation.title
+                    : 'Create ' + resources?.storageLocation?.titleSingular
                 }
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
