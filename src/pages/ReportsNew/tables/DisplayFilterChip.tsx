@@ -34,18 +34,18 @@ type DisplayFilterChipProps = {
   fetchResourceData: (deepFilters?: Filter[], filterByIds?: Filter[]) => void;
 };
 
-const textClassName = 'text-[12px] font-medium leading-[14px] text-[--primary-text] line-clamp-1';
+const textClassName = 'text-[12px] font-medium leading-[14px] text-[--primary] line-clamp-1';
 const buttonStyle: React.CSSProperties = {
   borderRadius: 50,
-  color: 'var(--primary-text)',
   position: 'absolute',
   right: 5,
   top: '50%',
   transform: 'translateY(-50%)',
-  fontSize: 16
+  fontSize: 16,
+  color: 'var(--primary)'
 };
 const chipClassName =
-  'relative max-w-[200px] rounded-[6px] bg-[--new_theme_secondary_color] p-[5px_7px] pr-[26px] [border:1px_solid_var(--new-theme-secondary-border-color)] dark:bg-yellow-600';
+  'relative max-w-[200px] rounded-[6px] bg-[--new-theme-secondary-color] p-[5px_7px] pr-[26px] [border:1px_solid_var(--new-theme-secondary-border-color)]';
 
 const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDeepFilters, setFilterByIds }: DisplayFilterChipProps) => {
   const uniqueFilters = useMemo(() => uniqBy([...deepFilters, ...filterByIds], (d) => d.field), [deepFilters, filterByIds]);

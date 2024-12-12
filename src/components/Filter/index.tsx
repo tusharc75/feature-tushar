@@ -156,7 +156,7 @@ const Filter = ({
                     return (
                       <li
                         key={i}
-                        className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-200 data-[active=true]:bg-gray-200 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
+                        className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
                         data-active={selectedField?.fieldName === o?.fieldName}
                         onClick={() => {
                           setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
@@ -164,7 +164,9 @@ const Filter = ({
                       >
                         <img src={listFilter} alt={''} />
                         {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                        <span className="ml-1">{getLabel(o, deepFilters, filterByIds)}</span>
+                        <span className="block min-w-[14px]  rounded-[4px] bg-[--dark-secondary,#E3F3F2] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                          {getLabel(o, deepFilters, filterByIds)}
+                        </span>
                         <MdChevronRight className="ml-auto text-[--new-theme-color]" />
                       </li>
                     );
