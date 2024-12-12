@@ -27,7 +27,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
@@ -419,7 +419,7 @@ function App() {
       }
     }
     if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = routes?.pos?.path;
+      redirectToAnotherScreen = sidebarResource?.pos;
     }
 
     return !user ? (
@@ -828,10 +828,10 @@ function App() {
             <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
               <RepairTypeDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.pos.path}`}>
+            <PrivateRoute exact path={`${routes?.pos?.path}`}>
               <Pos />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
+            <PrivateRoute exact path={`${routes?.posProductDetail?.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>

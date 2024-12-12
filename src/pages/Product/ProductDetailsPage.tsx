@@ -49,7 +49,7 @@ const ProductDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const [headingLabel, setHeadingLabel] = useState('');
@@ -323,7 +323,7 @@ const ProductDetailsPage = () => {
                                     <Box display="flex" justifyContent="space-between">
                                       <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
                                       {user?.user?.brandPolicy?.storageLocation && (
-                                        <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
+                                        <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
                                       )}
                                       <Typography className="table-head-v1">Qty</Typography>
                                     </Box>

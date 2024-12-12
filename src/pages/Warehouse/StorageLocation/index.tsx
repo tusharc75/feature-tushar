@@ -16,7 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 
-const renderedFrom = camelCase(routes?.storageLocation.title);
+const renderedFrom = camelCase(sidebarResource?.storageLocation);
 
 const StorageLocation = ({ warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +25,7 @@ const StorageLocation = ({ warehouse }) => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -273,7 +273,7 @@ const StorageLocation = ({ warehouse }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.storageLocation?.title?.toLowerCase()} ${deleteRecord?.storageLocationName || ''} ?`}
+          message={`Are you sure you want to delete the ${resources?.storageLocation?.titleSingular?.toLowerCase()} ${deleteRecord?.storageLocationName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

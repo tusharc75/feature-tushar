@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -20,12 +20,12 @@ import ManageCycleCountDetermination from './ManageCycleCountDetermination';
 import axios, { CancelTokenSource } from 'axios';
 
 const CycleCountDetermination = () => {
-  const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
+  const renderedFrom = camelCase(`${sidebarResource?.cycleCountDetermination}`);
   const [warehouseOption, setWarehouseOption] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [open, setOpen] = useState(false);
@@ -161,7 +161,7 @@ const CycleCountDetermination = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.cycleCountDetermination]} />
+        <CustomBreadCrumbs routes={[{...routes.cycleCountDetermination,title:resources?.cycleCountDetermination?.titleSingular}]} />
         <ImportExportLinks
           permissions={permissions?.cycleCountDetermination}
           module="cycleCountDetermination"

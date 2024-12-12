@@ -1,7 +1,7 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
-import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
@@ -22,11 +22,11 @@ import { FiExternalLink } from 'react-icons/fi';
 import InfoIcon from '@material-ui/icons/Info';
 
 export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = '' }) {
-  const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
+  const renderedFrom = `${camelCase(sidebarResource?.quotation)}_versions`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -133,7 +133,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.quotation?.isCreate ? `Clone Version to ${routes.quotation.title}` : cloneDisable}>
+        <HtmlTooltip title={permissions?.quotation?.isCreate ? `Clone Version to ${resources?.quotation?.titleSingular}` : cloneDisable}>
           <span>
             <IconButton
               size="small"

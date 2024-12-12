@@ -121,8 +121,8 @@ function PlanningView() {
     {
       key: 'quotation',
       resource: sidebarResource.quotation,
-      title: routes.quotationDetail.title,
-      path: routes.quotationDetail.path,
+      title: resources?.quotation?.titleSingular,
+      path: routes?.quotationDetail.path,
       fieldName: 'quotationNumber',
       start: 'estimateStartDate',
       end: 'estimateEndDate'

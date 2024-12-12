@@ -36,7 +36,7 @@ const Quotation = ({
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -384,7 +384,7 @@ const Quotation = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,

@@ -530,27 +530,19 @@ const routes = {
     path: '/bulk-asset-creation/detail'
   },
   pos: {
-    title: storedRoutes && storedRoutes.pos && storedRoutes.pos.title ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: '/erecs'
   },
   posProductDetail: {
-    title: storedRoutes && storedRoutes.pos && storedRoutes.pos.title ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: '/erecs/product'
   },
   repairType: {
-    title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type'
   },
   repairTypeDetail: {
-    title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type/detail'
   },
 
   storageLocation: {
-    title:
-      storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title
-        ? storedRoutes.storageLocation?.title
-        : RESOURCE_LABEL.storageLocation,
     path: '/storage-location'
   },
   storageLocationDetail: {
@@ -562,74 +554,36 @@ const routes = {
   },
 
   cageManagement: {
-    title:
-      storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title
-        ? storedRoutes.cageManagement?.title
-        : RESOURCE_LABEL.cageManagement,
     path: '/cage-management'
   },
   productAuction: {
-    title:
-      storedRoutes && storedRoutes.productAuction && storedRoutes.productAuction.title
-        ? storedRoutes.productAuction?.title
-        : RESOURCE_LABEL.productAuction,
     path: '/product-auction'
   },
   productAuctionDetail: {
-    title:
-      storedRoutes && storedRoutes.productAuction && storedRoutes.productAuction.title
-        ? storedRoutes.productAuction?.title
-        : RESOURCE_LABEL.productAuction,
     path: '/product-auction/detail'
   },
   inventoryToAsset: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.inventoryToAsset,
     path: '/inventory-to-asset'
   },
   importExport: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.importExport,
     path: '/import-export'
   },
   inventoryCycle: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle'
   },
   inventoryCycleDetail: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle?.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
   },
   cycleCountDetermination: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountDetermination && storedRoutes?.cycleCountDetermination?.title
-        ? storedRoutes?.cycleCountDetermination?.title
-        : RESOURCE_LABEL.cycleCountDetermination,
     path: '/cycle-count-determination'
   },
   cycleCountPhysicalInventory: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountPhysicalInventory && storedRoutes?.cycleCountPhysicalInventory?.title
-        ? storedRoutes?.cycleCountPhysicalInventory?.title
-        : RESOURCE_LABEL.cycleCountPhysicalInventory,
     path: '/cycle-count-physical-inventory'
   },
   quotation: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation'
   },
   quotationDetail: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation/detail'
   },
   serviceMaster: {
