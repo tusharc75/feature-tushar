@@ -3,6 +3,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -13,7 +14,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handleClose, addMaterial }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}`;
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -21,6 +22,9 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+  const {
+    state: { resources }
+  }: any = useData();
 
   const defaultColumns = [
     {
@@ -173,7 +177,7 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
       fullWidth
     >
       <>
-        <CustomDialogHeader title={`Add ${routes.product.title}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
+        <CustomDialogHeader title={`Add ${resources?.product?.titlePlural}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <ListingPageHeader
             showSearchInMobile={true}

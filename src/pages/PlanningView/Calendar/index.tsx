@@ -57,7 +57,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.product?.isRead
       ? [
           {
-            label: routes.product.title,
+            label: resources?.product?.titlePlural,
             value: 'Product',
             key: 'product'
           }
@@ -111,7 +111,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const PRODUCT_FILTERS = [
     {
-      label: routes.product.title,
+      label: resources?.product?.titlePlural,
       value: 'Product',
       key: 'product'
     },

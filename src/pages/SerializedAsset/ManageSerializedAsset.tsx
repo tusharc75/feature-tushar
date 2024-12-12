@@ -61,7 +61,7 @@ const ManageSerializedAsset = ({
   const isStepDataSet = useRef(false);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -335,7 +335,7 @@ const ManageSerializedAsset = ({
                                         </Box>
                                         {permissions?.product?.isCreate && (
                                           <Box className="ml-1 mt-1">
-                                            <HtmlTooltip title={`Add ${routes.product.title}`}>
+                                            <HtmlTooltip title={`Add ${resources?.product?.titlePlural}`}>
                                               <IconButton
                                                 onClick={() => {
                                                   setProductOpen({ open: true, isClone: false });
@@ -399,7 +399,7 @@ const ManageSerializedAsset = ({
                                         </Box>
                                         {permissions?.productCategory?.isCreate && (
                                           <Box className="ml-1 mt-1">
-                                            <HtmlTooltip title={`Add ${routes?.productCategory?.title}`}>
+                                            <HtmlTooltip title={`Add ${resources?.productCategory?.titlePlural}`}>
                                               <IconButton
                                                 onClick={() => {
                                                   setOpen({ open: true, isClone: false });

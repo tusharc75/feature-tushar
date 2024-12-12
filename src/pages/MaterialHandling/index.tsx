@@ -15,55 +15,12 @@ import { FiExternalLink } from 'react-icons/fi';
 import axios, { CancelTokenSource } from 'axios';
 import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
 
-const FIELD_TO_FILTER = [
-  {
-    fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'warehouse',
-    fieldLabel: routes.warehouse.title,
-    resource: sidebarResource.warehouse,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'serializedAsset',
-    fieldLabel: routes.serializedAsset.title,
-    resource: sidebarResource.serializedAsset,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'productCategory',
-    fieldLabel: routes.productCategory.title,
-    resource: sidebarResource.productCategory,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'product',
-    fieldLabel: routes.product.title,
-    resource: sidebarResource.product,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'createDate',
-    fieldLabel: 'Create Date',
-    type: 'date'
-  }
-  // {
-  //   fieldName: 'requestDate',
-  //   fieldLabel: 'Request Date',
-  //   type: 'date'
-  // },
-];
-
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [filterQuery, setFilterQuery] = useState({
@@ -133,6 +90,49 @@ const MaterialHandling = () => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const FIELD_TO_FILTER = [
+    {
+      fieldName: '_id',
+      fieldLabel: routes.workOrder.title,
+      resource: sidebarResource.workOrder,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'warehouse',
+      fieldLabel: routes.warehouse.title,
+      resource: sidebarResource.warehouse,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'serializedAsset',
+      fieldLabel: routes.serializedAsset.title,
+      resource: sidebarResource.serializedAsset,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'productCategory',
+      fieldLabel: resources?.productCategory?.titlePlural,
+      resource: sidebarResource.productCategory,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'product',
+      fieldLabel: resources?.product?.titlePlural,
+      resource: sidebarResource.product,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'createDate',
+      fieldLabel: 'Create Date',
+      type: 'date'
+    }
+    // {
+    //   fieldName: 'requestDate',
+    //   fieldLabel: 'Request Date',
+    //   type: 'date'
+    // },
+  ];
 
   return (
     <Box className="main-container-v1">
