@@ -90,7 +90,7 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
         <p>{fieldData?.fieldLabel}</p>
         <div className="flex items-center justify-between">
           <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
@@ -102,7 +102,7 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
           />
         </div>
       </div>
-      <div className="mt-4">
+      <div>
         {options?.map((o, i) => {
           return (
             <div key={i} className="infinite-scroll">

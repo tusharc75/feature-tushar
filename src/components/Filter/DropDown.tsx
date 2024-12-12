@@ -84,7 +84,7 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
         <p>{fieldData?.fieldLabel}</p>
         {fieldData?.lookup && fieldData?.lookupResource && (
           <div className="flex items-center justify-between">
@@ -98,7 +98,7 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div>
         {fieldData?.lookup && fieldData?.lookupResource ? (
           <>
             {options?.map((o, i) => {
