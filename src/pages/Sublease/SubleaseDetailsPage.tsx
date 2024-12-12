@@ -58,7 +58,7 @@ const SubleaseDetailsPage = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [subleaseSteps, setSubleaseSteps] = useState([]);
@@ -227,7 +227,7 @@ const SubleaseDetailsPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          <CustomTab value={2}>{routes.deliveryTicket.title}</CustomTab>
+          <CustomTab value={2}>{resources?.deliveryTicket?.titleSingular}</CustomTab>
           <CustomTab value={3}>Invoices</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>

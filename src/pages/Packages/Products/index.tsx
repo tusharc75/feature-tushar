@@ -16,7 +16,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, sidebarResource, prepareDataForGrid } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_product`;
+  const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
 
   const { setToastConfig } = useContext(CustomToastContext);
 

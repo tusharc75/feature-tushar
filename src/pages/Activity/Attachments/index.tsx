@@ -53,7 +53,7 @@ export default function Attachment() {
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
@@ -643,12 +643,12 @@ export default function Attachment() {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.attachment?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.attachment}
-          module="Attachment"
+          module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}

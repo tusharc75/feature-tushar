@@ -35,7 +35,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     values: {}
   });
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -62,12 +62,12 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 let { name, _id, ...rest } = clonedData;
                 clonedData = { ...rest };
                 clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user) 
+                let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user);
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: tempObjKeysWithValues
                 });
-              }else {
+              } else {
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -166,8 +166,8 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                     isClone
                       ? 'Clone'
                       : budgetId
-                      ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
-                      : 'Create Budget'
+                        ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
+                        : `Create ${resources?.budget?.titleSingular}`
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -181,16 +181,16 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
+                    <InputField
                       errors={errors}
                       values={values}
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
-                        if(name === 'entity'){
+                        if (name === 'entity') {
                           if (initialData?.fields?.some((e) => e.fieldName === 'salesRep')) {
                             setFieldValue('salesRep', '');
                           }
-                       }
+                        }
                       }}
                       touched={touched}
                       fieldsData={initialData.fields}

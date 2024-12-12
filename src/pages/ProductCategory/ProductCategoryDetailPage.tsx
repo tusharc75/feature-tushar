@@ -23,7 +23,7 @@ const ProductCategoryDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -163,7 +163,7 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

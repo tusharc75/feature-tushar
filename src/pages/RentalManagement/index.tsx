@@ -39,20 +39,20 @@ import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHe
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
-  const renderedFrom = camelCase(routes?.rentalManagement.title);
+  const renderedFrom = camelCase(sidebarResource?.rentalManagement);
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.rentalManagement.title}`,
+      key: `My ${resources?.rentalManagement?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.rentalManagement.title}`,
+      key: `All ${resources?.rentalManagement?.titlePlural}`,
       value: 2
     }
   ];
@@ -109,7 +109,7 @@ const RentalManagement = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.rentalManagement}&entity=${selectedEntity}&view=true`);
       data = response?.data?.data;
-      setWalkmeData([createRentalJobsFlow(data)]);
+      setWalkmeData([createRentalJobsFlow(data, resources)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.rentalManagement, data);
       } catch (e) {
@@ -449,7 +449,7 @@ const RentalManagement = () => {
           </MenuItem>
         )}
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${routes.rentalManagement.title} Offline`}
+          {`Add ${resources?.rentalManagement?.titleSingular} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}
@@ -463,10 +463,10 @@ const RentalManagement = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.rentalManagement]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.rentalManagement, title: resources?.rentalManagement?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.rentalManagement}
-          module={routes.rentalManagement.title}
+          module={resources?.rentalManagement?.titlePlural}
           api={rentalManagement.api}
           afterImportCompleted={() => {
             fetchData();
@@ -527,7 +527,7 @@ const RentalManagement = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete selected ${routes.rentalManagement.title.toLowerCase()} ?`}
+            message={`Are you sure you want to delete selected ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -540,7 +540,7 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+            message={`Are you sure you want to delete this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ${
               singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
             }?`}
             onClose={() =>

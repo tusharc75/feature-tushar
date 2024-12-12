@@ -15,117 +15,9 @@ import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
-const ASSET_HISTORY_RESOURCE = [
-  {
-    key: 'all',
-    resource: 'All',
-    title: 'All',
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.serializedAssets,
-    resource: sidebarResource.serializedAsset,
-    title: routes.serializedAsset.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.rental,
-    resource: sidebarResource.rentalManagement,
-    title: routes.rentalManagementDetail.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.repair,
-    resource: sidebarResource.repairOrder,
-    title: routes.repairOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.workOrder,
-    resource: sidebarResource.workOrder,
-    title: routes.workOrder.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.deliveryTicket,
-    resource: sidebarResource.deliveryTicket,
-    title: routes.deliveryTicket.title,
-  },
-  {
-    key: INVENTORY_HISTORY_TYPE.transferAssets,
-    resource: sidebarResource.transferAsset,
-    title: routes.transferAsset.title,
-  },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
-  //   resource: sidebarResource.purchaseOrder,
-  //   title: routes.purchaseOrder.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.salesOrder,
-  //   resource: sidebarResource.salesOrder,
-  //   title: routes.salesOrder.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.sublease,
-  //   resource: sidebarResource.sublease,
-  //   title: routes.sublease.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
-  //   resource: sidebarResource.bulkAssetCreation,
-  //   title: routes.bulkAssetCreation.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
-  //   resource: sidebarResource.inventoryToAsset,
-  //   title: routes.inventoryToAsset.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.quotation,
-  //   resource: sidebarResource.quotation,
-  //   title: routes.quotation.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.invoice,
-  //   resource: sidebarResource.invoice,
-  //   title: routes.invoice.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.productionOrder,
-  //   resource: sidebarResource.productionOrder,
-  //   title: routes.productionOrder.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
-  //   resource: sidebarResource.fieldServiceOrder,
-  //   title: routes.fieldServiceOrder.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.fieldTicket,
-  //   resource: sidebarResource.fieldTicket,
-  //   title: routes.fieldTicket.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.job,
-  //   resource: sidebarResource.job,
-  //   title: routes.job.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.planning,
-  //   resource: sidebarResource.planning,
-  //   title: routes.planning.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.deals,
-  //   resource: sidebarResource.deals,
-  //   title: routes.deals.title,
-  // },
-  // {
-  //   key: INVENTORY_HISTORY_TYPE.assemblyOrder,
-  //   resource: sidebarResource.assemblyOrder,
-  //   title: routes.assemblyOrder.title,
-  // },
-];
-
 const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
+  const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_assetHistory`;
 
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -137,8 +29,116 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   const [tabValue, setTabValue] = useState(0);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
+
+  const ASSET_HISTORY_RESOURCE = [
+    {
+      key: 'all',
+      resource: 'All',
+      title: 'All'
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.serializedAssets,
+      resource: sidebarResource.serializedAsset,
+      title: resources?.serializedAsset?.titlePlural
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.rental,
+      resource: sidebarResource.rentalManagement,
+      title: resources?.rentalManagement?.titlePlural
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.repair,
+      resource: sidebarResource.repairOrder,
+      title: routes.repairOrder.title
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.workOrder,
+      resource: sidebarResource.workOrder,
+      title: routes.workOrder.title
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.deliveryTicket,
+      resource: sidebarResource.deliveryTicket,
+      title: resources?.deliveryTicket?.titlePlural
+    },
+    {
+      key: INVENTORY_HISTORY_TYPE.transferAssets,
+      resource: sidebarResource.transferAsset,
+      title: routes.transferAsset.title
+    }
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
+    //   resource: sidebarResource.purchaseOrder,
+    //   title: routes.purchaseOrder.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.salesOrder,
+    //   resource: sidebarResource.salesOrder,
+    //   title: routes.salesOrder.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.sublease,
+    //   resource: sidebarResource.sublease,
+    //   title: routes.sublease.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
+    //   resource: sidebarResource.bulkAssetCreation,
+    //   title: routes.bulkAssetCreation.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
+    //   resource: sidebarResource.inventoryToAsset,
+    //   title: routes.inventoryToAsset.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.quotation,
+    //   resource: sidebarResource.quotation,
+    //   title: routes.quotation.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.invoice,
+    //   resource: sidebarResource.invoice,
+    //   title: routes.invoice.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.productionOrder,
+    //   resource: sidebarResource.productionOrder,
+    //   title: routes.productionOrder.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
+    //   resource: sidebarResource.fieldServiceOrder,
+    //   title: routes.fieldServiceOrder.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.fieldTicket,
+    //   resource: sidebarResource.fieldTicket,
+    //   title: routes.fieldTicket.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.job,
+    //   resource: sidebarResource.job,
+    //   title: routes.job.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.planning,
+    //   resource: sidebarResource.planning,
+    //   title: routes.planning.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.deals,
+    //   resource: sidebarResource.deals,
+    //   title: routes.deals.title,
+    // },
+    // {
+    //   key: INVENTORY_HISTORY_TYPE.assemblyOrder,
+    //   resource: sidebarResource.assemblyOrder,
+    //   title: routes.assemblyOrder.title,
+    // },
+  ];
 
   const { page, limit, filters, sorting } = state;
 
@@ -153,9 +153,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-              row.original.type === 'Receiving Ticket' ||
-              row.original.type === 'Return Ticket' ||
-              row.original.type === 'Delivery Ticket' ? (
+            row.original.type === 'Receiving Ticket' ||
+            row.original.type === 'Return Ticket' ||
+            row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -361,7 +361,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       Cell: ({ row }) => (
         <div>
           {row.original?.warehouse ? (
@@ -450,7 +450,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     const { deepFilters } = gridFilterParser(filters);
 
     if (tabValue !== 0) {
-      const filterKey = ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key == 'all')?.find((ele, idx) => idx == tabValue);
+      const filterKey = ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key == 'all')?.find(
+        (ele, idx) => idx == tabValue
+      );
       const tabFilters = {
         [INVENTORY_HISTORY_TYPE.deliveryTicket]: [
           INVENTORY_HISTORY_TYPE.deliveryTicket,
@@ -458,10 +460,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           INVENTORY_HISTORY_TYPE.receivingTicket,
           INVENTORY_HISTORY_TYPE.returnTicket
         ],
-        [INVENTORY_HISTORY_TYPE.serializedAssets]: [
-          INVENTORY_HISTORY_TYPE.inventory,
-          INVENTORY_HISTORY_TYPE.serializedAssets
-        ]
+        [INVENTORY_HISTORY_TYPE.serializedAssets]: [INVENTORY_HISTORY_TYPE.inventory, INVENTORY_HISTORY_TYPE.serializedAssets]
       };
       const filterTerms = tabFilters[filterKey.key] || filterKey.key;
       deepFilters.push({ field: 'type', term: filterTerms });
@@ -516,8 +515,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
   return (
     <Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) =>
-          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />)}
+        {ASSET_HISTORY_RESOURCE?.filter((f) => permissions[camelCase(f.resource)]?.isRead || f.key === 'all')?.map((res, idx) => (
+          <CustomTab primaryColor={true} value={idx} id={res.key} label={`${res.title}`} />
+        ))}
       </CustomTabs>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
@@ -527,8 +527,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => { }}
-          onExportToExcelSuccess={() => { }}
+          afterImportCompleted={() => {}}
+          onExportToExcelSuccess={() => {}}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

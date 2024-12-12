@@ -17,7 +17,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
+  const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
 
   const toastConfig = useContext(CustomToastContext);
   const {

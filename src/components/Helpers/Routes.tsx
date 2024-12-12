@@ -205,197 +205,115 @@ const routes = {
     path: '/product-template'
   },
   productInventory: {
-    title:
-      storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title
-        ? storedRoutes.productInventory?.title
-        : RESOURCE_LABEL.productInventory,
     path: '/product-inventory'
   },
   packageInventory: {
-    title:
-      storedRoutes && storedRoutes.packageInventory && storedRoutes.packageInventory.title
-        ? storedRoutes.packageInventory?.title
-        : RESOURCE_LABEL.packageInventory,
     path: '/package-inventory'
   },
   serializedAsset: {
-    title:
-      storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
-        ? storedRoutes.serializedAsset.title
-        : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset'
   },
   serializedAssetsCertification: {
-    title:
-      storedRoutes && storedRoutes.serializedAssetsCertification && storedRoutes.serializedAssetsCertification.title
-        ? storedRoutes.serializedAssetsCertification.title
-        : RESOURCE_LABEL.serializedAssetsCertification,
     path: '/serialized-assets-certification'
   },
   serializedAssetDetail: {
-    title:
-      storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
-        ? storedRoutes.serializedAsset.title
-        : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset/detail'
   },
   equiptmentRentalMaster: {
-    title:
-      storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster
-        ? storedRoutes.equiptmentRentalMaster.title
-        : RESOURCE_LABEL.equiptmentRentalMaster,
     path: '/equiptment-rental-master'
   },
   rentalManagement: {
-    title:
-      storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
-        ? storedRoutes.rentalManagement.title
-        : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
   },
   rentalManagementDetail: {
-    title:
-      storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
-        ? storedRoutes.rentalManagement.title
-        : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management/detail'
   },
   //Same name because handle old code issue
   quoteBuilder: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quoteBuilderDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
   quotes: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quotesDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
   quote: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quoteDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
-  //
   budget: {
-    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget'
   },
   budgetDetail: {
-    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget/detail'
   },
   pricingCondition: {
-    title:
-      storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
-        ? storedRoutes.pricingCondition?.title
-        : RESOURCE_LABEL.pricingCondition,
     path: '/pricing-condition'
   },
   pricingConditionDetail: {
-    title:
-      storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
-        ? storedRoutes.pricingCondition?.title
-        : RESOURCE_LABEL.pricingCondition,
     path: '/pricing-condition/detail'
   },
   marketSegment: {
-    title:
-      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment'
   },
   marketSegmentDetail: {
-    title:
-      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment/detail'
   },
   quotePdfTemplate: {
-    title:
-      storedRoutes && storedRoutes.quotePdfTemplate && storedRoutes.quotePdfTemplate
-        ? storedRoutes.quotePdfTemplate?.title
-        : RESOURCE_LABEL.quotePdfTemplate,
     path: '/quote-pdf-template'
   },
   quotePdfTemplateDetail: {
-    title:
-      storedRoutes && storedRoutes.quotePdfTemplate && storedRoutes.quotePdfTemplate
-        ? storedRoutes.quotePdfTemplate?.title
-        : RESOURCE_LABEL.quotePdfTemplate,
     path: '/quote-pdf-template/detail'
   },
   attachment: {
-    title: storedRoutes && storedRoutes.attachment && storedRoutes.attachment ? storedRoutes.attachment?.title : RESOURCE_LABEL.attachment,
     path: '/attachment'
   },
   calendar: {
-    title: storedRoutes && storedRoutes.calendar && storedRoutes.calendar ? storedRoutes.calendar?.title : RESOURCE_LABEL.calendar,
     path: '/calendar'
   },
   reminder: {
-    title: storedRoutes && storedRoutes.reminder && storedRoutes.reminder ? storedRoutes.reminder?.title : RESOURCE_LABEL.reminder,
     path: '/reminder'
   },
   DOARequest: {
-    title: storedRoutes && storedRoutes.DOARequest && storedRoutes.DOARequest ? storedRoutes.DOARequest?.title : RESOURCE_LABEL.DOARequest,
     path: '/doa-request'
   },
   task: {
-    title: storedRoutes && storedRoutes.task && storedRoutes.task ? storedRoutes.task?.title : RESOURCE_LABEL.task,
     path: '/task'
   },
   case: {
-    title: storedRoutes && storedRoutes.case && storedRoutes.case ? storedRoutes.case?.title : RESOURCE_LABEL.case,
     path: '/case'
   },
   note: {
-    title: storedRoutes && storedRoutes.note && storedRoutes.note ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: '/note'
   },
   zone: {
-    title: storedRoutes && storedRoutes.zone && storedRoutes.zone ? storedRoutes.zone?.title : RESOURCE_LABEL.zone,
     path: '/zone'
   },
   zoneDetail: {
-    title: storedRoutes && storedRoutes.zone && storedRoutes.zone ? storedRoutes.zone?.title : RESOURCE_LABEL.zone,
     path: '/zone/detail'
   },
   warehouse: {
-    title: storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: '/warehouse'
   },
   warehouseDetail: {
-    title: storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: '/warehouse/detail'
   },
   deliveryTicket: {
-    title:
-      storedRoutes && storedRoutes.deliveryTicket && storedRoutes.deliveryTicket.title
-        ? storedRoutes.deliveryTicket?.title
-        : RESOURCE_LABEL.deliveryTicket,
     path: '/delivery-ticket'
   },
   deliveryTicketDetail: {
-    title:
-      storedRoutes && storedRoutes.deliveryTicket && storedRoutes.deliveryTicket.title
-        ? storedRoutes.deliveryTicket?.title
-        : RESOURCE_LABEL.deliveryTicket,
     path: '/delivery-ticket/detail'
   },
   repairJob: {
-    title: storedRoutes && storedRoutes.repairJob && storedRoutes.repairJob.title ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
     path: '/repair-job'
   },
   repairJobDetail: {
-    title: storedRoutes && storedRoutes.repairJob && storedRoutes.repairJob.title ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
     path: '/repair-job/detail'
   },
   salesOrder: {
@@ -405,11 +323,9 @@ const routes = {
     path: '/sales-order/detail'
   },
   packages: {
-    title: storedRoutes && storedRoutes.packages && storedRoutes.packages.title ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: '/packages'
   },
   packagesDetail: {
-    title: storedRoutes && storedRoutes.packages && storedRoutes.packages.title ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: '/packages/detail'
   },
   purchaseOrder: {

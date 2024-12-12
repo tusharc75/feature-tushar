@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
 import routes from '../../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -27,7 +27,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_technician`;
+  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
 
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);

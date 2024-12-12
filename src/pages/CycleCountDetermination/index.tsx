@@ -25,7 +25,7 @@ const CycleCountDetermination = () => {
   const [warehouse, setWarehouse] = useState(null);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [open, setOpen] = useState(false);
@@ -134,7 +134,7 @@ const CycleCountDetermination = () => {
             setWarehouse(val && val.optionValue ? val.optionValue : null);
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+            <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
           )}
         />
       </>

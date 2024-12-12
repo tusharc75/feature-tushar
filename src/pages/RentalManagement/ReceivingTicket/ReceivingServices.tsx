@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_TYPE, dateFormat, rentalManagement } from 'src/constants/helpers';
+import { MATERIAL_TYPE, dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -25,7 +25,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Delete } from '@material-ui/icons';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
-  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
+  const renderedFrom = `${camelCase(sidebarResource.rentalManagement)}_services`;
   const toastConfig = useContext(CustomToastContext);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });

@@ -15,11 +15,17 @@ import Calendar from './Calendar';
 import CalendarList from './CalendarList';
 import MobileRoadmap from './MobileRoadmap';
 import { Activity } from './types';
+import { useData } from 'src/StateProvider/Provider';
 
 const stateDateFormat = 'YYYY-MM-DD';
 
 const RoadMap = () => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [products, setProducts] = useState([]);
   const [warehouse, setWarehouse] = useState([]);
 
@@ -191,7 +197,7 @@ const RoadMap = () => {
                 setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
               }}
               renderInput={(params) => (
-                <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
               )}
             />
             <KeyboardDatePicker

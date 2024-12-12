@@ -248,14 +248,11 @@ export default function Contact(props) {
                 });
               }}
             >
-              <DeleteIcon
-                fontSize="small"
-                color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'}
-              />
+              <DeleteIcon fontSize="small" color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}    >
+        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}>
           <span>
             <IconButton
               size="small"
@@ -488,7 +485,8 @@ export default function Contact(props) {
                 permissions,
                 setOpenAddPlantsDialog,
                 setEntities,
-                setShowEntityDialog
+                setShowEntityDialog,
+                resources
               }}
             />
           }
@@ -546,7 +544,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => { }}
+              onSuccess={() => {}}
               isRedirectToDetailPage={true}
             />
           )}
@@ -653,7 +651,8 @@ const ActionMenuItems = ({
   permissions,
   setOpenAddPlantsDialog,
   setEntities,
-  setShowEntityDialog
+  setShowEntityDialog,
+  resources
 }) => {
   return (
     <>
@@ -683,7 +682,7 @@ const ActionMenuItems = ({
             setOpenAddPlantsDialog(true);
           }}
         >
-          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
+          Assign {resources?.warehouse?.titlePlural} &nbsp; <Chip size="small" label={selectedRecords?.length} />
         </MenuItem>
       )}
       {contactPermissions?.isUpdate && (

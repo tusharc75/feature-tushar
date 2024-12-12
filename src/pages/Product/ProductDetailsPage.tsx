@@ -49,7 +49,7 @@ const ProductDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const [headingLabel, setHeadingLabel] = useState('');
@@ -298,7 +298,7 @@ const ProductDetailsPage = () => {
                             <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                               <Box display="flex" alignItems="center">
                                 <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                                  {productData?.expenseItem ? 'Expense Quantity' : routes?.productInventory?.title}
+                                  {productData?.expenseItem ? 'Expense Quantity' : resources?.productInventory?.titleSingular}
                                 </Typography>
                                 <Box pl={1} display="flex">
                                   <IconButton
@@ -321,7 +321,7 @@ const ProductDetailsPage = () => {
                                 {productInventoryData?.filter((d) => d.inventory)?.length ? (
                                   <>
                                     <Box display="flex" justifyContent="space-between">
-                                      <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
+                                      <Typography className="table-head-v1">{resources?.warehouse?.titleSingular}</Typography>
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
                                       )}
@@ -368,11 +368,11 @@ const ProductDetailsPage = () => {
                         <Grid item xs={12} sm={6} md={4} xl={3}>
                           <Box className="single-form-v1">
                             <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
-                              <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                              <Typography variant="subtitle2">{resources?.serializedAsset?.titlePlural}</Typography>
                               <Box>
                                 {permissions?.serializedAsset?.isCreate && (
                                   <IconButton
-                                    title={`Create ${routes.serializedAsset.title}`}
+                                    title={`Create ${resources?.serializedAsset?.titleSingular}`}
                                     color="primary"
                                     size="small"
                                     onClick={() => {
@@ -427,7 +427,11 @@ const ProductDetailsPage = () => {
                                                   }
                                                 }}
                                               >
-                                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                                {(selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue) ? (
+                                                  <ExpandLess />
+                                                ) : (
+                                                  <ExpandMore />
+                                                )}
                                               </IconButton>
                                             </Box>
                                             <Box ml={1} display="flex" alignItems="center">
@@ -462,7 +466,7 @@ const ProductDetailsPage = () => {
                                       </Grid>
                                     </Box>
                                     <Box p={1} className="flex flex-wrap gap-2">
-                                      {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
+                                      {(selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue) ? (
                                         inventoriesWarehouseLoading ? (
                                           <Typography
                                             variant="subtitle2"
@@ -517,7 +521,7 @@ const ProductDetailsPage = () => {
                                 ))
                               ) : (
                                 <Box textAlign="center" padding={2} minHeight={100}>
-                                  <Typography>No {routes.serializedAsset.title} Found</Typography>
+                                  <Typography>No {resources?.serializedAsset?.titleSingular} Found</Typography>
                                 </Box>
                               )}
                             </Box>

@@ -22,7 +22,7 @@ import InputField from 'src/components/Helpers/InputField';
 const ManageMarketSegmentDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const { marketSegmentId, onClose, onSuccess, isClone = false } = props;
   const [loading, setLoading] = useState(false);
@@ -123,7 +123,13 @@ const ManageMarketSegmentDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? 'Clone' : marketSegmentId ? 'Update ' + routes.marketSegment.title : 'Create ' + routes.marketSegment.title}
+                title={
+                  isClone
+                    ? 'Clone'
+                    : marketSegmentId
+                      ? 'Update ' + resources?.marketSegment?.titleSingular
+                      : 'Create ' + resources?.marketSegment?.titleSingular
+                }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);

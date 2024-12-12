@@ -36,7 +36,7 @@ const AssignProductDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -275,7 +275,7 @@ const AssignProductDialog = ({
           {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} label={`${routes.pricingCondition.title} Products`} />
+                <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Products`} />
                 <CustomTab value={1} className={'tabLayout'} label={'All Products'} />
               </CustomTabs>
             </Box>

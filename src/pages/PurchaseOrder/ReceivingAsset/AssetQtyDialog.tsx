@@ -18,7 +18,7 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +90,7 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
-                title={`Create ${routes.serializedAsset.title}`}
+                title={`Create ${resources?.serializedAsset?.titleSingular}`}
                 onClose={onClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

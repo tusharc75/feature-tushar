@@ -55,12 +55,12 @@ import { TbTruckDelivery } from 'react-icons/tb';
 import Step from 'src/pages/DynamicForm/Step';
 
 export default function DeliveryTicketDetail(props) {
-  const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
+  const renderedFrom = `${camelCase(sidebarResource.deliveryTicket)}_grid-1`;
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -469,7 +469,9 @@ export default function DeliveryTicketDetail(props) {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[routes.deliveryTicket, { title: deliveryTicketData?.ticketName }]} />
+            <CustomBreadCrumbs
+              routes={[{ ...routes.deliveryTicket, title: resources?.deliveryTicket?.titleSingular }, { title: deliveryTicketData?.ticketName }]}
+            />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
@@ -533,7 +535,7 @@ export default function DeliveryTicketDetail(props) {
                 resource={sidebarResource.deliveryTicket}
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
-                fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
+                fileName={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
                 columns={serializedAssetColumns?.length ? serializedAssetColumns : productColumns}
                 defaultColumns={
                   serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
@@ -549,22 +551,10 @@ export default function DeliveryTicketDetail(props) {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab value={0}>
-              Header
-            </CustomTab>
-            {permissions?.serializedAsset?.isRead && (
-              <CustomTab value={1}>
-                Serialized Assets
-              </CustomTab>
-            )}
-            <CustomTab value={2}>
-              Additional Products
-            </CustomTab>
-            {deliveryTicketData?.additionalCost?.length > 0 && (
-              <CustomTab value={3}>
-                Add-On
-              </CustomTab>
-            )}
+            <CustomTab value={0}>Header</CustomTab>
+            {permissions?.serializedAsset?.isRead && <CustomTab value={1}>Serialized Assets</CustomTab>}
+            <CustomTab value={2}>Additional Products</CustomTab>
+            {deliveryTicketData?.additionalCost?.length > 0 && <CustomTab value={3}>Add-On</CustomTab>}
             {resourceData &&
               resourceData?.tabs?.length > 0 &&
               resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
@@ -671,7 +661,7 @@ export default function DeliveryTicketDetail(props) {
           )}
           <TabPanel value={tabValue} index={2}>
             <DeliveryTicketProduct
-              renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`}
+              renderedFrom={`${camelCase(resources?.deliveryTicket?.titleSingular)}_grid-2`}
               deliveryTicketId={id}
               columns={productColumns}
             />
@@ -679,7 +669,7 @@ export default function DeliveryTicketDetail(props) {
           {deliveryTicketData?.additionalCost?.length > 0 && (
             <TabPanel value={tabValue} index={3}>
               <DeliveryTicketAdditionalCost
-                renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-3`}
+                renderedFrom={`${camelCase(resources?.deliveryTicket?.titleSingular)}_grid-3`}
                 additionalCost={deliveryTicketData?.additionalCost}
               />
             </TabPanel>

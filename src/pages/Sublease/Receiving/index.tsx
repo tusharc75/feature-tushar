@@ -25,7 +25,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [receiveDialog, setReceiveDialog] = useState(false);
@@ -215,7 +215,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
         {allowedToEdit && treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length > 0 && (
           <ImportExportMenu
             permissions={permissions?.serializedAsset}
-            module={routes.serializedAsset.title}
+            module={resources?.serializedAsset?.titlePlural}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchData();

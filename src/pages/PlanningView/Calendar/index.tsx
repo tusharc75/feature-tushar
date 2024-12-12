@@ -48,7 +48,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.warehouse?.isRead
       ? [
           {
-            label: routes.warehouse.title,
+            label: resources?.warehouse?.titlePlural,
             value: 'Warehouse',
             key: 'warehouse'
           }
@@ -66,7 +66,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serializedAsset?.isRead
       ? [
           {
-            label: routes.serializedAsset.title,
+            label: resources?.serializedAsset?.titlePlural,
             value: 'Serialized Asset',
             key: 'asset'
           }
@@ -103,7 +103,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const ASSET_FILTERS = [
     {
-      label: routes.serializedAsset.title,
+      label: resources?.serializedAsset?.titlePlural,
       value: 'Serialized Asset',
       key: 'assetIds'
     }
@@ -116,7 +116,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       key: 'product'
     },
     {
-      label: routes.warehouse.title,
+      label: resources?.warehouse?.titlePlural,
       value: 'Warehouse',
       key: 'warehouse'
     }
@@ -124,7 +124,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const RENTAL_JOB_FILTERS = [
     {
-      label: routes.rentalManagement.title,
+      label: resources?.rentalManagement?.titleSingular,
       value: 'Rental Management',
       key: 'rentalJob'
     },
@@ -852,7 +852,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} resources={resources}/>
+                    <RenderTable data={d.items} resources={resources} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -874,7 +874,7 @@ const RenderTable = ({ data, resources }) => {
           <TableRow>
             <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
-            <TableCell>{routes.warehouse.title}</TableCell>
+            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
             <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
             {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>

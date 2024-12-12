@@ -16,10 +16,10 @@ import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataF
 import axios, { CancelTokenSource } from 'axios';
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
-  const renderedFrom = camelCase(routes?.warehouse?.title);
+  const renderedFrom = camelCase(sidebarResource?.warehouse);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { selectedEntity }
+    state: { selectedEntity, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -98,7 +98,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Add ${routes.warehouse.title}`} onClose={onClose}></CustomDialogHeader>
+        <CustomDialogHeader title={`Add ${resources?.warehouse?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>
