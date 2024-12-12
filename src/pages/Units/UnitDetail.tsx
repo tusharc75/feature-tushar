@@ -23,7 +23,7 @@ const UnitDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
 
   const [unitData, setUnitData] = useState(null);
@@ -102,7 +102,7 @@ const UnitDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.units, { title: unitData?.unitNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes.units,title:resources?.units?.titleSingular}, { title: unitData?.unitNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

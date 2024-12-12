@@ -284,7 +284,7 @@ const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selected
 };
 
 const RenderTable = ({ resource, warehouse, setRecords }) => {
-  const renderedFrom = `${routes.workAutomation.title}_${resource}`;
+  const renderedFrom = `${sidebarResource?.workAutomation}_${resource}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

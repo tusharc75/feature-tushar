@@ -13,9 +13,14 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from 'src/StateProvider/Provider';
 
 const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchSettingsData();
@@ -62,7 +67,7 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <MuiPickersUtilsProvider utils={DateUtils}>
-              <CustomDialogHeader title={`Deliver ${routes.subcontractAssembly.title}`} showRequiredLabel={true} onClose={handleClose} />
+              <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
               <CustomDialogContent>
                 <Box p={1}>
                   <KeyboardDatePicker

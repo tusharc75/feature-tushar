@@ -19,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -132,7 +132,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id ? (isClone ? `Clone` : `Update`) : `Create ${routes?.triggerNotificationMaster?.title}`}`}
+                title={`${id ? (isClone ? `Clone` : `Update`) : `Create ${resources?.triggerNotificationMaster?.titleSingular}`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

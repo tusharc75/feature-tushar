@@ -46,7 +46,7 @@ const SubcontractAssemblyDetail = () => {
   const { itemTab }: any = parsed;
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -184,7 +184,7 @@ const SubcontractAssemblyDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.subcontractAssembly, { title: subcontractAssemblyData?.subcontractAssemblyNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes.subcontractAssembly, title:resources?.subcontractAssembly?.titleSingular}, { title: subcontractAssemblyData?.subcontractAssemblyNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
