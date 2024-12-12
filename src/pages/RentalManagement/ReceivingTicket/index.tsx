@@ -80,9 +80,7 @@ import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataD
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 import WarningIcon from '@material-ui/icons/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
-const {
-  state: { user, permissions, selectedEntity, resources }
-}: any = useData();
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
