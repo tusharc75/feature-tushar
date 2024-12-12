@@ -11,6 +11,7 @@ import { MATERIAL_TYPE, COLOUR_MASTER, } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase, startCase } from 'lodash';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from 'src/StateProvider/Provider';
 
 
 const ManagedPackagesView = ({ managedPackagesData }) => {
@@ -21,16 +22,18 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const {
+    state: {resources }
+  }: any = useData();
+
   const customNodeStyles = {
     managedPackage: {
       name: 'Managed Package',
-      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
-      borderColor: '#9789F0'
+      ...COLOUR_MASTER.purchaseOrder
     },
     product: {
       name: 'Product',
-      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
-      borderColor: '#8BCBDF'
+      ...COLOUR_MASTER.product
     },
     serializedAsset: {
       name: 'Serialized Asset',
@@ -38,8 +41,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     },
     package: {
       name: 'Package',
-      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
-      borderColor: '#66CDB7'
+      ...COLOUR_MASTER.package
     },
   };
 
@@ -66,9 +68,9 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
             ref_type: 'managedPackages',
             ref_id: managedPackagesData?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.managedPackages.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
                 <div>
-                  <Typography variant="body2">{routes.managedPackages.title}</Typography>
+                  <Typography variant="body2">{resources?.managedPackages?.titleSingular}</Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{managedPackagesData?.managedPackageName}</Typography>
                 </div>
               </HtmlTooltip>

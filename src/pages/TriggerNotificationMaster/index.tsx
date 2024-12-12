@@ -19,7 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageTriggerNotificationMaster from './ManageTriggerNotificationMaster';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.triggerNotificationMaster.title);
+const renderedFrom = camelCase(sidebarResource?.triggerNotificationMaster);
 
 const TriggerNotificationMaster = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const TriggerNotificationMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -201,7 +201,7 @@ const TriggerNotificationMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.triggerNotificationMaster]} />
+        <CustomBreadCrumbs routes={[{...routes.triggerNotificationMaster,title:resources?.triggerNotificationMaster?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -236,7 +236,7 @@ const TriggerNotificationMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.triggerNotificationMaster?.title} ?`}
+          message={`Are you sure you want to delete ${resources?.triggerNotificationMaster?.titleSingular} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -17,13 +17,13 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.resourceDoaRequest.title);
+const renderedFrom = camelCase(sidebarResource?.resourceDoaRequest);
 
 const ResourceDoaRequest = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -177,7 +177,7 @@ const ResourceDoaRequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.resourceDoaRequest]} />
+        <CustomBreadCrumbs routes={[{...routes.resourceDoaRequest,title:resources?.resourceDoaRequest?.titlePlural}]} />
       </div>
       <CustomContainer>
         {columns ? (

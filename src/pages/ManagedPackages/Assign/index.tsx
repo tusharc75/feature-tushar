@@ -12,13 +12,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE } from 'src/constants/helpers';
+import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const Assign = ({ managedPackagesData }) => {
-  const renderedFrom = `${camelCase(routes?.managedPackages.title)}_${managedPackagesData?.package?.optionLabel}`;
+  const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}_${managedPackagesData?.package?.optionLabel}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {

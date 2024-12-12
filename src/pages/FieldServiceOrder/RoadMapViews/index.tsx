@@ -13,23 +13,19 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 const customNodeStyles = {
   fieldServiceOrder: {
     name: routes.fieldServiceOrder.title,
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    ...COLOUR_MASTER.purchaseOrder
   },
   fieldTicket: {
     name: 'Field Ticket',
-    background: '#FFF7D9',
-    borderColor: '#FDD33E'
+    ...COLOUR_MASTER.product
   },
   invoice: {
     name: 'Invoice',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.service
   },
   serviceOrderClosed: {
     name: `${routes.fieldServiceOrder.title} Closed`,
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+    ...COLOUR_MASTER.receivingTicket
   }
 };
 

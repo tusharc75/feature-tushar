@@ -9,12 +9,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 
 const customNodeStyles = {
   repairJob: {
     name: 'Repair Job',
-    ...COLOUR_MASTER.repairJob
+    ...COLOUR_MASTER.purchaseOrder
   },
   asset: {
     name: 'Assets',
@@ -75,7 +75,12 @@ const RepairJobViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: repairId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{repairJobName ?? repairJobName}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                       <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
+                       <Typography variant="subtitle2">
+                       {repairJobName ?? repairJobName}
+                       </Typography>
+                    </div>
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.repairJob
@@ -98,7 +103,12 @@ const RepairJobViews = (props) => {
             ref_id: item.inventory,
             label: (
               <HtmlTooltip arrow placement="top" title={item?.status}>
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.assetNumber}</div>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{customNodeStyles.asset.name}</Typography>
+                  <Typography variant="subtitle2">
+                  {item.assetNumber}
+                  </Typography>
+                </div>
               </HtmlTooltip>
             )
           },
@@ -157,18 +167,25 @@ const RepairJobViews = (props) => {
                   title={
                     <>
                       <p>
-                        From: <b>{item?.pickupFrom}</b>
+                      <Typography variant="body2">From:</Typography>
+                       <Typography variant="subtitle2">
+                       {item?.pickupFrom}
+                       </Typography>
                       </p>
                       <p>
-                        To: <b>{item?.deliveryTo}</b>
+                      <Typography variant="body2">To:</Typography>
+                       <Typography variant="subtitle2">
+                       {item?.deliveryTo}
+                       </Typography>
                       </p>
                     </>
                   }
                 >
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.ticketName}
-                    <br />
-                    {item.ticketType} Ticket
+                      <Typography variant="body2">{item.ticketType} Ticket</Typography>
+                       <Typography variant="subtitle2">
+                       {item.ticketName}
+                       </Typography>
                   </div>
                 </HtmlTooltip>
               )
@@ -210,7 +227,12 @@ const RepairJobViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: repairId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{repairJobName ?? repairJobName}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                       <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
+                       <Typography variant="subtitle2">
+                       {repairJobName ?? repairJobName}
+                       </Typography>
+                    </div>
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.closedRepairJob
@@ -241,10 +263,10 @@ const RepairJobViews = (props) => {
       case 'repairJob':
         break;
       case 'deliveryTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

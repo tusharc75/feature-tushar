@@ -1,16 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import {
-  Box,
-  Button,
-  FormControl,
-  IconButton,
-  InputLabel,
-  Menu,
-  MenuItem,
-  Popover,
-  Select,
-  useMediaQuery
-} from '@material-ui/core';
+import { Box, Button, Checkbox, FormControl, IconButton, InputLabel, Menu, MenuItem, Popover, Select, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -34,9 +23,10 @@ import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ProductFrequencyDialog from './ProductFrequencyDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
+import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
+import { ExpandMore } from '@material-ui/icons';
 
 const LIMIT = 25;
 
@@ -80,7 +70,7 @@ const FIELD_TO_FILTER = [
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
-  const { limit } = state;
+  const { limit, selectedRecords } = state;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -88,8 +78,8 @@ const WorkOrderSupervisor = () => {
   }: any = useData();
 
   const [selectedUser, setSelectedUser] = useState(null);
-  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
@@ -97,7 +87,7 @@ const WorkOrderSupervisor = () => {
     filterById: [],
     deepFilter: []
   });
-  const [viewType, setViewType] = useState(3);
+  const [viewType, setViewType] = useState(1);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
@@ -153,7 +143,20 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
-      { accessor: 'serviceName', title: 'Service Name', type: 'title' },
+      {
+        accessor: 'workOrderNumber',
+        title: 'Work Order',
+        type: 'title',
+        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'serviceName',
+        title: routes.serviceMaster.title,
+        type: 'link',
+        link: (data) => `${routes.serviceMasterDetail.path}/${data?.service?.optionValue}`,
+        target: '_blank'
+      },
       {
         accessor: 'productionOrderNumber',
         type: 'link',
@@ -166,13 +169,6 @@ const WorkOrderSupervisor = () => {
         type: 'link',
         title: routes.repairOrder.title,
         link: (data) => `${routes.repairOrderDetail.path}/${data?.repairOrder?.optionValue}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'workOrderNumber',
-        type: 'link',
-        title: 'Work Order',
-        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
         target: '_blank'
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
@@ -203,9 +199,9 @@ const WorkOrderSupervisor = () => {
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
-      setAssignTechnicianDialog(true);
+      setAssignTechnicianDialog({ open: true, multiple: false });
     } else {
-      setWorkStationAssignDialog(true);
+      setWorkStationAssignDialog({ open: true, multiple: false });
     }
   };
 
@@ -280,6 +276,7 @@ const WorkOrderSupervisor = () => {
   const isMobile = useMediaQuery('(max-width: 800px)');
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -385,47 +382,65 @@ const WorkOrderSupervisor = () => {
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
           <div className="flex items-center gap-1">
-            {permissions?.workOrder?.isCreate &&
+            {permissions?.workOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
                   window.open(`${routes.workOrder.path}`);
-                }}> {`${routes?.workOrder.title}`}
-              </Button>}
-            {permissions?.repairOrder?.isCreate &&
+                }}
+              >
+                {' '}
+                {`${routes?.workOrder.title}`}
+              </Button>
+            )}
+            {permissions?.repairOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
                   window.open(`${routes.repairOrder.path}`);
-                }}> {`${routes?.repairOrder.title}`}
-              </Button>}
-            {permissions?.productionOrder?.isCreate &&
+                }}
+              >
+                {' '}
+                {`${routes?.repairOrder.title}`}
+              </Button>
+            )}
+            {permissions?.productionOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
                   window.open(`${routes.productionOrder.path}`);
-                }}> {`${routes?.productionOrder.title}`}
-              </Button>}
-            {permissions?.assemblyOrder?.isCreate &&
+                }}
+              >
+                {' '}
+                {`${routes?.productionOrder.title}`}
+              </Button>
+            )}
+            {permissions?.assemblyOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
                   window.open(`${routes.assemblyOrder.path}`);
-                }}> {`${routes?.assemblyOrder.title}`}
-              </Button>}
-            {permissions?.product?.isCreate &&
+                }}
+              >
+                {' '}
+                {`${routes?.assemblyOrder.title}`}
+              </Button>
+            )}
+            {permissions?.product?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
                   setShowProductFreqDialog(true);
-
-                }}>Scheduling
-              </Button>}
+                }}
+              >
+                Scheduling
+              </Button>
+            )}
           </div>
         </div>
         <div className="main-container">
@@ -438,12 +453,14 @@ const WorkOrderSupervisor = () => {
                       {isFilterPresent ? (
                         <>
                           <span
-                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
-                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -488,7 +505,7 @@ const WorkOrderSupervisor = () => {
                 )
               ) : (
                 <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {routes.workOrder.title}
                     </ToggleButton>
@@ -502,6 +519,49 @@ const WorkOrderSupervisor = () => {
               <div className="flex gap-2 max-[600px]:flex-wrap">
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                </div>
+                <div className="ml-[10px] pt-[4px]">
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={(e) => setAnchorActionEl(e.currentTarget)}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length === 0}
+                    endIcon={<ExpandMore />}
+                    id={'work-order-superviser-page-action-button'}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorActionEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorActionEl)}
+                    onClose={() => setAnchorActionEl(null)}
+                  >
+                    <MenuItem
+                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                      onClick={() => {
+                        setAssignTechnicianDialog({ open: true, multiple: true });
+                        setAnchorActionEl(null);
+                      }}
+                    >
+                      Assign Technician
+                    </MenuItem>
+                    <MenuItem
+                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                      onClick={() => {
+                        setWorkStationAssignDialog({ open: true, multiple: true });
+                        setAnchorActionEl(null);
+                      }}
+                    >{`Assign ${routes.workStations.title}`}</MenuItem>
+                  </Menu>
                 </div>
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
@@ -563,42 +623,62 @@ const WorkOrderSupervisor = () => {
           )}
           {viewType === 3 && <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} />}
         </div>
-        {assignTechnicianDialog && (
+        {assignTechnicianDialog.open && (
           <AssignUserDialog
-            warehouse={selectedServiceData?.warehouse}
-            workOrderData={[
-              {
-                uniqueId: selectedServiceData?.uniqueId,
-                workOrderId: selectedServiceData?._id
-              }
-            ]}
-            assignedUsers={selectedServiceData?.assignedUsers}
+            warehouse={assignTechnicianDialog.multiple ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+            workOrderData={
+              assignTechnicianDialog.multiple
+                ? selectedRecords?.map((r) => ({
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
+                : [
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
+            }
+            assignedUsers={
+              assignTechnicianDialog.multiple
+                ? selectedRecords?.length === 1
+                  ? selectedRecords[0]?.assignedUsers
+                  : []
+                : selectedServiceData?.assignedUsers
+            }
             reference={'service'}
             handleClose={() => {
-              setAssignTechnicianDialog(false);
+              setAssignTechnicianDialog({ open: false, multiple: false });
             }}
             handleSucess={() => {
-              setAssignTechnicianDialog(false);
+              setAssignTechnicianDialog({ open: false, multiple: false });
               dispatch({ type: 'refreshData' });
             }}
-            competencies={selectedServiceData?.competencies}
+            competencies={assignTechnicianDialog.multiple ? selectedRecords[0]?.competencies : selectedServiceData?.competencies}
           />
         )}
-        {workStationAssignDialog && (
+        {workStationAssignDialog.open && (
           <AssignWorkStationDialog
-            warehouse={selectedServiceData?.warehouse}
-            workOrderData={[
-              {
-                uniqueId: selectedServiceData?.uniqueId,
-                workOrderId: selectedServiceData?._id
-              }
-            ]}
-            workStations={selectedServiceData?.assignedWorkStations}
+            warehouse={workStationAssignDialog.open ? selectedRecords[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+            workOrderData={
+              workStationAssignDialog.multiple
+                ? selectedRecords?.map((r) => ({
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
+                : [
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
+            }
+            workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {
-              setWorkStationAssignDialog(false);
+              setWorkStationAssignDialog({ open: false, multiple: false });
             }}
             handleSucess={() => {
-              setWorkStationAssignDialog(false);
+              setWorkStationAssignDialog({ open: false, multiple: false });
               dispatch({ type: 'refreshData' });
             }}
           />
@@ -613,17 +693,15 @@ const WorkOrderSupervisor = () => {
           />
         )}
         {isOpen.open && (
-          <TechnicianDialog
+          <WorkOrderDetailDialog
+            workOrderId={isOpen?.id}
             handleClose={() => {
               setOpen({ open: false, id: null });
             }}
-            workOrderId={isOpen?.id}
-            uniqueId={null}
-            canPerform={false}
           />
         )}
       </section>
-    </MuiPickersUtilsProvider >
+    </MuiPickersUtilsProvider>
   );
 };
 

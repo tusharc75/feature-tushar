@@ -77,8 +77,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'purchaseOrder',
             ref_id: purchaseOrderData?._id,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.purchaseOrder.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.purchaseOrder.name}</Typography>
+              <Typography variant="subtitle2">
                 {purchaseOrderData?.purchaseOrderNumber}
               </Typography>
             </div>
@@ -105,8 +105,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'product',
             ref_id: item?.productId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.product.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.product.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.productDetail?.productName}
               </Typography>
             </div>
@@ -132,8 +132,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'service',
             ref_id: item?.serviceId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.service.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.service.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.serviceDetail?.serviceName}
               </Typography>
             </div>
@@ -159,8 +159,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'manualEntry',
             ref_id: item?._id,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.manualEntry.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.manualEntry.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.description}
               </Typography>
             </div>
@@ -194,8 +194,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
               label: (
                 <HtmlTooltip arrow placement="top" title={item?.status}>
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <Typography variant="subtitle2">{customNodeStyles.assets.name}</Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2">{customNodeStyles.assets.name}</Typography>
+                    <Typography variant="subtitle2">
                       {item?.assetNumber}
                     </Typography>
                   </div>
@@ -224,8 +224,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
               ref_type: 'serialNumber',
               ref_id: item?._id,
               label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="subtitle2">{customNodeStyles.serialNumber.name}</Typography>
-                <Typography variant="body2">
+                <Typography variant="body2">{customNodeStyles.serialNumber.name}</Typography>
+                <Typography variant="subtitle2">
                   {item?.serialNumber}
                 </Typography>
               </div>
@@ -254,8 +254,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           ref_id: purchaseOrderData?._id,
           label: (
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">Status</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">Status</Typography>
+              <Typography variant="subtitle2">
                 {purchaseOrderData?.status}
               </Typography>
             </div>

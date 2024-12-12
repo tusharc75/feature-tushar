@@ -225,7 +225,7 @@ const SerializedAsset = ({
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
             ) : alloweOperation &&
-              ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+              ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
@@ -436,7 +436,9 @@ const SerializedAsset = ({
               }}
             >
               <MenuItem
-                disabled={checkUniqcurrentOwnerType()}
+                disabled={
+                  checkUniqcurrentOwnerType() || selectedRecords?.some((r) => [ASSET_STATUS.reserved, ASSET_STATUS.needRepair]?.includes(r?.status))
+                }
                 onClick={() => {
                   setAnchorEl(null);
                   handleUpdateStatus();
@@ -468,8 +470,10 @@ const SerializedAsset = ({
               size="small"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
+                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)) ||
+                selectedRecords.some(
+                  (s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)
+                ) ||
                 checkUniqcurrentOwnerType()
               }
               onClick={() => {
@@ -509,7 +513,7 @@ const SerializedAsset = ({
           </MenuItem>
         ) : null}
         <MenuItem
-          disabled={checkUniqSupplier() || checkUniqWarehouse()}
+          disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
           onClick={() => {
             if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
               if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {

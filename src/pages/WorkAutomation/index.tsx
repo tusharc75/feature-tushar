@@ -11,13 +11,13 @@ const WorkAutomation = () => {
   const history = useHistory();
   const [openRentalJobDialog, setOpenRentalJobDialog] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions ,resources}
   }: any = useData();
 
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workAutomation]} />
+        <CustomBreadCrumbs routes={[{...routes.workAutomation,title:resources?.workAutomation?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

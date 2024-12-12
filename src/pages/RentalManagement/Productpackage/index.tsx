@@ -71,7 +71,7 @@ const Productpackage = ({
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -963,7 +963,7 @@ const Productpackage = ({
               setAddExistingManagedPackages(true);
             }}
           >
-            Add Existing {routes.managedPackages.title}
+            Add Existing {resources?.managedPackages?.titlePlural}
           </MenuItem>
         )}
         <MenuItem

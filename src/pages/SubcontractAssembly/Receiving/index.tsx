@@ -27,11 +27,16 @@ import History from '../../ProductInventory/LedgerHistory';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
+const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Receiving`;
 
 const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
@@ -245,7 +250,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.subcontractAssembly.title}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
+    fileName: `${resources?.subcontractAssembly?.titleSingular}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
     resource: sidebarResource.subcontractAssembly,
     referenceId: subcontractAssemblyData._id,
     columns: columns,

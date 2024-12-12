@@ -23,9 +23,18 @@ import ManageAssetDialog from './ManageAssetDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerialisedAsset, generateAddNewSerialisedAsset, generateEditSerialisedAsset } from '../walkmeSteps';
+import { repairJobMessage } from 'src/constants/messageHelpers';
 
-
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
+const SerializedAsset = ({
+  repairJobData,
+  setNextStep,
+  setNextStepToolTip,
+  updateJobStatus,
+  renderedFrom,
+  allowedToEdit,
+  stepFullScreen,
+  alloweOperation
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -66,19 +75,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   }, [columns]);
 
   useEffect(() => {
-    let stepData = [
-      generateAddExistingSerialisedAsset(),
-      generateAddNewSerialisedAsset()
-    ];
+    let stepData = [generateAddExistingSerialisedAsset(), generateAddNewSerialisedAsset()];
     if (dataRows?.length) {
       if (permissions?.repairJob?.isUpdate) {
         stepData.push(generateEditSerialisedAsset(false, 0));
-
       }
     }
     setWalkmeData(stepData);
   }, [dataRows]);
-
 
   const fetchFields = async () => {
     setColumns(null);
@@ -241,7 +245,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 }}
                 id={`edit-button-${row.index || 0}`}
               >
-                <Edit color="primary" fontSize='small' />
+                <Edit color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
           }
@@ -254,7 +258,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                   setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
                 }}
               >
-                <DeleteIcon color="error" fontSize='small' />
+                <DeleteIcon color="error" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -269,6 +273,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     dispatch({ type: 'selection', selectedRecords: [] });
 
     setNextStep(false);
+    setNextStepToolTip(null);
     var data: any = [];
     const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`);
     data = response?.data?.data;
@@ -282,6 +287,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     });
     if (data.filter((_rows) => _rows.isValid === false).length > 0 || data.length === 0) {
       setNextStep(false);
+      setNextStepToolTip(repairJobMessage.repairProcess);
     } else {
       setNextStep(true);
     }
