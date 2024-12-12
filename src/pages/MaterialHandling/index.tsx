@@ -15,52 +15,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import axios, { CancelTokenSource } from 'axios';
 import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
 
-<<<<<<< HEAD
-const FIELD_TO_FILTER = [
-  {
-    fieldName: '_id',
-    fieldLabel: sidebarResource?.workOrder,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'warehouse',
-    fieldLabel: routes.warehouse.title,
-    resource: sidebarResource.warehouse,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'serializedAsset',
-    fieldLabel: routes.serializedAsset.title,
-    resource: sidebarResource.serializedAsset,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'productCategory',
-    fieldLabel: routes.productCategory.title,
-    resource: sidebarResource.productCategory,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'product',
-    fieldLabel: routes.product.title,
-    resource: sidebarResource.product,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'createDate',
-    fieldLabel: 'Create Date',
-    type: 'date'
-  }
-  // {
-  //   fieldName: 'requestDate',
-  //   fieldLabel: 'Request Date',
-  //   type: 'date'
-  // },
-];
-
-=======
->>>>>>> 1825391d6e3b94ecfd46a69e5661232fbf7b2d67
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -140,7 +94,7 @@ const MaterialHandling = () => {
   const FIELD_TO_FILTER = [
     {
       fieldName: '_id',
-      fieldLabel: routes.workOrder.title,
+      fieldLabel: resources?.workOrder?.titlePlural,
       resource: sidebarResource.workOrder,
       type: 'dropDown'
     },
