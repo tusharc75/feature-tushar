@@ -3,10 +3,10 @@ import { Checkbox, FormControlLabel } from '@material-ui/core';
 const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
         <p>{fieldData?.fieldLabel}</p>
       </div>
-      <div className="mt-4">
+      <div>
         <div className="">
           <FormControlLabel
             control={
@@ -15,9 +15,9 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
                 checked={deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term === 'Yes'}
                 onChange={(e) => {
                   if (e?.target?.checked) {
-                    setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), { field: fieldData?.fieldName, term: 'Yes' }]);
+                    setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName), { field: fieldData?.fieldName, term: 'Yes' }]);
                   } else {
-                    setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
+                    setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
                 color="primary"
@@ -34,9 +34,9 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
                 checked={deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term === 'No'}
                 onChange={(e) => {
                   if (e?.target?.checked) {
-                    setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), { field: fieldData?.fieldName, term: 'No' }]);
+                    setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName), { field: fieldData?.fieldName, term: 'No' }]);
                   } else {
-                    setDeepFilters([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName)]);
+                    setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
                 color="primary"

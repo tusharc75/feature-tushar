@@ -90,7 +90,7 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
         <p>{fieldData?.fieldLabel}</p>
         <div className="flex items-center justify-between">
           <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
@@ -102,13 +102,14 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
           />
         </div>
       </div>
-      <div className="mt-4">
+      <div>
         {options?.map((o, i) => {
           return (
             <div key={i} className="infinite-scroll">
               <FormControlLabel
                 control={
                   <Checkbox
+                    size={'small'}
                     name={o}
                     checked={(deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term || [])?.includes(o)}
                     onChange={(e) => {
@@ -124,10 +125,10 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
                         setDeepFilters((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                       }
                     }}
-                    color="primary"
+                    className="!text-[--new-theme-color] dark:!text-gray-200"
                   />
                 }
-                label={o}
+                label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">{o}</span>}
               />
             </div>
           );
