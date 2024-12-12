@@ -9,11 +9,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import routes from 'src/components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import ServiceMaster from 'src/pages/Product/ServiceMaster';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function ProductFrequencyDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const { state: { resources } }: any = useData();
 
   useEffect(() => {
     axiosInstance()
@@ -46,7 +48,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
               onClose();
             }}
             showRequiredLabel={false}
-            title={`${routes.workOrder.title} Scheduling`}
+            title={`${resources?.workOrder?.titleSingular} Scheduling`}
           />
           <CustomDialogContent>
             <div className="flex flex-col p-3">

@@ -222,7 +222,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <Typography>Storage Location:</Typography>
             <Typography>
               {row?.['storageLocation'] ? (
-                <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} rel="noreferrer" target="_blank">
+                <a className="link" href={`${routes?.storageLocationDetail?.path}/${row?.['storageLocationId']}`} rel="noreferrer" target="_blank">
                   {row?.['storageLocation']}
                 </a>
               ) : (

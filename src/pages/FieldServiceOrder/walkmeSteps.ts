@@ -1,6 +1,7 @@
 import { camelCase } from 'lodash';
 import { generateFormFieldSteps, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
 export const generateAddFieldTicket = (isNextStepAdd: Boolean = false): WalkmeData => {
@@ -40,7 +41,7 @@ export const createFieldServiceOrderFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${routes.fieldServiceOrder.title}`,
+    name: `Add ${sidebarResource?.fieldServiceOrder}`,
     url: '/field-service-order',
     type: 'flow',
     steps: [

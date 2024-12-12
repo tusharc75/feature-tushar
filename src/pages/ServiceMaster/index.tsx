@@ -22,7 +22,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
-const renderedFrom = camelCase(routes?.serviceMaster.title);
+const renderedFrom = camelCase(sidebarResource?.serviceMaster);
 
 const ServiceMaster = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -32,7 +32,7 @@ const ServiceMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -220,10 +220,10 @@ const ServiceMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serviceMaster]} />
+        <CustomBreadCrumbs routes={[{...routes?.serviceMaster, title:resources?.serviceMaster?.titleSingular}]} />
         <ImportExportLinks
           permissions={permissions?.serviceMaster}
-          module={routes.serviceMaster.title}
+          module={resources?.serviceMaster?.titleSingular}
           api={serviceMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -307,7 +307,7 @@ const ServiceMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.serviceMaster?.title.toLowerCase()} ${deleteRecord?.serviceName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.serviceMaster?.titleSingular.toLowerCase()} ${deleteRecord?.serviceName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

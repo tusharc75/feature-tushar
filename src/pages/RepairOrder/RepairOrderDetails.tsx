@@ -53,7 +53,7 @@ const dataAdded = {
 
 const RepairOrderDetails = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.repairOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.repairOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -167,7 +167,7 @@ const RepairOrderDetails = () => {
   const fetchRepairOrderData = () => {
     setRepairOrderData(null);
     axiosInstance()
-      .get(`${routes.repairOrder.path}/${id}`)
+      .get(`${routes?.repairOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
 
@@ -211,7 +211,7 @@ const RepairOrderDetails = () => {
       .put(`${repairOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(routes.repairOrder.path);
+        history.push(routes?.repairOrder?.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -297,7 +297,7 @@ const RepairOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes?.repairOrder,title:resources?.repairOrder?.titleSingular}, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1 ">
@@ -322,7 +322,7 @@ const RepairOrderDetails = () => {
                     </Button>
                   )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
-                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}>
+                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
                     <span>
                       <Button
                         variant={'contained'}
@@ -559,7 +559,7 @@ const RepairOrderDetails = () => {
       {showQuotationConfirmBox && (
         <ConfirmationDialog
           open={showQuotationConfirmBox}
-          message={`Are you sure you want to create new version of this ${routes?.quotation?.title?.toLowerCase()}?`}
+          message={`Are you sure you want to create new version of this ${resources?.repairOrder?.titleSingular?.toLowerCase()}?`}
           onClose={() => {
             setShowQuotationConfirmBox(false);
             setCurrentStep((prevStep) => {

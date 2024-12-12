@@ -49,7 +49,7 @@ const ServiceOrderDetailsPage = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loadingDetails, setLoadingDetails] = useState(true);
@@ -202,7 +202,7 @@ const ServiceOrderDetailsPage = () => {
       .put(`${fieldServiceOrder.api}/remove`, { ids: [serviceOrderData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.fieldServiceOrder.path}`);
+        history.push(`${routes?.fieldServiceOrder?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -213,7 +213,7 @@ const ServiceOrderDetailsPage = () => {
   const handleChangeStatus = (status) => {
     if (isOffline) return;
     axiosInstance()
-      .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
+      .patch(`${routes?.fieldServiceOrder?.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchServiceOrderData();
         setShowClosedConfirmBox(false);
@@ -232,7 +232,7 @@ const ServiceOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.fieldServiceOrder, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
+          <CustomBreadCrumbs routes={[{...routes?.fieldServiceOrder,title:resources?.fieldServiceOrder?.titleSingular}, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
           {!isOffline && (
@@ -399,7 +399,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.fieldServiceOrder.title.toLowerCase()} ?`}
+          message={`Are you sure you want to delete this ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

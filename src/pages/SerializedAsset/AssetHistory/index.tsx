@@ -50,13 +50,13 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     },
     {
       key: INVENTORY_HISTORY_TYPE.repair,
-      resource: sidebarResource.repairOrder,
-      title: routes.repairOrder.title
+      resource: sidebarResource?.repairOrder,
+      title: resources?.repairOrder?.titlePlural
     },
     {
       key: INVENTORY_HISTORY_TYPE.workOrder,
-      resource: sidebarResource.workOrder,
-      title: routes.workOrder.title
+      resource: sidebarResource?.workOrder,
+      title: resources?.workOrder?.titlePlural
     },
     {
       key: INVENTORY_HISTORY_TYPE.deliveryTicket,
@@ -179,7 +179,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               <Link
                 className="link"
                 title={row.original.reference}
-                to={`${routes.workOrderDetail.path}/${row.original.referenceId}`}
+                to={`${routes?.workOrderDetail?.path}/${row.original.referenceId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -189,7 +189,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               <Link
                 className="link"
                 title={row.original.reference}
-                to={`${routes.repairOrderDetail.path}/${row.original.referenceId}`}
+                to={`${routes?.repairOrderDetail.path}/${row.original.referenceId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

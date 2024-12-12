@@ -108,7 +108,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
                   {row.original.procurementName}
                 </a>
               ) : row.original?.procurementType === sidebarResource.productionOrder ? (
-                <a className="link text-truncate" href={`${routes.productionOrderDetail.path}/${row.original.procurementId}`} target="_blank">
+                <a className="link text-truncate" href={`${routes?.productionOrderDetail?.path}/${row.original.procurementId}`} target="_blank">
                   {row.original.procurementName}
                 </a>
               ) : (

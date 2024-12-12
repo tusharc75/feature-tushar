@@ -47,7 +47,7 @@ const StorageLocation = ({ warehouse }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.storageLocation}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.storageLocationDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes?.storageLocationDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

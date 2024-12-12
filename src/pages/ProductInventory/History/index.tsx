@@ -207,9 +207,11 @@ const History = ({ product, warehouse, storageLocation }) => {
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`);
                 } else if (row?.original?.referenceType === 'Rental Job') {
                   window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
+
                 } else if (row?.original?.referenceType === sidebarResource.workOrder) {
-                  window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`);
                 } else if (row?.original?.referenceType === sidebarResource.fieldTicket) {
+
                   window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);
                 } else if (row?.original?.referenceType === sidebarResource.subcontractAssembly) {
                   window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
@@ -382,7 +384,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                      window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
                     }}
                   >
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

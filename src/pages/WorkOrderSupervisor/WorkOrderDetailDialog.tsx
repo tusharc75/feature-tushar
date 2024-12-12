@@ -23,7 +23,7 @@ const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {
 
   const fetchWorkOrderData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}`)
+      .get(`${routes?.workOrder?.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
         setWorkOrderData({ ...data });
       })

@@ -40,23 +40,23 @@ let serviceOrderTimeout;
 const ServiceOrder = () => {
   const types = [
     {
-      key: `My ${routes.fieldServiceOrder.title}`,
+      key: `My ${sidebarResource?.fieldServiceOrder}`,
       value: 1
     },
     {
-      key: `All ${routes.fieldServiceOrder.title}`,
+      key: `All ${sidebarResource?.fieldServiceOrder}`,
       value: 2
     }
   ];
 
   const { setWalkmeData } = useSetWalkmeData();
 
-  const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.fieldServiceOrder);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldServiceOrder));
   const [renderCount, setRenderCount] = useState(0);
@@ -90,7 +90,7 @@ const ServiceOrder = () => {
         toastConfig.setToastConfig(e);
       }
     }
-    const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes?.fieldServiceOrderDetail?.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(renderedFrom, field));
@@ -317,7 +317,7 @@ const ServiceOrder = () => {
           {`Delete (${selectedRecords.length})`}
         </MenuItem>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${routes.fieldServiceOrder.title} Offline`}
+          {`Add ${resources?.fieldServiceOrder?.titleSingular} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}
@@ -331,7 +331,7 @@ const ServiceOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
+        <CustomBreadCrumbs routes={[{...routes?.fieldServiceOrder,title:resources?.fieldServiceOrder?.titleSingular}]} />
         {!isOffline && (
           <ImportExportLinks
             permissions={permissions?.fieldServiceOrder}
@@ -387,7 +387,7 @@ const ServiceOrder = () => {
         {showDeleteConfirmBox.open && (
           <ConfirmationDialog
             open={showDeleteConfirmBox.open}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ? `}
+            message={`Are you sure you want to delete the ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()}${selectedRecords.length ? 's' : ''} ? `}
             onClose={() => {
               setShowDeleteConfirmBox({ open: false, ids: [] });
             }}
@@ -403,7 +403,7 @@ const ServiceOrder = () => {
           serviceOrderId={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
-            history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
+            history.push(`${routes?.fieldServiceOrderDetail?.path}/${data._id}`);
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
           open={showManageDialog.open}

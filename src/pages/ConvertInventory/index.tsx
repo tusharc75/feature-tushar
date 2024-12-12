@@ -19,7 +19,7 @@ import axios, { CancelTokenSource } from 'axios';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ConvertInventory = () => {
-  const renderedFrom = camelCase(routes?.inventoryToAsset.title);
+  const renderedFrom = camelCase(sidebarResource?.inventoryToAsset);
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -210,7 +210,7 @@ const ConvertInventory = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <div>
-          <CustomBreadCrumbs routes={[routes.inventoryToAsset]} />
+          <CustomBreadCrumbs routes={[{...routes.inventoryToAsset,title:resources?.inventoryToAsset?.titleSingular}]} />
         </div>
       </div>
       <CustomContainer>

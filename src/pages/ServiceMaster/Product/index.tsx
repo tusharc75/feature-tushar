@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Button, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
-import { serviceMaster } from '../../../constants/helpers';
+import { serviceMaster, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
@@ -19,7 +19,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
+const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_product`;
 
 function Product({ id }) {
   const isMobile = useMediaQuery('(max-width:600px)');

@@ -39,6 +39,10 @@ const WarehouseDetailsPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [resourceData, setResourceData] = useState(null);
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   useEffect(() => {
     if (id) {
       getWarehouseFields();

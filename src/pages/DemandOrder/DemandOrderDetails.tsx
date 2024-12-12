@@ -204,7 +204,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.productionOrder });
                     }}
                   >
-                    {routes.productionOrder.title}
+                    {resources?.productionOrder?.titleSingular}
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (

@@ -27,7 +27,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
@@ -419,7 +419,7 @@ function App() {
       }
     }
     if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = routes?.pos?.path;
+      redirectToAnotherScreen = sidebarResource?.pos;
     }
 
     return !user ? (
@@ -828,10 +828,10 @@ function App() {
             <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
               <RepairTypeDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.pos.path}`}>
+            <PrivateRoute exact path={`${routes?.pos?.path}`}>
               <Pos />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
+            <PrivateRoute exact path={`${routes?.posProductDetail?.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>
@@ -882,28 +882,28 @@ function App() {
             <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
               <ServiceMasterDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrder.path}>
+            <PrivateRoute exact path={routes?.repairOrder?.path}>
               <RepairOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.repairOrderDetail?.path}/:id`}>
               <RepairOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productionOrder.path}>
+            <PrivateRoute exact path={routes?.productionOrder?.path}>
               <ProductionOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.productionOrderDetail?.path}/:id`}>
               <ProductionOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.fieldServiceOrder.path}>
+            <PrivateRoute exact path={routes?.fieldServiceOrder?.path}>
               <FieldServiceOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldServiceOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
               <FieldServiceOrderDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.workOrder.path}>
+            <PrivateRoute exact path={routes?.workOrder?.path}>
               <WorkOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.workOrderDetail?.path}/:id`}>
               <WorkOrderDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrderSupervisor.path}>
@@ -1017,7 +1017,7 @@ function App() {
             <PrivateRoute exact path={`${routes.storageLocation.path}`}>
               <StorageLocation />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.storageLocationDetail?.path}/:id`}>
               <StorageLocationDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transactionLock.path}`}>
@@ -1140,7 +1140,7 @@ function App() {
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrderInvoice.path}>
+            <PrivateRoute exact path={routes?.repairOrderInvoice?.path}>
               <GenerateInvoice resourceRendered="repairOrder" />
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementInvoice.path}>

@@ -38,20 +38,20 @@ import axios, { CancelTokenSource } from 'axios';
 const Quotation = () => {
   const types = [
     {
-      key: `My ${routes.quotation.title}`,
+      key: `My ${sidebarResource?.quotation}`,
       value: 1
     },
     {
-      key: `All ${routes.quotation.title}`,
+      key: `All ${sidebarResource?.quotation}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.quotation.title);
+  const renderedFrom = camelCase(sidebarResource?.quotation);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quotation));
   const [renderCount, setRenderCount] = useState(0);
@@ -92,14 +92,14 @@ const Quotation = () => {
               <>
                 {moment(row.original?.estimateEndDate).isBefore(moment(), 'day') && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} Expired`} enterTouchDelay={0} arrow placement="top">
+                    <HtmlTooltip title={`${resources?.quotation?.titleSingular} Expired`} enterTouchDelay={0} arrow placement="top">
                       <Warning className=" cursor-pointer text-[22px] md:text-[14px]" fontSize="small" color="error" />
                     </HtmlTooltip>
                   </Box>
                 )}
                 {isDateWithinNext15Days(row.original?.estimateEndDate) && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} about to renew`} enterTouchDelay={0} arrow placement="top">
+                    <HtmlTooltip title={`${resources?.quotation?.titleSingular} about to renew`} enterTouchDelay={0} arrow placement="top">
                       <span className=" block cursor-pointer text-yellow-600 dark:text-yellow-500">
                         <Help className=" text-[22px] md:text-[14px]" fontSize="small" />
                       </span>
@@ -343,7 +343,7 @@ const Quotation = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.quotation]} />
+        <CustomBreadCrumbs routes={[{...routes?.quotation, title:resources?.quotation?.titleSingular}]} />
         <ImportExportLinks
           permissions={permissions?.quotation}
           module="quotation"
@@ -408,7 +408,7 @@ const Quotation = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.quotation?.title?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
+            message={`Are you sure you want to delete ${resources?.quotation?.titleSingular?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

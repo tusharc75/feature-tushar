@@ -365,111 +365,57 @@ const routes = {
     path: '/product-auction/detail'
   },
   inventoryToAsset: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.inventoryToAsset,
     path: '/inventory-to-asset'
   },
   importExport: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.importExport,
     path: '/import-export'
   },
   inventoryCycle: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle'
   },
   inventoryCycleDetail: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle?.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
   },
   cycleCountDetermination: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountDetermination && storedRoutes?.cycleCountDetermination?.title
-        ? storedRoutes?.cycleCountDetermination?.title
-        : RESOURCE_LABEL.cycleCountDetermination,
     path: '/cycle-count-determination'
   },
   cycleCountPhysicalInventory: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountPhysicalInventory && storedRoutes?.cycleCountPhysicalInventory?.title
-        ? storedRoutes?.cycleCountPhysicalInventory?.title
-        : RESOURCE_LABEL.cycleCountPhysicalInventory,
     path: '/cycle-count-physical-inventory'
   },
   quotation: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation'
   },
   quotationDetail: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation/detail'
   },
   serviceMaster: {
-    title:
-      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
-        ? storedRoutes.serviceMaster?.title
-        : RESOURCE_LABEL.serviceMaster,
     path: '/service-master'
   },
   serviceMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
-        ? storedRoutes.serviceMaster?.title
-        : RESOURCE_LABEL.serviceMaster,
     path: '/service-master/detail'
   },
   repairOrder: {
-    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order'
   },
   repairOrderDetail: {
-    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order/detail'
   },
   productionOrder: {
-    title:
-      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
-        ? storedRoutes.productionOrder?.title
-        : RESOURCE_LABEL.productionOrder,
     path: '/production-order'
   },
   productionOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
-        ? storedRoutes.productionOrder?.title
-        : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
   fieldServiceOrder: {
-    title:
-      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
-        ? storedRoutes.fieldServiceOrder?.title
-        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/field-service-order'
   },
   fieldServiceOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
-        ? storedRoutes.fieldServiceOrder?.title
-        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/field-service-order/detail'
   },
   workOrder: {
-    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order'
   },
   workOrderDetail: {
-    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order/detail'
   },
   invoice: {

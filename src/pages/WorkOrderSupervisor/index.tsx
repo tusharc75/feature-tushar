@@ -41,28 +41,28 @@ const FIELD_TO_FILTER = [
   {
     key: 'serviceMaster',
     fieldName: 'service',
-    fieldLabel: routes.serviceMaster.title,
+    fieldLabel: sidebarResource?.serviceMaster,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
     key: 'workOrder',
     fieldName: 'workOrder',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
   {
     key: 'repairOrder',
     fieldName: 'repairOrder',
-    fieldLabel: routes.repairOrder.title,
-    resource: sidebarResource.repairOrder,
+    fieldLabel: sidebarResource?.repairOrder,
+    resource: sidebarResource?.repairOrder,
     type: 'dropDown'
   },
   {
     key: 'productionOrder',
     fieldName: 'productionOrder',
-    fieldLabel: routes.productionOrder.title,
+    fieldLabel: sidebarResource.productionOrder,
     resource: sidebarResource.productionOrder,
     type: 'dropDown'
   }
@@ -74,7 +74,7 @@ const WorkOrderSupervisor = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const [selectedUser, setSelectedUser] = useState(null);
@@ -147,12 +147,12 @@ const WorkOrderSupervisor = () => {
         accessor: 'workOrderNumber',
         title: 'Work Order',
         type: 'title',
-        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
+        link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
         target: '_blank'
       },
       {
         accessor: 'serviceName',
-        title: routes.serviceMaster.title,
+        title: resources?.quotation?.titleSingular,
         type: 'link',
         link: (data) => `${routes.serviceMasterDetail.path}/${data?.service?.optionValue}`,
         target: '_blank'
@@ -160,15 +160,15 @@ const WorkOrderSupervisor = () => {
       {
         accessor: 'productionOrderNumber',
         type: 'link',
-        title: routes.productionOrder.title,
-        link: (data) => `${routes.productionOrderDetail.path}/${data?.productionOrder?.optionValue}`,
+        title: resources?.productionOrder?.titleSingular,
+        link: (data) => `${routes?.productionOrderDetail?.path}/${data?.productionOrder?.optionValue}`,
         target: '_blank'
       },
       {
         accessor: 'repairOrderNumber',
         type: 'link',
-        title: routes.repairOrder.title,
-        link: (data) => `${routes.repairOrderDetail.path}/${data?.repairOrder?.optionValue}`,
+        title: resources?.repairOrder?.titleSingular,
+        link: (data) => `${routes?.repairOrderDetail?.path}/${data?.repairOrder?.optionValue}`,
         target: '_blank'
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
@@ -387,11 +387,11 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  window.open(`${routes.workOrder.path}`);
+                  window.open(`${routes?.workOrder?.path}`);
                 }}
               >
                 {' '}
-                {`${routes?.workOrder.title}`}
+                {`${resources?.workOrder?.titleSingular}`}
               </Button>
             )}
             {permissions?.repairOrder?.isCreate && (
@@ -399,11 +399,11 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  window.open(`${routes.repairOrder.path}`);
+                  window.open(`${routes?.repairOrder?.path}`);
                 }}
               >
                 {' '}
-                {`${routes?.repairOrder.title}`}
+                {`${resources?.repairOrder?.titleSingular}`}
               </Button>
             )}
             {permissions?.productionOrder?.isCreate && (
@@ -411,11 +411,11 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  window.open(`${routes.productionOrder.path}`);
+                  window.open(`${routes?.productionOrder?.path}`);
                 }}
               >
                 {' '}
-                {`${routes?.productionOrder.title}`}
+                {`${resources?.productionOrder?.titleSingular}`}
               </Button>
             )}
             {permissions?.assemblyOrder?.isCreate && (
@@ -507,10 +507,10 @@ const WorkOrderSupervisor = () => {
                 <Box display="flex">
                   <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
-                      {routes.workOrder.title}
+                      {resources?.workOrder?.titleSingular}
                     </ToggleButton>
                     <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
-                      {routes.repairOrder.title}
+                      {resources?.repairOrder?.titleSingular}
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </Box>

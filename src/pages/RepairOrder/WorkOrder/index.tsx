@@ -285,7 +285,7 @@ const WorkOrder = ({
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row.original['workOrder']._id}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
