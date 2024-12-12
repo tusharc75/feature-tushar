@@ -4,13 +4,13 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
+import { dateFormat, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
-const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_depreciationHistory`;
+const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_depreciationHistory`;
 
 const DepreciationHistory = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);

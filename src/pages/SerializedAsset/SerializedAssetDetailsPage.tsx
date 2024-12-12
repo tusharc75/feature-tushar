@@ -57,7 +57,7 @@ const SerializedAssetDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -157,7 +157,10 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''}` }]);
+        setCustomizedRoutes([
+          { ...routes.serializedAsset, title: resources?.serializedAsset?.titleSingular },
+          { title: `${data?.assetNumber ?? ''}` }
+        ]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
         setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
       }
@@ -629,7 +632,7 @@ const SerializedAssetDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.serializedAsset?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.serializedAsset?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

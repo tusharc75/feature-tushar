@@ -31,7 +31,7 @@ function PlanningView() {
     {
       key: 'rentalManagement',
       resource: sidebarResource.rentalManagement,
-      title: routes.rentalManagementDetail.title,
+      title: resources?.rentalManagement?.titlePlural,
       path: routes.rentalManagementDetail.path,
       fieldName: 'rentalJobName',
       start: 'estimateStartDate',
@@ -85,7 +85,7 @@ function PlanningView() {
     {
       key: 'repairJob',
       resource: sidebarResource.repairJob,
-      title: routes.repairJobDetail.title,
+      title: resources?.repairJob?.titlePlural,
       path: routes.repairJobDetail.path,
       fieldName: 'repairJobName',
       start: 'startDate',
@@ -130,7 +130,7 @@ function PlanningView() {
     {
       key: 'serializedAsset',
       resource: sidebarResource.serializedAsset,
-      title: routes.serializedAsset.title,
+      title: resources?.serializedAsset?.titlePlural,
       path: routes.serializedAssetDetail.path,
       fieldName: 'assetNumber',
       start: 'estimateStartDate',

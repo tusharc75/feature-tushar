@@ -1,10 +1,9 @@
 import { WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 
-export const createRepairJobFlow = (): WalkmeData => {
-
+export const createRepairJobFlow = (resources): WalkmeData => {
   const data: WalkmeData = {
-    name: `Add ${routes.repairJob.title}`,
+    name: `Add ${resources?.repairJob?.titleSingular}`,
     url: '/repair-job',
     type: 'flow',
     steps: [
@@ -16,7 +15,7 @@ export const createRepairJobFlow = (): WalkmeData => {
       {
         target: '#dialog-save-button',
         title: 'Save',
-        nextButtonName: 'Create',
+        nextButtonName: 'Create'
       }
     ]
   };

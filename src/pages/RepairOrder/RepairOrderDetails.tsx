@@ -62,7 +62,7 @@ const RepairOrderDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
@@ -123,7 +123,9 @@ const RepairOrderDetails = () => {
       if (dataAdded.addExistingDataAdded) return;
       const steps = generateAddExistingSerializedAsset(
         true,
-        repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`
+        repairOrderData?.type === REPAIR_ORDER_TYPE.external
+          ? `Add Existing Customer Assets`
+          : `Add Existing ${resources?.serializedAsset?.titlePlural}`
       ).steps;
       walkmeInstance.instance.push(steps);
       // immediately start next step
@@ -396,24 +398,10 @@ const RepairOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
-          {resourceData &&
-            resourceData?.tabs?.length &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 3}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -439,13 +427,13 @@ const RepairOrderDetails = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
             handlePrev={
               stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+              allowedToEdit &&
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationVersionData?.status
+              )
                 ? () => {
-                  setShowQuotationConfirmBox(true);
-                }
+                    setShowQuotationConfirmBox(true);
+                  }
                 : null
             }
             updateStatus={(step: number) => {
@@ -484,8 +472,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }

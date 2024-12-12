@@ -11,9 +11,14 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const CostDetails = ({ product, productData, minHeight = null }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [loading, setLoading] = useState(false);
   const [listPrice, setListPrice] = useState(0);
@@ -61,7 +66,7 @@ const CostDetails = ({ product, productData, minHeight = null }) => {
                 <Accordion defaultExpanded={data?.warehouse === 'All' ? true : false}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                     <Typography variant="subtitle2">
-                      {data?.warehouse === 'All' ? `${data?.warehouse} ${routes.warehouse.title}` : data?.warehouse}
+                      {data?.warehouse === 'All' ? `${data?.warehouse} ${resources?.warehouse?.titleSingular}` : data?.warehouse}
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>

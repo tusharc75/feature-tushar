@@ -1,4 +1,5 @@
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 
 export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
 
@@ -82,7 +83,7 @@ export const rentalManagementMessage = {
   rentalProductConsumed: 'Product already consumed',
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
-  repairSameWarehouse: `Selected records must be at same ${routes.warehouse.title} to perform this action`,
+  repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
   transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
   transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
   onlySwapAssets: 'Only Assets can be swapped',
@@ -127,7 +128,7 @@ export const subleaseMessage = {
   assetsAlradyReturned: 'Assets are already returned to supplier',
   receiveAssets: 'Reveive Assets to proceed',
 
-  sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
+  sameWarehouse: `Selected Assets must be in same ${sidebarResource?.warehouse} to perform this action`,
   pickupDeliveryDifferent: 'Pickup and Delivery must be different'
 };
 

@@ -29,7 +29,7 @@ import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
 
 const InventoryProduct = () => {
-  const renderedFrom = camelCase(routes?.productInventory.title);
+  const renderedFrom = camelCase(sidebarResource?.productInventory);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -38,7 +38,7 @@ const InventoryProduct = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [plantId, setPlantId] = useState(null);
@@ -192,7 +192,7 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isCreate
               ? TOOLTIP_MESSAGE.add
               : row?.original?.plantId === 'All'
-                ? `Select ${routes.warehouse.title}`
+                ? `Select ${resources?.warehouse?.titleSingular}`
                 : 'Add'
           }
         >
@@ -218,7 +218,7 @@ const InventoryProduct = () => {
               !permissions?.productInventory?.isUpdate
                 ? TOOLTIP_MESSAGE.remove
                 : row?.original?.plantId === 'All'
-                  ? `Select ${routes.warehouse.title}`
+                  ? `Select ${resources?.warehouse?.titleSingular}`
                   : user?.user?.brandPolicy?.allowNegativeInventory
                     ? 'Remove'
                     : !row?.original?.availableInventory
@@ -459,7 +459,7 @@ const InventoryProduct = () => {
     return (
       <>
         {user?.role?.selectedEntity?.policy?.isProductInventorySettings ? (
-          <HtmlTooltip title={plantId === 'All' ? `Select ${routes.warehouse.title}` : 'Setting'}>
+          <HtmlTooltip title={plantId === 'All' ? `Select ${resources?.warehouse?.titleSingular}` : 'Setting'}>
             <span>
               <IconButton
                 size="small"
@@ -480,11 +480,11 @@ const InventoryProduct = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productInventory]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.productInventory, title: resources?.productInventory?.titleSingular }]} />
         <ImportExportLinks
           additionalParams={getQueryString(true)}
           permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== 'All' }}
-          module="product inventory"
+          module={resources?.productInventory?.titleSingular}
           api={productInventory.api}
           afterImportCompleted={() => {
             fetchData();
@@ -516,7 +516,8 @@ const InventoryProduct = () => {
                 expenseItemValue,
                 setExpenseItemValue,
                 fromProductMaster,
-                setFromProductMaster
+                setFromProductMaster,
+                resources
               }}
             />
           }
@@ -635,7 +636,8 @@ const LeftSideContents = ({
   expenseItemValue,
   setExpenseItemValue,
   fromProductMaster,
-  setFromProductMaster
+  setFromProductMaster,
+  resources
 }) => {
   return (
     <>
@@ -657,7 +659,7 @@ const LeftSideContents = ({
         }}
         size="small"
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
       {user?.user?.brandPolicy?.storageLocation && (

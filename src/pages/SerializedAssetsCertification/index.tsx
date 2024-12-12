@@ -18,6 +18,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import routes from '../../components/Helpers/Routes';
 import {
+  CHILD_RESOURCE,
   dateFormatForInputControl,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -29,7 +30,7 @@ import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
+const renderedFrom = camelCase(CHILD_RESOURCE?.serializedAssetsCertification);
 
 const SerializedAssetsCertification = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,7 +55,7 @@ const SerializedAssetsCertification = () => {
   });
 
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -228,7 +229,7 @@ const SerializedAssetsCertification = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
+          <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titleSingular }]} />
         </Grid>
       </Grid>
       <div className="main-container">

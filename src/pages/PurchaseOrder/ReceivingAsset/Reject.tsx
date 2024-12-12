@@ -29,7 +29,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(true);
@@ -138,12 +138,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
             if (user?.user?.brandPolicy?.productInventorySerialNumberRequired || materialSerialNumbers[tempProduct?._id]?.length) {
               if (totalSelected !== removeActualReceivedQty) {
-                errors['assetIds'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
-                errors['serialNumber'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
+                errors['assetIds'] = `Selected ${resources?.serializedAsset?.titlePlural} & Serial Numbers must be equal to reject quantity`;
+                errors['serialNumber'] = `Selected ${resources?.serializedAsset?.titlePlural} & Serial Numbers must be equal to reject quantity`;
               }
             } else if (tempProduct?.assetQty) {
               if (removeActualReceivedQty !== d?.assetIds?.length) {
-                errors['assetIds'] = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+                errors['assetIds'] = `Selected ${resources?.serializedAsset?.titlePlural} must be equal to reject quantity`;
               }
             }
           }
@@ -370,7 +370,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                               {...params}
                                               variant="outlined"
                                               name="assetIds"
-                                              label={routes.serializedAsset.title}
+                                              label={resources?.serializedAsset?.titlePlural}
                                               error={validate([data]).assetIds}
                                               helperText={validate([data]).assetIds}
                                             />

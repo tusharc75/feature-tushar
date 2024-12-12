@@ -27,7 +27,7 @@ const WarehouseDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ const WarehouseDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }]);
   const [tabValue, setTabValue] = useState(0);
   const [resourceData, setResourceData] = useState(null);
 
@@ -55,7 +55,7 @@ const WarehouseDetailsPage = () => {
       } = await axiosInstance().get(`/warehouse/${id}`);
       setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
-      setCustomizedRoutes([routes.warehouse, { title: data.warehouseName }]);
+      setCustomizedRoutes([{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -206,7 +206,7 @@ const WarehouseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

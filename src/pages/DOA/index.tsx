@@ -12,10 +12,15 @@ import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
+import { useData } from 'src/StateProvider/Provider';
 
 const DOARequest = () => {
-  const renderedFrom = camelCase(routes?.DOARequest.title);
+  const renderedFrom = camelCase(sidebarResource.DOARequest);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
@@ -153,7 +158,7 @@ const DOARequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.DOARequest]} />
+        <CustomBreadCrumbs routes={[{ ...routes.DOARequest, title: resources?.DOARequest?.titlePlural }]} />
       </div>
       <CustomContainer>
         {columns ? (

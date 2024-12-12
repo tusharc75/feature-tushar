@@ -26,6 +26,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { addAssetsInRental } from '../rentalOfflineHelper';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -60,6 +61,11 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   const [theme] = useAppTheme();
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [productData, setProductData] = useState<TableContent[]>([]);
   const [tableData, setTableData] = useState<TableContent[]>([]);
   const [dataWithNumber, setDataWithNumber] = useState<TableContent[]>([]);
@@ -211,7 +217,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   return (
     <Dialog open onClose={closeDialog} TransitionComponent={CustomDialogTransition} fullScreen>
       <CustomDialogHeader
-        title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`}
+        title={isOffline ? `Assign ${resources?.serializedAsset?.titlePlural}` : `Create Non ${resources?.serializedAsset?.titlePlural}`}
         onClose={closeDialog}
       />
       <CustomDialogContent isFooterPresent={false}>
