@@ -32,7 +32,7 @@ const RoleDetailsPage = () => {
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { user, permissions, selectedEntity, resources },
     dispatch
   }: any = useData();
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ const RoleDetailsPage = () => {
     description: '',
     tier: ''
   });
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.role]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.role, title: resources?.role?.titleSingular }]);
 
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
@@ -272,7 +272,7 @@ const RoleDetailsPage = () => {
         field: data.field,
         resource: data.resource
       };
-      setCustomizedRoutes([routes.role, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.role, title: resources?.role?.titleSingular }, { title: data.name }]);
       if (data?.policy) {
         let copyOfResourcePolicy = {};
         for (const item in data?.policy) {
@@ -526,15 +526,15 @@ const RoleDetailsPage = () => {
               {roleData ? (
                 <>
                   <ImportExportRole
-                     resource={resource}
-                     field={field}
-                     childrenResource={childrenResource}
-                     setField={setField}
-                     setResource={setResource}
-                     setChildrenResource={setChildrenResource}
-                     roleName={values?.name}
-                     isExport={!isEditDeleteDisable}
-                     isImport={permissions?.role.isUpdate && isEdit && !isEditDeleteDisable}
+                    resource={resource}
+                    field={field}
+                    childrenResource={childrenResource}
+                    setField={setField}
+                    setResource={setResource}
+                    setChildrenResource={setChildrenResource}
+                    roleName={values?.name}
+                    isExport={!isEditDeleteDisable}
+                    isImport={permissions?.role.isUpdate && isEdit && !isEditDeleteDisable}
                   />
                   {permissions?.role.isUpdate && !isEdit && (
                     <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>

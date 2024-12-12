@@ -31,7 +31,7 @@ const FormBuilder = () => {
   let { dynamicResource }: any = queryString.parse(history.location.search);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -161,7 +161,7 @@ const FormBuilder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.formBuilder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />

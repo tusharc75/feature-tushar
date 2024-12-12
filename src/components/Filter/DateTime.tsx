@@ -2,7 +2,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
+import { dateFormat } from 'src/constants/helpers';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
@@ -24,7 +24,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
       toDate = new Date();
     }
     setDeepFilters([
-      ...deepFilters?.filter((d) => d?.field != `from_${fieldData?.fieldName}` && d?.field != `to_${fieldData?.fieldName}`),
+      ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
       ...[
         { field: `from_${fieldData?.fieldName}`, term: moment(fromDate).format('MM/DD/YYYY') },
         { field: `to_${fieldData?.fieldName}`, term: moment(toDate).format('MM/DD/YYYY') }
@@ -52,9 +52,11 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
     }
   }, []);
 
+  console.log(deepFilters?.find((d) => d?.field === `from_${fieldData?.fieldName}`)?.term);
+
   return (
-    <div>
-      <div className="flex items-center justify-between">
+    <>
+      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
         <p>{fieldData?.fieldLabel}</p>
       </div>
       <div className="mt-5 w-1/2">
@@ -96,7 +98,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             }
             onChange={(date: any) => {
               setDeepFilters([
-                ...deepFilters?.filter((d) => d?.field != `from_${fieldData?.fieldName}`),
+                ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}`),
                 { field: `from_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
               ]);
             }}
@@ -126,7 +128,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             }
             onChange={(date: any) => {
               setDeepFilters([
-                ...deepFilters?.filter((d) => d?.field != `to_${fieldData?.fieldName}`),
+                ...deepFilters?.filter((d) => d?.field !== `to_${fieldData?.fieldName}`),
                 { field: `to_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
               ]);
             }}
@@ -140,7 +142,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

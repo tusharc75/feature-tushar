@@ -24,7 +24,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { isMobile, isTablet } from 'react-device-detect';
 
 const Entity: FC = () => {
-  const renderedFrom = camelCase(routes?.entity.title);
+  const renderedFrom = camelCase(sidebarResource.entity);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -32,7 +32,7 @@ const Entity: FC = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
@@ -277,7 +277,7 @@ const Entity: FC = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.entity]} />
+        <CustomBreadCrumbs routes={[{ ...routes.entity, title: resources?.entity?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions[entityResource]}
           module="entity(s)"

@@ -22,11 +22,12 @@ import CreateNewDialog from './CreateNewDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductBuilder = () => {
-  const renderedFrom = camelCase(routes?.productBuilder.title);
+  const renderedFrom = camelCase(sidebarResource.productBuilder);
   const {
     state: {
       permissions: { productBuilder: permission },
-      user: { user }
+      user: { user },
+      resources
     }
   } = useData();
   const history = useHistory();
@@ -225,7 +226,7 @@ const ProductBuilder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.productBuilder?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

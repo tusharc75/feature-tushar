@@ -45,7 +45,7 @@ const minHeight = '250px';
 const ProductDetailsPage = () => {
   const [themeColor] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.product.title);
+  const renderedFrom = camelCase(sidebarResource.product);
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -159,7 +159,7 @@ const ProductDetailsPage = () => {
                 ? `${data.productData?.productName} - ${data.productData?.productNumber}`
                 : data.productData?.productName
             );
-            setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
+            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titleSingular }, { title: `${data.productData.productName}` }]);
             if (data?.productData?.entity && data?.productData?.entity !== undefined) {
               data.productData.entity = user.entity
                 ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
