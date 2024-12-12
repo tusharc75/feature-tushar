@@ -9,40 +9,44 @@ import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
+import { useData } from 'src/StateProvider/Provider';
 
-const customNodeStyles = {
-  purchaseOrder: {
-    name: routes.purchaseOrder.title,
-    ...COLOUR_MASTER.purchaseOrder
-  },
-  product: {
-    name: 'Product',
-    ...COLOUR_MASTER.product
-  },
-  service: {
-    name: 'Service',
-    ...COLOUR_MASTER.service
-  },
-  manualEntry: {
-    name: 'Manual Entry',
-    ...COLOUR_MASTER.product
-  },
-  assets: {
-    name: 'Assets',
-    ...COLOUR_MASTER.assets
-  },
-  serialNumber: {
-    name: 'Serial Number',
-    ...COLOUR_MASTER.transferAsset
-  },
-  receiving: {
-    name: 'Receiving',
-    ...COLOUR_MASTER.receivingTicket
-  }
-};
 
 const PurchaseOrderViews = ({ purchaseOrderData }) => {
-
+  const {
+    state: { resources }
+  }: any = useData();
+  
+  const customNodeStyles = {
+    purchaseOrder: {
+      name: resources?.purchaseOrder?.titleSingular,
+      ...COLOUR_MASTER.purchaseOrder
+    },
+    product: {
+      name: 'Product',
+      ...COLOUR_MASTER.product
+    },
+    service: {
+      name: 'Service',
+      ...COLOUR_MASTER.service
+    },
+    manualEntry: {
+      name: 'Manual Entry',
+      ...COLOUR_MASTER.product
+    },
+    assets: {
+      name: 'Assets',
+      ...COLOUR_MASTER.assets
+    },
+    serialNumber: {
+      name: 'Serial Number',
+      ...COLOUR_MASTER.transferAsset
+    },
+    receiving: {
+      name: 'Receiving',
+      ...COLOUR_MASTER.receivingTicket
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const toastConfig = useContext(CustomToastContext);

@@ -62,7 +62,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'sublease',
       progressiveBilling: true,
       path: routes.subleaseDetail.path,
-      title: routes.sublease.title
+      title: resources?.sublease?.titleSingular
     },
     {
       key: 'repairOrder',

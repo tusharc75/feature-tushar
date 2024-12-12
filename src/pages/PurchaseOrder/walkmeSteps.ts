@@ -1,11 +1,12 @@
 import { camelCase, startCase } from 'lodash';
 import { WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from 'src/StateProvider/Provider';
 
-export const createPurchaseOrderFlow = (): WalkmeData => {
+export const createPurchaseOrderFlow = (resource:any): WalkmeData => {
 
   const data: WalkmeData = {
-    name: `Add ${routes.purchaseOrder.title}`,
+    name: `Add ${resource}`,
     url: '/purchase-order',
     type: 'flow',
     steps: [
@@ -218,14 +219,14 @@ export const generateEditManualEntry = (waitForStepInsertion: boolean = false, i
   return data;
 };
 
-export const generateReceiveProduct = (addStorageLocation = false, index: number = 0): WalkmeData => {
+export const generateReceiveProduct = (addStorageLocation = false, index: number = 0, resource:any): WalkmeData => {
 
   const data: WalkmeData = {
     name: 'Receive',
     url: '/purchase-order/detail/:id',
     steps: [
       {
-        target: `#${camelCase(routes?.purchaseOrder.title)}_grid-4-table-checkbox-${index}`,
+        target: `#${camelCase(resource)}_grid-4-table-checkbox-${index}`,
         title: 'Receive'
       },
       {
@@ -250,14 +251,14 @@ export const generateReceiveProduct = (addStorageLocation = false, index: number
   return data;
 };
 
-export const generateRejectProduct = (addStorageLocation = false, index: number = 0): WalkmeData => {
+export const generateRejectProduct = (addStorageLocation = false, index: number = 0, resource): WalkmeData => {
 
   const data: WalkmeData = {
     name: 'Reject',
     url: '/purchase-order/detail/:id',
     steps: [
       {
-        target: `#${camelCase(routes?.purchaseOrder.title)}_grid-4-table-checkbox-${index}`,
+        target: `#${camelCase(resource)}_grid-4-table-checkbox-${index}`,
         title: 'Reject'
       },
       {

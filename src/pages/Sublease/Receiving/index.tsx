@@ -201,7 +201,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
           resource: sidebarResource.sublease,
           referenceId: subleaseData?._id,
           columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],

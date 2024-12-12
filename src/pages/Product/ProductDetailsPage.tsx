@@ -323,7 +323,7 @@ const ProductDetailsPage = () => {
                                     <Box display="flex" justifyContent="space-between">
                                       <Typography className="table-head-v1">{resources?.warehouse?.titleSingular}</Typography>
                                       {user?.user?.brandPolicy?.storageLocation && (
-                                        <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
+                                        <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
                                       )}
                                       <Typography className="table-head-v1">Qty</Typography>
                                     </Box>

@@ -33,16 +33,20 @@ import ManageSublease from './ManageSublease';
 
 const Sublease = () => {
   const { setWalkmeData } = useSetWalkmeData();
-  let renderedFrom = camelCase(routes.sublease?.title);
+  let renderedFrom = camelCase(sidebarResource.sublease);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.sublease.title}`,
+      key: `My ${resources?.sublease?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.sublease.title}`,
+      key: `All ${resources?.sublease?.titlePlural}`,
       value: 2
     }
   ];
@@ -52,11 +56,6 @@ const Sublease = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
-
   const [columns, setColumns] = useState(null);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.sublease));
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -80,7 +79,7 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
-    setWalkmeData([createSubleaseFlow(data)]);
+    setWalkmeData([createSubleaseFlow(data, resources?.sublease?.titleSingular)]);
     let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -252,10 +251,10 @@ const Sublease = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.sublease]} />
+        <CustomBreadCrumbs routes={[{ ...routes.sublease, title: resources?.sublease?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.sublease}
-          module={routes.sublease.title}
+          module={resources?.sublease?.titlePlural}
           api={sublease.api}
           afterImportCompleted={() => {
             fetchData();
@@ -325,7 +324,7 @@ const Sublease = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.sublease?.title} ? `}
+          message={`Are you sure you want to delete the ${resources?.sublease?.titleSingular?.toLowerCase()} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

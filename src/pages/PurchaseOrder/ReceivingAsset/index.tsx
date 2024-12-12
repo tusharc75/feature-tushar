@@ -32,7 +32,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
   const { generateColumns } = useColumns();
   const { selectedRecords, dataRows } = state;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
@@ -63,14 +63,14 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       let rejectIndex = dataRows.findIndex((e) => e.qty - (e?.rejectQuantity || 0) > 0);
       let stepData = [];
       if(receiveIndex > -1) {
-        stepData.push(generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, receiveIndex));
+        stepData.push(generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, receiveIndex, resources?.purchaseOrder?.titleSingular));
       }
       if(rejectIndex > -1) {
-        stepData.push(generateRejectProduct(user?.user?.brandPolicy?.storageLocation, rejectIndex));
+        stepData.push(generateRejectProduct(user?.user?.brandPolicy?.storageLocation, rejectIndex, resources?.purchaseOrder?.titleSingular));
       }
       if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
-        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation).steps;
+        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation,0, resources?.purchaseOrder?.titleSingular).steps;
         walkmeInstance.instance.push(steps);
         walkmeInstance.handleNext();
       }
@@ -420,7 +420,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+    fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
     resource: sidebarResource.purchaseOrder,
     referenceId: purchaseOrderData?._id,
     columns: columns,

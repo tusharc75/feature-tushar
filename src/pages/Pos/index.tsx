@@ -20,9 +20,10 @@ import ProductCard from './Product/Card';
 import ProductGrid from './Product/Grid';
 import QuantityDialog from './QuantityDialog';
 import Scan from './Scan';
+import { sidebarResource } from 'src/constants/helpers';
 
 const Pos = () => {
-  const renderedFrom = camelCase(routes?.pos.title);
+  const renderedFrom = camelCase(sidebarResource.pos);
 
   const toastConfig = useContext(CustomToastContext);
   const [searchVal, setSearchVal] = useState('');
@@ -170,7 +171,7 @@ const Pos = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.pos]} />
+          <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titleSingular }]} />
         </Grid>
         <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>

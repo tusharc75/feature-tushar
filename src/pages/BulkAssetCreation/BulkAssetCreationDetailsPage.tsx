@@ -33,13 +33,13 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Step from '../DynamicForm/Step';
 
 const BulkAssetCreationDetailsPage = () => {
-  const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
+  const renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -165,7 +165,7 @@ const BulkAssetCreationDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.bulkAssetCreation, { title: `${bulkAssetCreationData?.baNumber}` }]} />
+          <CustomBreadCrumbs routes={[{...routes.bulkAssetCreation, title: resources?.bulkAssetCreation?.titleSingular}, { title: `${bulkAssetCreationData?.baNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -270,7 +270,7 @@ const BulkAssetCreationDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.bulkAssetCreation?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

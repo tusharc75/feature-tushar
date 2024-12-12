@@ -154,7 +154,7 @@ const WarehouseDetailsPage = () => {
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange}>
           <CustomTab label={'Details'} value={0} />
           {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
-            <CustomTab label={routes.storageLocation.title} value={1} />
+            <CustomTab label={resources?.storageLocation?.titleSingular} value={1} />
           )}
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}
