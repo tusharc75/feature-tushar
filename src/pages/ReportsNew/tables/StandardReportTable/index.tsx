@@ -63,12 +63,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    selectedEntity,
+    selectedEntity
   } = reportState;
   
-  const {
-    state: { resources }
-  } = useData();
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -680,7 +677,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   subResource={selectedReport.resource}
                   referenceId={null}
                   permissions={permissions?.report}
-                  module={resources?.productionOrder?.titleSingular}
+                  module={routes?.productionOrder?.title}
                   api={`/report/${selectedReport.resource}`}
                   afterImportCompleted={() => {}}
                   isExportCount={true}
