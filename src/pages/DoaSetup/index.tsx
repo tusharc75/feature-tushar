@@ -114,7 +114,7 @@ export default function Doa() {
   const classes = useStyles();
   const [dataRows, setDataRows] = useState<any[]>([]);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [userSingleSelect, setUserSingleSelect] = useState(null);
   const [open, setOpen] = useState(false);
@@ -195,13 +195,13 @@ export default function Doa() {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format(dateFormat),
-          status: user.blocked ? user.blocked : false
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: moment(user.createdAt).format(dateFormat),
+        status: user.blocked ? user.blocked : false
+      }))
       : [];
 
     setDataRows(rows);
@@ -417,7 +417,7 @@ export default function Doa() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.doa]} />
+        <CustomBreadCrumbs routes={[{ ...routes.doa, title: resources?.doa?.titlePlural }]} />
       </Grid>
       {/* Tables Begins Here */}
       <Container>

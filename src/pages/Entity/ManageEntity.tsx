@@ -33,7 +33,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create New Entities' : 'Update Entity'}
+                title={isClone ? `Clone - ${cloneHeading}` : isNew ? `Create New ${resources?.entity?.titleSingular}` : `Update ${resources?.entity?.titleSingular}`}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) close();
                   else setShowConfirmDialog(true);

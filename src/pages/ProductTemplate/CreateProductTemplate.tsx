@@ -83,7 +83,7 @@ const ProductTemplate = () => {
   };
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [productTemplatePermissions, setProductTemplatePermissions] = useState({
     isCreate: false,
@@ -324,7 +324,7 @@ const ProductTemplate = () => {
           <div className="flex items-center justify-between w-full">
             <CustomBreadCrumbs
               routes={[
-                { title: routes.productTemplate.title, path: routes.productTemplate.path },
+                { title: resources?.productTemplate?.titleSingular, path: routes.productTemplate.path },
                 { title: id === '0' || isClone ? 'New' : initialValues && initialValues.name }
               ]}
               isConfirmBeforeClick={hasPermissionToUpdate}

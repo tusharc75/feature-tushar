@@ -23,7 +23,7 @@ const ProductCategoryDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const ProductCategoryDetailPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productCategoryResource, setProductCategoryResource] = useState(null);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.productCategory]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.productCategory, title: resources?.productCategory?.titleSingular }]);
 
   useEffect(() => {
     if (id) {
@@ -52,7 +52,7 @@ const ProductCategoryDetailPage = () => {
       setHeadingLbl(data.name);
       setProductCategoryData(data);
       setProductCategoryResource({ id: data._id });
-      setCustomizedRoutes([routes.productCategory, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.productCategory, title: resources?.productCategory?.titleSingular }, { title: data.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

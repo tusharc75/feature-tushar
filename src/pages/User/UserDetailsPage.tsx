@@ -93,7 +93,7 @@ const UserDetailsPage = () => {
   const userSetup = new URLSearchParams(queryParameter).get('userSetup');
   const { tab }: any = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
@@ -115,7 +115,7 @@ const UserDetailsPage = () => {
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.user, title: resources?.user?.titleSingular }]);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([]);
@@ -209,7 +209,7 @@ const UserDetailsPage = () => {
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
-        setCustomizedRoutes([routes.user, { title: `${data.firstName} ${data.lastName}` }]);
+        setCustomizedRoutes([{ ...routes.user, title: resources?.user?.titleSingular }, { title: `${data.firstName} ${data.lastName}` }]);
         let orgChartData = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.forEach((d) => {

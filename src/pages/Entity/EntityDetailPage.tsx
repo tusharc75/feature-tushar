@@ -32,7 +32,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { user, permissions, resources },
     dispatch
   }: any = useData();
   const [loading, setLoading] = useState(false);
@@ -46,7 +46,7 @@ const EntityDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.entity]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.entity, title: resources?.entity?.titleSingular }]);
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [doa, setDoa] = useState<any[]>([]);
@@ -78,7 +78,7 @@ const EntityDetailsPage = () => {
 
       handleMainPoints(data);
       setEntityData(data);
-      setCustomizedRoutes([routes.entity, { title: data?.entityName }]);
+      setCustomizedRoutes([{ ...routes.entity, title: resources?.entity?.titleSingular }, { title: data?.entityName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

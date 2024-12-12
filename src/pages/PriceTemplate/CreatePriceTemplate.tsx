@@ -80,7 +80,7 @@ const PriceTemplate = () => {
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
     isCreate: false,
@@ -325,7 +325,7 @@ const PriceTemplate = () => {
             <CustomBreadCrumbs
               routes={[
                 {
-                  title: routes.priceTemplate.title,
+                  title: resources?.priceTemplate?.titleSingular,
                   path: routes.priceTemplate.path
                 },
                 {

@@ -20,13 +20,13 @@ import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductTemplate = () => {
-  const renderedFrom = camelCase(routes?.productTemplate.title);
+  const renderedFrom = camelCase(sidebarResource.productTemplate);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -219,7 +219,7 @@ const ProductTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productTemplate]} />
+        <CustomBreadCrumbs routes={[{ ...routes.productTemplate, title: resources?.productTemplate?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -252,7 +252,7 @@ const ProductTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productTemplate?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.productTemplate?.titleSingular.toLowerCase()} ${deleteRecord?.name || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

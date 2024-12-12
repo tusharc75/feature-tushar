@@ -28,7 +28,7 @@ const AssignProductDialog = ({
   hideQty = false,
   pricingCondition = null
 }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -36,7 +36,7 @@ const AssignProductDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -250,7 +250,7 @@ const AssignProductDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
+      <CustomDialogHeader title={`Add ${resources?.product?.titlePlural}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
