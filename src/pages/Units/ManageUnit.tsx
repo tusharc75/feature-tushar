@@ -22,7 +22,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageUnit = ({ onClose, onSuccess, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -141,7 +141,7 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}` : `Create ${routes?.units?.title}`
+                title={`${id ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}` : `Create ${resources?.units?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

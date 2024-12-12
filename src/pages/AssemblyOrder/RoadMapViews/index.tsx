@@ -12,6 +12,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from 'src/StateProvider/Provider';
 
 const AssemblyOrderViews = (props) => {
   const [themeColor] = useAppTheme();
@@ -26,6 +27,10 @@ const AssemblyOrderViews = (props) => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   const customNodeStyles = {
     assemblyOrder: {
@@ -233,10 +238,10 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'managedPackage',
             ref_id: cmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.managedPackages.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {routes.managedPackages.title}
+                    {resources?.managedPackages?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {cmp.optionLabel}
@@ -270,10 +275,10 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'managedPackage',
             ref_id: pmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={`${routes.managedPackages.title}`}>
+              <HtmlTooltip arrow placement="top" title={`${resources?.managedPackages?.titleSingular}`}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {routes.managedPackages.title}
+                    {resources?.managedPackages?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {pmp.optionLabel}

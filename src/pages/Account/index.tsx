@@ -43,23 +43,24 @@ export default function Account(props) {
     account: { accountApi, accountResource, accountRoute }
   } = props;
 
+  const {
+    state: { user, permissions, selectedEntity, resources },
+    dispatch: entityDispatch
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes[accountResource]?.title}`,
+      key: `My ${resources[accountResource]?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes[accountResource]?.title}`,
+      key: `All ${resources[accountResource]?.titlePlural}`,
       value: 2
     }
   ];
 
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const {
-    state: { user, permissions, selectedEntity },
-    dispatch: entityDispatch
-  }: any = useData();
 
   const renderedFrom = camelCase(accountResource);
   const history = useHistory();
@@ -508,7 +509,7 @@ export default function Account(props) {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources[accountResource]?.titlePlural }]} />
         <ImportExportLinks
           permissions={accountPermissions}
           module="account(s)"

@@ -39,7 +39,7 @@ const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -47,7 +47,7 @@ const LeadDetailsPage = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.lead, title: resources?.lead?.titleSingular}]);
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
@@ -134,7 +134,7 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
+        setCustomizedRoutes([{...routes.lead, title: resources?.lead?.titleSingular}, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

@@ -4,95 +4,53 @@ const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.ge
 
 const routes = {
   customerAccount: {
-    title:
-      storedRoutes && storedRoutes.customerAccount && storedRoutes.customerAccount.title
-        ? storedRoutes.customerAccount?.title
-        : RESOURCE_LABEL.customerAccount,
     path: '/customer-account'
   },
   customerAccountDetail: {
-    title:
-      storedRoutes && storedRoutes.customerAccount && storedRoutes.customerAccount.title
-        ? storedRoutes.customerAccount?.title
-        : RESOURCE_LABEL.customerAccount,
     path: '/customer-account/detail'
   },
   supplierAccount: {
-    title:
-      storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
-        ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.account,
     path: '/supplier-account'
   },
   supplierAccountDetail: {
-    title:
-      storedRoutes && storedRoutes.supplierAccount && storedRoutes.supplierAccount.title
-        ? storedRoutes.supplierAccount?.title
-        : RESOURCE_LABEL.account,
     path: '/supplier-account/detail'
   },
   customerContact: {
-    title:
-      storedRoutes && storedRoutes.customerContact && storedRoutes.customerContact.title
-        ? storedRoutes.customerContact?.title
-        : RESOURCE_LABEL.customerContact,
     path: '/customer-contact'
   },
   customerContactDetail: {
-    title:
-      storedRoutes && storedRoutes.customerContact && storedRoutes.customerContact.title
-        ? storedRoutes.customerContact?.title
-        : RESOURCE_LABEL.customerContact,
     path: '/customer-contact/detail'
   },
   supplierContact: {
-    title:
-      storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
-        ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.contact,
     path: '/supplier-contact'
   },
   supplierContactDetail: {
-    title:
-      storedRoutes && storedRoutes.supplierContact && storedRoutes.supplierContact.title
-        ? storedRoutes.supplierContact?.title
-        : RESOURCE_LABEL.contact,
     path: '/supplier-contact/detail'
   },
   lead: {
-    title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead',
     data: {}
   },
   resourceLogs: {
-    title:
-      storedRoutes && storedRoutes.resourceLogs && storedRoutes.resourceLogs.title ? storedRoutes.resourceLogs?.title : RESOURCE_LABEL.resourceLogs,
     path: '/resource-logs',
     data: {}
   },
   leadDetail: {
-    title: storedRoutes && storedRoutes.lead && storedRoutes.lead.title ? storedRoutes.lead?.title : RESOURCE_LABEL.lead,
     path: '/lead/detail',
     data: {}
   },
   opportunity: {
-    title: storedRoutes && storedRoutes.opportunity && storedRoutes.opportunity.title ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: '/opportunity',
     data: {}
   },
   opportunityDetail: {
-    title: storedRoutes && storedRoutes.opportunity && storedRoutes.opportunity.title ? storedRoutes.opportunity?.title : RESOURCE_LABEL.opportunity,
     path: '/opportunity/detail',
     data: {}
   },
   projectSales: {
-    title:
-      storedRoutes && storedRoutes.projectSales && storedRoutes.projectSales.title ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectSales,
     path: '/project-sales'
   },
   projectSalesDetail: {
-    title:
-      storedRoutes && storedRoutes.projectSales && storedRoutes.projectSales.title ? storedRoutes.projectSales?.title : RESOURCE_LABEL.projectSales,
     path: '/project-sales/detail'
   },
   user: {
@@ -1158,31 +1116,15 @@ const routes = {
     path: '/payroll-policy/detail'
   },
   triggerNotificationMaster: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
-        ? storedRoutes.triggerNotificationMaster?.title
-        : RESOURCE_LABEL.triggerNotificationMaster,
     path: '/trigger-notification-master'
   },
   triggerNotificationMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
-        ? storedRoutes.triggerNotificationMaster?.title
-        : RESOURCE_LABEL.triggerNotificationMaster,
     path: '/trigger-notification-master/detail'
   },
   triggerNotificationHistory: {
-    title:
-      storedRoutes && storedRoutes.triggerNotificationHistory && storedRoutes.triggerNotificationHistory.title
-        ? storedRoutes.triggerNotificationHistory?.title
-        : RESOURCE_LABEL.triggerNotificationHistory,
     path: '/trigger-notification-history'
   },
   userAttendance: {
-    title:
-      storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title
-        ? storedRoutes.userAttendance?.title
-        : RESOURCE_LABEL.userAttendance,
     path: '/user-attendance'
   },
   dataList: {
@@ -1212,53 +1154,27 @@ const routes = {
     path: '/serialized-asset-status-change-request'
   },
   units: {
-    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
     path: '/units'
   },
   unitDetail: {
-    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
     path: '/units/detail'
   },
   workOrderPlanning: {
-    title:
-      storedRoutes && storedRoutes.workOrderPlanning && storedRoutes.workOrderPlanning.title
-        ? storedRoutes.workOrderPlanning?.title
-        : sidebarResource.workOrderPlanning,
     path: '/work-order-planning'
   },
   resourceDoaRequest: {
-    title:
-      storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title
-        ? storedRoutes.resourceDoaRequest?.title
-        : sidebarResource.resourceDoaRequest,
     path: '/resource-doa-request'
   },
   subcontractAssembly: {
-    title:
-      storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title
-        ? storedRoutes.subcontractAssembly?.title
-        : sidebarResource.subcontractAssembly,
     path: '/subcontract-assembly'
   },
   subcontractAssemblyDetail: {
-    title:
-      storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title
-        ? storedRoutes.subcontractAssembly?.title
-        : sidebarResource.subcontractAssembly,
     path: '/subcontract-assembly/detail'
   },
   managedPackages: {
-    title:
-      storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages?.title
-        ? storedRoutes.managedPackages?.title
-        : RESOURCE_LABEL.managedPackages,
     path: '/managed-packages'
   },
   managedPackagesDetail: {
-    title:
-      storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages.title
-        ? storedRoutes.managedPackages?.title
-        : RESOURCE_LABEL.managedPackages,
     path: '/managed-packages/detail'
   },
   integration: {
@@ -1315,17 +1231,9 @@ const routes = {
     path: '/assembly-order/detail'
   },
   workAutomation: {
-    title:
-      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
-        ? storedRoutes.workAutomation?.title
-        : RESOURCE_LABEL.workAutomation,
     path: '/work-automation'
   },
   workAutomationDetail: {
-    title:
-      storedRoutes && storedRoutes.workAutomation && storedRoutes.workAutomation.title
-        ? storedRoutes.workAutomation?.title
-        : RESOURCE_LABEL.workAutomation,
     path: '/work-automation/detail'
   }
 };

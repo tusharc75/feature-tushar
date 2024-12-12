@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CreateBillingDialog from './CreateBillingDialog';
@@ -65,7 +65,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
     let newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     columns = [...newColumns, ActionsRenderer];
     columns?.forEach((column) => {
