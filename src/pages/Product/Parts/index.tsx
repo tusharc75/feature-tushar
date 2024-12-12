@@ -16,11 +16,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { product } from '../../../constants/helpers';
+import { product, sidebarResource } from '../../../constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
 
 function Parts({ id }) {
-  const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}_bom`;
   const {
     state: { permissions }
   }: any = useData();

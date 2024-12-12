@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import { product, prepareDataForGrid, gridLoadingTimeout } from '../../constants/helpers';
+import { product, prepareDataForGrid, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
@@ -23,7 +23,7 @@ import CustomContainer from 'src/components/CustomContainer';
 const BOMTable = () => {
   const { id } = useParams();
 
-  const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}_bom`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

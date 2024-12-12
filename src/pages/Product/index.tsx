@@ -31,7 +31,7 @@ import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 const ignoreField = ['qty', 'priceTemplate'];
 
 const Product = () => {
-  const renderedFrom = camelCase(routes?.product.title);
+  const renderedFrom = camelCase(sidebarResource.product);
   const { setWalkmeData } = useSetWalkmeData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
@@ -58,7 +58,7 @@ const Product = () => {
   const [isProductType, setIsProductType] = useState(false);
   const [productColumns, setProductColumns] = useState(null);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
   useEffect(() => {
@@ -315,9 +315,9 @@ const Product = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.product?.titlePlural }]} />
         <ImportExportLinks
-          module={routes.product.title}
+          module={resources?.product?.titlePlural}
           permission={permissions.product}
           api={product.api}
           refrenceId={null}

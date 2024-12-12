@@ -54,32 +54,26 @@ const routes = {
     path: '/project-sales/detail'
   },
   user: {
-    title: storedRoutes && storedRoutes.user && storedRoutes.user.title ? storedRoutes.user?.title : RESOURCE_LABEL.user,
     path: '/user',
     data: {}
   },
   userDetail: {
-    title: storedRoutes && storedRoutes.user && storedRoutes.user.title ? storedRoutes.user?.title : RESOURCE_LABEL.user,
     path: '/user/detail',
     data: {}
   },
   entity: {
-    title: storedRoutes && storedRoutes.entity && storedRoutes.entity.title ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: '/entity',
     data: {}
   },
   entityDetail: {
-    title: storedRoutes && storedRoutes.entity && storedRoutes.entity.title ? storedRoutes.entity?.title : RESOURCE_LABEL.entity,
     path: '/entity/detail',
     data: {}
   },
   role: {
-    title: storedRoutes && storedRoutes.role && storedRoutes.role.title ? storedRoutes.role?.title : RESOURCE_LABEL.role,
     path: '/role',
     data: {}
   },
   roleDetail: {
-    title: storedRoutes && storedRoutes.role && storedRoutes.role.title ? storedRoutes.role?.title : RESOURCE_LABEL.role,
     path: '/role/detail',
     data: {}
   },
@@ -89,55 +83,38 @@ const routes = {
     data: {}
   },
   activityEmail: {
-    title: storedRoutes && storedRoutes.email && storedRoutes.email.title ? storedRoutes.email?.title : RESOURCE_LABEL.email,
     path: '/email',
     data: {}
   },
   activityNote: {
-    title: storedRoutes && storedRoutes.note && storedRoutes.note.title ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: '/note',
     data: {}
   },
   doa: {
-    title: storedRoutes && storedRoutes.doa && storedRoutes.doa.title ? storedRoutes.doa?.title : RESOURCE_LABEL.doa,
     path: '/doa'
   },
   product: {
-    title: storedRoutes && storedRoutes.product && storedRoutes.product.title ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: '/product'
   },
   productDetail: {
-    title: storedRoutes && storedRoutes.product && storedRoutes.product.title ? storedRoutes.product?.title : RESOURCE_LABEL.product,
     path: '/product/detail'
   },
   formBuilder: {
-    title: storedRoutes && storedRoutes.formBuilder && storedRoutes.formBuilder.title ? storedRoutes.formBuilder?.title : RESOURCE_LABEL.formBuilder,
     path: '/form-builder'
   },
   formBuilderResource: {
-    title: 'Resource',
     path: '/:resource'
   },
   forms: {
-    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
     path: '/forms'
   },
   formsDetail: {
-    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
     path: '/forms/detail'
   },
   termsAndConditions: {
-    title:
-      storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
-        ? storedRoutes.termsAndConditions?.title
-        : RESOURCE_LABEL.termsAndConditions,
     path: '/terms-and-conditions'
   },
   termsAndConditionsDetail: {
-    title:
-      storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
-        ? storedRoutes.termsAndConditions?.title
-        : RESOURCE_LABEL.termsAndConditions,
     path: '/terms-and-conditions/detail'
   },
   profilePage: {
@@ -145,24 +122,12 @@ const routes = {
     path: '/profile'
   },
   priceTemplate: {
-    title:
-      storedRoutes && storedRoutes.priceTemplate && storedRoutes.priceTemplate.title
-        ? storedRoutes.priceTemplate?.title
-        : RESOURCE_LABEL.priceTemplate,
     path: '/price-template'
   },
   priceTemplateDetail: {
-    title:
-      storedRoutes && storedRoutes.priceTemplate && storedRoutes.priceTemplate.title
-        ? storedRoutes.priceTemplate?.title
-        : RESOURCE_LABEL.priceTemplate,
     path: '/price-template'
   },
   productBuilder: {
-    title:
-      storedRoutes && storedRoutes.productBuilder && storedRoutes.productBuilder.title
-        ? storedRoutes.productBuilder?.title
-        : RESOURCE_LABEL.productBuilder,
     path: '/product-builder'
   },
   brandConfiguration: {
@@ -170,38 +135,18 @@ const routes = {
     path: '/brand-configuration'
   },
   currencyConverter: {
-    title:
-      storedRoutes && storedRoutes.currencyConverter && storedRoutes.currencyConverter.title
-        ? storedRoutes.currencyConverter?.title
-        : RESOURCE_LABEL.currencyConverter,
     path: '/currency-converter'
   },
   productCategory: {
-    title:
-      storedRoutes && storedRoutes.productCategory && storedRoutes.productCategory.title
-        ? storedRoutes.productCategory?.title
-        : RESOURCE_LABEL.productCategory,
     path: '/product-category'
   },
   productCategoryDetail: {
-    title:
-      storedRoutes && storedRoutes.productCategory && storedRoutes.productCategory.title
-        ? storedRoutes.productCategory?.title
-        : RESOURCE_LABEL.productCategory,
     path: '/product-category/detail'
   },
   productTemplate: {
-    title:
-      storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
-        ? storedRoutes.productTemplate?.title
-        : RESOURCE_LABEL.productTemplate,
     path: '/product-template'
   },
   productTemplateDetail: {
-    title:
-      storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
-        ? storedRoutes.productTemplate?.title
-        : RESOURCE_LABEL.productTemplate,
     path: '/product-template'
   },
   productInventory: {
@@ -399,9 +344,11 @@ const routes = {
     path: '/repair-job/detail'
   },
   salesOrder: {
+    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order'
   },
   salesOrderDetail: {
+    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order/detail'
   },
   packages: {

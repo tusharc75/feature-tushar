@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import Dialog from '@material-ui/core/Dialog/Dialog';
-import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Box, IconButton } from '@material-ui/core';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -16,7 +16,7 @@ import LogDialog from './LogDialog';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const renderedFrom = camelCase(routes?.formBuilder.title);
+const renderedFrom = camelCase(sidebarResource.formBuilder);
 
 const HistoryLogs = ({ onClose, resource }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });

@@ -6,6 +6,7 @@ import SidebarContent from 'src/pages/ReportsNew/SidebarContent';
 import SidebarHead from 'src/pages/ReportsNew/SidebarHead';
 import useReport from 'src/pages/ReportsNew/useReport';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import ReportsContent from 'src/pages/ReportsNew/ReportsContent';
 
 const ReportsCenter = () => {
   const state = useReport();
@@ -36,7 +37,7 @@ const ReportsCenter = () => {
       </Box>
 
       <Layout sidebarHead={<SidebarHead state={state} />} sidebarContent={<SidebarContent state={state} />}>
-        Hi
+        {({ isSidebarOpen, isMobile }) => <ReportsContent state={state} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />}
       </Layout>
     </div>
   );

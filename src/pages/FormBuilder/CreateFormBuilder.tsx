@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateFormBuilder = () => {
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const classes = useStyles();
@@ -317,7 +317,7 @@ const CreateFormBuilder = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.formBuilder, { title: isNew ? 'New' : resource }]}
+              routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titleSingular }, { title: isNew ? 'New' : resource }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 if (!isEqual(orisection, section) && permissions?.isUpdate?.isUpdate) {

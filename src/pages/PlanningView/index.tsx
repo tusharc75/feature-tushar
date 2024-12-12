@@ -139,7 +139,7 @@ function PlanningView() {
     {
       key: 'product',
       resource: sidebarResource.product,
-      title: routes.product.title,
+      title: resources?.product?.titlePlural,
       path: routes.productDetail.path,
       fieldName: 'productName',
       start: 'estimateStartDate',

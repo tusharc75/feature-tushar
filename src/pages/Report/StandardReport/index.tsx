@@ -1,49 +1,45 @@
-import React, { useEffect } from 'react';
-import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, Button, Box, IconButton, CircularProgress } from '@material-ui/core';
-import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
-import axios from 'axios';
-import moment from 'moment';
-import { MdDescription, MdFilterList } from 'react-icons/md';
-import styles from 'src/pages/Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomContainer from 'src/components/CustomContainer';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  prepareDataForGrid,
-  gridLoadingTimeout,
-  downloadExcel,
-  isObjectEmpty,
-  sidebarResource,
-  REPORT_LIST,
-  formatAmountWithCurrency,
-  CustomDialogTransition
-} from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import ReportFilters from '../ReportFilters';
-import AverageCostHistory from '../AverageCostHistory';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { useAppTheme } from 'src/constants/AppConfig';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DialogContent from '@material-ui/core/DialogContent';
+import { Box, Button, CircularProgress, Grid, IconButton } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
-import PadData from 'src/pages/Report/PadData';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios from 'axios';
+import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
+import moment from 'moment';
+import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import SendMailMenu from './SendMailMenu';
+import { MdDescription, MdFilterList } from 'react-icons/md';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import { useAppTheme } from 'src/constants/AppConfig';
+import {
+  CustomDialogTransition,
+  REPORT_LIST,
+  downloadExcel,
+  formatAmountWithCurrency,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
+import PadData from 'src/pages/Report/PadData';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import AverageCostHistory from '../AverageCostHistory';
+import SendMailMenu from './SendMailMenu';
 
 let cancelTokenSource = null;
 

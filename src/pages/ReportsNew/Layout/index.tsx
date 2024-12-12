@@ -13,7 +13,7 @@ const Layout = ({ sidebarContent, children, sidebarHead }) => {
         <Sidebar state={state} sidebarHead={sidebarHead}>
           {sidebarContent}
         </Sidebar>
-        <Content state={state}>{children}</Content>
+        <Content state={state}>{children({ isSidebarOpen, isMobile })}</Content>
       </div>
     </div>
   );

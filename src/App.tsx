@@ -498,7 +498,7 @@ function App() {
             <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
               <OpportunityDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path="/doa">
+            <PrivateRoute exact path={routes.doa.path}>
               <Doa />
             </PrivateRoute>
             <PrivateRoute exact path="/add-doa">
