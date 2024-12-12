@@ -35,7 +35,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -78,7 +78,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   useEffect(() => {
     const walkmeData = generateAddExistingSerializedAsset(
       false,
-      repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`
+      repairOrderData?.type === REPAIR_ORDER_TYPE.external
+        ? `Add Existing Customer Assets`
+        : `Add Existing ${resources?.serializedAsset?.titlePlural}`
     );
     setWalkmeData([walkmeData]);
   }, []);
@@ -507,7 +509,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           }}
           id="add-existing-serialized-asset-menu-item"
         >
-          {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`}
+          {repairOrderData?.type === REPAIR_ORDER_TYPE.external
+            ? `Add Existing Customer Assets`
+            : `Add Existing ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
           <MenuItem
@@ -523,7 +527,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               });
             }}
           >
-            {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
+            {repairOrderData?.type === REPAIR_ORDER_TYPE.external
+              ? `Add New Customer Assets`
+              : `Add New ${resources?.serializedAsset?.titleSingular}`}
           </MenuItem>
         )}
         {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
@@ -755,7 +761,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
               }}
             >
-              {`Add Existing ${routes.serializedAsset.title}`}
+              {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
             </MenuItem>
             {permissions?.serializedAsset?.isCreate && (
               <MenuItem
@@ -771,7 +777,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
                 }}
               >
-                {`Add New ${routes.serializedAsset.title}`}
+                {`Add New ${resources?.serializedAsset?.titleSingular}`}
               </MenuItem>
             )}
           </MenuList>

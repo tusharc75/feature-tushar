@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, dateFormat, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, dateFormat, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
@@ -18,7 +18,7 @@ import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_certificationHistory`;
+const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_certificationHistory`;
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null, fetchAssetData = null }) => {
   const toastConfig = useContext(CustomToastContext);

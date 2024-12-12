@@ -48,7 +48,7 @@ const SerializedAsset = ({
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({
     open: false,
@@ -398,7 +398,7 @@ const SerializedAsset = ({
           }}
           id={'add-existing-serialised-asset-menu-item'}
         >
-          Add Existing {routes.serializedAsset.title}
+          Add Existing {resources?.serializedAsset?.titlePlural}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
           <MenuItem
@@ -407,7 +407,7 @@ const SerializedAsset = ({
             }}
             id={'add-new-serialised-asset-menu-item'}
           >
-            Add New {routes.serializedAsset.title}
+            Add New {resources?.serializedAsset?.titleSingular}
           </MenuItem>
         )}
       </>

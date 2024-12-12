@@ -30,7 +30,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
 
@@ -251,7 +251,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.packages?.title} ? `}
+          message={`Are you sure you want to delete the ${resources?.packages?.titleSingular} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

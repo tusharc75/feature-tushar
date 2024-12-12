@@ -39,18 +39,7 @@ import axios, { CancelTokenSource } from 'axios';
 import './style.scss';
 
 const QuoteBuilders = () => {
-  const types = [
-    {
-      key: `My ${routes.quote.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.quote.title}`,
-      value: 2
-    }
-  ];
-
-  const renderedFrom = camelCase(routes?.quoteBuilder.title);
+  const renderedFrom = camelCase(sidebarResource?.quoteBuilder);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { visibleColumns } = state;
@@ -58,8 +47,20 @@ const QuoteBuilders = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.quoteBuilder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.quoteBuilder?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   const { generateColumns, checkStaticField } = useColumns();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quoteBuilder));
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -104,7 +105,7 @@ const QuoteBuilders = () => {
     let data = response?.data?.data;
 
     let columns = [];
-    let newColumns = generateColumns(routes.quoteBuilder.title, data, `${routes.quoteBuilder.path}/detail`);
+    let newColumns = generateColumns(resources?.quoteBuilder?.titlePlural, data, `${routes.quoteBuilder.path}/detail`);
     newColumns?.forEach((o) => {
       if (o.accessor === 'quoteName') {
         o.cell = ({ row }) => (
@@ -493,10 +494,10 @@ const QuoteBuilders = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.quoteBuilder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.quoteBuilder, title: resources?.quoteBuilder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.quoteBuilder}
-          module={routes.quoteBuilder.title}
+          module={resources?.quoteBuilder?.titlePlural}
           api={qbApi}
           afterImportCompleted={() => {
             fetchData();
@@ -565,7 +566,7 @@ const QuoteBuilders = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.quoteBuilder.title}   ${deleteRecord?.quoteName || ''}?`}
+            message={`Are you sure you want to delete ${resources?.quoteBuilder?.titleSingular}   ${deleteRecord?.quoteName || ''}?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

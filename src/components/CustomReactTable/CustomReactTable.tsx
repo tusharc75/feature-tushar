@@ -85,7 +85,8 @@ const CustomReactTable = ({
   showOnlyMobileView = false,
   onRowClick = null,
   enableGlobalSearch = true,
-  pagination = true
+  pagination = true,
+  topLeftSlot = null
 }) => {
   const {
     currentEditingCellPosition,
@@ -541,6 +542,7 @@ const CustomReactTable = ({
             state={state}
             expander={expander}
             hideExportTable={hideExportTable}
+            topLeftSlot={topLeftSlot}
           />
           {!isMobileView && !showOnlyMobileView && (
             <div className="relative" ref={tableContainerRef}>

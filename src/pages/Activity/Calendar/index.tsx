@@ -39,7 +39,7 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user }
+      user: { user, resources }
     }
   } = useData();
   const history = useHistory();
@@ -137,7 +137,7 @@ const BigCalendar = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.calendar?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (

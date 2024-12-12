@@ -100,13 +100,13 @@ const MaterialHandling = () => {
     },
     {
       fieldName: 'warehouse',
-      fieldLabel: routes.warehouse.title,
+      fieldLabel: resources?.warehouse?.titlePlural,
       resource: sidebarResource.warehouse,
       type: 'dropDown'
     },
     {
       fieldName: 'serializedAsset',
-      fieldLabel: routes.serializedAsset.title,
+      fieldLabel: resources?.serializedAsset?.titlePlural,
       resource: sidebarResource.serializedAsset,
       type: 'dropDown'
     },
@@ -242,7 +242,7 @@ const MaterialHandling = () => {
                               </>
                             )}
                             <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
-                              {routes.warehouse.title} :{' '}
+                              {resources?.warehouse?.titleSingular} :{' '}
                               <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
                             </Typography>
                           </Box>

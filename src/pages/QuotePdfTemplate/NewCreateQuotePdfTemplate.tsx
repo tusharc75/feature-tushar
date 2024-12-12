@@ -86,7 +86,7 @@ export default function NewCreateQuotePdfTemplate() {
   const [quoteData, setQuoteData] = useState(null);
   const [version, setVersion] = useState(null);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
@@ -493,7 +493,7 @@ export default function NewCreateQuotePdfTemplate() {
                   <CustomBreadCrumbs
                     routes={[
                       {
-                        title: routes.quotePdfTemplate.title,
+                        title: resources?.quotePdfTemplate?.titleSingular,
                         path: routes.quotePdfTemplate.path
                       },
                       {

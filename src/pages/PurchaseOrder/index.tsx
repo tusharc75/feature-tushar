@@ -51,7 +51,7 @@ const PurchaseOrder = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseOrder));
@@ -305,7 +305,15 @@ const PurchaseOrder = () => {
             setWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
           renderInput={(params) => (
-            <TextField {...params} margin="none" size="small" name="plant" label={`${routes.warehouse.title}`} variant="outlined" fullWidth />
+            <TextField
+              {...params}
+              margin="none"
+              size="small"
+              name="plant"
+              label={`${resources?.warehouse?.titleSingular}`}
+              variant="outlined"
+              fullWidth
+            />
           )}
         />
         {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}

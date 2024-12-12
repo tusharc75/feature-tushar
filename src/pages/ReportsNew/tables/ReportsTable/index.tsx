@@ -15,6 +15,7 @@ import { TableCommonProps } from 'src/pages/ReportsNew/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DisplayFilterChip from 'src/pages/ReportsNew/tables/DisplayFilterChip';
 
 let cancelTokenSource = null;
 
@@ -216,7 +217,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
 
   const getFilter = useCallback(
-    (isExport = false) => {
+    (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
       let filterQuery = `page=${page}&`;
       let deepFilter = [];
 
@@ -239,15 +240,15 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
         });
       }
 
-      if (filterByIds?.length > 0) {
-        const filterById = filterByIds
+      if (filterByIdsP?.length > 0) {
+        const filterById = filterByIdsP
           ?.filter((f) => f?.term?.length > 0)
           ?.map((f) => {
             const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
             return {
               field: f?.field,
               term: {
-                [term]: f?.term?.map((d: any) => d.optionValue)
+                [term]: f?.term?.map?.((d: any) => d.optionValue)
               }
             };
           });
@@ -259,10 +260,10 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       const isStatusPeriod =
         resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
-      if (deepFilters?.length > 0) {
+      if (deepFiltersP?.length > 0) {
         deepFilter = [
           ...deepFilter,
-          ...deepFilters
+          ...deepFiltersP
             ?.filter((d) => {
               const hasTermLength = d?.term?.length ? true : false;
               if (isStatusPeriod) {
@@ -281,8 +282,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
             })
         ];
       }
-      if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))?.length) {
-        deepFilters
+      if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))?.length) {
+        deepFiltersP
           ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
           ?.forEach((ele) => {
             filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
@@ -296,48 +297,51 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     [deepFilters, filterByIds, filterTerm, filters, limit, page, resourceColumns, resourceStartCase, search, sorting]
   );
 
-  const fetchResourceData = useCallback(() => {
-    setShowGrid(true);
+  const fetchResourceData = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+      setShowGrid(true);
 
-    let filterQuery = getFilter();
+      let filterQuery = getFilter(false, deepFiltersP, filterByIdsP);
 
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel();
-    }
-    cancelTokenSource = axios.CancelToken.source();
-    dispatch({ type: 'loading', loading: true });
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel();
+      }
+      cancelTokenSource = axios.CancelToken.source();
+      dispatch({ type: 'loading', loading: true });
 
-    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
-    if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder/${filterQuery}`;
-    } else {
-      api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
-    }
+      let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
+      if (resourceCamelCase === 'quotes') {
+        api = `/report/quote-builder/${filterQuery}`;
+      } else {
+        api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
+      }
 
-    axiosInstance()
-      .get(api, {
-        cancelToken: cancelTokenSource?.token
-      })
-      .then(({ data: { data, count } }) => {
-        data = data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          return finalObject;
-        });
+      axiosInstance()
+        .get(api, {
+          cancelToken: cancelTokenSource?.token
+        })
+        .then(({ data: { data, count } }) => {
+          data = data.map((u: any) => {
+            let finalObject = prepareDataForGrid(u);
+            return finalObject;
+          });
 
-        dispatch({ type: 'initialize', data: data, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        if (!axios.isCancel(err)) {
+          dispatch({ type: 'initialize', data: data, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
-          toastConfig.setToastConfig(err);
-        }
-      });
-  }, [dispatch, getFilter, resourceCamelCase, toastConfig]);
+        })
+        .catch((err) => {
+          if (!axios.isCancel(err)) {
+            setTimeout(() => {
+              dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
+            toastConfig.setToastConfig(err);
+          }
+        });
+    },
+    [dispatch, getFilter, resourceCamelCase, toastConfig]
+  );
 
   const getApi = () => {
     if (!columns) return;
@@ -376,7 +380,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
         {showGrid && (
           <>
             <ThemeButton
-              iconForMobile={false}
+              iconForMobile={<MdFilterList />}
               size="small"
               variant="outlined"
               color="primary"
@@ -404,6 +408,15 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
 
       {columns ? (
         <CustomReactTable
+          topLeftSlot={
+            <DisplayFilterChip
+              deepFilters={deepFilters}
+              filterByIds={filterByIds}
+              fetchResourceData={fetchResourceData}
+              setDeepFilters={setDeepFilters}
+              setFilterByIds={setFilterByIds}
+            />
+          }
           height={'calc(100vh - 270px)'}
           columns={columns}
           state={state}

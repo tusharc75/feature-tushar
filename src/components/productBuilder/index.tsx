@@ -60,7 +60,7 @@ const ProductBuilder = (props) => {
     rightSideContents
   } = props;
 
-  const renderedFrom = `${camelCase(`${routes?.quote.title}_Product`)}`;
+  const renderedFrom = `${camelCase(`${sidebarResource.quoteBuilder}_Product`)}`;
 
   const toastConfig = useContext(CustomToastContext);
 

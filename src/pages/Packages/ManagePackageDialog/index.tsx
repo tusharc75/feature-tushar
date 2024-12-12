@@ -35,7 +35,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [packageName, setPackageName] = useState('');
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -84,10 +84,9 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           for (const key in referenceData) {
             const foundField = fieldsDataForCreate?.find((e) => e.fieldName === key);
             if (referenceData[key] && foundField) {
-              if (foundField?.type === "multiSelect" && isString(referenceData[key])) {
+              if (foundField?.type === 'multiSelect' && isString(referenceData[key])) {
                 initialData[key] = [referenceData[key]];
-              }
-              else {
+              } else {
                 initialData[key] = referenceData[key];
               }
             }
@@ -108,8 +107,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
     const findOptions = customerOption.filter((item) => item.optionValue === value);
     if (findOptions?.length) {
       return findOptions[0]?.optionLabel;
-    }
-    else {
+    } else {
       return null;
     }
   };
@@ -188,7 +186,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
-                title={!packageId ? 'Create Package' : `${isClone ? `Clone - ${packageName}` : 'Edit'}`}
+                title={!packageId ? `Create ${resources?.packages?.titleSingular}` : `${isClone ? `Clone - ${packageName}` : 'Edit'}`}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);

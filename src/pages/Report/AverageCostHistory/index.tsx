@@ -26,7 +26,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -267,7 +267,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       Cell: ({ row }) =>
         row?.original?.warehouse ? (
           <h5 className="text-truncate" title={row?.original?.warehouse}>

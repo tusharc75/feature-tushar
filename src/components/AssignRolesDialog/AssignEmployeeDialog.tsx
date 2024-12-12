@@ -29,7 +29,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isAssigning, setAssigning] = useState(false);
@@ -226,8 +226,8 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
               {...params}
               margin="dense"
               name="plant"
-              placeholder={routes.warehouse.title}
-              label={routes.warehouse.title}
+              placeholder={resources?.warehouse?.titleSingular}
+              label={resources?.warehouse?.titleSingular}
               variant="outlined"
               fullWidth
               className="m-0"
