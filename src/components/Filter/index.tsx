@@ -135,7 +135,7 @@ const Filter = ({
         <BsFillFunnelFill size={40} className="flex-shrink-0 text-[--new-theme-color]" />
         <div className="flex-grow">
           <h6 className="mb-[5px] text-[20px] font-semibold leading-[22px]">Filters for {filterTitle}</h6>
-          <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-600 max-sm:hidden">
+          <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-400 max-sm:hidden">
             See results in your view based on the filters your select here.
           </p>
         </div>
