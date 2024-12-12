@@ -78,7 +78,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                   : e.referenceType === sidebarResource.transferAsset
                     ? routes.transferAssetDetail.path
                     : e.referenceType === sidebarResource.workOrder
-                      ? routes.workOrderDetail.path
+                      ? routes?.workOrderDetail?.path
                       : e.referenceType === sidebarResource.subcontractAssembly
                         ? routes.subcontractAssemblyDetail.path
                         : e.referenceType === sidebarResource.rentalManagement

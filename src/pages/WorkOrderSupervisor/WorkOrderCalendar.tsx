@@ -297,7 +297,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
                         <IconButton
                           size="small"
                           onClick={() => {
-                            window.open(`${routes.workOrderDetail.path}/${d?._id}`);
+                            window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
                           }}
                         >
                           <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

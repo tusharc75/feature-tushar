@@ -215,7 +215,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                   window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
                 }
                 else if (row?.original?.referenceType === sidebarResource.workOrder) {
-                  window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`);
                 }
                 else if (row?.original?.referenceType === sidebarResource.fieldTicket) {
                   window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);

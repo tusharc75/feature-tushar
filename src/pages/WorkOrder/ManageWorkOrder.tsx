@@ -150,7 +150,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             message: data.message
           });
           if (isRedirectToDetailPage) {
-            history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
+            history.push(`${routes?.workOrderDetail?.path}/${data?.data?._id}`);
           }
           onSuccess();
         })

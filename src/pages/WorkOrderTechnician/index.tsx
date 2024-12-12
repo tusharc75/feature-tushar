@@ -25,7 +25,7 @@ const FIELD_TO_FILTER = [
   {
     key: 'workOrder',
     fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },

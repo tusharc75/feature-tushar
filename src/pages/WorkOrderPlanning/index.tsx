@@ -245,7 +245,7 @@ const WorkOrderPlanning = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.workOrderPlanning,title:resources?.workOrderPlanning?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{...routes?.workOrderPlanning,title:resources?.workOrderPlanning?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

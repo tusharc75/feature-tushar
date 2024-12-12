@@ -163,7 +163,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
             <Link
               className="link"
               title={row?.original?.reference}
-              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+              to={`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`}
               target="_blank"
             >
               {row?.original?.reference}

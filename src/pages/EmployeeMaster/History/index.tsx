@@ -24,8 +24,8 @@ const TECHNICIAN_RESOURCE = [
   {
     key: 'workOrder',
     resource: sidebarResource.workOrder,
-    path: routes.workOrderDetail.path,
-    title: routes.workOrder.title
+    path: routes?.workOrderDetail?.path,
+    title: sidebarResource?.workOrder
   },
   {
     key: 'rentalManagement',

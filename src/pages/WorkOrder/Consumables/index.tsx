@@ -52,7 +52,7 @@ const Consumables = ({
   workOrderData,
   serialNumberRequired = false
 }) => {
-  let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
+  let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_consumable`;
 
   const workOrderId = workOrderData?._id;
   const warehouse = workOrderData?.warehouse;

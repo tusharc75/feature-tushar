@@ -400,7 +400,7 @@ const Report = () => {
               className="link"
               target="_blank"
               title={row?.original?.reference}
-              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+              to={`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`}
             >
               {row?.original?.reference}
             </Link>

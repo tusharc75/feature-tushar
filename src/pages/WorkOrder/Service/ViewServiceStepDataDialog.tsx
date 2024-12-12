@@ -5,9 +5,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 
-const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
+const renderedFrom = `${sidebarResource?.workOrder}_Service_StepData`;
 
 const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
   const { generateColumns } = useColumns();

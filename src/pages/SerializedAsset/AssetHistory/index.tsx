@@ -38,8 +38,8 @@ const ASSET_HISTORY_RESOURCE = [
   },
   {
     key: INVENTORY_HISTORY_TYPE.workOrder,
-    resource: sidebarResource.workOrder,
-    title: routes.workOrder.title,
+    resource: sidebarResource?.workOrder,
+    title: sidebarResource?.workOrder,
   },
   {
     key: INVENTORY_HISTORY_TYPE.deliveryTicket,
@@ -179,7 +179,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
               <Link
                 className="link"
                 title={row.original.reference}
-                to={`${routes.workOrderDetail.path}/${row.original.referenceId}`}
+                to={`${routes?.workOrderDetail?.path}/${row.original.referenceId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

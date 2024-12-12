@@ -900,10 +900,10 @@ function App() {
             <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
               <FieldServiceOrderDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.workOrder.path}>
+            <PrivateRoute exact path={routes?.workOrder?.path}>
               <WorkOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.workOrderDetail?.path}/:id`}>
               <WorkOrderDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrderSupervisor.path}>

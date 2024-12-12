@@ -18,7 +18,7 @@ import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
 const FIELD_TO_FILTER = [
   {
     fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
@@ -204,7 +204,7 @@ const MaterialHandling = () => {
                                   onClick={() => {
                                     let route;
                                     if (data?.referenceType === sidebarResource.workOrder) {
-                                      route = routes.workOrderDetail.path;
+                                      route = routes?.workOrderDetail?.path;
                                     } else if (data?.referenceType === sidebarResource.fieldTicket) {
                                       route = routes.fieldTicketDetail.path;
                                     }

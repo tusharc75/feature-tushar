@@ -82,7 +82,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         'type'
       ]?.includes(f?.fieldData?.fieldName)
     );
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
     const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
 
     columns.forEach((c) => {
@@ -134,7 +134,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrder}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

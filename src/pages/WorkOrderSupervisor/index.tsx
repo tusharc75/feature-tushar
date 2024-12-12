@@ -48,7 +48,7 @@ const FIELD_TO_FILTER = [
   {
     key: 'workOrder',
     fieldName: 'workOrder',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
@@ -147,7 +147,7 @@ const WorkOrderSupervisor = () => {
         accessor: 'workOrderNumber',
         title: 'Work Order',
         type: 'title',
-        link: (data) => `${routes.workOrderDetail.path}/${data?.workOrder}`,
+        link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
         target: '_blank'
       },
       {
@@ -387,11 +387,11 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  window.open(`${routes.workOrder.path}`);
+                  window.open(`${routes?.workOrder?.path}`);
                 }}
               >
                 {' '}
-                {`${routes?.workOrder.title}`}
+                {`${resources?.workOrder?.titleSingular}`}
               </Button>
             )}
             {permissions?.repairOrder?.isCreate && (
@@ -507,7 +507,7 @@ const WorkOrderSupervisor = () => {
                 <Box display="flex">
                   <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
-                      {routes.workOrder.title}
+                      {resources?.workOrder?.titleSingular}
                     </ToggleButton>
                     <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
                       {resources?.repairOrder?.titleSingular}

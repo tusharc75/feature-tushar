@@ -20,7 +20,7 @@ const customNodeStyles = {
     ...COLOUR_MASTER.assets
   },
   workOrder: {
-    name: routes.workOrder.title,
+    name: sidebarResource?.workOrder,
     ...COLOUR_MASTER.service
   },
   loadingTicket: {
@@ -251,7 +251,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'workorder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
         window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
