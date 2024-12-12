@@ -21,7 +21,7 @@ import { findAll, findOne, objectStore } from '../../../constants/indexdbhelper'
 import routes from '.././../../components/Helpers/Routes';
 
 const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => {
-  const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-2`;
+  const renderedFrom = `${camelCase(sidebarResource?.deliveryTicket)}_grid-2`;
   const {
     state: { user, selectedEntity }
   }: any = useData();

@@ -26,7 +26,7 @@ const CageManagement = () => {
   const [plantOptions, setPlantOptions] = useState([]);
   const [plantId, setPlantId] = useState(null);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [scanDialog, setScanDialog] = useState(false);
   const [cartDialog, setHistoryDialog] = useState(false);
@@ -147,7 +147,9 @@ const CageManagement = () => {
       </Grid>
       <CustomContainer>
         <ListingPageHeader
-          leftSideContents={<LeftSideContent {...{ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }} />}
+          leftSideContents={
+            <LeftSideContent {...{ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory, resources }} />
+          }
           searchValue={searchVal}
           onSearch={(e) => {
             setSearchVal(e.target.value);
@@ -205,7 +207,7 @@ const CageManagement = () => {
 
 export default CageManagement;
 
-const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }) => {
+const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory, resources }) => {
   return (
     <>
       <Autocomplete
@@ -225,7 +227,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
           }
         }}
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
       <Autocomplete

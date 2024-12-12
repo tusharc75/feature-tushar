@@ -15,15 +15,19 @@ import {
 } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, productInventory, rentalManagement } from 'src/constants/helpers';
 
 const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId, type = 'add', nonSerializedInventory = [] }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [selectedProduct, setSelectedProduct] = useState(selectedProducts[0]);
   const [products, setProducts] = useState([]);
@@ -189,7 +193,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <TableCell>{routes.warehouse.title}</TableCell>
+                  <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
                   <TableCell align="left">Qty</TableCell>
                   <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
                 </TableRow>

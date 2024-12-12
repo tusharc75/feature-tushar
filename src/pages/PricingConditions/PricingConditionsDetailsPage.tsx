@@ -47,7 +47,7 @@ function PricingConditionsDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -271,7 +271,7 @@ function PricingConditionsDetailsPage() {
           <CustomBreadCrumbs
             routes={[
               {
-                title: routes.pricingCondition.title,
+                title: resources?.pricingCondition?.titleSingular,
                 path: routes.pricingCondition.path
               },
               {
@@ -594,7 +594,7 @@ function PricingConditionsDetailsPage() {
                                                   style={{ margin: 0 }}
                                                   value={
                                                     values[
-                                                    'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                                                      'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                                                     ]
                                                   }
                                                   onChange={(e) =>

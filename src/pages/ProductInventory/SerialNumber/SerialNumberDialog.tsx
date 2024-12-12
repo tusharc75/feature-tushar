@@ -9,8 +9,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
 import { Autocomplete } from '@material-ui/lab';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from 'src/StateProvider/Provider';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [serialNumberCount, setSerialNumberCount] = useState(0);
   const [addserialNumber, setAddserialNumber] = useState(false);
   const [refresh, setRefresh] = useState(true);
@@ -19,9 +24,8 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
 
   useEffect(() => {
     if (selectedWarehouse == 'All') {
-      setSerialNumberCount(0)
-    }
-    else {
+      setSerialNumberCount(0);
+    } else {
       fetchRecords();
     }
   }, [selectedWarehouse]);
@@ -40,14 +44,17 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
 
   const fetchRecords = () => {
     let api = `${productInventory.api}/product/${product}?warehouse=${selectedWarehouse}`;
-    axiosInstance().get(api).then(({ data: { data } }) => {
-      const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
-      if (count > 0) {
-        setSerialNumberCount(count);
-      } else {
-        setSerialNumberCount(0);
-      }
-    }).catch((err) => { });
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data } }) => {
+        const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
+        if (count > 0) {
+          setSerialNumberCount(count);
+        } else {
+          setSerialNumberCount(0);
+        }
+      })
+      .catch((err) => {});
   };
 
   return (
@@ -74,18 +81,13 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             )}
           </Grid>
           <Grid item xs={6} sm={6}>
-            <Grid
-              container
-              direction="row"
-              justifyContent="flex-end"
-              alignItems="center"
-            >
+            <Grid container direction="row" justifyContent="flex-end" alignItems="center">
               {serialNumberCount ? (
                 <Box>
                   <Button
@@ -104,11 +106,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
             </Grid>
           </Grid>
         </Grid>
-        {refresh ?
-          <History
-            product={product}
-            warehouse={selectedWarehouse === 'All' ? null : selectedWarehouse} />
-          : null}
+        {refresh ? <History product={product} warehouse={selectedWarehouse === 'All' ? null : selectedWarehouse} /> : null}
       </CustomDialogContent>
       {addserialNumber && (
         <AddSerialNumber

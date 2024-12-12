@@ -4,7 +4,7 @@ import { sidebarResource } from 'src/constants/helpers';
 
 export const generateAddExistingSerializedAsset = (
   waitForStepInsertion = false,
-  name = `Add Existing ${routes.serializedAsset.title}`
+  name = `Add Existing ${sidebarResource?.serializedAsset}`
 ): WalkmeData => ({
   name: name,
   url: `${routes?.repairOrderDetail?.path}/:id`,

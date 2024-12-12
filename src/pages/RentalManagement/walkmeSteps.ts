@@ -106,8 +106,8 @@ export const generateAddStepEditProduct = (index: number, waitForStepInsertion =
   ]
 });
 
-export const generateAssignStepAssignSerializedAsset = (index: number, waitForStepInsertion = false): WalkmeData => ({
-  name: `Assign ${routes.serializedAsset.title}`,
+export const generateAssignStepAssignSerializedAsset = (index: number, waitForStepInsertion = false, resources = null): WalkmeData => ({
+  name: `Assign ${resources?.serializedAsset?.titlePlural}`,
   url: '/rental-management/detail/:id',
   steps: [
     {
@@ -260,11 +260,11 @@ export const createCloseStep = (renderedFrom: string) => {
   return data;
 };
 
-export const createRentalJobsFlow = (fields: any): WalkmeData => {
+export const createRentalJobsFlow = (fields: any, resources: any): WalkmeData => {
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${routes.rentalManagement.title}`,
+    name: `Add ${resources?.rentalManagement?.titleSingular}`,
     url: '/rental-management',
     type: 'flow',
     steps: [

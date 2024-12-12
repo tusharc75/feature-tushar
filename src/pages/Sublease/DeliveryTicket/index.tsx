@@ -19,13 +19,20 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
+  sidebarResource,
   sublease
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const { selectedRecords } = state;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -312,7 +319,10 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
         } else if (!checkUniqueWarehouse()) {
-          errorMessages.push({ index: e.index, message: subleaseMessage.sameWarehouse });
+          errorMessages.push({
+            index: e.index,
+            message: subleaseMessage.sameWarehouse?.replace(sidebarResource?.warehouse, resources?.warehouse?.titleSingular)
+          });
         } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
           errorMessages.push({ index: e.index, message: subleaseMessage.pickupDeliveryDifferent });
         }

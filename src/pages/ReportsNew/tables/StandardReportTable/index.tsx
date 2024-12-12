@@ -31,6 +31,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import AverageCostHistory from 'src/pages/ReportsNew/tables/AverageCostHistory';
+import DisplayFilterChip from 'src/pages/ReportsNew/tables/DisplayFilterChip';
 import PadData from 'src/pages/ReportsNew/tables/PadData';
 import {
   CreditDebitRenderer,
@@ -230,7 +231,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     if (!isExport) {
       setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
     }
@@ -313,15 +314,15 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       });
     }
 
-    if (filterByIds?.length > 0) {
-      const filterById = filterByIds
+    if (filterByIdsP?.length > 0) {
+      const filterById = filterByIdsP
         ?.filter((f) => f?.term?.length > 0)
         ?.map((f) => {
           const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
           return {
             field: f?.field,
             term: {
-              [term]: f?.term?.map((d: any) => d.optionValue)
+              [term]: f?.term?.map?.((d: any) => d.optionValue)
             }
           };
         });
@@ -333,10 +334,10 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     const isStatusPeriod =
       resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
-    if (deepFilters?.length > 0) {
+    if (deepFiltersP?.length > 0) {
       deepFilter = [
         ...deepFilter,
-        ...deepFilters
+        ...deepFiltersP
           ?.filter((d) => {
             const hasTermLength = d?.term?.length ? true : false;
             if (isStatusPeriod) {
@@ -356,8 +357,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       ];
     }
 
-    if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
-      deepFilters
+    if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
+      deepFiltersP
         ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
         ?.forEach((ele) => {
           filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
@@ -405,9 +406,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     };
   };
 
-  const fetchResourceData = () => {
+  const fetchResourceData = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     setShowGrid(true);
-    let filterQuery = getQueryString();
+    let filterQuery = getQueryString(false, deepFiltersP, filterByIdsP);
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -717,6 +718,15 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       {columns ? (
         <>
           <CustomReactTable
+            topLeftSlot={
+              <DisplayFilterChip
+                deepFilters={deepFilters}
+                filterByIds={filterByIds}
+                fetchResourceData={fetchResourceData}
+                setDeepFilters={setDeepFilters}
+                setFilterByIds={setFilterByIds}
+              />
+            }
             height={'calc(100vh - 270px)'}
             columns={getFilteredColumn(columns)}
             state={state}

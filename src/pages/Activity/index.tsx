@@ -22,7 +22,7 @@ const Activity = ({ type }) => {
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState(null);
@@ -51,7 +51,7 @@ const Activity = ({ type }) => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
+        <CustomBreadCrumbs routes={[{ title: capitalize(resources[type].titlePlural) }]} />
       </div>
       <CustomContainer>
         {filter && (

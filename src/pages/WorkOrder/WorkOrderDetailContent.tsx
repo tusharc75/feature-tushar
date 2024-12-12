@@ -388,8 +388,8 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
         !workOrderData?.currentRepairJob
           ? true
           : false,
-      children: `Create ${routes?.repairJob.title}`,
-      tooltip: `Create ${routes?.repairJob.title}`,
+      children: `Create ${resources?.repairJob?.titleSingular}`,
+      tooltip: `Create ${resources?.repairJob?.titleSingular}`,
       onClick: () => setShowManageRepairJobDialog({ open: true })
     },
     {

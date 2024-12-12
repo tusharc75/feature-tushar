@@ -217,7 +217,17 @@ const ConvertInventory = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContents
-              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId, dispatch }}
+              {...{
+                warehouseOptions,
+                warehouseId,
+                setWarehouseId,
+                setStorageLocationId,
+                user,
+                storageLocationOptions,
+                storageLocationId,
+                dispatch,
+                resources
+              }}
             />
           }
           searchValue={search}
@@ -271,7 +281,8 @@ const LeftSideContents = ({
   user,
   storageLocationOptions,
   storageLocationId,
-  dispatch
+  dispatch,
+  resources
 }) => {
   return (
     <>
@@ -295,7 +306,7 @@ const LeftSideContents = ({
           }
         }}
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
       {user?.user?.brandPolicy?.storageLocation && (

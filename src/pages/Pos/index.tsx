@@ -1,11 +1,4 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  TextField
-} from '@material-ui/core';
+import { Badge, Box, Button, Grid, IconButton, TextField } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
@@ -208,13 +201,13 @@ const Pos = () => {
                       {...params}
                       margin="dense"
                       name="plant"
-                      placeholder={routes.warehouse.title}
+                      placeholder={resources?.warehouse?.titleSingular}
                       variant="standard"
                       fullWidth
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                   )
                 }
               />

@@ -84,8 +84,8 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
 
   return (
     <div>
-      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
-        <p>{fieldData?.fieldLabel}</p>
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
+        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
         {fieldData?.lookup && fieldData?.lookupResource && (
           <div className="flex items-center justify-between">
             <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
@@ -135,8 +135,14 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
                 </div>
               );
             })}
-            {loading && <p>Loading...</p>}
-            {!hasMore && <p>No more data to load.</p>}
+            {loading ? (
+              <p>Loading...</p>
+            ) : options.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-600">No Data Found</div>
+            ) : (
+              ''
+            )}
+            {!hasMore && <p></p>}
           </>
         ) : (
           <>

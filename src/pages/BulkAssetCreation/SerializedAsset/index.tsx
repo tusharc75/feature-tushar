@@ -15,7 +15,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -117,7 +117,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
       <>
         <ImportExportLinks
           permissions={permissions?.packages}
-          module={routes.serializedAsset.title}
+          module={resources?.serializedAsset?.titlePlural}
           api={`${serializedAsset.api}/custom-template`}
           afterImportCompleted={() => {
             fetchData();

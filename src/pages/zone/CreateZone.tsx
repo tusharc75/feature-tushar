@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 const CreateZone = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
@@ -138,10 +138,10 @@ const CreateZone = (props) => {
                   isClone
                     ? `Clone - ${cloneHeading}`
                     : zoneId
-                    ? !isUpdateDisabled
-                      ? 'Update ' + routes.zone.title
-                      : values['name']
-                    : 'Create ' + routes.zone.title
+                      ? !isUpdateDisabled
+                        ? 'Update ' + resources?.zone?.titleSingular
+                        : values['name']
+                      : 'Create ' + resources?.zone?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) onClose();
