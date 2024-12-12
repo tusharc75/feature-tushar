@@ -160,5 +160,5 @@ export const subcontractAssemblyMessage = {
 };
 
 export const repairJobMessage = {
-  repairProcess: 'Please enter the price to proceed on the next step'
+  repairProcess: 'Please enter the price to proceed'
 };
