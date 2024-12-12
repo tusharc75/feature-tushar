@@ -284,8 +284,6 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
     });
   }, [selectedData, selectedResources]);
 
-  console.log(resource);
-
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       {showGrid && (
