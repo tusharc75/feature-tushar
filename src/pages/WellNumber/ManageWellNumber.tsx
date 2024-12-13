@@ -24,7 +24,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, resources }
   }: any = useData();
   const ref = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -190,7 +190,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${wellNumberData?.wellNumber}`) : 'Create ' + routes.wellNumber.title}
+                title={id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${wellNumberData?.wellNumber}`) : 'Create ' + resources?.wellNumber?.titleSingular}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);

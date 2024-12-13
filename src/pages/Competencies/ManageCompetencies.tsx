@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -165,7 +165,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.competencyName ? `(${initialData.values?.competencyName})` : ''}`
-                    : `Create ${routes?.competencies?.title}`
+                    : `Create ${resources?.competencies?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

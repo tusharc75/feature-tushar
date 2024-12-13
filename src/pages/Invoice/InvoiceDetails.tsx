@@ -44,14 +44,14 @@ import { RiExchangeBoxFill } from 'react-icons/ri';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.invoice.title);
+  const renderedFrom = camelCase(sidebarResource.invoice);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -62,7 +62,6 @@ const InvoiceDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [invoiceFields, setInvoiceFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
@@ -137,8 +136,6 @@ const InvoiceDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
       }
       setHeadingLabel(data.invoiceNumber);
-      setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
-
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       setAllowedToDelete(
         permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete
@@ -237,7 +234,7 @@ const InvoiceDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.invoice, title: resources?.invoice?.titlePlural }, { title: invoiceData?.invoiceNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -368,7 +365,7 @@ const InvoiceDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{routes.creditMemo.title}</CustomTab>}
+          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{resources?.creditMemo?.titlePlural}</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 

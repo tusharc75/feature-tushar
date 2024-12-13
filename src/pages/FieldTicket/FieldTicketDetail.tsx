@@ -45,9 +45,9 @@ const FieldTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.fieldTicket?.title);
+  const renderedFrom = camelCase(sidebarResource.fieldTicket);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
 
   const [fieldTicketData, setFieldTicketData] = useState(null);
@@ -191,7 +191,7 @@ const FieldTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.fieldTicket, { title: fieldTicketData?.fieldTicketNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes.fieldTicket,title:resources?.fieldTicket?.titleSingular}, { title: fieldTicketData?.fieldTicketNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -325,7 +325,7 @@ const FieldTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.fieldTicket?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.fieldTicket?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

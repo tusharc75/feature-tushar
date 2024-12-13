@@ -13,7 +13,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } 
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { editDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -21,14 +21,14 @@ import ManageData from './ManageData';
 import axios, { CancelTokenSource } from 'axios';
 
 const DataList = () => {
-  const renderedFrom = camelCase(routes?.dataList.title);
+  const renderedFrom = camelCase(sidebarResource.dataList);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -203,7 +203,7 @@ const DataList = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.dataList]} />
+        <CustomBreadCrumbs routes={[{...routes.dataList,title:resources?.dataLists?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -237,7 +237,7 @@ const DataList = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.dataList?.title} ${deleteRecord?.title || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.dataList?.titleSingular} ${deleteRecord?.title || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

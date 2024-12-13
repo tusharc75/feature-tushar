@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManageDeviceTemplateAlert = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
     const history = useHistory();
     const {
-        state: { user }
+        state: { user, resources }
     }: any = useData();
     const toastConfig = useContext(CustomToastContext);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -162,7 +162,7 @@ const ManageDeviceTemplateAlert = ({ onClose, onSuccess, isClone = false, id = n
                                     ? isClone
                                         ? `Clone - ${cloneHeading}`
                                         : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
-                                    : `Create ${routes?.deviceTemplateAlert?.title}`
+                                    : `Create ${resources?.deviceTemplateAlert?.titleSingular}`
                                     }`}
                                 isMinimized={!fullScreen}
                                 onMinimizeMaximize={() => {

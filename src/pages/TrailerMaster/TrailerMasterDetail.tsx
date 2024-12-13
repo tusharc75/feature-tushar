@@ -25,7 +25,7 @@ const TrailerMasterDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
 
   const [trailerMasterData, setTrailerMasterData] = useState(null);
@@ -162,7 +162,7 @@ const TrailerMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.trailerMaster, { title: trailerMasterData?.trailerName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.trailerMaster, title: resources?.trailerMaster?.titleSingular }, { title: trailerMasterData?.trailerName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -254,7 +254,7 @@ const TrailerMasterDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.trailerMaster}
                   data={trailerMasterData}
-                  allowedToEdit={permissions?.trailerMaster?.isUpdate }
+                  allowedToEdit={permissions?.trailerMaster?.isUpdate}
                 />
               </TabPanel>
             );
@@ -263,7 +263,7 @@ const TrailerMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.trailerMaster?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.trailerMaster?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

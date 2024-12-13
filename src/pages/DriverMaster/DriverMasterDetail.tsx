@@ -22,7 +22,6 @@ const DriverMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.driverMaster]);
   const [driverMasterData, setDriverMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -32,8 +31,9 @@ const DriverMasterDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.driverMaster, title: resources?.driverMaster?.titleSingular }]);
 
   useEffect(() => {
     if (id) {
@@ -68,7 +68,7 @@ const DriverMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.driverMaster.path}/${id}`);
       setDriverMasterData(data);
-      setCustomizedRoutes([routes.driverMaster, { title: data?.driverName }]);
+      setCustomizedRoutes([{ ...routes.driverMaster, title: resources?.driverMaster?.titleSingular }, { title: data?.driverName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -230,7 +230,7 @@ const DriverMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.driverMaster?.title?.toLowerCase()} ${driverMasterData.driverName} ?`}
+          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} ${driverMasterData.driverName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -40,7 +40,7 @@ function PlanningView() {
     {
       key: 'planning',
       resource: sidebarResource.planning,
-      title: routes.planningDetail.title,
+      title: resources?.planning?.titlePlural,
       path: routes.planningDetail.path,
       fieldName: 'planningNumber',
       start: 'startDate',
@@ -49,7 +49,7 @@ function PlanningView() {
     {
       key: 'demandOrder',
       resource: sidebarResource.demandOrder,
-      title: routes.demandOrderDetail.title,
+      title: resources?.demandOrder?.titlePlural,
       path: routes.demandOrderDetail.path,
       fieldName: 'demandOrderNumber',
       start: 'createDate',
@@ -58,7 +58,7 @@ function PlanningView() {
     {
       key: 'productionOrder',
       resource: sidebarResource.productionOrder,
-      title: resources?.productionOrder?.titleSingular,
+      title: resources?.productionOrder?.titlePlural,
       path: routes?.productionOrderDetail?.path,
       fieldName: 'productionOrderNumber',
       start: 'createDate',
@@ -67,7 +67,7 @@ function PlanningView() {
     {
       key: 'purchaseRequisition',
       resource: sidebarResource.purchaseRequisition,
-      title: routes.purchaseRequisitionDetail.title,
+      title: resources?.purchaseRequisition?.titlePlural,
       path: routes.purchaseRequisitionDetail.path,
       fieldName: 'purchaseRequisitionNumber',
       start: 'createDate',
@@ -76,7 +76,7 @@ function PlanningView() {
     {
       key: 'purchaseOrder',
       resource: sidebarResource.purchaseOrder,
-      title: routes.purchaseOrderDetail.title,
+      title: resources?.purchaseOrder?.titlePlural,
       path: routes.purchaseOrderDetail.path,
       fieldName: 'purchaseOrderNumber',
       start: 'purchaseOrderDate',
@@ -94,7 +94,7 @@ function PlanningView() {
     {
       key: 'sublease',
       resource: sidebarResource.sublease,
-      title: routes.subleaseDetail.title,
+      title: resources?.sublease?.titlePlural,
       path: routes.subleaseDetail.path,
       fieldName: 'subleaseName',
       start: 'estimateStartDate',
@@ -112,7 +112,7 @@ function PlanningView() {
     {
       key: 'fieldServiceOrder',
       resource: sidebarResource.fieldServiceOrder,
-      title: resources?.fieldServiceOrder?.titleSingular,
+      title: resources?.fieldServiceOrder?.titlePlural,
       path: routes?.fieldServiceOrderDetail?.path,
       fieldName: 'fieldServiceOrderNumber',
       start: 'estimateStartDate',
@@ -121,7 +121,7 @@ function PlanningView() {
     {
       key: 'quotation',
       resource: sidebarResource.quotation,
-      title: resources?.quotation?.titleSingular,
+      title: resources?.quotation?.titlePlural,
       path: routes?.quotationDetail.path,
       fieldName: 'quotationNumber',
       start: 'estimateStartDate',
@@ -151,7 +151,7 @@ function PlanningView() {
     const options: any = [];
     PLANNING_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setResourceList(options);
@@ -175,15 +175,15 @@ function PlanningView() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
+            <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
-              module={routes.planningView.title}
+              module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />

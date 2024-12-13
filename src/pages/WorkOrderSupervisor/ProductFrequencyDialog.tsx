@@ -72,7 +72,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
               )}
               {selectedProduct ? (
                 <div className="mt-4">
-                  <ServiceMaster renderedFrom={routes.workOrderSupervisor.title} id={selectedProduct} key={selectedProduct} />
+                  <ServiceMaster renderedFrom={sidebarResource.workOrderSupervisor} id={selectedProduct} key={selectedProduct} />
                 </div>
               ) : null}
             </div>

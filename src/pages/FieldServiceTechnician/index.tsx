@@ -37,7 +37,7 @@ import { useHistory } from 'react-router-dom';
 
 type Views = 'card' | 'table';
 
-const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }) => {
+const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }) => {
   return {
     accessor: 'action',
     Header: 'Actions',
@@ -50,7 +50,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     Cell: ({ row }) => (
       <>
         {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${resources?.fieldTicket?.titleSingular}` : cloneDisable}>
             <span>
               <IconButton
                 size="small"
@@ -70,7 +70,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
         )}
         {view === 'table' && (
           <Box>
-            <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+            <HtmlTooltip title={`View ${resources?.fieldTicket?.titleSingular}`}>
               <span>
                 <IconButton
                   size="small"
@@ -93,7 +93,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
 const FieldServiceTechnician = () => {
   const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
+  const renderedFrom = camelCase(sidebarResource.fieldServiceTechnician);
   const [view, setView] = useState<Views>('table');
   const [selectedData, setSelectedData] = useState(null);
   const [colData, setColData] = useState(null);
@@ -135,8 +135,8 @@ const FieldServiceTechnician = () => {
       }
     }
     setColData(data);
-    const newColumns = [...generateColumns(renderedFrom, data, routes?.fieldServiceOrderDetail?.path), ...getStaticFields()];
-    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
+    const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data,resources }));
     setColumns(newColumns);
   };
 
@@ -329,7 +329,7 @@ const FieldServiceTechnician = () => {
     (view: Views) => {
       setView(view);
       const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
-      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
+      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources }));
       setColumns(updatedColumns);
     },
     [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
@@ -344,7 +344,7 @@ const FieldServiceTechnician = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.fieldServiceTechnician.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.fieldServiceTechnician?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

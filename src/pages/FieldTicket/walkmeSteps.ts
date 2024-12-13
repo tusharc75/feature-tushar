@@ -2,10 +2,10 @@ import { generateFormFieldSteps, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
-export const createFieldTicketFlow = (): WalkmeData => {
+export const createFieldTicketFlow = (fieldTicketTitle): WalkmeData => {
 
   const data: WalkmeData = {
-    name: `Add ${routes.fieldTicket.title}`,
+    name: `Add ${fieldTicketTitle}`,
     url: '/field-ticket',
     type: 'flow',
     steps: [
@@ -182,7 +182,7 @@ export const generateAddProductConsumable= (waitForStepInsertion: boolean = fals
       {
         target: `#select-service`,
         title: 'Select Service',
-        nextOnValueChange: (val) => val !== 'All' && val.length > 0
+        nextOnValueChange: (val:any) => val !== 'All' && val.length > 0
       },
       {
         target: '#add-product-consumable',

@@ -23,7 +23,7 @@ export const userManual = {
 
 function Dashboard() {
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions,resources }
   } = useData();
   const formPermission = permissions?.formBuilder;
   const aiPermission = permissions?.equiptAi;
@@ -61,7 +61,7 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={routes.equiptAi.title}
+                  heading={resources?.equiptAi?.titlePlural}
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">

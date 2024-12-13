@@ -12,7 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import moment from 'moment';
 
-const renderedFrom = `${camelCase(routes?.workStations.title)}_activeService`;
+const renderedFrom = `${camelCase(sidebarResource.workStations)}_activeService`;
 
 const CurrentStatus = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);

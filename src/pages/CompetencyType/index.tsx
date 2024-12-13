@@ -21,7 +21,7 @@ import ManageCompetencyType from './ManageCompetencyType';
 import axios, { CancelTokenSource } from 'axios';
 
 const CompetencyType = () => {
-  const renderedFrom = camelCase(routes?.competencyType.title);
+  const renderedFrom = camelCase(sidebarResource.competencyType);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -30,7 +30,7 @@ const CompetencyType = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -205,10 +205,10 @@ const CompetencyType = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.competencyType]} />
+        <CustomBreadCrumbs routes={[{...routes.competencyType,title:resources?.competencyType?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.competencyType}
-          module={routes.competencyType.title}
+          module={resources?.competencyType?.titlePlural}
           api={routes?.competencyType.path}
           afterImportCompleted={() => {
             fetchData();
@@ -257,7 +257,7 @@ const CompetencyType = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyType?.title} ${deleteRecord?.competencyType || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.competencyType?.titleSingular} ${deleteRecord?.competencyType || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

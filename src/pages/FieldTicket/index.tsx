@@ -27,25 +27,26 @@ import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FieldTicket = () => {
+  const {
+    state: { permissions, selectedEntity, user,resources }
+  }: any = useData();
+  
   const types = [
     {
-      key: `My ${routes.fieldTicket.title}`,
+      key: `My ${resources?.fieldTicket?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.fieldTicket.title}`,
+      key: `All ${resources?.fieldTicket?.titlePlural}`,
       value: 2
     }
   ];
 
   const { setWalkmeData } = useSetWalkmeData();
 
-  const renderedFrom = camelCase(routes?.fieldTicket.title);
+  const renderedFrom = camelCase(sidebarResource.fieldTicket);
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, selectedEntity, user }
-  }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -63,7 +64,7 @@ const FieldTicket = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    setWalkmeData([createFieldTicketFlow()]);
+    setWalkmeData([createFieldTicketFlow(resources?.fieldTicket?.titleSingular)]);
   }, []);
 
   useEffect(() => {
@@ -303,11 +304,11 @@ const FieldTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.fieldTicket?.titlePlural }]} />
         {!isOffline && (
           <ImportExportLinks
             permissions={permissions.fieldTicket}
-            module={routes.fieldTicket.title}
+            module={resources?.fieldTicket?.titlePlural}
             api={'field-ticket'}
             afterImportCompleted={() => {
               fetchData();
@@ -361,7 +362,7 @@ const FieldTicket = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldTicketNumber || ''
+            message={`Are you sure you want to delete ${resources?.fieldTicket?.titleSingular?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldTicketNumber || ''
               } ?`}
             onClose={() => {
               setDeleteRecord(null);

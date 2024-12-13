@@ -36,7 +36,7 @@ const formats = {
 
 function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, setOpen }, ref) {
   const {
-    state: { permissions }
+    state: { resources }
   }: any = useData();
 
   const [themeMode] = useAppTheme();
@@ -305,7 +305,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
                       </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <RenderTable data={d.competencies} />
+                      <RenderTable data={d.competencies} resources={resources}/>
                     </AccordionDetails>
                   </Accordion>
                 ))
@@ -333,13 +333,13 @@ function EventAgenda({ event, setOpen }) {
 
 export default forwardRef(WorkOrderCalendar);
 
-const RenderTable = ({ data }) => {
+const RenderTable = ({ data, resources }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
         <TableHead>
           <TableRow>
-            <TableCell>{routes.competencies.title}</TableCell>
+            <TableCell>{resources?.competencies?.titlePlural}</TableCell>
             <TableCell>Count</TableCell>
           </TableRow>
         </TableHead>

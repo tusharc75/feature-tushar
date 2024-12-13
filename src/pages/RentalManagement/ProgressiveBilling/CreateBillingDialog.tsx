@@ -71,7 +71,7 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
 };
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
-  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
+  const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_create_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
   const {

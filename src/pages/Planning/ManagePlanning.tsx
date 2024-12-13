@@ -20,7 +20,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -168,7 +168,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                    : `Create ${routes?.planning?.title}`
+                    : `Create ${resources?.planning?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

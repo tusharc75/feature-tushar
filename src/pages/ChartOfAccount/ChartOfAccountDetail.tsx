@@ -32,7 +32,7 @@ const ChartOfAccountDetail = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
-    state: { permissions }
+    state: { permissions,resources }
   }: any = useData();
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const ChartOfAccountDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.chartOfAccount.path}/${id}`);
       setChartOfAccountData(data);
-      setCustomizedRoutes([routes.chartOfAccount, { title: data?.accountNumber }]);
+      setCustomizedRoutes([{...routes.chartOfAccount,title:resources?.chartOfAccount?.titleSingular}, { title: data?.accountNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -173,7 +173,7 @@ const ChartOfAccountDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.chartOfAccount?.title?.toLowerCase()} ${chartOfAccountData.accountNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.chartOfAccount?.titleSingular?.toLowerCase()} ${chartOfAccountData.accountNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -18,21 +18,21 @@ const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
-    state: { permissions, resources }
+    state: { permissions,resources }
   }: any = useData();
 
   const TECHNICIAN_RESOURCE = [
-    {
-      key: 'fieldTicket',
-      resource: sidebarResource.fieldTicket,
-      title: routes.fieldTicketDetail.title
-    },
-    {
-      key: 'rentalManagement',
-      resource: sidebarResource.rentalManagement,
-      title: resources?.rentalManagement?.titleSingular
-    }
-  ];
+  {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    title: resources?.fieldTicket?.titlePlural
+  },
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    title: resources?.rentalManagement?.titlePlural
+  },
+];
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);

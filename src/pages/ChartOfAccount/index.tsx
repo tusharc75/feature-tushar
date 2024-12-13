@@ -20,14 +20,14 @@ import ManageChartOfAccount from './ManageChartOfAccount';
 import axios, { CancelTokenSource } from 'axios';
 
 const ChartOfAccount = () => {
-  const renderedFrom = camelCase(routes?.chartOfAccount.title);
+  const renderedFrom = camelCase(sidebarResource.chartOfAccount);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,10 +203,10 @@ const ChartOfAccount = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.chartOfAccount]} />
+        <CustomBreadCrumbs routes={[{...routes.chartOfAccount,title:resources?.chartOfAccount?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.chartOfAccount}
-          module={routes.chartOfAccount.title}
+          module={resources?.chartOfAccount?.titlePlural}
           api={routes?.chartOfAccount.path}
           afterImportCompleted={() => {
             fetchData();
@@ -255,7 +255,7 @@ const ChartOfAccount = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.chartOfAccount?.title.toLowerCase()} ${deleteRecord?.accountNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.chartOfAccount?.titleSingular.toLowerCase()} ${deleteRecord?.accountNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -34,7 +34,7 @@ const CompetencyMasterDetail = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const CompetencyMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/competency-type/${id}`);
       setCompetencyMasterData(data);
-      setCustomizedRoutes([routes.competencyType, { title: data?.competencyType }]);
+      setCustomizedRoutes([{ ...routes.competencyType, title: resources?.competencyType?.titleSingular }, { title: data?.competencyType }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -149,7 +149,7 @@ const CompetencyMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
-          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}  
+          {permissions?.competencies?.isRead && <CustomTab value={1} label={resources?.competencies?.titlePlural} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -176,7 +176,7 @@ const CompetencyMasterDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.competencyType}
                   data={competencyMasterData}
-                  allowedToEdit={permissions?.competencyType?.isUpdate }
+                  allowedToEdit={permissions?.competencyType?.isUpdate}
                 />
               </TabPanel>
             );
@@ -185,7 +185,7 @@ const CompetencyMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.competencyType?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

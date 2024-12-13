@@ -31,13 +31,13 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = camelCase(routes?.workOrderSupervisor.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
 const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -312,7 +312,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
-          >{`Assign ${routes.workStations.title}`}</MenuItem>
+          >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
         )}
         <MenuItem
           onClick={() => {

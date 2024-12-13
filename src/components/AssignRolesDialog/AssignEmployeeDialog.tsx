@@ -21,7 +21,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
-  const renderedFrom = `${routes.employeeMaster.title}`;
+  const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -249,7 +249,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${routes.employeeMaster.title}`}
+        title={`Assign ${resources?.employeeMaster?.titleSingular}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
