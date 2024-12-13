@@ -819,9 +819,9 @@ function App() {
             <PrivateRoute exact path={`/custom-report`}>
               <CustomReport />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
+            {/* <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
               <RentalPlanningCalendar />
             </PrivateRoute>
