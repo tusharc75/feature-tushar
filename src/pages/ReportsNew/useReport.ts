@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { REPORT_LIST } from 'src/constants/helpers';
+import { REPORT_LIST_WITH_SECTIONS } from 'src/constants/helpers';
 import { CustomReport, ReportState, UseReportActions, Report } from 'src/pages/ReportsNew/types';
 import { handleGetRoute } from 'src/pages/ReportsNew/utils';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
@@ -41,6 +41,13 @@ const reducer = (state: ReportState, action: UseReportActions) => {
   }
 };
 
+const filterRecords = (searchQuery = '', permissions: any): Report[] => {
+  return REPORT_LIST_WITH_SECTIONS.map((d) => ({
+    ...d,
+    reports: d.reports.filter((f) => f.title.toLowerCase().includes(searchQuery) && permissions[f.permission]?.isRead)
+  }));
+};
+
 const useReport = () => {
   const {
     state: { permissions, selectedEntity }
@@ -76,11 +83,11 @@ const useReport = () => {
     (searchedValue: string) => {
       const searchedFor = searchedValue.toLowerCase().trim();
       if (!searchedFor && searchedFor === '') {
-        setFilteredReports(REPORT_LIST.filter((report) => permissions[report.permission]?.isRead));
+        setFilteredReports(filterRecords('', permissions));
         customReports.length && setFilteredCustomReports(customReports);
         return;
       }
-      const filtered = REPORT_LIST.filter((f) => f.title.toLowerCase().includes(searchedFor) && permissions[f.permission]?.isRead);
+      const filtered = filterRecords(searchedFor, permissions);
       setFilteredReports(filtered);
       setFilteredCustomReports(customReports.filter((f) => f.customReportName.toLowerCase().includes(searchedFor)));
     },
@@ -96,7 +103,7 @@ const useReport = () => {
   );
 
   useEffect(() => {
-    const reports = REPORT_LIST.filter((report) => permissions[report.permission]?.isRead);
+    const reports = filterRecords('', permissions);
     setFilteredReports(reports);
   }, [permissions, setFilteredReports]);
 
