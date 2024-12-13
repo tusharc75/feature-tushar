@@ -12,6 +12,7 @@ import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition } from '../utils';
 import DataList from './DataList';
+import { getTempFilter, setTempFilter } from 'src/components/CustomReactTable/GridFilter/utils';
 
 let cellId;
 
@@ -333,6 +334,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
+        const data = getTempFilter(resource) || {};
+        setTempFilter(resource, { ...data, filters: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
