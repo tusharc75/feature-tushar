@@ -151,7 +151,7 @@ function PlanningView() {
     const options: any = [];
     PLANNING_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead) {
-        options.push({ ...item, title: resources[item.key] ? resources[item.key]?.titlePlural : item.title });
+        options.push(item);
       }
     });
     setResourceList(options);
@@ -182,8 +182,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />

@@ -12,9 +12,6 @@ type SectionProps<I> = {
   selectedTitle: string | null;
 };
 
-// const link = `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`;
-// const link = `/reports/custom-report/${item._id}`;
-
 const Section = <T,>({ items, onClick, title, getTitle, selectedTitle }: SectionProps<T>) => {
   const [open, setOpen] = React.useState(true);
   return (
