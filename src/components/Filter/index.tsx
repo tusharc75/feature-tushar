@@ -182,7 +182,7 @@ const Filter = ({
                       >
                         <img src={listFilter} alt={''} />
                         {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                        <span className="block min-w-[14px]  rounded-[4px] bg-[--dark-secondary,#E3F3F2] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                        <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
                           {getLabel(o, deepFilters, filterByIds)}
                         </span>
                         <MdChevronRight className="ml-auto text-[--new-theme-color]" />
