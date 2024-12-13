@@ -2565,198 +2565,244 @@ export const IOT_REPORT_LIST = [
   }
 ];
 
+export const REPORT_SECTIONS = {
+  rental: "Rental",
+  sales: "Sales",
+  inventory: "Inventory",
+  asset: "Asset",
+  purchase: "Purchase",
+  fieldService: "Field Service",
+  production: "Production",
+  deals: "Deals",
+  user: "User",
+  integration: "Integration",
+  iot: "Iot"
+}
+
 export const REPORT_LIST = [
   {
-    title: sidebarResource.rentalManagement,
-    permission: 'rentalManagement',
-    key: 'rentalManagement',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.quotation,
-    permission: 'quotation',
-    key: 'quotation',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.salesOrder,
-    permission: 'salesOrder',
-    key: 'salesOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.serializedAsset,
-    permission: 'serializedAsset',
-    key: 'serializedAsset',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.transferAsset,
-    permission: 'transferAsset',
-    key: 'transferAsset',
-    type: 'dynamic'
+    title: sidebarResource.projectSales,
+    permission: 'projectSales',
+    key: 'projectSales',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.quotation,
+    permission: 'quotation',
+    key: 'quotation',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
-    title: sidebarResource.projectSales,
-    permission: 'projectSales',
-    key: 'projectSales',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.workOrder,
-    permission: 'workOrder',
-    key: 'workOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.purchaseOrder,
-    permission: 'purchaseOrder',
-    key: 'purchaseOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.productionOrder,
-    permission: 'productionOrder',
-    key: 'productionOrder',
-    type: 'dynamic'
+    title: sidebarResource.salesOrder,
+    permission: 'salesOrder',
+    key: 'salesOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.invoice,
     permission: 'invoice',
     key: 'invoice',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.fieldTicket,
-    permission: 'fieldTicket',
-    key: 'fieldTicket',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Details',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceDetails'
+    type: 'invoiceDetails',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Backlog',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceBacklog'
-  },
-  {
-    title: 'Syteline Invoice Integration',
-    permission: 'invoice',
-    key: 'standardReport',
-    type: 'sytelineInvoiceIntegration'
+    type: 'invoiceBacklog',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Revenue By Customer',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'revenueByCustomer'
+    type: 'revenueByCustomer',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: 'Sales Funnel Report',
+    permission: 'lead',
+    key: 'standardReport',
+    type: 'salesFunnel',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.rentalManagement,
+    permission: 'rentalManagement',
+    key: 'rentalManagement',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.rental
+  },
+  {
+    title: sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'serializedAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Lost Assets',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'lostAssets'
-  },
-  {
-    title: 'Purchase Order Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderDetails'
-  },
-  {
-    title: 'Purchase Order Actual Received Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderActualReceivedDetails'
-  },
-  {
-    title: 'Inventory Evaluation',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryEvaluation'
-  },
-  {
-    title: 'Inventory History',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryHistory'
-  },
-  {
-    title: 'Average Price By Supplier',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'averagePriceBySupplier'
+    type: 'lostAssets',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'numberOfAssetsByStatus'
+    type: 'numberOfAssetsByStatus',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'assetUtilization'
+    type: 'assetUtilization',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Statistics',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'serializedAssetStatistics'
-  },
-  {
-    title: 'Work Order Service',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderService'
-  },
-  {
-    title: 'Work Order Technician Work Hours',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderTechnicianWorkHours'
-  },
-  {
-    title: 'User Session',
-    permission: 'user',
-    key: 'standardReport',
-    type: 'userSession'
+    type: 'serializedAssetStatistics',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'inUsedSerializedAsset'
+    type: 'inUsedSerializedAsset',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.fieldTicket,
+    permission: 'fieldTicket',
+    key: 'fieldTicket',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.workOrder,
+    permission: 'workOrder',
+    key: 'workOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Service',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderService',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'averagePriceBySupplier',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: sidebarResource.productionOrder,
+    permission: 'productionOrder',
+    key: 'productionOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryEvaluation',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'Inventory History',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryHistory',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'standardReport',
+    type: 'userSession',
+    section: REPORT_SECTIONS.user
   },
   {
     title: 'Fleet Report',
     permission: 'deals',
     key: 'standardReport',
-    type: 'fleetReport'
+    type: 'fleetReport',
+    section: REPORT_SECTIONS.deals
   },
   {
     title: 'Daily Volume Report',
@@ -2765,7 +2811,8 @@ export const REPORT_LIST = [
     type: 'dailyVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Volume Report',
@@ -2775,13 +2822,15 @@ export const REPORT_LIST = [
     defaultColumn: true,
     notMultiSelectFields: ['frequency'],
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotUnitDowntimeReport'
+    type: 'iotUnitDowntimeReport',
+    section: REPORT_SECTIONS.iot
   },
   {
     title: `Pad Job Volume Report`,
@@ -2790,7 +2839,8 @@ export const REPORT_LIST = [
     type: 'rentalVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'IOT Data Points',
@@ -2798,14 +2848,17 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true,
-    notMultiSelectFields: ['asset', 'interval']
+    notMultiSelectFields: ['asset', 'interval'],
+    section: REPORT_SECTIONS.iot
   },
+
   {
-    title: 'Sales Funnel Report',
-    permission: 'lead',
+    title: 'Syteline Invoice Integration',
+    permission: 'invoice',
     key: 'standardReport',
-    type: 'salesFunnel'
-  }
+    type: 'sytelineInvoiceIntegration',
+    section: REPORT_SECTIONS.integration
+  },
 ];
 
 export const REPORT_LIST_WITH_SECTIONS = [
