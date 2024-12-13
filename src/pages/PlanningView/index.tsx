@@ -40,7 +40,7 @@ function PlanningView() {
     {
       key: 'planning',
       resource: sidebarResource.planning,
-      title: resources?.planningDetail?.titlePlural,
+      title: resources?.planning?.titlePlural,
       path: routes.planningDetail.path,
       fieldName: 'planningNumber',
       start: 'startDate',
@@ -49,7 +49,7 @@ function PlanningView() {
     {
       key: 'demandOrder',
       resource: sidebarResource.demandOrder,
-      title: resources?.demandOrderDetail?.titlePlural,
+      title: resources?.demandOrder?.titlePlural,
       path: routes.demandOrderDetail.path,
       fieldName: 'demandOrderNumber',
       start: 'createDate',
@@ -76,7 +76,7 @@ function PlanningView() {
     {
       key: 'purchaseOrder',
       resource: sidebarResource.purchaseOrder,
-      title: routes.purchaseOrderDetail.title,
+      title: resources?.purchaseOrder?.titlePlural,
       path: routes.purchaseOrderDetail.path,
       fieldName: 'purchaseOrderNumber',
       start: 'purchaseOrderDate',
@@ -94,7 +94,7 @@ function PlanningView() {
     {
       key: 'sublease',
       resource: sidebarResource.sublease,
-      title: routes.subleaseDetail.title,
+      title: resources?.sublease?.titlePlural,
       path: routes.subleaseDetail.path,
       fieldName: 'subleaseName',
       start: 'estimateStartDate',

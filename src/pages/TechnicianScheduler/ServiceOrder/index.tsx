@@ -25,12 +25,12 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   {
     key: 'fieldTicket',
     resource: sidebarResource.fieldTicket,
-    title: resources?.fieldTicketDetail?.titlePlural
+    title: resources?.fieldTicket?.titlePlural
   },
   {
     key: 'rentalManagement',
     resource: sidebarResource.rentalManagement,
-    title: resources?.rentalManagementDetail?.titleSingular
+    title: resources?.rentalManagement?.titlePlural
   },
 ];
 
