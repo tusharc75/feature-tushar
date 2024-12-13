@@ -19,15 +19,15 @@ const IotDataPointsDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.iotDataPoints]);
   const [iotDataPointsData, setIotDataPointsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titleSingular }]);
 
   useEffect(() => {
     if (id) {
@@ -54,7 +54,7 @@ const IotDataPointsDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.iotDataPoints.path}/${id}`);
       setIotDataPointsData(data);
-      setCustomizedRoutes([routes.iotDataPoints, { title: data?.fieldLabel }]);
+      setCustomizedRoutes([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titleSingular }, { title: data?.fieldLabel }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -124,7 +124,7 @@ const IotDataPointsDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.iotDataPoints?.title?.toLowerCase()} ${iotDataPointsData?.fieldLabel || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.iotDataPoints?.titleSingular?.toLowerCase()} ${iotDataPointsData?.fieldLabel || ''} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

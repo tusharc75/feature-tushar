@@ -430,7 +430,7 @@ const RentalManagementDetailsPage = () => {
                         history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
                       }}
                     >
-                      {`View ${routes.iotChart.title}`}
+                      {`View ${resources?.iotChart?.titlePlural}`}
                     </Button>
                   )}
                   <Button
@@ -735,7 +735,7 @@ const RentalManagementDetailsPage = () => {
             open={showCancelConfirmBox.open}
             message={
               showCancelConfirmBox.isQuote
-                ? `Do you want to create a new version of the ${routes?.quotation?.title?.toLowerCase()}?`
+                ? `Do you want to create a new version of the ${resources?.quotation?.titleSingular?.toLowerCase()}?`
                 : `Are you sure you want to cancel this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ?`
             }
             onClose={() => {

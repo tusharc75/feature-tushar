@@ -8,7 +8,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -18,7 +18,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ManageVolumeData from './ManageVolumeData';
 import { camelCase } from 'lodash';
 
-const renderedFrom = `${camelCase(routes.iotChart.title)}_VolumeData`;
+const renderedFrom = `${camelCase(sidebarResource.iotChart)}_VolumeData`;
 
 const VolumeData = ({ assetId }) => {
   const toastConfig = useContext(CustomToastContext);

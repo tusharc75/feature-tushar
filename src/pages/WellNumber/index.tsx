@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageWellNumber from './ManageWellNumber';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.wellNumber.title);
+const renderedFrom = camelCase(sidebarResource.wellNumber);
 
 const WellNumber = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const WellNumber = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,10 +206,10 @@ const WellNumber = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.wellNumber]} />
+        <CustomBreadCrumbs routes={[{...routes.wellNumber, title: resources?.wellNumber?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.wellNumber}
-          module={routes.wellNumber.title}
+          module={resources?.wellNumber?.titlePlural}
           api={routes?.wellNumber.path}
           afterImportCompleted={() => {
             fetchData();
@@ -258,7 +258,7 @@ const WellNumber = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.wellNumber?.title.toLowerCase()} ${deleteRecord?.wellNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.wellNumber?.titleSingular.toLowerCase()} ${deleteRecord?.wellNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
