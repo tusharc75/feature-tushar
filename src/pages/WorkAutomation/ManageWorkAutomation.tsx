@@ -26,6 +26,10 @@ const ManageWorkAutomation = () => {
   const history = useHistory();
   const { id } = useParams();
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   useEffect(() => {
     axiosInstance()
       .get(`${rentalManagement.api}/${id}`)
@@ -220,7 +224,7 @@ const AddServices = ({ rentalManagementData, setSelectedServices, selectedAssets
   );
 };
 
-const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading, resources }) => {
+const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading ,resources}) => {
   const [records, setRecords] = useState(null);
 
   const handleAdd = () => {
