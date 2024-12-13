@@ -14,15 +14,21 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
+
+  const renderedFrom = `${camelCase(sidebarResource.invoice)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     if (
@@ -188,7 +194,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,

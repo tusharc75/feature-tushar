@@ -67,76 +67,76 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       key: INVENTORY_HISTORY_TYPE.transferAssets,
       resource: sidebarResource.transferAsset,
       title: resources?.transferAsset.titlePlural
-    }
+    },
     // {
     //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
     //   resource: sidebarResource.purchaseOrder,
-    //   title: routes.purchaseOrder.title,
+    //   title: resources?.purchaseOrder?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.salesOrder,
     //   resource: sidebarResource.salesOrder,
-    //   title: routes.salesOrder.title,
+    //   title: resources?.salesOrder?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.sublease,
     //   resource: sidebarResource.sublease,
-    //   title: routes.sublease.title,
+    //   title: resources?.sublease?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.bulkAssetCreation,
     //   resource: sidebarResource.bulkAssetCreation,
-    //   title: routes.bulkAssetCreation.title,
+    //   title: resources?.bulkAssetCreation?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.inventoryToAsset,
     //   resource: sidebarResource.inventoryToAsset,
-    //   title: routes.inventoryToAsset.title,
+    //   title: resources?.inventoryToAsset?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.quotation,
     //   resource: sidebarResource.quotation,
-    //   title: routes.quotation.title,
+    //   title: resources?.quotation?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.invoice,
     //   resource: sidebarResource.invoice,
-    //   title: routes.invoice.title,
+    //   title: resources?.invoice?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.productionOrder,
     //   resource: sidebarResource.productionOrder,
-    //   title: routes.productionOrder.title,
+    //   title: resources?.productionOrder?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.fieldServiceOrder,
     //   resource: sidebarResource.fieldServiceOrder,
-    //   title: routes.fieldServiceOrder.title,
+    //   title: resources?.fieldServiceOrder?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.fieldTicket,
     //   resource: sidebarResource.fieldTicket,
-    //   title: routes.fieldTicket.title,
+    //   title: resources?.fieldTicket?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.job,
     //   resource: sidebarResource.job,
-    //   title: routes.job.title,
+    //   title: resources?.job?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.planning,
     //   resource: sidebarResource.planning,
-    //   title: routes.planning.title,
+    //   title: resources?.planning?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.deals,
     //   resource: sidebarResource.deals,
-    //   title: routes.deals.title,
+    //   title: resources?.deals?.titlePlural,
     // },
     // {
     //   key: INVENTORY_HISTORY_TYPE.assemblyOrder,
     //   resource: sidebarResource.assemblyOrder,
-    //   title: routes.assemblyOrder.title,
+    //   title: resources?.assemblyOrder?.titlePlural,
     // },
   ];
 
@@ -153,9 +153,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -527,8 +527,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />
