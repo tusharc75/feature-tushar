@@ -11,18 +11,23 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
 
   return (
     <div className="space-y-4">
-      <Section
-        getTitle={(report) => (report.type === 'dynamic' && routes[report.key]?.title ? routes[report.key]?.title : report.title)}
-        items={filteredReports}
-        onClick={(report) =>
-          setSelectedReport({
-            route: `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`,
-            title: report.type === 'dynamic' && routes[report.key]?.title ? routes[report.key]?.title : report.title
-          })
-        }
-        selectedTitle={selectedReport?.title}
-        title="Reports"
-      />
+      {filteredReports.map((data) => {
+        if (data.reports.length === 0) return null;
+        return (
+          <Section
+            getTitle={(report) => (report.type === 'dynamic' && routes[report.key]?.title ? routes[report.key]?.title : report.title)}
+            items={data.reports}
+            onClick={(report) =>
+              setSelectedReport({
+                route: `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`,
+                title: report.type === 'dynamic' && routes[report.key]?.title ? routes[report.key]?.title : report.title
+              })
+            }
+            selectedTitle={selectedReport?.title}
+            title={data.section}
+          />
+        );
+      })}
 
       <Section
         getTitle={(report) => report.customReportName}

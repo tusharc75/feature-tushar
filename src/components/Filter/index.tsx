@@ -1,10 +1,9 @@
-import { Collapse, Dialog, FormControl, IconButton, MenuItem, Select } from '@material-ui/core';
+import { Dialog, FormControl, IconButton, MenuItem, Select } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
-import { isArray } from 'lodash';
+import { isArray, uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BsFillFunnelFill } from 'react-icons/bs';
-import { FaChevronDown } from 'react-icons/fa';
 import { MdChevronRight } from 'react-icons/md';
 import listFilter from 'src/assets/newSvgs/listFilter.svg';
 import selectFilter from 'src/assets/newSvgs/selectFilter.svg';
@@ -14,7 +13,6 @@ import DateTime from 'src/components/Filter/DateTime';
 import DropDown from 'src/components/Filter/DropDown';
 import SingleLine from 'src/components/Filter/SingleLine';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
@@ -42,6 +40,11 @@ const getLabel = (field, deepFilters, filterByIds) => {
   return '';
 };
 
+const isCLearFilterButtonVisible = (defaultColumnsMap: { [key: string]: boolean }, deepFilters = [], filterByIds = []) => {
+  const newData = uniqBy([...deepFilters, ...filterByIds], (d) => d.field).map((d) => d.field.replace('from_', '').replace('to_', ''));
+  return newData.filter((d) => !defaultColumnsMap[d]).length > 0;
+};
+
 const Filter = ({
   onClose,
   resource,
@@ -62,6 +65,12 @@ const Filter = ({
   const [fullScreen] = useState(isMobile && !isTablet);
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [searchVal, setSearchVal] = useState('');
+  const defaultColumnsMap = useMemo(() => {
+    return defaultColumns?.reduce((a, c) => {
+      a[c.fieldName] = true;
+      return a;
+    }, {});
+  }, [defaultColumns]);
 
   const options = useMemo(() => {
     if (!columns || columns?.length === 0 || !Array.isArray(columns)) return [];
@@ -107,6 +116,15 @@ const Filter = ({
     } else {
       setFilteredOptions(options);
     }
+  };
+
+  const handleClearAllFilter = () => {
+    const newDeepFilter = deepFilters.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
+    const newFilterByIds = filterByIds.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
+    setDeepFilters(newDeepFilter);
+    setFilterByIds(newFilterByIds);
+    setFilterTerm({});
+    // onApplyFilter(newDeepFilter, newFilterByIds);
   };
 
   return (
@@ -229,11 +247,16 @@ const Filter = ({
         </div>
       </CustomDialogContent>
       <div className="flex justify-between px-[--px] py-[--py] pt-0">
-        <ThemeButton iconForMobile={false} onClick={onClose}>
-          Close
-        </ThemeButton>
-        <CustomButton
-          variant="contained"
+        {isCLearFilterButtonVisible(defaultColumnsMap, deepFilters, filterByIds) ? (
+          <ThemeButton iconForMobile={false} onClick={handleClearAllFilter}>
+            Clear Filters
+          </ThemeButton>
+        ) : (
+          <div />
+        )}
+        <ThemeButton
+          iconForMobile={false}
+          borderColor="none"
           color="primary"
           onClick={() => {
             if (defaultColumns?.length > 0) {
@@ -274,7 +297,7 @@ const Filter = ({
           }}
         >
           Apply Filters
-        </CustomButton>
+        </ThemeButton>
       </div>
     </Dialog>
   );
