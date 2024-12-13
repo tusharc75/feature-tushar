@@ -388,6 +388,9 @@ export const sidebarResource = {
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
   workAutomation:'Work Automation',
+  iotChart: 'Iot Chart',
+  sendOutboundMessage: 'Send Outbound Message',
+  materialHandling: 'Material Handling',
   generateInvoice:'Generate Invoice',
   dataList:'DataList',
   dataListitems:'DataList Items',
@@ -1084,6 +1087,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       } else {
         obj[key.fieldName] = value ? value : '';
       }
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const value = dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) ? dataObj[key.fieldName] : []
+      obj[key.fieldName] = value;
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -1283,7 +1289,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1315,78 +1321,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+            }
+          )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(urlRegex, 'Enter valid URL').required(message),
-                otherwise: string().matches(urlRegex, 'Enter valid URL')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(urlRegex, 'Enter valid URL').required(message),
+              otherwise: string().matches(urlRegex, 'Enter valid URL')
+            }
+          )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().min(10, 'Mobile number is too short').required(message),
-                otherwise: string().min(10, 'Mobile number is too short')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().min(10, 'Mobile number is too short').required(message),
+              otherwise: string().min(10, 'Mobile number is too short')
+            }
+          )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: array().min(1, message),
-                otherwise: array()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: array().min(1, message),
+              otherwise: array()
+            }
+          )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-                otherwise: number().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+              otherwise: number().nullable()
+            }
+          )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1394,26 +1400,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-                validationFields?.map((f) => f?.fieldName),
-                {
-                  is: validation,
-                  then: string().email().required(message),
-                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-                }
-              )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().email().required(message),
+                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+              }
+            )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: boolean().required(message),
-                otherwise: boolean()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: boolean().required(message),
+              otherwise: boolean()
+            }
+          )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1442,13 +1448,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(`${input.fieldLabel} is required`).nullable(),
-                otherwise: string().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(`${input.fieldLabel} is required`).nullable(),
+              otherwise: string().nullable()
+            }
+          )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1469,13 +1475,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -1614,10 +1620,10 @@ interface IPermission {
 }
 
 interface IRoutesAndTitle {
-  [key: string] : {
+  [key: string]: {
     titlePlural: string;
     titleSingular: string;
-  }; 
+  };
 }
 
 interface IGetPermissionsReturn {
@@ -2811,6 +2817,274 @@ export const REPORT_LIST = [
   }
 ];
 
+export const REPORT_LIST_WITH_SECTIONS = [
+  {
+    section: 'Section 1 Reports',
+    reports: [
+      {
+        title: sidebarResource.rentalManagement,
+        permission: 'rentalManagement',
+        key: 'rentalManagement',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.quotation,
+        permission: 'quotation',
+        key: 'quotation',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.salesOrder,
+        permission: 'salesOrder',
+        key: 'salesOrder',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.serializedAsset,
+        permission: 'serializedAsset',
+        key: 'serializedAsset',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.transferAsset,
+        permission: 'transferAsset',
+        key: 'transferAsset',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.lead,
+        permission: 'lead',
+        key: 'lead',
+        type: 'dynamic'
+      }
+    ]
+  },
+  {
+    section: 'Section 2 Reports',
+    reports: [
+      {
+        title: sidebarResource.opportunity,
+        permission: 'opportunity',
+        key: 'opportunity',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.quoteBuilder,
+        permission: 'quoteBuilder',
+        key: 'quoteBuilder',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.projectSales,
+        permission: 'projectSales',
+        key: 'projectSales',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.workOrder,
+        permission: 'workOrder',
+        key: 'workOrder',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.purchaseOrder,
+        permission: 'purchaseOrder',
+        key: 'purchaseOrder',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.productionOrder,
+        permission: 'productionOrder',
+        key: 'productionOrder',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.invoice,
+        permission: 'invoice',
+        key: 'invoice',
+        type: 'dynamic'
+      },
+      {
+        title: sidebarResource.fieldTicket,
+        permission: 'fieldTicket',
+        key: 'fieldTicket',
+        type: 'dynamic'
+      }
+    ]
+  },
+  {
+    section: 'Section 3 Reports',
+    reports: [
+      {
+        title: 'Invoice Details',
+        permission: 'invoice',
+        key: 'standardReport',
+        type: 'invoiceDetails'
+      },
+      {
+        title: 'Invoice Backlog',
+        permission: 'invoice',
+        key: 'standardReport',
+        type: 'invoiceBacklog'
+      },
+      {
+        title: 'Syteline Invoice Integration',
+        permission: 'invoice',
+        key: 'standardReport',
+        type: 'sytelineInvoiceIntegration'
+      },
+      {
+        title: 'Revenue By Customer',
+        permission: 'invoice',
+        key: 'standardReport',
+        type: 'revenueByCustomer'
+      },
+      {
+        title: 'Lost Assets',
+        permission: 'serializedAsset',
+        key: 'standardReport',
+        type: 'lostAssets'
+      },
+      {
+        title: 'Purchase Order Details',
+        permission: 'purchaseOrder',
+        key: 'standardReport',
+        type: 'purchaseOrderDetails'
+      },
+      {
+        title: 'Purchase Order Actual Received Details',
+        permission: 'purchaseOrder',
+        key: 'standardReport',
+        type: 'purchaseOrderActualReceivedDetails'
+      }
+    ]
+  },
+  {
+    section: 'Section 4 Reports',
+    reports: [
+      {
+        title: 'Inventory Evaluation',
+        permission: 'productInventory',
+        key: 'standardReport',
+        type: 'inventoryEvaluation'
+      },
+      {
+        title: 'Inventory History',
+        permission: 'productInventory',
+        key: 'standardReport',
+        type: 'inventoryHistory'
+      },
+      {
+        title: 'Average Price By Supplier',
+        permission: 'purchaseOrder',
+        key: 'standardReport',
+        type: 'averagePriceBySupplier'
+      },
+      {
+        title: 'Number Of Assets by Status',
+        permission: 'serializedAsset',
+        key: 'standardReport',
+        type: 'numberOfAssetsByStatus'
+      },
+      {
+        title: 'Asset Utilization',
+        permission: 'serializedAsset',
+        key: 'standardReport',
+        type: 'assetUtilization'
+      },
+      {
+        title: 'Asset Statistics',
+        permission: 'serializedAsset',
+        key: 'standardReport',
+        type: 'serializedAssetStatistics'
+      },
+      {
+        title: 'Work Order Service',
+        permission: 'workOrder',
+        key: 'standardReport',
+        type: 'workOrderService'
+      },
+      {
+        title: 'Work Order Technician Work Hours',
+        permission: 'workOrder',
+        key: 'standardReport',
+        type: 'workOrderTechnicianWorkHours'
+      },
+      {
+        title: 'User Session',
+        permission: 'user',
+        key: 'standardReport',
+        type: 'userSession'
+      }
+    ]
+  },
+  {
+    section: 'Section 5 Reports',
+    reports: [
+      {
+        title: 'In Used Serialized Asset',
+        permission: 'serializedAsset',
+        key: 'standardReport',
+        type: 'inUsedSerializedAsset'
+      },
+      {
+        title: 'Fleet Report',
+        permission: 'deals',
+        key: 'standardReport',
+        type: 'fleetReport'
+      },
+      {
+        title: 'Daily Volume Report',
+        permission: 'iotChart',
+        key: 'standardReport',
+        type: 'dailyVolumeReport',
+        defaultColumn: true,
+        isExportPdf: true,
+        isSendMail: true
+      },
+      {
+        title: 'Volume Report',
+        permission: 'iotChart',
+        key: 'standardReport',
+        type: 'volumeReport',
+        defaultColumn: true,
+        notMultiSelectFields: ['frequency'],
+        isExportPdf: true,
+        isSendMail: true
+      },
+      {
+        title: 'Unit Downtime Report',
+        permission: 'iotChart',
+        key: 'standardReport',
+        type: 'iotUnitDowntimeReport'
+      },
+      {
+        title: `Pad Job Volume Report`,
+        permission: 'iotChart',
+        key: 'standardReport',
+        type: 'rentalVolumeReport',
+        defaultColumn: true,
+        isExportPdf: true,
+        isSendMail: true
+      },
+      {
+        title: 'IOT Data Points',
+        permission: 'iotChart',
+        key: 'standardReport',
+        type: 'iotDataPoints',
+        defaultColumn: true,
+        notMultiSelectFields: ['asset', 'interval']
+      },
+      {
+        title: 'Sales Funnel Report',
+        permission: 'lead',
+        key: 'standardReport',
+        type: 'salesFunnel'
+      }
+    ]
+  }
+] as const;
+
 export const RESOURCE_CALENDAR = [
   { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
   { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' }
@@ -2845,8 +3119,8 @@ export const PDF_RESOURCE_LIST = [
 
 export const COLOUR_MASTER = {
   rentalJob: {
-    background:'#E6E8F5',
-    borderColor:'#9789F0'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   cancelledRentalJob: {
     background: '#00FF00',
@@ -2872,7 +3146,7 @@ export const COLOUR_MASTER = {
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
   },
-  service:{
+  service: {
     background: '#FFF7D9',
     borderColor: '#FDD33E'
   },
@@ -2889,8 +3163,8 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   purchaseOrder: {
-    background:'#E6E8F5',
-    borderColor:'#9789F0'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   sublease: {
     background: '#FFE4C0',
@@ -2912,15 +3186,15 @@ export const COLOUR_MASTER = {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
-  accepted:{
+  accepted: {
     background: '#EDFFE1',
     borderColor: '#86DB71'
   },
-  rejected:{
+  rejected: {
     background: '#FFEAEA',
     borderColor: '#FFA0A0'
   },
-  skipped:{
+  skipped: {
     background: '#ffd65b',
     borderColor: 'grey'
   },
@@ -2944,12 +3218,12 @@ export const COLOUR_MASTER = {
     background: 'var(--replaceAsset-bg)',
     borderColor: 'var(--replaceAsset-bg)'
   },
-  preWork:{
-    background:'rgba(254, 249, 230, 1)',
+  preWork: {
+    background: 'rgba(254, 249, 230, 1)',
     borderColor: '#C0C0C0'
   },
-  postWork:{
-    background:'rgba(222, 249, 255, 1)',
+  postWork: {
+    background: 'rgba(222, 249, 255, 1)',
     borderColor: 'green'
   }
 };
@@ -3702,8 +3976,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

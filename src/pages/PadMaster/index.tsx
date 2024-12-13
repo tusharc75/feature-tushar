@@ -20,10 +20,10 @@ import ManagePadMaster from './ManagePadMaster';
 import axios, { CancelTokenSource } from 'axios';
 
 const PadMaster = () => {
-  const renderedFrom = camelCase(routes?.padMaster.title);
+  const renderedFrom = camelCase(sidebarResource.padMaster);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -215,7 +215,7 @@ const PadMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.padMaster]} />
+        <CustomBreadCrumbs routes={[{ ...routes.padMaster, title: resources?.padMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.padMaster}
           module="padMaster"
@@ -270,7 +270,7 @@ const PadMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.padMaster?.title.toLowerCase()} ${deleteRecord?.padName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.padMaster?.titleSingular.toLowerCase()} ${deleteRecord?.padName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

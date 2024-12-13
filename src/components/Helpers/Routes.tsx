@@ -532,140 +532,78 @@ const routes = {
     path: '/transaction-lock/detail'
   },
   wellNumber: {
-    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
     path: '/well-number'
   },
   wellNumberDetail: {
-    title: storedRoutes && storedRoutes.wellNumber && storedRoutes.wellNumber.title ? storedRoutes.wellNumber?.title : RESOURCE_LABEL.wellNumber,
     path: '/well-number/detail'
   },
   planningView: {
-    title: storedRoutes && storedRoutes.planningView && storedRoutes.planningView.title ? storedRoutes.planningView?.title : 'Planning View',
     path: '/planning-view'
   },
   taxMaster: {
-    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
     path: '/tax-master'
   },
   taxMasterDetail: {
-    title: storedRoutes && storedRoutes.taxMaster && storedRoutes.taxMaster.title ? storedRoutes.taxMaster?.title : RESOURCE_LABEL.taxMaster,
     path: '/tax-master/detail'
   },
   competencies: {
-    title:
-      storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
     path: '/competencies'
   },
   competenciesDetail: {
-    title:
-      storedRoutes && storedRoutes.competencies && storedRoutes.competencies.title ? storedRoutes.competencies?.title : RESOURCE_LABEL.competencies,
     path: '/competencies/detail'
   },
   materialHandling: {
-    title:
-      storedRoutes && storedRoutes.materialHandling && storedRoutes.materialHandling.title
-        ? storedRoutes.materialHandling?.title
-        : RESOURCE_LABEL.materialHandling,
     path: '/material-handling'
   },
   padMaster: {
-    title: storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
     path: '/pad-master'
   },
   padMasterDetail: {
-    title: storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
     path: '/pad-master/detail'
   },
   driverMaster: {
-    title:
-      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
     path: '/driver-master'
   },
   driverMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
     path: '/driver-master/detail'
   },
   trailerMaster: {
-    title:
-      storedRoutes && storedRoutes.trailerMaster && storedRoutes.trailerMaster.title
-        ? storedRoutes.trailerMaster?.title
-        : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master'
   },
   trailerMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.trailerMaster && storedRoutes.trailerMaster.title
-        ? storedRoutes.trailerMaster?.title
-        : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master/detail'
   },
   iotDataPoints: {
-    title:
-      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
-        ? storedRoutes.iotDataPoints?.title
-        : RESOURCE_LABEL.iotDataPoints,
     path: '/iot-data-points'
   },
   iotDataPointsDetail: {
-    title:
-      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
-        ? storedRoutes.iotDataPoints?.title
-        : RESOURCE_LABEL.iotDataPoints,
     path: '/iot-data-points/detail'
   },
   iotChart: {
-    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart?.title ? storedRoutes.iotChart?.title : RESOURCE_LABEL.iotChart,
     path: '/iot-chart'
   },
   iotChartDetail: {
-    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart.title ? storedRoutes.iotChart.title : RESOURCE_LABEL.iotChart,
     path: '/iot-chart/detail'
   },
   sendOutboundMessage: {
-    title:
-      storedRoutes && storedRoutes.sendOutboundMessage && storedRoutes.sendOutboundMessage?.title
-        ? storedRoutes.sendOutboundMessage?.title
-        : RESOURCE_LABEL.sendOutboundMessage,
     path: '/send-outbound-message'
   },
-
   deviceTemplates: {
-    title:
-      storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title
-        ? storedRoutes.deviceTemplates?.title
-        : RESOURCE_LABEL.deviceTemplates,
     path: '/device-templates'
   },
   deviceTemplatesDetail: {
-    title:
-      storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates.title
-        ? storedRoutes.deviceTemplates?.title
-        : RESOURCE_LABEL.deviceTemplates,
     path: '/device-templates/detail'
   },
   workStations: {
-    title:
-      storedRoutes && storedRoutes.workStations && storedRoutes.workStations?.title ? storedRoutes.workStations?.title : RESOURCE_LABEL.workStations,
     path: '/work-stations'
   },
   workStationsDetail: {
-    title:
-      storedRoutes && storedRoutes.workStations && storedRoutes.workStations.title ? storedRoutes.workStations?.title : RESOURCE_LABEL.workStations,
     path: '/work-stations/detail'
   },
   deviceTemplateAlert: {
-    title:
-      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
-        ? storedRoutes.deviceTemplateAlert?.title
-        : RESOURCE_LABEL.deviceTemplateAlert,
     path: '/device-template-alert'
   },
   deviceTemplateAlertDetail: {
-    title:
-      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
-        ? storedRoutes.deviceTemplateAlert?.title
-        : RESOURCE_LABEL.deviceTemplateAlert,
     path: '/device-template-alert/detail'
   },
   chartOfAccount: {

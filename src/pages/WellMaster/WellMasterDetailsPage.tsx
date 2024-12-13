@@ -114,7 +114,7 @@ const WellMasterDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab label={'Details'} value={0} />
-          {permissions?.wellNumber?.isRead && <CustomTab label={routes.wellNumber.title} value={1} />}
+          {permissions?.wellNumber?.isRead && <CustomTab label={resources?.wellNumber?.titlePlural} value={1} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !wellMasterFields.length ? (

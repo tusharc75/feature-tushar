@@ -23,11 +23,11 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 export default function DeviceTemplatesAlerts() {
-  const renderedFrom = camelCase(routes?.deviceTemplateAlert.title);
+  const renderedFrom = camelCase(sidebarResource.deviceTemplateAlert);
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -235,10 +235,10 @@ export default function DeviceTemplatesAlerts() {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.deviceTemplateAlert.title }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.deviceTemplateAlert}
-          module={routes.deviceTemplateAlert.title}
+          module={resources?.deviceTemplateAlert?.titlePlural}
           api={'device-template-alert'}
           afterImportCompleted={() => {
             fetchData();
@@ -307,7 +307,7 @@ export default function DeviceTemplatesAlerts() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplateAlert?.title?.toLowerCase()}  ${deleteRecord?.alertNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()}  ${deleteRecord?.alertNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

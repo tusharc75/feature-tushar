@@ -37,7 +37,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -312,7 +312,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
-          >{`Assign ${routes.workStations.title}`}</MenuItem>
+          >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
         )}
         <MenuItem
           onClick={() => {
