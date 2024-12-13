@@ -19,7 +19,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTransactionLock from './ManageTransactionLock';
 import axios, { CancelTokenSource } from 'axios';
-import { resolve } from 'path';
 
 const TransactionLock = () => {
   const renderedFrom = camelCase(sidebarResource.transactionLock);
