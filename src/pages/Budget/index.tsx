@@ -21,7 +21,7 @@ import ManageBudgetDialog from './ManageBudgetDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const Budget = () => {
-  const renderedFrom = camelCase(routes?.budget.title);
+  const renderedFrom = camelCase(sidebarResource?.budget);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const Budget = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,10 +203,10 @@ const Budget = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.budget]} />
+        <CustomBreadCrumbs routes={[{ ...routes.budget, title: resources?.budget?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.budget}
-          module={routes.budget.title}
+          module={resources?.budget?.titlePlural}
           api={budget.api}
           afterImportCompleted={() => {
             fetchData();
@@ -262,7 +262,7 @@ const Budget = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.budget?.title} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.budget?.titlePlural} ${deleteRecord?.name || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

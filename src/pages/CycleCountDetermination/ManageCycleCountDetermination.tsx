@@ -11,12 +11,17 @@ import { CustomDialogTransition } from './../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { Formik, Form, FieldArray } from 'formik';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [users, setUsers] = useState([]);
   const [inventoryCycle, setInventoryCycle] = useState([]);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchUsers();
@@ -84,7 +89,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
       fullWidth
     >
       <CustomDialogHeader
-        title={`${routes.cycleCountDetermination.title} - ${warehouseName}`}
+        title={`${resources?.cycleCountDetermination?.titleSingular} - ${warehouseName}`}
         showRequiredLabel={false}
         onClose={() => {
           onClose();

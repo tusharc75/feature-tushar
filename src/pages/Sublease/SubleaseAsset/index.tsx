@@ -39,7 +39,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -211,7 +211,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
         resource: sidebarResource.sublease,
         referenceId: subleaseData?._id,
         columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
@@ -225,7 +225,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
         {allowedToEdit && (
           <ImportExportMenu
             permissions={permissions?.serializedAsset}
-            module={routes.serializedAsset.title}
+            module={resources?.serializedAsset?.titlePlural}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchRecords();

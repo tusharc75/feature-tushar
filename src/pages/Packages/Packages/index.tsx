@@ -4,7 +4,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages } from 'src/constants/helpers';
+import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,7 +16,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { isMobile } from 'react-device-detect';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_packages'}`;
+  const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
   const {

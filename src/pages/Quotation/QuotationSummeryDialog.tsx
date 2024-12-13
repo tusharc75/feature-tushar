@@ -27,6 +27,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
 import { Background } from 'react-flow-renderer';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from 'src/StateProvider/Provider';
 
 interface CssObj {
   [index: string]: React.CSSProperties;
@@ -80,6 +81,10 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [redCard, setRedCard] = useState(false);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     if (quotationData) {
@@ -145,7 +150,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
           maxWidth: 'sm'
         }}
         modalHead={{
-          title: `${routes.quotation.title} Summary`,
+          title: `${resources?.quotation?.titleSingular} Summary`,
           icon: <GiReceiveMoney />,
           fullScreenOption: true
         }}

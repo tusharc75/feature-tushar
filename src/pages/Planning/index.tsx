@@ -129,7 +129,7 @@ const Planning = () => {
                     newPath = `${routes.salesOrderDetail.path}/${row?.original?.salesOrderId}`;
                   }
                   if (row?.original?.type === 'Field Service Order') {
-                    newPath = `${routes?.fieldServiceOrderDetail.path}/${row?.original?.fieldServiceOrderId}`;
+                    newPath = `${routes?.fieldServiceOrderDetail?.path}/${row?.original?.fieldServiceOrderId}`;
                   }
                   if (newPath) {
                     window.open(newPath, '_blank');

@@ -16,6 +16,7 @@ import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'import-export';
 
@@ -33,6 +34,10 @@ const ImportExport = () => {
   const [customImportDialog, setCustomImportDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const [file, setFile] = useState({});
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -339,7 +344,7 @@ const ImportExport = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.importExport]} />
+          <CustomBreadCrumbs routes={[{...routes.importExport,title:resources?.importExport?.titleSingular}]} />
         </Grid>
       </Grid>
       <CustomContainer>

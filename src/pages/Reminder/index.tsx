@@ -9,9 +9,15 @@ import { ListRelatedTo } from '../../components/Activity/Helpers/ListRelatedTo';
 import ActivityModelHandler from '../../components/Activity/ActivityModelHandler';
 import routes from '../../components/Helpers/Routes';
 import { DateRange } from '@material-ui/icons';
+import { useData } from 'src/StateProvider/Provider';
 
 const Reminder = () => {
   const history = useHistory();
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const { state } = useLocation();
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -99,7 +105,7 @@ const Reminder = () => {
   const dynamicChip = (data: string, type: string = null) => (
     <>
       <Typography
-        className="flex gap-[5px] items-center text-[#6B6B6B] dark:text-[var(--dark-secondary-text)]"
+        className="flex items-center gap-[5px] text-[#6B6B6B] dark:text-[var(--dark-secondary-text)]"
         variant="body2"
         style={{ fontSize: 12 }}
       >
@@ -131,12 +137,12 @@ const Reminder = () => {
       )}
       <div className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.reminder?.titlePlural }]} />
         </div>
         <div className="detail-container-v1  min-h-[calc(100vh-99px)]">
-          <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-172px)] overflow-auto">
-            <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>
-              <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+          <div className=" grid h-[calc(100vh-172px)] gap-4 overflow-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className={`rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`}>
+              <Box className="sticky top-0 z-10 rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)] px-[13px] py-[14px]">
                 <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
                   Events
                 </Typography>
@@ -145,12 +151,12 @@ const Reminder = () => {
                 {events.map((event) => (
                   <Box
                     key={event._id}
-                    className=" cursor-pointer relative mb-[14px] mx-[6px] rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
+                    className=" relative mx-[6px] mb-[14px] cursor-pointer rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
                     style={{ cursor: 'pointer', boxShadow: '0px 3.5833494663238525px 26.8751220703125px rgba(0, 0, 0, 0.06)' }}
                     onClick={() => setSelectedActivity({ id: event._id, type: 'event' })}
                   >
                     <Typography
-                      className=" truncate mb-[8px]"
+                      className=" mb-[8px] truncate"
                       variant="subtitle2"
                       style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.57, marginBottom: 8 }}
                     >
@@ -180,8 +186,8 @@ const Reminder = () => {
                 </Box>
               </Box>
             </div>
-            <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>
-              <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+            <div className={`rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`}>
+              <Box className="sticky top-0 z-10 rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)] px-[13px] py-[14px]">
                 <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
                   Tasks
                 </Typography>
@@ -190,12 +196,12 @@ const Reminder = () => {
                 {tasks.map((task) => (
                   <Box
                     key={task._id}
-                    className=" cursor-pointer relative mb-[14px] mx-[6px] rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
+                    className=" relative mx-[6px] mb-[14px] cursor-pointer rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
                     style={{ cursor: 'pointer', boxShadow: '0px 3.5833494663238525px 26.8751220703125px rgba(0, 0, 0, 0.06)' }}
                     onClick={() => setSelectedActivity({ id: task._id, type: 'task' })}
                   >
                     <Typography
-                      className=" truncate mb-[8px]"
+                      className=" mb-[8px] truncate"
                       variant="subtitle2"
                       style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.57, marginBottom: 8 }}
                     >
@@ -228,8 +234,8 @@ const Reminder = () => {
                 </Box>
               </Box>
             </div>
-            <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>
-              <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+            <div className={`rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`}>
+              <Box className="sticky top-0 z-10 rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)] px-[13px] py-[14px]">
                 <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
                   Cases
                 </Typography>
@@ -238,12 +244,12 @@ const Reminder = () => {
                 {cases.map((cas) => (
                   <Box
                     key={cas._id}
-                    className=" cursor-pointer relative mb-[14px] mx-[6px] rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
+                    className=" relative mx-[6px] mb-[14px] cursor-pointer rounded-[8px] bg-[var(--dark-primary,white)] px-[18px] py-[11px]"
                     style={{ cursor: 'pointer', boxShadow: '0px 3.5833494663238525px 26.8751220703125px rgba(0, 0, 0, 0.06)' }}
                     onClick={() => setSelectedActivity({ id: cas._id, type: 'case' })}
                   >
                     <Typography
-                      className=" truncate mb-[8px]"
+                      className=" mb-[8px] truncate"
                       variant="subtitle2"
                       style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.57, marginBottom: 8 }}
                     >

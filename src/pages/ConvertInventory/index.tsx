@@ -19,7 +19,7 @@ import axios, { CancelTokenSource } from 'axios';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ConvertInventory = () => {
-  const renderedFrom = camelCase(routes?.inventoryToAsset.title);
+  const renderedFrom = camelCase(sidebarResource?.inventoryToAsset);
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -32,7 +32,7 @@ const ConvertInventory = () => {
   const [inventory, setInventory] = useState({ open: false, product: [] });
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -210,14 +210,24 @@ const ConvertInventory = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <div>
-          <CustomBreadCrumbs routes={[routes.inventoryToAsset]} />
+          <CustomBreadCrumbs routes={[{...routes.inventoryToAsset,title:resources?.inventoryToAsset?.titleSingular}]} />
         </div>
       </div>
       <CustomContainer>
         <ListingPageHeader
           leftSideContents={
             <LeftSideContents
-              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId, dispatch }}
+              {...{
+                warehouseOptions,
+                warehouseId,
+                setWarehouseId,
+                setStorageLocationId,
+                user,
+                storageLocationOptions,
+                storageLocationId,
+                dispatch,
+                resources
+              }}
             />
           }
           searchValue={search}
@@ -271,7 +281,8 @@ const LeftSideContents = ({
   user,
   storageLocationOptions,
   storageLocationId,
-  dispatch
+  dispatch,
+  resources
 }) => {
   return (
     <>
@@ -295,7 +306,7 @@ const LeftSideContents = ({
           }
         }}
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
       {user?.user?.brandPolicy?.storageLocation && (

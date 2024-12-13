@@ -77,7 +77,7 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
-      const allDetails: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/detail`);
+      const allDetails: any = await axiosInstance().get(`${routes?.workOrder?.path}/${workOrderId}/detail`);
       const stepData = allDetails?.data?.data?.stepData;
       const stepDatas = {};
 

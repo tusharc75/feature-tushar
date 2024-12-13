@@ -20,7 +20,7 @@ import ManageRepairType from './ManageRepairType';
 import axios, { CancelTokenSource } from 'axios';
 
 const RepairType = () => {
-  const renderedFrom = camelCase(routes?.repairType.title);
+  const renderedFrom = camelCase(sidebarResource.repairType);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,7 +28,7 @@ const RepairType = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,10 +205,10 @@ const RepairType = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.repairType]} />
+        <CustomBreadCrumbs routes={[{ ...routes.repairType, title: resources?.repairType?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.repairType}
-          module={routes.repairType.title}
+          module={resources?.repairType?.titlePlural}
           api={repairType.api}
           afterImportCompleted={() => {
             fetchData();
@@ -264,7 +264,7 @@ const RepairType = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes.repairType?.title?.toLowerCase()} ${deleteRecord?.repairType || ''} ? `}
+          message={`Are you sure you want to delete ${resources?.repairType?.titleSingular?.toLowerCase()} ${deleteRecord?.repairType || ''} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

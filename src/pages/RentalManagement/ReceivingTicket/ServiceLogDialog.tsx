@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
@@ -19,7 +19,7 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate = null }) => {
-  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services_logs`;
+  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_services_logs`;
 
   const {
     state: { user }

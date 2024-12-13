@@ -16,6 +16,11 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 
 const ManageWorkAutomation = () => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -90,6 +95,7 @@ const ManageWorkAutomation = () => {
                   selectedAssets={selectedAssets}
                   isExpand={isExpand}
                   setIsExpand={setIsExpand}
+                  resources={resources}
                 />
               </div>
               <div>
@@ -127,7 +133,7 @@ const ManageWorkAutomation = () => {
 
 export default ManageWorkAutomation;
 
-const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedAssets, isExpand, setIsExpand }) => {
+const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedAssets, isExpand, setIsExpand, resources }) => {
   const [records, setRecords] = useState(null);
   const handleAdd = () => {
     const tempMaterial = records?.map((e) => {
@@ -143,7 +149,7 @@ const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedA
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4 ">
-          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.serializedAsset.title}`}</h3>
+          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${resources?.serializedAsset?.titleSingular}`}</h3>
           {/* <div className="flex min-w-fit gap-3">
             <IconButton size="small" disabled={!rentalManagementData} onClick={() => {}}>
               {isExpand.asset ? (

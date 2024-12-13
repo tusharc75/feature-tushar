@@ -325,7 +325,7 @@ const AssemblyOrderViews = (props) => {
         window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'workOrder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'managedPackage':
         window.open(`${routes.managedPackagesDetail.path}/${element.data.ref_id}`);

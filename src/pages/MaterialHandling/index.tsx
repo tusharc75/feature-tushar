@@ -94,19 +94,19 @@ const MaterialHandling = () => {
   const FIELD_TO_FILTER = [
     {
       fieldName: '_id',
-      fieldLabel: routes.workOrder.title,
+      fieldLabel: resources?.workOrder?.titlePlural,
       resource: sidebarResource.workOrder,
       type: 'dropDown'
     },
     {
       fieldName: 'warehouse',
-      fieldLabel: routes.warehouse.title,
+      fieldLabel: resources?.warehouse?.titlePlural,
       resource: sidebarResource.warehouse,
       type: 'dropDown'
     },
     {
       fieldName: 'serializedAsset',
-      fieldLabel: routes.serializedAsset.title,
+      fieldLabel: resources?.serializedAsset?.titlePlural,
       resource: sidebarResource.serializedAsset,
       type: 'dropDown'
     },
@@ -204,7 +204,7 @@ const MaterialHandling = () => {
                                   onClick={() => {
                                     let route;
                                     if (data?.referenceType === sidebarResource.workOrder) {
-                                      route = routes.workOrderDetail.path;
+                                      route = routes?.workOrderDetail?.path;
                                     } else if (data?.referenceType === sidebarResource.fieldTicket) {
                                       route = routes.fieldTicketDetail.path;
                                     }
@@ -242,7 +242,7 @@ const MaterialHandling = () => {
                               </>
                             )}
                             <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
-                              {routes.warehouse.title} :{' '}
+                              {resources?.warehouse?.titleSingular} :{' '}
                               <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
                             </Typography>
                           </Box>

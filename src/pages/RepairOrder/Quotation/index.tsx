@@ -59,7 +59,7 @@ const Quotation = ({
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const isMobileScreen = useMediaQuery('(max-width: 767px)');
@@ -607,7 +607,7 @@ const Quotation = ({
       {invoiceStep ? (
         <Box p={2}>
           <PreviewDownload
-            fileName={`${routes.repairOrder.title}-${repairOrderData?.repairOrderNumber}`}
+            fileName={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.repairOrderNumber}`}
             resource={sidebarResource.repairOrder}
             referenceId={repairOrderData?._id}
             columns={columns}

@@ -48,7 +48,7 @@ const Products = ({
   const { dataRows, selectedRecords } = state;
   const {
     state: {
-      user: { user },
+      user: { user, resources },
       permissions
     }
   } = useData();
@@ -212,7 +212,7 @@ const Products = ({
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (allowedToEdit) {
-      setWalkmeData([generateAddExistingProduct()]);
+      setWalkmeData([generateAddExistingProduct(false,resources?.transferInventory?.titleSingular)]);
     } else {
       setWalkmeData([]);
     }

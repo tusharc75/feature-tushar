@@ -31,7 +31,7 @@ import { Autorenew } from '@material-ui/icons';
 import { FiExternalLink } from 'react-icons/fi';
 
 const History = ({ product, warehouse, storageLocation }) => {
-  const renderedFrom = `${camelCase(routes.productInventory.title)}_history`;
+  const renderedFrom = `${camelCase(sidebarResource?.productInventory)}_history`;
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
@@ -40,7 +40,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const { page, limit, filters, sorting } = state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: '', product: '' });
@@ -98,9 +98,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -195,36 +195,28 @@ const History = ({ product, warehouse, storageLocation }) => {
               onClick={() => {
                 if (row?.original?.referenceType === sidebarResource.purchaseOrder) {
                   window.open(`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.transferInventory) {
+                } else if (row?.original?.referenceType === sidebarResource.transferInventory) {
                   window.open(`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.transferAsset) {
+                } else if (row?.original?.referenceType === sidebarResource.transferAsset) {
                   window.open(`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.salesOrder) {
+                } else if (row?.original?.referenceType === sidebarResource.salesOrder) {
                   window.open(`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.bulkAssetCreation) {
+                } else if (row?.original?.referenceType === sidebarResource.bulkAssetCreation) {
                   window.open(`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.serializedAsset) {
+                } else if (row?.original?.referenceType === sidebarResource.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === 'Rental Job') {
+                } else if (row?.original?.referenceType === 'Rental Job') {
                   window.open(`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.workOrder) {
-                  window.open(`${routes.workOrderDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.fieldTicket) {
+
+                } else if (row?.original?.referenceType === sidebarResource.workOrder) {
+                  window.open(`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`);
+                } else if (row?.original?.referenceType === sidebarResource.fieldTicket) {
+
                   window.open(`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.subcontractAssembly) {
+                } else if (row?.original?.referenceType === sidebarResource.subcontractAssembly) {
                   window.open(`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`);
-                }
-                else if (row?.original?.referenceType === sidebarResource.productInventory) {
-                  <h5 className="text-truncate">Manual Entry</h5>
+                } else if (row?.original?.referenceType === sidebarResource.productInventory) {
+                  <h5 className="text-truncate">Manual Entry</h5>;
                 }
               }}
             >
@@ -285,24 +277,24 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
       ? [
-        {
-          accessor: 'finalInventory',
-          Header: 'Final Quantity',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalInventory ? (
-                <h5 className="text-truncate" title={row?.original?.finalInventory}>
-                  {row?.original?.finalInventory}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalInventory',
+            Header: 'Final Quantity',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalInventory ? (
+                  <h5 className="text-truncate" title={row?.original?.finalInventory}>
+                    {row?.original?.finalInventory}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'price',
@@ -338,28 +330,28 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
-        {
-          accessor: 'finalAvgPrice',
-          Header: `Final Average Cost ${curr}`,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalAvgPrice ? (
-                <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
-                  {row?.original?.finalAvgPrice}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalAvgPrice',
+            Header: `Final Average Cost ${curr}`,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalAvgPrice ? (
+                  <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
+                    {row?.original?.finalAvgPrice}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
@@ -380,28 +372,28 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-        {
-          accessor: 'storageLocation',
-          Header: 'Storage Location',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div className="flex items-center gap-1">
-              <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
-              {
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              }
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-1">
+                <p title={row.original.storageLocation}>{row.original.storageLocation}</p>
+                {
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                }
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'supplierPartNumber',
@@ -498,9 +490,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
-            ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
-              row?.original?.type?.toLowerCase() === 'debit' &&
-              row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
+          ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
+            row?.original?.type?.toLowerCase() === 'debit' &&
+            row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
             <Box pl={1}>
               <HtmlTooltip title="Revert">
                 <span>
@@ -574,7 +566,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             </Grid>

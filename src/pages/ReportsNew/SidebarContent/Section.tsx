@@ -42,7 +42,7 @@ const Section = <T,>({ items, onClick, title, getTitle, selectedTitle }: Section
                   <IconButton size={'small'}>
                     <IoIosStarOutline size={16} />
                   </IconButton>
-                  <p className="text-[12px] font-normal leading-[15px] dark:text-gray-200">{getTitle(item)}</p>
+                  <p className="text-[14px] font-normal leading-[1.5] dark:text-gray-200">{getTitle(item)}</p>
                 </li>
               );
             })}

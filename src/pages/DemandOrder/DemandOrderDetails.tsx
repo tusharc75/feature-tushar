@@ -40,7 +40,7 @@ const DemandOrderDetails = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -196,7 +196,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.purchaseOrder });
                     }}
                   >
-                    {routes.purchaseOrder.title}
+                    {resources?.purchaseOrder?.titleSingular}
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
@@ -204,7 +204,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.productionOrder });
                     }}
                   >
-                    {routes.productionOrder.title}
+                    {resources?.productionOrder?.titleSingular}
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (

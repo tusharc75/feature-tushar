@@ -32,7 +32,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -115,7 +115,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle(`Create ${routes.repairJob.title}`);
+          setTitle(`Create ${resources?.repairJob?.titleSingular}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
             initialData['currency'] = user.user?.brandCurrency;
@@ -214,7 +214,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }
   };
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -230,12 +229,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       open={true}
     >
       {initialData && initialData?.fields?.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          validateOnMount
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader

@@ -3,14 +3,15 @@ import { Checkbox, FormControlLabel } from '@material-ui/core';
 const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
   return (
     <div>
-      <div className="sticky -top-[15px] z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-4">
-        <p>{fieldData?.fieldLabel}</p>
+      <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
+        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
       </div>
       <div>
         <div className="">
           <FormControlLabel
             control={
               <Checkbox
+                size={'small'}
                 name={'Yes'}
                 checked={deepFilters?.find((d) => d?.field === fieldData?.fieldName)?.term === 'Yes'}
                 onChange={(e) => {
@@ -20,10 +21,10 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
                     setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
-                color="primary"
+                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
-            label={'Yes'}
+            label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">Yes</span>}
           />
         </div>
         <div className="">
@@ -39,10 +40,11 @@ const CheckBox = ({ fieldData, deepFilters, setDeepFilters }) => {
                     setDeepFilters([...deepFilters?.filter((d) => d?.field !== fieldData?.fieldName)]);
                   }
                 }}
-                color="primary"
+                size="small"
+                className="!text-[--new-theme-color] dark:!text-gray-200"
               />
             }
-            label={'No'}
+            label={<span className="!text-[14px] !font-medium !leading-[17px] !text-[#6C757D] dark:!text-gray-200">No</span>}
           />
         </div>
       </div>

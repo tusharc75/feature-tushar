@@ -34,7 +34,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [productionOrderData, setProductionOrderData] = useState(null);
@@ -134,7 +134,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             type: 'success',
             message: message
           });
-          history.push(`${routes.productionOrderDetail.path}/${data?._id}`);
+          history.push(`${routes?.productionOrderDetail?.path}/${data?._id}`);
           onSuccess(data);
           setLoading(false);
         })
@@ -189,7 +189,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               <CustomDialogHeader
                 title={
                   !productionOrderId
-                    ? `Create ${routes.productionOrder.title}`
+                    ? `Create ${resources?.productionOrder?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${productionOrderData?.productionOrderNumber || ''}`}`
                 }
                 onClose={() => {

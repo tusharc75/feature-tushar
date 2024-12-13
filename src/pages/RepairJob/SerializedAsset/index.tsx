@@ -64,7 +64,7 @@ const SerializedAsset = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const handleClick = (event) => {
@@ -531,7 +531,7 @@ const SerializedAsset = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.repairJob.title}-${repairJobData?.repairJobName}`,
+    fileName: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
     resource: sidebarResource.repairJob,
     referenceId: repairJobData?._id,
     columns: columns,

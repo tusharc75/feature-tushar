@@ -40,7 +40,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
 
   const fetchData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}/log?uniqueId=${uniqueId}`)
+      .get(`${routes?.workOrder?.path}/${workOrderId}/log?uniqueId=${uniqueId}`)
       .then(({ data: { data } }) => {
         if (data && data?.length) {
           setData(data);

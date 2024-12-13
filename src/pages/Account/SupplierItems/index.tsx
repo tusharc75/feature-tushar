@@ -42,7 +42,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const renderedFrom = camelCase(
-    tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : routes?.serializedAsset.title
+    tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource?.serializedAsset
   );
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

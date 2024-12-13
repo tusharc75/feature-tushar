@@ -150,197 +150,115 @@ const routes = {
     path: '/product-template'
   },
   productInventory: {
-    title:
-      storedRoutes && storedRoutes.productInventory && storedRoutes.productInventory.title
-        ? storedRoutes.productInventory?.title
-        : RESOURCE_LABEL.productInventory,
     path: '/product-inventory'
   },
   packageInventory: {
-    title:
-      storedRoutes && storedRoutes.packageInventory && storedRoutes.packageInventory.title
-        ? storedRoutes.packageInventory?.title
-        : RESOURCE_LABEL.packageInventory,
     path: '/package-inventory'
   },
   serializedAsset: {
-    title:
-      storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
-        ? storedRoutes.serializedAsset.title
-        : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset'
   },
   serializedAssetsCertification: {
-    title:
-      storedRoutes && storedRoutes.serializedAssetsCertification && storedRoutes.serializedAssetsCertification.title
-        ? storedRoutes.serializedAssetsCertification.title
-        : RESOURCE_LABEL.serializedAssetsCertification,
     path: '/serialized-assets-certification'
   },
   serializedAssetDetail: {
-    title:
-      storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
-        ? storedRoutes.serializedAsset.title
-        : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset/detail'
   },
   equiptmentRentalMaster: {
-    title:
-      storedRoutes && storedRoutes.equiptmentRentalMaster && storedRoutes.equiptmentRentalMaster
-        ? storedRoutes.equiptmentRentalMaster.title
-        : RESOURCE_LABEL.equiptmentRentalMaster,
     path: '/equiptment-rental-master'
   },
   rentalManagement: {
-    title:
-      storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
-        ? storedRoutes.rentalManagement.title
-        : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
   },
   rentalManagementDetail: {
-    title:
-      storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
-        ? storedRoutes.rentalManagement.title
-        : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management/detail'
   },
   //Same name because handle old code issue
   quoteBuilder: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quoteBuilderDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
   quotes: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quotesDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
   quote: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
   },
   quoteDetail: {
-    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
-  //
   budget: {
-    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget'
   },
   budgetDetail: {
-    title: storedRoutes && storedRoutes.budget && storedRoutes.budget ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: '/budget/detail'
   },
   pricingCondition: {
-    title:
-      storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
-        ? storedRoutes.pricingCondition?.title
-        : RESOURCE_LABEL.pricingCondition,
     path: '/pricing-condition'
   },
   pricingConditionDetail: {
-    title:
-      storedRoutes && storedRoutes.pricingCondition && storedRoutes.pricingCondition
-        ? storedRoutes.pricingCondition?.title
-        : RESOURCE_LABEL.pricingCondition,
     path: '/pricing-condition/detail'
   },
   marketSegment: {
-    title:
-      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment'
   },
   marketSegmentDetail: {
-    title:
-      storedRoutes && storedRoutes.marketSegment && storedRoutes.marketSegment ? storedRoutes.marketSegment?.title : RESOURCE_LABEL.marketSegment,
     path: '/market-segment/detail'
   },
   quotePdfTemplate: {
-    title:
-      storedRoutes && storedRoutes.quotePdfTemplate && storedRoutes.quotePdfTemplate
-        ? storedRoutes.quotePdfTemplate?.title
-        : RESOURCE_LABEL.quotePdfTemplate,
     path: '/quote-pdf-template'
   },
   quotePdfTemplateDetail: {
-    title:
-      storedRoutes && storedRoutes.quotePdfTemplate && storedRoutes.quotePdfTemplate
-        ? storedRoutes.quotePdfTemplate?.title
-        : RESOURCE_LABEL.quotePdfTemplate,
     path: '/quote-pdf-template/detail'
   },
   attachment: {
-    title: storedRoutes && storedRoutes.attachment && storedRoutes.attachment ? storedRoutes.attachment?.title : RESOURCE_LABEL.attachment,
     path: '/attachment'
   },
   calendar: {
-    title: storedRoutes && storedRoutes.calendar && storedRoutes.calendar ? storedRoutes.calendar?.title : RESOURCE_LABEL.calendar,
     path: '/calendar'
   },
   reminder: {
-    title: storedRoutes && storedRoutes.reminder && storedRoutes.reminder ? storedRoutes.reminder?.title : RESOURCE_LABEL.reminder,
     path: '/reminder'
   },
   DOARequest: {
-    title: storedRoutes && storedRoutes.DOARequest && storedRoutes.DOARequest ? storedRoutes.DOARequest?.title : RESOURCE_LABEL.DOARequest,
     path: '/doa-request'
   },
   task: {
-    title: storedRoutes && storedRoutes.task && storedRoutes.task ? storedRoutes.task?.title : RESOURCE_LABEL.task,
     path: '/task'
   },
   case: {
-    title: storedRoutes && storedRoutes.case && storedRoutes.case ? storedRoutes.case?.title : RESOURCE_LABEL.case,
     path: '/case'
   },
   note: {
-    title: storedRoutes && storedRoutes.note && storedRoutes.note ? storedRoutes.note?.title : RESOURCE_LABEL.note,
     path: '/note'
   },
   zone: {
-    title: storedRoutes && storedRoutes.zone && storedRoutes.zone ? storedRoutes.zone?.title : RESOURCE_LABEL.zone,
     path: '/zone'
   },
   zoneDetail: {
-    title: storedRoutes && storedRoutes.zone && storedRoutes.zone ? storedRoutes.zone?.title : RESOURCE_LABEL.zone,
     path: '/zone/detail'
   },
   warehouse: {
-    title: storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: '/warehouse'
   },
   warehouseDetail: {
-    title: storedRoutes && storedRoutes.warehouse && storedRoutes.warehouse.title ? storedRoutes.warehouse.title : RESOURCE_LABEL.warehouse,
     path: '/warehouse/detail'
   },
   deliveryTicket: {
-    title:
-      storedRoutes && storedRoutes.deliveryTicket && storedRoutes.deliveryTicket.title
-        ? storedRoutes.deliveryTicket?.title
-        : RESOURCE_LABEL.deliveryTicket,
     path: '/delivery-ticket'
   },
   deliveryTicketDetail: {
-    title:
-      storedRoutes && storedRoutes.deliveryTicket && storedRoutes.deliveryTicket.title
-        ? storedRoutes.deliveryTicket?.title
-        : RESOURCE_LABEL.deliveryTicket,
     path: '/delivery-ticket/detail'
   },
   repairJob: {
-    title: storedRoutes && storedRoutes.repairJob && storedRoutes.repairJob.title ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
     path: '/repair-job'
   },
   repairJobDetail: {
-    title: storedRoutes && storedRoutes.repairJob && storedRoutes.repairJob.title ? storedRoutes.repairJob?.title : RESOURCE_LABEL.repairJob,
     path: '/repair-job/detail'
   },
   salesOrder: {
@@ -352,289 +270,152 @@ const routes = {
     path: '/sales-order/detail'
   },
   packages: {
-    title: storedRoutes && storedRoutes.packages && storedRoutes.packages.title ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: '/packages'
   },
   packagesDetail: {
-    title: storedRoutes && storedRoutes.packages && storedRoutes.packages.title ? storedRoutes.packages?.title : RESOURCE_LABEL.packages,
     path: '/packages/detail'
   },
   purchaseOrder: {
-    title:
-      storedRoutes && storedRoutes.purchaseOrder && storedRoutes.purchaseOrder.title
-        ? storedRoutes.purchaseOrder?.title
-        : RESOURCE_LABEL.purchaseOrder,
     path: '/purchase-order'
   },
   purchaseOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.purchaseOrder && storedRoutes.purchaseOrder.title
-        ? storedRoutes.purchaseOrder?.title
-        : RESOURCE_LABEL.purchaseOrder,
     path: '/purchase-order/detail'
   },
   transferAsset: {
-    title:
-      storedRoutes && storedRoutes.transferAsset && storedRoutes.transferAsset.title
-        ? storedRoutes.transferAsset?.title
-        : RESOURCE_LABEL.transferAsset,
     path: '/transfer-asset'
   },
   transferAssetDetail: {
-    title:
-      storedRoutes && storedRoutes.transferAsset && storedRoutes.transferAsset.title
-        ? storedRoutes.transferAsset?.title
-        : RESOURCE_LABEL.transferAsset,
     path: '/transfer-asset/detail'
   },
   transferInventory: {
-    title:
-      storedRoutes && storedRoutes.transferInventory && storedRoutes.transferInventory.title
-        ? storedRoutes.transferInventory?.title
-        : RESOURCE_LABEL.transferInventory,
     path: '/transfer-inventory'
   },
   transferInventoryDetail: {
-    title:
-      storedRoutes && storedRoutes.transferInventory && storedRoutes.transferInventory.title
-        ? storedRoutes.transferInventory?.title
-        : RESOURCE_LABEL.transferInventory,
     path: '/transfer-inventory/detail'
   },
   address: {
-    title: storedRoutes && storedRoutes.address && storedRoutes.address.title ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: '/address'
   },
   addressDetail: {
-    title: storedRoutes && storedRoutes.address && storedRoutes.address.title ? storedRoutes.address?.title : RESOURCE_LABEL.address,
     path: '/address/detail'
   },
   reports: {
-    title: storedRoutes && storedRoutes.reports && storedRoutes.reports.title ? storedRoutes.reports?.title : 'Reports',
     path: '/reports'
   },
   scheduleReport: {
-    title:
-      storedRoutes && storedRoutes.scheduleReport && storedRoutes.scheduleReport.title
-        ? storedRoutes.scheduleReport?.title
-        : RESOURCE_LABEL.scheduleReport,
     path: '/schedule-report'
   },
   resourceCalendar: {
-    title:
-      storedRoutes && storedRoutes.resourceCalendar && storedRoutes.resourceCalendar.title
-        ? storedRoutes.resourceCalendar?.title
-        : 'Resource Calendar',
     path: '/resource-calendar'
   },
   planningCalendar: {
-    title:
-      storedRoutes && storedRoutes.planningCalendar && storedRoutes.planningCalendar.title
-        ? storedRoutes.planningCalendar?.title
-        : 'Planning Calendar',
     path: '/planning-calendar'
   },
   rentalPlanningCalendar: {
-    title:
-      storedRoutes && storedRoutes.rentalPlanningCalendar && storedRoutes.rentalPlanningCalendar.title
-        ? storedRoutes.rentalPlanningCalendar?.title
-        : 'Rental Planning Calendar',
     path: '/rental-planning-calendar'
   },
   eCommercePolicy: {
-    title:
-      storedRoutes && storedRoutes.eCommercePolicy && storedRoutes.eCommercePolicy.title ? storedRoutes.eCommercePolicy?.title : 'e-Commerce Policy',
     path: '/e-commerce-policy'
   },
   sublease: {
-    title: storedRoutes && storedRoutes.sublease && storedRoutes.sublease.title ? storedRoutes.sublease?.title : RESOURCE_LABEL.sublease,
     path: '/sublease'
   },
   subleaseDetail: {
-    title: storedRoutes && storedRoutes.sublease && storedRoutes.sublease.title ? storedRoutes.sublease?.title : RESOURCE_LABEL.sublease,
     path: '/sublease/detail'
   },
   wellMaster: {
-    title: storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
     path: '/well-master'
   },
   wellMasterDetail: {
-    title: storedRoutes && storedRoutes.wellMaster && storedRoutes.wellMaster.title ? storedRoutes.wellMaster?.title : RESOURCE_LABEL.wellMaster,
     path: '/well-master/detail'
   },
   bulkAssetCreation: {
-    title:
-      storedRoutes && storedRoutes.bulkAssetCreation && storedRoutes.bulkAssetCreation.title
-        ? storedRoutes.bulkAssetCreation?.title
-        : RESOURCE_LABEL.bulkAssetCreation,
     path: '/bulk-asset-creation'
   },
   bulkAssetCreationDetail: {
-    title:
-      storedRoutes && storedRoutes.bulkAssetCreation && storedRoutes.bulkAssetCreation.title
-        ? storedRoutes.bulkAssetCreation?.title
-        : RESOURCE_LABEL.bulkAssetCreation,
     path: '/bulk-asset-creation/detail'
   },
   pos: {
-    title: storedRoutes && storedRoutes.pos && storedRoutes.pos.title ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: '/erecs'
   },
   posProductDetail: {
-    title: storedRoutes && storedRoutes.pos && storedRoutes.pos.title ? storedRoutes.pos?.title : RESOURCE_LABEL.pos,
     path: '/erecs/product'
   },
   repairType: {
-    title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type'
   },
   repairTypeDetail: {
-    title: storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: '/repair-type/detail'
   },
 
   storageLocation: {
-    title:
-      storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title
-        ? storedRoutes.storageLocation?.title
-        : RESOURCE_LABEL.storageLocation,
     path: '/storage-location'
   },
   storageLocationDetail: {
-    title:
-      storedRoutes && storedRoutes.storageLocation && storedRoutes.storageLocation.title
-        ? storedRoutes.storageLocation?.title
-        : RESOURCE_LABEL.storageLocation,
     path: '/storage-location/detail'
   },
 
   cageManagement: {
-    title:
-      storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title
-        ? storedRoutes.cageManagement?.title
-        : RESOURCE_LABEL.cageManagement,
     path: '/cage-management'
   },
   productAuction: {
-    title:
-      storedRoutes && storedRoutes.productAuction && storedRoutes.productAuction.title
-        ? storedRoutes.productAuction?.title
-        : RESOURCE_LABEL.productAuction,
     path: '/product-auction'
   },
   productAuctionDetail: {
-    title:
-      storedRoutes && storedRoutes.productAuction && storedRoutes.productAuction.title
-        ? storedRoutes.productAuction?.title
-        : RESOURCE_LABEL.productAuction,
     path: '/product-auction/detail'
   },
   inventoryToAsset: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.inventoryToAsset,
     path: '/inventory-to-asset'
   },
   importExport: {
-    title:
-      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
-        ? storedRoutes.InventoryToAsset?.title
-        : RESOURCE_LABEL.importExport,
     path: '/import-export'
   },
   inventoryCycle: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle'
   },
   inventoryCycleDetail: {
-    title:
-      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle?.title
-        ? storedRoutes?.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
   },
   cycleCountDetermination: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountDetermination && storedRoutes?.cycleCountDetermination?.title
-        ? storedRoutes?.cycleCountDetermination?.title
-        : RESOURCE_LABEL.cycleCountDetermination,
     path: '/cycle-count-determination'
   },
   cycleCountPhysicalInventory: {
-    title:
-      storedRoutes && storedRoutes?.cycleCountPhysicalInventory && storedRoutes?.cycleCountPhysicalInventory?.title
-        ? storedRoutes?.cycleCountPhysicalInventory?.title
-        : RESOURCE_LABEL.cycleCountPhysicalInventory,
     path: '/cycle-count-physical-inventory'
   },
   quotation: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation'
   },
   quotationDetail: {
-    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation/detail'
   },
   serviceMaster: {
-    title:
-      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
-        ? storedRoutes.serviceMaster?.title
-        : RESOURCE_LABEL.serviceMaster,
     path: '/service-master'
   },
   serviceMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
-        ? storedRoutes.serviceMaster?.title
-        : RESOURCE_LABEL.serviceMaster,
     path: '/service-master/detail'
   },
   repairOrder: {
-    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order'
   },
   repairOrderDetail: {
-    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order/detail'
   },
   productionOrder: {
-    title:
-      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
-        ? storedRoutes.productionOrder?.title
-        : RESOURCE_LABEL.productionOrder,
     path: '/production-order'
   },
   productionOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
-        ? storedRoutes.productionOrder?.title
-        : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
   fieldServiceOrder: {
-    title:
-      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
-        ? storedRoutes.fieldServiceOrder?.title
-        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/field-service-order'
   },
   fieldServiceOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.fieldServiceOrder && storedRoutes.fieldServiceOrder.title
-        ? storedRoutes.fieldServiceOrder?.title
-        : RESOURCE_LABEL.fieldServiceOrder,
     path: '/field-service-order/detail'
   },
   workOrder: {
-    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order'
   },
   workOrderDetail: {
-    title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order/detail'
   },
   invoice: {

@@ -31,7 +31,7 @@ function PlanningView() {
     {
       key: 'rentalManagement',
       resource: sidebarResource.rentalManagement,
-      title: routes.rentalManagementDetail.title,
+      title: resources?.rentalManagement?.titlePlural,
       path: routes.rentalManagementDetail.path,
       fieldName: 'rentalJobName',
       start: 'estimateStartDate',
@@ -58,8 +58,8 @@ function PlanningView() {
     {
       key: 'productionOrder',
       resource: sidebarResource.productionOrder,
-      title: routes.productionOrderDetail.title,
-      path: routes.productionOrderDetail.path,
+      title: resources?.productionOrder?.titleSingular,
+      path: routes?.productionOrderDetail?.path,
       fieldName: 'productionOrderNumber',
       start: 'createDate',
       end: 'estimateDeliveryDate'
@@ -85,7 +85,7 @@ function PlanningView() {
     {
       key: 'repairJob',
       resource: sidebarResource.repairJob,
-      title: resources?.repairJobDetail?.titlePlural,
+      title: resources?.repairJob?.titlePlural,
       path: routes.repairJobDetail.path,
       fieldName: 'repairJobName',
       start: 'startDate',
@@ -112,8 +112,8 @@ function PlanningView() {
     {
       key: 'fieldServiceOrder',
       resource: sidebarResource.fieldServiceOrder,
-      title: routes.fieldServiceOrderDetail.title,
-      path: routes.fieldServiceOrderDetail.path,
+      title: resources?.fieldServiceOrder?.titleSingular,
+      path: routes?.fieldServiceOrderDetail?.path,
       fieldName: 'fieldServiceOrderNumber',
       start: 'estimateStartDate',
       end: 'estimateEndDate'
@@ -121,8 +121,8 @@ function PlanningView() {
     {
       key: 'quotation',
       resource: sidebarResource.quotation,
-      title: routes.quotationDetail.title,
-      path: routes.quotationDetail.path,
+      title: resources?.quotation?.titleSingular,
+      path: routes?.quotationDetail.path,
       fieldName: 'quotationNumber',
       start: 'estimateStartDate',
       end: 'estimateEndDate'
@@ -130,7 +130,7 @@ function PlanningView() {
     {
       key: 'serializedAsset',
       resource: sidebarResource.serializedAsset,
-      title: routes.serializedAsset.title,
+      title: resources?.serializedAsset?.titlePlural,
       path: routes.serializedAssetDetail.path,
       fieldName: 'assetNumber',
       start: 'estimateStartDate',

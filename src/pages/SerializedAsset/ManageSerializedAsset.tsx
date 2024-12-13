@@ -83,7 +83,7 @@ const ManageSerializedAsset = ({
           data = data.filter((d) => [...assetLogFields].includes(d.fieldData.fieldName));
           data.forEach((d) => {
             d.fieldData.disableOnEdit = false;
-          })
+          });
         }
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -203,19 +203,23 @@ const ManageSerializedAsset = ({
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       if (assetLogFields) {
-        axiosInstance().put(`${serializedAsset.api}/update-with-log`, values).then(({ data: { data } }) => {
-          setSubmitting(false);
-          onSuccess();
-        })
+        axiosInstance()
+          .put(`${serializedAsset.api}/update-with-log`, values)
+          .then(({ data: { data } }) => {
+            setSubmitting(false);
+            onSuccess();
+          })
           .catch((error) => {
             setSubmitting(false);
             toastConfig.setToastConfig(error);
           });
       } else {
-        axiosInstance().put(`${serializedAsset.api}`, values).then(({ data: { data } }) => {
-          setSubmitting(false);
-          onSuccess();
-        })
+        axiosInstance()
+          .put(`${serializedAsset.api}`, values)
+          .then(({ data: { data } }) => {
+            setSubmitting(false);
+            onSuccess();
+          })
           .catch((error) => {
             setSubmitting(false);
             toastConfig.setToastConfig(error);
@@ -259,8 +263,8 @@ const ManageSerializedAsset = ({
                     productInventoryId
                       ? isClone
                         ? `Clone - ${cloneHeading}`
-                        : 'Update ' + routes.serializedAsset.title
-                      : 'Create ' + routes.serializedAsset.title
+                        : 'Update ' + resources?.serializedAsset?.titleSingular
+                      : 'Create ' + resources?.serializedAsset?.titleSingular
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -488,8 +492,9 @@ const ManageSerializedAsset = ({
                                       disabled={
                                         values['assetNumberType']
                                           ? values['assetNumberType'] === ASSET_NUMBER_TYPE.manual
-                                            ? Boolean(productInventoryId) && !isClone ?
-                                              field.disableOnEdit || field.isUneditable : false
+                                            ? Boolean(productInventoryId) && !isClone
+                                              ? field.disableOnEdit || field.isUneditable
+                                              : false
                                             : true
                                           : Boolean(productInventoryId) && !isClone
                                             ? field.disableOnEdit || field.isUneditable
@@ -629,7 +634,8 @@ const ManageSerializedAsset = ({
                     color="primary"
                     type="submit"
                     onClick={submitForm}
-                    id="dialog-save-button">
+                    id="dialog-save-button"
+                  >
                     {' '}
                     Save
                   </CustomButton>

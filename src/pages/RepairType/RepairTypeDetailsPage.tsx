@@ -20,7 +20,7 @@ const RepairTypeDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [repairTypeData, setRepairTypeData] = useState(null);
@@ -72,7 +72,7 @@ const RepairTypeDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.repairType, { title: repairTypeData?.repairType }]} />
+          <CustomBreadCrumbs routes={[{...routes.repairType, title: resources?.repairType?.titleSingular}, { title: repairTypeData?.repairType }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -134,7 +134,7 @@ const RepairTypeDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.repairType?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.repairType?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

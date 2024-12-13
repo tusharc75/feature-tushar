@@ -63,7 +63,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
     data = response?.data?.data;
 
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
     const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
 
     const extraColumns = [

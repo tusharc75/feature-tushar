@@ -25,7 +25,7 @@ export default function DeviceTemplates() {
   const renderedFrom = camelCase(routes?.deviceTemplates.title);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
 
@@ -202,7 +202,7 @@ export default function DeviceTemplates() {
         <CustomBreadCrumbs routes={[{ title: routes.deviceTemplates.title }]} />
         <ImportExportLinks
           permissions={permissions?.warehouse}
-          module={routes.warehouse.title}
+          module={resources?.warehouse?.titlePlural}
           api={routes?.warehouse.path}
           afterImportCompleted={() => {
             fetchData();

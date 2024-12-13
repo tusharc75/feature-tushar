@@ -3,9 +3,10 @@ import { Box, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 
 const ServiceStepsData = ({ servicesData, stepsData }) => {
-  const renderedFrom = `${routes?.workOrder?.title}_Version_Service_StepData`;
+  const renderedFrom = `${sidebarResource?.workOrder}}_Version_Service_StepData`;
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);

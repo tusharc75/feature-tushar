@@ -22,7 +22,7 @@ const Assign = ({ managedPackagesData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -140,21 +140,21 @@ const Assign = ({ managedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-          {
-            accessor: 'position',
-            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-            width: 200,
-            Cell: ({ row }) => {
-              return row.original['position'] ? (
-                <div>
-                  <p className="text-truncate">{row.original.position}</p>
-                </div>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'position',
+              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => {
+                return row.original['position'] ? (
+                  <div>
+                    <p className="text-truncate">{row.original.position}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'qty',
@@ -185,7 +185,7 @@ const Assign = ({ managedPackagesData }) => {
                     setShowDeleteConfirmBox(true);
                   }}
                 >
-                  <Delete color="error" fontSize='small' />
+                  <Delete color="error" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -202,32 +202,33 @@ const Assign = ({ managedPackagesData }) => {
     const allAssetsResponse: any = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
     const assets = allAssetsResponse?.data?.data || [];
 
-    axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`).then(
-      ({ data: { data } }) => {
+    axiosInstance()
+      .get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`)
+      .then(({ data: { data } }) => {
         let rows = data?.material.filter((e) => !e.parentId);
         rows.forEach((parent, i) => {
           parent.index = i + 1;
-          parent.detail = parent.type === MATERIAL_TYPE.product ?
-            parent?.productName : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageName
-              : '';
-          parent.description = parent.type === MATERIAL_TYPE.product ?
-            parent?.productDescription : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDescription
-              : '';
-          parent.productNumber = parent.type === MATERIAL_TYPE.product ?
-            parent?.productNumber : '';
-          parent.productCategory = parent.type === MATERIAL_TYPE.product ?
-            parent?.productCategory?.optionLabel || '' : '';
-          parent.assetQty = parent.type === MATERIAL_TYPE.product ? assets.filter((e) => {
-            return e.product === parent._id && (parent.package ? parent._id === e.package : true);
-          })?.length : 0;
+          parent.detail =
+            parent.type === MATERIAL_TYPE.product ? parent?.productName : parent.type === MATERIAL_TYPE.package ? parent?.packageName : '';
+          parent.description =
+            parent.type === MATERIAL_TYPE.product
+              ? parent?.productDescription
+              : parent.type === MATERIAL_TYPE.package
+                ? parent?.packageDescription
+                : '';
+          parent.productNumber = parent.type === MATERIAL_TYPE.product ? parent?.productNumber : '';
+          parent.productCategory = parent.type === MATERIAL_TYPE.product ? parent?.productCategory?.optionLabel || '' : '';
+          parent.assetQty =
+            parent.type === MATERIAL_TYPE.product
+              ? assets.filter((e) => {
+                  return e.product === parent._id && (parent.package ? parent._id === e.package : true);
+                })?.length
+              : 0;
           parent.subRows = generateNestedData(data.material, assets, parent);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
-      }
-    )
+      })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -237,24 +238,23 @@ const Assign = ({ managedPackagesData }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.package
-        ? _subRow?.packageName
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productName
-          : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDescription || ''
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDescription || ''
-          : '';
-      _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ?
-        _subRow?.productNumber : '';
-      _subRow.productCategory = _subRow.type === MATERIAL_TYPE.product ?
-        _subRow?.productCategory?.optionLabel || '' : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageName : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productName : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDescription || ''
+            : '';
+      _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productNumber : '';
+      _subRow.productCategory = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productCategory?.optionLabel || '' : '';
 
-      _subRow.assetQty = _subRow.type === MATERIAL_TYPE.product ? assets.filter((e) => {
-        return e.product === _subRow._id && (_subRow.package ? _subRow._id === e.package : true);
-      })?.length : 0;
+      _subRow.assetQty =
+        _subRow.type === MATERIAL_TYPE.product
+          ? assets.filter((e) => {
+              return e.product === _subRow._id && (_subRow.package ? _subRow._id === e.package : true);
+            })?.length
+          : 0;
       _subRow.subRows = generateNestedData(material, assets, _subRow);
     });
 
@@ -267,7 +267,7 @@ const Assign = ({ managedPackagesData }) => {
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
         _subRow.parentId = _subRow?.product;
-        subRows.push(_subRow)
+        subRows.push(_subRow);
       });
     }
     return subRows;
@@ -325,7 +325,8 @@ const Assign = ({ managedPackagesData }) => {
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
               const productsMap = new Map();
-              selectedRecords.filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
+              selectedRecords
+                .filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
                 ?.forEach((e) => {
                   let diff = e?.qty - e?.assetQty;
                   if (diff > 0) {
@@ -350,7 +351,7 @@ const Assign = ({ managedPackagesData }) => {
               setAssignAssetDialog({ open: true, products: products });
             }}
           >
-            {`Assign ${routes.serializedAsset.title}`}
+            {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.managedPackages?.isUpdate && (

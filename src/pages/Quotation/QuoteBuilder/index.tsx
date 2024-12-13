@@ -384,9 +384,9 @@ const QuoteBuilder = ({
               onClick={() => {
                 handleSendToCustomer(false);
               }}
-              tooltip={`Process ${routes.quotation.title}`}
+              tooltip={`Process ${resources?.quotation?.titleSingular}`}
             >
-              {`Process ${routes.quotation.title}`}
+              {`Process ${resources?.quotation?.titleSingular}`}
             </ThemeButton>
 
             <ThemeButton
@@ -412,7 +412,7 @@ const QuoteBuilder = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,

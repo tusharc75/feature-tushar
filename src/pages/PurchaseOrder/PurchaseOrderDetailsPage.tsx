@@ -39,13 +39,13 @@ import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.purchaseOrder.title);
+  const renderedFrom = camelCase(sidebarResource.purchaseOrder);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
@@ -188,7 +188,7 @@ const PurchaseOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.purchaseOrder, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
+          <CustomBreadCrumbs routes={[{...routes.purchaseOrder, title: resources?.purchaseOrder?.titleSingular}, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -209,7 +209,7 @@ const PurchaseOrderDetailsPage = () => {
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
               <HtmlTooltip
-                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}
+                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can edit ${resources?.purchaseOrder?.titleSingular}`}
               >
                 <span>
                   <Button
@@ -224,7 +224,7 @@ const PurchaseOrderDetailsPage = () => {
               </HtmlTooltip>
             ) : (
               <HtmlTooltip
-                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}
+                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.purchaseOrder?.titleSingular}`}
               >
                 <span>
                   <Button
@@ -355,7 +355,7 @@ const PurchaseOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.purchaseOrder?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.purchaseOrder?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

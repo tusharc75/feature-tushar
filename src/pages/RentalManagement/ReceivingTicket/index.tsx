@@ -166,7 +166,7 @@ const ReceivingTicket = ({
   const [allMaterial, setAllMaterial] = useState(false);
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const handleClick = (event) => {
@@ -394,7 +394,10 @@ const ReceivingTicket = ({
         } else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
         } else if (uniq(map(records, 'warehouseId')).length !== 1) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
+          errorMessages.push({
+            index: e.index,
+            message: rentalManagementMessage.repairSameWarehouse?.replace(sidebarResource?.warehouse, resources?.warehouse?.titleSingular)
+          });
         }
       } else if (action === rentalManagementActions.transferToAnotherRental) {
         if ([ASSET_STATUS.lost]?.includes(e?.status)) {
@@ -665,7 +668,10 @@ const ReceivingTicket = ({
         }
       });
 
-      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'), nonSerializedInventory);
+      products = uniqueProduct(
+        material?.filter((e) => e.consumableType !== 'Internal'),
+        nonSerializedInventory
+      );
 
       products?.forEach((element) => {
         var qty = element.qty;
@@ -1158,7 +1164,7 @@ const ReceivingTicket = ({
                 </Box>
               )}
             {row?.original?.isRepairJob && (
-              <HtmlTooltip title={`${routes.repairJob.title}`}>
+              <HtmlTooltip title={`${resources?.repairJob?.titleSingular}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -1170,11 +1176,11 @@ const ReceivingTicket = ({
               </HtmlTooltip>
             )}
             {row?.original?.isRepairOrder && (
-              <HtmlTooltip title={`${routes.repairOrder.title}`}>
+              <HtmlTooltip title={`${resources?.repairOrder?.titleSingular}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.repairOrderDetail.path}/${row?.original?.repairOrder}`);
+                    window.open(`${routes?.repairOrderDetail?.path}/${row?.original?.repairOrder}`);
                   }}
                 >
                   <MdHandyman fontSize="20" color="#163340" />
@@ -1599,7 +1605,7 @@ const ReceivingTicket = ({
       materialId: record._id,
       type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
-      parentId: null,
+      parentId: null
     }));
     axiosInstance()
       .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows, inUseAsset: showRepairOrderDialog.inUseAsset })
@@ -2197,7 +2203,8 @@ const ReceivingTicket = ({
                 setOpenChangeActualDateDialog,
                 setOpenAssetDataDialog,
                 assetPolicyData,
-                validateAction
+                validateAction,
+                resources
               }}
             />
           }
@@ -2252,16 +2259,16 @@ const ReceivingTicket = ({
               OpenInNewWindow(routes.repairJob.path);
             }}
           >
-            {`Created ${routes.repairJob.title}`}
+            {`Created ${resources?.repairJob?.titleSingular}`}
           </MenuItem>
         )}
         {repairOrderCount > 0 && (
           <MenuItem
             onClick={() => {
-              OpenInNewWindow(routes.repairOrder.path);
+              OpenInNewWindow(routes?.repairOrder?.path);
             }}
           >
-            {`Created ${routes.repairOrder.title}`}
+            {`Created ${resources?.repairOrder?.titleSingular}`}
           </MenuItem>
         )}
       </Menu>
@@ -2770,7 +2777,8 @@ const ActionButtonMenuItems = ({
   setOpenChangeActualDateDialog,
   setOpenAssetDataDialog,
   assetPolicyData,
-  validateAction
+  validateAction,
+  resources
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -2960,7 +2968,7 @@ const ActionButtonMenuItems = ({
                   });
                 }}
               >
-                {`Change ${routes.serializedAsset.title} Last Status Date`}
+                {`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}
               </MenuItem>
             )}
         </Box>
@@ -3054,7 +3062,7 @@ const ActionButtonMenuItems = ({
               }
             }}
           >
-            {`Transfer to another ${routes.rentalManagement.title}`}
+            {`Transfer to another ${resources?.rentalManagement?.titleSingular}`}
           </MenuItem>
         )}
       {selectedRecords?.length &&
@@ -3134,7 +3142,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          {`Create ${routes.repairJob.title}`}
+          {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>
       )}
       {permissions?.repairOrder?.isCreate && !isOffline && currentStep === RENTAL_STEPS.receiving && (
@@ -3146,23 +3154,23 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          {`Create ${routes.repairOrder.title}`}
+          {`Create ${resources?.repairOrder?.titleSingular}`}
         </MenuItem>
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
-        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep))
-        && user?.user?.brandPolicy?.rentalInUseAssetRepair
-        && permissions?.repairOrder?.isCreate
-        && !isOffline
-        && selectedRecords?.length > 0
-        && selectedRecords?.every(r => r?.status === ASSET_STATUS.inUse && r?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse) && (
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        user?.user?.brandPolicy?.rentalInUseAssetRepair &&
+        permissions?.repairOrder?.isCreate &&
+        !isOffline &&
+        selectedRecords?.length > 0 &&
+        selectedRecords?.every((r) => r?.status === ASSET_STATUS.inUse && r?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse) && (
           <MenuItem
             id={'create-repair-order-menu-item-in-use-assets'}
             onClick={() => {
               setShowRepairOrderDialog({ open: true, inUseAsset: true });
             }}
           >
-            {`Create ${routes.repairOrder.title} (${ASSET_STATUS.inUse} Assets)`}
+            {`Create ${resources?.repairOrder?.titleSingular} (${ASSET_STATUS.inUse} Assets)`}
           </MenuItem>
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||

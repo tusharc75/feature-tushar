@@ -38,13 +38,13 @@ const History = ({ id }) => {
     key: 'workOrder',
     resource: sidebarResource.workOrder,
     path: routes.workOrderDetail.path,
-    title: routes.workOrder.title
+    title: resources?.workOrder?.titlePlural
   },
   {
     key: 'rentalManagement',
     resource: sidebarResource.rentalManagement,
     path: routes.rentalManagementDetail.path,
-    title: routes.rentalManagement.title
+    title: resources?.rentalManagement?.titlePlural
   }
 ];
 
@@ -80,7 +80,7 @@ const History = ({ id }) => {
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       minWidth: 200,
       width: 200,
       disabled: true,
