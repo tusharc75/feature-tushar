@@ -17,7 +17,7 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
         onClick={(report) =>
           setSelectedReport({
             route: `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`,
-            title: report.type === 'dynamic' ? routes[report.key]?.title : report.title
+            title: report.type === 'dynamic' && routes[report.key]?.title ? routes[report.key]?.title : report.title
           })
         }
         selectedTitle={selectedReport?.title}
