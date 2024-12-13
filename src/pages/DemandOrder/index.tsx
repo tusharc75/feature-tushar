@@ -29,16 +29,20 @@ import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const DemandOrder = () => {
-  const renderedFrom = camelCase(routes?.demandOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.demandOrder);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity,resources }
+  }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.demandOrder.title}`,
+      key: `My ${resources?.demandOrder?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.demandOrder.title}`,
+      key: `All ${resources?.demandOrder?.titlePlural}`,
       value: 2
     }
   ];
@@ -46,10 +50,6 @@ const DemandOrder = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.demandOrder));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -230,10 +230,10 @@ const DemandOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.demandOrder]} />
+        <CustomBreadCrumbs routes={[{...routes.demandOrder,title:resources?.demandOrder?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.demandOrder}
-          module={routes.demandOrder.title}
+          module={resources?.demandOrder?.titlePlural}
           api={demandOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -285,7 +285,7 @@ const DemandOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.demandOrder?.title} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.demandOrder?.titleSingular} ${deleteRecord?.demandOrderNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

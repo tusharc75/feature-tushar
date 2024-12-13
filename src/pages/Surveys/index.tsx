@@ -20,7 +20,7 @@ import ManageSurveys from './ManageSurveys';
 import axios, { CancelTokenSource } from 'axios';
 
 const Survey = () => {
-  const renderedFrom = camelCase(routes?.surveys.title);
+  const renderedFrom = camelCase(sidebarResource?.surveys);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,7 +28,7 @@ const Survey = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
 
   const [selectedType, setSelectedType] = useState(1);
@@ -205,10 +205,10 @@ const Survey = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.surveys]} />
+        <CustomBreadCrumbs routes={[{...routes.surveys,title:resources?.surveys?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.surveys}
-          module={routes.surveys.title}
+          module={resources?.surveys?.titlePlural}
           api={routes.surveys.path}
           afterImportCompleted={() => {
             fetchData();
@@ -256,7 +256,7 @@ const Survey = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.surveys?.title} ${deleteRecord?.surveyName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.surveys?.titleSingular} ${deleteRecord?.surveyName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

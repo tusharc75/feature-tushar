@@ -10,6 +10,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, purchaseOrder } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ManageIrtTicket from 'src/pages/IrtTicket/ManageIrtTicket';
+import { useData } from 'src/StateProvider/Provider';
 
 const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrderData }) => {
   const history = useHistory();
@@ -21,6 +22,10 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
   useEffect(() => {
     fetchData();
   }, []);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const fetchData = () => {
     axiosInstance()
@@ -111,7 +116,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                                 setIrtTicketDialog({ open: true, data: item });
                               }}
                             >
-                              {`Create ${routes.irtTicket.title}`}
+                              {`Create ${resources?.irtTicket?.titleSingular}`}
                             </Button>
                           )}
                         </TableCell>

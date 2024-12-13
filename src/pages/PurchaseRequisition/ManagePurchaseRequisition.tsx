@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -159,7 +159,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                  : `Create ${routes?.purchaseRequisition?.title}`
+                  : `Create ${resources?.purchaseRequisition?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

@@ -10,9 +10,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { sidebarResource } from 'src/constants/helpers';
 
 const SurveysData = ({ surveyId }) => {
-  const renderedFrom = camelCase(routes?.surveys.title);
+  const renderedFrom = camelCase(sidebarResource?.surveys);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;

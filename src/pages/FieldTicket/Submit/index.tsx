@@ -21,9 +21,10 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateFieldTicketSubmit, generateFieldTicketReopen } from '../walkmeSteps';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
+import { useData } from 'src/StateProvider/Provider';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Submit`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
@@ -36,6 +37,10 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const { isOffline } = useContext(CustomOfflineContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -222,7 +227,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`,
+    fileName: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
     // hideDetailButton: true,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,

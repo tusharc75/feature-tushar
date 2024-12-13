@@ -47,7 +47,7 @@ const FieldTicket = ({
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
 
-  const renderedFrom = camelCase(routes?.fieldTicket.title);
+  const renderedFrom = camelCase(sidebarResource.fieldTicket);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
@@ -59,7 +59,7 @@ const FieldTicket = ({
   const [allFields, setAllFields] = useState([]);
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -96,7 +96,7 @@ const FieldTicket = ({
         data = response?.data?.data;
       }
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
+      const newColumns = generateColumns(resources?.fieldTicket?.titlePlural, data, routes.fieldTicketDetail.path);
       newColumns?.forEach((o) => {
         if (o.accessor === 'fieldTicketNumber') {
           o.cell = ({ row }) =>
@@ -306,7 +306,7 @@ const FieldTicket = ({
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
         >
-          {`Create ${routes.fieldTicket.title}`}
+          {`Create ${resources?.fieldTicket?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -389,7 +389,7 @@ const FieldTicket = ({
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.fieldTicket?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete the ${resources?.fieldTicket?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

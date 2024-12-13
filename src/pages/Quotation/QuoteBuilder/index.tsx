@@ -495,7 +495,7 @@ const QuoteBuilder = ({
             fetchFieldServiceOrderData();
           }}
         >
-          {`Create ${routes.fieldTicket.title}`}
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
       </>
     );

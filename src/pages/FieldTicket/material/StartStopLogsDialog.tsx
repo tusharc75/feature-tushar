@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDateTime, fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -17,7 +17,7 @@ import StartStopDate from './StartStopDateDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_start_stop_logs`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

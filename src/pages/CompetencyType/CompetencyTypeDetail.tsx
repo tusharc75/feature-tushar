@@ -34,7 +34,7 @@ const CompetencyMasterDetail = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
-    state: { permissions }
+    state: { permissions,resources }
   }: any = useData();
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const CompetencyMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/competency-type/${id}`);
       setCompetencyMasterData(data);
-      setCustomizedRoutes([routes.competencyType, { title: data?.competencyType }]);
+      setCustomizedRoutes([{...routes.competencyType,title:resources?.competencyType?.titleSingular}, { title: data?.competencyType }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -185,7 +185,7 @@ const CompetencyMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.competencyType?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

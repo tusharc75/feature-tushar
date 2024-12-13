@@ -30,6 +30,10 @@ const ManageWorkAutomation = () => {
   const history = useHistory();
   const { id } = useParams();
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   useEffect(() => {
     axiosInstance()
       .get(`${rentalManagement.api}/${id}`)
@@ -112,6 +116,7 @@ const ManageWorkAutomation = () => {
                   setIsExpand={setIsExpand}
                   handleSave={handleSave}
                   loading={loading}
+                  resources={resources}
                 />
               </div>
             </div>
@@ -223,7 +228,7 @@ const AddServices = ({ rentalManagementData, setSelectedServices, selectedAssets
   );
 };
 
-const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading }) => {
+const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading ,resources}) => {
   const [records, setRecords] = useState(null);
 
   const handleAdd = () => {
@@ -244,7 +249,7 @@ const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selected
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4">
-          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.employeeMaster.title}`}</h3>
+          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${resources?.employeeMaster?.titlePlural}`}</h3>
           {/* <div className="flex min-w-fit gap-3">
             <IconButton size="small" disabled={true} onClick={() => {}}>
               {isExpand.technician ? <ExpandLess fontSize="small" color={'disabled'} /> : <ExpandMore fontSize="small" color={'disabled'} />}

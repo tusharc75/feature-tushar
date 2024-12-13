@@ -14,6 +14,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, Tou
 import DropContainer, { SingleSection } from './DropContainer';
 import Sidebar, { SidebarItem } from './Sidebar';
 import { useDndSensors } from 'src/hooks';
+import { useData } from 'src/StateProvider/Provider';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -40,6 +41,10 @@ const EcommerceHome = () => {
   const toastConfig = useContext(CustomToastContext);
   const [activeSection, setActiveSection] = useState(null);
   const [activeSidebarItem, setActiveSidebarItem] = useState(null);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -175,7 +180,7 @@ const EcommerceHome = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes?.eCommerceHome?.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.eCommerceHome?.titlePlural }]} />
         </Box>
         <Box className="controls-v1">
           <Box sx={{ display: 'flex' }}>

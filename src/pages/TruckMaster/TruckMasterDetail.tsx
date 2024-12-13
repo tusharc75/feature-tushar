@@ -26,7 +26,7 @@ const TruckMasterDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
   const [truckMasterData, setTruckMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -162,7 +162,7 @@ const TruckMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.truckMaster, { title: truckMasterData?.truckName }]} />
+          <CustomBreadCrumbs routes={[{...routes.truckMaster,title:resources?.truckMaster?.titlePlural}, { title: truckMasterData?.truckName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -263,7 +263,7 @@ const TruckMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.truckMaster?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.truckMaster?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

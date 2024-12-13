@@ -19,7 +19,7 @@ import { useHistory } from 'react-router-dom';
 
 const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -189,7 +189,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
-                    : `Create ${routes?.irtTicket?.title}`
+                    : `Create ${resources?.irtTicket?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
