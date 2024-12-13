@@ -527,7 +527,7 @@ const RentalManagement = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete selected ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ?`}
+            message={`Are you sure you want to delete selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()} ?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

@@ -1,8 +1,8 @@
 import { groupBy } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { REPORT_LIST_WITH_SECTIONS, REPORT_LIST } from 'src/constants/helpers';
+import { REPORT_LIST } from 'src/constants/helpers';
 import { CustomReport, ReportState, UseReportActions, Report } from 'src/pages/ReportsNew/types';
 import { handleGetRoute } from 'src/pages/ReportsNew/utils';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
@@ -43,21 +43,10 @@ const reducer = (state: ReportState, action: UseReportActions) => {
 };
 
 const data = groupBy(REPORT_LIST, 'section');
-const reportListWithSections = Object.keys(data).map((key) => ({
-  section: key,
-  reports: data[key]
-}));
-
-const filterRecords = (searchQuery = '', permissions: any): Report[] => {
-  return reportListWithSections.map((d) => ({
-    ...d,
-    reports: d.reports.filter((f) => f.title.toLowerCase().includes(searchQuery) && permissions[f.permission]?.isRead)
-  }));
-};
 
 const useReport = () => {
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   } = useData();
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -70,6 +59,28 @@ const useReport = () => {
   const setResourceColumns = useCallback((payload: any[]) => dispatch({ type: 'setResourceColumns', payload }), []);
   const setColumns = useCallback((payload: TColType[] | null) => dispatch({ type: 'setColumns', payload }), []);
   const setIsColumnsLoading = useCallback((payload: boolean) => dispatch({ type: 'setIsColumnsLoading', payload }), []);
+
+  const reportListWithSections = useMemo(
+    () =>
+      Object.keys(data).map((key) => ({
+        section: key,
+        reports: data[key].map((d) => ({
+          ...d,
+          label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title
+        }))
+      })),
+    [resources]
+  );
+
+  const filterRecords = useCallback(
+    (searchQuery = '', permissions: any): Report[] => {
+      return reportListWithSections.map((d) => ({
+        ...d,
+        reports: d.reports.filter((f) => f.label.toLowerCase().includes(searchQuery) && permissions[f.permission]?.isRead)
+      }));
+    },
+    [reportListWithSections]
+  );
 
   const setSelectedReport = useCallback(
     (payload: { title: string; route: string }) => {
@@ -98,7 +109,7 @@ const useReport = () => {
       setFilteredReports(filtered);
       setFilteredCustomReports(customReports.filter((f) => f.customReportName.toLowerCase().includes(searchedFor)));
     },
-    [customReports, permissions, setFilteredCustomReports, setFilteredReports]
+    [customReports, filterRecords, permissions, setFilteredCustomReports, setFilteredReports]
   );
 
   const setSearchedValue = useCallback(
@@ -112,7 +123,7 @@ const useReport = () => {
   useEffect(() => {
     const reports = filterRecords('', permissions);
     setFilteredReports(reports);
-  }, [permissions, setFilteredReports]);
+  }, [filterRecords, permissions, setFilteredReports]);
 
   useEffect(() => {
     (async () => {
@@ -130,6 +141,7 @@ const useReport = () => {
 
   return {
     ...state,
+    resources,
     permissions,
     selectedEntity,
     setCustomReports,
