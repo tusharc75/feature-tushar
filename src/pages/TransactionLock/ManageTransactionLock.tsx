@@ -25,7 +25,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
   const ref = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -172,7 +172,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
             <Fragment>
               <CustomDialogHeader
                 title={
-                  id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${transactionLockData?.lockNumber}`) : 'Create ' + routes.transactionLock.title
+                  id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${transactionLockData?.lockNumber}`) : 'Create ' + resources?.transactionLock?.titleSingular
                 }
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {

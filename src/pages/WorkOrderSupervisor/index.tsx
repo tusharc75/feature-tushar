@@ -28,45 +28,7 @@ import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { ExpandMore } from '@material-ui/icons';
 
-const LIMIT = 25;
-
-const FIELD_TO_FILTER = [
-  {
-    key: 'user',
-    fieldName: 'user',
-    fieldLabel: routes.employeeMaster.title,
-    resource: sidebarResource.employeeMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'serviceMaster',
-    fieldName: 'service',
-    fieldLabel: sidebarResource?.serviceMaster,
-    resource: sidebarResource.serviceMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'workOrder',
-    fieldName: 'workOrder',
-    fieldLabel: sidebarResource?.workOrder,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'repairOrder',
-    fieldName: 'repairOrder',
-    fieldLabel: sidebarResource?.repairOrder,
-    resource: sidebarResource?.repairOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'productionOrder',
-    fieldName: 'productionOrder',
-    fieldLabel: sidebarResource.productionOrder,
-    resource: sidebarResource.productionOrder,
-    type: 'dropDown'
-  }
-];
+const LIMIT = 25;  
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -99,6 +61,44 @@ const WorkOrderSupervisor = () => {
   const [isOpen, setOpen] = useState({ open: false, id: null });
 
   const ref: any = useRef();
+
+  const FIELD_TO_FILTER = [
+  {
+    key: 'user',
+    fieldName: 'user',
+    fieldLabel: resources?.employeeMaster.titlePlural,
+    resource: sidebarResource.employeeMaster,
+    type: 'dropDown'
+  },
+  {
+    key: 'serviceMaster',
+    fieldName: 'service',
+    fieldLabel: sidebarResource?.serviceMaster,
+    resource: sidebarResource.serviceMaster,
+    type: 'dropDown'
+  },
+  {
+    key: 'workOrder',
+    fieldName: 'workOrder',
+    fieldLabel: sidebarResource?.workOrder,
+    resource: sidebarResource.workOrder,
+    type: 'dropDown'
+  },
+  {
+    key: 'repairOrder',
+    fieldName: 'repairOrder',
+    fieldLabel: sidebarResource?.repairOrder,
+    resource: sidebarResource?.repairOrder,
+    type: 'dropDown'
+  },
+  {
+    key: 'productionOrder',
+    fieldName: 'productionOrder',
+    fieldLabel: sidebarResource.productionOrder,
+    resource: sidebarResource.productionOrder,
+    type: 'dropDown'
+  }
+];
 
   useEffect(() => {
     const options: any = [];

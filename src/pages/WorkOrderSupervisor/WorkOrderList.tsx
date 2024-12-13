@@ -31,7 +31,7 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = camelCase(routes?.workOrderSupervisor.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
 const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const toastConfig = useContext(CustomToastContext);

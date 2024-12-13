@@ -158,7 +158,7 @@ const DemandOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.demandOrder, { title: `${demandOrderData?.demandOrderNumber}` }]} />
+          <CustomBreadCrumbs routes={[{...routes.demandOrder,title:resources?.demandOrder?.titleSingular}, { title: `${demandOrderData?.demandOrderNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -259,6 +259,7 @@ const DemandOrderDetails = () => {
               allowedToEdit={
                 allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false
               }
+              resources={resources}
             />
           )}
         </TabPanel>

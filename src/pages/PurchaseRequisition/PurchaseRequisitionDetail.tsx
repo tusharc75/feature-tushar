@@ -49,7 +49,7 @@ const PurchaseRequisitionDetail = () => {
   const [stepList, setStepList] = useState(purchaseRequisitionSteps);
   const [DOAData, setDOAData] = useState(null);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -113,7 +113,7 @@ const PurchaseRequisitionDetail = () => {
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
       setPurchaseRequisitionData(data);
-      setCustomizedRoutes([routes.purchaseRequisition, { title: data?.purchaseRequisitionNumber }]);
+      setCustomizedRoutes([{...routes.purchaseRequisition,title:resources?.purchaseRequisition?.titleSingular}, { title: data?.purchaseRequisitionNumber }]);
 
       if (data?.doaSetup) {
         const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
@@ -358,7 +358,7 @@ const PurchaseRequisitionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.purchaseRequisition?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.purchaseRequisition?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

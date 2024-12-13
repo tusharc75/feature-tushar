@@ -427,62 +427,36 @@ const routes = {
     path: '/invoice/detail'
   },
   workOrderSupervisor: {
-    title:
-      storedRoutes && storedRoutes.workOrderSupervisor && storedRoutes.workOrderSupervisor.title
-        ? storedRoutes.workOrderSupervisor?.title
-        : RESOURCE_LABEL.workOrderSupervisor,
-    path: '/work-order-supervisor'
+   path: '/work-order-supervisor'
   },
   workOrderTechnician: {
-    title:
-      storedRoutes && storedRoutes.workOrderTechnician && storedRoutes.workOrderTechnician.title
-        ? storedRoutes.workOrderTechnician?.title
-        : RESOURCE_LABEL.workOrderTechnician,
     path: '/work-order-technician'
   },
   frequentlyAskedQuestion: {
-    title:
-      storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
-        ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question'
   },
   frequentlyAskedQuestionDetail: {
-    title:
-      storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
-        ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question/detail'
   },
   blog: {
-    title: storedRoutes && storedRoutes.blog && storedRoutes.blog.title ? storedRoutes.blog?.title : RESOURCE_LABEL.blog,
     path: '/blog'
   },
   blogDetail: {
-    title: storedRoutes && storedRoutes.blog && storedRoutes.blog.title ? storedRoutes.blog?.title : RESOURCE_LABEL.blog,
     path: '/blog/detail'
   },
   eCommerceHome: {
-    title:
-      storedRoutes && storedRoutes.eCommerceHome && storedRoutes.eCommerceHome.title
-        ? storedRoutes.eCommerceHome?.title
-        : RESOURCE_LABEL?.eCommerceHome,
     path: '/e-commerce-home'
   },
   surveys: {
-    title: storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title ? storedRoutes.surveys?.title : RESOURCE_LABEL?.surveys,
     path: '/surveys'
   },
   surveysDetail: {
-    title: storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title ? storedRoutes.surveys?.title : RESOURCE_LABEL.surveys,
     path: '/surveys/detail'
   },
   contactUs: {
-    title: storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
     path: '/contact-us'
   },
   contactUsDetail: {
-    title: storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
     path: '/contact-us/detail'
   },
   supportTicket: {
@@ -500,135 +474,75 @@ const routes = {
     path: '/support-ticket/detail'
   },
   demandOrder: {
-    title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
     path: '/demand-order'
   },
   demandOrderDetail: {
-    title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
     path: '/demand-order/detail'
   },
   employeeMaster: {
-    title:
-      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
-        ? storedRoutes.employeeMaster?.title
-        : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master'
   },
   employeeMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
-        ? storedRoutes.employeeMaster?.title
-        : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
   competencyType: {
-    title:
-      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
-        ? storedRoutes.competencyType?.title
-        : RESOURCE_LABEL.competencyType,
     path: '/competency-type'
   },
   competencyTypeDetail: {
-    title:
-      storedRoutes && storedRoutes.competencyType && storedRoutes.competencyType.title
-        ? storedRoutes.competencyType?.title
-        : RESOURCE_LABEL.competencyType,
     path: '/competency-type/detail'
   },
   technicianScheduler: {
-    title:
-      storedRoutes && storedRoutes.technicianScheduler && storedRoutes.technicianScheduler.title
-        ? storedRoutes.technicianScheduler?.title
-        : RESOURCE_LABEL.technicianScheduler,
     path: '/technician-scheduler'
   },
   irtTicket: {
-    title: storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title ? storedRoutes.irtTicket?.title : RESOURCE_LABEL.irtTicket,
     path: '/irt-ticket'
   },
   irtTicketDetail: {
-    title: storedRoutes && storedRoutes.irtTicket && storedRoutes.irtTicket.title ? storedRoutes.irtTicket?.title : RESOURCE_LABEL.irtTicket,
     path: '/irt-ticket/detail'
   },
   purchaseRequisition: {
-    title:
-      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
-        ? storedRoutes.purchaseRequisition?.title
-        : RESOURCE_LABEL.purchaseRequisition,
     path: '/purchase-requisition'
   },
   purchaseRequisitionDetail: {
-    title:
-      storedRoutes && storedRoutes.purchaseRequisition && storedRoutes.purchaseRequisition.title
-        ? storedRoutes.purchaseRequisition?.title
-        : RESOURCE_LABEL.purchaseRequisition,
     path: '/purchase-requisition/detail'
   },
   planning: {
-    title: storedRoutes && storedRoutes.planning && storedRoutes.planning.title ? storedRoutes.planning?.title : RESOURCE_LABEL.planning,
     path: '/planning'
   },
   planningDetail: {
-    title: storedRoutes && storedRoutes.planning && storedRoutes.planning.title ? storedRoutes.planning?.title : RESOURCE_LABEL.planning,
     path: '/planning/detail'
   },
   fieldTicket: {
-    title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket'
   },
   fieldTicketDetail: {
-    title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
   },
   fieldServiceTechnician: {
-    title:
-      storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title
-        ? storedRoutes.fieldServiceTechnician?.title
-        : RESOURCE_LABEL.fieldServiceTechnician,
     path: '/field-service-technician'
   },
   fleetDispatch: {
-    title:
-      storedRoutes && storedRoutes.fleetDispatch && storedRoutes.fleetDispatch.title
-        ? storedRoutes.fleetDispatch?.title
-        : RESOURCE_LABEL.fleetDispatch,
     path: '/fleet-dispatch'
   },
   truckMaster: {
-    title: storedRoutes && storedRoutes.truckMaster && storedRoutes.truckMaster.title ? storedRoutes.truckMaster?.title : RESOURCE_LABEL.truckMaster,
     path: '/truck-master'
   },
   truckMasterDetail: {
-    title: storedRoutes && storedRoutes.truckMaster && storedRoutes.truckMaster.title ? storedRoutes.truckMaster?.title : RESOURCE_LABEL.truckMaster,
     path: '/truck-master/detail'
   },
   job: {
-    title: storedRoutes && storedRoutes.job && storedRoutes.job.title ? storedRoutes.job?.title : RESOURCE_LABEL.job,
     path: '/job'
   },
   jobDetail: {
-    title: storedRoutes && storedRoutes.job && storedRoutes.job.title ? storedRoutes.job?.title : RESOURCE_LABEL.job,
     path: '/job/detail'
   },
   fleetReceiver: {
-    title:
-      storedRoutes && storedRoutes.fleetReceiver && storedRoutes.fleetReceiver.title
-        ? storedRoutes.fleetReceiver?.title
-        : RESOURCE_LABEL.fleetReceiver,
     path: '/fleet-receiver'
   },
   transactionLock: {
-    title:
-      storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title
-        ? storedRoutes.transactionLock?.title
-        : RESOURCE_LABEL.transactionLock,
     path: '/transaction-lock'
   },
   transactionLockDetail: {
-    title:
-      storedRoutes && storedRoutes.transactionLock && storedRoutes.transactionLock.title
-        ? storedRoutes.transactionLock?.title
-        : RESOURCE_LABEL.transactionLock,
     path: '/transaction-lock/detail'
   },
   wellNumber: {

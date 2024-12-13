@@ -8,9 +8,9 @@ import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 
-const renderedFrom = `${camelCase(routes?.truckMaster.title)}_History`;
+const renderedFrom = `${camelCase(sidebarResource.truckMaster)}_History`;
 
 const History = ({ id, status }) => {
   const toastConfig = useContext(CustomToastContext);

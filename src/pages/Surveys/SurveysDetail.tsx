@@ -34,7 +34,7 @@ const SurveysDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const SurveysDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
       setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
       setSurveyData(data);
-      setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
+      setCustomizedRoutes([{...routes.surveys,title:resources?.surveys?.titleSingular}, { title: data?.surveyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -165,7 +165,7 @@ const SurveysDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.surveys?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.surveys?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -22,7 +22,7 @@ import TechnicianDialog from '../TechnicianDialog';
 import axios, { CancelTokenSource } from 'axios';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
-const renderedFrom = camelCase(routes?.workOrderTechnician.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderTechnician);
 
 const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const toastConfig = useContext(CustomToastContext);
