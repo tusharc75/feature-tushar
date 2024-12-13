@@ -25,7 +25,7 @@ const DashboardBuilder = () => {
 
   const { id } = useParams();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   } = useData();
   const isNew = id && id === 'new';
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -219,7 +219,7 @@ const DashboardBuilder = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { title: 'Dashboard Master', path: '/dashboard-master' },
+              { title: resources?.dashboardMaster?.titlePlural, path: '/dashboard-master' },
               { title: type && type === 'clone' ? 'Clone' : !isNew ? values.name : 'New', path: '' }
             ]}
           />

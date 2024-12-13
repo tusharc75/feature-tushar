@@ -42,7 +42,7 @@ const EmployeeMasterDetail = () => {
   const [resourceData, setResourceData] = useState(null);
 
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {

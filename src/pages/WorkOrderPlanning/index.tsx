@@ -35,7 +35,7 @@ const WorkOrderPlanning = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const statusOption = ['Pending', 'In-Progress', 'Completed'];
@@ -245,7 +245,7 @@ const WorkOrderPlanning = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.workOrderPlanning,title:resources?.workOrderPlanning?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.workOrderPlanning, title: resources?.workOrderPlanning?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

@@ -206,7 +206,7 @@ const WellNumber = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.wellNumber, title: resources?.wellNumber?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.wellNumber, title: resources?.wellNumber?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.wellNumber}
           module={resources?.wellNumber?.titlePlural}

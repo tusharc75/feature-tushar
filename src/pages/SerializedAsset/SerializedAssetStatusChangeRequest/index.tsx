@@ -27,7 +27,7 @@ const SerializedAssetStatusChangeRequest = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity,resources }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -190,7 +190,7 @@ const SerializedAssetStatusChangeRequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.serializedAssetStatusChangeRequest,title:resources?.serializedAssetStatusChangeRequest?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedAssetStatusChangeRequest, title: resources?.serializedAssetStatusChangeRequest?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -205,7 +205,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -218,7 +218,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }

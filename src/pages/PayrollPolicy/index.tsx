@@ -201,7 +201,7 @@ const PayrollPolicy = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.payrollPolicy,title:resources?.payrollPolicy?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.payrollPolicy, title: resources?.payrollPolicy?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

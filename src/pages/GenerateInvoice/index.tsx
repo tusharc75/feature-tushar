@@ -53,7 +53,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'rentalJob',
       progressiveBilling: true,
       path: routes.rentalManagementDetail.path,
-      title: resources?.rentalManagement?.titleSingular
+      title: resources?.rentalManagement?.titlePlural
     },
     {
       key: 'sublease',
@@ -62,7 +62,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'sublease',
       progressiveBilling: true,
       path: routes.subleaseDetail.path,
-      title: resources?.sublease?.titleSingular
+      title: resources?.sublease?.titlePlural
     },
     {
       key: 'repairOrder',
@@ -71,7 +71,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'repairOrder',
       progressiveBilling: false,
       path: routes?.repairOrderDetail?.path,
-      title: resources?.repairOrder?.titleSingular
+      title: resources?.repairOrder?.titlePlural
     },
     {
       key: 'fieldTicket',
@@ -89,7 +89,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'salesOrder',
       progressiveBilling: false,
       path: routes.salesOrderDetail.path,
-      title: resources?.salesOrder?.titleSingular
+      title: resources?.salesOrder?.titlePlural
     }
   ];
 
@@ -97,7 +97,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const options: any = [];
     GENERATE_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push({ ...item });
       }
     });
     setResourceList(options);
@@ -400,8 +400,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             routes={[
               {
                 title: resourceRendered
-                  ? routes[`${resourceRendered}Invoice`]
-                    ? routes[`${resourceRendered}Invoice`]?.title
+                  ? resources[`${resourceRendered}Invoice`]
+                    ? resources[`${resourceRendered}Invoice`]?.titlePlural
                     : 'Invoice'
                   : resources?.generateInvoice?.titlePlural
               }

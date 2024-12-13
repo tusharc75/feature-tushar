@@ -324,10 +324,10 @@ const RepairOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.repairOrder,title:resources?.repairOrder?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.repairOrder}
-          module={resources?.repairOrder?.titleSingular}
+          module={resources?.repairOrder?.titlePlural}
           api={repairOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -390,9 +390,8 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
-              deleteRecord.repairOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

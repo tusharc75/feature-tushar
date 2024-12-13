@@ -42,7 +42,7 @@ const creditMemoDetail = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
 
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -76,7 +76,7 @@ const creditMemoDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.creditMemo.path}/${id}`);
       setCreditMemoData(data);
-      setCustomizedRoutes([{...routes.creditMemo,title:resources?.creditMemo?.titleSingular}, { title: data?.creditMemoNumber }]);
+      setCustomizedRoutes([{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }, { title: data?.creditMemoNumber }]);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.creditMemo, data));
       setAllowedToDelete(permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete);
       setLoading(false);

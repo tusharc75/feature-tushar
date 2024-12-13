@@ -23,8 +23,8 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@material-ui/icons';
 
 const CreditMemo = () => {
-   const {
-    state: { user, permissions, selectedEntity,resources }
+  const {
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const types = [
@@ -124,7 +124,7 @@ const CreditMemo = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -281,7 +281,7 @@ const CreditMemo = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.creditMemo,title:resources?.creditMemo?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.creditMemo}
           module={resources?.creditMemo?.titlePlural}

@@ -203,10 +203,10 @@ const InventoryCycle = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.inventoryCycle,title:resources?.inventoryCycle?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.inventoryCycle, title: resources?.inventoryCycle?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.inventoryCycle}
-          module={resources?.inventoryCycle?.titleSingular}
+          module={resources?.inventoryCycle?.titlePlural}
           api={routes?.inventoryCycle?.path}
           afterImportCompleted={() => {
             fetchData();

@@ -251,7 +251,7 @@ const TransferAssetDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.transferAsset, title: resources?.transferAsset?.titleSingular}, { title: transferAssetData?.transferAssetNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.transferAsset, title: resources?.transferAsset?.titlePlural }, { title: transferAssetData?.transferAssetNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

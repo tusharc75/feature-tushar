@@ -214,7 +214,7 @@ const FrequentlyAskedQuestion = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.frequentlyAskedQuestion,title:resources?.frequentlyAskedQuestion?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.frequentlyAskedQuestion, title: resources?.frequentlyAskedQuestion?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.frequentlyAskedQuestion}
           module="frequentlyAskedQuestion"

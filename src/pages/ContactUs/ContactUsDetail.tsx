@@ -25,7 +25,7 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const BlogDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/contact-us/${id}`);
       setContactUsData(data);
-      setCustomizedRoutes([{...routes.contactUs,title:resources?.contactUs?.titlePlural}, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.contactUs, title: resources?.contactUs?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

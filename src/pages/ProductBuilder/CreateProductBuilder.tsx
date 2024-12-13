@@ -53,9 +53,9 @@ const CreateProductBuilder = () => {
       });
   };
 
-  const handleSave = () => {};
+  const handleSave = () => { };
 
-  const refreshProducts = (data) => {};
+  const refreshProducts = (data) => { };
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -73,7 +73,7 @@ const CreateProductBuilder = () => {
           <CustomBreadCrumbs
             routes={[
               {
-                title: resources?.productBuilde?.titleSingular,
+                title: resources?.productBuilde?.titlePlural,
                 path: routes.productBuilder.path
               },
               {

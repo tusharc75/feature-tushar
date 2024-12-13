@@ -253,10 +253,10 @@ const ProductionOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.productionOrder,title:resources?.productionOrder?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.productionOrder, title: resources?.productionOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productionOrder}
-          module={resources?.productionOrder?.titleSingular}
+          module={resources?.productionOrder?.titlePlural}
           api={productionOrder.api}
           afterImportCompleted={() => {
             fetchData();

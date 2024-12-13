@@ -30,7 +30,7 @@ const TransactionLock = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,7 +205,7 @@ const TransactionLock = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.transactionLock,title:resources?.transactionLock?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transactionLock}
           module={resources?.transactionLock?.titlePlural}

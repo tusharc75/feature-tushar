@@ -18,7 +18,7 @@ const WorkFlowReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [workFlowReportData, setWorkFlowReportData] = useState(null);
   const [workFlowData, setWorkFlowData] = useState(null);
@@ -102,7 +102,7 @@ const WorkFlowReportDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.workflowReport, { title: workFlowData?.workflowName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

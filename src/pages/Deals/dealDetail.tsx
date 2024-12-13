@@ -64,7 +64,7 @@ const DealDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.deals, { title: dealData?.dealname }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.deals, title: resources?.deals?.titlePlural }, { title: dealData?.dealname }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -77,11 +77,8 @@ const DealDetail = () => {
           <CustomTab value={0}>
             Header
           </CustomTab>
-          {/* <CustomTab
-                        value={1}
-                    ><BiFoodMenu className="mr-1" fontSize="inherit" /> Material</CustomTab> */}
           <CustomTab value={2}>
-            {resources?.units?.titleSingular}
+            {resources?.units?.titlePlural}
           </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>

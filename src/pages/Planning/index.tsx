@@ -37,7 +37,7 @@ const Planning = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const types = [
@@ -300,7 +300,7 @@ const Planning = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.planning,title:resources?.planning?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.planning, title: resources?.planning?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.planning}
           module={resources?.planning?.titlePlural}

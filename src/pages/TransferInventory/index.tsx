@@ -77,7 +77,7 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
-        setWalkmeData([createTransferInventoryFlow(data,resources?.transferInventory?.titleSingular)]);
+        setWalkmeData([createTransferInventoryFlow(data, resources?.transferInventory?.titleSingular)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });

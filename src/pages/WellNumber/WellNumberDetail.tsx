@@ -70,7 +70,7 @@ const WellNumberDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.wellNumber, title: resources?.wellNumber?.titleSingular }, { title: wellNumberData?.wellNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.wellNumber, title: resources?.wellNumber?.titlePlural }, { title: wellNumberData?.wellNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

@@ -176,7 +176,7 @@ const SalesOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.salesOrder, title: resources?.salesOrder?.titleSingular}, { title: `${salesOrderData?.salesOrderNo}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.salesOrder, title: resources?.salesOrder?.titlePlural }, { title: `${salesOrderData?.salesOrderNo}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -320,7 +320,7 @@ const SalesOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this sales order: ${salesOrderData?.salesOrderNo} ?`}
+          message={`Are you sure you want to delete ${resources?.salesOrder?.titleSingular?.toLowerCase()} : ${salesOrderData?.salesOrderNo} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

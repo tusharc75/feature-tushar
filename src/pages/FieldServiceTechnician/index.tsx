@@ -70,7 +70,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
         )}
         {view === 'table' && (
           <Box>
-            <HtmlTooltip title={`View ${resources?.fieldTicket?.titleSingular}`}>
+            <HtmlTooltip title={`View ${resources?.fieldTicket?.titlePlural}`}>
               <span>
                 <IconButton
                   size="small"
@@ -136,7 +136,7 @@ const FieldServiceTechnician = () => {
     }
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
-    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data,resources }));
+    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
     setColumns(newColumns);
   };
 
@@ -145,7 +145,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -300,7 +300,7 @@ const FieldServiceTechnician = () => {
     return (
       <>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${resources?.fieldServiceOrder?.titleSingular} Offline`}
+          {`Add ${resources?.fieldServiceOrder?.titlePlural} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}
@@ -316,8 +316,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     } else {
       setSelectedData(null);
@@ -383,12 +383,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => {}}
+                    fetchServiceOrderData={() => { }}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

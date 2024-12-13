@@ -34,7 +34,7 @@ const IrtTicketDetail = () => {
   const [tabValue, setTabValue] = useState(0);
 
   const {
-    state: { permissions, user , resources}
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const IrtTicketDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
       setAllowedToDelete(permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, data.owner.optionValue));
       setIrtTicketData(data);
-      setCustomizedRoutes([{...routes.irtTicket,title:resources?.irtTicket?.titleSingular}, { title: data?.irtTicketNumber }]);
+      setCustomizedRoutes([{ ...routes.irtTicket, title: resources?.irtTicket?.titlePlural }, { title: data?.irtTicketNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

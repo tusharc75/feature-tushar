@@ -132,7 +132,7 @@ const CycleCountPInventory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.cycleCountPhysicalInventory,title:resources?.cycleCountPhysicalInventory?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.cycleCountPhysicalInventory, title: resources?.cycleCountPhysicalInventory?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

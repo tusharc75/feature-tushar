@@ -63,7 +63,7 @@ const Opportunities = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-;
+  ;
   const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
@@ -317,7 +317,7 @@ const Opportunities = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.opportunity, title: resources?.opportunity?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.opportunity}
           module="opportunities"
@@ -380,8 +380,7 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular}${selectedRecords.length ? 's' : ''}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular} ${deleteRecord.opportunityName || ''}?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

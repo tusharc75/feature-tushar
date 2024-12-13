@@ -325,7 +325,7 @@ const PriceTemplate = () => {
             <CustomBreadCrumbs
               routes={[
                 {
-                  title: resources?.priceTemplate?.titleSingular,
+                  title: resources?.priceTemplate?.titlePlural,
                   path: routes.priceTemplate.path
                 },
                 {

@@ -31,7 +31,7 @@ const EcommercePolicy = () => {
       .then(({ data: { data } }) => {
         setDetails(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const getFields = () => {

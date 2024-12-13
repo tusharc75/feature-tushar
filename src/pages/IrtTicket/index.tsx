@@ -214,7 +214,7 @@ const IrtTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.irtTicket,title:resources?.irtTicket?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.irtTicket, title: resources?.irtTicket?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productionOrder}
           module="irtTicket"

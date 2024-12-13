@@ -419,7 +419,6 @@ export default function Doa() {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[{ ...routes.doa, title: resources?.doa?.titlePlural }]} />
       </Grid>
-      {/* Tables Begins Here */}
       <Container>
         <div className="header-panel">
           <DoaHeader

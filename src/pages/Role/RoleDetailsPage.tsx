@@ -53,7 +53,7 @@ const RoleDetailsPage = () => {
     description: '',
     tier: ''
   });
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.role, title: resources?.role?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.role, title: resources?.role?.titlePlural }]);
 
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
@@ -272,7 +272,7 @@ const RoleDetailsPage = () => {
         field: data.field,
         resource: data.resource
       };
-      setCustomizedRoutes([{ ...routes.role, title: resources?.role?.titleSingular }, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.role, title: resources?.role?.titlePlural }, { title: data.name }]);
       if (data?.policy) {
         let copyOfResourcePolicy = {};
         for (const item in data?.policy) {

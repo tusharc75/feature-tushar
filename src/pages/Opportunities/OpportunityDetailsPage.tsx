@@ -553,7 +553,7 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{...routes.opportunity, title: resources?.opportunity?.titleSingular}, { title: opportunityData?.opportunityName }]} />
+            <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]} />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">

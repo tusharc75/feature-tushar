@@ -26,7 +26,7 @@ const TaxMasterDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.taxMaster, title: resources?.taxMaster?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.taxMaster, title: resources?.taxMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -53,7 +53,7 @@ const TaxMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.taxMaster.path}/${id}`);
       setTaxMasterData(data);
-      setCustomizedRoutes([{ ...routes.taxMaster, title: resources?.taxMaster?.titleSingular }, { title: data?.taxCode }]);
+      setCustomizedRoutes([{ ...routes.taxMaster, title: resources?.taxMaster?.titlePlural }, { title: data?.taxCode }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

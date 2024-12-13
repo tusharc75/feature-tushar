@@ -204,7 +204,7 @@ const Blog = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.blog,title:resources?.blog?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.blog, title: resources?.blog?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.blog}
           module={resources?.blog?.titlePlural}

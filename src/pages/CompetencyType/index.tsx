@@ -30,7 +30,7 @@ const CompetencyType = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -205,7 +205,7 @@ const CompetencyType = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.competencyType,title:resources?.competencyType?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.competencyType, title: resources?.competencyType?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.competencyType}
           module={resources?.competencyType?.titlePlural}

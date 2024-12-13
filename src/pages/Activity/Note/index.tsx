@@ -411,7 +411,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}

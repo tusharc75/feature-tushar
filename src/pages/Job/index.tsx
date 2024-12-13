@@ -38,8 +38,8 @@ import axios, { CancelTokenSource } from 'axios';
 let jobTimeout;
 
 const Job = () => {
-    const {
-    state: { user, permissions, selectedEntity,resources }
+  const {
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const renderedFrom = camelCase(sidebarResource.job);
@@ -340,7 +340,7 @@ const Job = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.job,title:resources?.job?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.job, title: resources?.job?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.job}
           module="job"

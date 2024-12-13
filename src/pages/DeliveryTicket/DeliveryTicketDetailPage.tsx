@@ -470,7 +470,7 @@ export default function DeliveryTicketDetail(props) {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[{ ...routes.deliveryTicket, title: resources?.deliveryTicket?.titleSingular }, { title: deliveryTicketData?.ticketName }]}
+              routes={[{ ...routes.deliveryTicket, title: resources?.deliveryTicket?.titlePlural }, { title: deliveryTicketData?.ticketName }]}
             />
           </Box>
           <Box className="controls-v1">
@@ -661,7 +661,7 @@ export default function DeliveryTicketDetail(props) {
           )}
           <TabPanel value={tabValue} index={2}>
             <DeliveryTicketProduct
-              renderedFrom={`${camelCase(resources?.deliveryTicket?.titleSingular)}_grid-2`}
+              renderedFrom={`${camelCase(sidebarResource.deliveryTicket)}_grid-2`}
               deliveryTicketId={id}
               columns={productColumns}
             />
@@ -669,7 +669,7 @@ export default function DeliveryTicketDetail(props) {
           {deliveryTicketData?.additionalCost?.length > 0 && (
             <TabPanel value={tabValue} index={3}>
               <DeliveryTicketAdditionalCost
-                renderedFrom={`${camelCase(resources?.deliveryTicket?.titleSingular)}_grid-3`}
+                renderedFrom={`${camelCase(sidebarResource.deliveryTicket)}_grid-3`}
                 additionalCost={deliveryTicketData?.additionalCost}
               />
             </TabPanel>

@@ -8,6 +8,7 @@ export type Report = {
     permission?: string;
     key?: string;
     type?: string;
+    label?: string;
   }[];
 };
 export type CustomReport = {

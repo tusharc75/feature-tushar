@@ -21,7 +21,7 @@ const TriggerNotificationMasterDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [triggerNotificationMasterData, setTriggerNotificationMasterData] = useState(null);
@@ -100,7 +100,7 @@ const TriggerNotificationMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.triggerNotificationMaster,title:resources?.triggerNotificationMaster?.titleSingular}, { title: triggerNotificationMasterData?.resource }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.triggerNotificationMaster, title: resources?.triggerNotificationMaster?.titlePlural }, { title: triggerNotificationMasterData?.resource }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

@@ -218,7 +218,7 @@ const PriceTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.priceTemplate, title: resources?.priceTemplate?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.priceTemplate, title: resources?.priceTemplate?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
