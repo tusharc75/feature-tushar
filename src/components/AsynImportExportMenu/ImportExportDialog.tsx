@@ -34,13 +34,12 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
 
-  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const timerId = setInterval(() => {
-      setCount(count + 1);
-    }, 30000);
-    return () => clearInterval(timerId);
+    const interval = setInterval(() => {
+      fetchData();
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -49,7 +48,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
 
   useEffect(() => {
     fetchData();
-  }, [count, refresh, pageSizes, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly]);
+  }, [refresh, pageSizes, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
