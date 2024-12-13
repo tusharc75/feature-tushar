@@ -1,6 +1,6 @@
 import { Fragment, useContext, useState } from 'react';
 import DisplayChips from './ChipDataDisplay';
-import { setTempFilter } from 'src/components/CustomReactTable/GridFilter/utils';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 function DisplayFilters({
   columns,
@@ -16,6 +16,7 @@ function DisplayFilters({
 }) {
   const [chipData, setChipData] = useState([]);
   const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
+  const { setTempFilter } = useUserTempFilters();
 
   const clearSingleFilter = (name) => {
     // Create a copy of the customFilters object

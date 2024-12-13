@@ -13,6 +13,7 @@ export const WALK_ME_STEPS = 'walkMeSteps';
 export const WALK_ME_INSTANCE = 'walkMeInstance';
 export const GRID_METADATA = 'gridMetaData';
 export const USER_FAVOURITES = 'userFavorites';
+export const TEMP_USER_FILTER = 'tempUserFilter';
 
 const initialState: {
   searchQuery: string;
@@ -27,6 +28,7 @@ const initialState: {
   walkMeInstance: StateWalkmeInstance | null;
   gridMetaData: { [key: string]: { hide: string[]; order: string[]; name?: string; id?: string } | null };
   userFavorites: { [key: string]: boolean } | null;
+  tempUserFilter: { [key: string]: any };
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -40,6 +42,7 @@ const initialState: {
   walkMeInstance: null,
   gridMetaData: {},
   userFavorites: null,
+  tempUserFilter: {}
 };
 
 const { Provider, useStore } = createFastContext(initialState);

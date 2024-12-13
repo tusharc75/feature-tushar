@@ -1,21 +1,8 @@
-const LOCALHOST_KEY_FOR_TEMP_FILTER = 'tempUserFilter';
+import { useStore, TEMP_USER_FILTER } from 'src/StateProvider/fastContext';
+export const useUserTempFilters = () => {
+  const [userFilters, setUserFilter] = useStore((store) => store[TEMP_USER_FILTER]);
+  const setTempFilter = (resource, data: { [key: string]: any }) => setUserFilter({ [TEMP_USER_FILTER]: { ...userFilters, [resource]: data } });
+  const getTempFilter = (resource: string) => userFilters[resource];
 
-export const getTempFilter = (resource: string) => {
-  const data = localStorage.getItem(LOCALHOST_KEY_FOR_TEMP_FILTER);
-  if (data) {
-    return JSON.parse(data)[resource];
-  }
-  return false;
-};
-
-export const setTempFilter = (resource: string, data: any) => {
-  const tempData = localStorage.getItem(LOCALHOST_KEY_FOR_TEMP_FILTER);
-  const tempFilters = tempData ? JSON.parse(tempData) : {};
-  localStorage.setItem(
-    LOCALHOST_KEY_FOR_TEMP_FILTER,
-    JSON.stringify({
-      ...tempFilters,
-      [resource]: data
-    })
-  );
+  return { getTempFilter, setTempFilter, userFilters };
 };
