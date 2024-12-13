@@ -203,7 +203,7 @@ const ChartOfAccount = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.chartOfAccount,title:resources?.chartOfAccount?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.chartOfAccount, title: resources?.chartOfAccount?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.chartOfAccount}
           module={resources?.chartOfAccount?.titlePlural}

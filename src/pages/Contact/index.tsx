@@ -544,7 +544,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}

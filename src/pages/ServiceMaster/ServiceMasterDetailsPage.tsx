@@ -107,7 +107,7 @@ const ServiceMasterDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes?.serviceMaster, title:resources?.serviceMaster?.titleSingular}, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.serviceMaster, title: resources?.serviceMaster?.titlePlural }, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

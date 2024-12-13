@@ -930,9 +930,9 @@ const Report = () => {
                   subResource={type}
                   referenceId={null}
                   permissions={permissions?.report}
-                  module={resources?.productionOrder?.titleSingular}
+                  module={resources?.productionOrder?.titlePlural}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

@@ -47,7 +47,7 @@ const LeadDetailsPage = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.lead, title: resources?.lead?.titleSingular}]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.lead, title: resources?.lead?.titlePlural }]);
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
@@ -134,7 +134,7 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([{...routes.lead, title: resources?.lead?.titleSingular}, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
+        setCustomizedRoutes([{ ...routes.lead, title: resources?.lead?.titlePlural }, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -341,7 +341,6 @@ const LeadDetailsPage = () => {
                   color="primary"
                   size="small"
                   className={'no-shadow'}
-                  // style={isMobile && !isTablet ? { color: 'var(--warning-light)', borderColor: 'var(--warning-light)' } : {}}
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({

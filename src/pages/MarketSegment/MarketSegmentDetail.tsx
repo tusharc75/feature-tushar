@@ -24,7 +24,7 @@ const MarketSegmentDetail = () => {
     state: { permissions, user, resources }
   }: any = useData();
 
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.marketSegment, title: resources?.marketSegment?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.marketSegment, title: resources?.marketSegment?.titlePlural }]);
   const [marketSegmentData, setMarketSegmentData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);

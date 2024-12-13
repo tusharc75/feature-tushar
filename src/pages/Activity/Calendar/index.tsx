@@ -39,7 +39,7 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user, resources }
+      user: { user }, resources
     }
   } = useData();
   const history = useHistory();
@@ -69,7 +69,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setFilter([]);
     }
@@ -94,7 +94,7 @@ const BigCalendar = () => {
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     [type, filter]
   );
@@ -131,8 +131,6 @@ const BigCalendar = () => {
     setCreateType(null);
     fetchBoard();
   };
-
-  // const get;
 
   return (
     <section className="main-container-v1">

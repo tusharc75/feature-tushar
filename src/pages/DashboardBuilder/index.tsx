@@ -18,6 +18,7 @@ import { baseURL } from './builderHelpers';
 import axios, { CancelTokenSource } from 'axios';
 
 const DashBoards = () => {
+
   const renderedFrom = 'dashboard-builder';
   const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +27,7 @@ const DashBoards = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,7 +175,7 @@ const DashBoards = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: 'Dashboard Master' }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.dashboardMaster?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

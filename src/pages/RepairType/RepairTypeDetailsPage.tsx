@@ -72,7 +72,7 @@ const RepairTypeDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.repairType, title: resources?.repairType?.titleSingular}, { title: repairTypeData?.repairType }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.repairType, title: resources?.repairType?.titlePlural }, { title: repairTypeData?.repairType }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

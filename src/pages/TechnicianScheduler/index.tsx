@@ -21,7 +21,7 @@ function TechnicianScheduler() {
   const {
     state: { resources }
   }: any = useData();
-  
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">

@@ -13,7 +13,7 @@ const RentalPlanningCalendar = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs
-         routes={[{ ...routes.rentalPlanningCalendar, title: resources?.rentalPlanningCalendar?.titleSingular }]}
+          routes={[{ ...routes.rentalPlanningCalendar, title: resources?.rentalPlanningCalendar?.titlePlural }]}
         />
       </div>
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>

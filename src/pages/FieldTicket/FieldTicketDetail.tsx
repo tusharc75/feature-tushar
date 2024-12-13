@@ -47,7 +47,7 @@ const FieldTicketDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.fieldTicket);
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [fieldTicketData, setFieldTicketData] = useState(null);
@@ -191,7 +191,7 @@ const FieldTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.fieldTicket,title:resources?.fieldTicket?.titleSingular}, { title: fieldTicketData?.fieldTicketNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.fieldTicket, title: resources?.fieldTicket?.titlePlural }, { title: fieldTicketData?.fieldTicketNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

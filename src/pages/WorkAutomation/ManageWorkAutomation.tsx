@@ -74,7 +74,7 @@ const ManageWorkAutomation = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workAutomation, { title: rentalManagementData ? rentalManagementData?.rentalJobName : '' }]}
+              routes={[{ ...routes.workAutomation, title: resources?.workAutomation?.titlePlural }, { title: rentalManagementData ? rentalManagementData?.rentalJobName : '' }]}
               onBreadCrumbClick={(path) => {
                 history.push(path);
               }}

@@ -33,7 +33,7 @@ const DriverMasterDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.driverMaster, title: resources?.driverMaster?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.driverMaster, title: resources?.driverMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -68,7 +68,7 @@ const DriverMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.driverMaster.path}/${id}`);
       setDriverMasterData(data);
-      setCustomizedRoutes([{ ...routes.driverMaster, title: resources?.driverMaster?.titleSingular }, { title: data?.driverName }]);
+      setCustomizedRoutes([{ ...routes.driverMaster, title: resources?.driverMaster?.titlePlural }, { title: data?.driverName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

@@ -28,9 +28,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FieldTicket = () => {
   const {
-    state: { permissions, selectedEntity, user,resources }
+    state: { permissions, selectedEntity, user, resources }
   }: any = useData();
-  
+
   const types = [
     {
       key: `My ${resources?.fieldTicket?.titlePlural}`,

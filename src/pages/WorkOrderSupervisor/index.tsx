@@ -28,7 +28,7 @@ import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { ExpandMore } from '@material-ui/icons';
 
-const LIMIT = 25;  
+const LIMIT = 25;
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -63,42 +63,42 @@ const WorkOrderSupervisor = () => {
   const ref: any = useRef();
 
   const FIELD_TO_FILTER = [
-  {
-    key: 'user',
-    fieldName: 'user',
-    fieldLabel: resources?.employeeMaster.titlePlural,
-    resource: sidebarResource.employeeMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'serviceMaster',
-    fieldName: 'service',
-    fieldLabel: sidebarResource?.serviceMaster,
-    resource: sidebarResource.serviceMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'workOrder',
-    fieldName: 'workOrder',
-    fieldLabel: sidebarResource?.workOrder,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'repairOrder',
-    fieldName: 'repairOrder',
-    fieldLabel: sidebarResource?.repairOrder,
-    resource: sidebarResource?.repairOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'productionOrder',
-    fieldName: 'productionOrder',
-    fieldLabel: sidebarResource.productionOrder,
-    resource: sidebarResource.productionOrder,
-    type: 'dropDown'
-  }
-];
+    {
+      key: 'user',
+      fieldName: 'user',
+      fieldLabel: resources?.employeeMaster.titlePlural,
+      resource: sidebarResource.employeeMaster,
+      type: 'dropDown'
+    },
+    {
+      key: 'serviceMaster',
+      fieldName: 'service',
+      fieldLabel: sidebarResource?.serviceMaster,
+      resource: sidebarResource.serviceMaster,
+      type: 'dropDown'
+    },
+    {
+      key: 'workOrder',
+      fieldName: 'workOrder',
+      fieldLabel: sidebarResource?.workOrder,
+      resource: sidebarResource.workOrder,
+      type: 'dropDown'
+    },
+    {
+      key: 'repairOrder',
+      fieldName: 'repairOrder',
+      fieldLabel: sidebarResource?.repairOrder,
+      resource: sidebarResource?.repairOrder,
+      type: 'dropDown'
+    },
+    {
+      key: 'productionOrder',
+      fieldName: 'productionOrder',
+      fieldLabel: sidebarResource.productionOrder,
+      resource: sidebarResource.productionOrder,
+      type: 'dropDown'
+    }
+  ];
 
   useEffect(() => {
     const options: any = [];
@@ -178,7 +178,7 @@ const WorkOrderSupervisor = () => {
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources}/>
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources} />
       }
     ];
 
@@ -380,7 +380,7 @@ const WorkOrderSupervisor = () => {
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <section className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
+          <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
           <div className="flex items-center gap-1">
             {permissions?.workOrder?.isCreate && (
               <Button
@@ -453,14 +453,12 @@ const WorkOrderSupervisor = () => {
                       {isFilterPresent ? (
                         <>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                           ></span>
                           <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                           ></span>
                         </>
                       ) : null}
@@ -505,7 +503,7 @@ const WorkOrderSupervisor = () => {
                 )
               ) : (
                 <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                     <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                       {resources?.workOrder?.titleSingular}
                     </ToggleButton>
@@ -629,15 +627,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               assignTechnicianDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                    uniqueId: r?.uniqueId,
-                    workOrderId: r?.workOrder
-                  }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
                 : [
-                    {
-                      uniqueId: selectedServiceData?.uniqueId,
-                      workOrderId: selectedServiceData?._id
-                    }
-                  ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
             }
             assignedUsers={
               assignTechnicianDialog.multiple
@@ -663,15 +661,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               workStationAssignDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                    uniqueId: r?.uniqueId,
-                    workOrderId: r?.workOrder
-                  }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
                 : [
-                    {
-                      uniqueId: selectedServiceData?.uniqueId,
-                      workOrderId: selectedServiceData?._id
-                    }
-                  ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
             }
             workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {

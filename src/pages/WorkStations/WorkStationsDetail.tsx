@@ -30,7 +30,7 @@ const WorkStationsDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.workStations, title: resources?.workStations?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.workStations, title: resources?.workStations?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -57,7 +57,7 @@ const WorkStationsDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/work-stations/${id}`);
       setWorkStationsData(data);
-      setCustomizedRoutes([{ ...routes.workStations, title: resources?.workStations?.titleSingular }, { title: data?.workStationName }]);
+      setCustomizedRoutes([{ ...routes.workStations, title: resources?.workStations?.titlePlural }, { title: data?.workStationName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

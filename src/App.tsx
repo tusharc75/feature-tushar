@@ -352,7 +352,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -512,15 +512,6 @@ function App() {
             <PrivateRoute exact path="/add-doa">
               <Doa />
             </PrivateRoute>
-            {/* <PrivateRoute exact path="/">
-            <CreateBrand />
-          </PrivateRoute> */}
-            {/* <PrivateRoute exact path="/contact/new">
-              <CreateContact />
-          </PrivateRoute>
-          <PrivateRoute exact path="/contact/:id">
-              <CreateContact />
-          </PrivateRoute> */}
             <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
               <Account account={customerAccount} />
             </PrivateRoute>

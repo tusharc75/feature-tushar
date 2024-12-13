@@ -201,7 +201,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const checkDeliveryTicketFields = () => {
@@ -219,7 +219,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -410,7 +410,7 @@ const RentalManagementDetailsPage = () => {
           <Box className="nav-v1">
             <CustomBreadCrumbs
               routes={[
-                { ...routes?.rentalManagement, title: resources?.rentalManagement?.titleSingular },
+                { ...routes?.rentalManagement, title: resources?.rentalManagement?.titlePlural },
                 { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }
               ]}
             />
@@ -559,11 +559,11 @@ const RentalManagementDetailsPage = () => {
               setCurrentStep={setCurrentStep}
               handlePrev={
                 rentalSteps[currentStep]?.name === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                   ? () => {
-                      setShowCancelConfirmBox({ open: true, isQuote: true });
-                    }
+                    setShowCancelConfirmBox({ open: true, isQuote: true });
+                  }
                   : null
               }
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -587,12 +587,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -611,12 +611,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

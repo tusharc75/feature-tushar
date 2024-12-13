@@ -28,7 +28,7 @@ const Survey = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedType, setSelectedType] = useState(1);
@@ -205,7 +205,7 @@ const Survey = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.surveys,title:resources?.surveys?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.surveys, title: resources?.surveys?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.surveys}
           module={resources?.surveys?.titlePlural}

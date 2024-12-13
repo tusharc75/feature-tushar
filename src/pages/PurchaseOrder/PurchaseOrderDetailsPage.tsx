@@ -188,7 +188,7 @@ const PurchaseOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.purchaseOrder, title: resources?.purchaseOrder?.titleSingular}, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.purchaseOrder, title: resources?.purchaseOrder?.titlePlural }, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

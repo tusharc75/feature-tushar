@@ -29,7 +29,7 @@ const EmployeeMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -204,7 +204,7 @@ const EmployeeMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.employeeMaster,title:resources?.employeeMaster?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.employeeMaster}
           module={resources?.employeeMaster?.titlePlural}

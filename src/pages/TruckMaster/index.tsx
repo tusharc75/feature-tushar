@@ -33,7 +33,7 @@ const TruckMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -236,7 +236,7 @@ const TruckMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.truckMaster,title:resources?.truckMaster?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.truckMaster, title: resources?.truckMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.truckMaster}
           module={resources?.truckMaster?.titlePlural}

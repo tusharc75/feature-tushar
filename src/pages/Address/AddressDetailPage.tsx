@@ -29,7 +29,7 @@ const AddressDetailPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addressFields, setAddressFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.address, title: resources?.address?.titleSingular}]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.address, title: resources?.address?.titlePlural }]);
   const [themeColor] = useAppTheme();
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const AddressDetailPage = () => {
         data: { data }
       } = await axiosInstance().get(`/address/${id}`);
       setAddressData(data);
-      setCustomizedRoutes([{...routes.address, title: resources?.address?.titleSingular}, { title: data.fullAddress }]);
+      setCustomizedRoutes([{ ...routes.address, title: resources?.address?.titlePlural }, { title: data.fullAddress }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

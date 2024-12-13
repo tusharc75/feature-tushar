@@ -232,7 +232,7 @@ const ServiceOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes?.fieldServiceOrder,title:resources?.fieldServiceOrder?.titleSingular}, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.fieldServiceOrder, title: resources?.fieldServiceOrder?.titlePlural }, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
           {!isOffline && (

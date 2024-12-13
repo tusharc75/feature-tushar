@@ -36,7 +36,7 @@ const ImportExport = () => {
   const [file, setFile] = useState({});
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -344,7 +344,7 @@ const ImportExport = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{...routes.importExport,title:resources?.importExport?.titleSingular}]} />
+          <CustomBreadCrumbs routes={[{ ...routes.importExport, title: resources?.importExport?.titlePlural }]} />
         </Grid>
       </Grid>
       <CustomContainer>

@@ -273,9 +273,8 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-          }?`}
+          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
+            }?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

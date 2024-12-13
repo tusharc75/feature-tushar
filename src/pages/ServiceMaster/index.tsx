@@ -220,10 +220,10 @@ const ServiceMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.serviceMaster, title:resources?.serviceMaster?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.serviceMaster, title: resources?.serviceMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.serviceMaster}
-          module={resources?.serviceMaster?.titleSingular}
+          module={resources?.serviceMaster?.titlePlural}
           api={serviceMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -244,9 +244,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Step Export',
-              api: `${serviceMaster.api}/steps/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/steps/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -261,9 +260,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Consumable Export',
-              api: `${serviceMaster.api}/product/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/product/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {

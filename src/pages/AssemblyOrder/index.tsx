@@ -26,7 +26,7 @@ const AssemblyOrder = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const types = [
@@ -238,7 +238,7 @@ const AssemblyOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.assemblyOrder,title:resources?.assemblyOrder?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.assemblyOrder, title: resources?.assemblyOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.assemblyOrder}
           module={resources?.assemblyOrder?.titlePlural}
