@@ -115,7 +115,7 @@ export const PreviewDialog = ({
     }
     for (const col of visibleColumns) {
       const column = selectedView?.columns?.find((e) => e?.name === col?.fieldName);
-      if (!column || column?.customLabel !== col?.customLabel || column?.width !== col?.width) {
+      if (!column || ((column?.customLabel || null) !== (col?.customLabel || null)) || ((column?.width || null) !== (col?.width || null))) {
         return false;
       }
     }
