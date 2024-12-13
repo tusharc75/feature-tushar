@@ -17,10 +17,6 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 const ManageWorkAutomation = () => {
   const toastConfig = useContext(CustomToastContext);
 
-  const {
-    state: { resources }
-  }: any = useData();
-
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
