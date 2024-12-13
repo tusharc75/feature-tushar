@@ -27,7 +27,15 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
+import {
+  compareVersions,
+  customerAccount,
+  customerContact,
+  handleHardReload,
+  sidebarResource,
+  supplierAccount,
+  supplierContact
+} from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
@@ -517,25 +525,41 @@ function App() {
               <Account account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
-              <AccountDetailPage account={customerAccount} contact={customerContact} accountBreadcrumb={{...routes.customerAccount, title: resources?.customerAccount?.titlePlural }} />
+              <AccountDetailPage
+                account={customerAccount}
+                contact={customerContact}
+                accountBreadcrumb={{ ...routes.customerAccount, title: resources?.customerAccount?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
               <Contact contact={customerContact} account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
-              <ContactDetailPage account={customerAccount} contact={customerContact} contactBreadcrumb={{...routes.customerContact, title: resources?.customerContact?.titlePlural }} />
+              <ContactDetailPage
+                account={customerAccount}
+                contact={customerContact}
+                contactBreadcrumb={{ ...routes.customerContact, title: resources?.customerContact?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
               <Account account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
-              <AccountDetailPage account={supplierAccount} contact={supplierContact} accountBreadcrumb={{...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }} />
+              <AccountDetailPage
+                account={supplierAccount}
+                contact={supplierContact}
+                accountBreadcrumb={{ ...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
               <Contact contact={supplierContact} account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
-              <ContactDetailPage account={supplierAccount} contact={supplierContact} contactBreadcrumb={{...routes.supplierContact, title: resources?.supplierContact?.titlePlural }} />
+              <ContactDetailPage
+                account={supplierAccount}
+                contact={supplierContact}
+                contactBreadcrumb={{ ...routes.supplierContact, title: resources?.supplierContact?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
               <ProjectSales />
@@ -777,27 +801,27 @@ function App() {
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`/reports-new`}>
+            <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportsCenter />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}`}>
+            {/* <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
+            </PrivateRoute> */}
+            {/* <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
+            </PrivateRoute> */}
+            {/* <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
               <StandardReportView />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`/schedule-report`}>
               <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`/custom-report`}>
               <CustomReport />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
+            {/* <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
               <RentalPlanningCalendar />
             </PrivateRoute>
