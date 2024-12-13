@@ -149,7 +149,7 @@ const TriggerNotificationHistory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.triggerNotificationHistory,title:resources?.triggerNotificationHistory?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.triggerNotificationHistory, title: resources?.triggerNotificationHistory?.titlePlural }]} />
       </div>
       <CustomContainer>
         {columns ? (

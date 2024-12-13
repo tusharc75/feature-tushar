@@ -159,7 +159,7 @@ const ProductDetailsPage = () => {
                 ? `${data.productData?.productName} - ${data.productData?.productNumber}`
                 : data.productData?.productName
             );
-            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titleSingular }, { title: `${data.productData.productName}` }]);
+            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
             if (data?.productData?.entity && data?.productData?.entity !== undefined) {
               data.productData.entity = user.entity
                 ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
@@ -420,14 +420,14 @@ const ProductDetailsPage = () => {
                                               <IconButton
                                                 size="small"
                                                 onClick={() => {
-                                                  if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
-                                                    setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
+                                                  if (selectedWarehouse !== warehouse?.optionValue) {
+                                                    setSelectedWarehouse(warehouse?.optionValue);
                                                   } else {
                                                     setSelectedWarehouse(null);
                                                   }
                                                 }}
                                               >
-                                                {(selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue) ? (
+                                                {(selectedWarehouse === warehouse?.optionValue) ? (
                                                   <ExpandLess />
                                                 ) : (
                                                   <ExpandMore />
@@ -466,7 +466,7 @@ const ProductDetailsPage = () => {
                                       </Grid>
                                     </Box>
                                     <Box p={1} className="flex flex-wrap gap-2">
-                                      {(selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue) ? (
+                                      {(selectedWarehouse === warehouse?.optionValue) ? (
                                         inventoriesWarehouseLoading ? (
                                           <Typography
                                             variant="subtitle2"
@@ -521,7 +521,7 @@ const ProductDetailsPage = () => {
                                 ))
                               ) : (
                                 <Box textAlign="center" padding={2} minHeight={100}>
-                                  <Typography>No {resources?.serializedAsset?.titleSingular} Found</Typography>
+                                  <Typography>No {resources?.serializedAsset?.titlePlural} Found</Typography>
                                 </Box>
                               )}
                             </Box>

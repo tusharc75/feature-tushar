@@ -29,7 +29,7 @@ const TriggerNotificationMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -201,7 +201,7 @@ const TriggerNotificationMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.triggerNotificationMaster,title:resources?.triggerNotificationMaster?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.triggerNotificationMaster, title: resources?.triggerNotificationMaster?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

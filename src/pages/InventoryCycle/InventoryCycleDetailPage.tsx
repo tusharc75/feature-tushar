@@ -58,7 +58,7 @@ const InventoryCycleDetailPage = () => {
       } = await axiosInstance().get(`/inventory-cycle/${id}`);
       setHeadingLbl(data.cycleCode);
       setInventoryCycleData(data);
-      setCustomizedRoutes([{...routes?.inventoryCycle,title:resources?.inventoryCycle?.titleSingular}, { title: data.cycleCode }]);
+      setCustomizedRoutes([{ ...routes?.inventoryCycle, title: resources?.inventoryCycle?.titlePlural }, { title: data.cycleCode }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

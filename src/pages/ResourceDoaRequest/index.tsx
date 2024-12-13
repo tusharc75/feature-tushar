@@ -23,7 +23,7 @@ const ResourceDoaRequest = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -177,7 +177,7 @@ const ResourceDoaRequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.resourceDoaRequest,title:resources?.resourceDoaRequest?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titlePlural }]} />
       </div>
       <CustomContainer>
         {columns ? (

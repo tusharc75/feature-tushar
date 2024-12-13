@@ -24,7 +24,7 @@ const BudgetDetail = () => {
     state: { permissions, user, resources }
   }: any = useData();
 
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.budget, title: resources?.budget?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.budget, title: resources?.budget?.titlePlural }]);
   const [budgetData, setBudgetData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -56,7 +56,7 @@ const BudgetDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.budget?.path}/${id}`);
       setBudgetData(data);
-      setCustomizedRoutes([{ ...routes.budget, title: resources?.budget?.titleSingular }, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.budget, title: resources?.budget?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

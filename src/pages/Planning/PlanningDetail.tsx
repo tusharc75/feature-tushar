@@ -27,7 +27,7 @@ const PlanningDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [planningData, setPlanningData] = useState(null);
@@ -150,7 +150,7 @@ const PlanningDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.planning,title:resources?.planning?.titleSingular}, { title: planningData?.planningNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.planning, title: resources?.planning?.titlePlural }, { title: planningData?.planningNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

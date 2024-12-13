@@ -339,7 +339,7 @@ const ProjectSales: FC = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.projectSales, title: resources?.projectSales?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.projectSales}
           module={resources?.projectSales?.titlePlural}
@@ -411,9 +411,8 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.projectSales?.titlePlural?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-            deleteRecord?._id ? deleteRecord?.projectName : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${resources?.projectSales?.titlePlural?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.projectName : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

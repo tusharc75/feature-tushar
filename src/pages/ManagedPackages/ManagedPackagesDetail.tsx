@@ -31,7 +31,7 @@ const ManagedPackagedDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const ManagedPackagedDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.managedPackages.path}/${id}`);
       setManagedPackagesData(data);
-      setCustomizedRoutes([{...routes.managedPackages,title:resources?.managedPackages?.titleSingular}, { title: data?.managedPackageName }]);
+      setCustomizedRoutes([{ ...routes.managedPackages, title: resources?.managedPackages?.titlePlural }, { title: data?.managedPackageName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

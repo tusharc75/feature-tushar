@@ -28,7 +28,7 @@ const DataList = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -203,7 +203,7 @@ const DataList = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.dataList,title:resources?.dataLists?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.dataList, title: resources?.dataLists?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

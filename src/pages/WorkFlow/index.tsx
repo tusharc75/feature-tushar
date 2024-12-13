@@ -30,7 +30,7 @@ const WorkFlow = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -170,7 +170,7 @@ const WorkFlow = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.workflow,title:resources?.workflow?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workflow, title: resources?.workflow?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

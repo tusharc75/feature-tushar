@@ -224,7 +224,7 @@ const TransferInventoryDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.transferInventory, title: resources?.transferInventory?.titleSingular}, { title: transferInventoryData?.transferNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.transferInventory, title: resources?.transferInventory?.titlePlural }, { title: transferInventoryData?.transferNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

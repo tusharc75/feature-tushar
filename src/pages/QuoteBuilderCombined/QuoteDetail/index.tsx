@@ -331,7 +331,7 @@ export default function QuoteDetail() {
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([
-              { title: resources?.quoteBuilder?.titleSingular, path: routes.quoteBuilder.path },
+              { title: resources?.quoteBuilder?.titlePlural, path: routes.quoteBuilder.path },
               { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }
             ]);
             fetchDoaLimit();
@@ -495,7 +495,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -683,8 +683,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }

@@ -271,7 +271,7 @@ function PricingConditionsDetailsPage() {
           <CustomBreadCrumbs
             routes={[
               {
-                title: resources?.pricingCondition?.titleSingular,
+                title: resources?.pricingCondition?.titlePlural,
                 path: routes.pricingCondition.path
               },
               {
@@ -594,7 +594,7 @@ function PricingConditionsDetailsPage() {
                                                   style={{ margin: 0 }}
                                                   value={
                                                     values[
-                                                      'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                                                    'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                                                     ]
                                                   }
                                                   onChange={(e) =>

@@ -483,7 +483,7 @@ const Leads = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.lead, title: resources?.lead?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.lead, title: resources?.lead?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.lead}
           module="lead(s)"

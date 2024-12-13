@@ -27,7 +27,7 @@ const WorkFlowReport = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -215,7 +215,7 @@ const WorkFlowReport = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.workflowReport,title:resources?.workFlowReport?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

@@ -191,7 +191,7 @@ const ProductionOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes?.productionOrder,title:resources?.productionOrder?.titleSingular}, { title: productionOrderData?.productionOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.productionOrder, title: resources?.productionOrder?.titlePlural }, { title: productionOrderData?.productionOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -247,7 +247,7 @@ const ProductionOrderDetails = () => {
           <CustomTab value={1}>
             Details
           </CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

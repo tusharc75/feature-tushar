@@ -70,7 +70,7 @@ const SubcontractAssembly = () => {
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
-    setWalkmeData([createAddItemStepdata({title:resources?.subcontractAssembly?.titleSingular, path:routes.subcontractAssembly.path}, data)]);
+    setWalkmeData([createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, data)]);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -293,9 +293,8 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.subcontractAssembly?.titleSingular?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.subcontractAssemblyNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} ${deleteRecord?.subcontractAssemblyNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

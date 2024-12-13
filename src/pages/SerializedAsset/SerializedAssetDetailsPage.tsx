@@ -158,7 +158,7 @@ const SerializedAssetDetailsPage = () => {
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
         setCustomizedRoutes([
-          { ...routes.serializedAsset, title: resources?.serializedAsset?.titleSingular },
+          { ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural },
           { title: `${data?.assetNumber ?? ''}` }
         ]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {

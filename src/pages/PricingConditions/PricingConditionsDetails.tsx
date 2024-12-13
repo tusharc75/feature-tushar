@@ -61,7 +61,7 @@ const PricingConditionsDetails = () => {
       .then(({ data: { data } }) => {
         setDetailData(data);
         setHeadingLabel(data.conditionName);
-        setCustomizedRoutes([{ ...routes.pricingCondition, title: resources?.pricingCondition?.titleSingular }, { title: data.conditionName }]);
+        setCustomizedRoutes([{ ...routes.pricingCondition, title: resources?.pricingCondition?.titlePlural }, { title: data.conditionName }]);
         getResourceFields();
       })
       .catch((err) => {

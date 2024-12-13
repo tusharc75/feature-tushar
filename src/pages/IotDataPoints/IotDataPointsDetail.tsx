@@ -27,7 +27,7 @@ const IotDataPointsDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -54,7 +54,7 @@ const IotDataPointsDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.iotDataPoints.path}/${id}`);
       setIotDataPointsData(data);
-      setCustomizedRoutes([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titleSingular }, { title: data?.fieldLabel }]);
+      setCustomizedRoutes([{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titlePlural }, { title: data?.fieldLabel }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

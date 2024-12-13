@@ -142,7 +142,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -187,7 +187,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -209,7 +209,7 @@ const RepairJobDetails = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[{ ...routes?.repairJob, title: resources?.repairJob?.titleSingular }, { title: repairJobData?.repairJobName }]}
+            routes={[{ ...routes?.repairJob, title: resources?.repairJob?.titlePlural }, { title: repairJobData?.repairJobName }]}
           />
         </Box>
         <Box className="controls-v1">
@@ -230,7 +230,7 @@ const RepairJobDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          <CustomTab value={2}>{resources?.deliveryTicket?.titleSingular}</CustomTab>
+          <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={3}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>

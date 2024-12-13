@@ -449,7 +449,7 @@ const RentalManagement = () => {
           </MenuItem>
         )}
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${resources?.rentalManagement?.titleSingular} Offline`}
+          {`Add ${resources?.rentalManagement?.titlePlural} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}
@@ -540,9 +540,8 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ${
-              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-            }?`}
+            message={`Are you sure you want to delete this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

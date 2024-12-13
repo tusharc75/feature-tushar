@@ -27,7 +27,7 @@ const DeviceTemplateAlertDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -54,7 +54,7 @@ const DeviceTemplateAlertDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.deviceTemplateAlert.path}/${id}`);
       setDeviceTemplateAlertData(data);
-      setCustomizedRoutes([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titleSingular }, { title: data?.alertNumber }]);
+      setCustomizedRoutes([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }, { title: data?.alertNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

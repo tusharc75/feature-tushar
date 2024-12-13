@@ -27,7 +27,7 @@ const TrainAiModel = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   let { referenceId }: any = queryString.parse(history.location.search);
   const [showManageTrainAiModelDialog, setShowManageTrainAiModelDialog] = useState({ open: false });
@@ -179,7 +179,7 @@ const TrainAiModel = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.trainAiModel,title:resources?.trainAiModel?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.trainAiModel, title: resources?.trainAiModel?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

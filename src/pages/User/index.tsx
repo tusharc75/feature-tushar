@@ -660,7 +660,7 @@ const User: FC = () => {
 
       <section className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{...routes.user, title: resources?.user?.titlePlural}]} />
+          <CustomBreadCrumbs routes={[{ ...routes.user, title: resources?.user?.titlePlural }]} />
           <ImportExportLinks
             permissions={permissions?.user}
             module="user(s)"

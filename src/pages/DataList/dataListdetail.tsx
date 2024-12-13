@@ -37,7 +37,7 @@ const DataListDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.dataList.path}/${id}`);
       setDataListData(data);
-      setCustomizedRoutes([{...routes.dataList,title:resources.dataLists.titleSingular}, { title: data?.title }]);
+      setCustomizedRoutes([{ ...routes.dataList, title: resources.dataLists.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

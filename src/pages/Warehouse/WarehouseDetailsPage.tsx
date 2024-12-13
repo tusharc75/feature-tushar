@@ -117,7 +117,7 @@ const WarehouseDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }, { title: warehouseData?.warehouseName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.warehouse, title: resources?.warehouse?.titlePlural }, { title: warehouseData?.warehouseName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -150,7 +150,7 @@ const WarehouseDetailsPage = () => {
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange}>
           <CustomTab label={'Details'} value={0} />
           {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
-            <CustomTab label={resources?.storageLocation?.titleSingular} value={1} />
+            <CustomTab label={resources?.storageLocation?.titlePlural} value={1} />
           )}
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}

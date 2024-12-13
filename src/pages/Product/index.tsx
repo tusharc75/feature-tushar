@@ -357,9 +357,8 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -374,9 +373,8 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {

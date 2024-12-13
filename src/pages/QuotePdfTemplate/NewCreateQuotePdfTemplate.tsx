@@ -493,7 +493,7 @@ export default function NewCreateQuotePdfTemplate() {
                   <CustomBreadCrumbs
                     routes={[
                       {
-                        title: resources?.quotePdfTemplate?.titleSingular,
+                        title: resources?.quotePdfTemplate?.titlePlural,
                         path: routes.quotePdfTemplate.path
                       },
                       {
@@ -587,8 +587,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -620,10 +620,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -657,10 +657,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
