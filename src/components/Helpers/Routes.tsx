@@ -1,7 +1,3 @@
-import { RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
-
-const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
-
 const routes = {
   customerAccount: {
     path: '/customer-account'
@@ -625,31 +621,15 @@ const routes = {
     path: '/generate-invoice'
   },
   rentalManagementInvoice: {
-    title:
-      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
-        ? storedRoutes.rentalManagementInvoice.title
-        : RESOURCE_LABEL.rentalManagementInvoice,
     path: '/rental-management-invoice'
   },
   repairOrderInvoice: {
-    title:
-      storedRoutes && storedRoutes.repairOrderInvoice && storedRoutes.repairOrderInvoice.title
-        ? storedRoutes.repairOrderInvoice?.title
-        : RESOURCE_LABEL.repairOrderInvoice,
     path: '/repair-order-invoice'
   },
   subleaseInvoice: {
-    title:
-      storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title
-        ? storedRoutes.subleaseInvoice?.title
-        : RESOURCE_LABEL.subleaseInvoice,
     path: '/sublease-invoice'
   },
   fieldTicketInvoice: {
-    title:
-      storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title
-        ? storedRoutes.fieldTicketInvoice?.title
-        : RESOURCE_LABEL.fieldTicketInvoice,
     path: '/field-ticket-invoice'
   },
   payrollPolicy: {
@@ -710,18 +690,15 @@ const routes = {
     path: '/managed-packages/detail'
   },
   integration: {
-    title: storedRoutes && storedRoutes.integration && storedRoutes.integration?.title ? storedRoutes.integration?.title : RESOURCE_LABEL.integration,
     path: '/integration'
   },
   equiptAi: {
-    title: storedRoutes && storedRoutes.equiptAi && storedRoutes.equiptAi?.title ? storedRoutes.equiptAi?.title : RESOURCE_LABEL.equiptAi,
     path: '/equipt-ai'
   },
   trainAiModel: {
     path: '/train-ai-model'
   },
   workSpace: {
-    title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title : RESOURCE_LABEL.workSpace,
     path: '/work-space'
   },
   workflow: {

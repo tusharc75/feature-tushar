@@ -21,7 +21,7 @@ import xlsx from 'xlsx-js-style';
 
 const EquiptAi = () => {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [state, setState] = useChatboxReducer();
   const toastConfig = useContext(CustomToastContext);
@@ -76,8 +76,8 @@ const EquiptAi = () => {
         const selectedTopics =
           isArray(data?.topics) && data?.topics?.length
             ? data?.topics?.map((e) => {
-                return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
-              })
+              return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
+            })
             : [];
         setState({ type: 'setSelectedTopics', payload: selectedTopics });
         setState({ type: 'setMessageFromHistory', payload: data });
@@ -164,7 +164,7 @@ const EquiptAi = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.equiptAi.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.equiptAi?.titlePlural }]} />
       </div>
       <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
         <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
@@ -222,7 +222,7 @@ const EquiptAi = () => {
             </div>
             <Chatbox state={state} setState={setState} />
             <p className="absolute bottom-1 left-0 right-0 mx-auto block select-none pt-2 text-center text-[11px] text-gray-400">
-              {routes.equiptAi.title} can make mistakes. Check important info.
+              {resources?.equiptAi?.titleSingular} can make mistakes. Check important info.
             </p>
           </div>
         </div>

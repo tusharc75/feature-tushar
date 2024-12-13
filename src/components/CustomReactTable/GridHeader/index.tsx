@@ -8,7 +8,7 @@ import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
-import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
+import { IndeterminateCheckbox, TempFilter } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
 
 import { Table } from '@tanstack/react-table';
@@ -16,6 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { createFilterModel, fetchFieldOptions } from '../utils';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 type GridHeaderProps = {
   resource: any;
@@ -60,12 +61,21 @@ const GridHeader = ({
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
+  const { getTempFilter } = useUserTempFilters();
 
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
+
+  useEffect(() => {
+    const filters = getTempFilter(resource);
+    if (filters) {
+      if (filters.formValues) setCurrentFomValue(filters.formValues);
+      if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
+    }
+  }, [dispatch, resource]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -77,6 +87,8 @@ const GridHeader = ({
 
   useEffect(() => {
     if (!resource || !showFilters) return;
+    const filters = getTempFilter(resource);
+
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -97,6 +109,9 @@ const GridHeader = ({
               });
             }
           }
+        } else if (filters) {
+          if (filters.formValues) setCurrentFomValue(filters.formValues);
+          if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
