@@ -24,7 +24,7 @@ const PayrollPolicyDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
 
   const [payrollPolicyData, setPayrollPolicyData] = useState(null);
@@ -103,7 +103,7 @@ const PayrollPolicyDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.payrollPolicy, { title: payrollPolicyData?.payrollPolicyName }]} />
+          <CustomBreadCrumbs routes={[{...routes.payrollPolicy,title:resources?.payrollPolicy?.titleSingular}, { title: payrollPolicyData?.payrollPolicyName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -162,7 +162,7 @@ const PayrollPolicyDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.payrollPolicy?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.payrollPolicy?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

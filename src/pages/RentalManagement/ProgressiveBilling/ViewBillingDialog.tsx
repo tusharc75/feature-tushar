@@ -36,7 +36,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
-  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
+  const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
 

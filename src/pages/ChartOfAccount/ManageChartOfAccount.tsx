@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManageChartOfAccount = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -143,7 +143,7 @@ const ManageChartOfAccount = ({ onClose, onSuccess, isClone = false, id = null }
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.accountNumber ? `(${initialData.values?.accountNumber})` : ''}`
-                    : `Create ${routes?.chartOfAccount?.title}`
+                    : `Create ${resources?.chartOfAccount?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

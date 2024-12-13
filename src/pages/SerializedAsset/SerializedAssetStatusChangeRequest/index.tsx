@@ -18,7 +18,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { Autocomplete } from '@material-ui/lab';
 
-const renderedFrom = camelCase(routes?.serializedAssetStatusChangeRequest.title);
+const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
 const SerializedAssetStatusChangeRequest = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +27,7 @@ const SerializedAssetStatusChangeRequest = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity,resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -190,7 +190,7 @@ const SerializedAssetStatusChangeRequest = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serializedAssetStatusChangeRequest]} />
+        <CustomBreadCrumbs routes={[{...routes.serializedAssetStatusChangeRequest,title:resources?.serializedAssetStatusChangeRequest?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

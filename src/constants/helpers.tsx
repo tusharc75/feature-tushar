@@ -391,6 +391,12 @@ export const sidebarResource = {
   iotChart: 'Iot Chart',
   sendOutboundMessage: 'Send Outbound Message',
   materialHandling: 'Material Handling',
+  generateInvoice:'Generate Invoice',
+  dataList:'DataList',
+  dataListitems:'DataList Items',
+  workSpace:'WorkSpace',
+  workflow:'Workflow',
+  workflowReport:'Workflow Report'
 };
 
 export const primaryFields = {

@@ -427,7 +427,7 @@ const WorkOrderSupervisor = () => {
                 }}
               >
                 {' '}
-                {`${routes?.assemblyOrder.title}`}
+                {`${resources?.assemblyOrder?.titleSingular}`}
               </Button>
             )}
             {permissions?.product?.isCreate && (

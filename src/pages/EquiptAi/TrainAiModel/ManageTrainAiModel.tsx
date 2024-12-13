@@ -17,8 +17,12 @@ import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
+  const {
+      state: { resources }
+    }: any = useData();
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -126,7 +130,7 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
-                title={'Create ' + routes.trainAiModel.title}
+                title={'Create ' + resources?.trainAiModel?.titlePlural}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);

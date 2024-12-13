@@ -31,7 +31,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [selectedResource, setSelectedResource] = useState(null);
   const renderedFrom = resourceRendered
     ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
-    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+    : `${selectedResource?.key + camelCase(sidebarResource.generateInvoice)}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -403,7 +403,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                   ? routes[`${resourceRendered}Invoice`]
                     ? routes[`${resourceRendered}Invoice`]?.title
                     : 'Invoice'
-                  : routes.generateInvoice.title
+                  : resources?.generateInvoice?.titlePlural
               }
             ]}
           />
