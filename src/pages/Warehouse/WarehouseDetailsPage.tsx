@@ -29,19 +29,14 @@ const WarehouseDetailsPage = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [warehouseData, setWarehouseData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }]);
   const [tabValue, setTabValue] = useState(0);
   const [resourceData, setResourceData] = useState(null);
-
-  const {
-    state: { resources }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -57,9 +52,7 @@ const WarehouseDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/warehouse/${id}`);
-      setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
-      setCustomizedRoutes([{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -97,7 +90,6 @@ const WarehouseDetailsPage = () => {
           .put(`/warehouse/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-
             history.push(`${routes.warehouse.path}`);
           })
           .catch((err) => {
@@ -125,7 +117,7 @@ const WarehouseDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.warehouse, title: resources?.warehouse?.titleSingular }, { title: warehouseData?.warehouseName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -210,7 +202,7 @@ const WarehouseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${warehouseData?.warehouseName}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
