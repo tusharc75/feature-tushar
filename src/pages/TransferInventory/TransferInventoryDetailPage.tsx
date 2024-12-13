@@ -44,7 +44,7 @@ import {
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.transferInventory.title);
+  const renderedFrom = camelCase(sidebarResource.transferInventory);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -53,7 +53,7 @@ const TransferInventoryDetailPage = () => {
   const { tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -110,10 +110,10 @@ const TransferInventoryDetailPage = () => {
   useEffect(() => {
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.insertAtCurrentIndex([
-        ...generateAddExistingProduct(false).steps,
+        ...generateAddExistingProduct(false, resources?.transferInventory?.titleSingular).steps,
         nextButtonStep(false),
-        ...generateLoadingStepCreateLoadingTicket(0).steps,
-        ...generateLoadingStepReceive(0).steps,
+        ...generateLoadingStepCreateLoadingTicket(0, resources?.transferInventory?.titleSingular).steps,
+        ...generateLoadingStepReceive(0, resources?.transferInventory?.titleSingular).steps,
         ...generateCompleteButtonStep().steps
       ]);
       walkmeInstance.handleNext();
@@ -224,7 +224,7 @@ const TransferInventoryDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.transferInventory, { title: transferInventoryData?.transferNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes.transferInventory, title: resources?.transferInventory?.titleSingular}, { title: transferInventoryData?.transferNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

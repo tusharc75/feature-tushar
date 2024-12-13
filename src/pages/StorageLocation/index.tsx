@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageStorageLocation from './ManageStorageLocation';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(sidebarResource?.storageLocation);
+const renderedFrom = camelCase(sidebarResource.storageLocation);
 
 const StorageLocation = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const StorageLocation = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,10 +206,10 @@ const StorageLocation = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.storageLocation,title:resources?.storageLocation?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.storageLocation, title: resources?.storageLocation?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.storageLocation}
-          module={resources?.storageLocation?.titleSingular}
+          module={resources?.storageLocation?.titlePlural}
           api={storageLocation.api}
           afterImportCompleted={() => {
             fetchData();

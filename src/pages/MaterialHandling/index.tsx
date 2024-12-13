@@ -94,7 +94,7 @@ const MaterialHandling = () => {
   const FIELD_TO_FILTER = [
     {
       fieldName: '_id',
-      fieldLabel: sidebarResource.workOrder,
+      fieldLabel: resources?.workOrder?.titlePlural,
       resource: sidebarResource.workOrder,
       type: 'dropDown'
     },

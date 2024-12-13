@@ -34,17 +34,7 @@ import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeS
 
 const TransferInventory = () => {
   const { setWalkmeData } = useSetWalkmeData();
-  const types = [
-    {
-      key: `My ${routes.transferInventory.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.transferInventory.title}`,
-      value: 2
-    }
-  ];
-  const renderedFrom = camelCase(routes?.transferInventory.title);
+  const renderedFrom = camelCase(sidebarResource.transferInventory);
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferInventoryDialog, setShowManageTransferInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -56,8 +46,19 @@ const TransferInventory = () => {
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.transferInventory?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.transferInventory?.titlePlural}`,
+      value: 2
+    }
+  ];
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.transferInventory));
 
   const { generateColumns } = useColumns();
@@ -76,7 +77,7 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
-        setWalkmeData([createTransferInventoryFlow(data)]);
+        setWalkmeData([createTransferInventoryFlow(data,resources?.transferInventory?.titleSingular)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
@@ -221,7 +222,7 @@ const TransferInventory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.transferInventory]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transferInventory, title: resources?.transferInventory?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transferInventory}
           module="transfer inventory"
@@ -292,7 +293,7 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferInventory?.title?.toLowerCase()} 
+          message={`Are you sure you want to delete the ${resources?.transferInventory?.titleSingular?.toLowerCase()} 
           ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}?`}
           onClose={() => {
             setDeleteRecord(null);

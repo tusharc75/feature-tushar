@@ -19,7 +19,7 @@ import ProductGridLayout from './Product';
 import QuantityDialog from './QuantityDialog';
 
 const CageManagement = () => {
-  const renderedFrom = camelCase(sidebarResource?.cageManagement);
+  const renderedFrom = camelCase(sidebarResource.cageManagement);
 
   const toastConfig = useContext(CustomToastContext);
   const [searchVal, setSearchVal] = useState('');
@@ -141,7 +141,7 @@ const CageManagement = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.cageManagement]} />
+          <CustomBreadCrumbs routes={[{ ...routes.cageManagement, title: resources?.cageManagement?.titlePlural }]} />
         </Grid>
         <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>

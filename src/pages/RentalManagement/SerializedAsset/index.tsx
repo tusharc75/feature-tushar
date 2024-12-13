@@ -171,7 +171,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               </IconButton>
             )}
             {!isOffline && row.original.isPurchaseOrder && (
-              <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
+              <HtmlTooltip title={`${resources?.purchaseOrder?.titleSingular}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -183,7 +183,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               </HtmlTooltip>
             )}
             {row.original.isBulkAssetCreation && (
-              <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
+              <HtmlTooltip title={`${resources?.bulkAssetCreation?.titleSingular}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -195,7 +195,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               </HtmlTooltip>
             )}
             {row.original.isSublease && (
-              <HtmlTooltip title={`${routes.sublease.title}`}>
+              <HtmlTooltip title={`${resources?.sublease?.titleSingular}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -1043,7 +1043,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
             }}
           >
-            {`Create ${routes.bulkAssetCreation.title}`}
+            {`Create ${resources?.bulkAssetCreation?.titleSingular}`}
           </MenuItem>
         )}
         {permissions?.purchaseOrder?.isCreate && (
@@ -1053,7 +1053,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
             }}
           >
-            {`Create ${routes.purchaseOrder.title}`}
+            {`Create ${resources?.purchaseOrder?.titleSingular}`}
           </MenuItem>
         )}
         {permissions?.sublease?.isCreate && (
@@ -1063,7 +1063,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
             }}
           >
-            {`Create ${routes.sublease.title}`}
+            {`Create ${resources?.sublease?.titleSingular}`}
           </MenuItem>
         )}
         {selectedRecords.length && assetAssignedProduct?.length ? (
@@ -1180,7 +1180,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               OpenInNewWindow(routes.purchaseOrder.path);
             }}
           >
-            {`Show ${routes.purchaseOrder.title}`}
+            {`Show ${resources?.purchaseOrder?.titleSingular}`}
           </MenuItem>
         )}
         {permissions?.bulkAssetCreation?.isRead && (
@@ -1190,7 +1190,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               OpenInNewWindow(routes.bulkAssetCreation.path);
             }}
           >
-            {`Show ${routes.bulkAssetCreation.title}`}
+            {`Show ${resources?.bulkAssetCreation?.titleSingular}`}
           </MenuItem>
         )}
 
@@ -1201,7 +1201,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               OpenInNewWindow(routes.sublease.path);
             }}
           >
-            {`Show ${routes.sublease.title}`}
+            {`Show ${resources?.sublease?.titleSingular}`}
           </MenuItem>
         )}
         {permissions?.transferAsset?.isRead && (
@@ -1211,7 +1211,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               OpenInNewWindow(routes.transferAsset.path);
             }}
           >
-            {`Show ${routes.transferAsset.title}`}
+            {`Show ${resources?.transferAsset?.titleSingular}`}
           </MenuItem>
         )}
       </Menu>

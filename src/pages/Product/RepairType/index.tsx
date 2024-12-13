@@ -1,5 +1,6 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -50,7 +51,7 @@ const ProductRepairType = (props: Props) => {
     axiosInstance()
       .get(`/field?resource=${repairType.resource}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(sidebarResource?.repairType, data, routes.repairTypeDetail.path);
+        const newColumns = generateColumns(camelCase(sidebarResource.repairType), data, routes.repairTypeDetail.path);
         setColumns([...newColumns, ActionsRenderer]);
       });
   };

@@ -403,7 +403,7 @@ const Product = () => {
                 isProductType,
                 productTypeList,
                 productType,
-                setProductType
+                setProductType,
               }}
             />
           }
@@ -411,7 +411,7 @@ const Product = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          actionMenuItems={<ActionMenuItems {...{ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox }} />}
+          actionMenuItems={<ActionMenuItems {...{ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox, resources }} />}
           addButtonOnclick={() => {
             setOpen(true);
           }}
@@ -490,7 +490,7 @@ const LeftSideContent = ({
   isProductType,
   productTypeList,
   productType,
-  setProductType
+  setProductType,
 }) => {
   return (
     <>
@@ -558,7 +558,7 @@ const LeftSideContent = ({
   );
 };
 
-const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox }) => {
+const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox, resources }) => {
   return (
     <>
       <MenuItem
@@ -576,7 +576,7 @@ const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setSh
             setOpenAddDialog(true);
           }}
         >
-          {`Assign ${sidebarResource?.repairType} (${selectedRecords.length})`}
+          {`Assign ${resources?.repairType?.titleSingular} (${selectedRecords.length})`}
         </MenuItem>
       )}
     </>
