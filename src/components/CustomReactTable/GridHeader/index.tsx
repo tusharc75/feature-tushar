@@ -69,14 +69,6 @@ const GridHeader = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
 
-  useEffect(() => {
-    const filters = getTempFilter(resource);
-    if (filters) {
-      if (filters.formValues) setCurrentFomValue(filters.formValues);
-      if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
-    }
-  }, [dispatch, resource]);
-
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
   };
@@ -87,6 +79,8 @@ const GridHeader = ({
 
   useEffect(() => {
     if (!resource || !showFilters) return;
+    const filters = getTempFilter(resource);
+
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -107,6 +101,9 @@ const GridHeader = ({
               });
             }
           }
+        } else if (filters) {
+          if (filters.formValues) setCurrentFomValue(filters.formValues);
+          if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
