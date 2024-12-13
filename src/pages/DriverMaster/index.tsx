@@ -22,11 +22,11 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const DriverMaster = () => {
-  const renderedFrom = camelCase(routes?.driverMaster.title);
+  const renderedFrom = camelCase(sidebarResource.driverMaster);
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -222,10 +222,10 @@ const DriverMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.driverMaster.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.driverMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.driverMaster}
-          module={routes.driverMaster.title}
+          module={resources?.driverMaster?.titlePlural}
           api={'driver-master'}
           afterImportCompleted={() => {
             fetchData();
@@ -283,7 +283,7 @@ const DriverMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.driverMaster?.title?.toLowerCase()}  ${deleteRecord?.driverName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()}  ${deleteRecord?.driverName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

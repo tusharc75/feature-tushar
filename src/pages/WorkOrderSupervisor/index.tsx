@@ -173,12 +173,12 @@ const WorkOrderSupervisor = () => {
       },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-      { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
+      { accessor: 'workStation', title: resources?.workStations?.titleSingular, type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} />
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} resources={resources}/>
       }
     ];
 
@@ -560,7 +560,7 @@ const WorkOrderSupervisor = () => {
                         setWorkStationAssignDialog({ open: true, multiple: true });
                         setAnchorActionEl(null);
                       }}
-                    >{`Assign ${routes.workStations.title}`}</MenuItem>
+                    >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
                   </Menu>
                 </div>
                 <div className="pt-[4px]">
@@ -707,7 +707,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -746,7 +746,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
                 setAnchorEl(null);
               }}
             >
-              {`Assign ${routes.workStations.title}`}
+              {`Assign ${resources?.workStations?.titlePlural}`}
             </MenuItem>
           )}
         </Menu>

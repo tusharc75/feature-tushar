@@ -36,7 +36,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
   const history = useHistory();
   const inputRef = useRef<any>();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -255,7 +255,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
-                    : `Create ${routes?.iotDataPoints?.title}`
+                    : `Create ${resources?.iotDataPoints?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

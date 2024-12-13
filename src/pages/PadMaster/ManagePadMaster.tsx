@@ -21,7 +21,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -159,7 +159,7 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
-                  : `Create ${routes?.padMaster?.title}`
+                  : `Create ${resources?.padMaster?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

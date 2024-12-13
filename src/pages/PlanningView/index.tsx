@@ -175,12 +175,12 @@ function PlanningView() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
+            <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
-              module={routes.planningView.title}
+              module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
               afterImportCompleted={() => { }}
               onExportToExcelSuccess={() => { }}

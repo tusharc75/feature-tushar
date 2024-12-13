@@ -163,7 +163,7 @@ const RentalManagement = () => {
       <>
         <HideWhenOffline>
           {permissions?.iotChart?.isRead && (
-            <HtmlTooltip title={`View ${routes.iotChart.title}`} placement="top" arrow enterTouchDelay={0}>
+            <HtmlTooltip title={`View ${resources?.iotChart?.titlePlural}`} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton
                   color="inherit"

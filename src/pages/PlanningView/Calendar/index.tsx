@@ -93,7 +93,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.competencies?.isRead
       ? [
           {
-            label: routes.competencies.title,
+            label: resources?.competencies?.titlePlural,
             value: 'Competencies',
             key: 'competencies'
           }
@@ -124,12 +124,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const RENTAL_JOB_FILTERS = [
     {
-      label: resources?.rentalManagement?.titleSingular,
+      label: resources?.rentalManagement?.titlePlural,
       value: 'Rental Management',
       key: 'rentalJob'
     },
     {
-      label: routes.padMaster.title,
+      label: resources?.padMaster?.titlePlural,
       value: 'Pad Master',
       key: 'padMaster'
     }

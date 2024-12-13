@@ -21,7 +21,6 @@ const WorkStationsDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.workStations]);
   const [workStationsData, setWorkStationsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -29,8 +28,9 @@ const WorkStationsDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.workStations, title: resources?.workStations?.titleSingular }]);
 
   useEffect(() => {
     if (id) {
@@ -57,7 +57,7 @@ const WorkStationsDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/work-stations/${id}`);
       setWorkStationsData(data);
-      setCustomizedRoutes([routes.workStations, { title: data?.workStationName }]);
+      setCustomizedRoutes([{ ...routes.workStations, title: resources?.workStations?.titleSingular }, { title: data?.workStationName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -139,7 +139,7 @@ const WorkStationsDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.workStations?.title?.toLowerCase()} ${workStationsData.workStationName} ?`}
+          message={`Are you sure you want to delete ${resources?.workStations?.titleSingular?.toLowerCase()} ${workStationsData.workStationName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
