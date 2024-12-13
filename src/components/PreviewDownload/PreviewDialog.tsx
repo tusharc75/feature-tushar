@@ -13,6 +13,7 @@ import { PreviewFields } from './PreviewFields';
 import DownloadHistory from './DownloadHistory';
 import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDeep } from 'lodash';
 
 export const PreviewDialog = ({
   type,
@@ -196,6 +197,23 @@ export const PreviewDialog = ({
                 </CustomButton>
               </>
             </HtmlTooltip>
+          )}
+          {(type?.includes('Excel') || type?.includes('PDF')) && (selectedExcelView || selectedPdfView) && (
+            <>
+              <CustomButton
+                id={'show-column-dialog-save-update-button'}
+                onClick={() => {
+                  const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
+                  delete selectedView._id;
+                  setShowSaveViewDialog({ open: true, data: selectedView });
+                }}
+                disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
+                size="small"
+                className="yellow-button"
+              >
+                Save as New View
+              </CustomButton>
+            </>
           )}
           {operation === 'Send Email' ? (
             <CustomButton
