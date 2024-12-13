@@ -36,7 +36,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
   const toastConfig = useContext(CustomToastContext);

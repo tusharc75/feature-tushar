@@ -18,13 +18,14 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
-  const renderedFrom = camelCase(routes?.invoice?.title);
+
+  const renderedFrom = camelCase(sidebarResource.invoice);
 
   const toastConfig = useContext(CustomToastContext);
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -279,7 +280,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       {isConfirmDialogVisible && (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setIsConformDialogVisible(false);

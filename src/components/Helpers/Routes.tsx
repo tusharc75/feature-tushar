@@ -262,11 +262,9 @@ const routes = {
     path: '/repair-job/detail'
   },
   salesOrder: {
-    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order'
   },
   salesOrderDetail: {
-    title: storedRoutes && storedRoutes.salesOrder && storedRoutes.salesOrder.title ? storedRoutes.salesOrder?.title : RESOURCE_LABEL.salesOrder,
     path: '/sales-order/detail'
   },
   packages: {
@@ -347,14 +345,12 @@ const routes = {
   repairTypeDetail: {
     path: '/repair-type/detail'
   },
-
   storageLocation: {
     path: '/storage-location'
   },
   storageLocationDetail: {
     path: '/storage-location/detail'
   },
-
   cageManagement: {
     path: '/cage-management'
   },
@@ -419,15 +415,13 @@ const routes = {
     path: '/work-order/detail'
   },
   invoice: {
-    title: storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title ? storedRoutes.invoice?.title : RESOURCE_LABEL.invoice,
     path: '/invoice'
   },
   invoiceDetail: {
-    title: storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title ? storedRoutes.invoice?.title : RESOURCE_LABEL.invoice,
     path: '/invoice/detail'
   },
   workOrderSupervisor: {
-   path: '/work-order-supervisor'
+    path: '/work-order-supervisor'
   },
   workOrderTechnician: {
     path: '/work-order-technician'
@@ -460,17 +454,9 @@ const routes = {
     path: '/contact-us/detail'
   },
   supportTicket: {
-    title:
-      storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
-        ? storedRoutes.supportTicket?.title
-        : RESOURCE_LABEL?.supportTicket,
     path: '/support-ticket'
   },
   supportTicketDetail: {
-    title:
-      storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
-        ? storedRoutes.supportTicket?.title
-        : RESOURCE_LABEL?.supportTicket,
     path: '/support-ticket/detail'
   },
   demandOrder: {

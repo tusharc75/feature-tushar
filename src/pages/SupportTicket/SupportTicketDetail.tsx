@@ -24,7 +24,6 @@ const SupportTicketDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.supportTicket]);
   const [supportTicketData, setSupportTicketData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -34,7 +33,7 @@ const SupportTicketDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -67,7 +66,6 @@ const SupportTicketDetail = () => {
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed);
       setSupportTicketData(data);
-      setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -141,7 +139,7 @@ const SupportTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.supportTicket, title: resources?.supportTicket?.titlePlural }, { title: supportTicketData?.supportTicketNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -188,7 +186,7 @@ const SupportTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.supportTicket?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
