@@ -21,7 +21,6 @@ const PadMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.padMaster]);
   const [padMasterData, setPadMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -30,10 +29,10 @@ const PadMasterDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [assets, setAssets] = useState(null);
-
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.padMaster, title: resources?.padMaster?.titleSingular }]);
 
   useEffect(() => {
     if (id) {
@@ -61,7 +60,7 @@ const PadMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.padMaster.path}/${id}`);
       setPadMasterData(data);
-      setCustomizedRoutes([routes.padMaster, { title: data?.padName }]);
+      setCustomizedRoutes([{ ...routes.padMaster, title: resources?.padMaster?.titleSingular }, { title: data?.padName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -168,7 +167,7 @@ const PadMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.padMaster?.title?.toLowerCase()} ${padMasterData.padName} ?`}
+          message={`Are you sure you want to delete ${resources?.padMaster?.titleSingular?.toLowerCase()} ${padMasterData.padName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

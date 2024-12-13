@@ -138,7 +138,7 @@ const MaterialHandling = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.materialHandling.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.materialHandling?.titlePlural }]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

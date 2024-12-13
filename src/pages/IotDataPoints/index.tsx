@@ -21,12 +21,12 @@ import ManageIotDataPoints from './ManageIotDataPoints';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.iotDataPoints.title);
+const renderedFrom = camelCase(sidebarResource.iotDataPoints);
 
 const IotDataPoints = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -221,7 +221,7 @@ const IotDataPoints = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.iotDataPoints.title }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.iotDataPoints, title: resources?.iotDataPoints?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.iotDataPoints}
           module="iotDataPoints"
@@ -284,7 +284,7 @@ const IotDataPoints = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.iotDataPoints?.title?.toLowerCase()}  ${deleteRecord?.fieldLabel || ''} ?`}
+            message={`Are you sure you want to delete ${resources?.iotDataPoints?.titleSingular?.toLowerCase()}  ${deleteRecord?.fieldLabel || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

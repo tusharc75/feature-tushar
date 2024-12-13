@@ -387,7 +387,10 @@ export const sidebarResource = {
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
-  workAutomation:'Work Automation'
+  workAutomation:'Work Automation',
+  iotChart: 'Iot Chart',
+  sendOutboundMessage: 'Send Outbound Message',
+  materialHandling: 'Material Handling',
 };
 
 export const primaryFields = {

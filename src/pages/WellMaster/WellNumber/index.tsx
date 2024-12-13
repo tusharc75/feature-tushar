@@ -16,7 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 
-const renderedFrom = camelCase(routes?.wellNumber.title);
+const renderedFrom = camelCase(sidebarResource.wellNumber);
 
 const WellNumber = ({ wellName }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +25,7 @@ const WellNumber = ({ wellName }) => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -273,7 +273,7 @@ const WellNumber = ({ wellName }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.wellNumber?.title?.toLowerCase()} ${deleteRecord?.wellNumber || ''} ? `}
+          message={`Are you sure you want to delete the ${resources?.wellNumber?.titleSingular?.toLowerCase()} ${deleteRecord?.wellNumber || ''} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
