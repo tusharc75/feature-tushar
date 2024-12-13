@@ -1670,9 +1670,6 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
               permission['approveAccount'] = hasApproveAccountPermission;
             }
             permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
-            routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-              title: d.resourceLabel || d.name
-            };
             resources[sidebarFieldsKeys[indexOfPermission]] = {
               titlePlural: d.homePageLabel || d.resourceLabel || d.name,
               titleSingular: d.resourceLabel || d.name
@@ -1689,9 +1686,6 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
             }
             const k = lowerFirst(d.name.replace(/ /g, ''));
             permissions[k] = permission;
-            routesAndTitle[k] = {
-              title: d.resourceLabel || d.name
-            };
             resources[sidebarFieldsKeys[indexOfPermission]] = {
               titlePlural: d.homePageLabel || d.resourceLabel || d.name,
               titleSingular: d.resourceLabel || d.name
@@ -1699,8 +1693,6 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
           }
         });
       }
-
-      localStorage.setItem('routes', JSON.stringify(routesAndTitle));
       return { permissions, resources };
     } catch (e) {
       console.log(e);
