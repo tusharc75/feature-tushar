@@ -1077,6 +1077,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       } else {
         obj[key.fieldName] = value ? value : '';
       }
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const value = dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) ? dataObj[key.fieldName] : [];
+      obj[key.fieldName] = value;
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
