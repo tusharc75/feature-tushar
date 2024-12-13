@@ -285,7 +285,7 @@ const DynamicForm = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resourceLabel, path: `/${route}` }]} />
+        <CustomBreadCrumbs routes={[{ title: resourceLabel?.titlePlural, path: `/${route}` }]} />
         <ImportExportLinks
           permissions={permissions[renderedFrom]}
           module={renderedFrom}

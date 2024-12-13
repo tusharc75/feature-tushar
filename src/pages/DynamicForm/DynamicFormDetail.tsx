@@ -157,8 +157,8 @@ const DynamicFormDetail = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { title: resourceLabel, path: `/${route}` },
-              { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }
+              { title: resourceLabel?.titlePlural, path: `/${route}` },
+              { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel?.titleSingular }
             ]}
           />
         </Box>
