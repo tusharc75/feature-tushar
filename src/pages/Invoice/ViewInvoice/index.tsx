@@ -399,7 +399,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                     <CustomTab value={0} label={'Details'} />
-                    <CustomTab value={1} label={routes.creditMemo.title} />
+                    <CustomTab value={1} label={resources?.creditMemo?.titlePlural} />
                   </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <Fragment>

@@ -162,7 +162,7 @@ const SerializedAssetDetailsPage = () => {
           { title: `${data?.assetNumber ?? ''}` }
         ]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
-        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
+        setCustomizedRoutes([{ ...routes.iotChart, title: resources?.iotChart?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       }
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
@@ -284,7 +284,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

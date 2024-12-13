@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -147,7 +147,7 @@ const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, re
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.driverName ? `(${initialData.values?.driverName})` : ''}`
-                    : `Create ${routes?.driverMaster?.title}`
+                    : `Create ${resources?.driverMaster?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

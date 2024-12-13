@@ -365,7 +365,7 @@ const InvoiceDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{routes.creditMemo.title}</CustomTab>}
+          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{resources?.creditMemo?.titlePlural}</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 

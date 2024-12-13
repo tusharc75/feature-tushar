@@ -39,7 +39,7 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 
 const AssemblyOrderDetail = () => {
-  const renderedFrom = camelCase(routes?.assemblyOrder.title);
+  const renderedFrom = camelCase(sidebarResource.assemblyOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,7 +48,7 @@ const AssemblyOrderDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
@@ -174,7 +174,7 @@ const AssemblyOrderDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.assemblyOrder, { title: assemblyOrderData?.assemblyOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{...routes.assemblyOrder,title:resources?.assemblyOrder?.titleSingular}, { title: assemblyOrderData?.assemblyOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

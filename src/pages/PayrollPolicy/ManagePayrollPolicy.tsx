@@ -22,7 +22,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -145,7 +145,7 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.payrollPolicyName ? `(${initialData.values?.payrollPolicyName})` : ''}`
-                    : `Create ${routes?.payrollPolicy?.title}`
+                    : `Create ${resources?.payrollPolicy?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

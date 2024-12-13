@@ -20,7 +20,7 @@ const WellNumberDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { resources, permissions }
   }: any = useData();
   const [wellNumberData, setWellNumberData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -70,7 +70,7 @@ const WellNumberDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.wellNumber, { title: wellNumberData?.wellNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.wellNumber, title: resources?.wellNumber?.titleSingular }, { title: wellNumberData?.wellNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -103,7 +103,7 @@ const WellNumberDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.wellNumber?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete this ${resources?.wellNumber?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

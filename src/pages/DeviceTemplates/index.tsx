@@ -22,7 +22,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 export default function DeviceTemplates() {
-  const renderedFrom = camelCase(routes?.deviceTemplates.title);
+  const renderedFrom = camelCase(sidebarResource.deviceTemplates);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity, resources }
@@ -199,7 +199,7 @@ export default function DeviceTemplates() {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.deviceTemplates.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.deviceTemplates?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.warehouse}
           module={resources?.warehouse?.titlePlural}
@@ -215,7 +215,7 @@ export default function DeviceTemplates() {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
-          title={routes.deviceTemplates.title}
+          title={resources?.deviceTemplates?.titlePlural}
         />
       </div>
       <CustomContainer>
@@ -273,7 +273,7 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
+          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular?.toLowerCase()} ${
             deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
           }?`}
           onClose={() => {

@@ -10,7 +10,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getCompletedByField, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
@@ -18,7 +18,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = camelCase(routes?.workflowReport.title);
+const renderedFrom = camelCase(sidebarResource.workflowReport);
 
 const WorkFlowReport = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +27,7 @@ const WorkFlowReport = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -215,7 +215,7 @@ const WorkFlowReport = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workflowReport]} />
+        <CustomBreadCrumbs routes={[{...routes.workflowReport,title:resources?.workFlowReport?.titlePlural}]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

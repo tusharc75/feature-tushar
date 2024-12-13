@@ -18,16 +18,15 @@ const CompetenciesDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.competencies]);
   const [competenciesData, setCompetenciesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
-
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.competencies, title: resources?.competencies?.titleSingular }]);
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -53,7 +52,7 @@ const CompetenciesDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.competencies.path}/${id}`);
       setCompetenciesData(data);
-      setCustomizedRoutes([routes.competencies, { title: data?.competencyName }]);
+      setCustomizedRoutes([{ ...routes.competencies, title: resources?.competencies?.titleSingular }, { title: data?.competencyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -123,7 +122,7 @@ const CompetenciesDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencies?.title?.toLowerCase()} ${competenciesData.competencyName} ?`}
+          message={`Are you sure you want to delete ${resources?.competencies?.titleSingular?.toLowerCase()} ${competenciesData.competencyName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

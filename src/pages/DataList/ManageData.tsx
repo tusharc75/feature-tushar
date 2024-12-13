@@ -18,7 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 
 const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -154,7 +154,7 @@ const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={isEdit ? `Edit Data List` : 'Create New Data List'}
+                title={isEdit ? `Edit${resources?.dataLists?.titleSingular}` : `Create New ${resources?.dataLists?.titleSingular}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
