@@ -116,9 +116,9 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'assemblyOrder',
             ref_id: id,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.assemblyOrder.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.assemblyOrder?.titlePlural}>
                 <div>
-                <Typography variant="body2">{routes.assemblyOrder.title}</Typography>
+                <Typography variant="body2">{resources?.assemblyOrder?.titlePlural}</Typography>
                 <Typography variant="subtitle2">{assemblyOrderNumber}</Typography>
                 </div>
               </HtmlTooltip>

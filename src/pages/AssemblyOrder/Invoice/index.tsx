@@ -11,11 +11,16 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -171,7 +176,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'}>
           <PreviewDownload
-            fileName={`${routes.assemblyOrder.title}-${assemblyOrderData?.assemblyOrderNumber}`}
+            fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
             resource={sidebarResource.assemblyOrder}
             referenceId={assemblyOrderData._id}
             referenceLabel={assemblyOrderData?.assemblyOrderNumber}

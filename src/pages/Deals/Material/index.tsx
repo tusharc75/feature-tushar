@@ -8,12 +8,12 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ dealId }) => {
-  const renderedFrom = camelCase(`${routes?.deals.title}_material`);
+  const renderedFrom = camelCase(`${sidebarResource.deals}_material`);
   const {
     state: { user }
   }: any = useData();

@@ -26,7 +26,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
-const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
+const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
   const toastConfig = useContext(CustomToastContext);

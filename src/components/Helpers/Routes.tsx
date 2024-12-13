@@ -669,36 +669,21 @@ const routes = {
     path: '/device-template-alert/detail'
   },
   chartOfAccount: {
-    title:
-      storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount?.title
-        ? storedRoutes.chartOfAccount?.title
-        : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account'
   },
   chartOfAccountDetail: {
-    title:
-      storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount.title
-        ? storedRoutes.chartOfAccount?.title
-        : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
   },
   creditMemo: {
-    title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title : RESOURCE_LABEL.creditMemo,
     path: '/credit-memo'
   },
   userDownloadRequest: {
-    title: RESOURCE_LABEL.userDownloadRequest,
     path: '/user-download-request'
   },
   creditMemoDetail: {
-    title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo.title ? storedRoutes.creditMemo?.title : RESOURCE_LABEL.creditMemo,
     path: '/credit-memo/detail'
   },
   generateInvoice: {
-    title:
-      storedRoutes && storedRoutes.generateInvoice && storedRoutes.generateInvoice.title
-        ? storedRoutes.generateInvoice?.title
-        : RESOURCE_LABEL.generateInvoice,
     path: '/generate-invoice'
   },
   rentalManagementInvoice: {
@@ -730,17 +715,9 @@ const routes = {
     path: '/field-ticket-invoice'
   },
   payrollPolicy: {
-    title:
-      storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title
-        ? storedRoutes.payrollPolicy?.title
-        : RESOURCE_LABEL.payrollPolicy,
     path: '/payroll-policy'
   },
   payrollPolicyDetail: {
-    title:
-      storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title
-        ? storedRoutes.payrollPolicy?.title
-        : RESOURCE_LABEL.payrollPolicy,
     path: '/payroll-policy/detail'
   },
   triggerNotificationMaster: {
@@ -756,29 +733,18 @@ const routes = {
     path: '/user-attendance'
   },
   dataList: {
-    title: storedRoutes && storedRoutes.dataList && storedRoutes.dataList.title ? storedRoutes.dataList?.title : RESOURCE_LABEL.dataList,
     path: '/data-lists'
   },
   dataListitems: {
-    title:
-      storedRoutes && storedRoutes.dataListitems && storedRoutes.dataListitems.title
-        ? storedRoutes.dataListitems?.title
-        : RESOURCE_LABEL.dataListitems,
     path: '/data-lists/data-list-items'
   },
   deals: {
-    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
     path: '/deals'
   },
   dealDetail: {
-    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
     path: '/deals/detail'
   },
   serializedAssetStatusChangeRequest: {
-    title:
-      storedRoutes && storedRoutes.serializedAssetStatusChangeRequest && storedRoutes.serializedAssetStatusChangeRequest.title
-        ? storedRoutes.serializedAssetStatusChangeRequest?.title
-        : RESOURCE_LABEL.serializedAssetStatusChangeRequest,
     path: '/serialized-asset-status-change-request'
   },
   units: {
@@ -814,8 +780,6 @@ const routes = {
     path: '/equipt-ai'
   },
   trainAiModel: {
-    title:
-      storedRoutes && storedRoutes.trainAiModel && storedRoutes.trainAiModel?.title ? storedRoutes.trainAiModel?.title : RESOURCE_LABEL.trainAiModel,
     path: '/train-ai-model'
   },
   workSpace: {
@@ -823,39 +787,21 @@ const routes = {
     path: '/work-space'
   },
   workflow: {
-    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title : RESOURCE_LABEL.workflow,
     path: '/workflow'
   },
   workflowDetail: {
-    title: storedRoutes && storedRoutes.workflow && storedRoutes.workflow?.title ? storedRoutes.workflow?.title : RESOURCE_LABEL.workflow,
     path: '/workflow/:id'
   },
   workflowReport: {
-    title:
-      storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title
-        ? storedRoutes.workflowReport?.title
-        : RESOURCE_LABEL.workflowReport,
     path: '/workflow-report'
   },
   workflowReportDetail: {
-    title:
-      storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title
-        ? storedRoutes.workflowReport?.title
-        : RESOURCE_LABEL.workflowReport,
     path: '/workflow-report/detail'
   },
   assemblyOrder: {
-    title:
-      storedRoutes && storedRoutes.assemblyOrder && storedRoutes.assemblyOrder.title
-        ? storedRoutes.assemblyOrder?.title
-        : RESOURCE_LABEL.assemblyOrder,
     path: '/assembly-order'
   },
   assemblyOrderDetail: {
-    title:
-      storedRoutes && storedRoutes.assemblyOrder && storedRoutes.assemblyOrder.title
-        ? storedRoutes.assemblyOrder?.title
-        : RESOURCE_LABEL.assemblyOrder,
     path: '/assembly-order/detail'
   },
   workAutomation: {

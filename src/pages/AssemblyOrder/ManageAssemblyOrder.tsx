@@ -32,7 +32,7 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
@@ -187,7 +187,7 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
               <CustomDialogHeader
                 title={
                   !assemblyOrderId
-                    ? `Create ${routes.assemblyOrder.title}`
+                    ? `Create ${resources?.assemblyOrder?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${assemblyOrderData?.assemblyOrderNumber || ''}`}`
                 }
                 onClose={() => {

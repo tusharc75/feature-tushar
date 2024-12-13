@@ -17,7 +17,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
+const renderedFrom = `${camelCase(sidebarResource?.generateInvoice)}_invoice`;
 
 const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = null }) => {
   const toastConfig = useContext(CustomToastContext);
