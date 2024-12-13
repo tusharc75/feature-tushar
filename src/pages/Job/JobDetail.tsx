@@ -48,7 +48,7 @@ const JobDetail = () => {
   }, [jobProcessSteps]);
 
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const JobDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.job, data));
       setAllowedToDelete(permissions?.job?.isDelete && checkIsAllowedToDelete(user, sidebarResource.job, data.owner.optionValue));
       setJobData(data);
-      setCustomizedRoutes([{...routes.job,title:resources?.job?.titleSingular}, { title: data?.jobNumber }]);
+      setCustomizedRoutes([{ ...routes.job, title: resources?.job?.titlePlural }, { title: data?.jobNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

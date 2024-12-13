@@ -244,7 +244,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    if (renderedFrom === resources?.workOrder?.titleSingular) {
+    if (renderedFrom === sidebarResource.workOrder) {
       history.push(`?tab=${newValue}`);
     }
     if (newValue === 0) {
@@ -382,10 +382,10 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -477,10 +477,10 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -493,10 +493,10 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -548,9 +548,9 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        {renderedFrom === resources?.workOrder?.titleSingular && (
+        {renderedFrom === sidebarResource.workOrder && (
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{...routes?.workOrder,title:resources?.workOrder?.titleSingular}, { title: workOrderData?.workOrderNumber }]} />
+            <CustomBreadCrumbs routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }, { title: workOrderData?.workOrderNumber }]} />
           </Box>
         )}
         <Box className="controls-v1 ml-auto">

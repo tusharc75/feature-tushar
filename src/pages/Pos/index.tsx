@@ -171,7 +171,7 @@ const Pos = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titleSingular }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titlePlural }]} />
         </Grid>
         <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>

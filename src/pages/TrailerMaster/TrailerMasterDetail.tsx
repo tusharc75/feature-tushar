@@ -162,7 +162,7 @@ const TrailerMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.trailerMaster, title: resources?.trailerMaster?.titleSingular }, { title: trailerMasterData?.trailerName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.trailerMaster, title: resources?.trailerMaster?.titlePlural }, { title: trailerMasterData?.trailerName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

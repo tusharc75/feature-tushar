@@ -343,7 +343,7 @@ const Quotation = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.quotation, title:resources?.quotation?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.quotation, title: resources?.quotation?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.quotation}
           module="quotation"

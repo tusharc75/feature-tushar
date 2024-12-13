@@ -20,7 +20,7 @@ const TransactionLockDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions,resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [transactionLockData, setTransactionLockData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -71,7 +71,7 @@ const TransactionLockDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.transactionLock,title:resources?.transactionLock?.titleSingular}, { title: transactionLockData?.lockNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }, { title: transactionLockData?.lockNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

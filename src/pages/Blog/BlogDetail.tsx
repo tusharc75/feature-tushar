@@ -25,7 +25,7 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const BlogDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/blog/${id}`);
       setBlogData(data);
-      setCustomizedRoutes([{...routes.blog,title:resources?.blog?.titleSingular}, { title: data?.title }]);
+      setCustomizedRoutes([{ ...routes.blog, title: resources?.blog?.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

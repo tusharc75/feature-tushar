@@ -28,7 +28,7 @@ export default function DeviceTemplatesDetails() {
     state: { permissions, resources }
   }: any = useData();
 
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titlePlural }]);
   const [loading, setLoading] = useState(false);
   const [deviceTemplatesData, setDeviceTemplatesData] = useState(null);
   const [fields, setFields] = useState([]);
@@ -50,7 +50,7 @@ export default function DeviceTemplatesDetails() {
         data: { data }
       } = await axiosInstance().get(`${routes.deviceTemplates.path}/${id}`);
       setDeviceTemplatesData(data);
-      setCustomizedRoutes([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titleSingular }, { title: data.templateName }]);
+      setCustomizedRoutes([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titlePlural }, { title: data.templateName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

@@ -26,7 +26,7 @@ const CompetenciesDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.competencies, title: resources?.competencies?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.competencies, title: resources?.competencies?.titlePlural }]);
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -52,7 +52,7 @@ const CompetenciesDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.competencies.path}/${id}`);
       setCompetenciesData(data);
-      setCustomizedRoutes([{ ...routes.competencies, title: resources?.competencies?.titleSingular }, { title: data?.competencyName }]);
+      setCustomizedRoutes([{ ...routes.competencies, title: resources?.competencies?.titlePlural }, { title: data?.competencyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

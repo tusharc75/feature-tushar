@@ -206,10 +206,10 @@ const ManagedPackages = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.managedPackages,title:resources?.managedPackages?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.managedPackages, title: resources?.managedPackages?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.managedPackages}
-          module={resources?.managedPackages?.titleSingular}
+          module={resources?.managedPackages?.titlePlural}
           api={routes.managedPackages.path}
           afterImportCompleted={() => {
             fetchData();

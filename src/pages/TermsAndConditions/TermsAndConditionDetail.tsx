@@ -27,7 +27,7 @@ const TermsAndConditionDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural}]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
@@ -60,7 +60,7 @@ const TermsAndConditionDetail = () => {
       setAllowedToDelete(permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue));
 
       setTermsAndConditionData(data);
-      setCustomizedRoutes([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titleSingular }, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

@@ -33,7 +33,7 @@ const DemandOrder = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const types = [
@@ -230,7 +230,7 @@ const DemandOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.demandOrder,title:resources?.demandOrder?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.demandOrder, title: resources?.demandOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.demandOrder}
           module={resources?.demandOrder?.titlePlural}

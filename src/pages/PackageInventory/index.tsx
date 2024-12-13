@@ -136,9 +136,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -180,19 +180,19 @@ const PackageInventory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes?.packageInventory, title: resources?.packageInventory?.titleSingular }]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.packageInventory, title: resources?.packageInventory?.titlePlural }]} />
         <ImportExportLinks
           additionalParams={getQueryString(true)}
           permissions={{}}
-          module={resources?.packageInventory?.titleSingular}
+          module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {}}
+          onExportToExcelSuccess={() => { }}
         />
       </div>
       <CustomContainer>

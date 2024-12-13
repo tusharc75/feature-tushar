@@ -229,7 +229,7 @@ const SerializedAssetsCertification = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titleSingular }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titlePlural }]} />
         </Grid>
       </Grid>
       <div className="main-container">

@@ -80,7 +80,7 @@ const ResourceLogs = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.resourceLogs, title: resources?.resourceLogs?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.resourceLogs, title: resources?.resourceLogs?.titlePlural }]} />
       </div>
       <CustomContainer>
         <div className="header-panel">

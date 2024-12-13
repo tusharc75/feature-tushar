@@ -297,7 +297,7 @@ const RepairOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes?.repairOrder,title:resources?.repairOrder?.titleSingular}, { title: repairOrderData?.repairOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1 ">
@@ -318,7 +318,7 @@ const RepairOrderDetails = () => {
                       variant={'contained'}
                       className={'btn-outline-v1'}
                     >
-                      {`Create ${routes.transferAsset.title}`}
+                      {`Create ${resources?.transferAsset?.titleSingular}`}
                     </Button>
                   )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
@@ -427,13 +427,13 @@ const RepairOrderDetails = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
             handlePrev={
               stepNames[currentStep] === 'Quotation' &&
-              allowedToEdit &&
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationVersionData?.status
-              )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                 ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                  setShowQuotationConfirmBox(true);
+                }
                 : null
             }
             updateStatus={(step: number) => {
@@ -472,8 +472,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }

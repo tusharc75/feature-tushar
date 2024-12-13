@@ -331,7 +331,7 @@ const ServiceOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.fieldServiceOrder,title:resources?.fieldServiceOrder?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.fieldServiceOrder, title: resources?.fieldServiceOrder?.titlePlural }]} />
         {!isOffline && (
           <ImportExportLinks
             permissions={permissions?.fieldServiceOrder}

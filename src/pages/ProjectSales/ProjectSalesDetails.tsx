@@ -55,7 +55,7 @@ const ProjectSalesDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.projectSales, title: resources?.projectSales?.titleSingular}]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }]);
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [resourceData, setResourceData] = useState(null);
@@ -126,7 +126,7 @@ const ProjectSalesDetails = () => {
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
-      setCustomizedRoutes([{...routes.projectSales, title: resources?.projectSales?.titleSingular}, { title: data.projectName }]);
+      setCustomizedRoutes([{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);

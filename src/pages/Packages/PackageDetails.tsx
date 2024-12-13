@@ -75,7 +75,7 @@ const PackageDetails = () => {
       .then(({ data: { data } }) => {
         setPackageData(data);
         setHeadingLabel(data.packageName);
-        setCustomizedRoutes([{ ...routes?.packages, title: resources?.packages?.titleSingular }, { title: data.packageName }]);
+        setCustomizedRoutes([{ ...routes?.packages, title: resources?.packages?.titlePlural }, { title: data.packageName }]);
         fetchFields();
       })
       .catch((err) => {

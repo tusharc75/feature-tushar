@@ -32,7 +32,7 @@ const PadMasterDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.padMaster, title: resources?.padMaster?.titleSingular }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.padMaster, title: resources?.padMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -60,7 +60,7 @@ const PadMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.padMaster.path}/${id}`);
       setPadMasterData(data);
-      setCustomizedRoutes([{ ...routes.padMaster, title: resources?.padMaster?.titleSingular }, { title: data?.padName }]);
+      setCustomizedRoutes([{ ...routes.padMaster, title: resources?.padMaster?.titlePlural }, { title: data?.padName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

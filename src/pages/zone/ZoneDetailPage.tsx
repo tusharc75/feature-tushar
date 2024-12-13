@@ -50,7 +50,7 @@ const ZoneDetailPage = () => {
       handleMainPoints(data);
       setHeadingLbl(data.name);
       setZoneData(data);
-      setCustomizedRoutes([{ ...routes.zone, title: resources?.zone?.titleSingular }, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.zone, title: resources?.zone?.titlePlural }, { title: data.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

@@ -210,7 +210,7 @@ const ConvertInventory = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <div>
-          <CustomBreadCrumbs routes={[{...routes.inventoryToAsset,title:resources?.inventoryToAsset?.titleSingular}]} />
+          <CustomBreadCrumbs routes={[{ ...routes.inventoryToAsset, title: resources?.inventoryToAsset?.titlePlural }]} />
         </div>
       </div>
       <CustomContainer>

@@ -59,7 +59,7 @@ const Units = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity,resources }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -110,12 +110,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
@@ -291,7 +291,7 @@ const Units = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resources?.units?.titlePlural}]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.units?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.units}
           module={resources?.units?.titlePlural}

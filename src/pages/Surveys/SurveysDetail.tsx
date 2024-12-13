@@ -34,7 +34,7 @@ const SurveysDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   const {
-    state: { permissions, user,resources }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const SurveysDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
       setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
       setSurveyData(data);
-      setCustomizedRoutes([{...routes.surveys,title:resources?.surveys?.titleSingular}, { title: data?.surveyName }]);
+      setCustomizedRoutes([{ ...routes.surveys, title: resources?.surveys?.titlePlural }, { title: data?.surveyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

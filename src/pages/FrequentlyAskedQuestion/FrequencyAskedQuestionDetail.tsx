@@ -25,7 +25,7 @@ const FrequencyAskedQuestionDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const FrequencyAskedQuestionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/frequently-asked-question/${id}`);
       setFrequentlyAskedQuestionData(data);
-      setCustomizedRoutes([{...routes.frequentlyAskedQuestion,title:resources?.frequentlyAskedQuestion?.titleSingular}, { title: data?.label }]);
+      setCustomizedRoutes([{ ...routes.frequentlyAskedQuestion, title: resources?.frequentlyAskedQuestion?.titlePlural }, { title: data?.label }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

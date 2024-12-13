@@ -92,7 +92,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -194,7 +194,7 @@ const SubleaseDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.sublease, title: resources?.sublease?.titleSingular }, { title: subleaseData?.subleaseName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.sublease, title: resources?.sublease?.titlePlural }, { title: subleaseData?.subleaseName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

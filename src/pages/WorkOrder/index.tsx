@@ -278,10 +278,10 @@ const WorkOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes?.workOrder,title:resources?.workOrder?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.workOrder}
-          module={resources?.workOrder?.titleSingular}
+          module={resources?.workOrder?.titlePlural}
           api={workOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -333,9 +333,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : resources?.workOrder?.titleSingular}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : resources?.workOrder?.titleSingular}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

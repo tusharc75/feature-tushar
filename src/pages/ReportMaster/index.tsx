@@ -124,9 +124,8 @@ const ReportMaster = () => {
                           <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
                           <Typography variant="body2">{/* {report.text} */}</Typography>
                           <Link
-                            to={`/reports${
-                              report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path
-                            }`}
+                            to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path
+                              }`}
                           >
                             View <HiArrowRight className={styles.arrow} />
                           </Link>

@@ -33,7 +33,7 @@ const WellMasterDetailsPage = () => {
   const [wellMasterFields, setWellMasterFields] = useState([]);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [tabValue, setTabValue] = useState(0);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{...routes.wellMaster, title: resources?.wellMaster?.titleSingular}]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.wellMaster, title: resources?.wellMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -50,7 +50,7 @@ const WellMasterDetailsPage = () => {
       } = await axiosInstance().get(`${wellMaster.api}/${id}`);
       setHeadingLbl(data.wellName);
       setWellMasterData(data);
-      setCustomizedRoutes([{...routes.wellMaster, title: resources?.wellMaster?.titleSingular}, { title: data.wellName }]);
+      setCustomizedRoutes([{ ...routes.wellMaster, title: resources?.wellMaster?.titlePlural }, { title: data.wellName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

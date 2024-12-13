@@ -161,7 +161,7 @@ const CycleCountDetermination = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{...routes.cycleCountDetermination,title:resources?.cycleCountDetermination?.titleSingular}]} />
+        <CustomBreadCrumbs routes={[{ ...routes.cycleCountDetermination, title: resources?.cycleCountDetermination?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.cycleCountDetermination}
           module="cycleCountDetermination"

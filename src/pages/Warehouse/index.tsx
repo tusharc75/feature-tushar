@@ -237,24 +237,23 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                  {
-                    title: 'Assign Users Template',
-                    api: `warehouse/user/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Assign Users Export',
-                    api: `warehouse/user/template?export=true${
-                      selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Assign Users Template',
+                  api: `warehouse/user/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Assign Users Export',
+                  api: `warehouse/user/template?export=true${selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Assign Users Import',
-                    api: `warehouse/user/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Assign Users Import',
+                  api: `warehouse/user/import`,
+                  type: 'import'
+                }
+              ]
               : []
           }
         />
@@ -315,9 +314,8 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
-          } ?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
