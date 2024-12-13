@@ -23,6 +23,7 @@ import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 import SaveFilterDialog from './SaveFilterDialog';
 import NumberInput from 'src/components/CustomReactTable/GridFilter/NumberInput';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -31,6 +32,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   const [coloums, setColoums] = useState(null);
   const [userFilters, setUserFilters] = useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = useState(null);
+  const { setTempFilter } = useUserTempFilters();
 
   const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
   const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
@@ -41,6 +43,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   useEffect(() => {
     fetchAllColumns();
     fetchUserFilters();
+
     if (selectedFilter) {
       setFormValues(selectedFilter?.filterValue || {});
     } else {
@@ -142,9 +145,11 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const handleApplyFilter = () => {
+    const filters = createFilterModel(formValues, coloums);
     setCurrentFomValue(formValues || {});
-    dispatch({ type: 'filter', filters: createFilterModel(formValues, coloums) });
+    dispatch({ type: 'filter', filters });
     setSelectedFilter(selectedUserFilter || null);
+    setTempFilter(resource, { formValues: formValues || {}, filters });
     handleClose();
   };
 
