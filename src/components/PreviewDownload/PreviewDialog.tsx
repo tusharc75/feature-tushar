@@ -109,6 +109,7 @@ export const PreviewDialog = ({
   };
 
   const checkVisibleColumnsSame = (visibleColumns, selectedView): Boolean => {
+    if (!visibleColumns?.length) return true;
     if (visibleColumns?.length !== selectedView?.columns?.length || sortBy?.fieldName != selectedView?.sortBy || orderBy != selectedView?.orderBy) {
       return false;
     }
@@ -203,7 +204,7 @@ export const PreviewDialog = ({
                   delete selectedView._id;
                   setShowSaveViewDialog({ open: true, data: selectedView });
                 }}
-                disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
+                disabled={sortBy && !orderBy}
                 size="small"
                 className="yellow-button"
               >
