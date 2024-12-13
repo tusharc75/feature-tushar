@@ -2,10 +2,13 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 import useReport from 'src/pages/ReportsNew/useReport';
 
 export type Report = {
-  title: string;
-  permission: string;
-  key: string;
-  type: string;
+  section: string;
+  reports: {
+    title?: string;
+    permission?: string;
+    key?: string;
+    type?: string;
+  }[];
 };
 export type CustomReport = {
   _id?: string;
