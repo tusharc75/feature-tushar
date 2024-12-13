@@ -320,7 +320,7 @@ const SalesOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this sales order: ${salesOrderData?.salesOrderNo} ?`}
+          message={`Are you sure you want to delete ${resources?.salesOrder?.titleSingular?.toLowerCase()} : ${salesOrderData?.salesOrderNo} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

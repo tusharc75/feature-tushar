@@ -37,11 +37,11 @@ const DynamicForm = () => {
 
   const DynamicFormType = [
     {
-      key: `My ${resource}`,
+      key: `My ${resourceLabel?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${resource}`,
+      key: `All ${resourceLabel?.titlePlural}`,
       value: 2
     }
   ];
