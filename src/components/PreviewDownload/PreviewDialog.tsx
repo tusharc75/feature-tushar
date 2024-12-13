@@ -108,6 +108,19 @@ export const PreviewDialog = ({
     }
   };
 
+  const checkVisibleColumnsSame = (visibleColumns, selectedView): Boolean => {
+    if (visibleColumns?.length !== selectedView?.columns?.length || sortBy?.fieldName != selectedView?.sortBy || orderBy != selectedView?.orderBy) {
+      return false;
+    }
+    for (const col of visibleColumns) {
+      const column = selectedView?.columns?.find((e) => e?.name === col?.fieldName);
+      if (!column || column?.customLabel !== col?.customLabel || column?.width !== col?.width) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   return (
     <>
       <Dialog
@@ -181,6 +194,23 @@ export const PreviewDialog = ({
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
+          {(type?.includes('Excel') || type?.includes('PDF')) && (selectedExcelView || selectedPdfView) && !checkVisibleColumnsSame(type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf, type?.includes('Excel') ? selectedExcelView : selectedPdfView) && (
+            <>
+              <CustomButton
+                id={'show-column-dialog-save-update-button'}
+                onClick={() => {
+                  const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
+                  delete selectedView._id;
+                  setShowSaveViewDialog({ open: true, data: selectedView });
+                }}
+                disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
+                size="small"
+                className="yellow-button"
+              >
+                Save as New View
+              </CustomButton>
+            </>
+          )}
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
               <>
@@ -197,23 +227,6 @@ export const PreviewDialog = ({
                 </CustomButton>
               </>
             </HtmlTooltip>
-          )}
-          {(type?.includes('Excel') || type?.includes('PDF')) && (selectedExcelView || selectedPdfView) && (
-            <>
-              <CustomButton
-                id={'show-column-dialog-save-update-button'}
-                onClick={() => {
-                  const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
-                  delete selectedView._id;
-                  setShowSaveViewDialog({ open: true, data: selectedView });
-                }}
-                disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
-                size="small"
-                className="yellow-button"
-              >
-                Save as New View
-              </CustomButton>
-            </>
           )}
           {operation === 'Send Email' ? (
             <CustomButton
