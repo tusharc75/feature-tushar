@@ -211,12 +211,12 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {

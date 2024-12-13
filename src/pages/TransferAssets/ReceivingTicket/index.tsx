@@ -38,10 +38,11 @@ interface ReceivingGridProps {
   isTransferEnded: boolean;
   allowedToEdit: boolean;
   stepFullScreen: any;
+  resources: any;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen } =
+  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen, resources } =
     props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -349,7 +350,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
+    fileName: `${resources?.transferAsset?.titleSingular}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
     referenceId: transferAssetId,
     columns: columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor)),

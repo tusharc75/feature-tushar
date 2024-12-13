@@ -196,7 +196,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.purchaseOrder });
                     }}
                   >
-                    {routes.purchaseOrder.title}
+                    {resources?.purchaseOrder?.titleSingular}
                   </MenuItem>
                   <MenuItem
                     onClick={() => {

@@ -16,7 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 
-const renderedFrom = camelCase(sidebarResource?.storageLocation);
+const renderedFrom = camelCase(sidebarResource.storageLocation);
 
 const StorageLocation = ({ warehouse }) => {
   const toastConfig = useContext(CustomToastContext);

@@ -8,12 +8,17 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import DetailsDialog from './DetailsDialog';
+import { useData } from 'src/StateProvider/Provider';
 
 const EcommercePolicy = () => {
   const [details, setDetails] = useState({});
   const [fields, setFields] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const {
+    state: { resources }
+  } = useData();
 
   useEffect(() => {
     fetchDetails();
@@ -44,7 +49,7 @@ const EcommercePolicy = () => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.eCommercePolicy.title, path: '' }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.eCommercePolicy, title: resources?.eCommercePolicy?.titlePlural }]} />
         <Button
           variant={isMobile && !isTablet ? 'text' : 'contained'}
           size="small"

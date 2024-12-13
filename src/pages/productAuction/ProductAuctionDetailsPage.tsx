@@ -84,7 +84,7 @@ const ProductAuctionDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{...routes.productAuction,title:resources?.productAuction?.titlePlural}, { title: `${productAuctionData?.auctionNumber}` }]} />
+          <CustomBreadCrumbs routes={[{...routes.productAuction, title: resources?.productAuction?.titleSingular}, { title: `${productAuctionData?.auctionNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

@@ -35,24 +35,25 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createPurchaseOrderFlow } from './walkmeSteps';
 
 const PurchaseOrder = () => {
-  const PurchaseOrderType = [
-    {
-      key: `My ${routes.purchaseOrder.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.purchaseOrder.title}`,
-      value: 2
-    }
-  ];
-
-  let renderedFrom = camelCase(routes.purchaseOrder?.title);
+  let renderedFrom = camelCase(sidebarResource.purchaseOrder);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const PurchaseOrderType = [
+    {
+      key: `My ${resources?.purchaseOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.purchaseOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseOrder));
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -69,7 +70,7 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    setWalkmeData([createPurchaseOrderFlow()]);
+    setWalkmeData([createPurchaseOrderFlow(resources?.purchaseOrder?.titleSingular)]);
   }, []);
 
   useEffect(() => {
@@ -349,10 +350,10 @@ const PurchaseOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.purchaseOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.purchaseOrder, title: resources?.purchaseOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.purchaseOrder}
-          module="purchase order"
+          module={resources?.purchaseOrder?.titlePlural}
           api={purchaseOrder.api}
           afterImportCompleted={() => {
             fetchPurchaseOrder();
@@ -422,7 +423,7 @@ const PurchaseOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?.purchaseOrderNumber || ''} ? `}
+          message={`Are you sure you want to delete the ${resources?.purchaseOrder?.titleSingular?.toLowerCase()} ${deleteRecord?.purchaseOrderNumber || ''} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

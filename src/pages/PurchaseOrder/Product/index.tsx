@@ -35,7 +35,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate;
@@ -696,7 +696,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+    fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
     resource: sidebarResource.purchaseOrder,
     referenceId: purchaseOrderData?._id,
     columns: columns,

@@ -21,7 +21,7 @@ import ManageProductAuction from './ManageProductAuction';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductAuction = () => {
-  const renderedFrom = camelCase(sidebarResource?.productAuction);
+  const renderedFrom = camelCase(sidebarResource.productAuction);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -203,10 +203,10 @@ const ProductAuction = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[resources?.productAuction?.titleSingular]} />
+        <CustomBreadCrumbs routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productAuction}
-          module={resources?.productAuction?.titleSingular}
+          module={resources?.productAuction?.titlePlural}
           api={productAuction.api}
           afterImportCompleted={() => {
             fetchData();
@@ -255,7 +255,7 @@ const ProductAuction = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${sidebarResource?.productAuction} ${deleteRecord?.auctionNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular} ${deleteRecord?.auctionNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

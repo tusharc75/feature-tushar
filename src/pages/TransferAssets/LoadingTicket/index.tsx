@@ -36,6 +36,7 @@ import ReceiveDialog from './ReceiveDialog';
 
 interface LoadingGridProps {
   permissions: any;
+  resources: any;
   transferAssetData?: any;
   transferAssetId: string | any;
   setNextStep: any;
@@ -52,6 +53,7 @@ interface LoadingGridProps {
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const {
     permissions,
+    resources,
     transferAssetId,
     transferAssetData,
     setNextStep,
@@ -420,7 +422,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
+    fileName: `${resources?.transferAsset?.titleSingular}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
     referenceId: transferAssetId,
     columns: columns?.filter((e) => !extraColumn?.map((e) => e.accessor)?.includes(e?.accessor)),

@@ -35,7 +35,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -179,9 +179,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     for (let i = 0; i < rows.length; i++) {
       if (interPlantTransfer) return;
       if (rows.length > 0 && !rows[i]?.loadingTicketId) {
-        setWalkmeData([generateLoadingStepCreateLoadingTicket(i)]);
+        setWalkmeData([generateLoadingStepCreateLoadingTicket(i, resources?.transferInventory?.titleSingular)]);
       } else if (rows[i]?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) {
-        setWalkmeData([generateLoadingStepReceive(i)]);
+        setWalkmeData([generateLoadingStepReceive(i, resources?.transferInventory?.titleSingular)]);
       } else {
         setWalkmeData([]);
       }
@@ -419,7 +419,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`,
+    fileName: `${resources?.transferInventory?.titleSingular}-${transferInventoryData?.transferNumber}`,
     hideDetailButton: true,
     resource: sidebarResource.transferInventory,
     referenceId: transferInventoryData?._id,
