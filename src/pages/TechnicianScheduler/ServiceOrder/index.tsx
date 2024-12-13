@@ -14,11 +14,18 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const TECHNICIAN_RESOURCE = [
+const renderedFrom = `service_order_technician`;
+
+function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
+  const {
+    state: { permissions,resources }
+  }: any = useData();
+
+  const TECHNICIAN_RESOURCE = [
   {
     key: 'fieldTicket',
     resource: sidebarResource.fieldTicket,
-    title: routes.fieldTicketDetail.title
+    title: resources?.fieldTicketDetail?.titlePlural
   },
   {
     key: 'rentalManagement',
@@ -26,13 +33,6 @@ const TECHNICIAN_RESOURCE = [
     title: routes.rentalManagementDetail.title
   },
 ];
-
-const renderedFrom = `service_order_technician`;
-
-function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
-  const {
-    state: { permissions }
-  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);

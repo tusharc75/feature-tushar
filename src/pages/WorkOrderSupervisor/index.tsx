@@ -30,11 +30,43 @@ import { ExpandMore } from '@material-ui/icons';
 
 const LIMIT = 25;
 
-const FIELD_TO_FILTER = [
+const WorkOrderSupervisor = () => {
+  const { state, dispatch } = useCardReducer();
+  const { limit, selectedRecords } = state;
+
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions,resources }
+  }: any = useData();
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
+
+  const [selectedServiceData, setSelectedServiceData] = useState(null);
+  const [fieldToFilterList, setFieldToFilterList] = useState([]);
+  const [filterResourceQuery, setFilterResourceQuery] = useState({
+    filterById: [],
+    deepFilter: []
+  });
+  const [viewType, setViewType] = useState(1);
+
+  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
+  const [globalFilters, setGlobalFilters] = useState({
+    from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
+    to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
+  });
+  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
+  const [resourceType, setResourceType] = useState('workOrder');
+  const [isOpen, setOpen] = useState({ open: false, id: null });
+
+  const ref: any = useRef();
+
+  const FIELD_TO_FILTER = [
   {
     key: 'user',
     fieldName: 'user',
-    fieldLabel: routes.employeeMaster.title,
+    fieldLabel: resources?.employeeMaster.titlePlural,
     resource: sidebarResource.employeeMaster,
     type: 'dropDown'
   },
@@ -67,38 +99,6 @@ const FIELD_TO_FILTER = [
     type: 'dropDown'
   }
 ];
-
-const WorkOrderSupervisor = () => {
-  const { state, dispatch } = useCardReducer();
-  const { limit, selectedRecords } = state;
-
-  const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  }: any = useData();
-
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
-  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
-
-  const [selectedServiceData, setSelectedServiceData] = useState(null);
-  const [fieldToFilterList, setFieldToFilterList] = useState([]);
-  const [filterResourceQuery, setFilterResourceQuery] = useState({
-    filterById: [],
-    deepFilter: []
-  });
-  const [viewType, setViewType] = useState(1);
-
-  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
-  const [globalFilters, setGlobalFilters] = useState({
-    from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
-    to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
-  });
-  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
-  const [resourceType, setResourceType] = useState('workOrder');
-  const [isOpen, setOpen] = useState({ open: false, id: null });
-
-  const ref: any = useRef();
 
   useEffect(() => {
     const options: any = [];

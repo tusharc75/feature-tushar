@@ -49,7 +49,7 @@ const QuoteBuilder = ({
   const history = useHistory();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -495,7 +495,7 @@ const QuoteBuilder = ({
             fetchFieldServiceOrderData();
           }}
         >
-          {`Create ${routes.fieldTicket.title}`}
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
       </>
     );

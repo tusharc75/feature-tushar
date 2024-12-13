@@ -40,7 +40,7 @@ function PlanningView() {
     {
       key: 'planning',
       resource: sidebarResource.planning,
-      title: routes.planningDetail.title,
+      title: resources?.planningDetail?.titlePlural,
       path: routes.planningDetail.path,
       fieldName: 'planningNumber',
       start: 'startDate',
@@ -49,7 +49,7 @@ function PlanningView() {
     {
       key: 'demandOrder',
       resource: sidebarResource.demandOrder,
-      title: routes.demandOrderDetail.title,
+      title: resources?.demandOrderDetail?.titlePlural,
       path: routes.demandOrderDetail.path,
       fieldName: 'demandOrderNumber',
       start: 'createDate',
@@ -67,7 +67,7 @@ function PlanningView() {
     {
       key: 'purchaseRequisition',
       resource: sidebarResource.purchaseRequisition,
-      title: routes.purchaseRequisitionDetail.title,
+      title: resources?.purchaseRequisitionDetail.titllePlural,
       path: routes.purchaseRequisitionDetail.path,
       fieldName: 'purchaseRequisitionNumber',
       start: 'createDate',
@@ -85,7 +85,7 @@ function PlanningView() {
     {
       key: 'repairJob',
       resource: sidebarResource.repairJob,
-      title: routes.repairJobDetail.title,
+      title: resources?.repairJobDetail?.titlePlural,
       path: routes.repairJobDetail.path,
       fieldName: 'repairJobName',
       start: 'startDate',

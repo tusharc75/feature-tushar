@@ -47,7 +47,7 @@ const FIELD_TO_FILTER = [
 
 const WorkOrderTechnician = () => {
   const {
-    state: { permissions }
+    state: { permissions,resources }
   }: any = useData();
 
   const ref: any = useRef();
@@ -84,7 +84,7 @@ const WorkOrderTechnician = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.workOrderTechnician]} />
+          <CustomBreadCrumbs routes={[{...routes.workOrderTechnician,title:resources?.workOrderTechnician?.titlePlural}]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

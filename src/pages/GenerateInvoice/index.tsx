@@ -80,7 +80,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       invoiceFieldName: 'fieldTicket',
       progressiveBilling: false,
       path: routes.fieldTicketDetail.path,
-      title: routes.fieldTicket.title
+      title: resources?.fieldTicket?.titlePlural
     },
     {
       key: 'salesOrder',

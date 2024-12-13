@@ -1,6 +1,7 @@
 import { camelCase } from 'lodash';
 import { generateFormFieldSteps, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
 export const generateAddFieldTicket = (isNextStepAdd: Boolean = false): WalkmeData => {
@@ -101,7 +102,7 @@ export const generateFieldTicketActions = (index: number): Array<WalkmeData> => 
     url: '/field-service-order/detail/:id',
     steps: [
       {
-        target: `#${camelCase(routes?.fieldTicket.title)}-table-checkbox-${index}`,
+        target: `#${camelCase(sidebarResource.fieldTicket)}-table-checkbox-${index}`,
         title: 'Select a Field Ticket'
       },
       { target: '#details-page-action-button', title: 'Actions' },

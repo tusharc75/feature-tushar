@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.irtTicket.title);
+const renderedFrom = camelCase(sidebarResource.irtTicket);
 
 const IrtTicket = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const IrtTicket = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -214,7 +214,7 @@ const IrtTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.irtTicket]} />
+        <CustomBreadCrumbs routes={[{...routes.irtTicket,title:resources?.irtTicket?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.productionOrder}
           module="irtTicket"

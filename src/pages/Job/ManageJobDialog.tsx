@@ -32,7 +32,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [jobDetails, setJobDetails] = useState(null);
@@ -181,7 +181,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={!jobId ? `Create ${routes.job.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`}
+                  title={!jobId ? `Create ${resources?.job?.titleSingular}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`}
                   onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();

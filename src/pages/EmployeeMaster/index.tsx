@@ -21,7 +21,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const EmployeeMaster = () => {
-  const renderedFrom = camelCase(routes?.employeeMaster.title);
+  const renderedFrom = camelCase(sidebarResource?.employeeMaster);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const EmployeeMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity,resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -204,10 +204,10 @@ const EmployeeMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.employeeMaster]} />
+        <CustomBreadCrumbs routes={[{...routes.employeeMaster,title:resources?.employeeMaster?.titlePlural}]} />
         <ImportExportLinks
           permissions={permissions?.employeeMaster}
-          module={routes.employeeMaster.title}
+          module={resources?.employeeMaster?.titlePlural}
           api={employeeMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -263,7 +263,7 @@ const EmployeeMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.employeeMaster?.title} ${deleteRecord?.employeeNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.employeeMaster?.titleSingular} ${deleteRecord?.employeeNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

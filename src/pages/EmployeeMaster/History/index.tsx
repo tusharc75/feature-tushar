@@ -14,12 +14,25 @@ import { Autocomplete } from '@material-ui/lab';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
-const TECHNICIAN_RESOURCE = [
+const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
+
+const History = ({ id }) => {
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions,resources }
+  }: any = useData();
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [resourceList, setResourceList] = useState([]);
+
+  const TECHNICIAN_RESOURCE = [
   {
     key: 'fieldTicket',
     resource: sidebarResource.fieldTicket,
     path: routes.fieldTicketDetail.path,
-    title: routes.fieldTicket.title
+    title: resources?.fieldTicket?.titlePlural
   },
   {
     key: 'workOrder',
@@ -34,19 +47,6 @@ const TECHNICIAN_RESOURCE = [
     title: routes.rentalManagement.title
   }
 ];
-
-const renderedFrom = `${camelCase(routes?.employeeMaster.title)}_History`;
-
-const History = ({ id }) => {
-  const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  }: any = useData();
-
-  const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [resourceList, setResourceList] = useState([]);
 
   const columns = [
     {

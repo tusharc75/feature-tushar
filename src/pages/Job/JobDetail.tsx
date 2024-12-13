@@ -25,7 +25,7 @@ import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
 
 const JobDetail = () => {
-  const renderedFrom = camelCase(routes?.job.title);
+  const renderedFrom = camelCase(sidebarResource.job);
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -48,7 +48,7 @@ const JobDetail = () => {
   }, [jobProcessSteps]);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user,resources }
   }: any = useData();
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const JobDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.job, data));
       setAllowedToDelete(permissions?.job?.isDelete && checkIsAllowedToDelete(user, sidebarResource.job, data.owner.optionValue));
       setJobData(data);
-      setCustomizedRoutes([routes.job, { title: data?.jobNumber }]);
+      setCustomizedRoutes([{...routes.job,title:resources?.job?.titleSingular}, { title: data?.jobNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -219,7 +219,7 @@ const JobDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.job?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.job?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

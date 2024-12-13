@@ -15,6 +15,7 @@ import MapView from './Map';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import FleetDispatchBox from './DispatchCard';
 import { useDndSensors } from 'src/hooks';
+import { useData } from 'src/StateProvider/Provider';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,6 +29,10 @@ const FleetDispatch = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const fetchData = () => {
     axiosInstance()
@@ -70,7 +75,7 @@ const FleetDispatch = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.fleetDispatch.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.fleetDispatch?.titlePlural }]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
