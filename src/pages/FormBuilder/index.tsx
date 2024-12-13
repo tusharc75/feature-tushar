@@ -42,7 +42,7 @@ const FormBuilder = () => {
     const columns = [
       {
         accessor: 'resourceLabel',
-        Header: 'Resource Label',
+        Header: 'Resource Label (Singular)',
         primaryField: true,
         width: 300,
         Cell: ({ row }) => (
@@ -55,7 +55,7 @@ const FormBuilder = () => {
       },
       {
         accessor: 'homePageLabel',
-        Header: 'Home Page Label',
+        Header: 'Resource Label (Plural)',
         width: 300,
         Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
       },
