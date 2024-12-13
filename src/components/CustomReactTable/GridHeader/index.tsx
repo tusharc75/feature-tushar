@@ -16,7 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { createFilterModel, fetchFieldOptions } from '../utils';
-import { getTempFilter } from 'src/components/CustomReactTable/GridFilter/utils';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 type GridHeaderProps = {
   resource: any;
@@ -59,6 +59,7 @@ const GridHeader = ({
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
+  const { getTempFilter } = useUserTempFilters();
 
   const isMobileView = useMediaQuery('(max-width:768px)');
 
