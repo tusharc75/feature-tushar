@@ -145,7 +145,7 @@ const Productpackage = ({
             stepData.push(generateAddChildProduct(i));
             stepDataAdded.addChildProduct = true;
           }
-          if (!stepDataAdded.deleteAddedProduct && r.canDelete === false) {
+          if (!stepDataAdded.deleteAddedProduct && r.canDelete === true) {
             stepData.push(generateDeleteAddedProductSteps(i));
             stepDataAdded.deleteAddedProduct = true;
           }
