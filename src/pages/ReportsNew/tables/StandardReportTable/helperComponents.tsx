@@ -1,16 +1,18 @@
+import { IconButton } from '@material-ui/core';
 import { Warning } from '@material-ui/icons';
 import { capitalize, isArray } from 'lodash';
+import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 
 export const ReferenceRenderer = (row) => {
   return (
     <div>
       {row?.original?.reference ? (
-        row?.original?.referenceType === 'Purchase Order' ? (
+        row?.original?.referenceType === sidebarResource.purchaseOrder ? (
           <Link
             className="link"
             target="_blank"
@@ -19,7 +21,7 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+        ) : row?.original?.referenceType === sidebarResource.transferInventory ? (
           <Link
             className="link"
             target="_blank"
@@ -28,7 +30,7 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Transfer Asset' ? (
+        ) : row?.original?.referenceType === sidebarResource.transferAsset ? (
           <Link
             className="link"
             target="_blank"
@@ -37,7 +39,7 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Sales Order' ? (
+        ) : row?.original?.referenceType === sidebarResource.salesOrder ? (
           <Link
             className="link"
             target="_blank"
@@ -46,7 +48,7 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+        ) : row?.original?.referenceType === sidebarResource.bulkAssetCreation ? (
           <Link
             className="link"
             target="_blank"
@@ -55,7 +57,7 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Serialized Asset' ? (
+        ) : row?.original?.referenceType === sidebarResource.serializedAsset ? (
           <Link
             className="link"
             target="_blank"
@@ -73,11 +75,11 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Work Order' ? (
+        ) : row?.original?.referenceType === sidebarResource.workOrder ? (
           <Link className="link" target="_blank" title={row?.original?.reference} to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}>
             {row?.original?.reference}
           </Link>
-        ) : row?.original?.referenceType === 'Field Ticket' ? (
+        ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
           <Link
             className="link"
             target="_blank"
@@ -89,7 +91,7 @@ export const ReferenceRenderer = (row) => {
         ) : (
           row?.original?.reference
         )
-      ) : row?.original?.referenceType === 'Product Inventory' ? (
+      ) : row?.original?.referenceType === sidebarResource.productInventory ? (
         <h5 className="text-truncate">Manual Entry</h5>
       ) : (
         <NoDataCell />
@@ -154,14 +156,17 @@ export const ProductRenderer = (row) => {
   return (
     <div>
       {row?.original?.productName || row?.original?.product ? (
-        <Link
-          className="link"
-          title={row?.original?.productName || row?.original?.product}
-          to={`${routes.productDetail.path}/${row?.original?.materialId || row?.original?.productId || row?.original?._id}`}
-          target="_blank"
-        >
-          {row?.original?.productName || row?.original?.product}
-        </Link>
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.productName || row?.original?.product}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.productDetail.path}/${row?.original?.materialId || row?.original?.productId || row?.original?._id}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
       ) : (
         <NoDataCell />
       )}
@@ -173,14 +178,17 @@ export const ServiceRenderer = (row) => {
   return (
     <div>
       {row?.original?.serviceName ? (
-        <Link
-          className="link"
-          title={row?.original?.serviceName}
-          to={`${routes.serviceMasterDetail.path}/${row?.original?.materialId || row?.original?.serviceId}`}
-          target="_blank"
-        >
-          {row?.original?.serviceName}
-        </Link>
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.serviceName}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId || row?.original?.serviceId}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
       ) : (
         <NoDataCell />
       )}
@@ -192,14 +200,17 @@ export const PackageRenderer = (row) => {
   return (
     <div>
       {row?.original?.packageName ? (
-        <Link
-          className="link"
-          title={row?.original?.packageName}
-          to={`${routes.packagesDetail.path}/${row?.original?.materialId || row?.original?.packageId || row?.original?._id}`}
-          target="_blank"
-        >
-          {row?.original?.packageName}
-        </Link>
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.packageName}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.packagesDetail.path}/${row?.original?.materialId || row?.original?.packageId || row?.original?._id}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
       ) : (
         <NoDataCell />
       )}
@@ -211,14 +222,17 @@ export const SerializedAssetRenderer = (row) => {
   return (
     <div>
       {row?.original?.assetNumber ? (
-        <Link
-          className="link"
-          title={row?.original?.assetNumber}
-          to={`${routes.serializedAssetDetail.path}/${row?.original?.materialId || row?.original?.asset?._id}`}
-          target="_blank"
-        >
-          {row?.original?.assetNumber}
-        </Link>
+        <div className="flex items-center gap-1">
+          <p>{row?.original?.assetNumber}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.serializedAssetDetail.path}/${row?.original?.materialId || row?.original?._id}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
       ) : (
         <NoDataCell />
       )}
