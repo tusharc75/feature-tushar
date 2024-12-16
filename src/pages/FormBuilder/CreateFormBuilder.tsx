@@ -22,6 +22,8 @@ import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import { Settings } from '@material-ui/icons';
+import SettingDialog from './SettingDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -89,6 +91,8 @@ const CreateFormBuilder = () => {
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
   const [sectionNameList, setSectionNameList] = useState([]);
+  const [settingDialog, setSettingDialog] = useState(false);
+
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -468,6 +472,16 @@ const CreateFormBuilder = () => {
                         {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
                       </Button>
                     </Box>
+                    <Box ml={1}>
+                      <IconButton
+                        aria-label="setting"
+                        onClick={() => {
+                          setSettingDialog(true);
+                        }}
+                      >
+                        <Settings fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </Grid>
                 </Grid>
               </Box>
@@ -511,6 +525,13 @@ const CreateFormBuilder = () => {
                   }}
                 />
               ) : null}
+              {settingDialog && (
+                <SettingDialog
+                  entities = {user?.entity}
+                  resource={isNew ? startCase(toLower(resourceLabel)) : resource}
+                  handleClose={() => setSettingDialog(false)}
+                />
+              )}
             </Fragment>
           ) : (
             <Box p={2} height={500}>
