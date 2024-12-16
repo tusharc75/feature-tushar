@@ -23,7 +23,7 @@ const BlogDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -66,7 +66,7 @@ const BlogDetail = () => {
         axiosInstance()
           .put(`/contact-us/remove`, { ids: [id] })
           .then(({ data }) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
 
             toastConfig.setToastConfig({
               open: true,
@@ -76,11 +76,11 @@ const BlogDetail = () => {
             history.push(`${routes.contactUs.path}`);
           })
           .catch((err) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           });
       }
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -113,7 +113,7 @@ const BlogDetail = () => {
               <Box component="span" marginX={1} />
 
               <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
               </span>
             </>
           </Box>
@@ -132,12 +132,12 @@ const BlogDetail = () => {
           </Box>
         </Paper>
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${resources?.contactUs?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

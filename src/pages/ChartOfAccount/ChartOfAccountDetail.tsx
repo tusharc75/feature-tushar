@@ -27,8 +27,8 @@ const ChartOfAccountDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
@@ -74,7 +74,7 @@ const ChartOfAccountDetail = () => {
         axiosInstance()
           .put(`${routes.chartOfAccount.path}/remove`, { ids: [id] })
           .then(({ data }) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -83,11 +83,11 @@ const ChartOfAccountDetail = () => {
             history.push(`${routes.chartOfAccount.path}`);
           })
           .catch((err) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           });
       }
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -132,7 +132,7 @@ const ChartOfAccountDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.chartOfAccount?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.chartOfAccount?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -170,12 +170,12 @@ const ChartOfAccountDetail = () => {
             );
           })}
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${resources?.chartOfAccount?.titleSingular?.toLowerCase()} ${chartOfAccountData.accountNumber} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

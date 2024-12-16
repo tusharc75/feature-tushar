@@ -22,7 +22,7 @@ const CompetenciesDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -64,7 +64,7 @@ const CompetenciesDetail = () => {
       axiosInstance()
         .put(`${routes?.competencies?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
 
           toastConfig.setToastConfig({
             open: true,
@@ -74,10 +74,10 @@ const CompetenciesDetail = () => {
           history.push(`${routes.competencies.path}`);
         })
         .catch((err) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         });
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -103,7 +103,7 @@ const CompetenciesDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -119,12 +119,12 @@ const CompetenciesDetail = () => {
           )}
         </Box>
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${resources?.competencies?.titleSingular?.toLowerCase()} ${competenciesData.competencyName} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

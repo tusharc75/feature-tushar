@@ -62,10 +62,10 @@ const ContactDetailsPage = (props) => {
 
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
@@ -359,14 +359,14 @@ const ContactDetailsPage = (props) => {
             message: data.message
           });
           goBackToListing();
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         });
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -576,7 +576,7 @@ const ContactDetailsPage = (props) => {
               </HtmlTooltip>
             )}
             {contactPermissions?.isDelete && allowedToDelete && (
-              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
             )}
             <ActivityButton
               referenceId={contactData?._id}
@@ -785,11 +785,11 @@ const ContactDetailsPage = (props) => {
           </Box>
         )}
       </Box>
-      {showConfirmBox ? (
+      {showDeleteConfirmBox ? (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete this Contact ?`}
-          onClose={() => setShowConfirmBox(false)}
+          onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDeleteContact}
         />
       ) : null}

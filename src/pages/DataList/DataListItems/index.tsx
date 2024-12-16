@@ -30,7 +30,7 @@ const DataListItems = ({ dataListId }) => {
   const [columns, setColumns] = useState(null);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [ deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -87,8 +87,8 @@ const DataListItems = ({ dataListId }) => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
+                 setDeleteRecord(row.original);
+                 setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />

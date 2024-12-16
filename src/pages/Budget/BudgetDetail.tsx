@@ -29,7 +29,8 @@ const BudgetDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -68,8 +69,8 @@ const BudgetDetail = () => {
       axiosInstance()
         .put(`${routes?.budget?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
-          setShowConfirmBox(false);
-
+          setShowDeleteConfirmBox(false);
+          
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -78,10 +79,10 @@ const BudgetDetail = () => {
           history.push(`${routes.budget.path}`);
         })
         .catch((err) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         });
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -112,7 +113,7 @@ const BudgetDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} resourceLabel={budgetData?.name} />
             </>
           </Box>
@@ -139,12 +140,13 @@ const BudgetDetail = () => {
           budgetId={id}
         />
       )}
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${resources?.budget?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

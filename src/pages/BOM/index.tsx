@@ -29,6 +29,9 @@ const BOMTable = () => {
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+
   const {
     state: { permissions, selectedEntity, resources }
   }: any = useData();
@@ -84,7 +87,8 @@ const BOMTable = () => {
             size="small"
             aria-label="Delete"
             onClick={() => {
-              setShowConfirmBox({ open: true, data: [row?.original] });
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
             }}
           >
             <Delete fontSize="small" color="error" />
@@ -278,7 +282,9 @@ const BOMTable = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  <MenuItem onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
+                  <MenuItem onClick={() =>{     
+                          if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+                          setShowDeleteConfirmBox(true);}}>
                     {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
                 </Menu>
@@ -303,13 +309,14 @@ const BOMTable = () => {
           </Box>
         )}
       </div>
-      {showConfirmBox.open && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
-          open={true}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete this product?`}
           okBtnLoading={isDeleting}
           onClose={() => {
-            setShowConfirmBox({ open: false, data: null });
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleRemove}
         />
