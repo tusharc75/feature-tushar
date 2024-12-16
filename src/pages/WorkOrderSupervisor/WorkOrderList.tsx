@@ -230,7 +230,6 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
           finalObject.rentalJobId = u?.repairOrder?.rentalJob?.optionValue || '';
           return finalObject;
         });
-        console.log('rows', rows);
         dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
