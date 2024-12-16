@@ -60,8 +60,8 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
                 margin="dense"
                 variant="outlined"
                 label="Entites"
-                error={touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
-                helperText={touched['fieldEntity'] && errors['fieldEntity']}
+                error={touched && errors && touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
+                helperText={touched && errors && touched['fieldEntity'] && errors['fieldEntity']}
               />
             )}
           />

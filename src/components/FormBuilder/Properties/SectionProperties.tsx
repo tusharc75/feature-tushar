@@ -126,7 +126,15 @@ export const SectionProperties = ({ handleClose, section, setSections, sections 
                       <CustomTab value={0} label={'Visibility'} />
                     </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
-                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={section?.field?.map(f => f.fieldName)} />
+                      <Visibility
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        fields={fields}
+                        fieldsToExclude={section?.field?.map((f) => f.fieldName)}
+                        touched={null}
+                        errors={null}
+                        isVisibilityFromSection={true}
+                      />
                     </TabPanel>
                   </Box>
                 </Form>
