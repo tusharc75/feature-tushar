@@ -423,7 +423,7 @@ const PurchaseOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.purchaseOrder?.titleSingular?.toLowerCase()} ${deleteRecord?.purchaseOrderNumber || ''} ? `}
+          message={`Are you sure you want to delete the ${deleteRecord ? `${resources?.purchaseOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.purchaseOrderNumber}` : `selected ${resources?.purchaseOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
