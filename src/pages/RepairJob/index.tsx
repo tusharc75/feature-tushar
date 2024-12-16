@@ -61,14 +61,10 @@ const RepairJob = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleRepairJobDelete, setSingleRepairJobDelete] = useState({
-    id: null,
-    show: false,
-    repairJobName: ''
-  });
+
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -132,28 +128,6 @@ const RepairJob = () => {
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
-
-  const handleSingleDeleteRepairJob = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${repairJob.api}/remove`, {
-        ids: [singleRepairJobDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        dispatch({ type: 'loading', loading: false });
-        setSingleRepairJobDelete({ id: null, show: false, repairJobName: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -403,13 +377,6 @@ const RepairJob = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
@@ -424,18 +391,16 @@ const RepairJob = () => {
           />
         ) : null}
 
-        {singleRepairJobDelete.show ? (
+        {showDeleteConfirmBox ? (
           <ConfirmationDialog
-            open={singleRepairJobDelete.show}
-            message={`Are you sure you want to delete ${resources?.repairJob?.titleSingular}: ${singleRepairJobDelete.repairJobName}?`}
-            onClose={() =>
-              setSingleRepairJobDelete({
-                id: null,
-                show: false,
-                repairJobName: ''
-              })
-            }
-            onOk={handleSingleDeleteRepairJob}
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.repairJobName}` : resources?.repairJob?.titlePlural?.toLowerCase()} ?`}
+            onClose={() =>{
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            onOk={handleDeleteRepairJob}
           />
         ) : null}
       </CustomContainer>
