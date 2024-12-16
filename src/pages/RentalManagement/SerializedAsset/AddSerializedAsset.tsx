@@ -713,8 +713,9 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            if (checkAssetPolicy(receivingStatus)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: statusPolicy,

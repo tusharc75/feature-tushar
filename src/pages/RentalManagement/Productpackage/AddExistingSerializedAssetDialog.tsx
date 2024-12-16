@@ -39,7 +39,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -541,8 +541,9 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+            if (checkAssetPolicy(receivingStatus)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: statusPolicy,
@@ -567,7 +568,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

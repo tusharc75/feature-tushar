@@ -1560,7 +1560,8 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+    const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+    const statusPolicy = checkAssetPolicy(receivingStatus);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDetailDialog({
         open: open,
@@ -2413,7 +2414,8 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
             } else {

@@ -241,7 +241,8 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           rentalManagementData={selectedRecords[0]}
           onSuccess={(_selectedPackage) => {
             setSelectedPackage(_selectedPackage);
-            const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
               setOpenAssetDataDialog({
                 open: true,
@@ -262,7 +263,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: null, data: null })}
           onSuccess={(_assetData) => {
             if (openAssetDataDialog.type === 'underReview') {
