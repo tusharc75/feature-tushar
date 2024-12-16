@@ -79,7 +79,7 @@ const CustomCalendar = ({
   const Component = (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any;
 
   return (
-    <div className="relative">
+    <div className="relative min-h-[300px]">
       <Component
         view={stateView}
         events={mobileView ? mobileEvents : events}

@@ -1,4 +1,4 @@
-import { SelectedReport } from 'src/pages/ReportsNew/types';
+import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/ReportsNew/types';
 
 export const handleGetRoute = ({ route, title }: { route: string; title: string }): SelectedReport => {
   const data: SelectedReport = {
@@ -23,4 +23,28 @@ export const handleGetRoute = ({ route, title }: { route: string; title: string 
   }
   data.resource = routeArr[2];
   return data;
+};
+
+export const createUserFavouriteObj = (item: Report | CustomReport) => {
+  const name = (item as CustomReport)._id || (item as Report).label;
+  const type: 'standard' | 'custom' = (item as CustomReport)._id ? 'custom' : 'standard';
+  let obj: FavouriteReport = { identifier: name };
+  if (isCustomReport(item)) {
+    obj = {
+      identifier: name,
+      label: item.customReportName,
+      reportType: type,
+      ...item
+    };
+  } else if (isReport(item)) {
+    obj = {
+      identifier: name,
+      label: item.label,
+      reportType: type,
+      key: item.key,
+      type: item.type,
+      ...item
+    };
+  }
+  return { obj, name };
 };
