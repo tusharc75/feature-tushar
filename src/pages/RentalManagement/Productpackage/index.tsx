@@ -145,7 +145,7 @@ const Productpackage = ({
             stepData.push(generateAddChildProduct(i));
             stepDataAdded.addChildProduct = true;
           }
-          if (!stepDataAdded.deleteAddedProduct && r.hideSelection === false) {
+          if (!stepDataAdded.deleteAddedProduct && r.canDelete === false) {
             stepData.push(generateDeleteAddedProductSteps(i));
             stepDataAdded.deleteAddedProduct = true;
           }
@@ -334,7 +334,7 @@ const Productpackage = ({
               </IconButton>
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
-              row.original.hideSelection ? (
+              !row.original.canDelete ? (
                 <HtmlTooltip
                   title={
                     row.original?.assetQty
@@ -481,16 +481,26 @@ const Productpackage = ({
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
-      parent.hideSelection =
+      // parent.hideSelection =
+      //   parent.type === MATERIAL_TYPE.service && parent?.serviceLog
+      //     ? true
+      //     : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
+      //       ? true
+      //       : parent?.status
+      //         ? true
+      //         : parent?.invoiceCreated
+      //           ? true
+      //           : false;
+      parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog
-          ? true
+          ? false
           : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
-            ? true
+            ? false
             : parent?.status
-              ? true
+              ? false
               : parent?.invoiceCreated
-                ? true
-                : false;
+                ? false
+                : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
         !parent.serializedProduct &&
@@ -575,8 +585,8 @@ const Productpackage = ({
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
+      _subRow.canDelete =
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
         !_subRow.serializedProduct &&
@@ -607,9 +617,9 @@ const Productpackage = ({
     if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
       parent.isValid = subRows.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid) ? false : parent.isValid;
     }
-    if (subRows?.length && !parent.hideSelection) {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-      if (subRows.filter((e) => e.hideSelection)?.length) {
+    if (subRows?.length && parent.canDelete) {
+      parent.canDelete = !subRows?.some((r) => !r?.canDelete);
+      if (subRows?.some((r) => !r?.canDelete)) {
         parent.assetQty = parent.qty;
       }
     }
@@ -857,7 +867,7 @@ const Productpackage = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+    const dataToDelete = selectedRecords && selectedRecords.filter((e) => e.canDelete);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -920,7 +930,7 @@ const Productpackage = ({
           return;
         }
         inputField['qty'] = inputField['qtyDisplay'];
-        if (rowData.hideSelection && (inputField['qty'] < rowData?.assetQty || inputField['qty'] < rowData?.nonSerializedQty)) {
+        if (!rowData.canDelete && (inputField['qty'] < rowData?.assetQty || inputField['qty'] < rowData?.nonSerializedQty)) {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
@@ -1025,11 +1035,7 @@ const Productpackage = ({
     return (
       <>
         <HtmlTooltip
-          title={
-            Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
-              ? 'Bulk edit selected records'
-              : 'Select records to edit'
-          }
+          title={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry) ? 'Select records to edit' : 'Bulk edit selected records'}
           enterTouchDelay={0}
           arrow
           placement="top"
@@ -1046,18 +1052,14 @@ const Productpackage = ({
           </MenuItem>
         </HtmlTooltip>
         <HtmlTooltip
-          title={
-            Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
-              ? 'Delete selected records'
-              : 'Select records to delete'
-          }
+          title={Boolean(selectedRecords && selectedRecords?.some((r) => r?.canDelete)) ? 'Delete selected records' : 'Select records to delete'}
           enterTouchDelay={0}
           arrow
           placement="top"
         >
           <MenuItem
             id={'delete-menu-item'}
-            disabled={isDeleting}
+            disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
             onClick={() => {
               handleDeleteMultiple();
             }}
@@ -1083,7 +1085,7 @@ const Productpackage = ({
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonmenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
@@ -1132,7 +1134,7 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
-          selectedProducts={selectedRecords.filter((e) => !e.hideSelection)}
+          selectedProducts={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
