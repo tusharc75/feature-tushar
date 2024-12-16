@@ -192,7 +192,6 @@ import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePd
 import Reminder from './pages/Reminder';
 import RentalManagement from './pages/RentalManagement';
 import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
-import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import RepairJob from './pages/RepairJob';
 import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
 import RepairOrder from './pages/RepairOrder';
@@ -813,9 +812,6 @@ function App() {
             {/* <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
             </PrivateRoute> */}
-            <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
-              <RentalPlanningCalendar />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
             </PrivateRoute>
