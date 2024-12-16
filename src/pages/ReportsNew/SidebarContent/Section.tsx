@@ -53,7 +53,11 @@ const Section = <T,>({
                     }}
                     size={'small'}
                   >
-                    {isFilled(item) ? <TbStarFilled size={16} /> : <TbStar size={16} />}
+                    {isFilled(item) ? (
+                      <TbStarFilled size={16} className="text-[--new-theme-color]" />
+                    ) : (
+                      <TbStar size={16} className="text-[--new-theme-color]" />
+                    )}
                   </IconButton>
                   <p className="text-[14px] font-normal leading-[1.5] dark:text-gray-200">{getTitle(item)}</p>
                 </li>
