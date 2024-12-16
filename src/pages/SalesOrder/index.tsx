@@ -144,6 +144,7 @@ const SalesOrder = () => {
         type: 'success',
         message: data.message
       });
+      dispatch({ type: 'selection', selectedRecords: [] });
       fetchData();
       setShowDeleteConfirmBox(false);
       setDeleteRecord(null);
@@ -228,8 +229,13 @@ const SalesOrder = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
-            setDeleteRecord(null);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
