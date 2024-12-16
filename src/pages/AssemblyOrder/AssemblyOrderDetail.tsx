@@ -52,13 +52,13 @@ const AssemblyOrderDetail = () => {
   }: any = useData();
 
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allFields, setAllFields] = useState([]);
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -153,12 +153,12 @@ const AssemblyOrderDetail = () => {
     axiosInstance()
       .put(`${routes.assemblyOrder.path}/remove`, { ids: [id] })
       .then(() => {
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(routes.assemblyOrder.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
       });
   };
 
@@ -190,7 +190,7 @@ const AssemblyOrderDetail = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -300,12 +300,12 @@ const AssemblyOrderDetail = () => {
             );
           })}
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete this assembly order: ${assemblyOrderData?.assemblyOrderNumber} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

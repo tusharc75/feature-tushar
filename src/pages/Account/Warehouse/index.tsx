@@ -206,7 +206,8 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}
-          message={`Are you sure you want to delete this ${resources?.warehouse?.titleSingular}?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.warehouseNo}` : resources?.warehouse?.titlePlural?.toLowerCase()} ?`}
           okBtnLoading={isSubmitting}
           onClose={() => {
             setDeleteRecord(null);

@@ -295,7 +295,8 @@ const AssemblyOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.assemblyOrder?.titleSingular} ${deleteRecord?.assemblyOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.assemblyOrderNumber}` : resources?.assemblyOrder?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

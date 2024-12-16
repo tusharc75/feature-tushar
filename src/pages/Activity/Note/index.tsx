@@ -125,7 +125,7 @@ const Note = () => {
           <>
             <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
               <span>
-                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
                   <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>

@@ -26,7 +26,7 @@ const AddressDetailPage = () => {
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [addressData, setAddressData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [addressFields, setAddressFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.address, title: resources?.address?.titlePlural }]);
@@ -164,7 +164,7 @@ const AddressDetailPage = () => {
           type: 'success',
           message: data.message
         });
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(`${routes.address.path}`);
       })
       .catch((err) => {
@@ -192,12 +192,12 @@ const AddressDetailPage = () => {
           }}
         />
       )}
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${addressData?.fullAddress}?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDeleteAddress}
         />
@@ -217,7 +217,7 @@ const AddressDetailPage = () => {
                 )}
                 {permissions?.address?.isDelete && (
                   <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                    <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
                   </span>
                 )}
               </>

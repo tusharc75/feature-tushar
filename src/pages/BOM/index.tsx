@@ -283,7 +283,11 @@ const BOMTable = () => {
                   onClose={closeActions}
                 >
                   <MenuItem onClick={() =>{     
-                          if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+                          if (selectedRecords.length === 1){ 
+                          setDeleteRecord(selectedRecords[0]);
+                          }else{
+                            setDeleteRecord(null)
+                          }
                           setShowDeleteConfirmBox(true);}}>
                     {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
