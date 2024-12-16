@@ -722,9 +722,6 @@ const routes = {
   workAutomation: {
     path: '/work-automation'
   },
-  workAutomationDetail: {
-    path: '/work-automation/detail'
-  }
 };
 
 export default routes;

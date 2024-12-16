@@ -280,7 +280,6 @@ import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
 import WorkAutomation from 'src/pages/WorkAutomation';
-import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
 import ReportsCenter from 'src/pages/ReportsNew';
 
 var notificationInterval: any = null;
@@ -1238,9 +1237,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workAutomation.path}`}>
               <WorkAutomation />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomationDetail.path}/:id`}>
-              <ManageWorkAutomation />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
