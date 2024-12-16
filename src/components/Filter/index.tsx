@@ -37,6 +37,12 @@ const getLabel = (field, deepFilters, filterByIds) => {
       ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
       : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
   }
+  if (['date'].includes(field.type)) {
+    const found = deepFilters?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
+    if (found.length > 0) {
+      return found.length;
+    }
+  }
   return '';
 };
 

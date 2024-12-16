@@ -2,19 +2,37 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 import useReport from 'src/pages/ReportsNew/useReport';
 
 export type Report = {
+  title?: string;
+  permission?: string;
+  key?: string;
+  type?: string;
+  label?: string;
+};
+
+export type ReportWithSection = {
   section: string;
-  reports: {
-    title?: string;
-    permission?: string;
-    key?: string;
-    type?: string;
-    label?: string;
-  }[];
+  reports: Report[];
 };
 export type CustomReport = {
   _id?: string;
   brand?: string;
   customReportName?: string;
+};
+
+export type FavouriteReport = {
+  identifier: string;
+  _id?: string;
+  label?: string;
+  key?: string;
+  type?: string;
+  reportType?: 'custom' | 'standard';
+};
+
+export const isReport = (item: any): item is Report => {
+  return (item as Report).key !== undefined;
+};
+export const isCustomReport = (item: any): item is CustomReport => {
+  return (item as CustomReport)._id !== undefined;
 };
 
 export type ReportType = 'standard-report' | 'custom-report' | 'report';
@@ -28,22 +46,26 @@ export type SelectedReport = {
 export type ReportState = {
   customReports: CustomReport[];
   filteredCustomReports: CustomReport[];
-  filteredReports: Report[];
+  filteredReports: ReportWithSection[];
   searchedValue: string;
   selectedReport: SelectedReport | null;
   resourceColumns: any;
   columns: TColType[] | null;
   isColumnsLoading: boolean;
+  favouriteReports: FavouriteReport[];
+  favouritList: string[];
 };
 
 export type UseReportActions =
+  | { type: 'setFavouriteReports'; payload: FavouriteReport[] }
   | { type: 'setCustomReports'; payload: CustomReport[] }
   | { type: 'setFilteredCustomReports'; payload: CustomReport[] }
-  | { type: 'setFilteredReports'; payload: Report[] }
+  | { type: 'setFilteredReports'; payload: ReportWithSection[] }
   | { type: 'setSelectedReport'; payload: SelectedReport | null }
   | { type: 'setSearchedValue'; payload: string }
   | { type: 'setResourceColumns'; payload: any }
   | { type: 'setColumns'; payload: TColType[] | null }
+  | { type: 'setFavouritList'; payload: string[] }
   | { type: 'setIsColumnsLoading'; payload: boolean };
 
 export type UseReport = ReturnType<typeof useReport>;

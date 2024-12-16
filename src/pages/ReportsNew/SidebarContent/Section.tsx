@@ -1,19 +1,37 @@
 import { Collapse, IconButton } from '@material-ui/core';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import { IoIosStarOutline } from 'react-icons/io';
+import { TbStar, TbStarFilled } from 'react-icons/tb';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
+import ViewAllDialog from 'src/pages/ReportsNew/SidebarContent/ViewAllDialog';
 
-type SectionProps<I> = {
+export type SectionProps<I> = {
   title: string;
   items: I[];
   onClick: (item: I) => void;
   getTitle: (item: I) => string;
   selectedTitle: string | null;
+  isFilled?: (item: I) => boolean;
+  onButtonClick?: (item: I) => void;
 };
 
-const Section = <T,>({ items, onClick, title, getTitle, selectedTitle }: SectionProps<T>) => {
+const ITEMS_TO_SHOW = 5;
+
+const Section = <T,>({
+  items,
+  onClick,
+  title,
+  getTitle,
+  selectedTitle,
+  isFilled = () => false,
+  onButtonClick = (data) => console.log(data)
+}: SectionProps<T>) => {
   const [open, setOpen] = React.useState(true);
+  const firstFewItems = useMemo(() => [...items].slice(0, ITEMS_TO_SHOW), [items]);
+  const isShowMore = useMemo(() => items.length > ITEMS_TO_SHOW, [items]);
+  const [viewAll, setViewAll] = React.useState(false);
+
   return (
     <div>
       <div
@@ -26,28 +44,57 @@ const Section = <T,>({ items, onClick, title, getTitle, selectedTitle }: Section
       </div>
       <Collapse in={open}>
         {items.length > 0 ? (
-          <ul className="space-y-2">
-            {items?.map((item) => {
-              return (
-                <li
-                  key={getTitle(item)}
-                  onClick={() => onClick(item)}
-                  className="flex cursor-pointer list-none items-center gap-[10px] rounded-lg px-[14px] py-2 hover:bg-[#fafafa] data-[active=true]:bg-[#fafafa] dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
-                  data-active={selectedTitle === getTitle(item)}
-                  role="button"
-                >
-                  <IconButton size={'small'}>
-                    <IoIosStarOutline size={16} />
-                  </IconButton>
-                  <p className="text-[14px] font-normal leading-[1.5] dark:text-gray-200">{getTitle(item)}</p>
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <ul className="space-y-2">
+              {firstFewItems?.map((item) => {
+                return (
+                  <li
+                    key={getTitle(item)}
+                    onClick={() => onClick(item)}
+                    className="flex min-h-[32px] cursor-pointer list-none items-center gap-[10px] rounded-lg py-2 pl-2 pr-[14px] hover:bg-[#fafafa] data-[active=true]:bg-[#fafafa] dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
+                    data-active={selectedTitle === getTitle(item)}
+                    role="button"
+                  >
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onButtonClick?.(item);
+                      }}
+                      size={'small'}
+                    >
+                      {isFilled(item) ? (
+                        <TbStarFilled size={16} className="text-[--new-theme-color]" />
+                      ) : (
+                        <TbStar size={16} className="text-[--new-theme-color]" />
+                      )}
+                    </IconButton>
+                    <p className="text-[14px] font-normal leading-[1.5] dark:text-gray-200">{getTitle(item)}</p>
+                  </li>
+                );
+              })}
+            </ul>
+            {isShowMore && (
+              <ThemeButton fullWidth iconForMobile={false} onClick={() => setViewAll(true)}>
+                View All
+              </ThemeButton>
+            )}
+          </>
         ) : (
           <div className="p-12 text-center text-[16px] font-semibold text-gray-400  dark:text-gray-600">No {title} Found</div>
         )}
       </Collapse>
+      {viewAll && (
+        <ViewAllDialog
+          title={title}
+          onClose={() => setViewAll(false)}
+          items={items}
+          onClick={onClick}
+          getTitle={getTitle}
+          selectedTitle={selectedTitle}
+          isFilled={isFilled}
+          onButtonClick={onButtonClick}
+        />
+      )}
     </div>
   );
 };

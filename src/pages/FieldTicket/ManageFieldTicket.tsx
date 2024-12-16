@@ -14,7 +14,6 @@ import {
   CustomDialogTransition,
   FIELD_TICKET_STATUS,
   GenerateResourceLineNumber,
-  RESOURCE_LABEL,
   cloneResourceData,
   fieldServiceOrder,
   serviceMaster,
@@ -336,7 +335,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     referenceId={id || null}
                   />
                 </Form>
-                {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === RESOURCE_LABEL.serviceMaster) && (
+                {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === sidebarResource.serviceMaster) && (
                   <>
                     <div className={'detail-box-content'}>
                       <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />

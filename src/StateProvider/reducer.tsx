@@ -1,14 +1,5 @@
 import { getPermissions } from '../constants/helpers';
-import {
-  SET_USER,
-  USER_LOADING,
-  SET_ROLE,
-  SET_SELECTED_ENTITY,
-  SET_CHATTER,
-  SET_CART,
-  SET_START_TOUR,
-  SET_SEARCH
-} from './actionTypes';
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH } from './actionTypes';
 
 export const initialState = {
   user: null,
@@ -31,7 +22,7 @@ export const initialState = {
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_USER:
-      const { permissions, resources } = getPermissions(action.payload);
+      const { permissions, resources } = getPermissions?.(action.payload) || {};
       return { ...state, user: action.payload, permissions, resources };
 
     case SET_SEARCH:
@@ -55,7 +46,7 @@ const reducer = (state = initialState, action) => {
 
     case SET_SELECTED_ENTITY:
       localStorage.setItem('selectedEntity', action.payload);
-      const { permissions: nPermissions, resources: nResources } = getPermissions(state.user, action.payload);
+      const { permissions: nPermissions, resources: nResources } = getPermissions?.(state.user, action.payload) || {};
       return {
         ...state,
         selectedEntity: action.payload,
