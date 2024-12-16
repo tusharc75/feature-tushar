@@ -34,7 +34,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
   const [salesData, setSalesData] = useState({ fields: [], initialValues: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -176,7 +176,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
                 <CustomDialogHeader
                   title={
                     !demandOrderId
-                      ? `Create ${routes.demandOrder.title}`
+                      ? `Create ${resources?.demandOrder?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${demandOrderData?.demandOrderNumber}`}`
                   }
                   onClose={() => {

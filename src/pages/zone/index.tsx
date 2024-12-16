@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import CreateZone from './CreateZone';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.zone.title);
+const renderedFrom = camelCase(sidebarResource.zone);
 
 const Zone = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +31,7 @@ const Zone = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -218,10 +218,10 @@ const Zone = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.zone]} />
+        <CustomBreadCrumbs routes={[{ ...routes.zone, title: resources?.zone?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.zone}
-          module={routes.zone.title}
+          module={resources?.zone?.titlePlural}
           api={routes.zone.path}
           afterImportCompleted={() => {
             fetchData();
@@ -277,7 +277,7 @@ const Zone = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.zone?.title} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.zone?.titleSingular} ${deleteRecord?.name || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

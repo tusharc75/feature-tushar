@@ -70,7 +70,7 @@ const getWarningList = (row?: any) => {
 };
 
 const Deals = () => {
-  const renderedFrom = camelCase(routes?.deals.title);
+  const renderedFrom = camelCase(sidebarResource.deals);
   const toastConfig = useContext(CustomToastContext);
   const [checkedFilter, setCheckedFilter] = useState<null | number>(null);
 
@@ -78,7 +78,7 @@ const Deals = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, rowCount } = state;
 
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -124,12 +124,12 @@ const Deals = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
@@ -201,10 +201,10 @@ const Deals = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.deals]} />
+        <CustomBreadCrumbs routes={[{ ...routes.deals, title: resources?.deals.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.deals}
-          module={routes.deals.title}
+          module={resources?.deals.titlePlural}
           api={'/deals'}
           afterImportCompleted={() => {
             fetchDeals();

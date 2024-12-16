@@ -35,7 +35,7 @@ const planningResource = [
   },
   {
     resource: 'productionOrder',
-    path: routes.productionOrderDetail.path,
+    path: routes?.productionOrderDetail?.path,
     title: 'productionOrderNumber',
     start: 'createDate',
     end: 'estimateDeliveryDate'

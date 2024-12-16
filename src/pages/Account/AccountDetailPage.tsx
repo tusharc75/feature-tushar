@@ -99,7 +99,7 @@ export default function AccountDetailPage(props) {
   } = props;
 
   const {
-    state: { user, permissions, selectedEntity, tour },
+    state: { user, permissions, selectedEntity, tour, resources },
     dispatch
   }: any = useData();
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
@@ -719,7 +719,9 @@ export default function AccountDetailPage(props) {
               {accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification && (
                 <CustomTab value={3} label={'Supplier View'} />
               )}
-              {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab value={4} label={routes.warehouse.title} />}
+              {accountResource === 'customerAccount' && permissions?.productInventory && (
+                <CustomTab value={4} label={resources?.warehouse?.titleSingular} />
+              )}
               {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5} label={tab?.tabName} />)}
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
@@ -761,6 +763,7 @@ export default function AccountDetailPage(props) {
                         accountId={accountData._id}
                         accountName={accountData.accountName}
                         resource={accountResource}
+                        resources={resources}
                       />
                     </Box>
                   )}

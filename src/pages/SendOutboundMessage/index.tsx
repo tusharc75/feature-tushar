@@ -18,7 +18,7 @@ import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constan
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.sendOutboundMessage?.title);
+const renderedFrom = camelCase(sidebarResource.sendOutboundMessage);
 
 const SendOutboundMessage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,7 +28,7 @@ const SendOutboundMessage = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -43,7 +43,7 @@ const SendOutboundMessage = () => {
   const customColumns = [
     {
       accessor: 'serializedAsset',
-      Header: routes.serializedAsset.title,
+      Header: resources?.serializedAsset?.titleSingular,
       Cell: ({ row }) =>
         row?.original?.serializedAsset ? (
           <div>
@@ -172,7 +172,7 @@ const SendOutboundMessage = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.sendOutboundMessage]} />
+        <CustomBreadCrumbs routes={[{ ...routes.sendOutboundMessage, title: resources?.sendOutboundMessage?.titlePlural }]} />
       </div>
       <CustomContainer>
         <div className="header-panel">
@@ -188,7 +188,13 @@ const SendOutboundMessage = () => {
                   setSelectedSerializedAsset(val);
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name={'serializedAsset'} label={routes.serializedAsset.title} variant="outlined" />
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    name={'serializedAsset'}
+                    label={resources?.serializedAsset?.titleSingular}
+                    variant="outlined"
+                  />
                 )}
               />
             </div>

@@ -21,7 +21,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCondition } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCondition, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -29,7 +29,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
-  const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
+  const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
   const {

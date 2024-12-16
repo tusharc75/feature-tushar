@@ -33,7 +33,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const { dataRows, page, limit, filters, sorting, selectedRecords, search } = state;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -451,7 +451,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           subResource={`material`}
           referenceId={productionOrderData._id}
           permissions={permissions?.productionOrder}
-          module={routes.productionOrder.title}
+          module={resources?.productionOrder?.titleSingular}
           api={`${productionOrder.api}/material/${productionOrderData._id}`}
           afterImportCompleted={() => {
             fetchData();

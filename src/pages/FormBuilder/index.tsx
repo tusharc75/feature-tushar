@@ -31,7 +31,7 @@ const FormBuilder = () => {
   let { dynamicResource }: any = queryString.parse(history.location.search);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const FormBuilder = () => {
     const columns = [
       {
         accessor: 'resourceLabel',
-        Header: 'Resource Label',
+        Header: 'Resource Label (Singular)',
         primaryField: true,
         width: 300,
         Cell: ({ row }) => (
@@ -55,7 +55,7 @@ const FormBuilder = () => {
       },
       {
         accessor: 'homePageLabel',
-        Header: 'Home Page Label',
+        Header: 'Resource Label (Plural)',
         width: 300,
         Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
       },
@@ -161,7 +161,7 @@ const FormBuilder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.formBuilder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />

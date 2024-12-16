@@ -20,15 +20,16 @@ const BudgetDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.budget]);
+  const {
+    state: { permissions, user, resources }
+  }: any = useData();
+
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.budget, title: resources?.budget?.titlePlural }]);
   const [budgetData, setBudgetData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -55,7 +56,7 @@ const BudgetDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.budget?.path}/${id}`);
       setBudgetData(data);
-      setCustomizedRoutes([routes.budget, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.budget, title: resources?.budget?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -141,7 +142,7 @@ const BudgetDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.budget?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.budget?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

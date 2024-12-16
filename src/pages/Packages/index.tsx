@@ -22,7 +22,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
-const renderedFrom = camelCase(routes?.packages.title);
+const renderedFrom = camelCase(sidebarResource?.packages);
 
 const PackageList = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -32,7 +32,7 @@ const PackageList = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -222,10 +222,10 @@ const PackageList = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.packages]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.packages, title: resources?.packages?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.packages}
-          module={routes.packages.title}
+          module={resources?.packages?.titlePlural}
           api={packages.api}
           afterImportCompleted={() => {
             fetchData();
@@ -246,9 +246,8 @@ const PackageList = () => {
             },
             {
               title: 'Sub-Package Export',
-              api: `${packages.api}/unknown/package/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${packages.api}/unknown/package/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -293,7 +292,7 @@ const PackageList = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.packages?.title.toLowerCase()} ${deleteRecord?.packageName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.packages?.titleSingular?.toLowerCase()} ${deleteRecord?.packageName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

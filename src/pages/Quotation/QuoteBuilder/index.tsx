@@ -49,7 +49,7 @@ const QuoteBuilder = ({
   const history = useHistory();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -384,9 +384,9 @@ const QuoteBuilder = ({
               onClick={() => {
                 handleSendToCustomer(false);
               }}
-              tooltip={`Process ${routes.quotation.title}`}
+              tooltip={`Process ${resources?.quotation?.titleSingular}`}
             >
-              {`Process ${routes.quotation.title}`}
+              {`Process ${resources?.quotation?.titleSingular}`}
             </ThemeButton>
 
             <ThemeButton
@@ -412,7 +412,7 @@ const QuoteBuilder = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,
@@ -495,7 +495,7 @@ const QuoteBuilder = ({
             fetchFieldServiceOrderData();
           }}
         >
-          {`Create ${routes.fieldTicket.title}`}
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
       </>
     );

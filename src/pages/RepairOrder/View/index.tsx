@@ -12,25 +12,24 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 
 const customNodeStyles = {
   repairOrder: {
-    name: routes.repairOrder.title,
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    name: sidebarResource?.repairOrder,
+    ...COLOUR_MASTER.purchaseOrder
   },
   productAssets: {
     name: 'Assets',
     ...COLOUR_MASTER.assets
   },
   workOrder: {
-    name: routes.workOrder.title,
-    ...COLOUR_MASTER.repairJob
+    name: sidebarResource?.workOrder,
+    ...COLOUR_MASTER.service
   },
   loadingTicket: {
     name: 'Loading Ticket',
     ...COLOUR_MASTER.loadingTicket
   },
   repairOrderClosed: {
-    name: `${routes.repairOrder.title} Closed`,
-    ...COLOUR_MASTER.repairJob
+    name: `${sidebarResource?.repairOrder} Closed`,
+    ...COLOUR_MASTER.closedRepairJob
   },
 };
 
@@ -73,9 +72,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_type: 'repairOrder',
             ref_id: repairOrderId,
             label: (
-              <div>
-                <Typography variant="body2">{routes.repairOrder.title}</Typography>
-                <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="subtitle2">
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
+                <Typography  variant="subtitle2">
                   {repairOrderNumber}
                 </Typography>
               </div>
@@ -99,11 +98,11 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: asset._id,
             label: (
               <HtmlTooltip arrow placement="top" title={`Asset`}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{'Asset'}</Typography>
+                  <Typography variant="subtitle2">
                     {asset?.assetNumber}
                   </Typography>
-                  <Typography variant="subtitle2">{'Asset'}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -133,11 +132,11 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: workOrder?._id,
             label: (
               <HtmlTooltip arrow placement="top" title={'Work Order'}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{workOrder.status || ''}</Typography>
+                  <Typography  variant="subtitle2">
                     {workOrder.workOrderNumber || ''}
                   </Typography>
-                  <Typography variant="subtitle2">{workOrder.status || ''}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -166,11 +165,11 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: loadingTicket._id,
             label: (
               <HtmlTooltip arrow placement="top" title={'Loading Ticket'}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{'Loading Ticket'}</Typography>
+                  <Typography variant="subtitle2">
                     {loadingTicket.ticketName}
                   </Typography>
-                  <Typography variant="subtitle2">{'Loading Ticket'}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -205,11 +204,11 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_type: 'repairJob',
             ref_id: repairOrderId,
             label: (
-              <div>
-                <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
+                <Typography variant="subtitle2">
                   {repairOrderNumber}
                 </Typography>
-                <Typography variant="subtitle2">{routes.repairOrder.title}</Typography>
               </div>
             )
           },
@@ -252,7 +251,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'workorder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
         window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);

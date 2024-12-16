@@ -28,7 +28,14 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { checkIsAllowedToDelete, checkIsAllowedToEdit, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
@@ -43,23 +50,24 @@ export default function Account(props) {
     account: { accountApi, accountResource, accountRoute }
   } = props;
 
+  const {
+    state: { user, permissions, selectedEntity, resources },
+    dispatch: entityDispatch
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes[accountResource]?.title}`,
+      key: `My ${resources[accountResource]?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes[accountResource]?.title}`,
+      key: `All ${resources[accountResource]?.titlePlural}`,
       value: 2
     }
   ];
 
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const {
-    state: { user, permissions, selectedEntity },
-    dispatch: entityDispatch
-  }: any = useData();
 
   const renderedFrom = camelCase(accountResource);
   const history = useHistory();
@@ -254,10 +262,10 @@ export default function Account(props) {
               });
             }}
           >
-            <DeleteIcon color={accountPermissions?.isDelete && row?.original?.canDelete ? "error" : "disabled"} fontSize="small" />
+            <DeleteIcon color={accountPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={accountPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable} >
+        <HtmlTooltip title={accountPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}>
           <span>
             <IconButton
               size="small"
@@ -279,10 +287,7 @@ export default function Account(props) {
                 }
               }}
             >
-              <AiOutlineDeploymentUnit
-                fontSize="20"
-                color={accountPermissions?.isUpdate && row?.original?.canEdit ? 'primary' : 'disabled'}
-              />
+              <AiOutlineDeploymentUnit fontSize="20" color={accountPermissions?.isUpdate && row?.original?.canEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -342,27 +347,30 @@ export default function Account(props) {
   const fetchAccounts = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`${accountApi}${queryString}`, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
-        let res = {
-          ...finalObject,
-          canDelete: checkIsAllowedToDelete(user, sidebarResource[accountResource], u?.owner?.optionValue),
-          canEdit: checkIsAllowedToEdit(user, sidebarResource[accountResource], data),
-          lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-          leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-          leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-          approved: u.staticData?.approved ? u.staticData?.approved : false,
-          isChecked: false,
-          masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-          masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
-        };
-        return res;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
+    axiosInstance()
+      .get(`${accountApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          let res = {
+            ...finalObject,
+            canDelete: checkIsAllowedToDelete(user, sidebarResource[accountResource], u?.owner?.optionValue),
+            canEdit: checkIsAllowedToEdit(user, sidebarResource[accountResource], data),
+            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+            leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
+            approved: u.staticData?.approved ? u.staticData?.approved : false,
+            isChecked: false,
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
+            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
+          };
+          return res;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
       .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -508,7 +516,7 @@ export default function Account(props) {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources[accountResource]?.titlePlural }]} />
         <ImportExportLinks
           permissions={accountPermissions}
           module="account(s)"
@@ -527,23 +535,24 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                {
-                  title: 'Supplier View Template',
-                  api: `${accountApi}/items/unknown/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Supplier View Export',
-                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Supplier View Import',
-                  api: `${accountApi}/items/unknown/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
               : [])
           ]}
         />
@@ -572,7 +581,8 @@ export default function Account(props) {
                 permissions,
                 setOpenAddPlantsDialog,
                 setEntities,
-                setShowEntityDialog
+                setShowEntityDialog,
+                resources
               }}
             />
           }
@@ -638,8 +648,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -654,8 +665,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -807,7 +819,8 @@ const ActionMenuItems = ({
   permissions,
   setOpenAddPlantsDialog,
   setEntities,
-  setShowEntityDialog
+  setShowEntityDialog,
+  resources
 }) => {
   return (
     <>
@@ -860,7 +873,7 @@ const ActionMenuItems = ({
             setOpenAddPlantsDialog(true);
           }}
         >
-          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
+          Assign {resources?.warehouse?.titleSingular} &nbsp; <Chip size="small" label={selectedRecords?.length} />
         </MenuItem>
       )}
       {accountPermissions?.isUpdate && (

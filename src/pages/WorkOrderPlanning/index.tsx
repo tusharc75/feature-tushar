@@ -26,7 +26,7 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.workOrderPlanning.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderPlanning);
 const WorkOrderPlanning = () => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,7 +35,7 @@ const WorkOrderPlanning = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const statusOption = ['Pending', 'In-Progress', 'Completed'];
@@ -236,7 +236,7 @@ const WorkOrderPlanning = () => {
             setOpenRepairOrderDialog(true);
           }}
         >
-          {`Create ${routes.repairOrder.title}`}
+          {`Create ${resources?.repairOrder?.titleSingular}`}
         </MenuItem>
       </>
     );
@@ -245,7 +245,7 @@ const WorkOrderPlanning = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workOrderPlanning]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.workOrderPlanning, title: resources?.workOrderPlanning?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

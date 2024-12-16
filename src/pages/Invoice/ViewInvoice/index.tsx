@@ -36,8 +36,9 @@ import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
+  const renderedFrom = `${camelCase(sidebarResource.invoice)}_view`;
 
   const [columns, setColumns] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false);
@@ -55,7 +56,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -298,7 +299,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
@@ -398,7 +399,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                     <CustomTab value={0} label={'Details'} />
-                    <CustomTab value={1} label={routes.creditMemo.title} />
+                    <CustomTab value={1} label={resources?.creditMemo?.titlePlural} />
                   </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <Fragment>

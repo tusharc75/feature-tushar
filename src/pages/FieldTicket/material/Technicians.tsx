@@ -12,7 +12,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { displayDateTime, fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import { displayDateTime, fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -22,7 +22,7 @@ import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);

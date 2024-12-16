@@ -12,7 +12,7 @@ import CustomReactTable, { getStaticFields, useTableReducer } from 'src/componen
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -20,7 +20,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 
-const renderedFrom = camelCase(routes?.workflow.title);
+const renderedFrom = camelCase(sidebarResource.workflow);
 
 const WorkFlow = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const WorkFlow = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -170,7 +170,7 @@ const WorkFlow = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workflow]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workflow, title: resources?.workflow?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -203,7 +203,7 @@ const WorkFlow = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.workflow?.title} ${deleteRecord?.workflowName || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.workflow?.titleSingular} ${deleteRecord?.workflowName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

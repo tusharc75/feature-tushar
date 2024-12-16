@@ -50,7 +50,7 @@ const ManageRentalManagementDialog = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [rentalDetails, setRentalDetails] = useState(null);
@@ -245,7 +245,7 @@ const ManageRentalManagementDialog = ({
               <CustomDialogHeader
                 title={
                   !rentalManagementId
-                    ? `Create ${routes.rentalManagement.title}`
+                    ? `Create ${resources?.rentalManagement?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${rentalManagementData?.rentalJobName}`}`
                 }
                 onClose={() => {

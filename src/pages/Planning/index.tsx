@@ -33,16 +33,20 @@ import ManagePlanning from './ManagePlanning';
 import axios, { CancelTokenSource } from 'axios';
 
 const Planning = () => {
-  const renderedFrom = camelCase(routes?.planning.title);
+  const renderedFrom = camelCase(sidebarResource.planning);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.planning.title}`,
+      key: `My ${resources?.planning?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.planning.title}`,
+      key: `All ${resources?.planning?.titlePlural}`,
       value: 2
     }
   ];
@@ -51,10 +55,6 @@ const Planning = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   // const [selectedType, setSelectedType] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,7 +129,7 @@ const Planning = () => {
                     newPath = `${routes.salesOrderDetail.path}/${row?.original?.salesOrderId}`;
                   }
                   if (row?.original?.type === 'Field Service Order') {
-                    newPath = `${routes?.fieldServiceOrderDetail.path}/${row?.original?.fieldServiceOrderId}`;
+                    newPath = `${routes?.fieldServiceOrderDetail?.path}/${row?.original?.fieldServiceOrderId}`;
                   }
                   if (newPath) {
                     window.open(newPath, '_blank');
@@ -300,10 +300,10 @@ const Planning = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.planning]} />
+        <CustomBreadCrumbs routes={[{ ...routes.planning, title: resources?.planning?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.planning}
-          module={routes.planning.title}
+          module={resources?.planning?.titlePlural}
           api={routes?.planning?.path}
           afterImportCompleted={() => {
             fetchData();
@@ -359,7 +359,7 @@ const Planning = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.planning?.title} ${deleteRecord?.planningNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.planning?.titleSingular} ${deleteRecord?.planningNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

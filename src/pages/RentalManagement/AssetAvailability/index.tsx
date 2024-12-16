@@ -12,6 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
+import { useData } from 'src/StateProvider/Provider';
 
 interface CssObj {
   [index: string]: React.CSSProperties;
@@ -55,7 +56,7 @@ const styles: CssObj = {
   }
 };
 
-const ShowProduct = ({ product }) => {
+const ShowProduct = ({ product, resources }) => {
   const [productHeader, setProductHeader] = useState(null);
   const findLabel = async () => {
     const {
@@ -100,7 +101,7 @@ const ShowProduct = ({ product }) => {
       </div>
       {!product?.baseWarehouse && (
         <div>
-          <Typography style={styles.typographyh}>{routes.warehouse.title}</Typography>
+          <Typography style={styles.typographyh}>{resources?.warehouse?.titleSingular}</Typography>
           <Typography style={styles.typographyd}>{product?.warehouse?.optionLabel}</Typography>
         </div>
       )}
@@ -110,6 +111,9 @@ const ShowProduct = ({ product }) => {
 
 export default function AssetAvailability({ rentalId, handleClose }) {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [modalContent, setModalContent] = useState<ModalHead | null>({
     title: 'Checking Assets Availability',
@@ -139,8 +143,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           rows?.length === 0
         ) {
           setCanFulfil(true);
-        }
-        else {
+        } else {
           setCanFulfil(false);
         }
       })
@@ -152,12 +155,12 @@ export default function AssetAvailability({ rentalId, handleClose }) {
   useEffect(() => {
     if (canFulfil) {
       setModalContent({
-        title: `${routes.serializedAsset.title} Available`,
+        title: `${resources?.serializedAsset?.titleSingular} Available`,
         icon: <CheckCircleIcon color="secondary" />
       });
     } else if (canFulfil === false) {
       setModalContent({
-        title: `Unable to fulfill ${routes.serializedAsset.title} requirement(s) from this ${routes.warehouse.title}.`,
+        title: `Unable to fulfill ${resources?.serializedAsset?.titleSingular} requirement(s) from this ${resources?.warehouse?.titleSingular}.`,
         icon: <ErrorIcon color="error" />
       });
     } else {
@@ -183,7 +186,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <SerializedAssetAvailableIllustration />
             <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px', lineHeight: '1.8' }}>
-              {routes.serializedAsset.title} are available for all the products.
+              {resources?.serializedAsset?.titlePlural} are available for all the products.
               <br /> Job can be fulfilled.
             </Typography>
           </div>
@@ -192,7 +195,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
             <div className="mt-2">
               {products
                 ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
-                ?.map((product) => <ShowProduct key={product._id} product={product} />)}
+                ?.map((product) => <ShowProduct key={product._id} product={product} resources={resources} />)}
             </div>
             {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
               <Box pt={3} style={{ ...styles.cardWithPb, ...styles.minH }}>
@@ -206,9 +209,11 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     maxWidth: 'max-content',
                     color: '#fff'
                   }}
-                >{`${routes.serializedAsset.title} are available in other ${routes.warehouse.title}`}</Typography>
+                >{`${resources?.serializedAsset?.titlePlural} are available in other ${resources?.warehouse?.titlePlural}`}</Typography>
                 <div className="mt-2">
-                  {products?.filter((e) => !e.baseWarehouse)?.map((product) => <ShowProduct key={product._id} product={product} />)}
+                  {products
+                    ?.filter((e) => !e.baseWarehouse)
+                    ?.map((product) => <ShowProduct key={product._id} product={product} resources={resources} />)}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
                     <Button
                       size="small"

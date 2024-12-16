@@ -12,13 +12,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManagePaidTimeOff from './ManagePaidTimeOff';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { sidebarItems } from 'src/components/FormBuilder/FieldList';
 
 const PaidTimeOff = ({ payrollPolicyData }) => {
-  const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_paidTimeOff`;
+  const renderedFrom = `${camelCase(sidebarResource.payrollPolicy)}_paidTimeOff`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

@@ -18,7 +18,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, treeToFlatArray } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource, treeToFlatArray } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';
@@ -44,7 +44,7 @@ import {
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
@@ -65,7 +65,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [refreshChild, setRefreshChild] = useState(false);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const isStepDataSet = useRef(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -169,7 +169,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`Add ${routes.packages.title}`}>
+                    <HtmlTooltip title={`Add ${resources?.packages?.titleSingular}`}>
                       <IconButton
                         onClick={() => {
                           setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original._id });
@@ -395,7 +395,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
         let updatedData = [...(result?.data || []), ...material];
-        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData, type: 'fieldTicketMaterial' });
+        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, {
+          ...result,
+          data: updatedData,
+          type: 'fieldTicketMaterial'
+        });
       } else {
         let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
         let updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
@@ -426,21 +430,18 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
-          const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber')
+          const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber');
           if (wellNumberField && d?.wellNumber) {
             if (wellNumberField?.type === 'multiSelect') {
               if (isArray(d?.wellNumber)) {
                 element.wellNumber = d?.wellNumber?.map((e) => e.optionValue);
-              }
-              else if (isObject(d?.wellNumber)) {
+              } else if (isObject(d?.wellNumber)) {
                 element.wellNumber = [d?.wellNumber?.optionValue];
               }
-            }
-            else {
+            } else {
               if (isArray(d?.wellNumber)) {
                 element.wellNumber = d?.wellNumber[0]?.optionValue;
-              }
-              else if (isObject(d?.wellNumber)) {
+              } else if (isObject(d?.wellNumber)) {
                 element.wellNumber = d?.wellNumber?.optionValue;
               }
             }
@@ -492,7 +493,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+        const rateResult = priceData?.filter(
+          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
+        );
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
@@ -545,7 +548,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
         let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
         let updatedData = [...(result?.data || []), ...rows];
-        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData, type: 'fieldTicketMaterial' });
+        await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, {
+          ...result,
+          data: updatedData,
+          type: 'fieldTicketMaterial'
+        });
       } else {
         let result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
         let updatedData = { ...result?.data, cost: [...(result?.data?.cost || []), ...rows] };
@@ -571,7 +578,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     try {
       setUpdating(true);
       if (isOffline) {
-        let alreadyOfflineDataSyncStoredRows = [], result;
+        let alreadyOfflineDataSyncStoredRows = [],
+          result;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
           alreadyOfflineDataSyncStoredRows = result?.data || [];
@@ -593,7 +601,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           let updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
-          await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, { ...result, data: updatedData, type: 'fieldTicketMaterial' });
+          await insertUpdate(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`, {
+            ...result,
+            data: updatedData,
+            type: 'fieldTicketMaterial'
+          });
         } else {
           let updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
           await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
@@ -646,8 +658,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         materialIdsToDelete = [...materialIdsToDelete, ...productsToDelete];
 
         //Offline Data Deletion
-        [...materialIdsToDelete, ...cost].forEach((id) => { deleteOne(objectStore.fieldTicketMaterial, id) });
-        
+        [...materialIdsToDelete, ...cost].forEach((id) => {
+          deleteOne(objectStore.fieldTicketMaterial, id);
+        });
+
         //Updating offlineDataSync Store
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           let result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
@@ -695,7 +709,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     try {
       setUpdating(true);
       if (isOffline) {
-        let alreadyOfflineDataSyncStoredRows = [], result;
+        let alreadyOfflineDataSyncStoredRows = [],
+          result;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
           result = await findOne(objectStore.offlineDataSync, `${fieldTicketData?._id}_material`);
           alreadyOfflineDataSyncStoredRows = result?.data || [];
@@ -708,7 +723,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.service;
           const existingRow = await findOne(objectStore.fieldTicketMaterial, row._id);
-          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...(restoreObjKeysWithValues(row, allFields)) });
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...restoreObjKeysWithValues(row, allFields) });
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = { ...existingRow, ...row };

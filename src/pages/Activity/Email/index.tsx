@@ -37,12 +37,12 @@ const tabs = {
 };
 
 const Email = () => {
-  const renderedFrom = camelCase(routes?.activityEmail.title);
+  const renderedFrom = camelCase(sidebarResource.email);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
@@ -378,7 +378,7 @@ const Email = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.email?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (

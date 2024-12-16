@@ -3,7 +3,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { Box, Grid, IconButton, Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
-import { serviceMaster } from 'src/constants/helpers';
+import { serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -23,7 +23,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
+const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_steps`;
 
 const Steps = ({ serviceId }) => {
   const isMobile = useMediaQuery('(max-width:768px)');

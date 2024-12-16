@@ -57,7 +57,7 @@ const SerializedAssetDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -157,9 +157,12 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([routes.serializedAsset, { title: `${data?.assetNumber ?? ''}` }]);
+        setCustomizedRoutes([
+          { ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural },
+          { title: `${data?.assetNumber ?? ''}` }
+        ]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
-        setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
+        setCustomizedRoutes([{ ...routes.iotChart, title: resources?.iotChart?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       }
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
@@ -281,7 +284,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -629,7 +632,7 @@ const SerializedAssetDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.serializedAsset?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.serializedAsset?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

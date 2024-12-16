@@ -26,24 +26,27 @@ import CreateProjectSales from './CreateProjectSales';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProjectSales: FC = () => {
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes.projectSales.title}`,
+      key: `My ${resources?.projectSales?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.projectSales.title}`,
+      key: `All ${resources?.projectSales?.titlePlural}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.projectSales.title);
+  const renderedFrom = camelCase(sidebarResource.projectSales);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+
   const { generateColumns } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -336,10 +339,10 @@ const ProjectSales: FC = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.projectSales]} />
+        <CustomBreadCrumbs routes={[{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.projectSales}
-          module={routes.projectSales.title}
+          module={resources?.projectSales?.titlePlural}
           api={'project-sales'}
           afterImportCompleted={() => {
             fetchData();
@@ -408,9 +411,8 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-            deleteRecord?._id ? deleteRecord?.projectName : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${resources?.projectSales?.titlePlural?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.projectName : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

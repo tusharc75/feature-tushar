@@ -28,10 +28,10 @@ import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Note = () => {
-  const renderedFrom = camelCase(routes?.activityNote.title);
+  const renderedFrom = camelCase(sidebarResource.note);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -312,7 +312,7 @@ const Note = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.note?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (
@@ -411,7 +411,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}

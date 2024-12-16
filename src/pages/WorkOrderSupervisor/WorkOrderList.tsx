@@ -31,13 +31,13 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = camelCase(routes?.workOrderSupervisor.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
 const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -82,7 +82,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         'type'
       ]?.includes(f?.fieldData?.fieldName)
     );
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
     const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
 
     columns.forEach((c) => {
@@ -134,7 +134,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrder}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -299,6 +299,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
           onClick={() => {
             setAssignTechnicianDialog(true);
           }}
@@ -307,10 +308,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         </MenuItem>
         {permissions?.workStations?.isRead && (
           <MenuItem
+            disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
-          >{`Assign ${routes.workStations.title}`}</MenuItem>
+          >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
         )}
         <MenuItem
           onClick={() => {

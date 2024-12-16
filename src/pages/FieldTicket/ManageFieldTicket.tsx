@@ -36,7 +36,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
   const toastConfig = useContext(CustomToastContext);
@@ -298,7 +298,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                  : `Create ${routes?.fieldTicket?.title}`
+                  : `Create ${resources?.fieldTicket?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

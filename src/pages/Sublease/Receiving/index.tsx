@@ -25,7 +25,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [receiveDialog, setReceiveDialog] = useState(false);
@@ -201,7 +201,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
           resource: sidebarResource.sublease,
           referenceId: subleaseData?._id,
           columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
@@ -215,7 +215,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
         {allowedToEdit && treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length > 0 && (
           <ImportExportMenu
             permissions={permissions?.serializedAsset}
-            module={routes.serializedAsset.title}
+            module={resources?.serializedAsset?.titlePlural}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchData();

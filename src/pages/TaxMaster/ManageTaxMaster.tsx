@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 const ManageTaxMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -148,7 +148,7 @@ const ManageTaxMaster = ({ onClose, onSuccess, isClone = false, id = null }) => 
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.taxCode ? `(${initialData.values?.taxCode})` : ''}`
-                    : `Create ${routes?.taxMaster?.title}`
+                    : `Create ${resources?.taxMaster?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

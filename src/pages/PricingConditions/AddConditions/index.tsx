@@ -25,10 +25,10 @@ import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/const
 import { FiExternalLink } from 'react-icons/fi';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
-  const renderedFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
+  const renderedFrom = camelCase(`${sidebarResource?.pricingCondition}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -391,7 +391,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           <Box>
             <ImportExportLinks
               permissions={permissions.pricingCondition}
-              module={routes.pricingCondition.title}
+              module={resources?.pricingCondition?.titlePlural}
               api={pricingCondition.api}
               afterImportCompleted={() => {
                 fetchCondition();

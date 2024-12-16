@@ -19,15 +19,15 @@ const DeviceTemplateAlertDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.deviceTemplateAlert]);
   const [deviceTemplateAlertData, setDeviceTemplateAlertData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -54,7 +54,7 @@ const DeviceTemplateAlertDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.deviceTemplateAlert.path}/${id}`);
       setDeviceTemplateAlertData(data);
-      setCustomizedRoutes([routes.deviceTemplateAlert, { title: data?.alertNumber }]);
+      setCustomizedRoutes([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }, { title: data?.alertNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -124,9 +124,8 @@ const DeviceTemplateAlertDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplateAlert?.title?.toLowerCase()} ${
-            deviceTemplateAlertData?.alertNumber || ''
-          } ?`}
+          message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} ${deviceTemplateAlertData?.alertNumber || ''
+            } ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

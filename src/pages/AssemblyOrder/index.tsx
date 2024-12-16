@@ -22,16 +22,20 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AssemblyOrder = () => {
-  const renderedFrom = camelCase(routes?.assemblyOrder.title);
+  const renderedFrom = camelCase(sidebarResource.assemblyOrder);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.assemblyOrder.title}`,
+      key: `My ${resources?.assemblyOrder?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.assemblyOrder.title}`,
+      key: `All ${resources?.assemblyOrder?.titlePlural}`,
       value: 2
     }
   ];
@@ -39,10 +43,6 @@ const AssemblyOrder = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.assemblyOrder));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -238,10 +238,10 @@ const AssemblyOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.assemblyOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.assemblyOrder, title: resources?.assemblyOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.assemblyOrder}
-          module={routes.assemblyOrder.title}
+          module={resources?.assemblyOrder?.titlePlural}
           api={routes.assemblyOrder.path}
           afterImportCompleted={() => {
             fetchData();
@@ -295,7 +295,7 @@ const AssemblyOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.assemblyOrder?.title} ${deleteRecord?.assemblyOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.assemblyOrder?.titleSingular} ${deleteRecord?.assemblyOrderNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

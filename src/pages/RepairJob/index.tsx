@@ -37,24 +37,25 @@ import { createRepairJobFlow } from './walkmeSteps';
 let repairJobTimeout;
 
 const RepairJob = () => {
-  const types = [
-    {
-      key: `My ${routes?.repairJob.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes?.repairJob.title}`,
-      value: 2
-    }
-  ];
-
-  const renderedFrom = camelCase(routes?.repairJob.title);
+  const renderedFrom = camelCase(sidebarResource?.repairJob);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.repairJob?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.repairJob?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [renderCount, setRenderCount] = useState(0);
@@ -77,14 +78,14 @@ const RepairJob = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
-  const pageTitle = camelCase(`${routes.repairJob.title}`);
+  const pageTitle = camelCase(`${resources?.repairJob?.titlePlural}`);
   const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
-    setWalkmeData([createRepairJobFlow()]);
+    setWalkmeData([createRepairJobFlow(resources)]);
   }, []);
 
   const fetchGridColumns = async () => {
@@ -347,10 +348,10 @@ const RepairJob = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.repairJob]} />
+        <CustomBreadCrumbs routes={[{ ...routes.repairJob, title: resources?.repairJob?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.repairJob}
-          module="repairJob"
+          module={resources?.repairJob?.titlePlural}
           api={repairJob.api}
           afterImportCompleted={() => {
             fetchData();
@@ -412,9 +413,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? resources?.repairJob?.titleSingular : resources?.repairJob?.titlePlural}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -427,7 +427,7 @@ const RepairJob = () => {
         {singleRepairJobDelete.show ? (
           <ConfirmationDialog
             open={singleRepairJobDelete.show}
-            message={`Are you sure you want to delete Repair Job: ${singleRepairJobDelete.repairJobName}?`}
+            message={`Are you sure you want to delete ${resources?.repairJob?.titleSingular}: ${singleRepairJobDelete.repairJobName}?`}
             onClose={() =>
               setSingleRepairJobDelete({
                 id: null,

@@ -34,7 +34,7 @@ const IrtTicketDetail = () => {
   const [tabValue, setTabValue] = useState(0);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -65,7 +65,7 @@ const IrtTicketDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
       setAllowedToDelete(permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, data.owner.optionValue));
       setIrtTicketData(data);
-      setCustomizedRoutes([routes.irtTicket, { title: data?.irtTicketNumber }]);
+      setCustomizedRoutes([{ ...routes.irtTicket, title: resources?.irtTicket?.titlePlural }, { title: data?.irtTicketNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -154,7 +154,7 @@ const IrtTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.irtTicket?.title} ?`}
+          message={`Are you sure you want to delete ${resources?.irtTicket?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

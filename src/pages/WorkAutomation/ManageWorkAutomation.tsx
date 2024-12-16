@@ -16,6 +16,11 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 
 const ManageWorkAutomation = () => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -69,7 +74,7 @@ const ManageWorkAutomation = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workAutomation, { title: rentalManagementData ? rentalManagementData?.rentalJobName : '' }]}
+              routes={[{ ...routes.workAutomation, title: resources?.workAutomation?.titlePlural }, { title: rentalManagementData ? rentalManagementData?.rentalJobName : '' }]}
               onBreadCrumbClick={(path) => {
                 history.push(path);
               }}
@@ -86,6 +91,7 @@ const ManageWorkAutomation = () => {
                   selectedAssets={selectedAssets}
                   isExpand={isExpand}
                   setIsExpand={setIsExpand}
+                  resources={resources}
                 />
               </div>
               <div>
@@ -106,6 +112,7 @@ const ManageWorkAutomation = () => {
                   setIsExpand={setIsExpand}
                   handleSave={handleSave}
                   loading={loading}
+                  resources={resources}
                 />
               </div>
             </div>
@@ -122,7 +129,7 @@ const ManageWorkAutomation = () => {
 
 export default ManageWorkAutomation;
 
-const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedAssets, isExpand, setIsExpand }) => {
+const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedAssets, isExpand, setIsExpand, resources }) => {
   const [records, setRecords] = useState(null);
   const handleAdd = () => {
     const tempMaterial = records?.map((e) => {
@@ -138,7 +145,7 @@ const AddSerializedAsset = ({ rentalManagementData, setSelectedAssets, selectedA
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4 ">
-          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.serializedAsset.title}`}</h3>
+          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${resources?.serializedAsset?.titleSingular}`}</h3>
           {/* <div className="flex min-w-fit gap-3">
             <IconButton size="small" disabled={!rentalManagementData} onClick={() => {}}>
               {isExpand.asset ? (
@@ -217,7 +224,7 @@ const AddServices = ({ rentalManagementData, setSelectedServices, selectedAssets
   );
 };
 
-const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading }) => {
+const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selectedServices, isExpand, setIsExpand, handleSave, loading, resources }) => {
   const [records, setRecords] = useState(null);
 
   const handleAdd = () => {
@@ -238,7 +245,7 @@ const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selected
     <>
       <div className={`'bg-[var(--dark-secondary,white)] rounded-[5px] [border:1px_solid_var(--common-border-color)]`}>
         <div className="flex items-center justify-between p-4">
-          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${routes.employeeMaster.title}`}</h3>
+          <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{`Add ${resources?.employeeMaster?.titlePlural}`}</h3>
           {/* <div className="flex min-w-fit gap-3">
             <IconButton size="small" disabled={true} onClick={() => {}}>
               {isExpand.technician ? <ExpandLess fontSize="small" color={'disabled'} /> : <ExpandMore fontSize="small" color={'disabled'} />}
@@ -284,7 +291,7 @@ const AddTechnicians = ({ rentalManagementData, setSelectedTechnicians, selected
 };
 
 const RenderTable = ({ resource, warehouse, setRecords }) => {
-  const renderedFrom = `${routes.workAutomation.title}_${resource}`;
+  const renderedFrom = `${sidebarResource?.workAutomation}_${resource}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

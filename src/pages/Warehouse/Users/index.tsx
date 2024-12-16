@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
-let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
+let renderedFrom = `${camelCase(sidebarResource.user)}_warehouse_master`;
 
 const Users = ({ warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,7 +23,7 @@ const Users = ({ warehouse }) => {
   const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -270,7 +270,7 @@ const Users = ({ warehouse }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.user?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete the ${resources?.user?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

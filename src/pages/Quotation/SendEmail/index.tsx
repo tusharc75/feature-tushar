@@ -21,7 +21,7 @@ const SendEmail = ({
 }) => {
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   return (
@@ -58,7 +58,7 @@ const SendEmail = ({
               </Button>
             )}
             <PreviewDownload
-              fileName={`${routes.quotation.title}-${quotationData?.quotationNumber}`}
+              fileName={`${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`}
               resource={sidebarResource.quotation}
               referenceId={quotationData?._id}
               columns={columns}

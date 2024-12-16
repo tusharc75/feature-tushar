@@ -35,22 +35,13 @@ import axios, { CancelTokenSource } from 'axios';
 let invoiceTimeout;
 
 const Invoice = () => {
-  const types = [
-    {
-      key: `My ${routes.invoice.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.invoice.title}`,
-      value: 2
-    }
-  ];
 
-  const renderedFrom = camelCase(routes?.invoice.title);
+
+  const renderedFrom = camelCase(sidebarResource.invoice);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.invoice));
   const [renderCount, setRenderCount] = useState(0);
@@ -69,6 +60,18 @@ const Invoice = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
+
+  const types = [
+    {
+      key: `My ${resources?.invoice?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.invoice?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -339,7 +342,7 @@ const Invoice = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.invoice]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.invoice?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.invoice}
           module="invoice"
@@ -414,7 +417,7 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+            message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

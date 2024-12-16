@@ -29,24 +29,27 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import axios, { CancelTokenSource } from 'axios';
 
 const PurchaseRequisition = () => {
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
   const PurchaseRequisitionType = [
     {
-      key: `My ${routes.purchaseRequisition.title}`,
+      key: `My ${resources?.purchaseRequisition.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.purchaseRequisition.title}`,
+      key: `All ${resources?.purchaseRequisition.titlePlural}`,
       value: 2
     }
   ];
-  const renderedFrom = camelCase(routes?.purchaseRequisition.title);
+  const renderedFrom = camelCase(sidebarResource.purchaseRequisition);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseRequisition));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -277,10 +280,10 @@ const PurchaseRequisition = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.purchaseRequisition]} />
+        <CustomBreadCrumbs routes={[{ ...routes.purchaseRequisition, title: resources?.purchaseRequisition?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.purchaseRequisition}
-          module={routes.purchaseRequisition.title}
+          module={resources?.purchaseRequisition?.titlePlural}
           api={routes.purchaseRequisition.path}
           afterImportCompleted={() => {
             fetchData();
@@ -336,7 +339,7 @@ const PurchaseRequisition = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.purchaseRequisition?.title} ${deleteRecord?.purchaseRequisitionNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.purchaseRequisition?.titleSingular} ${deleteRecord?.purchaseRequisitionNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

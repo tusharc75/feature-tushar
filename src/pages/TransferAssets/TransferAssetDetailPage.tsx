@@ -37,14 +37,14 @@ import Step from '../DynamicForm/Step';
 
 
 const TransferAssetDetailPage = () => {
-  const renderedFrom = camelCase(routes?.transferAsset.title);
+  const renderedFrom = camelCase(sidebarResource.transferAsset);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -251,7 +251,7 @@ const TransferAssetDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.transferAsset, { title: transferAssetData?.transferAssetNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.transferAsset, title: resources?.transferAsset?.titlePlural }, { title: transferAssetData?.transferAssetNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -354,6 +354,7 @@ const TransferAssetDetailPage = () => {
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
                   permissions={permissions}
+                  resources={resources}
                   setNextStep={setNextStep}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
@@ -375,6 +376,7 @@ const TransferAssetDetailPage = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   allowedToEdit={allowedToEdit || isProcessor}
                   stepFullScreen={stepFullScreen}
+                  resources={resources}
                 />
               )}
             </ContentFullScreen>

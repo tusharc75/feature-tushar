@@ -39,7 +39,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Step from '../DynamicForm/Step';
 
 const ProductionOrderDetails = () => {
-  const renderedFrom = camelCase(routes?.productionOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.productionOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,7 +48,7 @@ const ProductionOrderDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [productionOrderData, setProductionOrderData] = useState(null);
@@ -128,7 +128,7 @@ const ProductionOrderDetails = () => {
 
   const fetchProductionOrderData = () => {
     axiosInstance()
-      .get(`${routes.productionOrder.path}/${id}`)
+      .get(`${routes?.productionOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket');
         setProductionOrderProcessSteps(tempStepList);
@@ -155,7 +155,7 @@ const ProductionOrderDetails = () => {
       .put(`${productionOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(routes.productionOrder.path);
+        history.push(routes?.productionOrder?.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -191,7 +191,7 @@ const ProductionOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.productionOrder, { title: productionOrderData?.productionOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.productionOrder, title: resources?.productionOrder?.titlePlural }, { title: productionOrderData?.productionOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -247,7 +247,7 @@ const ProductionOrderDetails = () => {
           <CustomTab value={1}>
             Details
           </CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

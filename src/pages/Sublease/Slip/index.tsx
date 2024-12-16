@@ -13,12 +13,16 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     if (
@@ -162,7 +166,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+    fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
     resource: sidebarResource.sublease,
     referenceId: subleaseData._id,
     columns: columns,

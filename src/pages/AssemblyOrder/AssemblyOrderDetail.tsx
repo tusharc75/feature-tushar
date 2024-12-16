@@ -39,7 +39,7 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 
 const AssemblyOrderDetail = () => {
-  const renderedFrom = camelCase(routes?.assemblyOrder.title);
+  const renderedFrom = camelCase(sidebarResource.assemblyOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,7 +48,7 @@ const AssemblyOrderDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
@@ -139,8 +139,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -174,7 +174,7 @@ const AssemblyOrderDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.assemblyOrder, { title: assemblyOrderData?.assemblyOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.assemblyOrder, title: resources?.assemblyOrder?.titlePlural }, { title: assemblyOrderData?.assemblyOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -232,10 +232,10 @@ const AssemblyOrderDetail = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
             handleNext={
               assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-              !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                 ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
+                  setOpenManagedPackageDialog(true);
+                }
                 : null
             }
             updateStatus={(step: number) => {

@@ -1,5 +1,6 @@
 import { Fragment, useContext, useState } from 'react';
 import DisplayChips from './ChipDataDisplay';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 
 function DisplayFilters({
   columns,
@@ -15,6 +16,7 @@ function DisplayFilters({
 }) {
   const [chipData, setChipData] = useState([]);
   const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
+  const { setTempFilter } = useUserTempFilters();
 
   const clearSingleFilter = (name) => {
     // Create a copy of the customFilters object
@@ -28,6 +30,7 @@ function DisplayFilters({
     setCurrentFomValue(formValues);
     // Dispatch the updated filters and update the chipData
     dispatchTable({ type: 'filter', filters: newFilters });
+    setTempFilter(resource, { formValues: formValues || {}, filters: newFilters });
     setChipData((prev) => prev.filter((item) => item.name !== name));
   };
 

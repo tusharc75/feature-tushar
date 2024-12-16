@@ -18,36 +18,36 @@ const FIELD_TO_FILTER = [
   {
     key: 'serviceMaster',
     fieldName: 'service',
-    fieldLabel: routes.serviceMaster.title,
+    fieldLabel: sidebarResource.serviceMaster,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
     key: 'workOrder',
     fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
+    fieldLabel: sidebarResource?.workOrder,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
   {
     key: 'repairOrder',
     fieldName: 'repairOrder',
-    fieldLabel: routes.repairOrder.title,
-    resource: sidebarResource.repairOrder,
+    fieldLabel: sidebarResource?.repairOrder,
+    resource: sidebarResource?.repairOrder,
     type: 'dropDown'
   },
   {
     key: 'productionOrder',
     fieldName: 'productionOrder',
-    fieldLabel: routes.productionOrder.title,
-    resource: sidebarResource.productionOrder,
+    fieldLabel: sidebarResource?.productionOrder,
+    resource: sidebarResource?.productionOrder,
     type: 'dropDown'
   }
 ];
 
 const WorkOrderTechnician = () => {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const ref: any = useRef();
@@ -84,7 +84,7 @@ const WorkOrderTechnician = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.workOrderTechnician]} />
+          <CustomBreadCrumbs routes={[{ ...routes.workOrderTechnician, title: resources?.workOrderTechnician?.titlePlural }]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

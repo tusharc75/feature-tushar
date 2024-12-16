@@ -1,13 +1,10 @@
 
 import routes from '../Helpers/Routes';
-import CustomBreadCrumbs from '../CustomBreadCrumbs';
-import CustomContainer from '../CustomContainer';
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import { Skeleton } from '@material-ui/lab';
 import Carousel from 'react-material-ui-carousel';
 import { BsFillCircleFill, BsImage } from 'react-icons/bs';
-import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
 import styles from './product-card.module.scss'
 import { Avatar, makeStyles } from '@material-ui/core';

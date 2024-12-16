@@ -40,16 +40,16 @@ import ManageRepairOrder from './ManageRepairOrder';
 
 const RepairOrder = () => {
   const { setWalkmeData } = useSetWalkmeData();
-  let renderedFrom = camelCase(routes.repairOrder?.title);
+  let renderedFrom = camelCase(sidebarResource?.repairOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const types = [
     {
-      key: `My ${routes.repairOrder.title}`,
+      key: `My ${sidebarResource?.repairOrder}`,
       value: 1
     },
     {
-      key: `All ${routes.repairOrder.title}`,
+      key: `All ${sidebarResource?.repairOrder}`,
       value: 2
     }
   ];
@@ -61,7 +61,7 @@ const RepairOrder = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -95,7 +95,7 @@ const RepairOrder = () => {
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
     setWalkmeData([createRepairOrderFlow(data)]);
-    let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes?.repairOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ...getCompletedByField(), ActionsRenderer]);
   };
 
@@ -324,10 +324,10 @@ const RepairOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.repairOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.repairOrder}
-          module={routes.repairOrder.title}
+          module={resources?.repairOrder?.titlePlural}
           api={repairOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -390,9 +390,8 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
-              deleteRecord.repairOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -422,7 +421,7 @@ const RepairOrder = () => {
             repairOrderId={showManageRepairOrderDialog.idToClone}
             onClose={() => setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null })}
             onSuccess={(data) => {
-              history.push(`${routes.repairOrderDetail.path}/${data._id}`);
+              history.push(`${routes?.repairOrderDetail?.path}/${data._id}`);
               setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null });
             }}
           />

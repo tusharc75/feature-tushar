@@ -41,14 +41,14 @@ const formats = {
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
           {
-            label: routes.warehouse.title,
+            label: resources?.warehouse?.titlePlural,
             value: 'Warehouse',
             key: 'warehouse'
           }
@@ -57,7 +57,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.product?.isRead
       ? [
           {
-            label: routes.product.title,
+            label: resources?.product?.titlePlural,
             value: 'Product',
             key: 'product'
           }
@@ -66,7 +66,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serializedAsset?.isRead
       ? [
           {
-            label: routes.serializedAsset.title,
+            label: resources?.serializedAsset?.titlePlural,
             value: 'Serialized Asset',
             key: 'asset'
           }
@@ -75,7 +75,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serviceMaster?.isRead
       ? [
           {
-            label: routes.serviceMaster.title,
+            label: resources?.serviceMaster?.titleSingular,
             value: 'Service Master',
             key: 'service'
           }
@@ -84,7 +84,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.customerAccount?.isRead
       ? [
           {
-            label: routes.customerAccount.title,
+            label: resources?.customerAccount?.titlePlural,
             value: 'Customer Account',
             key: 'customerAccount'
           }
@@ -93,7 +93,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.competencies?.isRead
       ? [
           {
-            label: routes.competencies.title,
+            label: resources?.competencies?.titlePlural,
             value: 'Competencies',
             key: 'competencies'
           }
@@ -103,7 +103,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const ASSET_FILTERS = [
     {
-      label: routes.serializedAsset.title,
+      label: resources?.serializedAsset?.titlePlural,
       value: 'Serialized Asset',
       key: 'assetIds'
     }
@@ -111,12 +111,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const PRODUCT_FILTERS = [
     {
-      label: routes.product.title,
+      label: resources?.product?.titlePlural,
       value: 'Product',
       key: 'product'
     },
     {
-      label: routes.warehouse.title,
+      label: resources?.warehouse?.titlePlural,
       value: 'Warehouse',
       key: 'warehouse'
     }
@@ -124,12 +124,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const RENTAL_JOB_FILTERS = [
     {
-      label: routes.rentalManagement.title,
+      label: resources?.rentalManagement?.titlePlural,
       value: 'Rental Management',
       key: 'rentalJob'
     },
     {
-      label: routes.padMaster.title,
+      label: resources?.padMaster?.titlePlural,
       value: 'Pad Master',
       key: 'padMaster'
     }
@@ -852,7 +852,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} />
+                    <RenderTable data={d.items} resources={resources} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -866,7 +866,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data }) => {
+const RenderTable = ({ data, resources }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -874,8 +874,8 @@ const RenderTable = ({ data }) => {
           <TableRow>
             <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
-            <TableCell>{routes.warehouse.title}</TableCell>
-            <TableCell>{routes.customerAccount.title}</TableCell>
+            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
+            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
             {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>
@@ -892,11 +892,11 @@ const RenderTable = ({ data }) => {
                     } else if (row?.resource === sidebarResource.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.demandOrder) {
                       window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairJob) {
                       window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.salesOrder) {

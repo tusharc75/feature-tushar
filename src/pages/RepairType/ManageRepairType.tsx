@@ -27,7 +27,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -188,7 +188,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={repairTypeId ? (isClone ? 'Clone' : `Update ${repairTypeData?.repairType}`) : 'Create ' + routes.repairType.title}
+                title={repairTypeId ? (isClone ? 'Clone' : `Update ${repairTypeData?.repairType}`) : 'Create ' + resources?.repairType?.titleSingular}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);

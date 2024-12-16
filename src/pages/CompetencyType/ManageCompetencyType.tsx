@@ -19,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -149,7 +149,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create ${routes.competencyType.title}`
+                    : `Create ${resources?.competencyType?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

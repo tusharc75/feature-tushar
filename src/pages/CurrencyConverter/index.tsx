@@ -34,7 +34,7 @@ const CurrencyConverter = () => {
   const [loading, setLoading] = useState(false);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [currencyConverterPermissions, setCurrencyConverterPermissions] = useState({
     isCreate: false,
@@ -182,7 +182,7 @@ const CurrencyConverter = () => {
   return (
     <section className="main-container-v1">
       <Grid container className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.currencyConverter]} />
+        <CustomBreadCrumbs routes={[{ ...routes.currencyConverter, title: resources?.currencyConverter?.titlePlural }]} />
       </Grid>
       <CustomContainer styles={{ overflowY: 'auto' }}>
         <ListingPageHeader
@@ -233,10 +233,10 @@ const CurrencyConverter = () => {
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
-                  // renderOption={(option) => {
-                  //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                  //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                  // }}
+                // renderOption={(option) => {
+                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                // }}
                 />
               </Grid>
               <Grid xs={12} md={4} sm={4} container justify="flex-end">

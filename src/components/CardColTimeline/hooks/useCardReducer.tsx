@@ -54,6 +54,11 @@ function reducer(state: TInitialState, action: TActios) {
         data: action.setData(state.data),
         count: action.setCount(state.count)
       };
+    case 'selection':
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords
+      };
     case 'visibleColumns':
       return {
         ...state,
@@ -69,6 +74,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         refreshDataCount: state.refreshDataCount < 10 ? state.refreshDataCount + 1 : 0,
         data: {},
+        selectedRecords: [],
         loading: {}
       };
     case 'reset':
@@ -77,6 +83,7 @@ function reducer(state: TInitialState, action: TActios) {
         count: {},
         loading: {},
         page: {},
+        selectedRecords: [],
         columnOrder: [],
         visibleColumns: [],
         filterQuery: '',
@@ -96,6 +103,7 @@ const intialState = {
   count: {},
   loading: {},
   page: {},
+  selectedRecords: [],
   columnOrder: [],
   visibleColumns: [],
   filterQuery: '',
@@ -110,6 +118,7 @@ export type TInitialState = {
   loading: { [key: string]: boolean };
   columnOrder: string[];
   page: { [key: string]: number };
+  selectedRecords: any[];
   visibleColumns: string[];
   filterQuery: string;
   rowDef: datarowInterface[];
@@ -119,6 +128,7 @@ export type TInitialState = {
 
 export type TActios =
   | { type: 'initialize'; columnOrder: string[]; visibleColumns: string[]; rowDef: datarowInterface[]; limit?: number }
+  | { type: 'selection'; selectedRecords: any[] }
   | { type: 'loading'; loading: (prev: { [key: string]: boolean }) => { [key: string]: boolean } }
   | { type: 'page'; setPage: (data: { [key: string]: number }) => { [key: string]: number } }
   | { type: 'columnOrder'; columnOrder: string[] }

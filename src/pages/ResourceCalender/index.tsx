@@ -9,14 +9,14 @@ import { useData } from '../../StateProvider/Provider';
 
 const ResourceCalendar = () => {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   } = useData();
 
   return (
     <div>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: 'Resource Calendar', path: '' }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.resourceCalendar, title: resources?.resourceCalendar?.titlePlural }]} />
         </Grid>
       </Grid>
       <div className="main-container">

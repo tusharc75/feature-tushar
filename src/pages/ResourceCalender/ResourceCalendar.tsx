@@ -55,7 +55,7 @@ const MyCalendar = (props: Props) => {
         }));
         setEvents(eventsData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [resource, dateRange]);
 
   const onRangeChange = useCallback(

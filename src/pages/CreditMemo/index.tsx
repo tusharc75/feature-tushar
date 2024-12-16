@@ -23,28 +23,27 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@material-ui/icons';
 
 const CreditMemo = () => {
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
 
   const types = [
     {
-      key: `My ${routes.creditMemo.title}`,
+      key: `My ${resources?.creditMemo?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.creditMemo.title}`,
+      key: `All ${resources?.creditMemo?.titlePlural}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.creditMemo.title);
+  const renderedFrom = camelCase(sidebarResource.creditMemo);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.creditMemo));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,7 +124,7 @@ const CreditMemo = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -282,10 +281,10 @@ const CreditMemo = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.creditMemo]} />
+        <CustomBreadCrumbs routes={[{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.creditMemo}
-          module={routes.creditMemo.title}
+          module={resources?.creditMemo?.titlePlural}
           api={routes.creditMemo.path}
           afterImportCompleted={() => {
             fetchData();
@@ -345,7 +344,7 @@ const CreditMemo = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.creditMemo?.title} ${deleteRecord?.creditMemoNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.creditMemo?.titleSingular} ${deleteRecord?.creditMemoNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -31,21 +31,21 @@ import ManageTransferAsset from './ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 
 const TransferAsset = () => {
+  let renderedFrom = camelCase(sidebarResource.transferAsset);
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes.transferAsset.title}`,
+      key: `My ${resources?.transferAsset?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.transferAsset.title}`,
+      key: `All ${resources?.transferAsset?.titlePlural}`,
       value: 2
     }
   ];
-
-  let renderedFrom = camelCase(routes?.transferAsset.title);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -244,10 +244,10 @@ const TransferAsset = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.transferAsset]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transferAsset, title: resources?.transferAsset?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transferAsset}
-          module={routes.transferAsset.title}
+          module={resources?.transferAsset?.titlePlural}
           api={transferAsset.api}
           afterImportCompleted={() => {
             fetchData();
@@ -314,9 +314,8 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${resources?.transferAsset?.titleSingular?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -41,7 +41,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.serializedAsset.title);
+const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
 const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +53,7 @@ const SerializedAsset = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -332,14 +332,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -502,10 +502,10 @@ const SerializedAsset = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.serializedAsset}
-          module={routes?.serializedAsset.title}
+          module={resources?.serializedAsset?.titlePlural}
           api={serializedAsset.api}
           afterImportCompleted={() => {
             fetchData();
@@ -544,7 +544,8 @@ const SerializedAsset = () => {
                 subleaseAsset,
                 setSubleaseAsset,
                 showScrapAsset,
-                setShowScrapAsset
+                setShowScrapAsset,
+                resources
               }}
             />
           }
@@ -607,9 +608,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${resources?.serializedAsset?.titleSingular?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -668,7 +668,8 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  setShowScrapAsset
+  setShowScrapAsset,
+  resources
 }) => {
   return (
     <>
@@ -770,7 +771,15 @@ const LeftSideContent = ({
               setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
             }}
             renderInput={(params) => (
-              <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+              <TextField
+                {...params}
+                margin="none"
+                size="small"
+                name="plant"
+                label={resources?.warehouse?.titleSingular}
+                variant="outlined"
+                fullWidth
+              />
             )}
           />
           {permissions?.sublease && (
@@ -801,7 +810,7 @@ const LeftSideContent = ({
               />
             }
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-            label={`Scrap ${routes.serializedAsset.title}`}
+            label={`Scrap ${resources?.serializedAsset?.titleSingular}`}
           />
         </Fragment>
       )}

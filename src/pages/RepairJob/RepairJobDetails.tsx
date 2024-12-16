@@ -33,10 +33,10 @@ import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Step from '../DynamicForm/Step'
+import Step from '../DynamicForm/Step';
 
 const RepairJobDetails = () => {
-  const renderedFrom = camelCase(routes?.repairJob.title);
+  const renderedFrom = camelCase(sidebarResource?.repairJob);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -45,7 +45,7 @@ const RepairJobDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -59,6 +59,7 @@ const RepairJobDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -207,7 +208,9 @@ const RepairJobDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.repairJob, { title: repairJobData?.repairJobName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes?.repairJob, title: resources?.repairJob?.titlePlural }, { title: repairJobData?.repairJobName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -225,20 +228,10 @@ const RepairJobDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          <CustomTab value={2}>
-            {routes.deliveryTicket.title}
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={3}>
-              Views
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={3}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -257,6 +250,7 @@ const RepairJobDetails = () => {
             <Steps
               isNextStep={false}
               nextStep={nextStep}
+              nextStepToolTip={nextStepToolTip}
               steps={repairJobProcessSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -271,6 +265,7 @@ const RepairJobDetails = () => {
                 <AddSerializedAsset
                   repairJobData={repairJobData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   updateJobStatus={updateJobStatus}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}

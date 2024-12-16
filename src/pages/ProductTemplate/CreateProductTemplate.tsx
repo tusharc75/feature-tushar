@@ -83,7 +83,7 @@ const ProductTemplate = () => {
   };
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [productTemplatePermissions, setProductTemplatePermissions] = useState({
     isCreate: false,
@@ -324,7 +324,7 @@ const ProductTemplate = () => {
           <div className="flex items-center justify-between w-full">
             <CustomBreadCrumbs
               routes={[
-                { title: routes.productTemplate.title, path: routes.productTemplate.path },
+                { title: resources?.productTemplate?.titlePlural, path: routes.productTemplate.path },
                 { title: id === '0' || isClone ? 'New' : initialValues && initialValues.name }
               ]}
               isConfirmBeforeClick={hasPermissionToUpdate}
@@ -430,7 +430,7 @@ const ProductTemplate = () => {
                       {!values['isStandard'] && (
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
-                          options={[{_id: 'Select All', name: 'Select All'},...productCategory]}
+                          options={[{ _id: 'Select All', name: 'Select All' }, ...productCategory]}
                           multiple
                           getOptionLabel={(option: any) => (option ? option.name : '')}
                           getOptionSelected={(option: any, val) => option._id === val}
@@ -441,9 +441,9 @@ const ProductTemplate = () => {
                               : []
                           }
                           onChange={(e, val) => {
-                            if(val?.find((v)=> v._id==="Select All")){
-                              setFieldValue('productCategory', productCategory?.map((d) => d._id)); 
-                            }else {
+                            if (val?.find((v) => v._id === "Select All")) {
+                              setFieldValue('productCategory', productCategory?.map((d) => d._id));
+                            } else {
                               setFieldValue('productCategory', val && val?.map((d) => d._id));
                             }
                           }}

@@ -47,7 +47,7 @@ function PricingConditionsDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -271,7 +271,7 @@ function PricingConditionsDetailsPage() {
           <CustomBreadCrumbs
             routes={[
               {
-                title: routes.pricingCondition.title,
+                title: resources?.pricingCondition?.titlePlural,
                 path: routes.pricingCondition.path
               },
               {

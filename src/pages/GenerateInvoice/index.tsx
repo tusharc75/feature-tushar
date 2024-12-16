@@ -21,65 +21,17 @@ import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const GENERATE_RESOURCE = [
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    fieldName: 'rentalJobName',
-    invoiceFieldName: 'rentalJob',
-    progressiveBilling: true,
-    path: routes.rentalManagementDetail.path,
-    title: routes.rentalManagement.title
-  },
-  {
-    key: 'sublease',
-    resource: sidebarResource.sublease,
-    fieldName: 'subleaseName',
-    invoiceFieldName: 'sublease',
-    progressiveBilling: true,
-    path: routes.subleaseDetail.path,
-    title: routes.sublease.title
-  },
-  {
-    key: 'repairOrder',
-    resource: sidebarResource.repairOrder,
-    fieldName: 'repairOrderNumber',
-    invoiceFieldName: 'repairOrder',
-    progressiveBilling: false,
-    path: routes.repairOrderDetail.path,
-    title: routes.repairOrder.title
-  },
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    fieldName: 'fieldTicketNumber',
-    invoiceFieldName: 'fieldTicket',
-    progressiveBilling: false,
-    path: routes.fieldTicketDetail.path,
-    title: routes.fieldTicket.title
-  },
-  {
-    key: 'salesOrder',
-    resource: sidebarResource.salesOrder,
-    fieldName: 'salesOrderNumber',
-    invoiceFieldName: 'salesOrder',
-    progressiveBilling: false,
-    path: routes.salesOrderDetail.path,
-    title: routes.salesOrder.title
-  }
-];
-
 const GenerateInvoice = ({ resourceRendered = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedResource, setSelectedResource] = useState(null);
   const renderedFrom = resourceRendered
     ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
-    : `${selectedResource?.key + camelCase(routes?.generateInvoice.title)}`;
+    : `${selectedResource?.key + camelCase(sidebarResource.generateInvoice)}`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -93,12 +45,59 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const GENERATE_RESOURCE = [
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      fieldName: 'rentalJobName',
+      invoiceFieldName: 'rentalJob',
+      progressiveBilling: true,
+      path: routes.rentalManagementDetail.path,
+      title: resources?.rentalManagement?.titlePlural
+    },
+    {
+      key: 'sublease',
+      resource: sidebarResource.sublease,
+      fieldName: 'subleaseName',
+      invoiceFieldName: 'sublease',
+      progressiveBilling: true,
+      path: routes.subleaseDetail.path,
+      title: resources?.sublease?.titlePlural
+    },
+    {
+      key: 'repairOrder',
+      resource: sidebarResource.repairOrder,
+      fieldName: 'repairOrderNumber',
+      invoiceFieldName: 'repairOrder',
+      progressiveBilling: false,
+      path: routes?.repairOrderDetail?.path,
+      title: resources?.repairOrder?.titlePlural
+    },
+    {
+      key: 'fieldTicket',
+      resource: sidebarResource.fieldTicket,
+      fieldName: 'fieldTicketNumber',
+      invoiceFieldName: 'fieldTicket',
+      progressiveBilling: false,
+      path: routes.fieldTicketDetail.path,
+      title: resources?.fieldTicket?.titlePlural
+    },
+    {
+      key: 'salesOrder',
+      resource: sidebarResource.salesOrder,
+      fieldName: 'salesOrderNumber',
+      invoiceFieldName: 'salesOrder',
+      progressiveBilling: false,
+      path: routes.salesOrderDetail.path,
+      title: resources?.salesOrder?.titlePlural
+    }
+  ];
 
   useEffect(() => {
     const options: any = [];
     GENERATE_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push({ ...item });
       }
     });
     setResourceList(options);
@@ -328,7 +327,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       return uniqueInvoice?.filter(Boolean);
     }
     return [];
-  }
+  };
 
   const handleDownloadZip = async () => {
     try {
@@ -338,13 +337,14 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         type: 'info',
         message: `Your file will be downloaded in a matter of seconds`
       });
-      setIsDownloading(true)
+      setIsDownloading(true);
       const uniqueInvoice = uniqueInvoices();
       if (uniqueInvoice?.length > 0) {
         const invoiceIds = uniqueInvoice.join(',');
-        await axiosInstance().get(`${routes?.generateInvoice.path}/invoice-field-ticket-zip?invoiceIds=${invoiceIds}`, {
-          responseType: 'blob'
-        })
+        await axiosInstance()
+          .get(`${routes?.generateInvoice.path}/invoice-field-ticket-zip?invoiceIds=${invoiceIds}`, {
+            responseType: 'blob'
+          })
           .then((response) => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -352,7 +352,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             link.setAttribute('download', 'Invoice_Tickets.zip');
             document.body.appendChild(link);
             link.click();
-            setIsDownloading(false)
+            setIsDownloading(false);
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -363,14 +363,14 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
-            setIsDownloading(false)
+            setIsDownloading(false);
           });
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
-      setIsDownloading(false)
+      setIsDownloading(false);
     }
-  }
+  };
 
   const ActionMenuItems = () => {
     return (
@@ -384,10 +384,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
           Create Invoice
         </MenuItem>
         {selectedResource?.resource === sidebarResource.fieldTicket && (
-          <MenuItem
-            disabled={uniqueInvoices()?.length === 0 || isDownloading}
-            onClick={handleDownloadZip}
-          >
+          <MenuItem disabled={uniqueInvoices()?.length === 0 || isDownloading} onClick={handleDownloadZip}>
             Download Invoice Tickets
           </MenuItem>
         )}
@@ -403,10 +400,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             routes={[
               {
                 title: resourceRendered
-                  ? routes[`${resourceRendered}Invoice`]
-                    ? routes[`${resourceRendered}Invoice`]?.title
+                  ? resources[`${resourceRendered}Invoice`]
+                    ? resources[`${resourceRendered}Invoice`]?.titlePlural
                     : 'Invoice'
-                  : routes.generateInvoice.title
+                  : resources?.generateInvoice?.titlePlural
               }
             ]}
           />

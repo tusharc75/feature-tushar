@@ -386,7 +386,17 @@ export const sidebarResource = {
   managedPackages: 'Managed Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
-  packageInventory: 'Package Inventory'
+  packageInventory: 'Package Inventory',
+  workAutomation: 'Work Automation',
+  iotChart: 'Iot Chart',
+  sendOutboundMessage: 'Send Outbound Message',
+  materialHandling: 'Material Handling',
+  generateInvoice: 'Generate Invoice',
+  dataList: 'DataList',
+  dataListitems: 'DataList Items',
+  workSpace: 'WorkSpace',
+  workflow: 'Workflow',
+  workflowReport: 'Workflow Report'
 };
 
 export const primaryFields = {
@@ -1077,6 +1087,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       } else {
         obj[key.fieldName] = value ? value : '';
       }
+    } else if (key.type === 'freeStyleMultiSelect') {
+      const value = dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) ? dataObj[key.fieldName] : [];
+      obj[key.fieldName] = value;
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -1276,7 +1289,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1308,78 +1321,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+            }
+          )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().matches(urlRegex, 'Enter valid URL').required(message),
-                otherwise: string().matches(urlRegex, 'Enter valid URL')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().matches(urlRegex, 'Enter valid URL').required(message),
+              otherwise: string().matches(urlRegex, 'Enter valid URL')
+            }
+          )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().min(10, 'Mobile number is too short').required(message),
-                otherwise: string().min(10, 'Mobile number is too short')
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().min(10, 'Mobile number is too short').required(message),
+              otherwise: string().min(10, 'Mobile number is too short')
+            }
+          )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: array().min(1, message),
-                otherwise: array()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: array().min(1, message),
+              otherwise: array()
+            }
+          )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-                otherwise: number().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+              otherwise: number().nullable()
+            }
+          )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1387,26 +1400,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-                validationFields?.map((f) => f?.fieldName),
-                {
-                  is: validation,
-                  then: string().email().required(message),
-                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-                }
-              )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().email().required(message),
+                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+              }
+            )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: boolean().required(message),
-                otherwise: boolean()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: boolean().required(message),
+              otherwise: boolean()
+            }
+          )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1435,13 +1448,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(`${input.fieldLabel} is required`).nullable(),
-                otherwise: string().nullable()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(`${input.fieldLabel} is required`).nullable(),
+              otherwise: string().nullable()
+            }
+          )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1462,13 +1475,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            validationFields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -1606,11 +1619,24 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+interface IRoutesAndTitle {
+  [key: string]: {
+    titlePlural: string;
+    titleSingular: string;
+  };
+}
+
+interface IGetPermissionsReturn {
+  permissions: IPermission;
+  resources: IRoutesAndTitle;
+}
+
+export const getPermissions = (user, selectedEntity = undefined): IGetPermissionsReturn | null => {
   if (user) {
     try {
       let permissions = {};
       let routesAndTitle = {};
+      let resources = {};
 
       let data = [...user?.role?.sideBar];
 
@@ -1644,8 +1670,9 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
               permission['approveAccount'] = hasApproveAccountPermission;
             }
             permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
-            routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-              title: d.resourceLabel || d.name
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           } else {
             let permission = {
@@ -1659,15 +1686,14 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             }
             const k = lowerFirst(d.name.replace(/ /g, ''));
             permissions[k] = permission;
-            routesAndTitle[k] = {
-              title: d.resourceLabel || d.name
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           }
         });
       }
-
-      localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-      return permissions;
+      return { permissions, resources };
     } catch (e) {
       console.log(e);
     }
@@ -2540,198 +2566,244 @@ export const IOT_REPORT_LIST = [
   }
 ];
 
+export const REPORT_SECTIONS = {
+  rental: 'Rental',
+  sales: 'Sales',
+  inventory: 'Inventory',
+  asset: 'Asset',
+  purchase: 'Purchase',
+  fieldService: 'Field Service',
+  production: 'Production',
+  deals: 'Deals',
+  user: 'User',
+  integration: 'Integration',
+  iot: 'Iot'
+};
+
 export const REPORT_LIST = [
   {
-    title: sidebarResource.rentalManagement,
-    permission: 'rentalManagement',
-    key: 'rentalManagement',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.quotation,
-    permission: 'quotation',
-    key: 'quotation',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.salesOrder,
-    permission: 'salesOrder',
-    key: 'salesOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.serializedAsset,
-    permission: 'serializedAsset',
-    key: 'serializedAsset',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.transferAsset,
-    permission: 'transferAsset',
-    key: 'transferAsset',
-    type: 'dynamic'
+    title: sidebarResource.projectSales,
+    permission: 'projectSales',
+    key: 'projectSales',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.quotation,
+    permission: 'quotation',
+    key: 'quotation',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
-    title: sidebarResource.projectSales,
-    permission: 'projectSales',
-    key: 'projectSales',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.workOrder,
-    permission: 'workOrder',
-    key: 'workOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.purchaseOrder,
-    permission: 'purchaseOrder',
-    key: 'purchaseOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.productionOrder,
-    permission: 'productionOrder',
-    key: 'productionOrder',
-    type: 'dynamic'
+    title: sidebarResource.salesOrder,
+    permission: 'salesOrder',
+    key: 'salesOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.invoice,
     permission: 'invoice',
     key: 'invoice',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.fieldTicket,
-    permission: 'fieldTicket',
-    key: 'fieldTicket',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Details',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceDetails'
+    type: 'invoiceDetails',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Backlog',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceBacklog'
-  },
-  {
-    title: 'Syteline Invoice Integration',
-    permission: 'invoice',
-    key: 'standardReport',
-    type: 'sytelineInvoiceIntegration'
+    type: 'invoiceBacklog',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Revenue By Customer',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'revenueByCustomer'
+    type: 'revenueByCustomer',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: 'Sales Funnel Report',
+    permission: 'lead',
+    key: 'standardReport',
+    type: 'salesFunnel',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.rentalManagement,
+    permission: 'rentalManagement',
+    key: 'rentalManagement',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.rental
+  },
+  {
+    title: sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'serializedAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Lost Assets',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'lostAssets'
-  },
-  {
-    title: 'Purchase Order Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderDetails'
-  },
-  {
-    title: 'Purchase Order Actual Received Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderActualReceivedDetails'
-  },
-  {
-    title: 'Inventory Evaluation',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryEvaluation'
-  },
-  {
-    title: 'Inventory History',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryHistory'
-  },
-  {
-    title: 'Average Price By Supplier',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'averagePriceBySupplier'
+    type: 'lostAssets',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'numberOfAssetsByStatus'
+    type: 'numberOfAssetsByStatus',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'assetUtilization'
+    type: 'assetUtilization',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Statistics',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'serializedAssetStatistics'
-  },
-  {
-    title: 'Work Order Service',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderService'
-  },
-  {
-    title: 'Work Order Technician Work Hours',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderTechnicianWorkHours'
-  },
-  {
-    title: 'User Session',
-    permission: 'user',
-    key: 'standardReport',
-    type: 'userSession'
+    type: 'serializedAssetStatistics',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'inUsedSerializedAsset'
+    type: 'inUsedSerializedAsset',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.fieldTicket,
+    permission: 'fieldTicket',
+    key: 'fieldTicket',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.workOrder,
+    permission: 'workOrder',
+    key: 'workOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Service',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderService',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'averagePriceBySupplier',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: sidebarResource.productionOrder,
+    permission: 'productionOrder',
+    key: 'productionOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryEvaluation',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'Inventory History',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryHistory',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'standardReport',
+    type: 'userSession',
+    section: REPORT_SECTIONS.user
   },
   {
     title: 'Fleet Report',
     permission: 'deals',
     key: 'standardReport',
-    type: 'fleetReport'
+    type: 'fleetReport',
+    section: REPORT_SECTIONS.deals
   },
   {
     title: 'Daily Volume Report',
@@ -2740,7 +2812,8 @@ export const REPORT_LIST = [
     type: 'dailyVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Volume Report',
@@ -2750,13 +2823,15 @@ export const REPORT_LIST = [
     defaultColumn: true,
     notMultiSelectFields: ['frequency'],
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotUnitDowntimeReport'
+    type: 'iotUnitDowntimeReport',
+    section: REPORT_SECTIONS.iot
   },
   {
     title: `Pad Job Volume Report`,
@@ -2765,7 +2840,8 @@ export const REPORT_LIST = [
     type: 'rentalVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'IOT Data Points',
@@ -2773,13 +2849,16 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true,
-    notMultiSelectFields: ['asset', 'interval']
+    notMultiSelectFields: ['asset', 'interval'],
+    section: REPORT_SECTIONS.iot
   },
+
   {
-    title: 'Sales Funnel Report',
-    permission: 'lead',
+    title: 'Syteline Invoice Integration',
+    permission: 'invoice',
     key: 'standardReport',
-    type: 'salesFunnel'
+    type: 'sytelineInvoiceIntegration',
+    section: REPORT_SECTIONS.integration
   }
 ];
 
@@ -2817,8 +2896,8 @@ export const PDF_RESOURCE_LIST = [
 
 export const COLOUR_MASTER = {
   rentalJob: {
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   cancelledRentalJob: {
     background: '#00FF00',
@@ -2844,7 +2923,7 @@ export const COLOUR_MASTER = {
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
   },
-  service:{
+  service: {
     background: '#FFF7D9',
     borderColor: '#FDD33E'
   },
@@ -2861,8 +2940,8 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   purchaseOrder: {
-    background:'#E6E8F5',
-    borderColor:'#9789F0'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   sublease: {
     background: '#FFE4C0',
@@ -2884,9 +2963,21 @@ export const COLOUR_MASTER = {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
+  accepted: {
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  rejected: {
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
+  },
+  skipped: {
+    background: '#ffd65b',
+    borderColor: 'grey'
+  },
   receivingTicket: {
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   deliveredReceivingTicket: {
     background: '#cfdb7f',
@@ -2903,6 +2994,14 @@ export const COLOUR_MASTER = {
   replaceAssetColor: {
     background: 'var(--replaceAsset-bg)',
     borderColor: 'var(--replaceAsset-bg)'
+  },
+  preWork: {
+    background: 'rgba(254, 249, 230, 1)',
+    borderColor: '#C0C0C0'
+  },
+  postWork: {
+    background: 'rgba(222, 249, 255, 1)',
+    borderColor: 'green'
   }
 };
 
@@ -3334,7 +3433,13 @@ export function clamp(val: number, min: number, max: number) {
 }
 
 export const getResourceLabel = (resource, user) => {
-  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource;
+  const resourceData = user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)
+  if (resourceData) {
+    return { titleSingular: resourceData?.resourceLabel, titlePlural: resourceData?.homePageLabel || resourceData?.resourceLabel }
+  }
+  else {
+    return { titleSingular: resource, titlePlural: resource }
+  }
 };
 
 export const ASSET_APPROVAL_STATUS = {
@@ -3654,8 +3759,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

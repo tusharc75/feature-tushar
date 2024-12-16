@@ -32,16 +32,16 @@ import ManageProductionOrder from './ManageProductionOrder';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductionOrder = () => {
-  const renderedFrom = camelCase(routes?.productionOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.productionOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const types = [
     {
-      key: `My ${routes.productionOrder.title}`,
+      key: `My ${sidebarResource?.productionOrder}`,
       value: 1
     },
     {
-      key: `All ${routes.productionOrder.title}`,
+      key: `All ${sidebarResource?.productionOrder}`,
       value: 2
     }
   ];
@@ -52,7 +52,7 @@ const ProductionOrder = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.productionOrder));
@@ -85,7 +85,7 @@ const ProductionOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Production Order`);
     data = response?.data?.data;
-    let columns = generateColumns(renderedFrom, data, routes.productionOrderDetail.path, true);
+    let columns = generateColumns(renderedFrom, data, routes?.productionOrderDetail?.path, true);
     columns = [...columns, ...getStaticFields(), ActionsRenderer];
     setColumns(columns);
   };
@@ -253,10 +253,10 @@ const ProductionOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productionOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.productionOrder, title: resources?.productionOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productionOrder}
-          module={routes.productionOrder.title}
+          module={resources?.productionOrder?.titlePlural}
           api={productionOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -310,7 +310,7 @@ const ProductionOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productionOrder?.title} ${deleteRecord?.productionOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.productionOrder?.titleSingular} ${deleteRecord?.productionOrderNumber || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

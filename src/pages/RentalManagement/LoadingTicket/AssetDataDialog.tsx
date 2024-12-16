@@ -12,9 +12,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, getObjKeysWithValues, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 import { read, utils, writeFile } from 'xlsx';
 
 const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids, onSuccess, loading }) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: { assetData: [] } });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -141,7 +146,7 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
 
     utils.book_append_sheet(wb, ws, 'Sheet1');
     utils.book_append_sheet(wb, ws_value, 'Value');
-    writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
+    writeFile(wb, `${resources?.serializedAsset?.titleSingular} Data.xlsx`);
   };
 
   const getValueInImport = (data: any, asset: string, product: string, fieldLabel: string, assetData: any[]) => {
@@ -256,7 +261,7 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={routes.serializedAsset.title}
+                title={resources?.serializedAsset?.titleSingular}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

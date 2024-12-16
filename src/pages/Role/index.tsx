@@ -36,7 +36,7 @@ import axios, { CancelTokenSource } from 'axios';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 
-const renderedFrom = camelCase(routes.role.title);
+const renderedFrom = camelCase(sidebarResource.role);
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +45,7 @@ const Roles: FC = () => {
   const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedType, setSelectedType] = useState(
@@ -353,7 +353,7 @@ const Roles: FC = () => {
       )}
       <section className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[routes.role]} />
+          <CustomBreadCrumbs routes={[{ ...routes.role, title: resources?.role?.titlePlural }]} />
         </div>
         <CustomContainer>
           <ListingPageHeader

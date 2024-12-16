@@ -11,13 +11,13 @@ const WorkAutomation = () => {
   const history = useHistory();
   const [openRentalJobDialog, setOpenRentalJobDialog] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workAutomation]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workAutomation, title: resources?.workAutomation?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -25,7 +25,7 @@ const WorkAutomation = () => {
           addButtonOnclick={() => {
             setOpenRentalJobDialog(true);
           }}
-          addButtonProps={{text: `${routes.rentalManagement.title}`}}
+          addButtonProps={{ text: `${resources?.rentalManagement?.titleSingular}` }}
           isAddButtonVisible={permissions?.workAutomation?.isCreate}
         />
       </CustomContainer>
@@ -38,7 +38,7 @@ const WorkAutomation = () => {
             setOpenRentalJobDialog(false);
           }}
           onSuccess={(data) => {
-            history.push(`${routes.workAutomationDetail.path}/${data?._id}`)
+            history.push(`${routes.workAutomationDetail.path}/${data?._id}`);
             setOpenRentalJobDialog(false);
           }}
           isAutomated={true}

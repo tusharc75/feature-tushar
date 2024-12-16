@@ -9,40 +9,44 @@ import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
+import { useData } from 'src/StateProvider/Provider';
 
-const customNodeStyles = {
-  purchaseOrder: {
-    name: routes.purchaseOrder.title,
-    ...COLOUR_MASTER.purchaseOrder
-  },
-  product: {
-    name: 'Product',
-    ...COLOUR_MASTER.product
-  },
-  service: {
-    name: 'Service',
-    ...COLOUR_MASTER.service
-  },
-  manualEntry: {
-    name: 'Manual Entry',
-    ...COLOUR_MASTER.product
-  },
-  assets: {
-    name: 'Assets',
-    ...COLOUR_MASTER.assets
-  },
-  serialNumber: {
-    name: 'Serial Number',
-    ...COLOUR_MASTER.transferAsset
-  },
-  receiving: {
-    name: 'Receiving',
-    ...COLOUR_MASTER.receivingTicket
-  }
-};
 
 const PurchaseOrderViews = ({ purchaseOrderData }) => {
-
+  const {
+    state: { resources }
+  }: any = useData();
+  
+  const customNodeStyles = {
+    purchaseOrder: {
+      name: resources?.purchaseOrder?.titleSingular,
+      ...COLOUR_MASTER.purchaseOrder
+    },
+    product: {
+      name: 'Product',
+      ...COLOUR_MASTER.product
+    },
+    service: {
+      name: 'Service',
+      ...COLOUR_MASTER.service
+    },
+    manualEntry: {
+      name: 'Manual Entry',
+      ...COLOUR_MASTER.product
+    },
+    assets: {
+      name: 'Assets',
+      ...COLOUR_MASTER.assets
+    },
+    serialNumber: {
+      name: 'Serial Number',
+      ...COLOUR_MASTER.transferAsset
+    },
+    receiving: {
+      name: 'Receiving',
+      ...COLOUR_MASTER.receivingTicket
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const toastConfig = useContext(CustomToastContext);
@@ -77,8 +81,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'purchaseOrder',
             ref_id: purchaseOrderData?._id,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.purchaseOrder.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.purchaseOrder.name}</Typography>
+              <Typography variant="subtitle2">
                 {purchaseOrderData?.purchaseOrderNumber}
               </Typography>
             </div>
@@ -105,8 +109,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'product',
             ref_id: item?.productId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.product.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.product.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.productDetail?.productName}
               </Typography>
             </div>
@@ -132,8 +136,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'service',
             ref_id: item?.serviceId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.service.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.service.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.serviceDetail?.serviceName}
               </Typography>
             </div>
@@ -159,8 +163,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             ref_type: 'manualEntry',
             ref_id: item?._id,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">{customNodeStyles.manualEntry.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">{customNodeStyles.manualEntry.name}</Typography>
+              <Typography variant="subtitle2">
                 {item?.description}
               </Typography>
             </div>
@@ -194,8 +198,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
               label: (
                 <HtmlTooltip arrow placement="top" title={item?.status}>
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <Typography variant="subtitle2">{customNodeStyles.assets.name}</Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2">{customNodeStyles.assets.name}</Typography>
+                    <Typography variant="subtitle2">
                       {item?.assetNumber}
                     </Typography>
                   </div>
@@ -224,8 +228,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
               ref_type: 'serialNumber',
               ref_id: item?._id,
               label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="subtitle2">{customNodeStyles.serialNumber.name}</Typography>
-                <Typography variant="body2">
+                <Typography variant="body2">{customNodeStyles.serialNumber.name}</Typography>
+                <Typography variant="subtitle2">
                   {item?.serialNumber}
                 </Typography>
               </div>
@@ -254,8 +258,8 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           ref_id: purchaseOrderData?._id,
           label: (
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="subtitle2">Status</Typography>
-              <Typography variant="body2">
+              <Typography variant="body2">Status</Typography>
+              <Typography variant="subtitle2">
                 {purchaseOrderData?.status}
               </Typography>
             </div>

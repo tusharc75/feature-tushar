@@ -35,7 +35,7 @@ import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const renderedFrom = camelCase(routes?.user.title);
+const renderedFrom = camelCase(sidebarResource.user);
 
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,7 +46,7 @@ const User: FC = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
@@ -660,7 +660,7 @@ const User: FC = () => {
 
       <section className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[routes.user]} />
+          <CustomBreadCrumbs routes={[{ ...routes.user, title: resources?.user?.titlePlural }]} />
           <ImportExportLinks
             permissions={permissions?.user}
             module="user(s)"

@@ -42,7 +42,7 @@ const ManageSublease = ({
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -295,7 +295,7 @@ const ManageSublease = ({
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={subleaseId ? (isClone ? 'Clone' : `Update ${subleaseData?.subleaseName}`) : 'Create ' + routes.sublease.title}
+                title={subleaseId ? (isClone ? 'Clone' : `Update ${subleaseData?.subleaseName}`) : 'Create ' + resources?.sublease?.titleSingular}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);

@@ -26,7 +26,8 @@ const CreateProductBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      permissions: { productBuilder: permissions }
+      permissions: { productBuilder: permissions },
+      resources
     }
   }: any = useData();
   const history = useHistory();
@@ -52,9 +53,9 @@ const CreateProductBuilder = () => {
       });
   };
 
-  const handleSave = () => {};
+  const handleSave = () => { };
 
-  const refreshProducts = (data) => {};
+  const refreshProducts = (data) => { };
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -72,7 +73,7 @@ const CreateProductBuilder = () => {
           <CustomBreadCrumbs
             routes={[
               {
-                title: routes.productBuilder.title,
+                title: resources?.productBuilde?.titlePlural,
                 path: routes.productBuilder.path
               },
               {

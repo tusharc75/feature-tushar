@@ -20,7 +20,7 @@ const Integration = () => {
 
   const toastConfig = useContext(CustomToastContext);
 
-  const { state: { user } } = useData();
+  const { state: { user, resources } } = useData();
 
   const [integratedApps, setIntegratedApps] = useState(null);
 
@@ -76,7 +76,7 @@ const Integration = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.integration.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.integration?.titlePlural }]} />
       </div>
       <div className="detail-container-v1">
         {
