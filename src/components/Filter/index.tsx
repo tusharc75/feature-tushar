@@ -133,8 +133,6 @@ const Filter = ({
     // onApplyFilter(newDeepFilter, newFilterByIds);
   };
 
-  console.log(filteredOptions, deepFilters, filterByIds);
-
   return (
     <Dialog
       open={true}
