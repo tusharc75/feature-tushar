@@ -279,7 +279,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
           </Button>
         )}
         {columns ? <CustomReactTable
-          height={'300px'}
+          height={fullScreen ? 'calc(100vh - 285px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
