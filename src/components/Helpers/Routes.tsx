@@ -305,9 +305,6 @@ const routes = {
   planningCalendar: {
     path: '/planning-calendar'
   },
-  rentalPlanningCalendar: {
-    path: '/rental-planning-calendar'
-  },
   eCommercePolicy: {
     path: '/e-commerce-policy'
   },

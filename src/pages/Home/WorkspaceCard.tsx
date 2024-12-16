@@ -1,6 +1,6 @@
-import workspaceImage from 'src/assets/dashboard_images/sidebar/workspace.png';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import workspaceImage from 'src/assets/dashboard_images/sidebar/workspace.png';
 import { getCollaborateIconBasedOnName } from 'src/assets/svg/CollaborateSidebar';
 import DashboardModal from 'src/components/DashboardModal';
 import { SideCardProps } from 'src/pages/Home/SideCard';
