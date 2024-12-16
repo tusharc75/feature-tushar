@@ -45,6 +45,7 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
             onButtonClick={(item) => setUserFavourites(item, !isFavourite(item))}
             selectedTitle={selectedReport?.title}
             title={data.section}
+            key={data.section}
             isFilled={(item) => isFavourite(item)}
           />
         );
