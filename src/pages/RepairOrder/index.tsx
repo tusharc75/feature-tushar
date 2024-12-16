@@ -68,15 +68,9 @@ const RepairOrder = () => {
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairOrder));
   const [renderCount, setRenderCount] = useState(0);
   const [showManageRepairOrderDialog, setShowManageRepairOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleRepairOrderDelete, setSingleRepairOrderDelete] = useState({
-    id: null,
-    show: false,
-    repairOrderNumber: ''
-  });
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -132,11 +126,8 @@ const RepairOrder = () => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setSingleRepairOrderDelete({
-                  show: true,
-                  id: row?.original?._id,
-                  repairOrderNumber: `${row?.original?.repairOrderNumber}`
-                });
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -238,43 +229,6 @@ const RepairOrder = () => {
     fetchData();
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords?.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const handleSingleDeleteRepairOrder = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${repairOrder.api}/remove`, {
-        ids: [singleRepairOrderDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        dispatch({ type: 'loading', loading: false });
-        setSingleRepairOrderDelete({ id: null, show: false, repairOrderNumber: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleDeleteRepairOrder = async () => {
     setDeleteLoading(true);
     let recordsToDelete = [];
@@ -289,20 +243,18 @@ const RepairOrder = () => {
           ids: recordsToDelete
         })
         .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleteLoading(false)
           fetchData();
-        })
-        .catch((error) => {
+        }).catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
           setDeleteLoading(false);
         });
     }
@@ -313,7 +265,13 @@ const RepairOrder = () => {
       <MenuItem
         disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
         onClick={() => {
-          showConfirmBox(null);
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
         }}
       >
         {`Delete (${selectedRecords?.length})`}
@@ -380,41 +338,6 @@ const RepairOrder = () => {
           </Box>
         )}
 
-        {showDeleteWarningConfirmBox && (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        )}
-        {isConfirmDialogVisible && (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
-            onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteRepairOrder}
-          />
-        )}
-
-        {singleRepairOrderDelete.show && (
-          <ConfirmationDialog
-            open={singleRepairOrderDelete.show}
-            message={`Are you sure you want to delete Repair Order: ${singleRepairOrderDelete.repairOrderNumber}?`}
-            onClose={() =>
-              setSingleRepairOrderDelete({
-                id: null,
-                show: false,
-                repairOrderNumber: ''
-              })
-            }
-            onOk={handleSingleDeleteRepairOrder}
-          />
-        )}
         {showManageRepairOrderDialog.open && (
           <ManageRepairOrder
             isClone={showManageRepairOrderDialog.isClone}
@@ -426,6 +349,19 @@ const RepairOrder = () => {
             }}
           />
         )}
+         {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.repairOrderNumber}` : resources?.repairOrder?.titlePlural?.toLowerCase()} ?`}
+            onClose={() =>{
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            okBtnLoading={deleteLoading}
+            onOk={handleDeleteRepairOrder}
+          />
+          )}
       </CustomContainer>
     </section>
   );
