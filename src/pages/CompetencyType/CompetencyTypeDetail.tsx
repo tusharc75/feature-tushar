@@ -19,11 +19,14 @@ import Competencies from './Competencies';
 import ManageCompetencyType from './ManageCompetencyType';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [competencyMasterData, setCompetencyMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -185,7 +188,8 @@ const CompetencyMasterDetail = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.competencyType?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.competencyType?.titleSingular?.toLowerCase()} :
+            ${competencyMasterData.accountNumber}` : resources?.competencyType?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

@@ -17,14 +17,17 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageChartOfAccount from './ManageChartOfAccount';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ChartOfAccountDetail = () => {
   const { id } = useParams();
   const history = useHistory();
+  const { state } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.chartOfAccount]);
   const [chartOfAccountData, setChartOfAccountData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const { selectedRecords } = state;
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -173,7 +176,8 @@ const ChartOfAccountDetail = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.chartOfAccount?.titleSingular?.toLowerCase()} : ${chartOfAccountData.accountNumber} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.chartOfAccount?.titleSingular?.toLowerCase()} :
+             ${chartOfAccountData.accountNumber}` : resources?.chartOfAccount?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

@@ -240,7 +240,8 @@ const DataListItems = ({ dataListId }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.dataListitems?.titleSingular} ${deleteRecord?.title || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.dataListitems?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.title || ''}` : resources?.dataListitems?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

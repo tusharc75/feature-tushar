@@ -529,7 +529,7 @@ export default function Contact(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete selected Contacts ?`}
+              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteContact}
             />
@@ -581,7 +581,7 @@ export default function Contact(props) {
           {singleContactDelete.show ? (
             <ConfirmationDialog
               open={singleContactDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactedName} ?`}
+              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
               onClose={() =>
                 setSingleContactDelete({
                   id: null,
