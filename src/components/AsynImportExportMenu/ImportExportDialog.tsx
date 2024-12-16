@@ -237,7 +237,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
       type="file"
     />
   );
-console.log(fullScreen)
+
   return (
     <Dialog
       open={true}
