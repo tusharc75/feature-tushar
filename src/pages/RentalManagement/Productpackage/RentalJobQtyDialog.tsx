@@ -18,12 +18,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import {
-  bulkUpdate,
-  calculatePrice,
-  calculateRowsField,
-  fetch_rental_product_fields,
-} from '../../../components/RentalManagment/helper';
+import { bulkUpdate, calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -220,11 +215,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    const taxApplicableField = user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== '' ?
-      fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn) : 'billingAddress'
+    const taxApplicableField =
+      user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+        ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+        : 'billingAddress';
 
-    if (rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.[taxApplicableField]?.zipCode || rentalManagementData?.[taxApplicableField]?.state || rentalManagementData?.[taxApplicableField]?.county)
+    if (
+      rentalManagementData?.customerAccount?.taxApplicable &&
+      (rentalManagementData?.[taxApplicableField]?.zipCode ||
+        rentalManagementData?.[taxApplicableField]?.state ||
+        rentalManagementData?.[taxApplicableField]?.county)
     ) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField]);
       fields?.forEach((e: any) => {
@@ -271,7 +271,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData, rentalManagementData?.currency, user?.user?.brandPolicy?.packagePriceComponentWise ? false : true);
+        const rows = await calculateRowsField(
+          material,
+          values,
+          allFields,
+          rowData,
+          rentalManagementData?.currency,
+          user?.user?.brandPolicy?.packagePriceComponentWise ? false : true
+        );
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
@@ -346,7 +353,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     if (estimateEndDate.diff(rentalManagementEstimateEndDate, 'days') > 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    if (rowData && rowData.hideSelection) {
+    if (rowData && !rowData.canDelete) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
