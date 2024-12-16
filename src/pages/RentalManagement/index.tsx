@@ -478,7 +478,7 @@ const RentalManagement = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.rentalJobName}` : resources?.rentalManagement?.titlePlural?.toLowerCase()} ?`}
+              ${deleteRecord?.rentalJobName}` : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

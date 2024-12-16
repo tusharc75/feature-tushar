@@ -307,7 +307,7 @@ const SalesOrder = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
-             ${deleteRecord?.salesOrderNo}` : resources?.salesOrder?.titlePlural?.toLowerCase()} ?`}
+             ${deleteRecord?.salesOrderNo}` : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
