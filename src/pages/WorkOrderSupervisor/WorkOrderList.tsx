@@ -183,6 +183,26 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'rentalJob',
+        Header: resources?.rentalManagement?.titleSingular,
+        Cell: ({ row }) =>
+          row?.original['rentalJob'] ? (
+            <div className="flex items-center gap-1">
+              <h5 className=" text-truncate">{row.original.rentalJob?.optionLabel}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJob?.optionValue}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       }
     ];
     const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2)];
