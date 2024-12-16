@@ -12,7 +12,6 @@ import Chart from './Chart';
 import { assignIconAndText, getAllData, groupByKey } from './helpers';
 import SideCard from 'src/pages/Home/SideCard';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
-
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 
@@ -23,7 +22,7 @@ export const userManual = {
 
 function Dashboard() {
   const {
-    state: { user, selectedEntity, permissions,resources }
+    state: { user, selectedEntity, permissions }
   } = useData();
   const formPermission = permissions?.formBuilder;
   const aiPermission = permissions?.equiptAi;
@@ -61,7 +60,7 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={resources?.equiptAi?.titlePlural}
+                  heading={"Equipt Genie"}
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">

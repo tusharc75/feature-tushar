@@ -408,3 +408,4 @@ const RenderTable = ({ resource, warehouse, setRecords }) => {
     </>
   );
 };
+

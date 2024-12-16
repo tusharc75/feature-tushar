@@ -11,6 +11,7 @@ export const IconEventMap = {
   Attachment: <AttachmentIcon />,
   Calendar: <CalendarIcon />,
   [sidebarResource.workSpace]: <WorkSpaceIcon />,
+  'Work Spaces': <WorkSpaceIcon />,
   Collaborate: <WorkSpaceIcon />,
   Reminder: <ReminderIcon />
 } as const;

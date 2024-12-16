@@ -16,7 +16,7 @@ const useStyles = makeStyles({
   }
 });
 
-const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, errors }) => {
+const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, errors, isVisibilityFromSection = false }) => {
   const classes = useStyles();
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
@@ -89,12 +89,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
 
   return (
     <Box>
-      <Entity
-        values={values}
-        setFieldValue={setFieldValue}
-        errors={errors}
-        touched={touched}
-      />
+      {!isVisibilityFromSection && <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
       <Box pl={0.5} pt={2}>
         <Typography variant="subtitle2">ONLY SHOW WHEN...</Typography>
       </Box>
@@ -172,15 +167,16 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
                 alignItems={'center'}
                 mt={1}
               >
-                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
-                  ? data[_f?.fieldName]
+                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${
+                  fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
                     ? data[_f?.fieldName]
-                      ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
-                      ?.map((v) => v?.optionLabel)
-                      ?.join(', ')
-                    : ''
-                  : _f?.value
-                  }`}</Typography>
+                      ? data[_f?.fieldName]
+                          ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
+                          ?.map((v) => v?.optionLabel)
+                          ?.join(', ')
+                      : ''
+                    : _f?.value
+                }`}</Typography>
                 <Box>
                   <IconButton
                     aria-label="setting"
