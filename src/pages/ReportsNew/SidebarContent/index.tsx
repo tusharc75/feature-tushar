@@ -51,20 +51,22 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
         );
       })}
 
-      <Section
-        getTitle={(report) => report.customReportName}
-        items={filteredCustomReports}
-        onClick={(report) =>
-          setSelectedReport({
-            route: `/reports/custom-report/${report._id}`,
-            title: report.customReportName
-          })
-        }
-        onButtonClick={(item) => setUserFavourites(item, !isFavourite(item))}
-        selectedTitle={selectedReport?.title}
-        title="Custom Reports"
-        isFilled={(item) => isFavourite(item)}
-      />
+      {filteredCustomReports.length > 0 && (
+        <Section
+          getTitle={(report) => report.customReportName}
+          items={filteredCustomReports}
+          onClick={(report) =>
+            setSelectedReport({
+              route: `/reports/custom-report/${report._id}`,
+              title: report.customReportName
+            })
+          }
+          onButtonClick={(item) => setUserFavourites(item, !isFavourite(item))}
+          selectedTitle={selectedReport?.title}
+          title="Custom Reports"
+          isFilled={(item) => isFavourite(item)}
+        />
+      )}
     </div>
   );
 };

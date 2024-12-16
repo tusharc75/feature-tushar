@@ -44,6 +44,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
       >
         <FiSearch style={{ color: '#737373' }} className="absolute left-[10px] top-1/2 [transform:translateY(-50%)]" />
         <input
+          autoComplete="off"
           id="search-input"
           title={'search'}
           value={inputvalue}
