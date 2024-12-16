@@ -14,7 +14,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
@@ -56,11 +56,11 @@ const ProductTemplate = () => {
         width: 120,
         order: 1,
         Cell: ({ row }) => (
-          <>
+          <div>
             <Link className="link" to={`${routes.productTemplate.path}/${row?.original?._id}`} title={row?.original?.name}>
               {row?.original?.name}
             </Link>
-          </>
+          </div>
         )
       },
       ...getStaticFields(),
@@ -105,7 +105,7 @@ const ProductTemplate = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -147,10 +147,9 @@ const ProductTemplate = () => {
       .get(`${productTemplateApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.productTemplate?.isUpdate;
-          finalObject['canDelete'] = permissions?.productTemplate.isDelete && user?.user?._id === finalObject['owner'];
+          finalObject['canDelete'] = permissions?.productTemplate?.isDelete && checkIsAllowedToDelete(user, sidebarResource.productTemplate, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
