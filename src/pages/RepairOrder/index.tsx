@@ -43,17 +43,6 @@ const RepairOrder = () => {
   let renderedFrom = camelCase(sidebarResource?.repairOrder);
   const toastConfig = useContext(CustomToastContext);
 
-  const types = [
-    {
-      key: `My ${sidebarResource?.repairOrder}`,
-      value: 1
-    },
-    {
-      key: `All ${sidebarResource?.repairOrder}`,
-      value: 2
-    }
-  ];
-
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -63,6 +52,17 @@ const RepairOrder = () => {
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.repairOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.repairOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   const [columns, setColumns] = useState(null);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairOrder));
@@ -338,6 +338,40 @@ const RepairOrder = () => {
           </Box>
         )}
 
+        {showDeleteWarningConfirmBox && (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
+          />
+        )}
+        {isConfirmDialogVisible && (
+          <ConfirmationDialog
+            open={isConfirmDialogVisible}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.repairOrderNumber} ` : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`} ?`}
+            onClose={() => {
+              if (deleteRecord) setDeleteRecord({});
+              setIsConformDialogVisible(false);
+            }}
+            okBtnLoading={deleteLoading}
+            onOk={handleDeleteRepairOrder}
+          />
+        )}
+
+        {singleRepairOrderDelete.show && (
+          <ConfirmationDialog
+            open={singleRepairOrderDelete.show}
+            message={`Are you sure you want to delete Repair Order: ${singleRepairOrderDelete.repairOrderNumber}?`}
+            onClose={() =>
+              setSingleRepairOrderDelete({
+                id: null,
+                show: false,
+                repairOrderNumber: ''
+              })
+            }
+            onOk={handleSingleDeleteRepairOrder}
+          />
+        )}
         {showManageRepairOrderDialog.open && (
           <ManageRepairOrder
             isClone={showManageRepairOrderDialog.isClone}
