@@ -143,7 +143,7 @@ const BudgetDetail = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.budget?.titleSingular?.toLowerCase()}` : resources?.budget?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.budget?.titleSingular?.toLowerCase()} : ${deleteRecord?.name}` : resources?.budget?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
