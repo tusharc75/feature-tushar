@@ -390,7 +390,7 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.repairOrderNumber} ` : `${resources?.repairOrder?.titleSingular?.toLowerCase()}(s)`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} : ${deleteRecord?.repairOrderNumber} ` : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
