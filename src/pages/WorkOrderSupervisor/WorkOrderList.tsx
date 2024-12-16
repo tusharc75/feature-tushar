@@ -190,11 +190,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         Cell: ({ row }) =>
           row?.original['rentalJob'] ? (
             <div className="flex items-center gap-1">
-              <h5 className=" text-truncate">{row.original.rentalJob?.optionLabel}</h5>
+              <h5 className=" text-truncate">{row.original.rentalJob}</h5>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJob?.optionValue}`);
+                  window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -226,8 +226,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
                 : '';
 
           finalObject.type = type;
+          finalObject.rentalJob = u?.repairOrder?.rentalJob?.optionLabel || '';
+          finalObject.rentalJobId = u?.repairOrder?.rentalJob?.optionValue || '';
           return finalObject;
         });
+        console.log('rows', rows);
         dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
