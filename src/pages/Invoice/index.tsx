@@ -46,7 +46,6 @@ const Invoice = () => {
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.invoice));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -110,7 +109,6 @@ const Invoice = () => {
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
   const handleDelete = () => {
-    setDeleteLoading(true);
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
@@ -131,12 +129,10 @@ const Invoice = () => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setIsSubmitting(false);
-        setDeleteLoading(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
-        setDeleteLoading(false);
       });
   };
 
