@@ -85,6 +85,13 @@ const AssignProductDialog = ({
       }
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+      if (serialized != null) {
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'serializedProduct') {
+            e.disableFilters = true
+          }
+        })
+      }
       columns = [...newColumns, ...getStaticFields()];
       if (hideQty) {
         setColumns([...columns]);
@@ -172,7 +179,6 @@ const AssignProductDialog = ({
       }
     } else {
       if (serialized != null) {
-        updatedDeepFilters = updatedDeepFilters.filter((e) => e.field !== 'serializedProduct');
         updatedDeepFilters.push({
           field: 'serializedProduct',
           term: `${serialized === true ? 'Yes' : 'No'}`
