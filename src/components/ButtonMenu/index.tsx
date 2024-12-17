@@ -5,12 +5,6 @@ import { BiChevronDown } from 'react-icons/bi';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
-// type SlotProp =
-//   | Partial<React.ButtonHTMLAttributes<HTMLButtonElement>>
-//   | Omit<Partial<IconButtonProps>, 'color'>
-//   | Omit<Partial<ButtonProps>, 'variants' | 'color'>;
-// // | Omit<ButtonType, 'iconForMobile' | 'variant' | 'color'>;
-
 export type ButtonMenuProps<D extends string> = {
   items: Items<D>[];
   menuProps?: MenuProps;
