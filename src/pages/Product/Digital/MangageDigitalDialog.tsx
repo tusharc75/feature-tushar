@@ -266,7 +266,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
               <Fragment>
                 <CustomDialogHeader
                   title={digitalId ? 'Edit' : 'Add'}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
@@ -306,7 +306,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={ loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       submitForm();
