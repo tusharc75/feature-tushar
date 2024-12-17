@@ -423,8 +423,7 @@ const WorkOrderSupervisor = () => {
                 className={'btn-outline-v1'}
                 onClick={() => {
                   setShowProductFreqDialog(true);
-
-                }}>Scheduling
+                }}>Scheduler
               </Button>}
           </div>
         </div>
