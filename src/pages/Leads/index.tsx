@@ -427,6 +427,11 @@ const Leads = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setIsConformDialogVisible(true);
           }}
         >
@@ -556,8 +561,7 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${resources?.lead?.titleSingular?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.lead?.titleSingular?.toLowerCase()} : ${deleteRecord?.concatedName}` : `selected ${resources?.lead?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

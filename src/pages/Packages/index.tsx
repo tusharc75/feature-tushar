@@ -210,6 +210,11 @@ const PackageList = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox();
           }}
         >
@@ -292,7 +297,7 @@ const PackageList = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.packages?.titleSingular?.toLowerCase()} ${deleteRecord?.packageName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${deleteRecord?.packageName || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

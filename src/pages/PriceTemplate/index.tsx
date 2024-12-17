@@ -204,7 +204,11 @@ const PriceTemplate = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -249,7 +253,7 @@ const PriceTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.priceTemplate?.titleSingular.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.priceTemplate?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.priceTemplate?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

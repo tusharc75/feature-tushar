@@ -22,11 +22,14 @@ import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [employeeMasterData, setEmployeeMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -245,7 +248,7 @@ const EmployeeMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.employeeMaster?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.employeeMaster?.titleSingular?.toLowerCase()} : ${employeeMasterData?.employeeNumber}` : `selected ${resources?.employeeMaster?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}
