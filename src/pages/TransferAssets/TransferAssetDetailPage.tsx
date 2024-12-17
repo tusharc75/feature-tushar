@@ -20,6 +20,7 @@ import Steps from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_ASSET_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
   transferAsset,
@@ -34,6 +35,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 
 const TransferAssetDetailPage = () => {
@@ -60,6 +62,7 @@ const TransferAssetDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [isProcessor, setProcessor] = useState(false);
   const [canReceive, setCanReceive] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
@@ -198,6 +201,7 @@ const TransferAssetDetailPage = () => {
         } else {
           setTransferIsEnded(false);
         }
+        setAllowedToDelete(permissions?.transferAsset?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferAsset, data.owner.optionValue) && data?.canEdit);
         setTransferAssetData(data);
       })
       .catch((err) => {
@@ -287,7 +291,7 @@ const TransferAssetDetailPage = () => {
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -409,7 +413,7 @@ const TransferAssetDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${transferAssetData?.transferAssetNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.transferAsset?.titleSingular?.toLowerCase()}: ${transferAssetData?.transferAssetNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
