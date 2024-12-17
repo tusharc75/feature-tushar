@@ -231,7 +231,7 @@ const AssignPackageDialog = ({
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${resources?.packages?.titlePlural}`}
+        title={`Add ${resources?.packages?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

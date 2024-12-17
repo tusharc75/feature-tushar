@@ -85,13 +85,6 @@ const AssignProductDialog = ({
       }
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
-      if (serialized != null) {
-        newColumns?.forEach((e) => {
-          if (e.accessor === 'serializedProduct') {
-            e.disableFilters = true
-          }
-        })
-      }
       columns = [...newColumns, ...getStaticFields()];
       if (hideQty) {
         setColumns([...columns]);
@@ -179,10 +172,34 @@ const AssignProductDialog = ({
       }
     } else {
       if (serialized != null) {
-        updatedDeepFilters.push({
-          field: 'serializedProduct',
-          term: `${serialized === true ? 'Yes' : 'No'}`
-        });
+        const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct')
+        updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct')
+        if (serializedProductFilter) {
+          if (serialized && serializedProductFilter?.term?.toLowerCase() !== 'yes') {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: ``
+            });
+          }
+          else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: ``
+            });
+          }
+          else {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: `${serialized === true ? 'Yes' : 'No'}`
+            });
+          }
+        }
+        else {
+          updatedDeepFilters.push({
+            field: 'serializedProduct',
+            term: `${serialized === true ? 'Yes' : 'No'}`
+          });
+        }
       }
     }
     if (extraFilterById && extraFilterById?.length) {
@@ -277,7 +294,6 @@ const AssignProductDialog = ({
             isAddButtonVisible
             setQueryString={false}
           />
-
           {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
