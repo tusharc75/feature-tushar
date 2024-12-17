@@ -246,8 +246,6 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
                 : '';
 
           finalObject.type = type;
-          finalObject.rentalJob = u?.repairOrder?.rentalJob?.optionLabel || '';
-          finalObject.rentalJobId = u?.repairOrder?.rentalJob?.optionValue || '';
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
