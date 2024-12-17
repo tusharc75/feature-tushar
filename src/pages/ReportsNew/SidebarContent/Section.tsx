@@ -25,7 +25,7 @@ const Section = <T,>({
   getTitle,
   selectedTitle,
   isFilled = () => false,
-  onButtonClick = (data) => console.log(data)
+  onButtonClick = (data) => { () => { } }
 }: SectionProps<T>) => {
   const [open, setOpen] = React.useState(true);
   const firstFewItems = useMemo(() => [...items].slice(0, ITEMS_TO_SHOW), [items]);
