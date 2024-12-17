@@ -72,7 +72,7 @@ const EmployeeMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
       setEmployeeMasterData(data);
-      setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
+      setCustomizedRoutes([{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: data?.employeeNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
