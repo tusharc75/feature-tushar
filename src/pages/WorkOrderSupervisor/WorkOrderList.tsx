@@ -3,22 +3,22 @@ import { Info } from '@material-ui/icons';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import moment from 'moment';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { DateRange } from 'react-day-picker';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import {
   gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
-  MATERIAL_TYPE,
   prepareDataForGrid,
   sidebarResource,
   workOrder,
@@ -31,26 +31,35 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
+type Props = {
+  filterResourceQuery: any;
+  globalFilters: DateRange;
+  status: string;
+};
+
+export type WorkOrderListRef = {
+  refreshGrid: () => void;
+};
+
 const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
-const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
-  const toastConfig = useContext(CustomToastContext);
+const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(({ filterResourceQuery, globalFilters, status }, ref) => {
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
 
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, resources }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, sorting, selectedRecords, filters } = state;
 
   const { generateColumns } = useColumns();
 
-  const [tabValue, setTabValue] = useState(1);
   const [columns, setColumns] = useState(null);
   const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
@@ -60,11 +69,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
-    if (tabValue) {
+    if (status) {
       fetchData(cancelToken);
     }
     return () => cancelToken.cancel();
-  }, [page, limit, sorting, tabValue, filterResourceQuery, globalFilters, filters]);
+  }, [page, limit, sorting, status, filterResourceQuery, globalFilters, filters]);
 
   const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     let data;
@@ -211,6 +220,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
 
   const fetchData = (cancelToken?: CancelTokenSource) => {
     dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
       .get(`${workOrderSupervisor.api}/work-order-service${queryString}`, { cancelToken: cancelToken?.token })
@@ -243,14 +253,6 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   };
 
   const getQueryString = () => {
-    let status = WORKORDER_SERVICE_STATUS.pending;
-    if (tabValue === 2) {
-      status = WORKORDER_SERVICE_STATUS.inProgress;
-    }
-    if (tabValue === 3) {
-      status = WORKORDER_SERVICE_STATUS.completed;
-    }
-
     let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
 
     if (filterResourceQuery?.filterById?.length) {
@@ -273,10 +275,6 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     }
 
     return `${deepFilter}&filterType=and&filterByIdType=and`;
-  };
-
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
   };
 
   const handleAddConsumables = (rows, records = []) => {
@@ -317,63 +315,47 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-          onClick={() => {
-            setAssignTechnicianDialog(true);
-          }}
-        >
-          {'Assign Technician'}
-        </MenuItem>
-        {permissions?.workStations?.isRead && (
-          <MenuItem
-            disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-            onClick={() => {
-              setWorkStationAssignDialog(true);
-            }}
-          >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setConsumablesDialog(true);
-          }}
-          id="add-consumables"
-        >
-          Add Products/Consumables
-        </MenuItem>
-      </>
-    );
+  useImperativeHandle(ref, () => ({
+    refreshGrid() {
+      fetchData();
+    }
+  }));
+
+  const newActionButtonProps: NewActionButtonProps<string> = {
+    disabled: selectedRecords?.length === 0,
+    items: [
+      {
+        label: 'Assign Technician',
+        disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
+        onClick: () => setAssignTechnicianDialog(true)
+      },
+      {
+        label: `Assign ${resources?.workStations?.titlePlural}`,
+        disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
+        onClick: () => setWorkStationAssignDialog(true)
+      },
+      {
+        disabled: selectedRecords?.length === 0,
+        label: 'Add Products/Consumables',
+        onClick: () => setConsumablesDialog(true)
+      }
+    ]
   };
 
   return (
     <>
       <Box>
-        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab key={WORKORDER_SERVICE_STATUS.pending} label={WORKORDER_SERVICE_STATUS.pending} value={1} />
-          <CustomTab key={WORKORDER_SERVICE_STATUS.inProgress} label={WORKORDER_SERVICE_STATUS.inProgress} value={2} />
-          <CustomTab key={WORKORDER_SERVICE_STATUS.completed} label={WORKORDER_SERVICE_STATUS.completed} value={3} />
-        </CustomTabs>
-
         <DetailsPageHeader
           isAddButtonVisible={false}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
+          isActionButtonVisible={false}
+          isNewActionButtonVisible={true}
+          newActionButtonProps={newActionButtonProps}
           actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
           hasXpadding
         />
 
         {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 300px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-          />
+          <CustomReactTable height={'calc(100vh - 300px)'} columns={columns} state={state} dispatch={dispatch} renderedFrom={renderedFrom} />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -440,6 +422,6 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
       )}
     </>
   );
-};
+});
 
 export default WorkOrderList;
