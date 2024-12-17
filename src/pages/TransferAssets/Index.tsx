@@ -1,4 +1,4 @@
-import { Box, Chip } from '@material-ui/core';
+import { Box, Chip, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -199,20 +199,22 @@ const TransferAsset = () => {
     } else {
       ids = selectedRecords.map((d) => d._id);
     }
-    setDeleting(true);
-    axiosInstance()
-      .put(`${transferAsset.api}/remove`, { ids: ids })
-      .then(() => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setDeleting(false);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-      });
+    if (ids?.length > 0) {
+      setDeleting(true);
+      axiosInstance()
+        .put(`${transferAsset.api}/remove`, { ids: ids })
+        .then(() => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleting(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleSearch = (e) => {
@@ -239,6 +241,25 @@ const TransferAsset = () => {
     } else {
       history.push(`?type=${value}`);
     }
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   return (
@@ -273,7 +294,9 @@ const TransferAsset = () => {
           }
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
           }}

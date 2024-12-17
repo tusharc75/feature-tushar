@@ -33,7 +33,8 @@ const SerializedAsset = ({
   renderedFrom,
   allowedToEdit,
   stepFullScreen,
-  alloweOperation
+  alloweOperation,
+  fetchRepairJobData
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -306,6 +307,7 @@ const SerializedAsset = ({
         setOkBtnLoading(false);
         setShowAssetRemoveConfirmationDialog({ open: false, id: null, ids: [] });
         fetchRecords();
+        fetchRepairJobData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -335,6 +337,7 @@ const SerializedAsset = ({
           updateJobStatus(REPAIR_JOB_STATUS.inProgress);
         }
         fetchRecords();
+        fetchRepairJobData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',

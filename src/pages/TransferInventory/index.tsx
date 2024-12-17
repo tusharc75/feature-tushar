@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -195,20 +195,22 @@ const TransferInventory = () => {
     } else {
       ids = selectedRecords.map((d) => d._id);
     }
-    setDeleting(true);
-    axiosInstance()
-      .put(`${transferInventory.api}/remove`, { ids: ids })
-      .then(() => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setDeleting(false);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-      });
+    if (ids?.length > 0) {
+      setDeleting(true);
+      axiosInstance()
+        .put(`${transferInventory.api}/remove`, { ids: ids })
+        .then(() => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleting(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleSearch = (e) => {
@@ -217,6 +219,25 @@ const TransferInventory = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   return (
@@ -250,9 +271,9 @@ const TransferInventory = () => {
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
-          isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageTransferInventoryDialog({ open: true, isClone: false, idToClone: null });

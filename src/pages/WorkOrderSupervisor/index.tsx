@@ -438,7 +438,7 @@ const WorkOrderSupervisor = () => {
                   setShowProductFreqDialog(true);
                 }}
               >
-                Scheduling
+                Scheduler
               </Button>
             )}
           </div>
