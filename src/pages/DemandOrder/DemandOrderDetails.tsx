@@ -286,7 +286,7 @@ const DemandOrderDetails = () => {
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
-            ${demandOrderData?.demandOrderNumber || ''}` : resources?.demandOrder?.titlePlural?.toLowerCase()} ?`}
+            ${demandOrderData?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

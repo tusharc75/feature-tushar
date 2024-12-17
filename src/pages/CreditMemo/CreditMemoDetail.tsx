@@ -308,7 +308,7 @@ const creditMemoDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${creditMemoData.creditMemoNumber}` : resources?.creditMemo?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${creditMemoData.creditMemoNumber}` : `selected ${resources?.creditMemo?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

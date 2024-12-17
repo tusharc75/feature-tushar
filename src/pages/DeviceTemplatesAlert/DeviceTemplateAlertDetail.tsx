@@ -128,7 +128,7 @@ const DeviceTemplateAlertDetail = () => {
         <ConfirmationDialog
           open={showConfirmBox}
         message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
-              ${deviceTemplateAlertData?.alertNumber}` : resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()} ?`}  
+              ${deviceTemplateAlertData?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setShowConfirmBox(false);
           }}

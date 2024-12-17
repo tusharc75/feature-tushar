@@ -211,7 +211,7 @@ const DashBoards = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.dashboardMaster?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.name}` : resources?.dashboardMaster?.titlePlural?.toLowerCase()} ?`}
+            ${deleteRecord?.name}` : `selected ${resources?.dashboardMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

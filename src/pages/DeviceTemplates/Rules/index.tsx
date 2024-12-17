@@ -283,7 +283,7 @@ export default function Rules({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${'Rule'.toLowerCase()} ?`}
+          message={`Are you sure you want to delete the selected ${'Rule'.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -243,7 +243,7 @@ const DataList = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.dataLists?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.title || ''}` : resources?.dataLists?.titlePlural?.toLowerCase()} ?`}          onClose={() => {
+            ${deleteRecord?.title || ''}` : `selected ${resources?.dataLists?.titlePlural?.toLowerCase()}`} ?`}          onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}

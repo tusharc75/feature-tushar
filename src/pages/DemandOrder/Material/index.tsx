@@ -442,7 +442,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
         <ConfirmationDialog
           open={true}
           message={`Are you sure you want to delete ${deleteData ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
-            ${deleteData?.demandOrderNumber || ''}` : resources?.demandOrder?.titlePlural?.toLowerCase()} ?`}
+            ${deleteData?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

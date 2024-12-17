@@ -395,7 +395,7 @@ const DeliveryTicket = () => {
             <ConfirmationDialog
               open={isConfirmDialogVisible}
                 message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
-                  ${deleteRecord?.ticketName || ''}` : resources?.deliveryTicket?.titlePlural?.toLowerCase()} ?`}
+                  ${deleteRecord?.ticketName || ''}` : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`} ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

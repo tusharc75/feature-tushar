@@ -234,7 +234,7 @@ const DriverMasterDetail = () => {
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.driverMaster?.titleSingular?.toLowerCase()} :
-            ${driverMasterData.driverName}` : resources?.driverMaster?.titlePlural?.toLowerCase()} ?`}  
+            ${driverMasterData.driverName}` : `selected ${resources?.driverMaster?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setShowConfirmBox(false);
           }}

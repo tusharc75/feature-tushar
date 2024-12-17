@@ -307,7 +307,7 @@ export default function IotDataPoints({ deviceTemplate }) {
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.product}` : resources?.iotDataPoints?.titlePlural?.toLowerCase()} ?`}
+            ${deleteRecord?.product}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

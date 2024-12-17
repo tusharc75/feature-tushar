@@ -31,6 +31,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -41,6 +42,8 @@ const BulkAssetCreationDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -270,7 +273,7 @@ const BulkAssetCreationDetailsPage = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} : ${bulkAssetCreationData?.baNumber}` : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

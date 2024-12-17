@@ -310,7 +310,7 @@ export default function Alerts({ deviceTemplate }) {
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.alertNumber}` : resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()} ?`}
+            ${deleteRecord?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -791,7 +791,7 @@ const ContactDetailsPage = (props) => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()} :
-            ${contactData.name}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}
+            ${contactData.name}` : `selected ${resources?.contact?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDeleteContact}
         />

@@ -241,11 +241,7 @@ export default function Contact(props) {
               aria-label="Clone"
               disabled={contactPermissions?.isDelete && row?.original?.canDelete ? false : true}
               onClick={() => {
-                setSingleContactDelete({
-                  show: true,
-                  id: row?.original?._id,
-                  contactedName: row?.original?.concatedName
-                });
+                setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -358,26 +354,6 @@ export default function Contact(props) {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-  };
-
-  const handleSingleDeleteContacts = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`/${contactApi}/remove`, { ids: [singleContactDelete.id] })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        getContacts();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
-    setSingleContactDelete({ id: null, show: false, contactedName: '' });
   };
 
   const clickCreateNew = () => {
@@ -514,17 +490,6 @@ export default function Contact(props) {
         )}
 
         <Box component="div">
-          {showDeleteWarningConfirmBox?.show ? (
-            <MessageDialog
-              open={showDeleteWarningConfirmBox?.show}
-              message={
-                showDeleteWarningConfirmBox?.isDelete
-                  ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
-                  : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
-              }
-              onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
-            />
-          ) : null}
 
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
@@ -577,21 +542,6 @@ export default function Contact(props) {
               />
             </Dialog>
           )}
-
-          {singleContactDelete.show ? (
-            <ConfirmationDialog
-              open={singleContactDelete.show}
-              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
-              onClose={() =>
-                setSingleContactDelete({
-                  id: null,
-                  show: false,
-                  contactedName: ''
-                })
-              }
-              onOk={handleSingleDeleteContacts}
-            />
-          ) : null}
 
           {openAddPlantsDialog && (
             <WarhouseList
