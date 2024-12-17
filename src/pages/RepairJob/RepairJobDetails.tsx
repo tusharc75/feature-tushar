@@ -20,6 +20,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   REPAIR_JOB_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   repairJob,
   repairJobProcessSteps,
@@ -34,6 +35,7 @@ import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.repairJob);
@@ -57,6 +59,7 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
@@ -152,6 +155,7 @@ const RepairJobDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
         setAlloweOperation(data?.workOrder ? false : true);
+        setAllowedToDelete(permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, data.owner.optionValue) && data?.canDelete);
         setRepairJobData({ ...data });
       })
       .catch((err) => {
@@ -220,7 +224,7 @@ const RepairJobDetails = () => {
                   {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               )}
-              {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />
             </>
           </Box>
@@ -271,6 +275,7 @@ const RepairJobDetails = () => {
                   allowedToEdit={allowedToEdit}
                   stepFullScreen={stepFullScreen}
                   alloweOperation={alloweOperation}
+                  fetchRepairJobData={fetchRepairJobData}
                 />
               )}
               {currentStep === 1 && repairJobData && (
@@ -318,7 +323,7 @@ const RepairJobDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this repair job: ${repairJobData?.repairJobName} ?`}
+          message={`Are you sure you want to delete this ${resources?.repairJob?.titleSingular?.toLowerCase()}: ${repairJobData?.repairJobName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

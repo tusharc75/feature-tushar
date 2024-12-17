@@ -314,7 +314,7 @@ export default Filter;
 export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
   return (
     <div className="mr-2">
-      <FormControl fullWidth size="small" variant="outlined" margin="none">
+      <FormControl fullWidth size="small" variant="outlined" margin="dense">
         <Select
           labelId={'filter-term'}
           id={'filter-term'}
