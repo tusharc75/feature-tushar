@@ -153,9 +153,9 @@ export default function ManageAccount(props) {
                         ? `Clone - ${accountNameForClone}`
                         : isNew
                           ? accountResource === 'customerAccount'
-                            ? `Add ${resources?.customerAccount?.titleSingular}`
-                            : `Add ${resources?.supplierAccount?.titleSingular}`
-                          : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
+                            ? `Create ${resources?.customerAccount?.titleSingular}`
+                            : `Create ${resources?.supplierAccount?.titleSingular}`
+                          : `Update ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
                     }
                   />
                   <CustomDialogContent>

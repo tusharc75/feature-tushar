@@ -1,6 +1,4 @@
-import routes from 'src/components/Helpers/Routes';
 import { AttachmentIcon, CalendarIcon, CaseIcon, EmailIcon, EventIcon, NoteIcon, ReminderIcon, TaskIcon, WorkSpaceIcon } from './icons';
-import { sidebarResource } from 'src/constants/helpers';
 
 export const IconEventMap = {
   Task: <TaskIcon />,
@@ -10,9 +8,7 @@ export const IconEventMap = {
   Email: <EmailIcon />,
   Attachment: <AttachmentIcon />,
   Calendar: <CalendarIcon />,
-  [sidebarResource.workSpace]: <WorkSpaceIcon />,
-  'Work Spaces': <WorkSpaceIcon />,
-  Collaborate: <WorkSpaceIcon />,
+  'Work Space': <WorkSpaceIcon />,
   Reminder: <ReminderIcon />
 } as const;
 

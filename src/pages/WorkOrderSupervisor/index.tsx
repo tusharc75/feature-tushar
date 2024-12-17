@@ -5,19 +5,16 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { camelCase } from 'lodash';
 import moment from 'moment';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { FaRegCalendar } from 'react-icons/fa';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ButtonMenu from 'src/components/ButtonMenu';
 import CardColTimeline, { datarowInterface, useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -31,8 +28,8 @@ import routes from '../../components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
-import ProductFrequencyDialog from './ProductFrequencyDialog';
-import { BiChevronDown } from 'react-icons/bi';
+
+import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
 
 const LIMIT = 25;
 
@@ -67,13 +64,13 @@ const WorkOrderSupervisor = () => {
     filterById: [],
     deepFilter: []
   });
+  const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [viewType, setViewType] = useState<ViewType>('card-view');
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
 
@@ -294,7 +291,7 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.workOrder?.path}`);
                 }}
               >
-                {`${resources?.workOrder?.titleSingular}`}
+                {`${resources?.workOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.repairOrder?.isCreate && (
@@ -305,7 +302,7 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.repairOrder?.path}`);
                 }}
               >
-                {`${resources?.repairOrder?.titleSingular}`}
+                {`${resources?.repairOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.productionOrder?.isCreate && (
@@ -316,7 +313,7 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.productionOrder?.path}`);
                 }}
               >
-                {`${resources?.productionOrder?.titleSingular}`}
+                {`${resources?.productionOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.assemblyOrder?.isCreate && (
@@ -327,18 +324,18 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes.assemblyOrder.path}`);
                 }}
               >
-                {`${resources?.assemblyOrder?.titleSingular}`}
+                {`${resources?.assemblyOrder?.titlePlural}`}
               </Button>
             )}
-            {permissions?.product?.isCreate && (
+            {permissions?.workOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  setShowProductFreqDialog(true);
+                  setOpenWorkOrderScheduler(true);
                 }}
               >
-                Scheduling
+                Scheduler
               </Button>
             )}
           </div>
@@ -557,12 +554,13 @@ const WorkOrderSupervisor = () => {
             }}
           />
         )}
-        {showProductFreqDialog && (
-          <ProductFrequencyDialog
-            onClose={() => setShowProductFreqDialog(false)}
+
+        {openWorkOrderScheduler && (
+          <WorkOrderSchedulerDialog
+            onClose={() => setOpenWorkOrderScheduler(false)}
             onSuccess={() => {
               onClickRefreshIcon();
-              setShowProductFreqDialog(false);
+              setOpenWorkOrderScheduler(false);
             }}
           />
         )}

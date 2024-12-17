@@ -42,8 +42,4 @@ const NewActionButton = <D extends string>({ items, itemsVisibleCount = 2, disab
   );
 };
 
-// const SlotButton = (props: IconButtonProps) => (
-
-// );
-
 export default NewActionButton;

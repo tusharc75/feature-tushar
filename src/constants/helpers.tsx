@@ -386,16 +386,17 @@ export const sidebarResource = {
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
-  workAutomation: 'Work Automation',
+  scheduleAndDispatch: 'Schedule And Dispatch',
   iotChart: 'Iot Chart',
   sendOutboundMessage: 'Send Outbound Message',
   materialHandling: 'Material Handling',
   generateInvoice: 'Generate Invoice',
   dataList: 'DataList',
   dataListitems: 'DataList Items',
-  workSpace: 'WorkSpace',
+  workSpace: 'Work Space',
   workflow: 'Workflow',
-  workflowReport: 'Workflow Report'
+  workflowReport: 'Workflow Report',
+  equiptAi: 'Equipt Ai',
 };
 
 export const primaryFields = {

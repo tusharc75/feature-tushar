@@ -46,11 +46,11 @@ const BulkAssetCreationDetailsPage = () => {
 
   const [loadingBulkAssetCreation, setLoadingBulkAssetCreation] = useState(false);
   const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [bulkAssetCreationFields, setBulkAssetCreationFields] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [nextStep, setNextStep] = useState(true);
@@ -129,12 +129,12 @@ const BulkAssetCreationDetailsPage = () => {
     axiosInstance()
       .put(`${bulkAssetCreation.api}/remove`, { ids: [] })
       .then(() => {
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(`${routes.bulkAssetCreation.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
       });
   };
 
@@ -267,12 +267,12 @@ const BulkAssetCreationDetailsPage = () => {
           })}
       </Box>
 
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete this ${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

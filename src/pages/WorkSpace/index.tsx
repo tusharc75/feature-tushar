@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import routes from 'src/components/Helpers/Routes';
 import MessagePanel from 'src/pages/WorkSpace/MessagePanel';
 import Sidebar from 'src/pages/WorkSpace/Sidebar';
 import { TChannel } from 'src/pages/WorkSpace/types';
@@ -91,6 +90,7 @@ const Workspace = () => {
     });
     setSocket(s);
   }, [token]);
+
 
   return (
     <>

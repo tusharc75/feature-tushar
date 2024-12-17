@@ -49,7 +49,7 @@ const Email = () => {
 
   const [filter, setFilter] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -184,7 +184,7 @@ const Email = () => {
         Cell: ({ row }) => (
           <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
             <span>
-              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
                 <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
@@ -300,12 +300,12 @@ const Email = () => {
 
   const showConfirmBox = (row) => {
     if (row) {
-      setIsConformDialogVisible(true);
+      setShowDeleteConfirmBox(true);
       if (row && row.id) {
         setDeleteRecord(row);
       }
     } else {
-      setIsConformDialogVisible(true);
+      setShowDeleteConfirmBox(true);
     }
   };
 
@@ -338,14 +338,14 @@ const Email = () => {
             message: data.message
           });
           dispatch({ type: 'selection', selectedRecords: [] });
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
           setDeleteRecord(null);
           fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
         });
     }
@@ -431,13 +431,13 @@ const Email = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
-        {isConfirmDialogVisible ? (
+        {showDeleteConfirmBox ? (
           <ConfirmationDialog
-            open={isConfirmDialogVisible}
+            open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord?.id ? 'this email' : 'these emails'}?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
+              setShowDeleteConfirmBox(false);
             }}
             okBtnLoading={deleteLoading}
             onOk={handleDeleteEmails}

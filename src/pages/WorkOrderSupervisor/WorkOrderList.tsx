@@ -212,6 +212,26 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(({ filterResourc
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'serializedAsset',
+        Header: resources?.serializedAsset?.titleSingular,
+        Cell: ({ row }) =>
+          row?.original['serializedAsset'] ? (
+            <div className="flex items-center gap-1">
+              <h5 className=" text-truncate">{row.original.serializedAsset}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes?.serializedAssetDetail?.path}/${row.original.serializedAssetId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       }
     ];
     const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2)];
@@ -236,8 +256,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(({ filterResourc
                 : '';
 
           finalObject.type = type;
-          finalObject.rentalJob = u?.repairOrder?.rentalJob?.optionLabel || '';
-          finalObject.rentalJobId = u?.repairOrder?.rentalJob?.optionValue || '';
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
