@@ -4,16 +4,16 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import Scheduler from 'src/pages/ScheduleAndDispatch/Scheduler';
-import Dispatcher from 'src/pages/ScheduleAndDispatch/Dispatch';
+import Dispatch from 'src/pages/ScheduleAndDispatch/Dispatch';
 import CustomContainer from 'src/components/CustomContainer';
 
 const JobType = [
   {
-    key: 'Scheduler',
+    key: 'Schedule',
     value: 1
   },
   {
-    key: 'Dispatcher',
+    key: 'Dispatch',
     value: 2
   }
 ];
@@ -48,7 +48,7 @@ const ScheduleAndDispatch = () => {
           </ToggleButtonGroup>
         </div>
         {viewType === 1 && <Scheduler />}
-        {viewType === 2 && <Dispatcher />}
+        {viewType === 2 && <Dispatch />}
       </CustomContainer>
     </div>
   );

@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Dispatcher = () => {
+const Dispatch = () => {
   return (
     <div>Dispatcher</div>
   )
 }
 
-export default Dispatcher
+export default Dispatch
