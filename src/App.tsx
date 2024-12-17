@@ -278,7 +278,7 @@ import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
-import WorkAutomation from 'src/pages/WorkAutomation';
+import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ReportsCenter from 'src/pages/ReportsNew';
 
 var notificationInterval: any = null;
@@ -1231,8 +1231,8 @@ function App() {
             <PrivateRoute exact path={`${routes.packageInventory.path}`}>
               <PackageInventory />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomation.path}`}>
-              <WorkAutomation />
+            <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
+              <ScheduleAndDispatch />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
