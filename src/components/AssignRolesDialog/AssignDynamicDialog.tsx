@@ -216,7 +216,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${routes[camelCase(resource)]?.title || resource}`}
+        title={`Add ${routes[camelCase(resource)]?.title || resource}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
