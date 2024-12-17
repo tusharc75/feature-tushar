@@ -21,7 +21,7 @@ import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
-import ProductFrequencyDialog from './ProductFrequencyDialog';
+import WorkOrderSchedulerDialog from './WorkOrderSchedulerDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
@@ -56,7 +56,7 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
+  const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
 
@@ -66,35 +66,35 @@ const WorkOrderSupervisor = () => {
     {
       key: 'user',
       fieldName: 'user',
-      fieldLabel: resources?.employeeMaster.titlePlural,
+      fieldLabel: resources?.employeeMaster?.titlePlural,
       resource: sidebarResource.employeeMaster,
       type: 'dropDown'
     },
     {
       key: 'serviceMaster',
       fieldName: 'service',
-      fieldLabel: sidebarResource?.serviceMaster,
+      fieldLabel: resources?.serviceMaster?.titlePlural,
       resource: sidebarResource.serviceMaster,
       type: 'dropDown'
     },
     {
       key: 'workOrder',
       fieldName: 'workOrder',
-      fieldLabel: sidebarResource?.workOrder,
+      fieldLabel: resources?.serviceMaster?.titlePlural,
       resource: sidebarResource.workOrder,
       type: 'dropDown'
     },
     {
       key: 'repairOrder',
       fieldName: 'repairOrder',
-      fieldLabel: sidebarResource?.repairOrder,
+      fieldLabel: resources?.repairOrder?.titlePlural,
       resource: sidebarResource?.repairOrder,
       type: 'dropDown'
     },
     {
       key: 'productionOrder',
       fieldName: 'productionOrder',
-      fieldLabel: sidebarResource.productionOrder,
+      fieldLabel: resources?.productionOrder?.titlePlural,
       resource: sidebarResource.productionOrder,
       type: 'dropDown'
     }
@@ -391,7 +391,7 @@ const WorkOrderSupervisor = () => {
                 }}
               >
                 {' '}
-                {`${resources?.workOrder?.titleSingular}`}
+                {`${resources?.workOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.repairOrder?.isCreate && (
@@ -403,7 +403,7 @@ const WorkOrderSupervisor = () => {
                 }}
               >
                 {' '}
-                {`${resources?.repairOrder?.titleSingular}`}
+                {`${resources?.repairOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.productionOrder?.isCreate && (
@@ -415,7 +415,7 @@ const WorkOrderSupervisor = () => {
                 }}
               >
                 {' '}
-                {`${resources?.productionOrder?.titleSingular}`}
+                {`${resources?.productionOrder?.titlePlural}`}
               </Button>
             )}
             {permissions?.assemblyOrder?.isCreate && (
@@ -427,15 +427,15 @@ const WorkOrderSupervisor = () => {
                 }}
               >
                 {' '}
-                {`${resources?.assemblyOrder?.titleSingular}`}
+                {`${resources?.assemblyOrder?.titlePlural}`}
               </Button>
             )}
-            {permissions?.product?.isCreate && (
+            {permissions?.workOrder?.isCreate && (
               <Button
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  setShowProductFreqDialog(true);
+                  setOpenWorkOrderScheduler(true);
                 }}
               >
                 Scheduler
@@ -681,12 +681,12 @@ const WorkOrderSupervisor = () => {
             }}
           />
         )}
-        {showProductFreqDialog && (
-          <ProductFrequencyDialog
-            onClose={() => setShowProductFreqDialog(false)}
+        {openWorkOrderScheduler && (
+          <WorkOrderSchedulerDialog
+            onClose={() => setOpenWorkOrderScheduler(false)}
             onSuccess={() => {
               onClickRefreshIcon();
-              setShowProductFreqDialog(false);
+              setOpenWorkOrderScheduler(false);
             }}
           />
         )}
