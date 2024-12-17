@@ -13,16 +13,19 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageCompetencies from './ManageCompetencies';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const CompetenciesDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [competenciesData, setCompetenciesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -64,7 +67,7 @@ const CompetenciesDetail = () => {
       axiosInstance()
         .put(`${routes?.competencies?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
 
           toastConfig.setToastConfig({
             open: true,
@@ -74,10 +77,10 @@ const CompetenciesDetail = () => {
           history.push(`${routes.competencies.path}`);
         })
         .catch((err) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         });
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -103,7 +106,7 @@ const CompetenciesDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -119,12 +122,13 @@ const CompetenciesDetail = () => {
           )}
         </Box>
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.competencies?.titleSingular?.toLowerCase()} ${competenciesData.competencyName} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
+            ${competenciesData.competencyName}` : resources?.competencies?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />
