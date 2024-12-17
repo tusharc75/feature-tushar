@@ -488,6 +488,7 @@ const SerializedAsset = ({
           selectedProducts={[]}
           filterByPlant={repairJobData.warehouse}
           chartOfAccount={repairJobData?.chartOfAccount}
+          ids={dataRows?.filter((d) => d?.status === ASSET_STATUS.needRepair)?.map((d) => d?._id)}
         />
       )}
       {addNewSerializedAssetDialog && (
