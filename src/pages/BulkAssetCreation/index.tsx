@@ -333,9 +333,9 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${selectedRecords?.length ? resources?.bulkAssetCreation?.titlePlural?.toLowerCase() : resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.baNumber : ''
-            } ? `}
-          onClose={() => {
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.baNumber}` : resources?.bulkAssetCreation?.titlePlural?.toLowerCase()} ?`}          
+            onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}

@@ -181,9 +181,11 @@ const Competencies = ({ competencyType }) => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){ 
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >

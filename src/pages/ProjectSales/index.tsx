@@ -26,7 +26,6 @@ import CreateProjectSales from './CreateProjectSales';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProjectSales: FC = () => {
-
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -411,8 +410,12 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.projectSales?.titlePlural?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.projectName : ''
-            } ? `}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.projectName}`
+              : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

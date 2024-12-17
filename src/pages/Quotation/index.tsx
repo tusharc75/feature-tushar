@@ -58,7 +58,6 @@ const Quotation = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -293,14 +292,6 @@ const Quotation = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
-  };
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
   };
@@ -331,7 +322,13 @@ const Quotation = () => {
       <>
         <MenuItem
           onClick={() => {
-            showConfirmBox();
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -398,17 +395,11 @@ const Quotation = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.quotation?.titleSingular?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.quotationNumber}` : resources?.quotation?.titlePlural?.toLowerCase()} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

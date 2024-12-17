@@ -41,8 +41,8 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [isAutoCreating, setIsAutoCreating] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [material, setMaterial] = useState([]);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
@@ -296,7 +296,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
                     aria-label="Delete"
                     onClick={() => {
                       setDeleteData([row.original]);
-                      setShowConfirmBox(true);
+                      setShowDeleteConfirmBox(true);
                     }}
                   >
                     <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -449,7 +449,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       });
       await axiosInstance().put(`${workOrder.api}/${assemblyOrderData?._id}/material/remove`, records);
       setDeleting(false);
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
       fetchData();
       toastConfig.setToastConfig({
         open: true,
@@ -470,7 +470,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       .put(`${workOrder.api}/remove`, { ids: ids })
       .then(({ data }) => {
         setDeleting(false);
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         setCurrentStep((prevStep) => {
           const newStep = prevStep - 1;
           return newStep;
@@ -482,7 +482,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         });
       })
       .catch((err) => {
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         setDeleting(false);
         toastConfig.setToastConfig(err);
       });
@@ -661,7 +661,7 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
               user,
               checkUniqWorkOrder,
               setDeleteData,
-              setShowConfirmBox,
+              setShowDeleteConfirmBox,
               setAutoCompleteData,
               setCompleteConfirmBox,
               checkParentProduct,
@@ -702,13 +702,13 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
         </Box>
       )}
 
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
-          open={showConfirmBox}
+          open={showDeleteConfirmBox}
           message={`Are you sure you want to delete this item(s)`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />
@@ -897,7 +897,7 @@ const ActionButtonMenuItems = ({
   user,
   checkUniqWorkOrder,
   setDeleteData,
-  setShowConfirmBox,
+  setShowDeleteConfirmBox,
   setAutoCompleteData,
   setCompleteConfirmBox,
   checkParentProduct,
@@ -1045,7 +1045,7 @@ const ActionButtonMenuItems = ({
       <MenuItem
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
-          setShowConfirmBox(true);
+          setShowDeleteConfirmBox(true);
         }}
         disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
       >
