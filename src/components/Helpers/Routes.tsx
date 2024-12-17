@@ -716,8 +716,8 @@ const routes = {
   assemblyOrderDetail: {
     path: '/assembly-order/detail'
   },
-  workAutomation: {
-    path: '/work-automation'
+  scheduleAndDispatch: {
+    path: '/schedule-and-dispatch'
   },
 };
 
