@@ -6,14 +6,14 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import routes from 'src/components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
+import { useData } from 'src/StateProvider/Provider';
 
-export default function ProductFrequencyDialog({ onClose, onSuccess }) {
+export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -24,6 +24,11 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+
+  const {
+    state: { permissions, resources }
+  }: any = useData();
+
 
   useEffect(() => {
     const deepFilter = [
@@ -127,7 +132,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
               onClose();
             }}
             showRequiredLabel={false}
-            title={`${routes.workOrder.title} Scheduler`}
+            title={`${resources?.workOrder?.titleSingular} Scheduler`}
           />
           <CustomDialogContent>
             <div className="flex flex-col p-3">
@@ -150,7 +155,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
                     size="small"
                     style={{ width: '100%' }}
                     options={assetOptions}
-                    loading={loading} 
+                    loading={loading}
                     value={assetOptions?.find((data) => data.optionValue === selectedAsset) || {}}
                     getOptionLabel={(option) => option?.optionLabel || ''}
                     onChange={(e, val) => setSelectedAsset(val?.optionValue)}
