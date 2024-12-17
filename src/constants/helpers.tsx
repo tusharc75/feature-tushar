@@ -386,7 +386,7 @@ export const sidebarResource = {
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   packageInventory: 'Package Inventory',
-  workAutomation: 'Work Automation',
+  scheduleAndDispatch: 'Schedule And Dispatch',
   iotChart: 'Iot Chart',
   sendOutboundMessage: 'Send Outbound Message',
   materialHandling: 'Material Handling',
