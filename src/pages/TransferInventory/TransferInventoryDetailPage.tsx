@@ -352,7 +352,7 @@ const TransferInventoryDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer inventory: ${transferInventoryData?.transferNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.transferInventory?.titleSingular?.toLowerCase()}: ${transferInventoryData?.transferNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
