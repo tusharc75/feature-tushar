@@ -32,7 +32,6 @@ import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 
-const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
 const localizer = momentLocalizer(moment);
 const formats = {
@@ -47,57 +46,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+        {
+          label: resources?.warehouse?.titlePlural,
+          value: 'Warehouse',
+          key: 'warehouse'
+        }
+      ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+        {
+          label: resources?.product?.titlePlural,
+          value: 'Product',
+          key: 'product'
+        }
+      ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+        {
+          label: resources?.serializedAsset?.titlePlural,
+          value: 'Serialized Asset',
+          key: 'asset'
+        }
+      ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-          {
-            label: resources?.serviceMaster?.titleSingular,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+        {
+          label: resources?.serviceMaster?.titlePlural,
+          value: 'Service Master',
+          key: 'service'
+        }
+      ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+        {
+          label: resources?.customerAccount?.titlePlural,
+          value: 'Customer Account',
+          key: 'customerAccount'
+        }
+      ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+        {
+          label: resources?.competencies?.titlePlural,
+          value: 'Competencies',
+          key: 'competencies'
+        }
+      ]
       : [])
   ];
 
@@ -312,67 +311,83 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             };
           }
           if (selectedResource.resource === sidebarResource.product) {
-            if (d?.inventory) {
-              otherData.push({
-                title: `Inventory ${d?.inventory}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
-            }
-            if (d?.available) {
-              otherData.push({
-                title: `Available ${d?.available}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
-            }
-            if (d?.reserved?.length) {
-              otherData.push({
-                title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'reserved',
-                data: d?.reserved
-              });
-            }
-            if (d?.debit?.length) {
-              const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
-              otherData.push({
-                title: `↓ Planned ${debitQty}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'debit',
-                data: d?.debit,
-                isRedAlert: debitQty > d?.available ? true : false
-              });
-            }
-            if (d?.credit?.length) {
-              otherData.push({
-                title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'credit',
-                data: d?.credit
-              });
-            }
-            if (d?.repair) {
-              otherData.push({
-                title: `Repair/Review ${d?.repair}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
+            for (const property in d) {
+              if (property === 'debit') {
+                if (d?.debit?.length) {
+                  const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
+                  otherData.push({
+                    title: `↓ Planned ${debitQty}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'debit',
+                    data: d?.debit,
+                    isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                  });
+                }
+              }
+              else if (property === 'credit') {
+                if (d?.credit?.length) {
+                  otherData.push({
+                    title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'credit',
+                    data: d?.credit
+                  });
+                }
+              }
+              else if (property === 'reserved') {
+                if (d?.reserved?.length) {
+                  otherData.push({
+                    title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'reserved',
+                    data: d?.reserved
+                  });
+                }
+              }
+              else if (property === 'inventory') {
+                if (d?.inventory) {
+                  otherData.push({
+                    title: `Inventory ${d?.inventory}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource
+                  });
+                }
+              }
+              else if (property === 'availableByPlanning') {
+                if (d?.availableByPlanning) {
+                  otherData.push({
+                    title: `Planned Quantity ${d?.availableByPlanning}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource
+                  });
+                }
+              }
+              else if (['assetCount', 'date']?.includes(property)) {
+              }
+              else if (d[property]) {
+                otherData.push({
+                  title: `${property} ${d[property]}`,
+                  start: new Date(d['date']),
+                  end: new Date(d['date']),
+                  allDay: true,
+                  type: 'assetStatus',
+                  status: property,
+                  resource: selectedResource.resource
+                });
+              }
             }
           }
           let title = d[selectedResource.fieldName];
@@ -417,7 +432,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -452,20 +467,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
       element[i].onclick = (clickEvent) => {
         const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent);
-        // let path = selectedResource.path;
-        // if(selectedResource.resource === sidebarResource.serializedAsset){
-        //   path = routes[`${camelCase(event.resource)}Detail`]?.path
-        // }
-        // window.open(`${path}/${event.id}`);
+        handleClick(data, clickEvent?.target);
       };
     }
   };
 
-  const handleClick = (data, event) => {
+  const handleClick = (data, target) => {
     if (selectedResource.resource === sidebarResource.product) {
-      setAnchor(event.target);
-      if (data?.type) {
+      if (data?.type === 'assetStatus') {
+        window.open(`${routes.serializedAsset.path}?assetStatus=${data?.status}`);
+      }
+      else if (data?.type) {
+        setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
       }
@@ -812,20 +825,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   onNavigate(date);
                 }}
                 onSelectEvent={(data: any, event: any) => {
-                  if (selectedResource.resource === sidebarResource.product) {
-                    setAnchor(event.nativeEvent.target);
-                    if (data?.type) {
-                      const newData: OnSelectDataType[] = data.data;
-                      setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
-                    }
-                  } else {
-                    if (data.resource) {
-                      const resource = resourceList?.find((r) => r.resource === data.resource);
-                      window.open(`${resource.path}/${data.id}`);
-                    } else {
-                      window.open(`${selectedResource.path}/${data.id}`);
-                    }
-                  }
+                  handleClick(data, event.nativeEvent.target)
                 }}
               />
             </div>

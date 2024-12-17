@@ -47,7 +47,7 @@ const WorkspaceCard = ({ handleRoutes, objBySectionName }) => {
               <li key={item.name} className="list-none rounded-md border shadow-md transition-shadow hover:shadow-lg">
                 <Link to={handleRoutes(item)} className={'flex items-center gap-2 px-2 py-4'}>
                   <span className="block max-h-[20px] max-w-[20px] flex-shrink-0 [&>*]:h-[auto] [&>*]:max-w-full">
-                    {getCollaborateIconBasedOnName(item.resourceLabel || item.name)}
+                    {getCollaborateIconBasedOnName(item.name)}
                   </span>
                   <span className="line-clamp-1 min-w-0 text-[14px] font-medium">{item.resourceLabel || item.name}</span>
                 </Link>

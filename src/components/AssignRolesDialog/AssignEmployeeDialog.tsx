@@ -249,7 +249,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${resources?.employeeMaster?.titleSingular}`}
+        title={`Add ${resources?.employeeMaster?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
