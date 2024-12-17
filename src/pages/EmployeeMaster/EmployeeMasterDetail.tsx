@@ -27,7 +27,6 @@ const EmployeeMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.employeeMaster]);
   const [employeeMasterData, setEmployeeMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -72,7 +71,6 @@ const EmployeeMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
       setEmployeeMasterData(data);
-      setCustomizedRoutes([{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: data?.employeeNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -156,7 +154,7 @@ const EmployeeMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: employeeMasterData?.employeeNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

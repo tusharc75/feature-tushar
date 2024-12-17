@@ -30,6 +30,7 @@ import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,7 +43,8 @@ const DemandOrderDetails = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [loading, setLoading] = useState(false);
   const [demandOrderData, setDemandOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -283,7 +285,8 @@ const DemandOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this demand order: ${demandOrderData?.demandOrderNumber} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+            ${demandOrderData?.demandOrderNumber || ''}` : resources?.demandOrder?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

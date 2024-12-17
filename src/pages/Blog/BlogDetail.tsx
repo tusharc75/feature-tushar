@@ -13,11 +13,14 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageBlog from './ManageBlog';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [blogData, setBlogData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -123,7 +126,8 @@ const BlogDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.blog?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.blog?.titleSingular?.toLowerCase()} :
+            ${blogData?.title}` : resources?.blog?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -187,6 +187,11 @@ export default function DeviceTemplates() {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -273,8 +278,8 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-            }?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplates?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.templateName}` : resources?.deviceTemplates?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

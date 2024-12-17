@@ -223,6 +223,11 @@ const CreditMemo = () => {
         <MenuItem
           disabled={!selectedRecords?.every((d) => d?.canDelete)}
           onClick={() => {
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox();
           }}
         >
@@ -344,7 +349,7 @@ const CreditMemo = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.creditMemo?.titleSingular} ${deleteRecord?.creditMemoNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${deleteRecord?.creditMemoNumber}` : resources?.creditMemo?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

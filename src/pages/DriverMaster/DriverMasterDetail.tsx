@@ -17,11 +17,14 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageDriverMaster from './ManageDriverMaster';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const DriverMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [driverMasterData, setDriverMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -230,7 +233,8 @@ const DriverMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} ${driverMasterData.driverName} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.driverMaster?.titleSingular?.toLowerCase()} :
+            ${driverMasterData.driverName}` : resources?.driverMaster?.titlePlural?.toLowerCase()} ?`}  
           onClose={() => {
             setShowConfirmBox(false);
           }}

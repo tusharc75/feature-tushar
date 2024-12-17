@@ -208,8 +208,11 @@ const DriverMaster = () => {
         <MenuItem
           disabled={!(permissions?.driverMaster?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
-
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -283,7 +286,8 @@ const DriverMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()}  ${deleteRecord?.driverName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.driverMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.driverName || ''}` : resources?.driverMaster?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
