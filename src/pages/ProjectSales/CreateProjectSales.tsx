@@ -114,7 +114,7 @@ const CreateProjectSales = ({
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleSubmit = (values) => {
@@ -230,7 +230,7 @@ const CreateProjectSales = ({
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${resources?.projectSales?.titleSingular}`}`}
+                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `Create ${resources?.projectSales?.titleSingular}`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

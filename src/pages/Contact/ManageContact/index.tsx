@@ -1,11 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import {
-  getObjKeys,
-  sidebarResource,
-  getObjKeysWithValues,
-  CustomDialogTransition,
-  yupSchema
-} from '../../../constants/helpers';
+import { getObjKeys, sidebarResource, getObjKeysWithValues, CustomDialogTransition, yupSchema } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -199,9 +193,9 @@ export default function ManageContactDialog({
                     ? `Clone - ${cloneHeading}`
                     : isNew
                       ? contactResource === 'customerContact'
-                        ? `Add ${resources?.customerContact?.titleSingular}`
-                        : `Add ${resources?.supplierContact?.titleSingular}`
-                      : `Edit ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
+                        ? `Create ${resources?.customerContact?.titleSingular}`
+                        : `Create ${resources?.supplierContact?.titleSingular}`
+                      : `Update ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
                 }
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -212,17 +206,17 @@ export default function ManageContactDialog({
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      touched={touched}
-                      fieldsData={contactData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource[contactResource]}
-                      referenceId={contactId || null}
-                      collaborateTools = {true}
-                    />
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={contactData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource[contactResource]}
+                    referenceId={contactId || null}
+                    collaborateTools={true}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

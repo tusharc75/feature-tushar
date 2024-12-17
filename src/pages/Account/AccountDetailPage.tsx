@@ -123,6 +123,7 @@ export default function AccountDetailPage(props) {
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -687,7 +688,7 @@ export default function AccountDetailPage(props) {
               </Button>
             )}
             {permissions && permissions[accountResource] && permissions[accountResource].isDelete && allowedToDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
             )}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
@@ -956,13 +957,13 @@ export default function AccountDetailPage(props) {
           </>
         )}
       </Box>
-      {showConfirmBox ? (
+      {showDeleteConfirmBox ? (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-            }`}
+          open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteAccount ? `${resources?.account?.titleSingular?.toLowerCase()} :
+              ${deleteAccount?.accountName}` : resources?.account?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
             setDeleteAccountId({});
           }}
           onOk={handleDeleteAcc}
