@@ -8,7 +8,6 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -43,7 +42,7 @@ const ManagePurchaseOrder = ({
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -233,7 +232,7 @@ const ManagePurchaseOrder = ({
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update - ${purchaseOrderData?.purchaseOrderNumber || ''}`
-                    : 'Create ' + routes.purchaseOrder.title
+                    : 'Create ' + resources?.purchaseOrder?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

@@ -14,40 +14,39 @@ import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
-  workOrder: { name: 'Work Order', ...COLOUR_MASTER.repairJob },
+  workOrder: { 
+    name: 'Work Order', 
+    ...COLOUR_MASTER.repairJob 
+  },
   workOrderClosed: {
-    name: 'Work Order Closed', ...COLOUR_MASTER.repairJob
+    name: 'Work Order Closed', 
+    ...COLOUR_MASTER.closedRepairJob
   },
   preWorkService: {
     name: 'Pre Work Service',
-    background: WORKORDER_SERVICE_COLOR.preWork,
-    borderColor: '#C0C0C0'
+    ...COLOUR_MASTER.preWork
   },
   postWorkService: {
     name: 'Post Work Service',
-    background: WORKORDER_SERVICE_COLOR.postWork,
-    borderColor: 'green'
+    ...COLOUR_MASTER.postWork
   },
   stepPassed: {
     name: 'Step Passed',
-    background: '#ffd65b',
-    borderColor: 'green',
+    ...COLOUR_MASTER.accepted,
     cursor: 'pointer'
   },
   stepFailed: {
     name: 'Step Failed',
-    background: '#ffd65b',
-    borderColor: 'red',
+    ...COLOUR_MASTER.rejected,
     cursor: 'pointer'
   },
   stepSkipped: {
     name: 'Step Skipped',
-    background: '#ffd65b',
-    borderColor: 'grey'
+    ...COLOUR_MASTER.skipped
   },
   step: {
     name: 'Step',
-    ...COLOUR_MASTER.assets,
+    ...COLOUR_MASTER.service,
     cursor: 'pointer'
   }
 };
@@ -78,7 +77,7 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
-      const allDetails: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/detail`);
+      const allDetails: any = await axiosInstance().get(`${routes?.workOrder?.path}/${workOrderId}/detail`);
       const stepData = allDetails?.data?.data?.stepData;
       const stepDatas = {};
 
@@ -98,7 +97,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workOrderName ?? ''}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <Typography variant="body2">{customNodeStyles.workOrder.name}</Typography>
+                       <Typography variant="subtitle2">
+                       {workOrderName ?? ''}
+                       </Typography>
+                     </div>
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrder
@@ -131,8 +135,8 @@ const WorkOrderViews = (props) => {
                 title={capitalize(s.type)}
               >
                 <div >
-                  <Typography variant="body2">{s?.serviceName || ''}</Typography>
-                  <Typography variant="subtitle2">{s?.status || ''}</Typography>
+                  <Typography variant="body2">{s?.status || ''}</Typography>
+                  <Typography variant="subtitle2">{s?.serviceName || ''}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -163,8 +167,8 @@ const WorkOrderViews = (props) => {
                   title={'Step'}
                 >
                   <div>
-                    <Typography variant="body2">{step?.stepName || ''}</Typography>
-                    <Typography variant="subtitle2">{s?.status || ''}</Typography>
+                    <Typography variant="body2">{s?.status || ''}</Typography>
+                    <Typography variant="subtitle2">{step?.stepName || ''}</Typography>
                   </div>
                 </HtmlTooltip>
               )
@@ -199,7 +203,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workOrderName ?? ''}</div>
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                       <Typography variant="body2">{customNodeStyles.workOrderClosed.name}</Typography>
+                       <Typography variant="subtitle2">
+                       {workOrderName ?? ''}
+                       </Typography>
+            </div>
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrderClosed
@@ -240,10 +249,10 @@ const WorkOrderViews = (props) => {
       case 'repairJob':
         break;
       case 'deliveryTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'serializedAsset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

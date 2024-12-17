@@ -32,11 +32,11 @@ const Quotation = ({
   setCurrentVersion,
   setNextStepToolTip
 }) => {
-  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
+  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_quotation`;
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -61,12 +61,14 @@ const Quotation = ({
   useEffect(() => {
     if (!material?.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
       setNextStepToolTip(rentalManagementMessage.validPrice);
+    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
+      setNextStepToolTip(rentalManagementMessage.processQuotation);
     } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
       setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
     } else {
       setNextStepToolTip(null);
     }
-  }, [material, quotationData?.versions[currentVersion]?._id]);
+  }, [material, quotationData?.versions[currentVersion]?._id, quotationData?.versions[currentVersion]?.status]);
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
@@ -384,7 +386,7 @@ const Quotation = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,

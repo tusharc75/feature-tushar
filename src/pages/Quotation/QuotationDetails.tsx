@@ -50,7 +50,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.quotation.title);
+  const renderedFrom = camelCase(sidebarResource?.quotation);
 
   const { id } = useParams();
   const history = useHistory();
@@ -58,7 +58,7 @@ const QuotationDetails = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -350,10 +350,10 @@ const QuotationDetails = () => {
           window.open(`${routes.salesOrderDetail.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          window.open(`${routes.repairOrderDetail.path}/${data?._id}`);
+          window.open(`${routes?.repairOrderDetail?.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+          window.open(`${routes?.fieldServiceOrderDetail?.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.assemblyOrder) {
           window.open(`${routes.assemblyOrderDetail.path}/${data?._id}`);
@@ -381,7 +381,7 @@ const QuotationDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.quotation, { title: `${quotationData?.quotationNumber}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.quotation, title: resources?.quotation?.titlePlural }, { title: `${quotationData?.quotationNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -419,7 +419,7 @@ const QuotationDetails = () => {
                     </HtmlTooltip>
                   </>
                 )}
-                <HtmlTooltip title={`${routes.quotation.title} Summary`}>
+                <HtmlTooltip title={`${resources?.quotation?.titleSingular} Summary`}>
                   <Button
                     onClick={() => {
                       setShowQuotationSummaryDialog(true);

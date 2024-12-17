@@ -29,7 +29,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
   const history = useHistory();
 
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -172,7 +172,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.subcontractAssemblyNumber ? `(${initialData.values?.subcontractAssemblyNumber})` : ''}`
-                    : `Create ${routes.subcontractAssembly.title}`
+                    : `Create ${resources?.subcontractAssembly?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

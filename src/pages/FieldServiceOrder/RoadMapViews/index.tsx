@@ -2,7 +2,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { COLOUR_MASTER, fieldServiceOrder, fieldTicket, invoice } from 'src/constants/helpers';
+import { COLOUR_MASTER, fieldServiceOrder, fieldTicket, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -12,24 +12,20 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const customNodeStyles = {
   fieldServiceOrder: {
-    name: routes.fieldServiceOrder.title,
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    name: sidebarResource?.fieldServiceOrder,
+    ...COLOUR_MASTER.purchaseOrder
   },
   fieldTicket: {
     name: 'Field Ticket',
-    background: '#FFF7D9',
-    borderColor: '#FDD33E'
+    ...COLOUR_MASTER.product
   },
   invoice: {
     name: 'Invoice',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.service
   },
   serviceOrderClosed: {
-    name: `${routes.fieldServiceOrder.title} Closed`,
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+    name: `${sidebarResource?.fieldServiceOrder} Closed`,
+    ...COLOUR_MASTER.receivingTicket
   }
 };
 
@@ -67,7 +63,7 @@ function ServiceOrderViews({ serviceData }) {
             ref_id: serviceData?._id,
             label: (
               <div>
-                <Typography variant="body2">{routes.fieldServiceOrder.title}</Typography>
+                <Typography variant="body2">{sidebarResource?.fieldServiceOrder}</Typography>
                 <Typography variant="subtitle2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
               </div>
             )

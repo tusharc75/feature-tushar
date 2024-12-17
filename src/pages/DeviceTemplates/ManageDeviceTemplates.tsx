@@ -42,7 +42,7 @@ const ManageDeviceTemplates = ({
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const {
-        state: { user }
+        state: { user, resources }
     }: any = useData();
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -169,7 +169,7 @@ const ManageDeviceTemplates = ({
                                 <CustomDialogHeader
                                     title={
                                         !deviceTemplatesId
-                                            ? `Create ${routes.deviceTemplates.title}`
+                                            ? `Create ${resources?.deviceTemplates?.titleSingular}`
                                             : `${isClone ? `Clone - ${cloneHeading}` : `Update ${initialData?.values['templateName'] ?? ''}`}`
                                     }
                                     onClose={(e, reason) => {

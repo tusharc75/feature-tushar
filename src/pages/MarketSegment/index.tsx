@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.marketSegment.title);
+const renderedFrom = camelCase(sidebarResource?.marketSegment);
 
 const MarketSegment = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const MarketSegment = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,10 +205,10 @@ const MarketSegment = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.marketSegment]} />
+        <CustomBreadCrumbs routes={[{ ...routes.marketSegment, title: resources?.marketSegment?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.marketSegment}
-          module={routes.marketSegment.title}
+          module={resources?.marketSegment?.titlePlural}
           api={routes?.marketSegment.path}
           afterImportCompleted={() => {
             fetchData();
@@ -257,7 +257,7 @@ const MarketSegment = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.marketSegment?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.marketSegment?.titleSingular?.toLowerCase()} ${deleteRecord?.name || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

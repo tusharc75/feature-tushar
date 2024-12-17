@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CreateBillingDialog from './CreateBillingDialog';
@@ -18,13 +18,14 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
-  const renderedFrom = camelCase(routes?.invoice?.title);
+
+  const renderedFrom = camelCase(sidebarResource.invoice);
 
   const toastConfig = useContext(CustomToastContext);
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -65,7 +66,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
     let newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     columns = [...newColumns, ActionsRenderer];
     columns?.forEach((column) => {
@@ -279,7 +280,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       {isConfirmDialogVisible && (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setIsConformDialogVisible(false);

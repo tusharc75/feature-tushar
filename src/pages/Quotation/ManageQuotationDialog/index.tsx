@@ -36,7 +36,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -239,7 +239,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
               <CustomDialogHeader
                 title={
                   !quotationId
-                    ? `Create ${routes.quotation.title}`
+                    ? `Create ${resources?.quotation?.titleSingular}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${quotationData?.quotationNumber}`}`
                 }
                 onClose={() => {

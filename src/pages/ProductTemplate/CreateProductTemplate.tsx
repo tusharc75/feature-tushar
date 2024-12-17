@@ -1,7 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-
-import { Box, Grid, Typography, Button, Menu, MenuItem, IconButton, CircularProgress, makeStyles, useMediaQuery, Dialog } from '@material-ui/core';
-
+import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, makeStyles, useMediaQuery } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { FormBuilder } from '../../components/FormBuilder';
@@ -11,7 +9,7 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -19,17 +17,12 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
 import HistoryDialog from '../../components/Activity/History';
-import { CustomDialogTransition, fieldLabelToFieldName, productTemplate } from '../../constants/helpers';
+import { checkIsAllowedToEdit, fieldLabelToFieldName, productTemplate, sidebarResource } from '../../constants/helpers';
 import HistoryButton from '../../components/Helpers/HistoryButton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { isMobile, isTablet } from 'react-device-detect';
-import { camelCase } from 'lodash';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import TinyMce from './../../components/TinyMCE/index';
+import { isTablet } from 'react-device-detect';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
@@ -67,7 +60,6 @@ const ProductTemplate = () => {
   const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [generalRemarkOpen, setGeneralRemarkOpen] = useState(false);
   const [generalRemarkData, setGeneralRemarkData] = useState('');
   const ref = useRef(null);
@@ -83,7 +75,7 @@ const ProductTemplate = () => {
   };
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [productTemplatePermissions, setProductTemplatePermissions] = useState({
     isCreate: false,
@@ -178,9 +170,8 @@ const ProductTemplate = () => {
           setGeneralRemarkData(data?.generalRemark || '');
           setInitialValues(data);
           setSection(JSON.parse(JSON.stringify(data.section)));
-          if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator.some((d) => d === user.user._id)) {
-            setHasPermissionToUpdate(false);
-          }
+          var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.productTemplate, data);
+          setHasPermissionToUpdate(isAllowedToEdit && permissions?.productTemplate?.isUpdate);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -324,7 +315,7 @@ const ProductTemplate = () => {
           <div className="flex items-center justify-between w-full">
             <CustomBreadCrumbs
               routes={[
-                { title: routes.productTemplate.title, path: routes.productTemplate.path },
+                { title: resources?.productTemplate?.titlePlural, path: routes.productTemplate.path },
                 { title: id === '0' || isClone ? 'New' : initialValues && initialValues.name }
               ]}
               isConfirmBeforeClick={hasPermissionToUpdate}
@@ -430,7 +421,7 @@ const ProductTemplate = () => {
                       {!values['isStandard'] && (
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
-                          options={[{_id: 'Select All', name: 'Select All'},...productCategory]}
+                          options={[{ _id: 'Select All', name: 'Select All' }, ...productCategory]}
                           multiple
                           getOptionLabel={(option: any) => (option ? option.name : '')}
                           getOptionSelected={(option: any, val) => option._id === val}
@@ -441,9 +432,9 @@ const ProductTemplate = () => {
                               : []
                           }
                           onChange={(e, val) => {
-                            if(val?.find((v)=> v._id==="Select All")){
-                              setFieldValue('productCategory', productCategory?.map((d) => d._id)); 
-                            }else {
+                            if (val?.find((v) => v._id === "Select All")) {
+                              setFieldValue('productCategory', productCategory?.map((d) => d._id));
+                            } else {
                               setFieldValue('productCategory', val && val?.map((d) => d._id));
                             }
                           }}

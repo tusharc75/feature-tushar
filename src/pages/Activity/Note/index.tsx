@@ -28,10 +28,10 @@ import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Note = () => {
-  const renderedFrom = camelCase(routes?.activityNote.title);
+  const renderedFrom = camelCase(sidebarResource.note);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -125,7 +125,7 @@ const Note = () => {
           <>
             <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
               <span>
-                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
                   <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
@@ -312,7 +312,7 @@ const Note = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.note?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (
@@ -364,7 +364,8 @@ const Note = () => {
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${deleteRecord.name || 'Notes'}?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.activity?.titleSingular?.toLowerCase()} :
+            ${deleteRecord.name || 'Notes'}` : resources?.activity?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
             if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
             setIsConformDialogVisible(false);
@@ -411,7 +412,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}

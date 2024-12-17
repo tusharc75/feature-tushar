@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Calendar, momentLocalizer, View } from 'react-big-calendar';
-import { useParams, useHistory } from 'react-router-dom';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
+import { useCallback, useEffect, useState } from 'react';
+import { momentLocalizer, View } from 'react-big-calendar';
+import { useHistory, useParams } from 'react-router-dom';
 
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { Box } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomCalendar from 'src/components/CustomCalendar';
 import CustomContainer from 'src/components/CustomContainer';
-import { filterDataByDateIntersection } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
 
 const localizer = momentLocalizer(moment);
 
@@ -31,7 +30,6 @@ const MyCalendar = (props: Props) => {
     estimateEndDate: moment().endOf('month').format('MM/DD/YYYY')
   });
   const [view, setView] = useState<View>('month');
-  const [isDataPresent, setIsDataPresent] = useState(true);
 
   useEffect(() => {
     const deepFilter = [
@@ -57,19 +55,14 @@ const MyCalendar = (props: Props) => {
         }));
         setEvents(eventsData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [resource, dateRange]);
 
   const onRangeChange = useCallback(
     (range, view) => {
       setRange(range);
-      if (view === 'day') {
-        setIsDataPresent(!!filterDataByDateIntersection(range, events)?.length);
-      } else {
-        setIsDataPresent(true);
-      }
     },
-    [setRange, events]
+    [setRange]
   );
 
   const onView = useCallback(
@@ -94,7 +87,7 @@ const MyCalendar = (props: Props) => {
       </div>
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
         <div className="relative">
-          <Calendar
+          <CustomCalendar
             defaultDate={moment().toDate()}
             defaultView="day"
             events={events}
@@ -109,7 +102,7 @@ const MyCalendar = (props: Props) => {
                 });
               }
             }}
-            views={{ month: true, week: true, day: true }}
+            views={['month', 'week', 'day']}
             eventPropGetter={(obj) => ({})}
             onSelectEvent={(event: any) => {
               history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
@@ -118,11 +111,6 @@ const MyCalendar = (props: Props) => {
             onView={onView}
             view={view}
           />
-          {!isDataPresent && (
-            <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-              No data available for the selected date range.
-            </div>
-          )}
         </div>
       </CustomContainer>
     </>

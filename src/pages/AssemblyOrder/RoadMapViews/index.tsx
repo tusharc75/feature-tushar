@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { MATERIAL_TYPE } from '../../../constants/helpers';
+import { COLOUR_MASTER, MATERIAL_TYPE } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,6 +12,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from 'src/StateProvider/Provider';
 
 const AssemblyOrderViews = (props) => {
   const [themeColor] = useAppTheme();
@@ -27,36 +28,34 @@ const AssemblyOrderViews = (props) => {
     fetchData();
   }, []);
 
+  const {
+    state: {resources }
+  }: any = useData();
+
   const customNodeStyles = {
     assemblyOrder: {
       name: 'Assembly Order',
-      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
-      borderColor: '#9789F0'
+      ...COLOUR_MASTER.purchaseOrder
     },
     product: {
       name: 'Product',
-      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
-      borderColor: '#8BCBDF'
+      ...COLOUR_MASTER.product
     },
     workOrder: {
       name: 'Work Order',
-      background: '#ffd65b',
-      borderColor: 'green'
+      ...COLOUR_MASTER.purchaseOrder
     },
     package: {
       name: 'Package',
-      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
-      borderColor: '#66CDB7'
+      ...COLOUR_MASTER.assets
     },
     managedPackage: {
       name: 'Managed Package',
-      background: themeColor === 'dark' ? 'rgb(158,204,219)' : '#FFF7D9',
-      borderColor: '#FDD33E'
+      ...COLOUR_MASTER.assets
     },
     parentManagedpackage: {
       name: 'Parent Managed package',
-      background: themeColor === 'dark' ? 'rgb(165,212,134)' : '#EDFFE1',
-      borderColor: '#86DB71'
+      ...COLOUR_MASTER.receivingTicket
     },
     // closed: {
     //   name: 'Closed',
@@ -117,10 +116,10 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'assemblyOrder',
             ref_id: id,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.assemblyOrder.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.assemblyOrder?.titlePlural}>
                 <div>
+                <Typography variant="body2">{resources?.assemblyOrder?.titlePlural}</Typography>
                 <Typography variant="subtitle2">{assemblyOrderNumber}</Typography>
-                  <Typography variant="body2">{routes.assemblyOrder.title}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -143,8 +142,8 @@ const AssemblyOrderViews = (props) => {
             label: (
               <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
                 <div>
-                  <Typography variant="subtitle2">{item.packageDetail?.packageName || item?.detail}</Typography>
                   <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                  <Typography variant="subtitle2">{item.packageDetail?.packageName || item?.detail}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -177,8 +176,8 @@ const AssemblyOrderViews = (props) => {
             label: (
               <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
                 <div>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
                   <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -209,8 +208,8 @@ const AssemblyOrderViews = (props) => {
             label: (
               <HtmlTooltip arrow placement="top" title={'Work Order'}>
                 <div>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.optionLabel}</Typography>
                   <Typography variant="body2">{'Work Order'}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.optionLabel}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -239,13 +238,13 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'managedPackage',
             ref_id: cmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.managedPackages.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {cmp.optionLabel}
+                    {resources?.managedPackages?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {routes.managedPackages.title}
+                    {cmp.optionLabel}
                   </Typography>
                 </div>
               </HtmlTooltip>
@@ -276,13 +275,13 @@ const AssemblyOrderViews = (props) => {
             ref_type: 'managedPackage',
             ref_id: pmp.optionValue,
             label: (
-              <HtmlTooltip arrow placement="top" title={`${routes.managedPackages.title}`}>
+              <HtmlTooltip arrow placement="top" title={`${resources?.managedPackages?.titleSingular}`}>
                 <div>
                   <Typography variant="body2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {pmp.optionLabel}
+                    {resources?.managedPackages?.titleSingular}
                   </Typography>
                   <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {routes.managedPackages.title}
+                    {pmp.optionLabel}
                   </Typography>
                 </div>
               </HtmlTooltip>
@@ -326,7 +325,7 @@ const AssemblyOrderViews = (props) => {
         window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'workOrder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'managedPackage':
         window.open(`${routes.managedPackagesDetail.path}/${element.data.ref_id}`);

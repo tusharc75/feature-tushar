@@ -27,15 +27,14 @@ const WarehouseDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [warehouseData, setWarehouseData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
   const [tabValue, setTabValue] = useState(0);
   const [resourceData, setResourceData] = useState(null);
 
@@ -53,9 +52,7 @@ const WarehouseDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/warehouse/${id}`);
-      setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
-      setCustomizedRoutes([routes.warehouse, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -93,7 +90,6 @@ const WarehouseDetailsPage = () => {
           .put(`/warehouse/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-
             history.push(`${routes.warehouse.path}`);
           })
           .catch((err) => {
@@ -121,7 +117,7 @@ const WarehouseDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.warehouse, title: resources?.warehouse?.titlePlural }, { title: warehouseData?.warehouseName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -154,7 +150,7 @@ const WarehouseDetailsPage = () => {
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange}>
           <CustomTab label={'Details'} value={0} />
           {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
-            <CustomTab label={routes.storageLocation.title} value={1} />
+            <CustomTab label={resources?.storageLocation?.titlePlural} value={1} />
           )}
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
           {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}
@@ -206,7 +202,7 @@ const WarehouseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${warehouseData?.warehouseName}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -18,6 +18,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { object, string } from 'yup';
 import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 const workFlowSchema = object().shape({
   workflowName: string().required('Please enter Workflow Name'),
@@ -25,6 +26,9 @@ const workFlowSchema = object().shape({
 });
 
 const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, data = null }) => {
+  const {
+    state: { resources }
+  }: any = useData();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -114,7 +118,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${data ? 'Edit' : 'Add'} Workflow`}
+                title={`${data ? 'Edit' : 'Add'} ${resources?.workflow?.titleSingular}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

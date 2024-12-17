@@ -21,7 +21,8 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   MATERIAL_TYPE,
-  deliveryTicket
+  deliveryTicket,
+  sidebarResource
 } from 'src/constants/helpers';
 import { subcontractAssemblyActions, subcontractAssemblyMessage } from 'src/constants/messageHelpers';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
@@ -29,7 +30,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import ReceiveDateDialog from 'src/pages/SubcontractAssembly/LoadingTicket/ReceiveDateDialog';
 
-const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
+const renderedFrom = `${sidebarResource?.subcontractAssembly}_LoadingTicket`;
 
 const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const { setWalkmeData } = useSetWalkmeData();

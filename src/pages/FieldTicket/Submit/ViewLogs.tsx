@@ -13,12 +13,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
-  const renderedFrom = `${routes.fieldTicket.title}_logs`;
+  const renderedFrom = `${sidebarResource.fieldTicket}_logs`;
 
   const {
     state: { permissions }

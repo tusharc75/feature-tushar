@@ -31,7 +31,7 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 import { Link } from 'react-router-dom';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
-  const renderedFrom = `${camelCase(routes.serializedAsset.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -39,7 +39,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -354,8 +354,8 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
               {...params}
               margin="dense"
               name="plant"
-              placeholder={routes.warehouse.title}
-              label={routes.warehouse.title}
+              placeholder={resources?.warehouse?.titleSingular}
+              label={resources?.warehouse?.titleSingular}
               variant="outlined"
               fullWidth
               className="m-0"
@@ -457,7 +457,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${routes.serializedAsset.title}`}
+        title={`Add ${resources?.serializedAsset?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -541,8 +541,9 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            if (checkAssetPolicy(receivingStatus)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: statusPolicy,

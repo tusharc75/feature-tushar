@@ -37,37 +37,34 @@ import { createRepairJobFlow } from './walkmeSteps';
 let repairJobTimeout;
 
 const RepairJob = () => {
-  const types = [
-    {
-      key: `My ${routes?.repairJob.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes?.repairJob.title}`,
-      value: 2
-    }
-  ];
-
-  const renderedFrom = camelCase(routes?.repairJob.title);
+  const renderedFrom = camelCase(sidebarResource?.repairJob);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.repairJob?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.repairJob?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleRepairJobDelete, setSingleRepairJobDelete] = useState({
-    id: null,
-    show: false,
-    repairJobName: ''
-  });
+
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -77,14 +74,14 @@ const RepairJob = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
-  const pageTitle = camelCase(`${routes.repairJob.title}`);
+  const pageTitle = camelCase(`${resources?.repairJob?.titlePlural}`);
   const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
-    setWalkmeData([createRepairJobFlow()]);
+    setWalkmeData([createRepairJobFlow(resources)]);
   }, []);
 
   const fetchGridColumns = async () => {
@@ -131,28 +128,6 @@ const RepairJob = () => {
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
-
-  const handleSingleDeleteRepairJob = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${repairJob.api}/remove`, {
-        ids: [singleRepairJobDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        dispatch({ type: 'loading', loading: false });
-        setSingleRepairJobDelete({ id: null, show: false, repairJobName: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -347,10 +322,10 @@ const RepairJob = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.repairJob]} />
+        <CustomBreadCrumbs routes={[{ ...routes.repairJob, title: resources?.repairJob?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.repairJob}
-          module="repairJob"
+          module={resources?.repairJob?.titlePlural}
           api={repairJob.api}
           afterImportCompleted={() => {
             fetchData();
@@ -402,19 +377,11 @@ const RepairJob = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? resources?.repairJob?.titleSingular : resources?.repairJob?.titlePlural}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -424,18 +391,16 @@ const RepairJob = () => {
           />
         ) : null}
 
-        {singleRepairJobDelete.show ? (
+        {showDeleteConfirmBox ? (
           <ConfirmationDialog
-            open={singleRepairJobDelete.show}
-            message={`Are you sure you want to delete Repair Job: ${singleRepairJobDelete.repairJobName}?`}
-            onClose={() =>
-              setSingleRepairJobDelete({
-                id: null,
-                show: false,
-                repairJobName: ''
-              })
-            }
-            onOk={handleSingleDeleteRepairJob}
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.repairJobName}` : resources?.repairJob?.titlePlural?.toLowerCase()} ?`}
+            onClose={() =>{
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            onOk={handleDeleteRepairJob}
           />
         ) : null}
       </CustomContainer>

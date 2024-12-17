@@ -21,7 +21,7 @@ import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const renderedFrom = 'schedule-report';
+const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
 const ScheduleReport = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const ScheduleReport = () => {
   const { page, limit, filters, sorting, selectedRecords } = state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -258,7 +258,7 @@ const ScheduleReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.scheduleReport?.title.toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
+            message={`Are you sure you want to delete ${resources?.scheduleReport?.titleSingular?.toLowerCase().toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

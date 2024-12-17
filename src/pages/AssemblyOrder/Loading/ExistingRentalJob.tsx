@@ -16,7 +16,7 @@ const renderedFrom = 'assemblyOrder_rental_management_existing';
 const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventory = [], assetPolicyData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -35,10 +35,10 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`);
     const data = response?.data?.data;
-    let newColumns = generateColumns(routes.rentalManagement, data, routes.rentalManagementDetail.path);
+    let newColumns = generateColumns(resources?.rentalManagement?.titleSingular, data, routes.rentalManagementDetail.path);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.rentalManagement.title, field));
+      newColumns.push(checkStaticField(resources?.rentalManagement?.titleSingular, field));
     });
     setColumns([...newColumns]);
     fetchRentalManagement();
@@ -102,7 +102,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
 
   return (
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-      <CustomDialogHeader title={`Select ${routes.rentalManagement.title}`} onClose={onClose}></CustomDialogHeader>
+      <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
           <Grid item xs={12} sm={12} md={12} container justify={'flex-end'}>
@@ -114,7 +114,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
               }}
               variant="contained"
             >
-              {`Create ${routes.rentalManagement.title}`}
+              {`Create ${resources?.rentalManagement?.titleSingular}`}
             </Button>
             <Box mx={1} />
             <Button
@@ -168,7 +168,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, rentalId: null })}
           onSuccess={(_assetData) => {
             handleAddManagedPAckage(openAssetDataDialog.rentalId, _assetData);

@@ -9,28 +9,28 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  useMediaQuery
+  TextField
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
-import React, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
+import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import CustomCalendar from 'src/components/CustomCalendar';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, filterDataByDateIntersection, sidebarResource } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import { useData } from 'src/StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
@@ -41,14 +41,14 @@ const formats = {
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
           {
-            label: routes.warehouse.title,
+            label: resources?.warehouse?.titlePlural,
             value: 'Warehouse',
             key: 'warehouse'
           }
@@ -57,7 +57,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.product?.isRead
       ? [
           {
-            label: routes.product.title,
+            label: resources?.product?.titlePlural,
             value: 'Product',
             key: 'product'
           }
@@ -66,7 +66,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serializedAsset?.isRead
       ? [
           {
-            label: routes.serializedAsset.title,
+            label: resources?.serializedAsset?.titlePlural,
             value: 'Serialized Asset',
             key: 'asset'
           }
@@ -75,7 +75,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serviceMaster?.isRead
       ? [
           {
-            label: routes.serviceMaster.title,
+            label: resources?.serviceMaster?.titleSingular,
             value: 'Service Master',
             key: 'service'
           }
@@ -84,7 +84,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.customerAccount?.isRead
       ? [
           {
-            label: routes.customerAccount.title,
+            label: resources?.customerAccount?.titlePlural,
             value: 'Customer Account',
             key: 'customerAccount'
           }
@@ -93,7 +93,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.competencies?.isRead
       ? [
           {
-            label: routes.competencies.title,
+            label: resources?.competencies?.titlePlural,
             value: 'Competencies',
             key: 'competencies'
           }
@@ -103,7 +103,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const ASSET_FILTERS = [
     {
-      label: routes.serializedAsset.title,
+      label: resources?.serializedAsset?.titlePlural,
       value: 'Serialized Asset',
       key: 'assetIds'
     }
@@ -111,12 +111,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const PRODUCT_FILTERS = [
     {
-      label: routes.product.title,
+      label: resources?.product?.titlePlural,
       value: 'Product',
       key: 'product'
     },
     {
-      label: routes.warehouse.title,
+      label: resources?.warehouse?.titlePlural,
       value: 'Warehouse',
       key: 'warehouse'
     }
@@ -124,12 +124,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const RENTAL_JOB_FILTERS = [
     {
-      label: routes.rentalManagement.title,
+      label: resources?.rentalManagement?.titlePlural,
       value: 'Rental Management',
       key: 'rentalJob'
     },
     {
-      label: routes.padMaster.title,
+      label: resources?.padMaster?.titlePlural,
       value: 'Pad Master',
       key: 'padMaster'
     }
@@ -151,15 +151,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const defaultDate = useMemo(() => moment().toDate(), []);
 
   const [staticEvents, setStaticEvents] = useState([]);
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day' || view === 'agenda') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-  };
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -763,21 +754,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         <div className={cn('relative')}>
           {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
             <>
-              <DragAndDropCalendar
+              <CustomCalendar
+                dragAndDrop={true}
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
                 onEventDrop={moveEvent}
+                loading={isDataFetching}
                 onEventResize={resizeEvent}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
                 resizable
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -796,19 +788,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </>
           ) : (
             <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
-              <Calendar
+              <CustomCalendar
                 defaultDate={defaultDate}
-                key={mobileView ? 'mobile' : 'desktop'}
-                defaultView={mobileView ? 'day' : 'month'}
+                defaultView={'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
+                loading={isDataFetching}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
-                onRangeChange={handleRangeChange}
-                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -837,18 +828,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   }
                 }}
               />
-              {!isDataPresent && (
-                <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-                  No data available for the selected date range.
-                </div>
-              )}
             </div>
           )}
-          {isDataFetching && (
+          {/* {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
               <CircularProgress />
             </span>
-          )}
+          )} */}
         </div>
         {isOpen.open && (
           <Popover
@@ -866,7 +852,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} />
+                    <RenderTable data={d.items} resources={resources} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -880,7 +866,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data }) => {
+const RenderTable = ({ data, resources }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -888,8 +874,8 @@ const RenderTable = ({ data }) => {
           <TableRow>
             <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
-            <TableCell>{routes.warehouse.title}</TableCell>
-            <TableCell>{routes.customerAccount.title}</TableCell>
+            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
+            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
             {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>
@@ -906,11 +892,11 @@ const RenderTable = ({ data }) => {
                     } else if (row?.resource === sidebarResource.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.demandOrder) {
                       window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairJob) {
                       window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.salesOrder) {

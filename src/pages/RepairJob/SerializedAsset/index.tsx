@@ -30,6 +30,7 @@ import {
   REPAIR_JOB_STATUS,
   deliveryTicket,
   repairJob,
+  serializedAsset,
   sidebarResource
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -63,7 +64,7 @@ const SerializedAsset = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const handleClick = (event) => {
@@ -224,7 +225,7 @@ const SerializedAsset = ({
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
             ) : alloweOperation &&
-              ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+              ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
@@ -377,6 +378,30 @@ const SerializedAsset = ({
     }
   };
 
+  const handleUpdateStatus = () => {
+    axiosInstance()
+      .put(`${serializedAsset.api}/update-status`, {
+        comment: '',
+        assets: selectedRecords.map((m) => ({
+          _id: m?._id ?? m?.id,
+          currentStatus: m.status
+        })),
+        status: ASSET_STATUS.needRepair,
+        reference: {
+          _id: repairJobData._id,
+          type: 'Repair'
+        }
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        fetchRecords();
+        repairedAssetStatus([]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const rightSideContents = () => {
     return (
       <>
@@ -411,6 +436,17 @@ const SerializedAsset = ({
               }}
             >
               <MenuItem
+                disabled={
+                  checkUniqcurrentOwnerType() || selectedRecords?.some((r) => [ASSET_STATUS.reserved, ASSET_STATUS.needRepair]?.includes(r?.status))
+                }
+                onClick={() => {
+                  setAnchorEl(null);
+                  handleUpdateStatus();
+                }}
+              >
+                {ASSET_STATUS.needRepair}
+              </MenuItem>
+              <MenuItem
                 disabled={checkUniqcurrentOwnerType()}
                 onClick={() => {
                   setAnchorEl(null);
@@ -434,8 +470,10 @@ const SerializedAsset = ({
               size="small"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
+                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)) ||
+                selectedRecords.some(
+                  (s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)
+                ) ||
                 checkUniqcurrentOwnerType()
               }
               onClick={() => {
@@ -475,7 +513,7 @@ const SerializedAsset = ({
           </MenuItem>
         ) : null}
         <MenuItem
-          disabled={checkUniqSupplier() || checkUniqWarehouse()}
+          disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
           onClick={() => {
             if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
               if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
@@ -493,7 +531,7 @@ const SerializedAsset = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.repairJob.title}-${repairJobData?.repairJobName}`,
+    fileName: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
     resource: sidebarResource.repairJob,
     referenceId: repairJobData?._id,
     columns: columns,

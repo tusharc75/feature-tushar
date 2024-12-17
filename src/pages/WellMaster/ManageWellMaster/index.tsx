@@ -29,7 +29,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, resources }
   }: any = useData();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle(`Create ${routes.wellMaster.title}`);
+          setTitle(`Create ${resources?.wellMaster?.titleSingular}`);
           let tempInitialData: any = getObjKeys('', fieldsDataForCreate);
           for (const key in referenceData) {
             if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {

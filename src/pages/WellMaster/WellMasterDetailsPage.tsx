@@ -24,7 +24,7 @@ const WellMasterDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const WellMasterDetailsPage = () => {
   const [wellMasterFields, setWellMasterFields] = useState([]);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [tabValue, setTabValue] = useState(0);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.wellMaster]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.wellMaster, title: resources?.wellMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -50,7 +50,7 @@ const WellMasterDetailsPage = () => {
       } = await axiosInstance().get(`${wellMaster.api}/${id}`);
       setHeadingLbl(data.wellName);
       setWellMasterData(data);
-      setCustomizedRoutes([routes.wellMaster, { title: data.wellName }]);
+      setCustomizedRoutes([{ ...routes.wellMaster, title: resources?.wellMaster?.titlePlural }, { title: data.wellName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -114,7 +114,7 @@ const WellMasterDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab label={'Details'} value={0} />
-          {permissions?.wellNumber?.isRead && <CustomTab label={routes.wellNumber.title} value={1} />}
+          {permissions?.wellNumber?.isRead && <CustomTab label={resources?.wellNumber?.titlePlural} value={1} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !wellMasterFields.length ? (
@@ -143,7 +143,7 @@ const WellMasterDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.wellMaster.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.wellMaster?.titleSingular.toLowerCase()} ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

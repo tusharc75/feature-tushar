@@ -1,8 +1,6 @@
 import moment from 'moment';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import { momentLocalizer } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
-import React, { useRef, useState } from 'react';
-import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
 import CustomCalendar from 'src/components/CustomCalendar';
 
 const localizer = momentLocalizer(moment);
@@ -11,31 +9,27 @@ type Props = {
   activities: any[];
   setActivityData: any;
   type?: string;
+  loading?: boolean;
 };
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const MyCalendar = (props: Props) => {
-  const { activities, setActivityData } = props;
+const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
   const mobileView = isMobile && !isTablet;
-  const calendarRef = useRef<Calendar<any, object>>(null);
 
   return (
     <div className="relative">
-      <Calendar
-        key={mobileView ? 'mobile' : 'desktop'}
+      <CustomCalendar
         defaultDate={moment().toDate()}
-        defaultView={mobileView ? 'day' : 'month'}
         events={activities}
+        loading={loading}
         localizer={localizer}
         formats={formats}
         style={{ height: 'calc(100vh - 200px)', borderRadius: '4px', overflow: 'auto' }}
         popup={!mobileView}
-        ref={calendarRef}
-        // views={{ month: !mobileView, week: !mobileView, day: true }}
-        views={mobileView ? ['day'] : ['month', 'week', 'day']}
+        views={['month', 'week', 'day']}
         eventPropGetter={(obj) => {
           const newStyles = {
             backgroundColor:

@@ -36,7 +36,7 @@ const ManageServiceOrderDialog = ({
   open,
 }) => {
 
-  const { state: { user } }: any = useData();
+  const { state: { user, resources } }: any = useData();
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -147,7 +147,7 @@ const ManageServiceOrderDialog = ({
             type: 'success',
             message: message
           });
-          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+          history.push(`${routes?.fieldServiceOrderDetail?.path}/${data?._id}`);
           setLoading(false);
         })
         .catch((error) => {
@@ -207,7 +207,7 @@ const ManageServiceOrderDialog = ({
                 <CustomDialogHeader
                   title={
                     !serviceOrderId
-                      ? `Create ${routes.fieldServiceOrder.title}`
+                      ? `Create ${resources?.fieldServiceOrder?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceDetails?.fieldServiceOrderNumber}`}`
                   }
                   onClose={(e, reason) => {

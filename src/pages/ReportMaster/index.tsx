@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from '@material-ui/core';
-import { debounce, kebabCase } from 'lodash';
+import { kebabCase } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { AiFillCalendar } from 'react-icons/ai';
 import { HiArrowRight } from 'react-icons/hi';
@@ -124,9 +124,8 @@ const ReportMaster = () => {
                           <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
                           <Typography variant="body2">{/* {report.text} */}</Typography>
                           <Link
-                            to={`/reports${
-                              report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path
-                            }`}
+                            to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path
+                              }`}
                           >
                             View <HiArrowRight className={styles.arrow} />
                           </Link>

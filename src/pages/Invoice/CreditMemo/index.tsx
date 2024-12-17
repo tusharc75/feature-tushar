@@ -22,9 +22,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
+
+  const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -41,7 +42,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const [invoiceColumns, setInvoiceColumns] = useState(null);
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -261,7 +262,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: invoiceColumns,
@@ -367,17 +368,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             fetchData();
           }}
           creditMemoId={creditMemoDialog.id}
-          referenceData={{
-            invoice: invoiceData?._id,
-            currency: invoiceData?.currency,
-            customerAccount: invoiceData?.customerAccount?.optionValue,
-            customerContact: invoiceData?.customerContact?.optionValue,
-            customerDepartment: invoiceData?.customerDepartment,
-            shippingAddress: invoiceData?.shippingAddress?.optionValue,
-            billingAddress: invoiceData?.billingAddress?.optionValue,
-            wellName: invoiceData?.wellName?.optionValue,
-            wellNumber: invoiceData?.wellNumber?.map((e) => e.optionValue),
-          }}
+          invoiceData={invoiceData}
           isRedirectToDetailPage={false}
         />
       )}

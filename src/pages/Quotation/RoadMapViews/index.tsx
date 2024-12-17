@@ -15,6 +15,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from 'src/StateProvider/Provider';
 
 const QuotationViews = (props) => {
   const [themeColor] = useAppTheme();
@@ -25,6 +26,10 @@ const QuotationViews = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
+
+  const {
+    state: {resources }
+  }: any = useData();
 
   useEffect(() => {
     versionId && fetchData();
@@ -91,9 +96,9 @@ const QuotationViews = (props) => {
             ref_type: 'quotation',
             ref_id: quoteId,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.quotation.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.quotation?.titleSingular}>
                 <div>
-                  <Typography variant="body2">{routes.quotation.title}</Typography>
+                  <Typography variant="body2">{resources?.quotation?.titleSingular}</Typography>
                   <Typography variant="subtitle2">{quoteName ?? quoteName}</Typography>
                 </div>
               </HtmlTooltip>
@@ -204,7 +209,7 @@ const QuotationViews = (props) => {
             ref_id: quoteId,
             label: (
               <div>
-                <Typography variant="body2">{routes.quotation.title}</Typography>
+                <Typography variant="body2">{resources?.quotation?.titleSingular}</Typography>
                 <Typography variant="body2">{quoteName ?? quoteName}</Typography>
                 <Typography variant="subtitle2">{status ?? status}</Typography>
               </div>
@@ -250,13 +255,13 @@ const QuotationViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'product':
-        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'serializedAsset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };

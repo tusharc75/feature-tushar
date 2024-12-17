@@ -20,14 +20,14 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ManageTrainAiModel from './ManageTrainAiModel';
 
-let renderedFrom = camelCase(routes.trainAiModel?.title);
+let renderedFrom = camelCase(sidebarResource.trainAiModel);
 
 const TrainAiModel = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   let { referenceId }: any = queryString.parse(history.location.search);
   const [showManageTrainAiModelDialog, setShowManageTrainAiModelDialog] = useState({ open: false });
@@ -179,7 +179,7 @@ const TrainAiModel = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.trainAiModel]} />
+        <CustomBreadCrumbs routes={[{ ...routes.trainAiModel, title: resources?.trainAiModel?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

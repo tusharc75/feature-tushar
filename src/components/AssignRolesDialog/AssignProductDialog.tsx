@@ -28,7 +28,7 @@ const AssignProductDialog = ({
   hideQty = false,
   pricingCondition = null
 }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -36,7 +36,7 @@ const AssignProductDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -85,6 +85,13 @@ const AssignProductDialog = ({
       }
       let columns = [];
       let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+      if (serialized != null) {
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'serializedProduct') {
+            e.disableFilters = true
+          }
+        })
+      }
       columns = [...newColumns, ...getStaticFields()];
       if (hideQty) {
         setColumns([...columns]);
@@ -151,7 +158,7 @@ const AssignProductDialog = ({
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (extraDeepFilter?.length > 0) {
@@ -165,6 +172,7 @@ const AssignProductDialog = ({
         term: 'Part'
       });
     }
+
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
         updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
@@ -248,7 +256,7 @@ const AssignProductDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
+      <CustomDialogHeader title={`Add ${resources?.product?.titlePlural}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
@@ -273,7 +281,7 @@ const AssignProductDialog = ({
           {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} label={`${routes.pricingCondition.title} Products`} />
+                <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Products`} />
                 <CustomTab value={1} className={'tabLayout'} label={'All Products'} />
               </CustomTabs>
             </Box>

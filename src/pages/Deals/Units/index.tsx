@@ -10,7 +10,7 @@ import routes from '../../../components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 
 const Units = ({ dealData }) => {
-  const renderedFrom = camelCase(`${routes?.deals.title}_assets`);
+  const renderedFrom = camelCase(`${sidebarResource.deals}_assets`);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user }

@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDateTime, fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -16,8 +16,8 @@ import { Delete, Edit } from '@material-ui/icons';
 import StartStopDate from './StartStopDateDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const StartStopLogsDialog = ({ onClose, referenceId, rowId, fetchRecords }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_start_stop_logs`;
+const StartStopLogsDialog = ({ onClose, referenceId, _id, fetchRecords }) => {
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,12 +28,12 @@ const StartStopLogsDialog = ({ onClose, referenceId, rowId, fetchRecords }) => {
 
   useEffect(() => {
     fetchData();
-  }, [rowId, referenceId]);
+  }, [_id, referenceId]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&rowId=${rowId}`)
+      .get(`${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&_id=${_id}`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
@@ -141,7 +141,8 @@ const StartStopLogsDialog = ({ onClose, referenceId, rowId, fetchRecords }) => {
                 <IconButton
                   size="small"
                   onClick={() => {
-                    let minStartDate = null, maxEndDate = null;
+                    let minStartDate = null,
+                      maxEndDate = null;
                     dataRows?.forEach((d: any, index: number) => {
                       if (d._id === row.original._id) {
                         if (index !== 0) {
@@ -188,7 +189,6 @@ const StartStopLogsDialog = ({ onClose, referenceId, rowId, fetchRecords }) => {
   ];
 
   const handleUpdateLog = (values, _id) => {
-
     setStartStopDateDialog({ ...startStopDateDialog, loading: true });
 
     axiosInstance()

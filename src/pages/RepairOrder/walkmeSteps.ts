@@ -4,10 +4,10 @@ import { sidebarResource } from 'src/constants/helpers';
 
 export const generateAddExistingSerializedAsset = (
   waitForStepInsertion = false,
-  name = `Add Existing ${routes.serializedAsset.title}`
+  name = `Add Existing ${sidebarResource?.serializedAsset}`
 ): WalkmeData => ({
   name: name,
-  url: `${routes.repairOrderDetail.path}/:id`,
+  url: `${routes?.repairOrderDetail?.path}/:id`,
   steps: [
     {
       target: '#main-tab-1',
@@ -42,7 +42,7 @@ export const nextButtonStep = (waitForStepInsertion: boolean = false): StepDefin
 
 export const generateAutoCompleteSteps = (waitForStepInsertion = false, renderedFrom = ''): WalkmeData => {
   const data: WalkmeData = {
-    url: `${routes.repairOrderDetail.path}/:id`,
+    url: `${routes?.repairOrderDetail?.path}/:id`,
     name: 'Auto Complete Work Order',
     steps: [
       {
@@ -71,7 +71,7 @@ export const generateAutoCompleteSteps = (waitForStepInsertion = false, rendered
 
 export const generateCompleteStepData = (): WalkmeData => {
   const data: WalkmeData = {
-    url: `${routes.repairOrderDetail.path}/:id`,
+    url: `${routes?.repairOrderDetail?.path}/:id`,
     name: 'Complete Work Order',
     steps: [
       {
@@ -88,8 +88,8 @@ export const createRepairOrderFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner'];
 
   const data: WalkmeData = {
-    name: `Add ${routes.repairOrder.title}`,
-    url: `${routes.repairOrder.path}`,
+    name: `Add ${sidebarResource?.repairOrder}`,
+    url: `${routes?.repairOrder?.path}`,
     type: 'flow',
     steps: [
       {

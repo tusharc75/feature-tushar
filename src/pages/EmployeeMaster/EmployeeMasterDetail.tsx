@@ -42,7 +42,7 @@ const EmployeeMasterDetail = () => {
   const [resourceData, setResourceData] = useState(null);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const EmployeeMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
       setEmployeeMasterData(data);
-      setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
+      setCustomizedRoutes([{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }, { title: data?.employeeNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -247,7 +247,7 @@ const EmployeeMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.employeeMaster?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.employeeMaster?.titleSingular?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

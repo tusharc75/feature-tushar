@@ -39,7 +39,7 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user }
+      user: { user }, resources
     }
   } = useData();
   const history = useHistory();
@@ -50,7 +50,7 @@ const BigCalendar = () => {
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState(null);
   const [activityData, setActivityData] = useState(null);
-  const [activities, setActivities] = useState([]);
+  const [activities, setActivities] = useState({ activities: [], loading: true });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -69,7 +69,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setFilter([]);
     }
@@ -79,6 +79,7 @@ const BigCalendar = () => {
 
   const fetchBoard = useCallback(
     (cancelTokenSource?: CancelTokenSource) => {
+      setActivities({ activities: [], loading: true });
       axiosInstance()
         .get(`/activity/board?type=${''}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
@@ -91,9 +92,9 @@ const BigCalendar = () => {
             allDay: true,
             type: d.type
           }));
-          setActivities(newData);
+          setActivities({ activities: newData, loading: false });
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     [type, filter]
   );
@@ -131,12 +132,10 @@ const BigCalendar = () => {
     fetchBoard();
   };
 
-  // const get;
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.calendar?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (
@@ -214,7 +213,7 @@ const BigCalendar = () => {
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
               </div>
             </div>
-            <MyCalendar activities={activities} setActivityData={setActivityData} />
+            <MyCalendar activities={activities.activities} setActivityData={setActivityData} loading={activities.loading} />
           </>
         )}
         {activityData && (

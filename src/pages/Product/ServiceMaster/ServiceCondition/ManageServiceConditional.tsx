@@ -54,7 +54,7 @@ const OPERATOR = [
 
 const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.serviceMaster.title);
+  const renderedFrom = camelCase(sidebarResource?.serviceMaster);
   const [initialData, setInitialData] = useState(null);
   const [fullScreen, setFullScreen] = useState(true);
   const [assetFieldOptions, setAssetFieldOptions] = useState([]);

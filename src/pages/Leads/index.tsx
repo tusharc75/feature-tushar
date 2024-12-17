@@ -34,20 +34,25 @@ import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.lead.title);
+const renderedFrom = camelCase(sidebarResource.lead);
 
 const Leads = () => {
+
+  const {
+    state: { user, selectedEntity, permissions, resources }
+  }: any = useData();
+
   const LeadTypes = [
     {
-      key: `My ${routes.lead.title}`,
+      key: `My ${resources?.lead?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.lead.title}`,
+      key: `All ${resources?.lead?.titlePlural}`,
       value: 2
     },
     {
-      key: `Converted ${routes.lead.title}`,
+      key: `Converted ${resources?.lead?.titlePlural}`,
       value: 3
     }
   ];
@@ -55,9 +60,6 @@ const Leads = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
-  const {
-    state: { user, selectedEntity, permissions }
-  }: any = useData();
   const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.lead));
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
@@ -481,7 +483,7 @@ const Leads = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.lead]} />
+        <CustomBreadCrumbs routes={[{ ...routes.lead, title: resources?.lead?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.lead}
           module="lead(s)"
@@ -554,7 +556,7 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+            message={`Are you sure you want to delete the ${resources?.lead?.titleSingular?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
               }?`}
             onClose={() => {
               setDeleteRecord(null);

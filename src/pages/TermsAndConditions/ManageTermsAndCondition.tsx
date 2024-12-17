@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema, termsAndCondition } from '
 const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -145,7 +145,7 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.name ? `(${initialData.values?.name})` : ''}`
-                    : `Create ${routes?.termsAndConditions?.title}`
+                    : `Create ${resources?.termsAndConditions?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

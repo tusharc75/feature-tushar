@@ -39,7 +39,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
   const { isClone = false, transferInventoryId = null, onClose, onSuccess, referenceType = null, referenceId = null, referenceData = null } = props;
 
   const {
-    state: { selectedEntity, permissions, user }
+    state: { selectedEntity, permissions, user, resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -219,7 +219,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update - ${values?.transferNumber}`
-                    : 'Create ' + routes.transferInventory.title
+                    : 'Create ' + resources?.transferInventory?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

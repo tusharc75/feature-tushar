@@ -3,7 +3,7 @@ import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { CustomDialogTransition, MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,7 +16,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FiExternalLink } from 'react-icons/fi';
 
 const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting = false, currency, ids = [] }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Rental_Material`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Rental_Material`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { search, selectedRecords } = state;

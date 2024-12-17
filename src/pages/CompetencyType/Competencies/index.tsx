@@ -16,14 +16,14 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 
 const Competencies = ({ competencyType }) => {
-  let renderedFrom = camelCase(routes.competencies?.title);
+  let renderedFrom = camelCase(sidebarResource.competencies);
 
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -181,9 +181,11 @@ const Competencies = ({ competencyType }) => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){ 
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -238,7 +240,7 @@ const Competencies = ({ competencyType }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.competencies?.title?.toLowerCase()} ${deleteRecord?.competencyName || ''} ? `}
+          message={`Are you sure you want to delete the ${resources?.competencies?.titleSingular?.toLowerCase()} ${deleteRecord?.competencyName || ''} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -59,7 +59,7 @@ const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
-  const renderedFrom = camelCase(routes?.rentalManagement.title);
+  const renderedFrom = camelCase(sidebarResource?.rentalManagement);
 
   const { id } = useParams();
   const history = useHistory();
@@ -67,7 +67,7 @@ const RentalManagementDetailsPage = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loadingDetails, setLoadingDetails] = useState(true);
@@ -162,11 +162,11 @@ const RentalManagementDetailsPage = () => {
         if (data?.versions) {
           setQuotationData(data);
           let keys: any = Object.keys(data.versions);
-          const versionsArray: any = []
+          const versionsArray: any = [];
           Object.keys(data.versions)?.forEach((e) => {
-            versionsArray.push(data.versions[e])
-          })
-          const index = findIndex(versionsArray, { converted: true })
+            versionsArray.push(data.versions[e]);
+          });
+          const index = findIndex(versionsArray, { converted: true });
           setCurrentVersion(versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1]));
           const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1])];
           if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
@@ -311,7 +311,7 @@ const RentalManagementDetailsPage = () => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `${routes.rentalManagement.title} cancelled successfully`
+          message: `${resources?.rentalManagement?.titleSingular} cancelled successfully`
         });
         fetchRentalManagementData();
         setShowCancelConfirmBox({ open: false, isQuote: false });
@@ -408,7 +408,12 @@ const RentalManagementDetailsPage = () => {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
+            <CustomBreadCrumbs
+              routes={[
+                { ...routes?.rentalManagement, title: resources?.rentalManagement?.titlePlural },
+                { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }
+              ]}
+            />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
@@ -425,7 +430,7 @@ const RentalManagementDetailsPage = () => {
                         history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
                       }}
                     >
-                      {`View ${routes.iotChart.title}`}
+                      {`View ${resources?.iotChart?.titlePlural}`}
                     </Button>
                   )}
                   <Button
@@ -718,7 +723,7 @@ const RentalManagementDetailsPage = () => {
         {showConfirmBox && (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ?`}
+            message={`Are you sure you want to delete this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ?`}
             onClose={() => {
               setShowConfirmBox(false);
             }}
@@ -730,8 +735,8 @@ const RentalManagementDetailsPage = () => {
             open={showCancelConfirmBox.open}
             message={
               showCancelConfirmBox.isQuote
-                ? `Do you want to create a new version of the ${routes?.quotation?.title?.toLowerCase()}?`
-                : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
+                ? `Do you want to create a new version of the ${resources?.quotation?.titleSingular?.toLowerCase()}?`
+                : `Are you sure you want to cancel this ${resources?.rentalManagement?.titleSingular?.toLowerCase()} ?`
             }
             onClose={() => {
               setShowCancelConfirmBox({ open: false, isQuote: false });

@@ -52,7 +52,7 @@ const ManageRepairOrder = ({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -192,7 +192,7 @@ const ManageRepairOrder = ({
         .post(`${repairOrder.api}`, rest)
         .then(({ data: { data, message } }) => {
           if (!referenceType) {
-            history.push(`${routes.repairOrderDetail.path}/${data._id}`);
+            history.push(`${routes?.repairOrderDetail?.path}/${data._id}`);
           }
           setLoading(false);
           onSuccess(data);
@@ -290,7 +290,7 @@ const ManageRepairOrder = ({
                 <CustomDialogHeader
                   title={
                     !repairOrderId
-                      ? `Create ${routes.repairOrder.title}`
+                      ? `Create ${resources?.repairOrder?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
                   }
                   onClose={() => {

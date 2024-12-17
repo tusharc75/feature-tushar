@@ -19,22 +19,25 @@ import Competencies from './Competencies';
 import ManageCompetencyType from './ManageCompetencyType';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [competencyMasterData, setCompetencyMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -63,7 +66,7 @@ const CompetencyMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/competency-type/${id}`);
       setCompetencyMasterData(data);
-      setCustomizedRoutes([routes.competencyType, { title: data?.competencyType }]);
+      setCustomizedRoutes([{ ...routes.competencyType, title: resources?.competencyType?.titlePlural }, { title: data?.competencyType }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -76,7 +79,7 @@ const CompetencyMasterDetail = () => {
         axiosInstance()
           .put(`/competency-type/remove`, { ids: [id] })
           .then(({ data }) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
 
             toastConfig.setToastConfig({
               open: true,
@@ -86,11 +89,11 @@ const CompetencyMasterDetail = () => {
             history.push(`${routes.competencyType.path}`);
           })
           .catch((err) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           });
       }
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -135,7 +138,7 @@ const CompetencyMasterDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             </>
             <ActivityButton
               referenceId={competencyMasterData?._id}
@@ -149,7 +152,7 @@ const CompetencyMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
-          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}  
+          {permissions?.competencies?.isRead && <CustomTab value={1} label={resources?.competencies?.titlePlural} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -176,18 +179,19 @@ const CompetencyMasterDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.competencyType}
                   data={competencyMasterData}
-                  allowedToEdit={permissions?.competencyType?.isUpdate }
+                  allowedToEdit={permissions?.competencyType?.isUpdate}
                 />
               </TabPanel>
             );
           })}
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.competencyType?.title?.toLowerCase()} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.competencyType?.titleSingular?.toLowerCase()} :
+            ${competencyMasterData.accountNumber}` : resources?.competencyType?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

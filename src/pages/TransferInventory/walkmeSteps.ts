@@ -19,12 +19,12 @@ export const generateCompleteButtonStep = (): WalkmeData => ({
   ]
 });
 
-export const generateLoadingStepReceive = (index: number): WalkmeData => ({
+export const generateLoadingStepReceive = (index: number, resource: any): WalkmeData => ({
   name: 'Receive',
   url: `${routes.transferInventoryDetail.path}/:id`,
   steps: [
     {
-      target: `#${camelCase(routes?.transferInventory.title)}_grid-3-table-checkbox-${index}`,
+      target: `#${camelCase(resource)}_grid-3-table-checkbox-${index}`,
       title: 'Select Product'
     },
     {
@@ -37,12 +37,12 @@ export const generateLoadingStepReceive = (index: number): WalkmeData => ({
   ]
 });
 
-export const generateLoadingStepCreateLoadingTicket = (index: number): WalkmeData => ({
+export const generateLoadingStepCreateLoadingTicket = (index: number, resource: any): WalkmeData => ({
   name: 'Create Loading Ticket',
   url: `${routes.transferInventoryDetail.path}/:id`,
   steps: [
     {
-      target: `#${camelCase(routes?.transferInventory.title)}_grid-3-table-checkbox-${index}`,
+      target: `#${camelCase(resource)}_grid-3-table-checkbox-${index}`,
       title: 'Select Product'
     },
     {
@@ -55,7 +55,7 @@ export const generateLoadingStepCreateLoadingTicket = (index: number): WalkmeDat
   ]
 });
 
-export const generateAddExistingProduct = (waitForStepInsertion = false): WalkmeData => ({
+export const generateAddExistingProduct = (waitForStepInsertion = false, resource: any): WalkmeData => ({
   name: 'Add Existing Product',
   url: `${routes.transferInventoryDetail.path}/:id`,
   steps: [
@@ -74,7 +74,7 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
       content: 'Click here to add existing product.'
     },
     {
-      target: `#${camelCase(routes?.transferInventory.title)}_grid-1_sub-1-table-checkbox-0`,
+      target: `#${camelCase(resource)}_grid-1_sub-1-table-checkbox-0`,
       title: 'Add a Product'
     },
     {
@@ -85,10 +85,10 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
   ]
 });
 
-export const createTransferInventoryFlow = (fields: any): WalkmeData => {
+export const createTransferInventoryFlow = (fields: any, resource: any): WalkmeData => {
   const includeFields = [];
   const data: WalkmeData = {
-    name: `Add ${routes.transferInventory.title}`,
+    name: `Add ${resource}`,
     url: routes.transferInventory.path,
     type: 'flow',
     steps: [

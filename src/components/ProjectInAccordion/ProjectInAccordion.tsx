@@ -44,7 +44,8 @@ export default function ProjectInAccordion({
   isAllowedToEdit,
   accountId = '',
   accountName = '',
-  resource = ''
+  resource = '',
+  resources
 }) {
   const [showCreateProjectSalesDialog, setShowCreateProjectSalesDialog] = useState(false);
 
@@ -95,7 +96,7 @@ export default function ProjectInAccordion({
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                    {routes.projectSales.title} ({projectSales?.length || 0})
+                    {resources?.projectSales?.titlePlural} ({projectSales?.length || 0})
                   </Typography>
                 </Box>
               </Box>

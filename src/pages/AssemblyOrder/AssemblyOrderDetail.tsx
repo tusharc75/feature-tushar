@@ -37,9 +37,10 @@ import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumber
 import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const AssemblyOrderDetail = () => {
-  const renderedFrom = camelCase(routes?.assemblyOrder.title);
+  const renderedFrom = camelCase(sidebarResource.assemblyOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,17 +49,18 @@ const AssemblyOrderDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-
+  const {state} = useTableReducer();
+  const {selectedRecords} = state;
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allFields, setAllFields] = useState([]);
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -139,8 +141,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -153,12 +155,12 @@ const AssemblyOrderDetail = () => {
     axiosInstance()
       .put(`${routes.assemblyOrder.path}/remove`, { ids: [id] })
       .then(() => {
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(routes.assemblyOrder.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
       });
   };
 
@@ -174,7 +176,7 @@ const AssemblyOrderDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.assemblyOrder, { title: assemblyOrderData?.assemblyOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.assemblyOrder, title: resources?.assemblyOrder?.titlePlural }, { title: assemblyOrderData?.assemblyOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -190,7 +192,7 @@ const AssemblyOrderDetail = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -232,10 +234,10 @@ const AssemblyOrderDetail = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
             handleNext={
               assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-              !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                 ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
+                  setOpenManagedPackageDialog(true);
+                }
                 : null
             }
             updateStatus={(step: number) => {
@@ -300,12 +302,12 @@ const AssemblyOrderDetail = () => {
             );
           })}
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this assembly order: ${assemblyOrderData?.assemblyOrderNumber} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} : ${assemblyOrderData?.assemblyOrderNumber}` : resources?.assemblyOrder?.titlePlural?.toLowerCase()} ?`}              
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

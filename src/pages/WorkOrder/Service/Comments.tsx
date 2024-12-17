@@ -29,7 +29,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
   }, []);
 
   const fetchData = () => {
-    let url = `${routes.workOrder.path}/${workOrderId}/comment?uniqueId=${uniqueId}`;
+    let url = `${routes?.workOrder?.path}/${workOrderId}/comment?uniqueId=${uniqueId}`;
     if (stepId) {
       url += `&stepId=${stepId}`;
     }
@@ -50,7 +50,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
   const handleSubmit = (event) => {
     event.preventDefault();
     axiosInstance()
-      .post(`${routes.workOrder.path}/${workOrderId}/comment`, {
+      .post(`${routes?.workOrder?.path}/${workOrderId}/comment`, {
         uniqueId: uniqueId,
         stepId: stepId,
         comment: comment
@@ -71,7 +71,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
 
   const handleSave = () => {
     axiosInstance()
-      .put(`${routes.workOrder.path}/${editingCommentId}/comment`, {
+      .put(`${routes?.workOrder?.path}/${editingCommentId}/comment`, {
         comment: editedComment
       })
       .then(({ data: { data } }) => {

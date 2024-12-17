@@ -34,7 +34,7 @@ export default function WorkOrderCostDialog({ onClose, workOrderCostFields, onSu
   }, []);
 
   const fetchData = async () => {
-    axiosInstance().get(`${routes.workOrder.path}/total-consumables-cost/${id}`).then(({ data: { data } }) => {
+    axiosInstance().get(`${routes?.workOrder?.path}/total-consumables-cost/${id}`).then(({ data: { data } }) => {
       const tempInitialData = getObjKeys('', workOrderCostFields);
       const calValues = autoCalculateSpecificFields({ [`consumableCost_${currency.toLowerCase()}`]: data?.totalConsumablesCost }, tempInitialData, workOrderCostFields);
       Object.assign(tempInitialData, calValues);

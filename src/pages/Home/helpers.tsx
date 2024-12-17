@@ -187,7 +187,7 @@ export const setDataBySectionName = (secName, index = 0, className = '') => {
       sideBarIcon = <ServiceManagementIcon size={18} className={className} />;
       break;
     }
-    case compareName(['Setups & Administration'], secName): {
+    case compareName(['Setup & Administration'], secName): {
       sideBarIcon = <BiCog size={20} className={className} />;
       break;
     }

@@ -15,6 +15,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -22,14 +23,16 @@ const AddressDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [loading, setLoading] = useState(false);
   const [addressData, setAddressData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [addressFields, setAddressFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.address]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.address, title: resources?.address?.titlePlural }]);
   const [themeColor] = useAppTheme();
 
   useEffect(() => {
@@ -138,7 +141,7 @@ const AddressDetailPage = () => {
         data: { data }
       } = await axiosInstance().get(`/address/${id}`);
       setAddressData(data);
-      setCustomizedRoutes([routes.address, { title: data.fullAddress }]);
+      setCustomizedRoutes([{ ...routes.address, title: resources?.address?.titlePlural }, { title: data.fullAddress }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -164,7 +167,7 @@ const AddressDetailPage = () => {
           type: 'success',
           message: data.message
         });
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(`${routes.address.path}`);
       })
       .catch((err) => {
@@ -192,12 +195,13 @@ const AddressDetailPage = () => {
           }}
         />
       )}
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${addressData?.fullAddress}?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.address?.titleSingular?.toLowerCase()} :
+            ${addressData?.fullAddress}` : resources?.address?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDeleteAddress}
         />
@@ -217,7 +221,7 @@ const AddressDetailPage = () => {
                 )}
                 {permissions?.address?.isDelete && (
                   <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                    <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
                   </span>
                 )}
               </>

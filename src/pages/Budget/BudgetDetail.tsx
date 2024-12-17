@@ -20,15 +20,17 @@ const BudgetDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.budget]);
+  const {
+    state: { permissions, user, resources }
+  }: any = useData();
+
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.budget, title: resources?.budget?.titlePlural }]);
   const [budgetData, setBudgetData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const {
-    state: { permissions, user }
-  }: any = useData();
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -55,7 +57,7 @@ const BudgetDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.budget?.path}/${id}`);
       setBudgetData(data);
-      setCustomizedRoutes([routes.budget, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.budget, title: resources?.budget?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -67,8 +69,8 @@ const BudgetDetail = () => {
       axiosInstance()
         .put(`${routes?.budget?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
-          setShowConfirmBox(false);
-
+          setShowDeleteConfirmBox(false);
+          
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -77,10 +79,10 @@ const BudgetDetail = () => {
           history.push(`${routes.budget.path}`);
         })
         .catch((err) => {
-          setShowConfirmBox(false);
+          setShowDeleteConfirmBox(false);
         });
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -111,7 +113,7 @@ const BudgetDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} resourceLabel={budgetData?.name} />
             </>
           </Box>
@@ -138,12 +140,13 @@ const BudgetDetail = () => {
           budgetId={id}
         />
       )}
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.budget?.title?.toLowerCase()} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.budget?.titleSingular?.toLowerCase()} : ${deleteRecord?.name}` : resources?.budget?.titlePlural?.toLowerCase()} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

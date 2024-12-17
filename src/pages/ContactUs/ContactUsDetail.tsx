@@ -13,6 +13,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageContactUs from './ManageContactUs';
+import { useTableReducer } from 'src/components/CustomReactTable';
+
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -22,10 +24,12 @@ const BlogDetail = () => {
   const [contactUsData, setContactUsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +57,7 @@ const BlogDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/contact-us/${id}`);
       setContactUsData(data);
-      setCustomizedRoutes([routes.contactUs, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.contactUs, title: resources?.contactUs?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -66,7 +70,7 @@ const BlogDetail = () => {
         axiosInstance()
           .put(`/contact-us/remove`, { ids: [id] })
           .then(({ data }) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
 
             toastConfig.setToastConfig({
               open: true,
@@ -76,11 +80,11 @@ const BlogDetail = () => {
             history.push(`${routes.contactUs.path}`);
           })
           .catch((err) => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           });
       }
     } else {
-      setShowConfirmBox(false);
+      setShowDeleteConfirmBox(false);
     }
   };
 
@@ -113,7 +117,7 @@ const BlogDetail = () => {
               <Box component="span" marginX={1} />
 
               <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
               </span>
             </>
           </Box>
@@ -132,12 +136,12 @@ const BlogDetail = () => {
           </Box>
         </Paper>
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.contactUs?.title?.toLowerCase()} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()} : ${contactUsData.name}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

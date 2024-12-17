@@ -7,19 +7,24 @@ import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
+import { useData } from 'src/StateProvider/Provider';
 
 const TriggerNotificationHistory = () => {
-  const renderedFrom = camelCase(routes?.triggerNotificationHistory.title);
+  const renderedFrom = camelCase(sidebarResource?.triggerNotificationHistory);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   let columns = [
     {
@@ -144,7 +149,7 @@ const TriggerNotificationHistory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.triggerNotificationHistory]} />
+        <CustomBreadCrumbs routes={[{ ...routes.triggerNotificationHistory, title: resources?.triggerNotificationHistory?.titlePlural }]} />
       </div>
       <CustomContainer>
         {columns ? (

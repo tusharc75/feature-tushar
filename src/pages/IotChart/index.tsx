@@ -16,12 +16,16 @@ import { serializedAsset } from '../../constants/helpers';
 import cardStyle from '../ReportMaster/index.module.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { uniqBy } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
-
   const history = useHistory();
   let { referenceData }: any = queryString.parse(history.location.search);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [assetLocation, setAssetLocation] = useState(null);
   const [search, setSearch] = useState('');
@@ -97,7 +101,7 @@ function IotChart() {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.iotChart]} />
+        <CustomBreadCrumbs routes={[{ ...routes.iotChart, title: resources?.iotChart?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader

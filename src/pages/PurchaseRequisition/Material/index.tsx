@@ -23,6 +23,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import RequestButton from 'src/pages/DoaSetupNew/RequestButton';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
 
 const Material = ({
   allowedToEdit,
@@ -37,7 +38,7 @@ const Material = ({
   setPrevStep,
   setNextStepToolTip
 }) => {
-  const renderedFrom = `${camelCase(routes?.purchaseRequisition.title)}_Material`;
+  const renderedFrom = `${camelCase(sidebarResource.purchaseRequisition)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
@@ -65,6 +66,10 @@ const Material = ({
   useEffect(() => {
     fetchData();
   }, [allFields]);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(
@@ -457,7 +462,7 @@ const Material = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.purchaseRequisition.title}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
     columns: columns

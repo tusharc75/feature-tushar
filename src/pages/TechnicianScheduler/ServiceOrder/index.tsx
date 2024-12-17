@@ -14,25 +14,25 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const TECHNICIAN_RESOURCE = [
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    title: routes.fieldTicketDetail.title
-  },
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    title: routes.rentalManagementDetail.title
-  },
-];
-
 const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
-    state: { permissions }
+    state: { permissions,resources }
   }: any = useData();
+
+  const TECHNICIAN_RESOURCE = [
+  {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    title: resources?.fieldTicket?.titlePlural
+  },
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    title: resources?.rentalManagement?.titlePlural
+  },
+];
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -112,37 +112,40 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       ...(selectedType === 'fieldTicket'
-        ? [
-          {
-            accessor: 'fieldServiceOrderNumber',
-            Header: 'Field Service Order',
-            width: 200,
-            Cell: ({ row }) => (
+        ? [{
+          accessor: 'fieldTicketNumber',
+          Header: 'Field Ticket',
+          width: 200,
+          Cell: ({ row }) =>
+            row.original['fieldTicketNumber'] ? (
               <div className="flex items-center gap-1">
-                <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
+                <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                    window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
               </div>
+            ) : (
+              <NoDataCell />
             )
-          },
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
+        }]
+        : selectedType === 'rentalManagement'
+          ? [{
+            accessor: 'rentalJobName',
+            Header: 'Rental Job',
             width: 200,
             Cell: ({ row }) =>
-              row.original['fieldTicketNumber'] ? (
+              row.original['rentalJobName'] ? (
                 <div className="flex items-center gap-1">
-                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                  <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                      window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
                     }}
                   >
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -152,30 +155,6 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 <NoDataCell />
               )
           }
-        ]
-        : selectedType === 'rentalManagement'
-          ? [
-            {
-              accessor: 'rentalJobName',
-              Header: 'Rental Job',
-              width: 200,
-              Cell: ({ row }) =>
-                row.original['rentalJobName'] ? (
-                  <div className="flex items-center gap-1">
-                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
           ]
           : []),
       {

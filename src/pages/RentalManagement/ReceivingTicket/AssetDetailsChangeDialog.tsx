@@ -25,6 +25,7 @@ import { isArray, isEqual, isString } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function AssetDetailsChangeDialog({
   onClose,
@@ -36,6 +37,10 @@ export default function AssetDetailsChangeDialog({
   productsDefaultData = [],
   ticketType = null
 }) {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -253,7 +258,7 @@ export default function AssetDetailsChangeDialog({
 
     utils.book_append_sheet(wb, ws, 'Sheet1');
     utils.book_append_sheet(wb, ws_value, 'Value');
-    writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
+    writeFile(wb, `${resources?.serializedAsset?.titleSingular} Data.xlsx`);
   };
 
   const getValueInImport = (data: any, asset: string, product: string, fieldLabel: string, assetData: any[]) => {
@@ -336,7 +341,7 @@ export default function AssetDetailsChangeDialog({
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={routes.serializedAsset.title}
+                title={resources?.serializedAsset?.titlePlural}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

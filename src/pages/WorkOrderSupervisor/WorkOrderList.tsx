@@ -27,17 +27,17 @@ import {
 } from 'src/constants/helpers';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
+import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const renderedFrom = camelCase(routes?.workOrderSupervisor.title);
+const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
 const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -82,7 +82,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         'type'
       ]?.includes(f?.fieldData?.fieldName)
     );
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
     const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
 
     columns.forEach((c) => {
@@ -134,7 +134,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrder}`);
+                  window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -150,7 +150,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ?
+          row.original['assignedWorkStations'] ? (
             <DropdownCell
               permissions={permissions}
               permissionForLinks={{}}
@@ -160,7 +160,9 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               }}
               original={row?.original}
             />
-            : <NoDataCell />
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'assignedUsers',
@@ -178,6 +180,46 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
               }}
               original={row?.original}
             />
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'rentalJob',
+        Header: resources?.rentalManagement?.titleSingular,
+        Cell: ({ row }) =>
+          row?.original['rentalJob'] ? (
+            <div className="flex items-center gap-1">
+              <h5 className=" text-truncate">{row.original.rentalJob}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes?.rentalManagementDetail?.path}/${row.original.rentalJobId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'serializedAsset',
+        Header: resources?.serializedAsset?.titleSingular,
+        Cell: ({ row }) =>
+          row?.original['serializedAsset'] ? (
+            <div className="flex items-center gap-1">
+              <h5 className=" text-truncate">{row.original.serializedAsset}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes?.serializedAssetDetail?.path}/${row.original.serializedAssetId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -258,7 +300,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
   const handleAddConsumables = (rows, records = []) => {
     setSubmitting(true);
     const data: any = [];
-    const workOrderId: any = uniqBy(records, 'workOrder').map(record => record.workOrder);
+    const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record.workOrder);
 
     records?.forEach((s) => {
       rows?.forEach((e) => {
@@ -297,6 +339,7 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
           onClick={() => {
             setAssignTechnicianDialog(true);
           }}
@@ -305,10 +348,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         </MenuItem>
         {permissions?.workStations?.isRead && (
           <MenuItem
+            disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
-          >{`Assign ${routes.workStations.title}`}</MenuItem>
+          >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
         )}
         <MenuItem
           onClick={() => {
@@ -355,13 +399,11 @@ const WorkOrderList = ({ filterResourceQuery, globalFilters }) => {
         )}
       </Box>
       {serviceOpen.open && (
-        <TechnicianDialog
+        <WorkOrderDetailDialog
+          workOrderId={serviceOpen?.id}
           handleClose={() => {
             setServiceOpen({ open: false, id: null });
           }}
-          workOrderId={serviceOpen?.id}
-          uniqueId={null}
-          canPerform={false}
         />
       )}
       {assignTechnicianDialog && (

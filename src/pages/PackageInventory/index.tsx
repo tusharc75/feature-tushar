@@ -18,7 +18,7 @@ import ShowAvailableInventory from 'src/pages/PackageInventory/ShowAvailableInve
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const PackageInventory = () => {
-  const renderedFrom = camelCase(routes?.packageInventory.title);
+  const renderedFrom = camelCase(sidebarResource?.packageInventory);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -27,7 +27,7 @@ const PackageInventory = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -136,9 +136,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -180,19 +180,19 @@ const PackageInventory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.packageInventory]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.packageInventory, title: resources?.packageInventory?.titlePlural }]} />
         <ImportExportLinks
           additionalParams={getQueryString(true)}
           permissions={{}}
-          module={routes.packageInventory.title}
+          module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {}}
+          onExportToExcelSuccess={() => { }}
         />
       </div>
       <CustomContainer>
@@ -202,7 +202,8 @@ const PackageInventory = () => {
               {...{
                 plantOptions,
                 plantId,
-                setPlantId
+                setPlantId,
+                resources
               }}
             />
           }
@@ -246,7 +247,7 @@ const PackageInventory = () => {
 
 export default PackageInventory;
 
-const LeftSideContents = ({ plantOptions, plantId, setPlantId }) => {
+const LeftSideContents = ({ plantOptions, plantId, setPlantId, resources }) => {
   return (
     <>
       <Autocomplete
@@ -266,7 +267,7 @@ const LeftSideContents = ({ plantOptions, plantId, setPlantId }) => {
         }}
         size="small"
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
     </>

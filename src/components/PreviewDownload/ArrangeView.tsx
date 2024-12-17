@@ -192,48 +192,46 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
     <li
       style={style}
       ref={setNodeRef}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`grid grid-cols-[20px_1fr_400px] items-center gap-2 p-[8px_0px]  [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
         <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
-        <div className='flex items-center'>
-          <div className='max-w-[200px] mr-4'>
-            <TextField
-              variant="outlined"
-              margin="none"
-              size="small"
-              fullWidth
-              value={width}
-              onChange={(e) => {
-                setWidth(e?.target?.value);
-              }}
-              InputProps={{
-                endAdornment: '%',
-              }}
-              placeholder="Width"
-            />
-          </div>
-          <div className='max-w-[200px]'>
-            <TextField
-              variant="outlined"
-              margin="none"
-              size="small"
-              placeholder="Custom Label"
-              fullWidth
-              value={customLabel}
-              onChange={(e) => {
-                setCustomLabel(e?.target?.value);
-              }}
-            />
-          </div>
+        <div className="flex items-center gap-4 max-sm:col-span-2 max-sm:ml-[28px]">
+          <TextField
+            variant="outlined"
+            margin="none"
+            size="small"
+            fullWidth
+            value={width}
+            onChange={(e) => {
+              setWidth(e?.target?.value);
+            }}
+            InputProps={{
+              endAdornment: '%'
+            }}
+            placeholder="Width"
+          />
+          <TextField
+            variant="outlined"
+            margin="none"
+            size="small"
+            placeholder="Custom Label"
+            fullWidth
+            value={customLabel}
+            onChange={(e) => {
+              setCustomLabel(e?.target?.value);
+            }}
+          />
         </div>
       </div>
     </li>

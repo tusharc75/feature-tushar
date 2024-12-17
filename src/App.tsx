@@ -27,7 +27,15 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import {
+  compareVersions,
+  customerAccount,
+  customerContact,
+  handleHardReload,
+  sidebarResource,
+  supplierAccount,
+  supplierContact
+} from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
@@ -184,7 +192,6 @@ import CreateNewQuotePdfTemplate from './pages/QuotePdfTemplate/NewCreateQuotePd
 import Reminder from './pages/Reminder';
 import RentalManagement from './pages/RentalManagement';
 import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
-import RentalPlanningCalendar from './pages/RentalPlanningCalendar';
 import RepairJob from './pages/RepairJob';
 import RepairJobDetails from './pages/RepairJob/RepairJobDetails';
 import RepairOrder from './pages/RepairOrder';
@@ -271,8 +278,8 @@ import AgentChat from 'src/components/AgentChat';
 import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
-import WorkAutomation from 'src/pages/WorkAutomation';
-import ManageWorkAutomation from 'src/pages/WorkAutomation/ManageWorkAutomation';
+import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
+import ReportsCenter from 'src/pages/ReportsNew';
 
 var notificationInterval: any = null;
 
@@ -291,7 +298,7 @@ function App() {
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
-    state: { user },
+    state: { user, resources },
     dispatch
   }: any = useData();
 
@@ -343,7 +350,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -418,7 +425,7 @@ function App() {
       }
     }
     if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = routes?.pos?.path;
+      redirectToAnotherScreen = sidebarResource?.pos;
     }
 
     return !user ? (
@@ -497,44 +504,51 @@ function App() {
             <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
               <OpportunityDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path="/doa">
+            <PrivateRoute exact path={routes.doa.path}>
               <Doa />
             </PrivateRoute>
             <PrivateRoute exact path="/add-doa">
               <Doa />
             </PrivateRoute>
-            {/* <PrivateRoute exact path="/">
-            <CreateBrand />
-          </PrivateRoute> */}
-            {/* <PrivateRoute exact path="/contact/new">
-              <CreateContact />
-          </PrivateRoute>
-          <PrivateRoute exact path="/contact/:id">
-              <CreateContact />
-          </PrivateRoute> */}
             <PrivateRoute key="customer-account" exact path={routes.customerAccount.path}>
-              <Account account={customerAccount} accountBreadcrumb={routes.customerAccount} />
+              <Account account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-account-edit" exact path={`${routes.customerAccountDetail.path}/:id`}>
-              <AccountDetailPage account={customerAccount} contact={customerContact} accountBreadcrumb={routes.customerAccount} />
+              <AccountDetailPage
+                account={customerAccount}
+                contact={customerContact}
+                accountBreadcrumb={{ ...routes.customerAccount, title: resources?.customerAccount?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="customer-contact" exact path={routes.customerContact.path}>
-              <Contact contact={customerContact} account={customerAccount} contactBreadcrumb={routes.customerContact} />
+              <Contact contact={customerContact} account={customerAccount} />
             </PrivateRoute>
             <PrivateRoute key="customer-contact-edit" exact path={`${routes.customerContactDetail.path}/:id`}>
-              <ContactDetailPage account={customerAccount} contact={customerContact} contactBreadcrumb={routes.customerContact} />
+              <ContactDetailPage
+                account={customerAccount}
+                contact={customerContact}
+                contactBreadcrumb={{ ...routes.customerContact, title: resources?.customerContact?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="supplier-account" exact path={routes.supplierAccount.path}>
-              <Account account={supplierAccount} accountBreadcrumb={routes.supplierAccount} />
+              <Account account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-account-edit" exact path={`${routes.supplierAccountDetail.path}/:id`}>
-              <AccountDetailPage account={supplierAccount} contact={supplierContact} accountBreadcrumb={routes.supplierAccount} />
+              <AccountDetailPage
+                account={supplierAccount}
+                contact={supplierContact}
+                accountBreadcrumb={{ ...routes.supplierAccount, title: resources?.supplierAccount?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact" exact path={routes.supplierContact.path}>
-              <Contact contact={supplierContact} account={supplierAccount} contactBreadcrumb={routes.supplierContact} />
+              <Contact contact={supplierContact} account={supplierAccount} />
             </PrivateRoute>
             <PrivateRoute key="supplier-contact-edit" exact path={`${routes.supplierContactDetail.path}/:id`}>
-              <ContactDetailPage account={supplierAccount} contact={supplierContact} contactBreadcrumb={routes.supplierContact} />
+              <ContactDetailPage
+                account={supplierAccount}
+                contact={supplierContact}
+                contactBreadcrumb={{ ...routes.supplierContact, title: resources?.supplierContact?.titlePlural }}
+              />
             </PrivateRoute>
             <PrivateRoute key="project-sales" exact path={routes.projectSales.path}>
               <ProjectSales />
@@ -777,26 +791,26 @@ function App() {
               <AddressDetailPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}`}>
+              <ReportsCenter />
+            </PrivateRoute>
+            {/* <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
+            </PrivateRoute> */}
+            {/* <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
+            </PrivateRoute> */}
+            {/* <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
               <StandardReportView />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`/schedule-report`}>
               <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`/custom-report`}>
               <CustomReport />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
+            {/* <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
               <CustomReports />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.rentalPlanningCalendar.path}`}>
-              <RentalPlanningCalendar />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
             </PrivateRoute>
@@ -824,10 +838,10 @@ function App() {
             <PrivateRoute exact path={`${routes.repairTypeDetail.path}/:id`}>
               <RepairTypeDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.pos.path}`}>
+            <PrivateRoute exact path={`${routes?.pos?.path}`}>
               <Pos />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
+            <PrivateRoute exact path={`${routes?.posProductDetail?.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>
@@ -878,28 +892,28 @@ function App() {
             <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
               <ServiceMasterDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrder.path}>
+            <PrivateRoute exact path={routes?.repairOrder?.path}>
               <RepairOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.repairOrderDetail?.path}/:id`}>
               <RepairOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.productionOrder.path}>
+            <PrivateRoute exact path={routes?.productionOrder?.path}>
               <ProductionOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.productionOrderDetail?.path}/:id`}>
               <ProductionOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.fieldServiceOrder.path}>
+            <PrivateRoute exact path={routes?.fieldServiceOrder?.path}>
               <FieldServiceOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldServiceOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.fieldServiceOrderDetail?.path}/:id`}>
               <FieldServiceOrderDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.workOrder.path}>
+            <PrivateRoute exact path={routes?.workOrder?.path}>
               <WorkOrder />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workOrderDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.workOrderDetail?.path}/:id`}>
               <WorkOrderDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrderSupervisor.path}>
@@ -1013,7 +1027,7 @@ function App() {
             <PrivateRoute exact path={`${routes.storageLocation.path}`}>
               <StorageLocation />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.storageLocationDetail.path}/:id`}>
+            <PrivateRoute exact path={`${routes?.storageLocationDetail?.path}/:id`}>
               <StorageLocationDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.transactionLock.path}`}>
@@ -1136,7 +1150,7 @@ function App() {
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.repairOrderInvoice.path}>
+            <PrivateRoute exact path={routes?.repairOrderInvoice?.path}>
               <GenerateInvoice resourceRendered="repairOrder" />
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
@@ -1217,11 +1231,8 @@ function App() {
             <PrivateRoute exact path={`${routes.packageInventory.path}`}>
               <PackageInventory />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomation.path}`}>
-              <WorkAutomation />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workAutomationDetail.path}/:id`}>
-              <ManageWorkAutomation />
+            <PrivateRoute exact path={`${routes.scheduleAndDispatch.path}`}>
+              <ScheduleAndDispatch />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

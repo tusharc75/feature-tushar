@@ -10,6 +10,7 @@ import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'serialNumber_grid';
 
@@ -18,6 +19,10 @@ const SerialNumber = ({ product, warehouse }) => {
   const { page, limit, filters, sorting } = state;
 
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -92,7 +97,7 @@ const SerialNumber = ({ product, warehouse }) => {
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       disableFilters: true,
       disabled: true,
       Cell: ({ row }) => (

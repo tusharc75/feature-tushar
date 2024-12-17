@@ -8,6 +8,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import DataListItems from './DataListItems';
+import { useData } from 'src/StateProvider/Provider';
 
 const DataListDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,10 @@ const DataListDetail = () => {
     setTabValue(newValue);
   };
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -32,7 +37,7 @@ const DataListDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.dataList.path}/${id}`);
       setDataListData(data);
-      setCustomizedRoutes([routes.dataList, { title: data?.title }]);
+      setCustomizedRoutes([{ ...routes.dataList, title: resources.dataLists.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

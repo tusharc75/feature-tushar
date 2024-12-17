@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageTaxMaster from './ManageTaxMaster';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.taxMaster.title);
+const renderedFrom = camelCase(sidebarResource.taxMaster);
 
 const TaxMaster = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ const TaxMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -205,10 +205,10 @@ const TaxMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.taxMaster]} />
+        <CustomBreadCrumbs routes={[{ ...routes.taxMaster, title: resources?.taxMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.taxMaster}
-          module={routes.taxMaster}
+          module={resources?.taxMaster?.titlePlural}
           api={routes?.taxMaster.path}
           afterImportCompleted={() => {
             fetchData();
@@ -258,7 +258,7 @@ const TaxMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.taxMaster?.title} ${deleteRecord?.taxCode || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.taxMaster?.titleSingular} ${deleteRecord?.taxCode || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

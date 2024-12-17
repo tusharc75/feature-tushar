@@ -7,7 +7,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cageManagement } from 'src/constants/helpers';
+import { cageManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import CustomContainer from '../../components/CustomContainer';
@@ -19,14 +19,14 @@ import ProductGridLayout from './Product';
 import QuantityDialog from './QuantityDialog';
 
 const CageManagement = () => {
-  const renderedFrom = camelCase(routes?.cageManagement.title);
+  const renderedFrom = camelCase(sidebarResource.cageManagement);
 
   const toastConfig = useContext(CustomToastContext);
   const [searchVal, setSearchVal] = useState('');
   const [plantOptions, setPlantOptions] = useState([]);
   const [plantId, setPlantId] = useState(null);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [scanDialog, setScanDialog] = useState(false);
   const [cartDialog, setHistoryDialog] = useState(false);
@@ -141,13 +141,15 @@ const CageManagement = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.cageManagement]} />
+          <CustomBreadCrumbs routes={[{ ...routes.cageManagement, title: resources?.cageManagement?.titlePlural }]} />
         </Grid>
         <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>
       <CustomContainer>
         <ListingPageHeader
-          leftSideContents={<LeftSideContent {...{ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }} />}
+          leftSideContents={
+            <LeftSideContent {...{ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory, resources }} />
+          }
           searchValue={searchVal}
           onSearch={(e) => {
             setSearchVal(e.target.value);
@@ -205,7 +207,7 @@ const CageManagement = () => {
 
 export default CageManagement;
 
-const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }) => {
+const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory, resources }) => {
   return (
     <>
       <Autocomplete
@@ -225,7 +227,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
           }
         }}
         renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
       />
       <Autocomplete

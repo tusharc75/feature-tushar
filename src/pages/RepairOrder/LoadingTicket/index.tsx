@@ -197,7 +197,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
             <IconButton
               size="small"
               onClick={() => {
-                window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                window.open(`${routes?.workOrderDetail?.path}/${row?.original?.workOrderId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />

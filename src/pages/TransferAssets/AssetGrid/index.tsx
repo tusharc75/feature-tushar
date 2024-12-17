@@ -3,6 +3,7 @@ import { Delete } from '@material-ui/icons';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -45,6 +46,10 @@ const AssetsGrid: FC<AssetsGridProps> = ({
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -228,7 +233,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
             setAddSerializedAssetDialog(true);
           }}
         >
-          Add Existing {routes.serializedAsset.title}
+          Add Existing {resources?.serializedAsset?.titlePlural}
         </MenuItem>
       </>
     );

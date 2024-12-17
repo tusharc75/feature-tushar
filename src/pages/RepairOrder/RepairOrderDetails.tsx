@@ -53,7 +53,7 @@ const dataAdded = {
 
 const RepairOrderDetails = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.repairOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.repairOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -62,7 +62,7 @@ const RepairOrderDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
@@ -123,7 +123,9 @@ const RepairOrderDetails = () => {
       if (dataAdded.addExistingDataAdded) return;
       const steps = generateAddExistingSerializedAsset(
         true,
-        repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`
+        repairOrderData?.type === REPAIR_ORDER_TYPE.external
+          ? `Add Existing Customer Assets`
+          : `Add Existing ${resources?.serializedAsset?.titlePlural}`
       ).steps;
       walkmeInstance.instance.push(steps);
       // immediately start next step
@@ -165,7 +167,7 @@ const RepairOrderDetails = () => {
   const fetchRepairOrderData = () => {
     setRepairOrderData(null);
     axiosInstance()
-      .get(`${routes.repairOrder.path}/${id}`)
+      .get(`${routes?.repairOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
 
@@ -209,7 +211,7 @@ const RepairOrderDetails = () => {
       .put(`${repairOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(routes.repairOrder.path);
+        history.push(routes?.repairOrder?.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -295,7 +297,7 @@ const RepairOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1 ">
@@ -316,11 +318,11 @@ const RepairOrderDetails = () => {
                       variant={'contained'}
                       className={'btn-outline-v1'}
                     >
-                      {`Create ${routes.transferAsset.title}`}
+                      {`Create ${resources?.transferAsset?.titleSingular}`}
                     </Button>
                   )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
-                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}>
+                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
                     <span>
                       <Button
                         variant={'contained'}
@@ -396,24 +398,10 @@ const RepairOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
-          {resourceData &&
-            resourceData?.tabs?.length &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 3}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -571,7 +559,7 @@ const RepairOrderDetails = () => {
       {showQuotationConfirmBox && (
         <ConfirmationDialog
           open={showQuotationConfirmBox}
-          message={`Are you sure you want to create new version of this ${routes?.quotation?.title?.toLowerCase()}?`}
+          message={`Are you sure you want to create new version of this ${resources?.repairOrder?.titleSingular?.toLowerCase()}?`}
           onClose={() => {
             setShowQuotationConfirmBox(false);
             setCurrentStep((prevStep) => {

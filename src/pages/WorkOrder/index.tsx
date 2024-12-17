@@ -34,20 +34,20 @@ import axios, { CancelTokenSource } from 'axios';
 const WorkOrder = () => {
   const types = [
     {
-      key: `My ${routes.workOrder.title}`,
+      key: `My ${sidebarResource?.workOrder}`,
       value: 1
     },
     {
-      key: `All ${routes.workOrder.title}`,
+      key: `All ${sidebarResource?.workOrder}`,
       value: 2
     }
   ];
 
-  let renderedFrom = camelCase(routes?.workOrder.title);
+  let renderedFrom = camelCase(sidebarResource?.workOrder);
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.workOrder));
@@ -92,7 +92,7 @@ const WorkOrder = () => {
     if (typeFieldOption?.find((e) => e?.default)?.optionValue === WORK_ORDER_TYPE.productionOrder) {
       setAlloweToCreate(true);
     }
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -278,10 +278,10 @@ const WorkOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.workOrder}
-          module={routes.workOrder.title}
+          module={resources?.workOrder?.titlePlural}
           api={workOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -333,9 +333,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : resources?.workOrder?.titleSingular}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

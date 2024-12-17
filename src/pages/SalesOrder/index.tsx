@@ -16,15 +16,12 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
-  customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   salesOrder,
   sidebarResource,
-  supplierAccount
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -32,48 +29,38 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const SalesOrder = () => {
-  const renderedFrom = camelCase(routes?.salesOrder.title);
+
+  const renderedFrom = camelCase(sidebarResource.salesOrder);
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
 
   const types = [
     {
-      key: `My ${routes?.salesOrder.title}`,
+      key: `My ${resources?.salesOrder?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes?.salesOrder.title}`,
+      key: `All ${resources?.salesOrder?.titlePlural}`,
       value: 2
     }
   ];
 
-  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.salesOrder));
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageSalesOrderDialog, setShowManageSalesOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleSalesOrderDelete, setSingleSalesOrderDelete] = useState({
-    id: null,
-    show: false,
-    salesOrderName: ''
-  });
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource
-  });
-  const [anchorEl, setAnchorEl] = useState(null);
+
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -86,7 +73,7 @@ const SalesOrder = () => {
     let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };
@@ -116,7 +103,6 @@ const SalesOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -124,11 +110,8 @@ const SalesOrder = () => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setSingleSalesOrderDelete({
-                  show: true,
-                  id: row?.original?._id,
-                  salesOrderName: `${row?.original?.salesOrderNo}`
-                });
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -145,29 +128,31 @@ const SalesOrder = () => {
       fetchData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [search, page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleSingleDeleteSalesOrder = async () => {
-    dispatch({ type: 'loading', loading: true });
-
-    axiosInstance()
-      .put(`${salesOrder.api}/remove`, {
-        ids: [singleSalesOrderDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        dispatch({ type: 'loading', loading: false });
-        setSingleSalesOrderDelete({ id: null, show: false, salesOrderName: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
+  const handleDelete = async () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
+    setDeleteLoading(true)
+    axiosInstance().put(`${salesOrder.api}/remove`, { ids }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      setDeleteLoading(false)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setDeleteLoading(false)
+    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -183,20 +168,6 @@ const SalesOrder = () => {
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    if (accountDetails.accountId) {
-      if (accountDetails.resource === customerAccount.accountResource) {
-        filterByIds.push({
-          field: 'customerAccount',
-          term: accountDetails.accountId
-        });
-      } else if (accountDetails.resource === supplierAccount.accountResource) {
-        filterByIds.push({
-          field: 'supplierAccountName',
-          term: { $in: [accountDetails.accountId] }
-        });
-      }
-    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -252,61 +223,19 @@ const SalesOrder = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const handleDeleteSalesOrder = async () => {
-    setDeleteLoading(true);
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
-    } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
-    }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${salesOrder.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-        });
-    }
-  };
-
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            showConfirmBox(null);
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -318,10 +247,10 @@ const SalesOrder = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.salesOrder]} />
+        <CustomBreadCrumbs routes={[{ ...routes.salesOrder, title: resources?.salesOrder?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.salesOrder}
-          module={routes.salesOrder.title}
+          module={resources?.salesOrder?.titlePlural}
           api={salesOrder.api}
           afterImportCompleted={() => {
             fetchData();
@@ -374,43 +303,19 @@ const SalesOrder = () => {
           </Box>
         )}
       </CustomContainer>
-
-      {showDeleteWarningConfirmBox ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox}
-          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-          onClose={() => setShowDeleteWarningConfirmBox(false)}
-        />
-      ) : null}
-
-      {isConfirmDialogVisible ? (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${routes?.salesOrder?.title?.toLowerCase()} ${deleteRecord?.salesOrderName || ''} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.salesOrderNo}` : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
-            setIsConformDialogVisible(false);
+            setShowDeleteConfirmBox(false);
           }}
           okBtnLoading={deleteLoading}
-          onOk={handleDeleteSalesOrder}
-        />
-      ) : null}
-
-      {singleSalesOrderDelete.show && (
-        <ConfirmationDialog
-          open={singleSalesOrderDelete.show}
-          message={`Are you sure you want to delete Sales Order: ${singleSalesOrderDelete.salesOrderName}?`}
-          onClose={() =>
-            setSingleSalesOrderDelete({
-              id: null,
-              show: false,
-              salesOrderName: ''
-            })
-          }
-          onOk={handleSingleDeleteSalesOrder}
+          onOk={handleDelete}
         />
       )}
-
       {showManageSalesOrderDialog.open && (
         <ManageSalesOrderDialog
           isClone={showManageSalesOrderDialog.isClone}

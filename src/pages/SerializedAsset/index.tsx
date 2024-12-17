@@ -41,7 +41,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.serializedAsset.title);
+const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
 const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +53,7 @@ const SerializedAsset = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -93,20 +93,20 @@ const SerializedAsset = () => {
   useEffect(() => {
     if (assetStatus || currentLocation) {
       const filterVal = {};
-  
+
       if (assetStatus) {
         filterVal['status'] = { filter: [assetStatus] };
       }
-  
+
       if (currentLocation && currentLocationId) {
         filterVal['currentLocation'] = {
           operator: 'OR',
           condition1: {
-            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }],
-          },
+            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }]
+          }
         };
       }
-  
+
       dispatch({ type: 'filter', filters: filterVal });
     }
   }, []);
@@ -502,10 +502,10 @@ const SerializedAsset = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.serializedAsset}
-          module={routes?.serializedAsset.title}
+          module={resources?.serializedAsset?.titlePlural}
           api={serializedAsset.api}
           afterImportCompleted={() => {
             fetchData();
@@ -545,6 +545,7 @@ const SerializedAsset = () => {
                 setSubleaseAsset,
                 showScrapAsset,
                 setShowScrapAsset,
+                resources
               }}
             />
           }
@@ -607,7 +608,7 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          message={`Are you sure you want to delete the ${resources?.serializedAsset?.titleSingular?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
             } ? `}
           onClose={() => {
             setDeleteRecord(null);
@@ -668,6 +669,7 @@ const LeftSideContent = ({
   setSubleaseAsset,
   showScrapAsset,
   setShowScrapAsset,
+  resources
 }) => {
   return (
     <>
@@ -769,7 +771,15 @@ const LeftSideContent = ({
               setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
             }}
             renderInput={(params) => (
-              <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+              <TextField
+                {...params}
+                margin="none"
+                size="small"
+                name="plant"
+                label={resources?.warehouse?.titleSingular}
+                variant="outlined"
+                fullWidth
+              />
             )}
           />
           {permissions?.sublease && (
@@ -800,7 +810,7 @@ const LeftSideContent = ({
               />
             }
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-            label={`Scrap ${routes.serializedAsset.title}`}
+            label={`Scrap ${resources?.serializedAsset?.titleSingular}`}
           />
         </Fragment>
       )}
@@ -836,9 +846,14 @@ const ActionMenuItems = ({
             }}
             disabled={
               selectedRecords?.filter(
-                (o) => [ASSET_STATUS.underReview, ASSET_STATUS.new,
-                ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords?.length
+                (o) =>
+                  [
+                    ASSET_STATUS.underReview,
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.needRepair,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -850,15 +865,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [
-                    ASSET_STATUS.new,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.needRecert,
-                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRecert,
+                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -871,14 +885,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.scrap,
                   ASSET_STATUS.needRepair,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -891,14 +905,14 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.needRepair,
                   ASSET_STATUS.needRecert,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true
@@ -911,15 +925,15 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.lost);
             }}
             disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [ASSET_STATUS.new,
+              selectedRecords?.filter((o) =>
+                [
+                  ASSET_STATUS.new,
                   ASSET_STATUS.available,
                   ASSET_STATUS.scrap,
                   ASSET_STATUS.needRepair,
                   ASSET_STATUS.needRecert,
                   ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
+                ].includes(o.status)
               ).length === selectedRecords?.length
                 ? false
                 : true

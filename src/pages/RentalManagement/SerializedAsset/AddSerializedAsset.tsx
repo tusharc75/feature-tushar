@@ -35,6 +35,7 @@ import {
   prepareDataForGrid,
   rentalManagement,
   serializedAsset,
+  sidebarResource,
   transferAsset
 } from '../../../constants/helpers';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
@@ -61,7 +62,7 @@ const AddSerializedAsset = ({
   assetPolicyData = null,
   selectedRecordsOfMain = []
 }) => {
-  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -69,7 +70,7 @@ const AddSerializedAsset = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [serializedProducts, setSerializedProducts] = useState([]);
@@ -474,7 +475,7 @@ const AddSerializedAsset = ({
       >
         <CustomDialogHeader
           showRequiredLabel={false}
-          title={`${replaceAssets ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
+          title={`${replaceAssets ? 'Replace' : 'Add'} ${resources?.serializedAsset?.titleSingular}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
@@ -534,8 +535,8 @@ const AddSerializedAsset = ({
                         {...params}
                         margin="dense"
                         name="plant"
-                        placeholder={routes.warehouse.title}
-                        label={routes.warehouse.title}
+                        placeholder={resources?.warehouse?.titleSingular}
+                        label={resources?.warehouse?.titleSingular}
                         variant="outlined"
                         fullWidth
                         className="m-0"
@@ -713,8 +714,9 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            if (checkAssetPolicy(receivingStatus)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: statusPolicy,
@@ -772,7 +774,7 @@ const AddSerializedAsset = ({
           }}
           staticLookUpFilters={{
             wellNumber: referenceData?.wellNumber,
-            wellName: referenceData?.wellName ? isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName : null
+            wellName: referenceData?.wellName ? (isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName) : null
           }}
           productsDefaultData={selectedProducts}
         />
