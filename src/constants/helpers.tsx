@@ -393,9 +393,10 @@ export const sidebarResource = {
   generateInvoice: 'Generate Invoice',
   dataList: 'DataList',
   dataListitems: 'DataList Items',
-  workSpace: 'WorkSpace',
+  workSpace: 'Work Space',
   workflow: 'Workflow',
-  workflowReport: 'Workflow Report'
+  workflowReport: 'Workflow Report',
+  equiptAi: 'Equipt Ai',
 };
 
 export const primaryFields = {
