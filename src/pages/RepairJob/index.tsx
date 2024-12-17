@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -33,6 +33,8 @@ import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createRepairJobFlow } from './walkmeSteps';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 let repairJobTimeout;
 
@@ -60,7 +62,6 @@ const RepairJob = () => {
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -140,25 +141,35 @@ const RepairJob = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions.repairJob?.isCreate ? (
-          <HtmlTooltip title="Clone">
+         <HtmlTooltip title={permissions?.repairJob?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.repairJob?.isCreate ? false : true}
               onClick={() => {
                 setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.repairJob?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -249,7 +260,6 @@ const RepairJob = () => {
   };
 
   const handleDeleteRepairJob = async () => {
-    setDeleteLoading(true);
     let recordsToDelete = [];
     if (deleteRecord?._id) {
       recordsToDelete.push(deleteRecord?._id);
@@ -257,6 +267,7 @@ const RepairJob = () => {
       recordsToDelete = selectedRecords.map((o) => o._id);
     }
     if (recordsToDelete.length > 0) {
+      setDeleteLoading(true);
       axiosInstance()
         .put(`${repairJob.api}/remove`, {
           ids: recordsToDelete
@@ -268,14 +279,14 @@ const RepairJob = () => {
             message: data.message
           });
           dispatch({ type: 'selection', selectedRecords: [] });
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
           fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
         });
     }
@@ -319,6 +330,25 @@ const RepairJob = () => {
     );
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
@@ -350,9 +380,9 @@ const RepairJob = () => {
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
-          isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
@@ -377,20 +407,6 @@ const RepairJob = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? resources?.repairJob?.titleSingular : resources?.repairJob?.titlePlural}   ${deleteRecord.repairJobName || ''
-              }?`}
-            onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteRepairJob}
-          />
-        ) : null}
-
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
@@ -401,6 +417,7 @@ const RepairJob = () => {
               setShowDeleteConfirmBox(false);
             }}
             onOk={handleDeleteRepairJob}
+            okBtnLoading={deleteLoading}
           />
         ) : null}
       </CustomContainer>
