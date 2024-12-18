@@ -51,7 +51,6 @@ const ProductDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const parsed = queryString.parse(history.location.search);
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingWarehouse, setLoadingWarehouse] = useState(false);
@@ -488,11 +487,15 @@ const ProductDetailsPage = () => {
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
-                                                      history.push(`${routes.serializedAsset.path}`, {
-                                                        warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
-                                                          .warehouse,
-                                                        product: { id: id, name: headingLabel }
-                                                      });
+                                                      const warehouseFilter = [{
+                                                        optionLabel: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)?.warehouse?.optionLabel,
+                                                        optionValue: selectedWarehouse
+                                                      }]
+                                                      const productFilter = [{
+                                                        optionLabel: productData?.productName,
+                                                        optionValue: id
+                                                      }]
+                                                      window.open(`${routes.serializedAsset.path}?warehouse=${encodeURIComponent(JSON.stringify(warehouseFilter))}&product=${encodeURIComponent(JSON.stringify(productFilter))}`, '_blank')
                                                     }}
                                                   >
                                                     View All
