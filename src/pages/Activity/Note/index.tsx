@@ -57,7 +57,7 @@ const Note = () => {
   const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {
@@ -364,8 +364,12 @@ const Note = () => {
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.activity?.titleSingular?.toLowerCase()} :
-            ${deleteRecord.name || 'Notes'}` : `selected ${resources?.activity?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.activity?.titleSingular?.toLowerCase()} :
+            ${deleteRecord.name || 'Notes'}`
+              : `selected ${resources?.activity?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
             setIsConformDialogVisible(false);
@@ -412,7 +416,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}
