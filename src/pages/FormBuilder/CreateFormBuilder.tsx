@@ -24,6 +24,7 @@ import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
 import { Settings } from '@material-ui/icons';
 import SettingDialog from './SettingDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -472,15 +473,19 @@ const CreateFormBuilder = () => {
                         {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
                       </Button>
                     </Box>
-                    <Box ml={1}>
-                      <IconButton
-                        aria-label="setting"
-                        onClick={() => {
-                          setSettingDialog(true);
-                        }}
-                      >
-                        <Settings fontSize="small" />
-                      </IconButton>
+                    <Box ml={2} mt={0.5}>
+                      <HtmlTooltip title="Settings">
+                        <IconButton
+                          aria-label="setting"
+                          onClick={() => {
+                            setSettingDialog(true);
+                          }}
+                          color='primary'
+                          size='small'
+                        >
+                          <Settings fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
                     </Box>
                   </Grid>
                 </Grid>
@@ -527,7 +532,7 @@ const CreateFormBuilder = () => {
               ) : null}
               {settingDialog && (
                 <SettingDialog
-                  entities = {user?.entity}
+                  entities={user?.entity}
                   resource={isNew ? startCase(toLower(resourceLabel)) : resource}
                   handleClose={() => setSettingDialog(false)}
                 />

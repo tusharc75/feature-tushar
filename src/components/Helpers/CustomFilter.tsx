@@ -177,10 +177,10 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <Box className="flex items-start justify-between gap-2">
-        <Box minWidth="70%">
+      <Box className="flex items-center justify-between gap-2">
+        <div className="mt-[3px] flex-grow">
           <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
-        </Box>
+        </div>
         <ThemeButton
           tooltip="Apply Filters"
           startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}

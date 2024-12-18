@@ -18,6 +18,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
 import AddConditions from './AddConditions';
 import PricingConditionsDialog from './PricingConditionsDialog';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const PricingConditionsDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,6 +27,8 @@ const PricingConditionsDetails = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [headingLabel, setHeadingLabel] = useState('');
   const [detailData, setDetailData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -130,7 +133,7 @@ const PricingConditionsDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this : ${headingLabel} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.pricingCondition?.titleSingular?.toLowerCase()} : ${headingLabel || ''}` : `selected ${resources?.pricingCondition?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

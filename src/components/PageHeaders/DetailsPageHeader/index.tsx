@@ -6,6 +6,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import NewActionButton, { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -17,6 +18,7 @@ type ButtonPropsWithTooltip = {
 
 type DetailsPageHeaderProps = {
   isAddButtonVisible: boolean;
+  isNewActionButtonVisible?: boolean;
   addButtonMenuItems?: ReactNode;
   addButtonProps?: ButtonPropsWithTooltip;
   isActionButtonVisible: boolean;
@@ -26,6 +28,7 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
+  newActionButtonProps?: NewActionButtonProps;
 };
 
 const DetailsPageHeader = ({
@@ -38,19 +41,13 @@ const DetailsPageHeader = ({
   previewDownloadProps,
   leftSideContents,
   rightSideContents,
-  hasXpadding = true
+  hasXpadding = true,
+  isNewActionButtonVisible = false,
+  newActionButtonProps
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
-  const {
-    tooltip: addButtonTooltip,
-    onClick: addButtonOnClick,
-    placement = 'left',
-    introWrapper = false,
-    introWrapperTitle = '',
-    introWrapperContent = '',
-    ...restOfAddButtonProps
-  } = addButtonProps || {};
+  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, placement = 'left', ...restOfAddButtonProps } = addButtonProps || {};
 
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -147,6 +144,7 @@ const DetailsPageHeader = ({
         ) : null}
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
         {rightSideContents}
+        {isNewActionButtonVisible && <NewActionButton {...newActionButtonProps} />}
         {isActionButtonVisible ? (
           <>
             <HtmlTooltip title={actionButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>

@@ -316,7 +316,8 @@ const BOMTable = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete this product?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productName || ''}` : resources?.product?.titlePlural?.toLowerCase()} ?`}
           okBtnLoading={isDeleting}
           onClose={() => {
             setDeleteRecord(null);

@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, TextField } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -61,7 +61,14 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
     }
 
     axiosInstance().post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
-      .then(() => { handleClose() })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        handleClose();
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         handleClose();
@@ -136,13 +143,11 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                     label="Entity Wise Resoure Name"
                   />
                   {values.entityWiseResourceName && (
-
                     <Box pt={1} pb={1}>
                       <Autocomplete
                         id="entities"
                         multiple
                         size='small'
-                        className='max-w-[500px]'
                         disableCloseOnSelect
                         options={entities || []}
                         getOptionLabel={(option: any) => (option ? option?.entityName : '')}
@@ -151,44 +156,57 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                         onChange={(e, val) => {
                           setSelectedEntities(val);
                         }}
-                        renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Entities" name="entities" />}
+                        renderInput={(params) => <TextField {...params}
+                          margin="dense"
+                          variant="outlined"
+                          label="Entities"
+                          fullWidth
+                          name="entities" />}
                       />
                       <FieldArray name="entityResources">
                         {() =>
                           selectedEntities?.map((entity, index) => (
-                            <Box key={entity._id} display="flex" alignItems="center" my={2}>
-                              <TextField
-                                disabled
-                                variant="outlined"
-                                size="small"
-                                value={entities.find((e) => e._id === entity._id)?.entityName || ""}
-                                label="Entity Name"
-                                style={{ marginRight: "10px", width: "200px" }}
-                              />
-                              <Field
-                                as={TextField}
-                                variant="outlined"
-                                size="small"
-                                required={true}
-                                value={values['entityResources'][entity._id]?.resourceLabel || ""}
-                                label="Resource Label (Singular)"
-                                style={{ marginRight: "10px", width: "200px" }}
-                                onChange={(e) => {
-                                  setFieldValue(`entityResources.${entity._id}.resourceLabel`, e.target.value);
-                                }}
-                              />
-                              <Field
-                                as={TextField}
-                                value={values['entityResources'][entity._id]?.homePageLabel || ""}
-                                variant="outlined"
-                                size="small"
-                                required={true}
-                                label="Resource Label (Plural)"
-                                style={{ width: "200px" }}
-                                onChange={(e) => {
-                                  setFieldValue(`entityResources.${entity._id}.homePageLabel`, e.target.value);
-                                }}
-                              />
+                            <Box pt={2}>
+                              <Grid container spacing={1}>
+                                <Grid item xs={4}>
+                                  <TextField
+                                    disabled
+                                    variant="outlined"
+                                    size="small"
+                                    value={entities.find((e) => e._id === entity._id)?.entityName || ""}
+                                    label="Entity"
+                                    fullWidth
+                                  />
+                                </Grid>
+                                <Grid item xs={4}>
+                                  <Field
+                                    as={TextField}
+                                    variant="outlined"
+                                    size="small"
+                                    required={true}
+                                    value={values['entityResources'][entity._id]?.resourceLabel || ""}
+                                    label="Resource Label (Singular)"
+                                    fullWidth
+                                    onChange={(e) => {
+                                      setFieldValue(`entityResources.${entity._id}.resourceLabel`, e.target.value);
+                                    }}
+                                  />
+                                </Grid>
+                                <Grid item xs={4}>
+                                  <Field
+                                    as={TextField}
+                                    value={values['entityResources'][entity._id]?.homePageLabel || ""}
+                                    variant="outlined"
+                                    size="small"
+                                    required={true}
+                                    label="Resource Label (Plural)"
+                                    fullWidth
+                                    onChange={(e) => {
+                                      setFieldValue(`entityResources.${entity._id}.homePageLabel`, e.target.value);
+                                    }}
+                                  />
+                                </Grid>
+                              </Grid>
                             </Box>
                           ))
                         }

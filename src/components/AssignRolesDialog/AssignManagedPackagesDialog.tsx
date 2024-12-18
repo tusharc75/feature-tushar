@@ -24,7 +24,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
   const [columns, setColumns] = useState(null);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${resources?.managedPackages?.titlePlural}`}
+        title={`Add ${resources?.managedPackages?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

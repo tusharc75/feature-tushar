@@ -5,7 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SimpleButton = {
   borderColor?: 'none';
-  iconForMobile: ReactNode | boolean;
+  iconForMobile?: ReactNode | boolean;
   tooltip?: string;
   mobileTooltip?: string;
   isLoading?: boolean;
@@ -14,7 +14,7 @@ type SimpleButton = {
 
 type OutlinedButtonProps = {
   borderColor?: 'default';
-  iconForMobile: ReactNode | boolean;
+  iconForMobile?: ReactNode | boolean;
   hasMobileBorder?: boolean;
   mobileTooltip?: string;
   tooltip?: string;
@@ -24,7 +24,7 @@ type OutlinedButtonProps = {
 
 type RedOutlineProps = {
   borderColor?: 'red';
-  iconForMobile: ReactNode | boolean;
+  iconForMobile?: ReactNode | boolean;
   hasMobileBorder?: boolean;
   mode?: 'dark' | 'light';
   tooltip?: string;

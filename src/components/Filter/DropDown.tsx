@@ -7,7 +7,17 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilterByIds, multiple = true, filterTerm, setFilterTerm }) => {
+const DropDown = ({
+  fieldData,
+  deepFilters,
+  setDeepFilters,
+  filterByIds,
+  setFilterByIds,
+  multiple = true,
+  filterTerm,
+  setFilterTerm,
+  sidebarIcon = null
+}) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -83,20 +93,23 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
   }, [loading, hasMore]);
 
   return (
-    <div>
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
-        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
-        {fieldData?.lookup && fieldData?.lookupResource && (
-          <div className="flex items-center justify-between">
-            <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
+    <>
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
+        <div className="flex items-center gap-2">
+          {sidebarIcon}
+          <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
+          {fieldData?.lookup && fieldData?.lookupResource && (
             <SearchBox
               onChange={(e) => {
                 setSearchVal(e?.target?.value);
               }}
               value={searchVal}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div>
         {fieldData?.lookup && fieldData?.lookupResource ? (
@@ -198,7 +211,7 @@ const DropDown = ({ fieldData, deepFilters, setDeepFilters, filterByIds, setFilt
           </>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

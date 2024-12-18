@@ -961,7 +961,7 @@ export default function AccountDetailPage(props) {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteAccount ? `${resources?.account?.titleSingular?.toLowerCase()} :
-              ${deleteAccount?.accountName}` : resources?.account?.titlePlural?.toLowerCase()} ?`}
+              ${deleteAccount?.accountName}` : `selected ${resources?.account?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
             setDeleteAccountId({});

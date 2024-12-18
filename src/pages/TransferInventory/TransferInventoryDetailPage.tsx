@@ -20,6 +20,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_INVENTORY_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
   transferInventory,
@@ -34,13 +35,13 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Step from '../DynamicForm/Step';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import {
-  createTransferInventoryFlow,
   generateAddExistingProduct,
   generateCompleteButtonStep,
   generateLoadingStepCreateLoadingTicket,
   generateLoadingStepReceive,
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -69,6 +70,7 @@ const TransferInventoryDetailPage = () => {
   const [nextStep, setNextStep] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [stepNames, setStepNames] = useState(transferInventorySteps?.map((item) => item.name));
@@ -171,6 +173,7 @@ const TransferInventoryDetailPage = () => {
         }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
+        setAllowedToDelete(permissions?.transferInventory?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) && data?.canEdit);
         setTransferInventoryData(data);
       })
       .catch((err) => {
@@ -254,6 +257,7 @@ const TransferInventoryDetailPage = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={transferInventoryData?._id}
               resource={ACTIVITY_RESOURCE.transferInventory}
@@ -348,7 +352,7 @@ const TransferInventoryDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer inventory: ${transferInventoryData?.transferNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.transferInventory?.titleSingular?.toLowerCase()}: ${transferInventoryData?.transferNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

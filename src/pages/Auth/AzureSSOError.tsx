@@ -14,7 +14,6 @@ const AzureSSOError = () => {
     const email = searchParams.get('email');
     if (email) setEmail(email)
     if (errorMessage) setError(errorMessage);
-    console.log("SAML Data -:", JSON.parse(searchParams.get('samlData') || ""))
   }, []);
 
   return (

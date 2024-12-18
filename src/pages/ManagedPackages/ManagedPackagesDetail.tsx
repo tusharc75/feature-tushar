@@ -18,11 +18,14 @@ import { DeleteButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagedPackagesView from './View';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ManagedPackagedDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.managedPackages]);
   const [managedPackagesData, setManagedPackagesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -156,7 +159,7 @@ const ManagedPackagedDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} ${managedPackagesData.managedPackageName} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

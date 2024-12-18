@@ -39,6 +39,7 @@ import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -49,7 +50,8 @@ const FieldTicketDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [fieldTicketData, setFieldTicketData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -325,7 +327,7 @@ const FieldTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.fieldTicket?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${fieldTicketData?.fieldTicketNumber}` : `selected ${resources?.fieldTicket?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

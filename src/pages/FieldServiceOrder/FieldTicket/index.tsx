@@ -389,7 +389,7 @@ const FieldTicket = ({
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.fieldTicket?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldTicketNumber}` : `selected ${resources?.fieldTicket?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

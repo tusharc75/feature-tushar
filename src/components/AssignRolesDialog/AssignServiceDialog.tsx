@@ -282,7 +282,7 @@ const AssignServiceDialog = ({
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${resources?.serviceMaster?.titleSingular}`}
+        title={`Add ${resources?.serviceMaster?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

@@ -411,7 +411,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.product?.titleSingular?.toLowerCase()} : ${selectedProductData?.productName}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />

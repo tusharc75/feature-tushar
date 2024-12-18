@@ -17,7 +17,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -68,7 +67,6 @@ const RentalManagement = () => {
   const [columns, setColumns] = useState(null);
   const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
 
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -365,7 +363,7 @@ const RentalManagement = () => {
                 });
               }}
             >
-              Planned Rental
+              {resources?.planning?.titlePlural}
             </Button>
           </>
         )}

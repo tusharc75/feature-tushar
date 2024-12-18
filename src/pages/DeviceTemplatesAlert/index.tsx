@@ -222,8 +222,12 @@ export default function DeviceTemplatesAlerts() {
         <MenuItem
           disabled={!(permissions?.deviceTemplateAlert?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
-            setShowDeleteConfirmBox(true);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
+              setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -307,7 +311,8 @@ export default function DeviceTemplatesAlerts() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()}  ${deleteRecord?.alertNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

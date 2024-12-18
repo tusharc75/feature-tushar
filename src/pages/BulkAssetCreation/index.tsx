@@ -248,6 +248,11 @@ const BulkAssetCreation = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -334,7 +339,7 @@ const BulkAssetCreation = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
-             ${deleteRecord?.baNumber}` : resources?.bulkAssetCreation?.titlePlural?.toLowerCase()} ?`}          
+             ${deleteRecord?.baNumber}` : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`} ?`}          
             onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

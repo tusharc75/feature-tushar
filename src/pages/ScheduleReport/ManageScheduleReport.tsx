@@ -12,7 +12,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
-import routes from './../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import { camelCase, isEmpty, kebabCase } from 'lodash';
 import React from 'react';
@@ -55,7 +54,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
   const [loadingColumns, setLoadingColumns] = useState(false);
@@ -65,7 +64,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     const options = [];
     REPORT_LIST?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item?.type });
+        options.push({
+          title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
+          value: item.title,
+          key: item.key,
+          type: item?.type
+        });
       }
     });
     setResourceOption(options);
@@ -73,7 +77,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
   useEffect(() => {
     fetchSharepointSiteData();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -85,7 +89,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
           resource = {
-            title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title,
+            title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
             value: resource.title,
             key: resource.key,
             type: resource.type
@@ -262,13 +266,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       .get(`/sharepoint-configuration/share-point-site`)
       .then(({ data: { data } }) => {
         if (data?.sharepointConfiguration) {
-          setSharepointOptions(data?.sharepointSites)
+          setSharepointOptions(data?.sharepointSites);
         }
       })
       .catch((err) => {
         setToastConfig(err);
       });
-  }
+  };
 
   const validate = (values: ValueTypes) => {
     let errors = {};
@@ -691,8 +695,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             getOptionLabel={(option) => option.optionLabel}
                             getOptionSelected={(option, value) => option.optionValue == value}
                             value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
-                            onChange={(_, newVal) =>
-                              setFieldValue('sharepointSite', newVal?.optionValue || '')}
+                            onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (
                               <TextField
                                 {...params}

@@ -217,6 +217,11 @@ const DemandOrder = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
           disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
@@ -285,7 +290,8 @@ const DemandOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.demandOrder?.titleSingular} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

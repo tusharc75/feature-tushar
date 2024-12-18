@@ -17,6 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
 import BidsPage from './Bids';
 import ManageProductAuction from './ManageProductAuction';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ProductAuctionDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +26,8 @@ const ProductAuctionDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [productAuctionData, setProductAuctionData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -138,7 +140,7 @@ const ProductAuctionDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.productAuction?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''}` : `selected ${resources?.productAuction?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}
