@@ -191,6 +191,11 @@ const InventoryCycle = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -262,7 +267,7 @@ const InventoryCycle = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${deleteRecord?.cycleCode}` : `selected ${resources?.inventoryCycle?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

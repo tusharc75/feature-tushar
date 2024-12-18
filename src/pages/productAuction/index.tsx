@@ -191,6 +191,11 @@ const ProductAuction = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -255,7 +260,7 @@ const ProductAuction = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular} ${deleteRecord?.auctionNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productAuction?.titleSingular?.toLowerCase()} : ${deleteRecord?.auctionNumber || ''}` : `selected ${resources?.productAuction?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

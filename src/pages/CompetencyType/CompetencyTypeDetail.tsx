@@ -189,7 +189,7 @@ const CompetencyMasterDetail = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.competencyType?.titleSingular?.toLowerCase()} :
-            ${competencyMasterData.accountNumber}` : resources?.competencyType?.titlePlural?.toLowerCase()} ?`}
+            ${competencyMasterData.accountNumber}` : `selected ${resources?.competencyType?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

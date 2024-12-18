@@ -297,6 +297,11 @@ const Opportunities = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setIsConformDialogVisible(true);
           }}
         >
@@ -380,7 +385,7 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular} ${deleteRecord.opportunityName || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.opportunity?.titleSingular?.toLowerCase()} : ${deleteRecord?.opportunityName || ''}` : `selected ${resources?.opportunity?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

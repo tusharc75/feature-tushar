@@ -329,6 +329,11 @@ const Job = () => {
     return (
       <MenuItem
         onClick={() => {
+          if (selectedRecords.length === 1){
+            setDeleteRecord(selectedRecords[0]);
+            }else{
+              setDeleteRecord(null)
+            }
           showConfirmBox();
         }}
       >
@@ -414,7 +419,7 @@ const Job = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'} ${deleteRecord.jobNumber || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${singleJobDelete?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -428,21 +433,6 @@ const Job = () => {
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-
-        {singleJobDelete.show ? (
-          <ConfirmationDialog
-            open={singleJobDelete.show}
-            message={`Are you sure you want to delete Job: ${singleJobDelete.jobNumber}?`}
-            onClose={() =>
-              setSingleJobDelete({
-                id: null,
-                show: false,
-                jobNumber: ''
-              })
-            }
-            onOk={handleSingleDeleteJob}
           />
         ) : null}
       </CustomContainer>

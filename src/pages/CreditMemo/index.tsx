@@ -223,6 +223,11 @@ const CreditMemo = () => {
         <MenuItem
           disabled={!selectedRecords?.every((d) => d?.canDelete)}
           onClick={() => {
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox();
           }}
         >
@@ -334,17 +339,10 @@ const CreditMemo = () => {
           </Box>
         )}
       </CustomContainer>
-      {showDeleteWarningConfirmBox ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox}
-          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-          onClose={() => setShowDeleteWarningConfirmBox(false)}
-        />
-      ) : null}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.creditMemo?.titleSingular} ${deleteRecord?.creditMemoNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${deleteRecord?.creditMemoNumber}` : `selected ${resources?.creditMemo?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

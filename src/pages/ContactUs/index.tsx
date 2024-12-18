@@ -267,8 +267,7 @@ const ContactUs = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.contactUs?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.name || ''}` : resources?.contactUs?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.contactUs?.titleSingular?.toLowerCase()} : ${deleteRecord.name}` : `selected ${resources?.contactUs?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

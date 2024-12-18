@@ -193,6 +193,11 @@ const ManagedPackages = () => {
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
+              if (selectedRecords.length === 1){
+                setDeleteRecord(selectedRecords[0]);
+                }else{
+                  setDeleteRecord(null)
+                }
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -256,7 +261,7 @@ const ManagedPackages = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular} ${deleteRecord?.managedPackageName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.managedPackageName || ''}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
