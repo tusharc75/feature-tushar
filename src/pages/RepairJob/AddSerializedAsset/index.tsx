@@ -132,8 +132,6 @@ const SerializedAsset = ({
         coloum.push({
           accessor: 'assetNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row, table }) => (
             <div className="flex items-center gap-2">
               {row.original.assetNumber ? (
@@ -177,8 +175,6 @@ const SerializedAsset = ({
         coloum.push({
           accessor: 'serialNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row }) => (
             <>
               {row.original.serialNumber ? (
@@ -197,8 +193,6 @@ const SerializedAsset = ({
       coloum.push({
         accessor: ele?.fieldName,
         Header: ele?.fieldLabel,
-        sticky: 'none',
-        width: 200,
         Cell: ({ row }) => (
           <>
             {row.original[ele?.fieldName] ? (
@@ -215,8 +209,6 @@ const SerializedAsset = ({
     coloum.push({
       accessor: 'status',
       Header: 'Status',
-      sticky: 'none',
-      width: 100,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p className="text-truncate">{row.original.status}</p>
