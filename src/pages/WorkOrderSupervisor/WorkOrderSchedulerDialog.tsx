@@ -19,7 +19,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form, Field } from 'formik';
 
-export default function ProductFrequencyDialog({ onClose, onSuccess }) {
+export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
