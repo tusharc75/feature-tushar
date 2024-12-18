@@ -432,7 +432,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
       .finally(() => setIsDataFetching(false));
   };
 
