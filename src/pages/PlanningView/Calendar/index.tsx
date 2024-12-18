@@ -486,6 +486,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
         window.open(`${routes.serializedAsset.path}${query}`);
       }
+      else if (data?.type === 'availableByPlanning') { }
       else if (data?.type) {
         setAnchor(target);
         const newData: OnSelectDataType[] = data.data;

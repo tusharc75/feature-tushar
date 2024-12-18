@@ -1,4 +1,4 @@
-import { TableRow } from '@material-ui/core';
+import { Collapse, TableRow } from '@material-ui/core';
 import { Fragment, memo } from 'react';
 import { CellRenderer } from '../TableHelperComponents';
 
@@ -23,21 +23,30 @@ export const VirtualTableBody = memo(
     left,
     vtableData,
     virtualPaddingRight,
-    virtualPaddingLeft
+    virtualPaddingLeft,
+    rowVirtualizer,
+    expanderWithCustomContent = false,
+    customContentHeight = 300,
+    customContent = null
   }: any) => {
+    const { customExpanderRowData } = state;
     return (
       <>
         {virtualrows.map((virtualRow, index) => {
           const row = rows[virtualRow.index];
           const visibleCells = row?.getVisibleCells();
           if (!row) return null;
+          const isExpanded = customExpanderRowData?.[row?.id] || (customExpanderRowData && customExpanderRowData === 'all');
           return (
-            <Fragment key={virtualRow.index}>
+            <div
+              key={virtualRow.index}
+              data-index={virtualRow.index}
+              ref={rowVirtualizer.measureElement}
+              style={{ transform: `translateY(${virtualRow.start}px)`, position: 'absolute', willChange: 'transform', width: '100%' }}
+            >
               <TableRow
                 key={virtualrows.index}
                 style={{
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
                   display: 'flex'
                 }}
                 className={`tr`}
@@ -63,7 +72,14 @@ export const VirtualTableBody = memo(
                   virtualPaddingLeft={virtualPaddingLeft}
                 />
               </TableRow>
-            </Fragment>
+              {expanderWithCustomContent && customContent ? (
+                <Collapse in={isExpanded} unmountOnExit>
+                  <div className="custom-content pl-[70px]" style={{ height: customContentHeight }}>
+                    {customContent({ row: row.original })}
+                  </div>
+                </Collapse>
+              ) : null}
+            </div>
           );
         })}
       </>
