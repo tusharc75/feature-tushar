@@ -165,7 +165,7 @@ const SurveysDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.surveys?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.surveys?.titleSingular?.toLowerCase()} : ${SurveyData?.surveyName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

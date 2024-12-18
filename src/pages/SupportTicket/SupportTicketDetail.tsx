@@ -186,7 +186,7 @@ const SupportTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular?.toLowerCase()} : ${supportTicketData?.supportTicketNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

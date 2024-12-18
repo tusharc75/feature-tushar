@@ -103,7 +103,7 @@ const WellNumberDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.wellNumber?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete this ${resources?.wellNumber?.titleSingular?.toLowerCase()} : ${wellNumberData?.wellNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

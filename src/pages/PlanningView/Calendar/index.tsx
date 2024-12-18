@@ -323,7 +323,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     resource: selectedResource.resource,
                     type: 'debit',
                     data: d?.debit,
-                    isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                    //isRedAlert: debitQty > d?.availableByPlanning ? true : false
                   });
                 }
               }
@@ -365,15 +365,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }
               }
               else if (property === 'availableByPlanning') {
-                if (d?.availableByPlanning) {
-                  otherData.push({
-                    title: `Planned Quantity ${d?.availableByPlanning}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
-                    allDay: true,
-                    resource: selectedResource.resource
-                  });
-                }
+                otherData.push({
+                  title: `Planned Available ${d?.availableByPlanning || 0}`,
+                  start: new Date(d['date']),
+                  end: new Date(d['date']),
+                  allDay: true,
+                  type: 'availableByPlanning',
+                  resource: selectedResource.resource,
+                  isRedAlert: d?.availableByPlanning < 0 ? true : false
+                });
               }
               else if (['assetCount', 'date']?.includes(property)) {
               }
@@ -647,6 +647,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         backgroundColor = 'var(--success-light) ';
       } else if (obj?.type === 'reserved') {
         backgroundColor = 'var(--warning-light)';
+      } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+        backgroundColor = 'var(--danger-light)';
+        color = 'white';
       } else if (obj?.type === 'debit' && obj?.isRedAlert) {
         backgroundColor = 'var(--danger-light)';
         color = 'white';

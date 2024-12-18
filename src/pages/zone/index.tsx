@@ -206,6 +206,11 @@ const Zone = () => {
         <MenuItem
           disabled={!permissions?.zone.isDelete}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -277,7 +282,8 @@ const Zone = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.zone?.titleSingular} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.zone?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.name || ''}` : `selected ${resources?.zone?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

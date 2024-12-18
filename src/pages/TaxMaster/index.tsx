@@ -192,7 +192,11 @@ const TaxMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -258,7 +262,8 @@ const TaxMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.taxMaster?.titleSingular} ${deleteRecord?.taxCode || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.taxMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.taxCode || ''}` : `selected ${resources?.taxMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
