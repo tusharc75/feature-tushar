@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import {
   ASSET_STATUS,
   CustomDialogTransition,
-  dateFormat,
   dateFormatForInputControl,
   serializedAsset,
   sidebarResource,
@@ -19,7 +18,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form} from 'formik';
 import moment from 'moment';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
