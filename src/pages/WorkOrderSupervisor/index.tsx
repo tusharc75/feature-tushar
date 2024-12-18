@@ -25,12 +25,12 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
+import { MATERIAL_SUB_TYPE, WORKORDER_SERVICE_STATUS, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 
 import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
-import { camelCase } from 'lodash';
+import { camelCase, uniqBy } from 'lodash';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
@@ -49,7 +49,7 @@ const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
-  const { limit, selectedRecords: cardSelectedRecords } = state;
+  const { limit, selectedRecords: cardSelectedRecords, visibleColumns, filterQuery } = state;
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords: tableSelectedRecords } = tableState;
 
@@ -269,7 +269,6 @@ const WorkOrderSupervisor = () => {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
   }, [selectedUser, globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType, filterResourceQuery]);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const handleClearFilter = () => {
     setSelectedUser(null);
@@ -289,6 +288,42 @@ const WorkOrderSupervisor = () => {
     } else {
       dispatch({ type: 'refreshData' });
     }
+  };
+
+  const handleAddConsumables = (rows, records = []) => {
+    const data: any = [];
+    const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record?.workOrder);
+
+    records?.forEach((s) => {
+      rows?.forEach((e) => {
+        data.push({
+          product: e._id,
+          qty: parseInt(e.qty) || 1,
+          service: s?.service?.optionValue,
+          subType: MATERIAL_SUB_TYPE.consumable,
+          uniqueId: s?.uniqueId,
+          stepId: null,
+          parentId: null
+        });
+      });
+    });
+    console.log('visibleColumns', visibleColumns);
+    axiosInstance()
+      .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        visibleColumns?.map((c) => {
+          fetchSingleColumn(c, 0, false, filterQuery);
+        });
+        setConsumablesDialog(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
@@ -316,16 +351,18 @@ const WorkOrderSupervisor = () => {
               setWorkStationAssignDialog({ open: true, multiple: true });
             }
           }
-        }
+        },
+        ...(['table-view', 'card-view']?.includes(viewType)
+          ? [
+              {
+                disabled: selectedRecords?.length === 0,
+                label: 'Add Products/Consumables',
+                onClick: () => setConsumablesDialog(true)
+              }
+            ]
+          : [])
       ]
     };
-    if (viewType === 'table-view') {
-      items.items.push({
-        disabled: selectedRecords?.length === 0,
-        label: 'Add Products/Consumables',
-        onClick: () => setConsumablesDialog(true)
-      });
-    }
     return items;
   }, [resources?.workStations?.titlePlural, selectedRecords, viewType]);
 
@@ -612,7 +649,11 @@ const WorkOrderSupervisor = () => {
             handleCloseDialog={() => setConsumablesDialog(false)}
             ids={[]}
             onSuccess={(rows) => {
-              workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
+              if (viewType === 'card-view') {
+                handleAddConsumables(rows, selectedRecords);
+              } else {
+                workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
+              }
             }}
             serialized={false}
             isSubmitting={workOrderListRef.current?.submitting}
