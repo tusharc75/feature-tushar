@@ -15,7 +15,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
 import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const MarketSegmentDetail = () => {
   const { id } = useParams();
@@ -24,8 +23,6 @@ const MarketSegmentDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.marketSegment, title: resources?.marketSegment?.titlePlural }]);
   const [marketSegmentData, setMarketSegmentData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -142,7 +139,7 @@ const MarketSegmentDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.marketSegment?.titleSingular?.toLowerCase()} : ${fields?.name}` : `selected ${resources?.marketSegment?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.marketSegment?.titleSingular?.toLowerCase()} : ${fields?.name} ?`}            
           onClose={() => {
             setShowConfirmBox(false);
           }}

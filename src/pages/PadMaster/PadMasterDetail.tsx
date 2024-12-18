@@ -16,14 +16,11 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagePadMaster from './ManagePadMaster';
 import Step from '../DynamicForm/Step';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const PadMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [padMasterData, setPadMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -170,7 +167,7 @@ const PadMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length  ? `${resources?.padMaster?.titleSingular?.toLowerCase()} : ${padMasterData.padName}` : `selected ${resources?.padMaster?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.padMaster?.titleSingular?.toLowerCase()} : ${padMasterData?.padName} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

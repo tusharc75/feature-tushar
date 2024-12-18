@@ -41,7 +41,6 @@ import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
 import { RiExchangeBoxFill } from 'react-icons/ri';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,8 +55,6 @@ const InvoiceDetails = () => {
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
@@ -454,7 +451,7 @@ const InvoiceDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.invoice?.titleSingular?.toLowerCase()} : ${headingLabel}` : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}             
           onClose={() => {
             setShowConfirmBox(false);
           }}

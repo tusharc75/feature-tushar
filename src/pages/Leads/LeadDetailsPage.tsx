@@ -34,7 +34,6 @@ import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from 'src/pages/DynamicForm/Step';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,8 +41,6 @@ const LeadDetailsPage = () => {
   const {
     state: { user, selectedEntity, permissions, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [fields, setFields] = useState([]);
@@ -478,7 +475,7 @@ const LeadDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName}` : `selected ${resources?.lead?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName} ?`}            
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDeleteLead}
           okBtnLoading={isDeleting}

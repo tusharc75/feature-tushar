@@ -37,7 +37,6 @@ import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumber
 import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -51,8 +50,6 @@ const AssemblyOrderDetail = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const {state} = useTableReducer();
-  const {selectedRecords} = state;
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allFields, setAllFields] = useState([]);
@@ -305,7 +302,7 @@ const AssemblyOrderDetail = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} : ${assemblyOrderData?.assemblyOrderNumber}` : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete this ${resources?.assemblyOrder?.titleSingular?.toLowerCase()}: ${assemblyOrderData?.assemblyOrderNumber} ?`}          
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

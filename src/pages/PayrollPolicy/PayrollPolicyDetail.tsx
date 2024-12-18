@@ -157,7 +157,7 @@ const PayrollPolicyDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.payrollPolicy?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.payrollPolicy?.titleSingular?.toLowerCase()} : ${payrollPolicyData?.payrollPolicyName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
