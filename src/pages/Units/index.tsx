@@ -279,6 +279,11 @@ const Units = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -355,7 +360,8 @@ const Units = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.units?.titleSingular?.toLowerCase()} ${deleteRecord?.unitNumber || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.units?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.unitNumber || ''}` : `selected ${resources?.units?.titlePlural?.toLowerCase()}`} ?`}  
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

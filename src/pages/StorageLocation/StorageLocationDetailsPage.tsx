@@ -105,7 +105,7 @@ const StorageLocationDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.storageLocation?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${resources?.storageLocation?.titleSingular?.toLowerCase()} : ${storageLocationData?.storageLocationName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -192,7 +192,11 @@ const TransactionLock = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -257,7 +261,8 @@ const TransactionLock = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.transactionLock?.titleSingular} ${deleteRecord?.lockNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.lockNumber || ''}` : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

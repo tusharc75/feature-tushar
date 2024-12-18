@@ -263,7 +263,7 @@ const TruckMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.truckMaster?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.truckMaster?.titleSingular?.toLowerCase()} : ${truckMasterData?.truckName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

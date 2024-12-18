@@ -135,7 +135,7 @@ const UnitDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.trailerMaster?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.trailerMaster?.titleSingular?.toLowerCase()} : ${unitData?.unitNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

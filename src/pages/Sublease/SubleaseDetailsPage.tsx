@@ -394,7 +394,7 @@ const SubleaseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.sublease?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${resources?.sublease?.titleSingular?.toLowerCase()} : ${subleaseData?.subleaseName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

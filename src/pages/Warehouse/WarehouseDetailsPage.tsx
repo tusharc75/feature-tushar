@@ -202,7 +202,7 @@ const WarehouseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${warehouseData?.warehouseName}?`}
+          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} : ${warehouseData?.warehouseName}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -191,9 +191,11 @@ const WellNumber = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -258,7 +260,8 @@ const WellNumber = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.wellNumber?.titleSingular.toLowerCase()} ${deleteRecord?.wellNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.wellNumber?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.wellNumber || ''}` : `selected ${resources?.wellNumber?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -227,9 +227,11 @@ const SupportTicket = () => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -296,7 +298,8 @@ const SupportTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular} ${deleteRecord?.supportTicketNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.supportTicketNumber || ''}` : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
