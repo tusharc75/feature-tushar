@@ -329,23 +329,26 @@ const RentalManagement = () => {
       recordsToDelete = selectedRecords?.map((o) => o._id);
     }
     if (recordsToDelete.length > 0) {
-      axiosInstance().put(`${rentalManagement.api}/remove`, {
-        ids: recordsToDelete
-      }).then(({ data }) => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${rentalManagement.api}/remove`, {
+          ids: recordsToDelete
+        })
+        .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleteLoading(false);
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setDeleteLoading(false);
         });
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setDeleteLoading(false)
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-        setDeleteLoading(false);
-      });
     }
   };
 
@@ -395,8 +398,7 @@ const RentalManagement = () => {
             onClick={() => {
               if (selectedRecords?.length === 1) {
                 setDeleteRecord(selectedRecords[0]);
-              }
-              else {
+              } else {
                 setDeleteRecord(null);
               }
               setShowDeleteConfirmBox(true);
@@ -475,8 +477,12 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.rentalJobName}` : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.rentalJobName}`
+                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
