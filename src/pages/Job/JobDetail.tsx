@@ -23,15 +23,12 @@ import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(sidebarResource.job);
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.job]);
   const [jobData, setJobData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -222,7 +219,7 @@ const JobDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.job?.titleSingular?.toLowerCase()} : ${jobData?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.job?.titleSingular?.toLowerCase()} : ${jobData?.jobNumber} ?`}             
           onClose={() => {
             setShowConfirmBox(false);
           }}

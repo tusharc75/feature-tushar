@@ -14,7 +14,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageInventoryCycle from './ManageInventoryCycle';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const InventoryCycleDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,8 +22,6 @@ const InventoryCycleDetailPage = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -150,7 +147,7 @@ const InventoryCycleDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl}` : `selected ${resources?.inventoryCycle?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}          
           onClose={() => {
             setShowConfirmBox(false);
           }}

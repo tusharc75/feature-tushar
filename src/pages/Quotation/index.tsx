@@ -399,7 +399,7 @@ const Quotation = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.quotationNumber}` : resources?.quotation?.titlePlural?.toLowerCase()} ?`}
+              ${deleteRecord?.quotationNumber}` : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
