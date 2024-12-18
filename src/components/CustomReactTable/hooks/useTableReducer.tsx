@@ -105,6 +105,11 @@ function reducer(state: TInitialState, action: TActios) {
         sizes: action.sizes
       };
     }
+    case 'setCustomExpanderRowData':
+      return {
+        ...state,
+        customExpanderRowData: action.data
+      };
 
     default:
       break;
@@ -131,7 +136,8 @@ const intialState = {
   initialDataLoaded: false,
   visibleColumns: {},
   columnOrder: [],
-  sizes: null
+  sizes: null,
+  customExpanderRowData: null
 };
 
 export type TInitialState = {
@@ -153,6 +159,7 @@ export type TInitialState = {
   visibleColumns: { [key: string]: boolean };
   columnOrder: string[];
   sizes: { [key: string]: number } | null;
+  customExpanderRowData: { [key: string]: boolean } | null | 'all';
 };
 
 export type TActios =
@@ -174,7 +181,8 @@ export type TActios =
   | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
   | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] }
-  | { type: 'setColumnSizes'; sizes: { [key: string]: number } | null };
+  | { type: 'setColumnSizes'; sizes: { [key: string]: number } | null }
+  | { type: 'setCustomExpanderRowData'; data: { [key: string]: boolean } | null | 'all' };
 
 type UseTableReducerProps = {
   renderedFrom?: string;

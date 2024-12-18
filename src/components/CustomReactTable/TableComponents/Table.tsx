@@ -28,6 +28,9 @@ type TTableProps = {
   pagination?: boolean;
   expander: boolean;
   hideSelection: boolean;
+  expanderWithCustomContent: boolean;
+  customContentHeight: number;
+  customContent: ({ row }: { row: any }) => React.ReactNode;
 };
 
 const TableComponent = forwardRef(function (
@@ -50,7 +53,10 @@ const TableComponent = forwardRef(function (
     resource,
     pagination,
     expander,
-    hideSelection
+    hideSelection,
+    expanderWithCustomContent,
+    customContentHeight,
+    customContent
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -172,6 +178,9 @@ const TableComponent = forwardRef(function (
             stickyColumns={stickyColumns}
             handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
             vtableData={vtableData}
+            expanderWithCustomContent={expanderWithCustomContent}
+            customContentHeight={customContentHeight}
+            customContent={customContent}
           />
         </>
       )}
