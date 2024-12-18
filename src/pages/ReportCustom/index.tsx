@@ -10,7 +10,6 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
 import { camelCase, startCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
@@ -116,7 +115,9 @@ const CustomReport = () => {
         let count = data?.length;
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+          finalObject.resource = resources[camelCase(finalObject.resource)]?.titleSingular
+            ? resources[camelCase(finalObject.resource)]?.titleSingular
+            : finalObject.resource;
           finalObject.column = finalObject.column
             ?.split(',')
             ?.map((s: string) => startCase(s))
