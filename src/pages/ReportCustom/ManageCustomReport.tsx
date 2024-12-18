@@ -12,7 +12,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import { isEmpty, kebabCase } from 'lodash';
 
@@ -41,7 +40,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
 
@@ -49,7 +48,12 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     const options = [];
     REPORT_LIST?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item.type });
+        options.push({
+          title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
+          value: item.title,
+          key: item.key,
+          type: item.type
+        });
       }
     });
     setResourceOption(options);
@@ -65,7 +69,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
           let resource: any = REPORT_LIST?.find((item) => item.title === data.resource);
           resource = {
-            title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title,
+            title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
             value: resource.title,
             key: resource.key,
             type: resource.type
@@ -366,8 +370,8 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           options={resourceOption}
                           fullWidth
                           size="small"
-                          getOptionLabel={(option) => option.title}
-                          getOptionSelected={(option, value) => option.value === value.value}
+                          getOptionLabel={(option) => option?.title || ''}
+                          getOptionSelected={(option, value) => option?.value === value?.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
