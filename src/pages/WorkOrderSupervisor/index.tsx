@@ -1,6 +1,6 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { ExpandMore, MoreVert } from '@material-ui/icons';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
@@ -73,6 +73,7 @@ const WorkOrderSupervisor = () => {
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const ref: any = useRef();
 
@@ -288,43 +289,10 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  window.open(`${routes?.workOrder?.path}`);
+                  setOpenWorkOrderScheduler(true);
                 }}
               >
-                {`${resources?.workOrder?.titlePlural}`}
-              </Button>
-            )}
-            {permissions?.repairOrder?.isCreate && (
-              <Button
-                variant="outlined"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  window.open(`${routes?.repairOrder?.path}`);
-                }}
-              >
-                {`${resources?.repairOrder?.titlePlural}`}
-              </Button>
-            )}
-            {permissions?.productionOrder?.isCreate && (
-              <Button
-                variant="outlined"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  window.open(`${routes?.productionOrder?.path}`);
-                }}
-              >
-                {`${resources?.productionOrder?.titlePlural}`}
-              </Button>
-            )}
-            {permissions?.assemblyOrder?.isCreate && (
-              <Button
-                variant="outlined"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  window.open(`${routes.assemblyOrder.path}`);
-                }}
-              >
-                {`${resources?.assemblyOrder?.titlePlural}`}
+                Scheduler
               </Button>
             )}
             {permissions?.workOrder?.isCreate && (
@@ -332,12 +300,49 @@ const WorkOrderSupervisor = () => {
                 variant="outlined"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  setOpenWorkOrderScheduler(true);
+                  window.open(`${routes?.workOrder?.path}`);
                 }}
               >
-                Scheduler
+                {`${resources?.workOrder?.titlePlural}`}
               </Button>
             )}
+            <Box>
+              <IconButton aria-haspopup="true" color="primary" size="small" title="More" onClick={(event) => setAnchorEl(event.currentTarget)}>
+                <MoreVert />
+              </IconButton>
+              <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+                {permissions?.repairOrder?.isCreate && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      window.open(`${routes?.repairOrder?.path}`);
+                    }}
+                  >
+                    {`${resources?.repairOrder?.titlePlural}`}
+                  </MenuItem>
+                )}
+                {permissions?.productionOrder?.isCreate && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      window.open(`${routes?.productionOrder?.path}`);
+                    }}
+                  >
+                    {`${resources?.productionOrder?.titlePlural}`}
+                  </MenuItem>
+                )}
+                {permissions?.assemblyOrder?.isCreate && (
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      window.open(`${routes?.assemblyOrder?.path}`);
+                    }}
+                  >
+                    {`${resources?.assemblyOrder?.titlePlural}`}
+                  </MenuItem>
+                )}
+              </Menu>
+            </Box>
           </div>
         </div>
         <div className="main-container">
