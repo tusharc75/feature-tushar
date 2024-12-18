@@ -25,7 +25,8 @@ const Board = ({ type, filter }) => {
   const {
     state: {
       user: { user },
-      permissions
+      permissions,
+      resources
     }
   }: any = useData();
   const [resource, setResource] = useState(null);
@@ -53,7 +54,7 @@ const Board = ({ type, filter }) => {
       }
     });
 
-    setResourceOptions([...get_activity_resource(permissions), ...resource]);
+    setResourceOptions([...get_activity_resource(permissions, resources), ...resource]);
   };
 
   useEffect(() => {

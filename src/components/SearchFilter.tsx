@@ -8,7 +8,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../StateProvider/Provider';
 import ActivityModelHandler from './Activity/ActivityModelHandler';
 import { get_activity_resource, get_dynamic_resource } from './Activity/Helpers/utils';
-import routes from './Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
   chipStyle: {
@@ -51,7 +50,8 @@ export const SearchFilter = ({
   const {
     state: {
       user: { user },
-      permissions
+      permissions,
+      resources
     }
   } = useData();
   const [options, setOptions] = React.useState([]);
@@ -67,7 +67,7 @@ export const SearchFilter = ({
   }, []);
 
   const setResource = async () => {
-    const resourceOptions = get_activity_resource(permissions);
+    const resourceOptions = get_activity_resource(permissions, resources);
     const data = [];
     resourceOptions.forEach((ele) => {
       data.push({ label: ele.optionLabel, type: ele.optionValue, name: 'All', isAll: true });
@@ -89,7 +89,7 @@ export const SearchFilter = ({
 
   useEffect(() => {
     filter?.forEach((e) => {
-      e.label = routes[e.type] ? routes[e.type].title : startCase(e.type);
+      e.label = resources[e.type] ? resources[e.type]?.titleSingular : startCase(e.type);
     });
     setValue(filter.filter((d) => permissionsSearch?.some((f) => f.type === d.type)));
   }, [filter, permissionsSearch]);
@@ -110,7 +110,7 @@ export const SearchFilter = ({
         .then(({ data: { data } }) => {
           setLoading(false);
           data?.forEach((e) => {
-            e.label = routes[e.type] && routes[e.type]?.title ? routes[e.type]?.title : e.type;
+            e.label = resources[e.type] && resources[e.type]?.titleSingular ? resources[e.type]?.titleSingular : e.type;
           });
           setOptions(data);
         })
@@ -141,7 +141,7 @@ export const SearchFilter = ({
         limitTags={1}
         multiple={true}
         disableCloseOnSelect={true}
-        className={`sm:max-w-[500px] sm:min-w-[200px] flex-grow`}
+        className={`flex-grow sm:min-w-[200px] sm:max-w-[500px]`}
         size="small"
         fullWidth
         loading={loading}
