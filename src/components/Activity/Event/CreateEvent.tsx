@@ -41,7 +41,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   const {
     state: {
       user: { user },
-      permissions
+      permissions,
+      resources
     }
   } = useData();
 
@@ -58,7 +59,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {

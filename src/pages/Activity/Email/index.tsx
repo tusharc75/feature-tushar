@@ -69,7 +69,7 @@ const Email = () => {
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {
