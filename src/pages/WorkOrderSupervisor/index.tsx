@@ -1,47 +1,62 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Box, Button, Checkbox, FormControl, IconButton, InputLabel, Menu, MenuItem, Popover, Select, useMediaQuery } from '@material-ui/core';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
-import React, { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { FaRegCalendar } from 'react-icons/fa';
+import { MdViewWeek } from 'react-icons/md';
+import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CardColTimeline, { useCardReducer, datarowInterface } from 'src/components/CardColTimeline';
+import ButtonMenu from 'src/components/ButtonMenu';
+import CardColTimeline, { datarowInterface, useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomFilter from 'src/components/Helpers/CustomFilter';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
+import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
+import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
+import { WORKORDER_SERVICE_STATUS, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { BiFilterAlt } from 'react-icons/bi';
-import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
-import AppsIcon from '@material-ui/icons/Apps';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import WorkOrderSchedulerDialog from './WorkOrderSchedulerDialog';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import ViewListIcon from '@material-ui/icons/ViewList';
-import WorkOrderList from 'src/pages/WorkOrderSupervisor/WorkOrderList';
-import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
-import { ExpandMore } from '@material-ui/icons';
+import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
+
+import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
 
 const LIMIT = 25;
+
+type ViewType = 'card-view' | 'table-view' | 'calendar-view';
+
+type TableViewStatus =
+  | typeof WORKORDER_SERVICE_STATUS.pending
+  | typeof WORKORDER_SERVICE_STATUS.inProgress
+  | typeof WORKORDER_SERVICE_STATUS.completed;
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
   const { limit, selectedRecords } = state;
 
+  const resetSelectedRecords = () => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, resources }
   }: any = useData();
-
+  const workOrderListRef = useRef<WorkOrderListRef>();
   const [selectedUser, setSelectedUser] = useState(null);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
+  const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
@@ -49,14 +64,13 @@ const WorkOrderSupervisor = () => {
     filterById: [],
     deepFilter: []
   });
-  const [viewType, setViewType] = useState(1);
+  const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
+  const [viewType, setViewType] = useState<ViewType>('card-view');
 
-  const [timeFrame, setTimeFrame] = React.useState<any>('custom');
-  const [globalFilters, setGlobalFilters] = useState({
+  const [globalFilters, setGlobalFilters] = useState<DateRange>({
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
 
@@ -66,35 +80,35 @@ const WorkOrderSupervisor = () => {
     {
       key: 'user',
       fieldName: 'user',
-      fieldLabel: resources?.employeeMaster?.titlePlural,
+      fieldLabel: resources?.employeeMaster.titlePlural,
       resource: sidebarResource.employeeMaster,
       type: 'dropDown'
     },
     {
       key: 'serviceMaster',
       fieldName: 'service',
-      fieldLabel: resources?.serviceMaster?.titlePlural,
+      fieldLabel: sidebarResource?.serviceMaster,
       resource: sidebarResource.serviceMaster,
       type: 'dropDown'
     },
     {
       key: 'workOrder',
       fieldName: 'workOrder',
-      fieldLabel: resources?.serviceMaster?.titlePlural,
+      fieldLabel: sidebarResource?.workOrder,
       resource: sidebarResource.workOrder,
       type: 'dropDown'
     },
     {
       key: 'repairOrder',
       fieldName: 'repairOrder',
-      fieldLabel: resources?.repairOrder?.titlePlural,
+      fieldLabel: sidebarResource?.repairOrder,
       resource: sidebarResource?.repairOrder,
       type: 'dropDown'
     },
     {
       key: 'productionOrder',
       fieldName: 'productionOrder',
-      fieldLabel: resources?.productionOrder?.titlePlural,
+      fieldLabel: sidebarResource.productionOrder,
       resource: sidebarResource.productionOrder,
       type: 'dropDown'
     }
@@ -109,37 +123,6 @@ const WorkOrderSupervisor = () => {
     });
     setFieldToFilterList(options);
   }, []);
-
-  React.useEffect(() => {
-    switch (timeFrame) {
-      case '1-month':
-        setGlobalFilters({
-          from: new Date(moment().subtract('1', 'month').calendar()),
-          to: new Date()
-        });
-        break;
-      case '3-months':
-        setGlobalFilters({
-          from: new Date(moment().subtract('3', 'months').calendar()),
-          to: new Date()
-        });
-        break;
-      case '6-months':
-        setGlobalFilters({
-          from: new Date(moment().subtract('6', 'months').calendar()),
-          to: new Date()
-        });
-        break;
-      case '1-year':
-        setGlobalFilters({
-          from: new Date(moment().subtract('1', 'year').calendar()),
-          to: new Date()
-        });
-        break;
-      default:
-        break;
-    }
-  }, [timeFrame]);
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
@@ -265,31 +248,16 @@ const WorkOrderSupervisor = () => {
   );
 
   useEffect(() => {
-    if (selectedUser || timeFrame || globalFilters || filterResourceQuery?.filterById?.length) {
+    if (selectedUser || globalFilters || filterResourceQuery?.filterById?.length) {
       const query = getQueryString();
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
-  }, [selectedUser, timeFrame, globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType, filterResourceQuery]);
-
-  const isMobile = useMediaQuery('(max-width: 800px)');
-
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  }, [selectedUser, globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType, filterResourceQuery]);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
-
-  const reset = () => {
+  const handleClearFilter = () => {
     setSelectedUser(null);
     setFilterResourceQuery({
       filterById: [],
@@ -297,80 +265,13 @@ const WorkOrderSupervisor = () => {
     });
   };
 
-  const isFilterPresent = useMemo(() => {
-    return selectedUser || filterResourceQuery?.filterById?.length;
-  }, [selectedUser, filterResourceQuery]);
-
-  const filters = (
-    <>
-      {viewType !== 2 && (
-        <FormControl fullWidth size="small" margin="none" variant="outlined">
-          <InputLabel id="duration">Select Duration</InputLabel>
-          <Select
-            labelId="duration"
-            id="time-duration"
-            value={timeFrame}
-            onChange={(e) => setTimeFrame(e.target.value)}
-            label="Select Duration"
-            SelectDisplayProps={{
-              style: { minHeight: 22.5 }
-            }}
-            fullWidth
-          >
-            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-            <MenuItem value={'custom'}>Custom</MenuItem>
-          </Select>
-        </FormControl>
-      )}
-      {viewType !== 2 && (
-        <KeyboardDatePicker
-          disabled={timeFrame !== 'custom'}
-          inputVariant="outlined"
-          variant="inline"
-          size="small"
-          InputProps={{
-            style: { minHeight: '38px' }
-          }}
-          autoOk
-          format={dateFormatForInputControl}
-          maxDate={globalFilters.to}
-          label="From"
-          value={globalFilters.from}
-          onChange={(date) => {
-            setGlobalFilters({ ...globalFilters, from: date });
-          }}
-        />
-      )}
-      {viewType !== 2 && (
-        <KeyboardDatePicker
-          disabled={timeFrame !== 'custom'}
-          inputVariant="outlined"
-          variant="inline"
-          autoOk
-          size="small"
-          InputProps={{
-            style: { minHeight: '38px' }
-          }}
-          minDate={globalFilters.from}
-          format={dateFormatForInputControl}
-          label="To"
-          value={globalFilters.to}
-          onChange={(date) => {
-            setGlobalFilters({ ...globalFilters, to: date });
-          }}
-        />
-      )}
-    </>
-  );
-
   const onClickRefreshIcon = () => {
-    if (viewType === 2) {
+    if (viewType === 'calendar-view') {
       if (ref?.current) {
         ref?.current?.childFunction();
       }
+    } else if (viewType === 'table-view') {
+      workOrderListRef?.current?.refreshGrid();
     } else {
       dispatch({ type: 'refreshData' });
     }
@@ -390,7 +291,6 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.workOrder?.path}`);
                 }}
               >
-                {' '}
                 {`${resources?.workOrder?.titlePlural}`}
               </Button>
             )}
@@ -402,7 +302,6 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.repairOrder?.path}`);
                 }}
               >
-                {' '}
                 {`${resources?.repairOrder?.titlePlural}`}
               </Button>
             )}
@@ -414,7 +313,6 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes?.productionOrder?.path}`);
                 }}
               >
-                {' '}
                 {`${resources?.productionOrder?.titlePlural}`}
               </Button>
             )}
@@ -426,7 +324,6 @@ const WorkOrderSupervisor = () => {
                   window.open(`${routes.assemblyOrder.path}`);
                 }}
               >
-                {' '}
                 {`${resources?.assemblyOrder?.titlePlural}`}
               </Button>
             )}
@@ -445,160 +342,134 @@ const WorkOrderSupervisor = () => {
         </div>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
-              {[1, 3].includes(viewType) ? (
-                isMobile ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex gap-2">
+                {['card-view', 'table-view'].includes(viewType) ? (
                   <>
-                    <div className="relative mr-auto max-w-fit">
-                      {isFilterPresent ? (
-                        <>
-                          <span
-                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                              } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
-                          ></span>
-                          <span
-                            className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
-                              } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
-                          ></span>
-                        </>
-                      ) : null}
-                      <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
-                        Filter
-                      </ThemeButton>
-                    </div>
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
+                    <DateRangePicker date={globalFilters} setDate={setGlobalFilters} />
+                    {viewType === 'table-view' && (
+                      <ButtonMenu
+                        showChevron={true}
+                        items={[
+                          { label: WORKORDER_SERVICE_STATUS.pending, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending },
+                          { label: WORKORDER_SERVICE_STATUS.inProgress, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress },
+                          { label: WORKORDER_SERVICE_STATUS.completed, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed }
+                        ]}
+                        onItemClick={(e, item) => {
+                          setTableViewStatus(item.label);
+                        }}
+                      >
+                        Status: {tableViewStatus}
+                      </ButtonMenu>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex">
+                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                      <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
+                        {resources?.workOrder?.titleSingular}
+                      </ToggleButton>
+                      <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
+                        {resources?.repairOrder?.titleSingular}
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-grow items-center gap-2 max-[600px]:flex-wrap">
+                <div className="flex-grow">
+                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                </div>
+                {viewType !== 'table-view' && (
+                  <>
+                    <ThemeButton
+                      iconForMobile={false}
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={(e) => setAnchorActionEl(e.currentTarget)}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length === 0}
+                      endIcon={<ExpandMore />}
+                      id={'work-order-superviser-page-action-button'}
+                    >
+                      Actions
+                    </ThemeButton>
+                    <Menu
+                      anchorEl={anchorActionEl}
+                      keepMounted
+                      getContentAnchorEl={null}
                       anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'left'
                       }}
-                      PaperProps={{
-                        style: {
-                          borderRadius: 5
-                        }
-                      }}
+                      id="action-menu"
+                      open={Boolean(anchorActionEl)}
+                      onClose={() => setAnchorActionEl(null)}
                     >
-                      <div className="grid gap-3 p-5">
-                        {filters}
-                        <div className="flex justify-between gap-2">
-                          {isFilterPresent ? (
-                            <ThemeButton iconForMobile={false} onClick={reset}>
-                              Clear Filters
-                            </ThemeButton>
-                          ) : (
-                            <span />
-                          )}
-                          <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
-                            Close
-                          </ThemeButton>
-                        </div>
-                      </div>
-                    </Popover>
+                      <MenuItem
+                        disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                        onClick={() => {
+                          setAssignTechnicianDialog({ open: true, multiple: true });
+                          setAnchorActionEl(null);
+                        }}
+                      >
+                        Assign Technician
+                      </MenuItem>
+                      <MenuItem
+                        disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
+                        onClick={() => {
+                          setWorkStationAssignDialog({ open: true, multiple: true });
+                          setAnchorActionEl(null);
+                        }}
+                      >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
+                      {viewType === 'table-view' && (
+                        <MenuItem
+                          onClick={() => {
+                            setConsumablesDialog(true);
+                          }}
+                          id="add-consumables"
+                        >
+                          Add Products/Consumables
+                        </MenuItem>
+                      )}
+                    </Menu>
                   </>
-                ) : (
-                  <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
-                )
-              ) : (
-                <Box display="flex">
-                  <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
-                    <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
-                      {resources?.workOrder?.titleSingular}
-                    </ToggleButton>
-                    <ToggleButton value={'repairOrder'} onClick={() => setResourceType('repairOrder')}>
-                      {resources?.repairOrder?.titleSingular}
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-              )}
-
-              <div className="flex gap-2 max-[600px]:flex-wrap">
-                <div className="flex-grow pt-[4px]">
-                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
-                </div>
-                <div className="ml-[10px] pt-[4px]">
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={(e) => setAnchorActionEl(e.currentTarget)}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length === 0}
-                    endIcon={<ExpandMore />}
-                    id={'work-order-superviser-page-action-button'}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorActionEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorActionEl)}
-                    onClose={() => setAnchorActionEl(null)}
-                  >
-                    <MenuItem
-                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-                      onClick={() => {
-                        setAssignTechnicianDialog({ open: true, multiple: true });
-                        setAnchorActionEl(null);
-                      }}
-                    >
-                      Assign Technician
-                    </MenuItem>
-                    <MenuItem
-                      disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-                      onClick={() => {
-                        setWorkStationAssignDialog({ open: true, multiple: true });
-                        setAnchorActionEl(null);
-                      }}
-                    >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
-                  </Menu>
-                </div>
-                <div className="pt-[4px]">
-                  <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
-                    <IconButton
-                      size="small"
-                      aria-label="Clone"
-                      onClick={() => {
-                        setViewType(1);
-                      }}
-                    >
-                      <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
-                <div className="pt-[4px]">
-                  <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
-                    <IconButton size="small" onClick={() => setViewType(2)}>
-                      <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
-                <div className="pt-[4px]">
-                  <HtmlTooltip title={'Table View'} placement="top" arrow enterTouchDelay={0}>
-                    <IconButton size="small" onClick={() => setViewType(3)}>
-                      <ViewListIcon color={viewType === 3 ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
-                <div className="pt-[4px]">
-                  <HtmlTooltip title={'Refresh'}>
-                    <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
-                      <RefreshIcon />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
+                )}
+                <IconButtonTabs
+                  onItemClick={resetSelectedRecords}
+                  items={
+                    [
+                      {
+                        value: 'card-view',
+                        icon: <MdViewWeek />,
+                        tooltip: 'Card View'
+                      },
+                      {
+                        value: 'table-view',
+                        icon: <TfiLayoutListThumbAlt />,
+                        tooltip: 'Table View'
+                      },
+                      {
+                        value: 'calendar-view',
+                        icon: <FaRegCalendar />,
+                        tooltip: 'Calendar View'
+                      }
+                    ] as const
+                  }
+                  setValue={setViewType}
+                  value={viewType}
+                />
+                <HtmlTooltip title={'Refresh'}>
+                  <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
+                    <RefreshIcon />
+                  </IconButton>
+                </HtmlTooltip>
               </div>
             </div>
           </div>
-          {viewType === 1 && (
+          {viewType === 'card-view' && (
             <CardColTimeline
               fetchSingleColumn={fetchSingleColumn}
               state={state}
@@ -610,7 +481,7 @@ const WorkOrderSupervisor = () => {
               }}
             />
           )}
-          {viewType === 2 && (
+          {viewType === 'calendar-view' && (
             <WorkOrderCalendar
               getFilterQuery={getQueryString}
               filterResourceQuery={filterResourceQuery}
@@ -619,7 +490,9 @@ const WorkOrderSupervisor = () => {
               setOpen={setOpen}
             />
           )}
-          {viewType === 3 && <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} />}
+          {viewType === 'table-view' && (
+            <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} ref={workOrderListRef} status={tableViewStatus} />
+          )}
         </div>
         {assignTechnicianDialog.open && (
           <AssignUserDialog
@@ -627,15 +500,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               assignTechnicianDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
                 : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
             }
             assignedUsers={
               assignTechnicianDialog.multiple
@@ -661,15 +534,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               workStationAssignDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
                 : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
             }
             workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {
@@ -681,6 +554,7 @@ const WorkOrderSupervisor = () => {
             }}
           />
         )}
+
         {openWorkOrderScheduler && (
           <WorkOrderSchedulerDialog
             onClose={() => setOpenWorkOrderScheduler(false)}

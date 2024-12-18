@@ -274,6 +274,11 @@ const DynamicForm = () => {
     return (
       <MenuItem
         onClick={() => {
+          if (selectedRecords.length === 1){
+            setDeleteRecord(selectedRecords[0]);
+            }else{
+              setDeleteRecord(null)
+            }
           setShowDeleteConfirmBox(true);
         }}
       >
@@ -344,7 +349,7 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resource?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resource?.toLowerCase()} : ${deleteRecord.dynamicNumber}` : `selected ${resource?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

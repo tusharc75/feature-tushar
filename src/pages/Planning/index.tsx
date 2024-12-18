@@ -285,6 +285,11 @@ const Planning = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -356,7 +361,7 @@ const Planning = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.planning?.titleSingular} ${deleteRecord?.planningNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.planning?.titleSingular?.toLowerCase()} : ${deleteRecord?.planningNumber || ''}` : `selected ${resources?.planning?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

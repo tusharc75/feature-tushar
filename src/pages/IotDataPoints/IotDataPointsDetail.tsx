@@ -14,11 +14,14 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageIotDataPoints from './ManageIotDataPoints';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const IotDataPointsDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [iotDataPointsData, setIotDataPointsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -124,7 +127,7 @@ const IotDataPointsDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.iotDataPoints?.titleSingular?.toLowerCase()} ${iotDataPointsData?.fieldLabel || ''} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} : ${iotDataPointsData?.fieldLabel}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

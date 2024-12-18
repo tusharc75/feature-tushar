@@ -231,7 +231,11 @@ export default function Alerts({ deviceTemplate }) {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -305,7 +309,8 @@ export default function Alerts({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

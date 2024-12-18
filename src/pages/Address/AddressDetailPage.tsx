@@ -199,7 +199,7 @@ const AddressDetailPage = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.address?.titleSingular?.toLowerCase()} :
-            ${addressData?.fullAddress}` : resources?.address?.titlePlural?.toLowerCase()} ?`}
+            ${addressData?.fullAddress}` : `selected ${resources?.address?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

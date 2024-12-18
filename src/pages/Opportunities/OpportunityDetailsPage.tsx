@@ -45,6 +45,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from '../DynamicForm/Step';
 import QuotationInAccordion from 'src/components/QuotationInAccordion/QuotationInAccordion';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -63,7 +64,8 @@ function OpportunityDetailsPage() {
   const {
     state: { user, selectedEntity, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [copyOfOpportunityData, setCopyOfOpportunityData] = useState(null);
@@ -726,7 +728,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this opportunity`}
+            message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''}` : `selected ${resources?.opportunity?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

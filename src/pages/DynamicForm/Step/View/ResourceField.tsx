@@ -272,7 +272,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ?`}
+          message={`Are you sure you want to delete selected item(s) ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

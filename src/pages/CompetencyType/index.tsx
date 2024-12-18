@@ -261,7 +261,7 @@ const CompetencyType = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.competencyType?.titleSingular?.toLowerCase()} : ${deleteRecord?.competencyType || ''}` : resources?.competencyType?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.competencyType?.titleSingular?.toLowerCase()} : ${deleteRecord?.competencyType || ''}` : `selected ${resources?.competencyType?.titlePlural?.toLowerCase()}`} ?`}
 
           onClose={() => {
             setDeleteRecord(null);

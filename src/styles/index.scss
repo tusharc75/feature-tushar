@@ -228,6 +228,8 @@ body {
   padding: 0;
   box-sizing: border-box;
   border-color: var(--common-border-color);
+  border-style: solid;
+  border-width: 0;
 }
 
 html {
@@ -4709,5 +4711,39 @@ td.google-visualization-orgchart-node {
   li {
     display: flex;
     align-items: center;
+  }
+}
+
+.rdp-calendar-main {
+  table {
+    border-collapse: collapse;
+  }
+
+  .rdp-range_start:not([data-outside='true']),
+  .rdp-range_end:not([data-outside='true']) {
+    button {
+      color: white;
+      background-color: var(--new-theme-color);
+      &:hover {
+        background-color: var(--new-theme-color);
+      }
+    }
+  }
+  .rdp-range_start[data-outside='true'],
+  .rdp-range_end[data-outside='true'] {
+    @apply bg-gray-200 dark:bg-gray-800;
+  }
+  .rdp-range_middle {
+    @apply bg-gray-200 dark:bg-gray-800;
+    &:last-child {
+      @apply rounded-r-md;
+    }
+    &:first-child {
+      @apply rounded-l-md;
+    }
+  }
+  .rdp-range_start,
+  .rdp-range_end {
+    @apply rounded-md;
   }
 }
