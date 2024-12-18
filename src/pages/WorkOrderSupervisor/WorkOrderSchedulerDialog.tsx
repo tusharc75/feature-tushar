@@ -40,7 +40,18 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
   useEffect(() => {
     setLoading(true);
     const deepFilter = [
-      { field: 'status', term: { $in: Object.values(ASSET_STATUS) } }
+      {
+        field: 'status',
+        term: {
+          $in: [
+            ASSET_STATUS.new,
+            ASSET_STATUS.available,
+            ASSET_STATUS.underReview,
+            ASSET_STATUS.needRepair,
+            ASSET_STATUS.needRecert
+          ]
+        }
+      }
     ];
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`)
