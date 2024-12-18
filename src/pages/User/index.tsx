@@ -4,7 +4,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -34,6 +34,7 @@ import {
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import { isMobile, isTablet } from 'react-device-detect';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const renderedFrom = camelCase(sidebarResource.user);
 
@@ -79,53 +80,43 @@ const User: FC = () => {
 
   const extraColumns = [
     {
-      accessor: 'regionalWideRole',
-      Header: 'Assigned Roles',
-      minWidth: 180,
-      width: 180,
+      accessor: 'assignedEntity',
+      Header: 'Assigned Entities',
+      width: 300,
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) =>
-        row?.original?.regionalWideRole ? (
-          <>
-            <h5 className="createBy d-flex">
-              <Link className="link" title={row?.original?.regionalWideRole} to={`${routes.roleDetail.path}/${row?.original?.regionalWideRoleId}`}>
-                {row?.original?.regionalWideRole}
-              </Link>
-              {row?.original?.restRegionalWideRoles.length > 0 && (
-                <span className="createdAtTime badge-date">
-                  <span className="hidden">&nbsp;&nbsp;</span>
-                  {`+${row?.original?.restRegionalWideRoles.length} more..`}
-                </span>
-              )}
-            </h5>
-          </>
+        row?.original?.assignedEntity ? (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'assignedEntity',
+              lookupResource: sidebarResource.entity
+            }}
+            original={row?.original}
+          />
         ) : (
           <NoDataCell />
         )
     },
     {
-      accessor: 'assignedEntity',
-      Header: 'Assigned Entities',
-      minWidth: 180,
-      width: 180,
+      accessor: 'regionalWideRole',
+      Header: 'Assigned Roles',
+      width: 300,
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) =>
-        row?.original?.assignedEntity ? (
-          <>
-            <h5 className="createBy d-flex">
-              <Link className="link" title={row?.original?.assignedEntity} to={`${routes.entityDetail.path}/${row?.original?.assignedEntityId}`}>
-                {row?.original?.assignedEntity}
-              </Link>
-              {row?.original?.restAssignedEntities.length > 0 && (
-                <span className="createdAtTime badge-date">
-                  <span className="hidden">&nbsp;&nbsp;</span>
-                  {`+${row?.original?.restAssignedEntities?.length} more..`}
-                </span>
-              )}
-            </h5>
-          </>
+        row?.original?.regionalWideRole ? (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'regionalWideRole',
+              lookupResource: sidebarResource.role
+            }}
+            original={row?.original}
+          />
         ) : (
           <NoDataCell />
         )
@@ -301,14 +292,10 @@ const User: FC = () => {
       .get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          const { createdBy, updatedBy, role, entities, ...restProperties } = u;
+          const { entities } = u;
 
-          const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
-
-          const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
-          const [firstAssignedEntity, ...restAssignedEntities] = allAssignedEntities;
 
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
@@ -318,15 +305,8 @@ const User: FC = () => {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
             isBrandAdmin: u.userType === userType.brandAdmin,
-            companyWideRoleId: firstCompanyWideRole?._id ?? '',
-            companyWideRole: firstCompanyWideRole?.name ?? '',
-            restCompanyWideRoles: restCompanyWideRoles,
-            regionalWideRoleId: firstRegionalWideRole?._id ?? '',
-            regionalWideRole: firstRegionalWideRole?.name ?? '',
-            restRegionalWideRoles: restRegionalWideRoles,
-            assignedEntityId: firstAssignedEntity?._id ?? '',
-            assignedEntity: firstAssignedEntity?.entityName ?? '',
-            restAssignedEntities: restAssignedEntities
+            assignedEntity: allAssignedEntities?.map((e) => { return { optionLabel: e?.entityName, optionValue: e?._id } }),
+            regionalWideRole: allRegionalWideRoles?.map((e) => { return { optionLabel: e?.name, optionValue: e?._id } }),
           };
           return res;
         });
