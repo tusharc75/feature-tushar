@@ -38,7 +38,6 @@ import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -52,8 +51,6 @@ const ServiceOrderDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state ;
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [serviceOrderData, setServiceOrderData] = useState(null);
 
@@ -401,7 +398,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount}` : `selected ${resources?.fieldServiceOrder?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount} ?`}          
           onClose={() => {
             setShowConfirmBox(false);
           }}

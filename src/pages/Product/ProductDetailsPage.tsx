@@ -595,7 +595,7 @@ const ProductDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this product ${headingLabel} ?`}
+          message={`Are you sure you want to delete this product : ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

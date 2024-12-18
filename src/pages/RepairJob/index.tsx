@@ -411,7 +411,7 @@ const RepairJob = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.repairJobName}` : resources?.repairJob?.titlePlural?.toLowerCase()} ?`}
+              ${deleteRecord?.repairJobName}` : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() =>{
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

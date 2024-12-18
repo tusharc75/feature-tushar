@@ -206,6 +206,11 @@ const ScheduleReport = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -258,7 +263,7 @@ const ScheduleReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.scheduleReport?.titleSingular?.toLowerCase().toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.scheduleReport?.titleSingular?.toLowerCase()} : ${deleteRecord?.scheduleName || ''}` : `selected ${resources?.scheduleReport?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

@@ -465,6 +465,11 @@ const QuoteBuilders = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setIsConformDialogVisible(true);
           }}
         >
@@ -566,7 +571,7 @@ const QuoteBuilders = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${resources?.quoteBuilder?.titleSingular}   ${deleteRecord?.quoteName || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quoteBuilder?.titleSingular?.toLowerCase()} : ${deleteRecord?.quoteName || ''}` : `selected ${resources?.quoteBuilder?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

@@ -13,14 +13,11 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const FrequencyAskedQuestionDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.frequentlyAskedQuestion]);
   const [frequentlyAskedQuestionData, setFrequentlyAskedQuestionData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -126,7 +123,7 @@ const FrequencyAskedQuestionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label}` : `selected ${resources?.frequentlyAskedQuestion?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}            
           onClose={() => {
             setShowConfirmBox(false);
           }}
