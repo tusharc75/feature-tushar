@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { dateFormat } from 'src/constants/helpers';
 
-const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false }) => {
+const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
   const handleDuration = (timeFrame) => {
@@ -55,7 +55,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
   return (
     <>
       <div className="sticky top-0 z-10 flex min-h-[64px] items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
-        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
+        <div className="flex items-center gap-2">
+          {sidebarIcon}
+          <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
+        </div>
       </div>
       <div className="mt-5 w-1/2">
         <div>

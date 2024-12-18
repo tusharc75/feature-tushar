@@ -1,10 +1,11 @@
-import { Dialog, FormControl, IconButton, MenuItem, Select } from '@material-ui/core';
+import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { isArray, uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import { MdChevronRight } from 'react-icons/md';
+import { TbLayoutSidebarFilled } from 'react-icons/tb';
 import listFilter from 'src/assets/newSvgs/listFilter.svg';
 import selectFilter from 'src/assets/newSvgs/selectFilter.svg';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -68,9 +69,10 @@ const Filter = ({
   loading = false
 }) => {
   const [selectedField, setSelectedField] = useState(null);
-  const [fullScreen] = useState(isMobile && !isTablet);
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [searchVal, setSearchVal] = useState('');
+  const isMobile = useMediaQuery('(max-width:767px)');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const defaultColumnsMap = useMemo(() => {
     return defaultColumns?.reduce((a, c) => {
       a[c.fieldName] = true;
@@ -133,13 +135,17 @@ const Filter = ({
     // onApplyFilter(newDeepFilter, newFilterByIds);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <Dialog
       open={true}
       maxWidth="md"
       fullWidth
       TransitionComponent={CustomDialogTransition}
-      fullScreen={fullScreen}
+      fullScreen={isMobile}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           onClose();
@@ -150,9 +156,7 @@ const Filter = ({
       }}
       className={cn(
         ' [--px:20px] [--py:20px] md:[--px:37px] md:[--py:21px]',
-        fullScreen
-          ? '[--container-max-h:calc(100vh-160px)]  [--content-max-h:calc(100vh-250px)]'
-          : '[--container-max-h:500px] [--content-max-h:433px]'
+        isMobile ? '[--container-max-h:calc(100vh-160px)]  [--content-max-h:calc(100vh-237px)]' : '[--container-max-h:500px] [--content-max-h:433px]'
       )}
     >
       <div className="flex items-center gap-3 px-[--px] py-[--py] ">
@@ -167,42 +171,63 @@ const Filter = ({
           <Close />
         </IconButton>
       </div>
-      <CustomDialogContent className="!px-[--px] !py-[--py] pt-0">
-        <div className="grid  grid-cols-[285px_1fr] overflow-hidden rounded-lg border">
-          <div className="px-[17px] py-[15px] [border-right:1px_solid_var(--common-border-color)]">
-            <div className="mb-[15px] flex items-center gap-4">
-              <p className="text-[16px] font-medium leading-[22px] text-[--primary-text]">Filters</p>
-              <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />
-            </div>
-            <ul className="max-h-[--content-max-h] space-y-2 overflow-y-auto">
-              {!loading
-                ? filteredOptions?.map((o, i) => {
-                    return (
-                      <li
-                        key={i}
-                        className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
-                        data-active={selectedField?.fieldName === o?.fieldName}
-                        onClick={() => {
-                          setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
-                        }}
-                      >
-                        <img src={listFilter} alt={''} />
-                        {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                        <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
-                          {getLabel(o, deepFilters, filterByIds)}
-                        </span>
-                        <MdChevronRight className="ml-auto text-[--new-theme-color]" />
+      <CustomDialogContent className="relative !px-[--px] !py-[--py] pt-0 [--sidebar-width:285px]">
+        <div className={cn('grid overflow-hidden rounded-lg border', isMobile ? 'relative' : 'grid-cols-[var(--sidebar-width)1fr]')}>
+          <div
+            className={cn(
+              'transition-[width] duration-300 ',
+              isMobile ? 'absolute bottom-0 left-0 top-0 z-[11] bg-[--dark-primary,white]' : '[border-right:1px_solid_var(--common-border-color)]',
+              isMobile && isSidebarOpen ? 'w-[--sidebar-width] [border-right:1px_solid_var(--common-border-color)]' : isMobile ? 'w-0' : ''
+            )}
+          >
+            <div
+              className={cn(
+                'w-[--sidebar-width] px-[17px] py-[15px] transition-transform duration-300',
+                isMobile ? `shadow-md` : '[border-right:1px_solid_var(--common-border-color)]',
+                isMobile && isSidebarOpen ? '[transform:translateX(0)]' : isMobile ? '[transform:translateX(calc(var(--sidebar-width)*-1))]' : ''
+              )}
+            >
+              <div className="mb-[15px] flex items-center gap-4">
+                <p className="text-[16px] font-medium leading-[22px] text-[--primary-text]">Filters</p>
+                <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />
+                {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+              </div>
+              <ul className={cn(' space-y-2 overflow-y-auto', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
+                {!loading
+                  ? filteredOptions?.map((o, i) => {
+                      return (
+                        <li
+                          key={i}
+                          className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
+                          data-active={selectedField?.fieldName === o?.fieldName}
+                          onClick={() => {
+                            setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
+                            setIsSidebarOpen(false);
+                          }}
+                        >
+                          <img src={listFilter} alt={''} />
+                          {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
+                          <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                            {getLabel(o, deepFilters, filterByIds)}
+                          </span>
+                          <MdChevronRight className="ml-auto text-[--new-theme-color]" />
+                        </li>
+                      );
+                    })
+                  : [...Array(9).keys()].map((l) => (
+                      <li className="list-none">
+                        <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
                       </li>
-                    );
-                  })
-                : [...Array(9).keys()].map((l) => (
-                    <li className="list-none">
-                      <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
-                    </li>
-                  ))}
-            </ul>
+                    ))}
+              </ul>
+            </div>
           </div>
-          <div className="relative h-[--container-max-h] flex-grow overflow-y-auto px-[17px] py-[15px] pt-0 [--py:15px]">
+          <div
+            className={cn(
+              'relative h-[--container-max-h] flex-grow  px-[17px] py-[15px] pt-0 [--py:15px]',
+              isMobile && isSidebarOpen ? 'overflow-hidden' : 'overflow-y-auto'
+            )}
+          >
             {selectedField && selectedField?.type === 'singleLine' ? (
               <SingleLine
                 key={selectedField._id || selectedField.fieldName}
@@ -212,6 +237,7 @@ const Filter = ({
                 setDeepFilters={setDeepFilters}
                 filterTerm={filterTerm}
                 setFilterTerm={setFilterTerm}
+                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
               />
             ) : ['dropDown', 'multiSelect']?.includes(selectedField?.type) ? (
               <DropDown
@@ -226,6 +252,7 @@ const Filter = ({
                 }
                 filterTerm={filterTerm}
                 setFilterTerm={setFilterTerm}
+                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
               />
             ) : selectedField?.type === 'checkBox' ? (
               <CheckBox
@@ -233,6 +260,7 @@ const Filter = ({
                 fieldData={selectedField}
                 deepFilters={deepFilters}
                 setDeepFilters={setDeepFilters}
+                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
               />
             ) : selectedField?.type === 'date' ? (
               <DateTime
@@ -241,14 +269,26 @@ const Filter = ({
                 deepFilters={deepFilters}
                 setDeepFilters={setDeepFilters}
                 resource={resource}
+                sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
               />
             ) : (
-              <div className="absolute left-[23px] right-[23px] top-[50px] text-center">
-                <img src={selectFilter} alt={''} />
-                <h6 className="mb-[5px] text-[16px] font-semibold leading-[22px] text-[--primary-text]">Select Filter</h6>
-                <p className="text-[12px] font-normal leading-[14.5px]">Choose a filter from the left panel to apply it.</p>
+              <div className="min-h-[75px] py-[15px]">
+                {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
+                <div className="absolute left-[23px] right-[23px] top-[50px] text-center">
+                  <img src={selectFilter} alt={''} />
+                  <h6 className="mb-[5px] text-[16px] font-semibold leading-[22px] text-[--primary-text]">Select Filter</h6>
+                  <p className="text-[12px] font-normal leading-[14.5px]">Choose a filter from the left panel to apply it.</p>
+                </div>
               </div>
             )}
+            <div
+              onClick={() => setIsSidebarOpen(false)}
+              title={isMobile && isSidebarOpen ? 'Close Sidebar' : ''}
+              className={cn(
+                'absolute inset-0 cursor-pointer bg-black/50 [backdrop-filter:blur(3px)] [transition:opacity_300ms,_backdrop-filter_300ms] ',
+                isMobile && isSidebarOpen ? 'z-10 opacity-100' : '-z-10 opacity-0'
+              )}
+            />
           </div>
         </div>
       </CustomDialogContent>
@@ -332,3 +372,9 @@ export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
     </div>
   );
 };
+
+const ToggleSidebar = ({ toggleSidebar }) => (
+  <IconButton size="small" style={{ padding: 5, height: 32, width: 32 }} onClick={toggleSidebar}>
+    <TbLayoutSidebarFilled className="text-[--new-theme-color]" />
+  </IconButton>
+);

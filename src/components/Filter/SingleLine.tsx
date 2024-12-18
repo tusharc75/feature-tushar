@@ -6,7 +6,7 @@ import { useData } from 'src/StateProvider/Provider';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { InNin } from 'src/components/Filter';
 
-const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterTerm, setFilterTerm }) => {
+const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterTerm, setFilterTerm, sidebarIcon = null }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -90,8 +90,11 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px]">
-        <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] py-[--py,_16px] max-md:flex-wrap">
+        <div className="flex items-center gap-2">
+          {sidebarIcon}
+          <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
+        </div>
         <div className="flex items-center justify-between">
           <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
           <SearchBox
