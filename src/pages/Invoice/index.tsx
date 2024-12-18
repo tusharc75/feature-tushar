@@ -408,7 +408,7 @@ const Invoice = () => {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.invoiceNumber}` : resources?.invoice?.titlePlural?.toLowerCase()} ?`}
+              ${deleteRecord?.invoiceNumber}` : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

@@ -229,7 +229,11 @@ export default function IotDataPoints({ deviceTemplate }) {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -302,7 +306,8 @@ export default function IotDataPoints({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.iotDataPoints?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.product}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

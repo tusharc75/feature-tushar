@@ -21,6 +21,7 @@ import Products from './Products';
 import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,6 +31,8 @@ const PackageDetails = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
 
@@ -164,7 +167,7 @@ const PackageDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.packages?.titleSingular}: ${headingLabel} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${headingLabel || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setShowConfirmBox(false);
           }}

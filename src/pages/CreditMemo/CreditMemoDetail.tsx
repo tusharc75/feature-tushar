@@ -20,11 +20,14 @@ import { Edit, ExpandMore } from '@material-ui/icons';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { Skeleton } from '@material-ui/lab';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const creditMemoDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const {state} = useTableReducer();
+  const {selectedRecords} = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.creditMemo]);
   const [creditMemoData, setCreditMemoData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -305,7 +308,7 @@ const creditMemoDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.creditMemo?.titleSingular?.toLowerCase()} ${creditMemoData.creditMemoNumber} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${creditMemoData.creditMemoNumber}` : `selected ${resources?.creditMemo?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

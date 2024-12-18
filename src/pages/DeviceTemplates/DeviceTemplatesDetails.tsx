@@ -18,6 +18,7 @@ import Alerts from './Alerts';
 import IotDataPoints from './IotDataPoints';
 import ManageDeviceTemplates from './ManageDeviceTemplates';
 import Rules from './Rules';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 export default function DeviceTemplatesDetails() {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +28,8 @@ export default function DeviceTemplatesDetails() {
   const {
     state: { permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titlePlural }]);
   const [loading, setLoading] = useState(false);
   const [deviceTemplatesData, setDeviceTemplatesData] = useState(null);
@@ -169,7 +171,8 @@ export default function DeviceTemplatesDetails() {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular.toLowerCase()} ${deviceTemplatesData?.templateName}?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.deviceTemplates?.titleSingular?.toLowerCase()} :
+            ${deviceTemplatesData?.templateName}` : `selected ${resources?.deviceTemplates?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

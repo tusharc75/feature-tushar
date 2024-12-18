@@ -25,7 +25,7 @@ const Holidays = ({ payrollPolicyData }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, selectedRecords } = state;
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -138,6 +138,11 @@ const Holidays = ({ payrollPolicyData }) => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setManageHolidays({ open: true, id: null });
           }}
         >
@@ -230,7 +235,7 @@ const Holidays = ({ payrollPolicyData }) => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.holiday?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.holiday?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowConfirmBox(false);

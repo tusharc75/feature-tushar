@@ -209,6 +209,11 @@ const IotDataPoints = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox();
           }}
         >
@@ -284,7 +289,7 @@ const IotDataPoints = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.iotDataPoints?.titleSingular?.toLowerCase()}  ${deleteRecord?.fieldLabel || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldLabel}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

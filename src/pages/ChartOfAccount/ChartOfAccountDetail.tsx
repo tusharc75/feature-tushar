@@ -177,7 +177,7 @@ const ChartOfAccountDetail = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.chartOfAccount?.titleSingular?.toLowerCase()} :
-             ${chartOfAccountData.accountNumber}` : resources?.chartOfAccount?.titlePlural?.toLowerCase()} ?`}
+             ${chartOfAccountData.accountNumber}` : `selected ${resources?.chartOfAccount?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}
