@@ -67,7 +67,7 @@ export const SearchFilter = ({
   }, []);
 
   const setResource = async () => {
-    const resourceOptions = get_activity_resource(permissions, resources);
+    const resourceOptions = get_activity_resource(permissions, resources, false);
     const data = [];
     resourceOptions.forEach((ele) => {
       data.push({ label: ele.optionLabel, type: ele.optionValue, name: 'All', isAll: true });
