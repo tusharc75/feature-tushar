@@ -719,7 +719,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this work order: ${workOrderData?.workOrderNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.workOrder?.titleSingular?.toLowerCase()} : ${workOrderData?.workOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

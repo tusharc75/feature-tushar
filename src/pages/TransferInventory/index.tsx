@@ -314,8 +314,8 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.transferInventory?.titleSingular?.toLowerCase()} 
-          ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}` : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -203,7 +203,7 @@ const ServiceMasterDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.serviceMaster?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${resources?.serviceMaster?.titleSingular?.toLowerCase()} : ${serviceMasterDetailData?.serviceName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

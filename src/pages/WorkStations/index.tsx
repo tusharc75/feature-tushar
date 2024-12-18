@@ -188,6 +188,11 @@ const WorkStations = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -252,7 +257,8 @@ const WorkStations = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.workStations?.titleSingular} ${deleteRecord?.workStationName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.workStations?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.workStationName || ''}` : `selected ${resources?.workStations?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -267,10 +267,15 @@ const WorkOrder = () => {
       <MenuItem
         disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
         onClick={() => {
+          if (selectedRecords.length === 1){
+            setDeleteRecord(selectedRecords[0]);
+            }else{
+              setDeleteRecord(null)
+            }
           setIsConformDialogVisible(true);
         }}
       >
-        Delete
+        {`Delete (${selectedRecords?.length})`}
       </MenuItem>
     );
   };
@@ -333,8 +338,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : resources?.workOrder?.titleSingular}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.workOrderNumber || ''}` : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

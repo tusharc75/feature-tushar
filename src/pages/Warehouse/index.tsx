@@ -314,8 +314,8 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
-            } ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.warehouseName : ''}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
