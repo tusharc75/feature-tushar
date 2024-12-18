@@ -361,7 +361,22 @@ const WorkOrderSupervisor = () => {
               <IconButton aria-haspopup="true" color="primary" size="small" title="More" onClick={(event) => setAnchorEl(event.currentTarget)}>
                 <MoreVert />
               </IconButton>
-              <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+              <Menu
+                id="menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center'
+                }}
+                onClose={() => setAnchorEl(null)}
+              >
                 {permissions?.repairOrder?.isCreate && (
                   <MenuItem
                     onClick={() => {
