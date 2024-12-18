@@ -475,7 +475,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const handleClick = (data, target) => {
     if (selectedResource.resource === sidebarResource.product) {
       if (data?.type === 'assetStatus') {
-        window.open(`${routes.serializedAsset.path}?assetStatus=${data?.status}`);
+        let query = `?assetStatus=${data?.status}`
+        if (selectedLookUpResourceData?.product) {
+          query += `&product=${encodeURIComponent(JSON.stringify(selectedLookUpResourceData?.product?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } })))}`
+        }
+        if (selectedLookUpResourceData?.warehouse) {
+          query += `&warehouse=${encodeURIComponent(JSON.stringify(selectedLookUpResourceData?.warehouse?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } })))}`
+        }
+        window.open(`${routes.serializedAsset.path}${query}`);
       }
       else if (data?.type) {
         setAnchor(target);
