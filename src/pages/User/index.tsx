@@ -105,6 +105,32 @@ const User: FC = () => {
         )
     },
     {
+      accessor: 'assignedEntity',
+      Header: 'Assigned Entities',
+      minWidth: 180,
+      width: 180,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) =>
+        row?.original?.assignedEntity ? (
+          <>
+            <h5 className="createBy d-flex">
+              <Link className="link" title={row?.original?.assignedEntity} to={`${routes.entityDetail.path}/${row?.original?.assignedEntityId}`}>
+                {row?.original?.assignedEntity}
+              </Link>
+              {row?.original?.restAssignedEntities.length > 0 && (
+                <span className="createdAtTime badge-date">
+                  <span className="hidden">&nbsp;&nbsp;</span>
+                  {`+${row?.original?.restAssignedEntities?.length} more..`}
+                </span>
+              )}
+            </h5>
+          </>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
       accessor: 'status',
       Header: 'Status',
       minWidth: 150,
@@ -180,7 +206,7 @@ const User: FC = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
@@ -279,8 +305,10 @@ const User: FC = () => {
 
           const [firstCompanyWideRole, ...restCompanyWideRoles] = role;
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
+          const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
 
           const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
+          const [firstAssignedEntity, ...restAssignedEntities] = allAssignedEntities;
 
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
@@ -295,7 +323,10 @@ const User: FC = () => {
             restCompanyWideRoles: restCompanyWideRoles,
             regionalWideRoleId: firstRegionalWideRole?._id ?? '',
             regionalWideRole: firstRegionalWideRole?.name ?? '',
-            restRegionalWideRoles: restRegionalWideRoles
+            restRegionalWideRoles: restRegionalWideRoles,
+            assignedEntityId: firstAssignedEntity?._id ?? '',
+            assignedEntity: firstAssignedEntity?.entityName ?? '',
+            restAssignedEntities: restAssignedEntities
           };
           return res;
         });
