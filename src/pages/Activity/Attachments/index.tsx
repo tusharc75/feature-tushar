@@ -284,7 +284,7 @@ export default function Attachment() {
   };
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions, resources));
+    setResourceOptions(get_activity_resource(permissions, resources, true));
   }, []);
 
   useEffect(() => {
