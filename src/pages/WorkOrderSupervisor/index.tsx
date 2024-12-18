@@ -6,7 +6,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaRegCalendar } from 'react-icons/fa';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
@@ -30,6 +30,11 @@ import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 
 import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
+import { camelCase } from 'lodash';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const LIMIT = 25;
 
@@ -40,12 +45,19 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.inProgress
   | typeof WORKORDER_SERVICE_STATUS.completed;
 
+const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
+
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
-  const { limit, selectedRecords } = state;
+  const { limit, selectedRecords: cardSelectedRecords } = state;
+  const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
+  const { selectedRecords: tableSelectedRecords } = tableState;
+
+  const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
 
   const resetSelectedRecords = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
+    tableDispatch({ type: 'selection', selectedRecords: [] });
   };
 
   const toastConfig = useContext(CustomToastContext);
@@ -66,6 +78,7 @@ const WorkOrderSupervisor = () => {
   });
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [viewType, setViewType] = useState<ViewType>('card-view');
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
@@ -278,6 +291,44 @@ const WorkOrderSupervisor = () => {
     }
   };
 
+  const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
+    const items = {
+      disabled: selectedRecords?.length === 0,
+      items: [
+        {
+          label: 'Assign Technician',
+          disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
+          onClick: () => {
+            if (viewType === 'table-view') {
+              workOrderListRef.current?.setAssignTechnicianDialog(true);
+            } else {
+              setAssignTechnicianDialog({ open: true, multiple: true });
+            }
+          }
+        },
+        {
+          label: `Assign ${resources?.workStations?.titlePlural}`,
+          disabled: selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecords?.length === 0,
+          onClick: () => {
+            if (viewType === 'table-view') {
+              workOrderListRef.current?.setWorkStationAssignDialog(true);
+            } else {
+              setWorkStationAssignDialog({ open: true, multiple: true });
+            }
+          }
+        }
+      ]
+    };
+    if (viewType === 'table-view') {
+      items.items.push({
+        disabled: selectedRecords?.length === 0,
+        label: 'Add Products/Consumables',
+        onClick: () => setConsumablesDialog(true)
+      });
+    }
+    return items;
+  }, [resources?.workStations?.titlePlural, selectedRecords, viewType]);
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <section className="main-container-v1">
@@ -361,7 +412,7 @@ const WorkOrderSupervisor = () => {
           </div>
         </div>
         <div className="main-container">
-          <div className="header-panel">
+          <div className="header-panel pb-0">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex gap-2">
                 {['card-view', 'table-view'].includes(viewType) ? (
@@ -401,62 +452,6 @@ const WorkOrderSupervisor = () => {
                 <div className="flex-grow">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
-                {viewType !== 'table-view' && (
-                  <>
-                    <ThemeButton
-                      iconForMobile={false}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={(e) => setAnchorActionEl(e.currentTarget)}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length === 0}
-                      endIcon={<ExpandMore />}
-                      id={'work-order-superviser-page-action-button'}
-                    >
-                      Actions
-                    </ThemeButton>
-                    <Menu
-                      anchorEl={anchorActionEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorActionEl)}
-                      onClose={() => setAnchorActionEl(null)}
-                    >
-                      <MenuItem
-                        disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-                        onClick={() => {
-                          setAssignTechnicianDialog({ open: true, multiple: true });
-                          setAnchorActionEl(null);
-                        }}
-                      >
-                        Assign Technician
-                      </MenuItem>
-                      <MenuItem
-                        disabled={selectedRecords?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed)}
-                        onClick={() => {
-                          setWorkStationAssignDialog({ open: true, multiple: true });
-                          setAnchorActionEl(null);
-                        }}
-                      >{`Assign ${resources?.workStations?.titlePlural}`}</MenuItem>
-                      {viewType === 'table-view' && (
-                        <MenuItem
-                          onClick={() => {
-                            setConsumablesDialog(true);
-                          }}
-                          id="add-consumables"
-                        >
-                          Add Products/Consumables
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </>
-                )}
                 <IconButtonTabs
                   onItemClick={resetSelectedRecords}
                   items={
@@ -488,6 +483,16 @@ const WorkOrderSupervisor = () => {
                 </HtmlTooltip>
               </div>
             </div>
+            <div className="min-h-[48px]">
+              <DetailsPageHeader
+                isAddButtonVisible={false}
+                isActionButtonVisible={false}
+                isNewActionButtonVisible={selectedRecords.length > 0}
+                newActionButtonProps={newActionButtonProps}
+                actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                hasXpadding={false}
+              />
+            </div>
           </div>
           {viewType === 'card-view' && (
             <CardColTimeline
@@ -511,7 +516,17 @@ const WorkOrderSupervisor = () => {
             />
           )}
           {viewType === 'table-view' && (
-            <WorkOrderList filterResourceQuery={filterResourceQuery} globalFilters={globalFilters} ref={workOrderListRef} status={tableViewStatus} />
+            <WorkOrderList
+              renderedFrom={renderedFrom}
+              state={tableState}
+              dispatch={tableDispatch}
+              filterResourceQuery={filterResourceQuery}
+              globalFilters={globalFilters}
+              ref={workOrderListRef}
+              status={tableViewStatus}
+              consumablesDialog={consumablesDialog}
+              setConsumablesDialog={setConsumablesDialog}
+            />
           )}
         </div>
         {assignTechnicianDialog.open && (
@@ -590,6 +605,18 @@ const WorkOrderSupervisor = () => {
             handleClose={() => {
               setOpen({ open: false, id: null });
             }}
+          />
+        )}
+        {consumablesDialog && (
+          <AssignProductDialog
+            handleCloseDialog={() => setConsumablesDialog(false)}
+            ids={[]}
+            onSuccess={(rows) => {
+              workOrderListRef.current?.handleAddConsumables(rows, selectedRecords);
+            }}
+            serialized={false}
+            isSubmitting={workOrderListRef.current?.submitting}
+            extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
           />
         )}
       </section>
