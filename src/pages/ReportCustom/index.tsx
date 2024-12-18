@@ -231,6 +231,11 @@ const CustomReport = () => {
                     >
                       <MenuItem
                         onClick={() => {
+                          if (selectedRecords.length === 1){
+                            setDeleteRecord(selectedRecords[0]);
+                            }else{
+                              setDeleteRecord(null)
+                            }
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
@@ -264,7 +269,7 @@ const CustomReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete custom report ${deleteRecord?.customReportName || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.reportCustom?.titleSingular?.toLowerCase()} : ${deleteRecord?.customReportName || ''}` : `selected ${resources?.reportCustom?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

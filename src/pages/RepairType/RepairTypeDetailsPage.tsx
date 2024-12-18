@@ -134,7 +134,7 @@ const RepairTypeDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.repairType?.titleSingular} ?`}
+          message={`Are you sure you want to delete this ${resources?.repairType?.titleSingular?.toLowerCase()}: ${repairTypeData?.repairType} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

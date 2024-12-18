@@ -214,10 +214,15 @@ const ProductBuilder = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox(null);
           }}
         >
-          Delete
+          {`Delete (${selectedRecords?.length})`}
         </MenuItem>
       </>
     );
@@ -264,7 +269,8 @@ const ProductBuilder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? deleteRecord.name : 'selected product(s)'}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productBuilder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.name || ''}` : `selected ${resources?.productBuilder?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

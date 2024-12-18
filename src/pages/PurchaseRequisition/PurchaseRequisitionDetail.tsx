@@ -358,7 +358,7 @@ const PurchaseRequisitionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.purchaseRequisition?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.purchaseRequisition?.titleSingular?.toLowerCase()} : ${purchaseRequisitionData?.purchaseRequisitionNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

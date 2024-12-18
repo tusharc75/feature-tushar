@@ -46,7 +46,6 @@ import {
 } from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -67,8 +66,6 @@ const ContactDetailsPage = (props) => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -790,8 +787,7 @@ const ContactDetailsPage = (props) => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()} :
-            ${contactData.name}` : `selected ${resources?.contact?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${resources?.contact?.titleSingular?.toLowerCase()} : ${contactData?.name} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDeleteContact}
         />

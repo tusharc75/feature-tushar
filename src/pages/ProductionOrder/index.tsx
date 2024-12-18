@@ -241,6 +241,11 @@ const ProductionOrder = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             showConfirmBox();
           }}
         >
@@ -310,7 +315,8 @@ const ProductionOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.productionOrder?.titleSingular} ${deleteRecord?.productionOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productionOrderNumber || ''}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -37,6 +37,7 @@ import WorkOrder from './WorkOrder';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
@@ -50,7 +51,8 @@ const ProductionOrderDetails = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [productionOrderData, setProductionOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -349,7 +351,7 @@ const ProductionOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this production order: ${productionOrderData?.productionOrderNumber} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} : ${productionOrderData?.productionOrderNumber}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

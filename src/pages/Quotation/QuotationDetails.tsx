@@ -733,7 +733,7 @@ const QuotationDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this : ${quotationData?.quotationNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.quotation?.titleSingular?.toLowerCase()} : ${quotationData?.quotationNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
