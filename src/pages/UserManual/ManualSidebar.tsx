@@ -44,7 +44,8 @@ const ManualSidebar = ({ state }: ComponentCommonProps) => {
                             'cursor-pointer rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#272729]',
                             sections[0] === section.sectionName && sections[1] === resource.resourceLabel && 'bg-gray-100 dark:bg-[#272729]'
                           )}
-                          onClick={() => navigate(`/${section.sectionName}/${resource.resourceLabel}`)}
+                          onClick={() => {const encodedLabel = encodeURIComponent(resource.resourceLabel);
+                            navigate(`/${section.sectionName}/${encodedLabel}`);}}
                         >
                           <span className="text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">{resource.resourceLabel}</span>
                         </li>
