@@ -1,5 +1,3 @@
-import { kebabCase } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
 import Section from 'src/pages/ReportsNew/SidebarContent/Section';
 import { UseReport } from 'src/pages/ReportsNew/types';
 
@@ -17,10 +15,7 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
           items={favouriteReports}
           onClick={(report) =>
             setSelectedReport({
-              route:
-                report.reportType === 'standard'
-                  ? `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`
-                  : `/reports/custom-report/${report._id}`,
+              route: report.route,
               title: report.label
             })
           }
@@ -38,7 +33,7 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
             items={data.reports}
             onClick={(report) =>
               setSelectedReport({
-                route: `/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`,
+                route: report.route,
                 title: report.label
               })
             }
@@ -57,7 +52,7 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
           items={filteredCustomReports}
           onClick={(report) =>
             setSelectedReport({
-              route: `/reports/custom-report/${report._id}`,
+              route: report.route,
               title: report.customReportName
             })
           }

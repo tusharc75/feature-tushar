@@ -14,7 +14,7 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import Filter from 'src/components/Filter';
+import Filter, { getErrors } from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -593,7 +593,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, []);
 
   React.useEffect(() => {
-    if (showGrid) {
+    if (showGrid && getErrors(defaultColumns, deepFilters).errorColumns.length === 0) {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
@@ -678,7 +678,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

@@ -350,7 +350,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -790,7 +790,7 @@ function App() {
             <PrivateRoute exact path={`${routes.addressDetail.path}/:id`}>
               <AddressDetailPage />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}`}>
+            <PrivateRoute exact path={`${routes.reports.path}*`}>
               <ReportsCenter />
             </PrivateRoute>
             {/* <PrivateRoute exact path={`${routes.reports.path}`}>

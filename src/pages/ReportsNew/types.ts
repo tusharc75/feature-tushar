@@ -7,6 +7,7 @@ export type Report = {
   key?: string;
   type?: string;
   label?: string;
+  route: string;
 };
 
 export type ReportWithSection = {
@@ -17,6 +18,8 @@ export type CustomReport = {
   _id?: string;
   brand?: string;
   customReportName?: string;
+  route: string;
+  label: string;
 };
 
 export type FavouriteReport = {
@@ -26,6 +29,7 @@ export type FavouriteReport = {
   key?: string;
   type?: string;
   reportType?: 'custom' | 'standard';
+  route: string;
 };
 
 export const isReport = (item: any): item is Report => {
