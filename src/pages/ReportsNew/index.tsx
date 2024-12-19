@@ -7,16 +7,28 @@ import SidebarHead from 'src/pages/ReportsNew/SidebarHead';
 import useReport from 'src/pages/ReportsNew/useReport';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ReportsContent from 'src/pages/ReportsNew/ReportsContent';
+import routes from 'src/components/Helpers/Routes';
+import { useMemo } from 'react';
 
 const ReportsCenter = () => {
   const state = useReport();
-  const { permissions } = state;
+  const { permissions, selectedReport } = state;
+
+  const routesList = useMemo(() => {
+    const routeList: { title: string; path: string }[] = [];
+    if (selectedReport) {
+      routeList.push({ title: 'Reports', path: routes.reports.path }, { title: selectedReport.title, path: '' });
+    } else {
+      routeList.push({ title: 'Reports', path: '' });
+    }
+    return routeList;
+  }, [selectedReport]);
 
   return (
     <div className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: 'Reports', path: '' }]} />
+          <CustomBreadCrumbs routes={routesList} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

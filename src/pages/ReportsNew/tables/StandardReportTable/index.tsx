@@ -62,7 +62,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    selectedEntity
+    selectedEntity,
+    navigateToMainPage
   } = reportState;
 
   const resourceCamelCase = camelCase(selectedReport.resource);
@@ -763,6 +764,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           setFilterTerm={setFilterTerm}
           defaultColumns={defaultColumns}
           reportConfig={reportConfig}
+          onCloseWithErrors={navigateToMainPage}
         />
       )}
       {showPriceHistory.open && (

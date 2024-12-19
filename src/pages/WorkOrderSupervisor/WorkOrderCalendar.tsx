@@ -231,7 +231,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
     <>
       <div>
         <Box display="flex" flexDirection="column"></Box>
-        <div className={cn('relative min-h-[400px] [&_.rbc-agenda-empty]:hidden')}>
+        <div className={cn('relative min-h-[400px]')}>
           <CustomCalendar
             defaultDate={defaultDate}
             defaultView={'month'}
@@ -305,7 +305,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
                       </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <RenderTable data={d.competencies} resources={resources}/>
+                      <RenderTable data={d.competencies} resources={resources} />
                     </AccordionDetails>
                   </Accordion>
                 ))

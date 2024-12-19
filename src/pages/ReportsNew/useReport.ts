@@ -90,6 +90,7 @@ const useReport = () => {
   const setColumns = useCallback((payload: TColType[] | null) => dispatch({ type: 'setColumns', payload }), []);
   const setIsColumnsLoading = useCallback((payload: boolean) => dispatch({ type: 'setIsColumnsLoading', payload }), []);
   const setFavouritList = useCallback((payload: string[]) => dispatch({ type: 'setFavouritList', payload }), []);
+  const navigateToMainPage = useCallback((): void => history.push(routes.reports.path), [history]);
 
   const filterRecords = useCallback(
     (searchQuery = ''): ReportWithSection[] => {
@@ -229,6 +230,9 @@ const useReport = () => {
         setIsColumnsLoading(true);
       }
     }
+    if (pathname === routes.reports.path) {
+      dispatch({ type: 'setSelectedReport', payload: null });
+    }
   }, [customReports, pathname, reportList, selectedReport?.route, setIsColumnsLoading]);
 
   return {
@@ -245,7 +249,8 @@ const useReport = () => {
     setColumns,
     setIsColumnsLoading,
     setUserFavourites,
-    isFavourite
+    isFavourite,
+    navigateToMainPage
   };
 };
 
