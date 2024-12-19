@@ -222,16 +222,18 @@ const WorkOrderTechnician = () => {
               </HtmlTooltip>
             </div>
           </div>
-          <div className="min-h-[48px]">
-            <DetailsPageHeader
-              isAddButtonVisible={false}
-              isActionButtonVisible={false}
-              isNewActionButtonVisible={selectedRecords.length > 0}
-              newActionButtonProps={newActionButtonProps}
-              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-              hasXpadding={false}
-            />
-          </div>
+          {viewType === 'card-view' && (
+            <div className="min-h-[48px]">
+              <DetailsPageHeader
+                isAddButtonVisible={false}
+                isActionButtonVisible={false}
+                isNewActionButtonVisible={selectedRecords.length > 0}
+                newActionButtonProps={newActionButtonProps}
+                actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                hasXpadding={false}
+              />
+            </div>
+          )}
         </div>
 
         {viewType === 'card-view' && (
