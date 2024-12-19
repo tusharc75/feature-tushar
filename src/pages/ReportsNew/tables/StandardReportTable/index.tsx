@@ -569,19 +569,23 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         toastConfig.setToastConfig(err);
       });
   };
+
   const getFilteredColumn = (column) => {
     let tempColumn = column;
     if (resourceCamelCase === 'dailyVolumeReport') {
-      if (!selectedData?.dayWise?.value) {
+      const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise')
+      if (!dayWiseFilter || (dayWiseFilter && dayWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
-      if (selectedData?.padWise?.value) {
+      const padWiseFilter = deepFilters?.find((e) => e.field === 'padWise')
+      if (padWiseFilter && padWiseFilter?.term === 'Yes') {
         tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
       }
       return tempColumn;
     }
     if (resourceCamelCase === 'volumeReport') {
-      if (!selectedData?.unitWise?.value) {
+      const unitWiseFilter = deepFilters?.find((e) => e.field === 'unitWise')
+      if (!unitWiseFilter || (unitWiseFilter && unitWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['asset', 'padName', 'customerAccount']?.includes(e.accessor));
       }
       return tempColumn;
@@ -679,7 +683,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
