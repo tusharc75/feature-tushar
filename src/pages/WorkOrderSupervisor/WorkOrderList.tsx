@@ -382,7 +382,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             warehouse={selectedRecords[0]?.warehouseId}
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
             assignedUsers={
-              selectedRecords?.length === 1
+              selectedRecords?.length === 1 && selectedRecords[0]?.assignedUsers && selectedRecords[0]?.assignedUsersId
                 ? [{ optionLabel: selectedRecords[0]?.assignedUsers, optionValue: selectedRecords[0]?.assignedUsersId }]
                 : []
             }
@@ -402,7 +402,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             warehouse={selectedRecords[0]?.warehouseId}
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
             workStations={
-              selectedRecords?.length === 1
+              selectedRecords?.length === 1 && selectedRecords[0]?.assignedWorkStations && selectedRecords[0]?.assignedWorkStationsId
                 ? [{ optionLabel: selectedRecords[0]?.assignedWorkStations, optionValue: selectedRecords[0]?.assignedWorkStationsId }]
                 : []
             }
