@@ -78,6 +78,7 @@ const useManual = () => {
       const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
+  
       if (scrollKey) {
         setTimeout(() => {
           const element = document.querySelector(scrollKey);
@@ -87,8 +88,8 @@ const useManual = () => {
         }, 0);
       }
     }
-
   }, []);
+  
 
   useEffect(() => {
     const handlePopstate = () => {
