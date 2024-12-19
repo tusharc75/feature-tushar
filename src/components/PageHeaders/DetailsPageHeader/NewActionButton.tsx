@@ -4,11 +4,11 @@ import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export type NewActionButtonProps<D extends string> = {
+export type NewActionButtonProps<D> = {
   itemsVisibleCount?: number;
 } & Omit<ButtonMenuProps<D>, 'showChevron'>;
 
-const NewActionButton = <D extends string>({ items, itemsVisibleCount = 2, disabled, ...rest }: NewActionButtonProps<D>) => {
+const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }: NewActionButtonProps<D>) => {
   const visibleItems = [...items].slice(0, itemsVisibleCount);
   const hiddenItems = [...items].slice(itemsVisibleCount);
 

@@ -3,7 +3,7 @@ import { camelCase, capitalize, isArray, isString } from 'lodash';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat } from 'src/constants/helpers';
+import { dateFormat, UnCamelCase } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
 const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
@@ -153,7 +153,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                 return (
                   <TableRow key={index}>
                     <TableCell>{capitalize(o?.type)}</TableCell>
-                    <TableCell>{`${o?.label} (${capitalize(o?.referenceType)})`}</TableCell>
+                    <TableCell>{`${o?.label} (${UnCamelCase(o?.referenceType)})`}</TableCell>
                     <TableCell>
                       {o?.changes?.length ? (
                         <TableContainer component={Paper}>

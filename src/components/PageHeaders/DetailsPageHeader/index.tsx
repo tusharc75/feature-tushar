@@ -7,6 +7,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import NewActionButton, { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import { cn } from 'src/constants/helpers';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -28,7 +29,9 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
-  newActionButtonProps?: NewActionButtonProps;
+  newActionButtonProps?: NewActionButtonProps<any>;
+  hasYpadding?: boolean;
+  className?: string;
 };
 
 const DetailsPageHeader = ({
@@ -43,7 +46,9 @@ const DetailsPageHeader = ({
   rightSideContents,
   hasXpadding = true,
   isNewActionButtonVisible = false,
-  newActionButtonProps
+  newActionButtonProps,
+  hasYpadding = true,
+  className = ''
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -76,7 +81,14 @@ const DetailsPageHeader = ({
   };
 
   return (
-    <div className={`details-page-header flex flex-wrap items-center justify-between gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
+    <div
+      className={cn(
+        `details-page-header flex flex-wrap items-center justify-between gap-2`,
+        hasXpadding ? 'px-2' : '',
+        hasYpadding ? 'py-2' : '',
+        className
+      )}
+    >
       <div className="flex flex-grow flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'left' ? (
           <>
