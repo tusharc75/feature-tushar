@@ -15,7 +15,7 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, material, assetPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, resources }
+    state: { user }
   }: any = useData();
 
   const [packageOptions, setPackageOptions] = useState([]);
