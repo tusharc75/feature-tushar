@@ -18,7 +18,6 @@ export const createURl = (url: string) => {
 };
 
 export const getCurrentManualUrl = () => {
-  console.log(window.location.href);
   return getLastPart(window.location.href);
 };
 
