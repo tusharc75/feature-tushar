@@ -379,7 +379,7 @@ const PurchaseOrder = () => {
           onToggle={handleFilter}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContents={<LeftSideContents />} 
+          leftSideContents={<LeftSideContents />}
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
