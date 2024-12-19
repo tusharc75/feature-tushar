@@ -75,9 +75,10 @@ const useManual = () => {
 
   const navigate = useCallback((url, scrollKey = null) => {
     if (url) {
-      const parsedUrl = createURl(url);
+      const parsedUrl = createURl(url); // Standardized encoding
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
+  
       if (scrollKey) {
         setTimeout(() => {
           const element = document.querySelector(scrollKey);
@@ -87,8 +88,8 @@ const useManual = () => {
         }, 0);
       }
     }
-
   }, []);
+  
 
   useEffect(() => {
     const handlePopstate = () => {
