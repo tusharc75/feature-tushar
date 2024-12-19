@@ -2,15 +2,14 @@ import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import { Close } from '@material-ui/icons';
 import { IconButton } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export default function ContentFullScreen({ children, fullScreen, setFullScreen }) {
   return fullScreen ? (
-    <Dialog fullScreen={true} aria-labelledby="customized-dialog-title" open={true} disableEnforceFocus>
-      <CustomDialogContent isFooterPresent={false}>
-        <div className="flex justify-end">
+    <Dialog fullScreen={true} onClose={() => { setFullScreen(false) }} aria-labelledby="customized-dialog-title" className='mt-0' open={true} disableEnforceFocus>
+      <div className="absolute top-1 right-1 z-50">
+        <HtmlTooltip title='Exit full screen'>
           <IconButton
-            title="Close"
-            size="small"
             aria-label="Close"
             onClick={() => {
               setFullScreen(false);
@@ -18,10 +17,12 @@ export default function ContentFullScreen({ children, fullScreen, setFullScreen 
           >
             <Close fontSize="small" color="primary" />
           </IconButton>
-        </div>
+        </HtmlTooltip>
+      </div>
+      <CustomDialogContent isFooterPresent={false}>
         {children}
       </CustomDialogContent>
-    </Dialog>
+    </Dialog >
   ) : (
     children
   );
