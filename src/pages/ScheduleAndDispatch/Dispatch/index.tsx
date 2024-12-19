@@ -4,25 +4,25 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { gridLoadingTimeout, prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, RENTAL_STATUS, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
-import { ListingPageHeader } from 'src/components/PageHeaders';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Assets from 'src/pages/ScheduleAndDispatch/Dispatch/Assets';
 import Services from 'src/pages/ScheduleAndDispatch/Dispatch/Services';
 import Technician from 'src/pages/ScheduleAndDispatch/Dispatch/Technician';
+import React from 'react';
 
-const Dispatch = () => {
+const Dispatch = ({ search }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.rentalManagement);
   const {
     state: { resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [columns, setColumns] = useState(null);
 
@@ -78,6 +78,16 @@ const Dispatch = () => {
       deepFilter = `?`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+    deepFilters.push({
+      field: 'status',
+      term: [
+        RENTAL_STATUS.new,
+        RENTAL_STATUS.inProgress,
+        RENTAL_STATUS.jobPartiallyStarted,
+        RENTAL_STATUS.jobStarted,
+        RENTAL_STATUS.jobPartiallyEnded
+      ]
+    });
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -99,10 +109,6 @@ const Dispatch = () => {
     return deepFilter;
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
@@ -120,14 +126,6 @@ const Dispatch = () => {
 
   return (
     <>
-      <ListingPageHeader
-        searchValue={search}
-        onSearch={handleSearch}
-        isActionButtonVisible={false}
-        isAddButtonVisible={false}
-        rightSideContents={null}
-        actionMenuItems={null}
-      />
       {columns ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-[400px_1fr]">
           <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
@@ -162,7 +160,7 @@ const Dispatch = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={12} md={12} lg={12}>
                     <TabPanel value={tabValue} index={1}>
-                      {tabValue === 1 && <Assets rentalManagementData={rentalManagementData} />}
+                      {tabValue === 1 && <Assets rentalManagementData={rentalManagementData} onSuccess={() => fetchData()} />}
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       {tabValue === 2 && <Services rentalManagementData={rentalManagementData} />}

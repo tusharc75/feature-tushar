@@ -150,7 +150,7 @@ const Technicians = ({ rentalManagementData }) => {
     <Fragment>
       {columns && dataRows ? (
         <CustomReactTable
-          height={'300px'}
+          height={'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}

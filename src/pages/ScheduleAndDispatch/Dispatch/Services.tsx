@@ -128,7 +128,7 @@ const Services = ({ rentalManagementData }) => {
     <Fragment>
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 200px)'}
+          height={'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
