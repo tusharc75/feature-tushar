@@ -3,7 +3,7 @@ import MaUTable from '@material-ui/core/Table';
 import { Error } from '@material-ui/icons';
 import { Column, flexRender } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
-import React, { ForwardedRef, forwardRef, useEffect } from 'react';
+import React, { ForwardedRef, forwardRef, Fragment, useEffect } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
 import { VirtualTableBody } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Body';
 import { VirtualTableHead } from 'src/components/CustomReactTable/TableComponents/VirtualTable/Head';
@@ -93,6 +93,12 @@ export const VirtualTable = forwardRef(function (
   useEffect(() => {
     columnVirtualizer.measure();
   }, [columns.length]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      rowVirtualizer.measure();
+    }, 0);
+  }, []);
 
   const virtualColumns = columnVirtualizer.getVirtualItems();
   const virtualrows = rowVirtualizer.getVirtualItems();
@@ -221,21 +227,29 @@ export const VirtualTable = forwardRef(function (
                         const { style } = vtableData && vtableData[vc.index] ? vtableData[vc.index] : getStickyPosition(columnDef, vc.index, table);
                         const colSize = header.getSize();
                         return (
-                          <th
-                            className={`sticky bottom-0 bg-[var(--dark-primary,_white)]`}
-                            style={{
-                              ...style,
-                              position: 'sticky',
-                              zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-                              minWidth: colSize,
-                              maxWidth: colSize,
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                            key={header.id}
-                          >
-                            {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
-                          </th>
+                          <Fragment key={vc.index}>
+                            {right.length && header.id === right[0] && virtualPaddingRight ? (
+                              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                            ) : null}
+                            <th
+                              className={`sticky bottom-0 bg-[var(--dark-primary,_white)]`}
+                              style={{
+                                ...style,
+                                position: 'sticky',
+                                zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                                minWidth: colSize,
+                                maxWidth: colSize,
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                              key={header.id}
+                            >
+                              {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                            </th>
+                            {left.length && header.id === left[left.length - 1] && virtualPaddingLeft ? (
+                              <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                            ) : null}
+                          </Fragment>
                         );
                       })}
                       {virtualPaddingRight ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} /> : null}
