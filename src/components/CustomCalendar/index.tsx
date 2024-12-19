@@ -79,7 +79,7 @@ const CustomCalendar = ({
   const Component = (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any;
 
   return (
-    <div className="relative min-h-[300px]">
+    <div className="relative min-h-[300px] [&_.rbc-agenda-empty]:hidden">
       <Component
         view={stateView}
         events={mobileView ? mobileEvents : events}
