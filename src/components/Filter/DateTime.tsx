@@ -1,36 +1,65 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { dateFormat } from 'src/constants/helpers';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
 
-  const handleDuration = (timeFrame) => {
-    let fromDate: any = '';
-    let toDate: any = '';
-    if (timeFrame === '1-month') {
-      fromDate = new Date(moment().subtract('1', 'month').calendar());
-      toDate = new Date();
-    } else if (timeFrame === '3-months') {
-      fromDate = new Date(moment().subtract('3', 'months').calendar());
-      toDate = new Date();
-    } else if (timeFrame === '6-months') {
-      fromDate = new Date(moment().subtract('6', 'months').calendar());
-      toDate = new Date();
-    } else if (timeFrame === '1-year') {
-      fromDate = new Date(moment().subtract('1', 'year').calendar());
-      toDate = new Date();
-    }
-    setDeepFilters([
-      ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
-      ...[
-        { field: `from_${fieldData?.fieldName}`, term: moment(fromDate).format('MM/DD/YYYY') },
-        { field: `to_${fieldData?.fieldName}`, term: moment(toDate).format('MM/DD/YYYY') }
-      ]
-    ]);
-  };
+  const handleDuration = useCallback(
+    (timeFrame) => {
+      let fromDate: any = '';
+      let toDate: any = '';
+      if (timeFrame === '1-month') {
+        fromDate = new Date(moment().subtract('1', 'month').calendar());
+        toDate = new Date();
+      } else if (timeFrame === '3-months') {
+        fromDate = new Date(moment().subtract('3', 'months').calendar());
+        toDate = new Date();
+      } else if (timeFrame === '6-months') {
+        fromDate = new Date(moment().subtract('6', 'months').calendar());
+        toDate = new Date();
+      } else if (timeFrame === '1-year') {
+        fromDate = new Date(moment().subtract('1', 'year').calendar());
+        toDate = new Date();
+      }
+      setDeepFilters([
+        ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
+        ...[
+          { field: `from_${fieldData?.fieldName}`, term: moment(fromDate).format('MM/DD/YYYY') },
+          { field: `to_${fieldData?.fieldName}`, term: moment(toDate).format('MM/DD/YYYY') }
+        ]
+      ]);
+    },
+    [deepFilters, fieldData?.fieldName, setDeepFilters]
+  );
+
+  const handleChangeTimeFrame = useCallback(
+    (timeFrame) => {
+      setTimeFrame(timeFrame);
+      handleDuration(timeFrame);
+    },
+    [handleDuration]
+  );
+
+  const clearDate = useCallback(() => {
+    handleChangeTimeFrame('custom');
+  }, []);
+
+  const isDatePresent = useMemo(() => {
+    const found = deepFilters.find((d) => {
+      if (d?.field === `from_${fieldData?.fieldName}`) {
+        return Boolean(d.term);
+      }
+      if (d?.field === `to_${fieldData?.fieldName}`) {
+        return Boolean(d.term);
+      }
+      return true;
+    });
+    return Boolean(found);
+  }, [deepFilters, fieldData?.fieldName]);
 
   useEffect(() => {
     const fromDate = moment(deepFilters?.find((item) => item.field === `from_${fieldData?.fieldName}`)?.term, 'MM/DD/YYYY');
@@ -69,8 +98,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
               id={`time-${fieldData?.fieldName}`}
               value={timeFrame}
               onChange={(e) => {
-                setTimeFrame(e.target.value);
-                handleDuration(e.target.value);
+                handleChangeTimeFrame(e.target.value);
               }}
               label="Select Duration"
             >
@@ -142,6 +170,13 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
+        {isDatePresent && (
+          <div className="mt-4">
+            <ThemeButton onClick={clearDate} iconForMobile={false}>
+              Clear Dates
+            </ThemeButton>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Close, Info } from '@material-ui/icons';
 import { isArray, uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,6 +9,7 @@ import { TbLayoutSidebarFilled } from 'react-icons/tb';
 import listFilter from 'src/assets/newSvgs/listFilter.svg';
 import selectFilter from 'src/assets/newSvgs/selectFilter.svg';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CheckBox from 'src/components/Filter/CheckBox';
 import DateTime from 'src/components/Filter/DateTime';
 import DropDown from 'src/components/Filter/DropDown';
@@ -41,7 +42,15 @@ const getLabel = (field, deepFilters, filterByIds) => {
   if (['date'].includes(field.type)) {
     const found = deepFilters?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
     if (found.length > 0) {
-      return found.length;
+      let formattedMessage = '';
+      found.forEach((d) => {
+        if ((d.field as string).startsWith('from_')) {
+          formattedMessage += `From: ${d.term}`;
+        } else if ((d.field as string).startsWith('to_')) {
+          formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${d.term}`;
+        }
+      });
+      return <HtmlTooltip title={formattedMessage}>{found.length}</HtmlTooltip>;
     }
   }
   return '';
