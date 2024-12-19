@@ -98,7 +98,6 @@ export const getErrors = (
       if (!value) {
         errors[c.fieldName] = true;
         errorColumns.push(c);
-        console.log(c);
         continue;
       }
       if ((typeof value === 'string' || Array.isArray(value)) && value.length === 0) {
