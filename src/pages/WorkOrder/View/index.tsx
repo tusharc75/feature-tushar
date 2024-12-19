@@ -254,6 +254,9 @@ const WorkOrderViews = (props) => {
       case 'serializedAsset':
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
+      case 'service':
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`)
+        break;
     }
   };
 

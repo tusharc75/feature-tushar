@@ -115,7 +115,11 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   <span>
                     <Checkbox
                       size="small"
-                      checked={selectedRecords?.length && data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length}
+                      checked={
+                        selectedRecords?.length &&
+                        selectedRecords?.filter((r) => r?.status === col)?.length &&
+                        data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length
+                      }
                       onChange={(e) => {
                         if (e?.target?.checked) {
                           dispatch({ type: 'selection', selectedRecords: [...uniqBy([...selectedRecords, ...data[col]], '_id')] });

@@ -549,34 +549,35 @@ const RentalManagementDetailsPage = () => {
               ) : null}
             </Box>
           </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <Steps
-              isNextStep={false}
-              nextStep={nextStep}
-              nextStepToolTip={nextStepToolTip}
-              steps={rentalSteps}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              handlePrev={
-                rentalSteps[currentStep]?.name === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
-                  ? () => {
-                    setShowCancelConfirmBox({ open: true, isQuote: true });
-                  }
-                  : null
-              }
-              isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
-              setStepFullScreen={() => setStepFullScreen(true)}
-              updateStatus={(step: number) => {
-                if (isOffline) {
-                  updateRentalProcessStatus(id, rentalSteps[step]?.name);
-                } else {
-                  dynamicFormUpdateProcessStatus(sidebarResource.rentalManagement, rentalSteps[step]?.name, id);
+          <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            <TabPanel value={tabValue} index={1}>
+              <Steps
+                isNextStep={false}
+                nextStep={nextStep}
+                nextStepToolTip={nextStepToolTip}
+                steps={rentalSteps}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                handlePrev={
+                  rentalSteps[currentStep]?.name === 'Quotation' &&
+                    allowedToEdit &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    ? () => {
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
+                    : null
                 }
-              }}
-            />
-            <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
+                setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                stepFullScreen={stepFullScreen}
+                updateStatus={(step: number) => {
+                  if (isOffline) {
+                    updateRentalProcessStatus(id, rentalSteps[step]?.name);
+                  } else {
+                    dynamicFormUpdateProcessStatus(sidebarResource.rentalManagement, rentalSteps[step]?.name, id);
+                  }
+                }}
+              />
               {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
                 <Productpackage
                   rentalManagementData={rentalManagementData}
@@ -689,8 +690,8 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-5`}
                 />
               )}
-            </ContentFullScreen>
-          </TabPanel>
+            </TabPanel>
+          </ContentFullScreen>
           {resourceData &&
             resourceData?.tabs?.length > 0 &&
             resourceData?.tabs?.map((tab, i) => {

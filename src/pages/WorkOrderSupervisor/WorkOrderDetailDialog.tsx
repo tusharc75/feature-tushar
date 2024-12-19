@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import WorkOrderDetailContent from 'src/pages/WorkOrder/WorkOrderDetailContent';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -62,8 +62,11 @@ const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {
               )
             }
           ></CustomDialogHeader>
-          <Box p={2}>
-            <WorkOrderDetailContent id={workOrderId} tab={1} renderedFrom={routes.workOrderSupervisor.title} />
+          <Box pl={1} pr={1}>
+            <WorkOrderDetailContent
+              id={workOrderId}
+              tab={1}
+              resource={sidebarResource.workOrderSupervisor} />
           </Box>
         </>
       ) : (

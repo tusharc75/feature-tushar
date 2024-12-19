@@ -307,7 +307,6 @@ const WorkOrderSupervisor = () => {
         });
       });
     });
-    console.log('visibleColumns', visibleColumns);
     axiosInstance()
       .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
       .then(({ data }) => {
@@ -472,9 +471,11 @@ const WorkOrderSupervisor = () => {
               horizontal="right"
               slot={
                 ((props) => (
-                  <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
-                    <MoreVert />
-                  </IconButton>
+                  <HtmlTooltip title={'More'}>
+                    <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
+                      <MoreVert />
+                    </IconButton>
+                  </HtmlTooltip>
                 )) as any
               }
             />
