@@ -43,10 +43,14 @@ function ServiceOrderViews({ serviceData }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const fieldTickets = await axiosInstance().get(`${fieldTicket.api}?filterById=${JSON.stringify([{
-        field: 'fieldServiceOrder',
-        term: serviceData?._id
-      }])}`);
+      const fieldTickets = await axiosInstance().get(
+        `${fieldTicket.api}?filterById=${JSON.stringify([
+          {
+            field: 'fieldServiceOrder',
+            term: serviceData?._id
+          }
+        ])}`
+      );
 
       const invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`);
 
@@ -73,11 +77,11 @@ function ServiceOrderViews({ serviceData }) {
         }
       ];
 
-      const allFieldTickets = []
+      const allFieldTickets = [];
       if (fieldTickets?.data?.data?.length) {
         xPosition += 300;
         fieldTickets?.data?.data?.map((fieldTicket, index) => {
-          allFieldTickets.push(fieldTicket._id)
+          allFieldTickets.push(fieldTicket._id);
           flow.push({
             id: `${fieldTicket?._id}`,
             type: 'default',
@@ -88,7 +92,7 @@ function ServiceOrderViews({ serviceData }) {
               ref_id: fieldTicket?._id,
               label: (
                 <div>
-                  <Typography variant="body2">{"Field Ticket"}</Typography>
+                  <Typography variant="body2">{'Field Ticket'}</Typography>
                   <Typography variant="subtitle2">{fieldTicket?.fieldTicketNumber ?? fieldTicket?.fieldTicketNumber}</Typography>
                 </div>
               )
@@ -118,7 +122,7 @@ function ServiceOrderViews({ serviceData }) {
               ref_id: invoice?._id,
               label: (
                 <div>
-                  <Typography variant="body2">{"Invoice"}</Typography>
+                  <Typography variant="body2">{'Invoice'}</Typography>
                   <Typography variant="subtitle2">{invoice?.invoiceNumber ?? invoice?.invoiceNumber}</Typography>
                 </div>
               )
@@ -128,7 +132,6 @@ function ServiceOrderViews({ serviceData }) {
           });
           if (invoice?.fieldTicket) {
             invoice?.fieldTicket?.map((ft, index) => {
-
               const indexToRemove = allFieldTickets.indexOf(ft?.optionValue);
               if (indexToRemove > -1) {
                 allFieldTickets.splice(indexToRemove, 1);
@@ -139,7 +142,7 @@ function ServiceOrderViews({ serviceData }) {
                 target: `${invoice?._id}`,
                 arrowHeadType: 'arrow'
               });
-            })
+            });
           }
         });
       }
@@ -225,7 +228,7 @@ function ServiceOrderViews({ serviceData }) {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

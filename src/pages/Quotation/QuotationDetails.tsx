@@ -125,19 +125,29 @@ const QuotationDetails = () => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName)
+        );
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['repairOrder', 'salesOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName)
+        );
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['salesOrder', 'fieldJob', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName)
+        );
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['fieldJob', 'repairOrder', 'rentalJob', 'assemblyOrder']?.includes(d?.fieldData?.fieldName)
+        );
       }
       if (quotationData['type'] === QUOTATION_TYPE.assemblyOrder) {
-        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob', 'salesOrder']?.includes(d?.fieldData?.fieldName));
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['fieldJob', 'repairOrder', 'rentalJob', 'salesOrder']?.includes(d?.fieldData?.fieldName)
+        );
       }
     }
     return tempQuotationFields;
@@ -381,7 +391,9 @@ const QuotationDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes?.quotation, title: resources?.quotation?.titlePlural }, { title: `${quotationData?.quotationNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes?.quotation, title: resources?.quotation?.titlePlural }, { title: `${quotationData?.quotationNumber}` }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -553,24 +565,10 @@ const QuotationDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
-          {resourceData &&
-            resourceData?.tabs?.length &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 3}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -585,49 +583,50 @@ const QuotationDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1} style={{ position: 'relative' }}>
-          {stepNames[currentStep] === 'DOA' && quotationData && (
-            <Box
-              style={{
-                marginLeft: 'auto',
-                maxWidth: 'max-content',
-                marginTop: '-30px'
-              }}
-            >
-              <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
-            </Box>
-          )}
-          {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
-            quotationData?.versions[currentVersion]?.status
-          ) && (
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1} style={{ position: 'relative' }}>
+            {stepNames[currentStep] === 'DOA' && quotationData && (
+              <Box
+                style={{
+                  marginLeft: 'auto',
+                  maxWidth: 'max-content',
+                  marginTop: '-30px'
+                }}
+              >
+                <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
+              </Box>
+            )}
+            {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+              quotationData?.versions[currentVersion]?.status
+            ) && (
               <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
                 <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
               </Box>
             )}
-          <div>
-            <Steps
-              isNextStep={false}
-              nextStep={nextStep}
-              steps={stepList}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
-              isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
-                quotationData?.versions[currentVersion]?.status
-              )}
-              setStepFullScreen={() => setStepFullScreen(true)}
-              isPrevStep={prevStep}
-              updateStatus={updateProcessStatus}
-              handleNext={
-                stepNames[currentStep] === 'Quote Approval'
-                  ? () => {
-                    if (allowedToEdit) {
-                      setCustomerAcceptable(true);
-                    }
-                  }
-                  : null
-              }
-            />
-            <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            <div>
+              <Steps
+                isNextStep={false}
+                nextStep={nextStep}
+                steps={stepList}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+                  quotationData?.versions[currentVersion]?.status
+                )}
+                stepFullScreen={stepFullScreen}
+                setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                isPrevStep={prevStep}
+                updateStatus={updateProcessStatus}
+                handleNext={
+                  stepNames[currentStep] === 'Quote Approval'
+                    ? () => {
+                        if (allowedToEdit) {
+                          setCustomerAcceptable(true);
+                        }
+                      }
+                    : null
+                }
+              />
               {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
@@ -703,9 +702,9 @@ const QuotationDetails = () => {
                   setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
-            </ContentFullScreen>
-          </div>
-        </TabPanel>
+            </div>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Box>
             {quotationData && (

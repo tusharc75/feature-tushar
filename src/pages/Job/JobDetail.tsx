@@ -154,12 +154,8 @@ const JobDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -173,20 +169,21 @@ const JobDetail = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={jobProcessSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={false}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.job, jobProcessStepsNames[step], id);
-            }}
-          />
-          <ContentFullScreen title={jobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={jobProcessSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={false}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.job, jobProcessStepsNames[step], id);
+              }}
+            />
             {currentStep === 0 && jobData && (
               <Material
                 renderedFrom={`${renderedFrom}_grid-1`}
@@ -197,8 +194,8 @@ const JobDetail = () => {
             )}
 
             {currentStep === 1 && jobData && <Dispatch renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -219,7 +216,7 @@ const JobDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.job?.titleSingular?.toLowerCase()} : ${jobData?.jobNumber} ?`}             
+          message={`Are you sure you want to delete ${resources?.job?.titleSingular?.toLowerCase()} : ${jobData?.jobNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -226,10 +226,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => { });
+            .catch((err) => {});
         }
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [currentVersion]);
 
   useEffect(() => {
@@ -337,7 +337,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -667,36 +667,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-      resource: sidebarResource.quoteBuilder,
-      referenceId: quoteData?._id,
-      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-      columns: columns,
-      hideDetailButton: true,
-      isSendEmail:
-        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+        resource: sidebarResource.quoteBuilder,
+        referenceId: quoteData?._id,
+        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+        columns: columns,
+        hideDetailButton: true,
+        isSendEmail:
+          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-          ? true
-          : false,
-      isExcelDownload: true,
-      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-      versionNumber: currentVersion,
-      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-      defaultColumns: [
-        'productName',
-        'unit',
-        'qty',
-        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-      ],
-      handleRefresh: () => {
-        fetchQuoteData(currentVersion);
-      },
-      toEmails: userEmails?.to,
-      ccEmails: userEmails?.cc ?? []
-    }
+            ? true
+            : false,
+        isExcelDownload: true,
+        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+        versionNumber: currentVersion,
+        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+        defaultColumns: [
+          'productName',
+          'unit',
+          'qty',
+          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+        ],
+        handleRefresh: () => {
+          fetchQuoteData(currentVersion);
+        },
+        toEmails: userEmails?.to,
+        ccEmails: userEmails?.cc ?? []
+      }
     : null;
 
   const leftSideContents = () => {
@@ -785,44 +785,38 @@ export default function QuoteProcess(props) {
 
   return (
     <>
-      <div>
-        <Steps
-          steps={DOAneeded ? DOASteps : OtherSteps}
-          currentStep={
-            DOAneeded
-              ? DOASteps.findIndex((d) => d?.key === processStatus)
-              : processStatus === QUOTE_PROCESS_STATUS.doaProcess
-                ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
-                : OtherSteps.findIndex((d) => d?.key === processStatus)
-          }
-          id={quoteData._id}
-          version={currentVersion}
-          Refresh={fetchQuoteData}
-          nextStep={nextStep}
-          isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
-          versionStatus={versionStatus}
-          loading={loading}
-          approvedQuote={ifQuoteApproved}
-          handleVersionUpdate={() => {
-            handleVersionUpdate(versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus, state?.selectedRecords);
-          }}
-          isStepEnded={['End'].includes(processStatus)}
-          allowedToEdit={allowedToEdit}
-          DOAData={DOAData}
-          quoteData={quoteData}
-          globalLoading={globalLoading}
-          setStepFullScreen={() => setStepFullScreen(true)}
-        />
-      </div>
-
-      <div className={`pt-[12px] subDetailModule `}>
-        <ContentFullScreen
-          title={DOASteps.find((d) => d?.key === processStatus).label || ''}
-          fullScreen={stepFullScreen}
-          setFullScreen={setStepFullScreen}
-        >
+      <div className={`subDetailModule pt-[12px] `}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <Grid container className="position-relative">
             <Grid item xs={12} sm={12} md={12} className="mt-1">
+              <Steps
+                steps={DOAneeded ? DOASteps : OtherSteps}
+                currentStep={
+                  DOAneeded
+                    ? DOASteps.findIndex((d) => d?.key === processStatus)
+                    : processStatus === QUOTE_PROCESS_STATUS.doaProcess
+                      ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+                      : OtherSteps.findIndex((d) => d?.key === processStatus)
+                }
+                id={quoteData._id}
+                version={currentVersion}
+                Refresh={fetchQuoteData}
+                nextStep={nextStep}
+                isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
+                versionStatus={versionStatus}
+                loading={loading}
+                approvedQuote={ifQuoteApproved}
+                handleVersionUpdate={() => {
+                  handleVersionUpdate(versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus, state?.selectedRecords);
+                }}
+                isStepEnded={['End'].includes(processStatus)}
+                allowedToEdit={allowedToEdit}
+                DOAData={DOAData}
+                quoteData={quoteData}
+                globalLoading={globalLoading}
+                stepFullScreen={stepFullScreen}
+                setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              />
               {quoteData && !loading && productBuilderId ? (
                 <ProductBuilder
                   isAddButtonVisible={isAddButtonVisible}

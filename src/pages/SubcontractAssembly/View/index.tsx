@@ -8,7 +8,7 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { COLOUR_MASTER, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE,deliveryTicket} from 'src/constants/helpers';
+import { COLOUR_MASTER, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, deliveryTicket } from 'src/constants/helpers';
 
 const customNodeStyles = {
   subcontractAssembly: {
@@ -26,7 +26,7 @@ const customNodeStyles = {
   receivingTicket: {
     name: 'Receiving Ticket',
     ...COLOUR_MASTER.receivingTicket
-  },
+  }
 };
 
 const IrtTicketView = ({ subcontractAssemblyData }) => {
@@ -46,11 +46,10 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
     const materials = res?.data?.data?.material;
 
     const result = await axiosInstance().get(
-			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
-		);
-		const deliveryTicketList = result?.data?.data;
+      `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
+    );
+    const deliveryTicketList = result?.data?.data;
     const loadingTicket = deliveryTicketList?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.delivery);
-
 
     var xPosition = 0;
     var flow: any = [
@@ -102,7 +101,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
           ref_type: material?.type,
           ref_id: material?.materialId,
           label: (
-           <HtmlTooltip
+            <HtmlTooltip
               arrow
               placement="top"
               title={material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
@@ -111,16 +110,13 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
                 <Typography variant="body2">
                   {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
                 </Typography>
-                <Typography variant="subtitle2">
-                  {material?.productDetail?.productName}
-                </Typography>
+                <Typography variant="subtitle2">{material?.productDetail?.productName}</Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: index * 100 },
-        style:
-          customNodeStyles.product
+        style: customNodeStyles.product
       });
 
       flowEdge.push({
@@ -132,7 +128,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
     });
 
     if (loadingTicket?.length) xPosition += 300;
-    loadingTicket?.forEach((obj:any, index) => {
+    loadingTicket?.forEach((obj: any, index) => {
       flow.push({
         id: obj?._id,
         type: 'default',
@@ -144,54 +140,45 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
           ref_id: obj?._id,
           label: (
             <HtmlTooltip
-                arrow
-                placement="top"
-                title={
-                  <>
-                    <p>
-                       <Typography variant="body2">From:</Typography>
-                       <Typography variant="subtitle2">
-                        {obj?.pickupFrom?.optionLabel}
-                       </Typography>
-                    </p>
-                    <p>
-                       <Typography variant="body2">To:</Typography>
-                       <Typography variant="subtitle2">
-                       {obj?.deliveryTo?.optionLabel}
-                       </Typography>
-                    </p>
-                  </>
-                }
-              >
+              arrow
+              placement="top"
+              title={
+                <>
+                  <p>
+                    <Typography variant="body2">From:</Typography>
+                    <Typography variant="subtitle2">{obj?.pickupFrom?.optionLabel}</Typography>
+                  </p>
+                  <p>
+                    <Typography variant="body2">To:</Typography>
+                    <Typography variant="subtitle2">{obj?.deliveryTo?.optionLabel}</Typography>
+                  </p>
+                </>
+              }
+            >
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="body2">
-                {obj.ticketType} Ticket
-                </Typography>
-                <Typography variant="subtitle2">
-                {obj.ticketName}
-                </Typography>
+                <Typography variant="body2">{obj.ticketType} Ticket</Typography>
+                <Typography variant="subtitle2">{obj.ticketName}</Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: index * 100 },
-        style:
-          obj?.ticketType === "Delivery" ? customNodeStyles.loadingTicket : ""
+        style: obj?.ticketType === 'Delivery' ? customNodeStyles.loadingTicket : ''
       });
-      obj?.products?.forEach((p:any) => {
+      obj?.products?.forEach((p: any) => {
         flowEdge.push({
           id: `${p.uniqueId}-${obj?._id}-edge`,
           source: p.uniqueId,
           target: obj?._id,
           arrowHeadType: 'arrow'
         });
-      })
-    })
-
-    let rows = materials?.filter((d: any) =>{
-      !d.parentId && d.receivedQty>0;
+      });
     });
-    if(rows?.length)xPosition += 300;
+
+    let rows = materials?.filter((d: any) => {
+      !d.parentId && d.receivedQty > 0;
+    });
+    if (rows?.length) xPosition += 300;
     rows?.forEach((material, index) => {
       flow.push({
         id: material?._id,
@@ -212,9 +199,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
                 <Typography variant="body2">
                   {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
                 </Typography>
-                <Typography variant="subtitle2">
-                  {material?.productDetail?.productName}
-                </Typography>
+                <Typography variant="subtitle2">{material?.productDetail?.productName}</Typography>
               </div>
             </HtmlTooltip>
           )
@@ -223,19 +208,19 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
         style: customNodeStyles.product
       });
       materials?.forEach((material, index) => {
-      if(material.parentId){
-        let ticket=loadingTicket.filter((d:any)=>{
-          d.products[0]?.product===material.materialId;
-        })
+        if (material.parentId) {
+          let ticket = loadingTicket.filter((d: any) => {
+            d.products[0]?.product === material.materialId;
+          });
 
-        flowEdge.push({
-        id: `${ticket._id}-${material?._id}-edge`,
-        source: ticket._id,
-        target: material?._id,
-        arrowHeadType: 'arrow'
+          flowEdge.push({
+            id: `${ticket._id}-${material?._id}-edge`,
+            source: ticket._id,
+            target: material?._id,
+            arrowHeadType: 'arrow'
+          });
+        }
       });
-      }
-    })
     });
 
     setFlowData([...flow, ...flowEdge]);
@@ -257,7 +242,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

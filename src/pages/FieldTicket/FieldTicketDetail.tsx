@@ -190,7 +190,9 @@ const FieldTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.fieldTicket, title: resources?.fieldTicket?.titlePlural }, { title: fieldTicketData?.fieldTicketNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.fieldTicket, title: resources?.fieldTicket?.titlePlural }, { title: fieldTicketData?.fieldTicketNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -242,19 +244,9 @@ const FieldTicketDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 2}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -265,23 +257,24 @@ const FieldTicketDetail = () => {
             <DetailsPage data={fieldTicketData} fields={fields} />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={fieldTicketSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            updateStatus={(step: number) => {
-              if (!isOffline) {
-                dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
-              }
-            }}
-          />
-          <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
+              steps={fieldTicketSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              updateStatus={(step: number) => {
+                if (!isOffline) {
+                  dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
+                }
+              }}
+            />
             {currentStep === 0 && fieldTicketData && (
               <Material
                 fieldTicketData={fieldTicketData}
@@ -302,8 +295,8 @@ const FieldTicketDetail = () => {
                 resourcePolicy={resourceData?.policy}
               />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -324,7 +317,7 @@ const FieldTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${fieldTicketData?.fieldTicketNumber} ?`}            
+          message={`Are you sure you want to delete ${resources?.fieldTicket?.titleSingular?.toLowerCase()} : ${fieldTicketData?.fieldTicketNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -92,7 +92,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -250,24 +250,25 @@ const SubleaseDetailsPage = () => {
           </Box>
           <Grid container spacing={2}></Grid>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {subleaseData ? (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={subleaseSteps}
-                  nextStepToolTip={nextStepToolTip}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                  updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
-                  }}
-                />
-                <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {subleaseData ? (
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={subleaseSteps}
+                    nextStepToolTip={nextStepToolTip}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
+                    stepFullScreen={stepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
+                    }}
+                  />
                   {subleaseStepsNames[currentStep] === 'Add Products' && subleaseData && (
                     <Productpackage
                       subleaseData={subleaseData}
@@ -343,15 +344,16 @@ const SubleaseDetailsPage = () => {
                       updateStatus={updateStatus}
                     />
                   )}
-                </ContentFullScreen>
-              </Grid>
-            ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            )}
-          </Grid>
-        </TabPanel>
+                </Grid>
+              ) : (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
+
         <TabPanel value={tabValue} index={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (

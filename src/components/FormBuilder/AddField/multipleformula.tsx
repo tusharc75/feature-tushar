@@ -7,10 +7,10 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Button, Typography } from '@material-ui/core';
 import { checkFormula } from '../../../constants/formulaUtility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { IconButton } from "@material-ui/core";
+import { IconButton } from '@material-ui/core';
 import { FiMaximize2 } from 'react-icons/fi';
-import ContentFullScreen from "src/components/ContentFullScreen";
-import Grid from "@material-ui/core/Grid";
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Grid from '@material-ui/core/Grid';
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   useEffect(() => {
@@ -116,15 +116,18 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
     <Box>
       <Grid container justifyContent="flex-end">
         <HtmlTooltip title={`Full Screen`}>
-          <IconButton aria-label="Full Screen" onClick={() => {
-            setStepFullScreen(true)
-          }}
-            size="small">
+          <IconButton
+            aria-label="Full Screen"
+            onClick={() => {
+              setStepFullScreen(true);
+            }}
+            size="small"
+          >
             <FiMaximize2 />
           </IconButton>
         </HtmlTooltip>
       </Grid>
-      <ContentFullScreen title={'Formula'} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+      <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
         <>
           <FormControl variant="outlined" fullWidth margin="dense">
             <Autocomplete

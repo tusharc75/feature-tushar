@@ -14,12 +14,12 @@ import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
-  workOrder: { 
-    name: 'Work Order', 
-    ...COLOUR_MASTER.repairJob 
+  workOrder: {
+    name: 'Work Order',
+    ...COLOUR_MASTER.repairJob
   },
   workOrderClosed: {
-    name: 'Work Order Closed', 
+    name: 'Work Order Closed',
     ...COLOUR_MASTER.closedRepairJob
   },
   preWorkService: {
@@ -59,7 +59,6 @@ const WorkOrderViews = (props) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const {
     state: { user }
@@ -97,12 +96,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <Typography variant="body2">{customNodeStyles.workOrder.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {workOrderName ?? ''}
-                       </Typography>
-                     </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.workOrder.name}</Typography>
+                <Typography variant="subtitle2">{workOrderName ?? ''}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrder
@@ -110,16 +109,16 @@ const WorkOrderViews = (props) => {
       ];
       var flowEdge: any[] = [];
 
-      const allServices =  allDetails?.data?.data?.services || [];
+      const allServices = allDetails?.data?.data?.services || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;
       const allStepsIds = [];
-      const servicesWithNoSteps = []
+      const servicesWithNoSteps = [];
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
         const serviceId = `${s?._id}_${s?.uniqueId}`;
-        if (!s?.steps?.length) servicesWithNoSteps.push(serviceId)
+        if (!s?.steps?.length) servicesWithNoSteps.push(serviceId);
         flow.push({
           id: `${serviceId}`,
           sourcePosition: 'right',
@@ -129,12 +128,8 @@ const WorkOrderViews = (props) => {
             ref_type: 'service',
             ref_id: s?._id,
             label: (
-              <HtmlTooltip
-                arrow
-                placement="top"
-                title={capitalize(s.type)}
-              >
-                <div >
+              <HtmlTooltip arrow placement="top" title={capitalize(s.type)}>
+                <div>
                   <Typography variant="body2">{s?.status || ''}</Typography>
                   <Typography variant="subtitle2">{s?.serviceName || ''}</Typography>
                 </div>
@@ -161,11 +156,7 @@ const WorkOrderViews = (props) => {
             data: {
               ref_type: 'step',
               label: (
-                <HtmlTooltip
-                  arrow
-                  placement="top"
-                  title={'Step'}
-                >
+                <HtmlTooltip arrow placement="top" title={'Step'}>
                   <div>
                     <Typography variant="body2">{s?.status || ''}</Typography>
                     <Typography variant="subtitle2">{step?.stepName || ''}</Typography>
@@ -203,12 +194,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.workOrderClosed.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {workOrderName ?? ''}
-                       </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.workOrderClosed.name}</Typography>
+                <Typography variant="subtitle2">{workOrderName ?? ''}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrderClosed
@@ -220,17 +211,16 @@ const WorkOrderViews = (props) => {
             source: `${id}`,
             arrowHeadType: 'arrow',
             target: `${workOrderId}-closed`
-          })
-        })
+          });
+        });
         servicesWithNoSteps?.map((id, idx) => {
           flowEdge.push({
             id: `workOrder-service-steps-${workOrderId}-${id}`,
             source: `${id}`,
             arrowHeadType: 'arrow',
             target: `${workOrderId}-closed`
-          })
-        })
-
+          });
+        });
       }
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
@@ -255,13 +245,13 @@ const WorkOrderViews = (props) => {
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'service':
-        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`)
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button
