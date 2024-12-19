@@ -1,12 +1,11 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import { Help, LocalShipping } from '@material-ui/icons';
-import { camelCase, isEmpty } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { sidebarItems } from 'src/components/FormBuilder/FieldList';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -26,7 +25,7 @@ import {
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Assets = ({ rentalManagementData }) => {
+const Assets = ({ rentalManagementData, onSuccess }) => {
   const renderedFrom = `${camelCase(sidebarResource.scheduleAndDispatch)}_${camelCase(sidebarResource.rentalManagement)}_asset`;
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -138,6 +137,57 @@ const Assets = ({ rentalManagementData }) => {
           Cell: ({ row }) => (row?.original?.displayType ? <h5 className="text-truncate">{row?.original?.displayType}</h5> : <NoDataCell />)
         },
         {
+          accessor: 'productName',
+          Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
+          Cell: ({ row }) =>
+            row?.original?.productName ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate">{row?.original?.productName}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'qty',
+          Header: 'Qty',
+          disabled: true,
+          Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+        },
+        {
+          accessor: 'description',
+          Header: 'Description',
+          Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+        },
+        {
+          accessor: 'warehouse',
+          Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
+          Cell: ({ row }) =>
+            row?.original?.warehouse ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate">{row?.original?.warehouse}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
           accessor: 'loadingTicket',
           Header: 'Loading Ticket',
           Cell: ({ row }) =>
@@ -168,57 +218,6 @@ const Assets = ({ rentalManagementData }) => {
                   size="small"
                   onClick={() => {
                     window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'qty',
-          Header: 'Qty',
-          disabled: true,
-          Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
-        },
-        {
-          accessor: 'productName',
-          Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-          Cell: ({ row }) =>
-            row?.original?.productName ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate">{row?.original?.productName}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'description',
-          Header: 'Description',
-          Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
-        },
-        {
-          accessor: 'warehouse',
-          Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
-          Cell: ({ row }) =>
-            row?.original?.warehouse ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate">{row?.original?.warehouse}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -351,7 +350,9 @@ const Assets = ({ rentalManagementData }) => {
     }
   };
   const handleReceivingTicket = () => {
-    const receivingTicketRecords = dataRows?.filter((d) => d?.loadingTicketId && d?.loadingTicketStatus===DELIVERY_TICKET_STATUS.delivered && !d?.receivingTicketId);
+    const receivingTicketRecords = dataRows?.filter(
+      (d) => d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && !d?.receivingTicketId
+    );
     if (receivingTicketRecords.length) {
       const data = {};
       data['ticketName'] = rentalManagementData.rentalJobName;
@@ -396,11 +397,11 @@ const Assets = ({ rentalManagementData }) => {
   };
 
   return (
-    <div className="mt-3">
+    <Fragment>
       {columns ? (
         <div>
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -411,24 +412,22 @@ const Assets = ({ rentalManagementData }) => {
             hideSelection={true}
           />
           <div className="mt-4 flex justify-end gap-2">
-            <Button
-              disabled={!dataRows?.some((d) => !d?.loadingTicketId)}
-              variant="contained"
-              size="small"
-              color="primary"
-              onClick={() => handleLoadingTicket()}
-            >
-              Dispatch
-            </Button>
-            <Button
-              disabled={!dataRows?.some((d) => d?.loadingTicketId && d?.loadingTicketStatus===DELIVERY_TICKET_STATUS.delivered && !d?.receivingTicketId)}
-              variant="contained"
-              size="small"
-              color="primary"
-              onClick={() => handleReceivingTicket()}
-            >
-              Receive
-            </Button>
+            {dataRows?.some((d) => !d?.loadingTicketId) && (
+              <Button
+                disabled={!dataRows?.some((d) => !d?.loadingTicketId)}
+                variant="contained"
+                size="small"
+                color="primary"
+                onClick={() => handleLoadingTicket()}
+              >
+                Dispatch
+              </Button>
+            )}
+            {dataRows?.some((d) => d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && !d?.receivingTicketId) && (
+              <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleReceivingTicket()}>
+                Receive
+              </Button>
+            )}
           </div>
         </div>
       ) : (
@@ -445,15 +444,16 @@ const Assets = ({ rentalManagementData }) => {
           assets={
             showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.loading
               ? dataRows?.filter((e) => !e.loadingTicketId)
-              : dataRows?.filter((e) => e.loadingTicketId && e?.loadingTicketStatus===DELIVERY_TICKET_STATUS.delivered && !e?.receivingTicketId)
+              : dataRows?.filter((e) => e.loadingTicketId && e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && !e?.receivingTicketId)
           }
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: null, data: {} });
             fetchData();
+            onSuccess();
           }}
         />
       )}
-    </div>
+    </Fragment>
   );
 };
 
