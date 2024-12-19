@@ -175,10 +175,11 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
-            if (openAssetDataDialog.statusPolicy?.status === ASSET_STATUS.underReview) {
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
+            if (openAssetDataDialog.statusPolicy?.status === receivingStatus) {
               setUnderReviewAssetData(data);
               handlePerformUnderReview();
             } else {

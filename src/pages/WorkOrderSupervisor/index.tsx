@@ -307,7 +307,6 @@ const WorkOrderSupervisor = () => {
         });
       });
     });
-    console.log('visibleColumns', visibleColumns);
     axiosInstance()
       .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
       .then(({ data }) => {
