@@ -22,52 +22,7 @@ const PadData = ({ handleClose, column, data }) => {
   }, [data]);
 
   const fetchColumns = () => {
-    const newColumn = [
-      {
-        accessor: 'padName',
-        Header: 'Pad Name',
-        width: 200,
-        Footer: () => 'Total',
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.padName?.optionLabel ? (
-              <p
-                className="link text-truncate"
-                onClick={() => {
-                  window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`);
-                }}
-              >
-                {row?.original?.padName?.optionLabel}
-              </p>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      },
-      {
-        accessor: 'customerAccount',
-        Header: 'Customer Account',
-        width: 200,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.customerAccount?.optionLabel ? (
-              <p
-                className="link text-truncate"
-                onClick={() => {
-                  window.open(`${routes.customerAccountDetail.path}/${row?.original?.customerAccount?.optionValue}`);
-                }}
-              >
-                {row?.original?.customerAccount?.optionLabel}
-              </p>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      },
-      ...column
-    ];
+    const newColumn = [...column];
     const footerData = data;
     const dataKeys = Object.keys(footerData);
     const updatedColumn = newColumn?.map((col, index) => {
