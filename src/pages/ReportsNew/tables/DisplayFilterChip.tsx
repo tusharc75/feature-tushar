@@ -86,15 +86,15 @@ const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDee
     <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-100px)]">
       {filters.otherData?.map((d) => {
         if (typeof d.term === 'string') {
-          return <RenderSringType data={d as Dates} handleClearFilter={handleClearFilter} />;
+          return <RenderSringType key={d.field} data={d as Dates} handleClearFilter={handleClearFilter} />;
         }
         if (Array.isArray(d.term) && typeof d.term[0] === 'string') {
-          return <RenderStringArray data={d as FilterStringArray} handleClearFilter={handleClearFilter} />;
+          return <RenderStringArray key={d.field} data={d as FilterStringArray} handleClearFilter={handleClearFilter} />;
         }
-        return <RenderObjectArray data={d as FilterObjectArray} handleClearFilter={handleClearFilter} />;
+        return <RenderObjectArray key={d.field} data={d as FilterObjectArray} handleClearFilter={handleClearFilter} />;
       })}
       {filters.dates?.map((d) => {
-        return <RenderDates data={d} handleClearFilter={handleClearFilter} />;
+        return <RenderDates key={d.field} data={d} handleClearFilter={handleClearFilter} />;
       })}
     </div>
   );

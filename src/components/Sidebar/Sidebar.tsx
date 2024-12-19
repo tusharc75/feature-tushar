@@ -2,7 +2,7 @@ import { Collapse, CssBaseline, Drawer, IconButton, List, ListItem, ListItemIcon
 import { Close } from '@material-ui/icons';
 import clsx from 'clsx';
 import { kebabCase, lowerCase } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
 import { Link, useHistory, withRouter } from 'react-router-dom';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
@@ -63,7 +63,7 @@ function SideBar({ location }) {
     }
   }, [isSidebarOpen]);
 
-  const getListItem = () => {
+  const getListItem = useCallback(() => {
     if (user) {
       const sections: TSidebarSection[] = [...staticSidebarData(user, permissions, isOffline)];
 
@@ -108,7 +108,9 @@ function SideBar({ location }) {
       return sections;
     }
     return [];
-  };
+  }, [isOffline, permissions, selectedEntity, user]);
+
+  const listItems = useMemo(() => getListItem(), [getListItem]);
 
   const handleCollapse = (section) => {
     let tempdata = { ...open };
@@ -188,7 +190,7 @@ function SideBar({ location }) {
               isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
             } overflow-x-hidden`}
           >
-            {getListItem()?.map((listItem, i) => {
+            {listItems?.map((listItem, i) => {
               const hasChild = Boolean(listItem.items);
               const isItemActive = isSectionActive(pathName, location.pathname, listItem);
 

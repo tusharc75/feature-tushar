@@ -24,7 +24,7 @@ const IconButtonTabs = <D,>({ items, setValue, value, onItemClick = () => {} }: 
         return (
           <HtmlTooltip key={JSON.stringify(item.value)} title={item.tooltip || ''}>
             <IconButton
-              style={{ display: 'block', padding: '8px', borderRadius: 0 }}
+              style={{ display: 'block', padding: '7px', borderRadius: 0 }}
               size="small"
               onClick={(e) => {
                 setValue(item.value);
