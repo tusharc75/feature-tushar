@@ -74,7 +74,7 @@ type ToolbarButton = {
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
-const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
+const WorkOrderDetailContent = ({ id, tab, resource }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -244,7 +244,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    if (renderedFrom === sidebarResource.workOrder) {
+    if (resource === sidebarResource.workOrder) {
       history.push(`?tab=${newValue}`);
     }
     if (newValue === 0) {
@@ -548,7 +548,7 @@ const WorkOrderDetailContent = ({ id, tab, renderedFrom }) => {
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
-        {renderedFrom === sidebarResource.workOrder && (
+        {resource === sidebarResource.workOrder && (
           <Box className="nav-v1">
             <CustomBreadCrumbs routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }, { title: workOrderData?.workOrderNumber }]} />
           </Box>
