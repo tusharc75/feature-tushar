@@ -40,6 +40,7 @@ type Props = {
   dispatch: Dispatch<TActios>;
   consumablesDialog: boolean;
   setConsumablesDialog: (value: boolean) => void;
+  tableHead?: React.ReactNode;
 };
 
 export type WorkOrderListRef = {
@@ -51,7 +52,7 @@ export type WorkOrderListRef = {
 };
 
 const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
-  ({ filterResourceQuery, globalFilters, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog }, ref) => {
+  ({ filterResourceQuery, globalFilters, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, tableHead = null }, ref) => {
     const toastConfig = useContext(CustomToastContext);
     const {
       state: { user, permissions, resources }
@@ -352,15 +353,22 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     return (
       <>
-        <>
+        <div className="[&_.table-container-v1>div]:mt-0">
           {columns ? (
-            <CustomReactTable height={'calc(100vh - 300px)'} columns={columns} state={state} dispatch={dispatch} renderedFrom={renderedFrom} />
+            <CustomReactTable
+              topLeftSlot={tableHead}
+              height={'calc(100vh - 300px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+            />
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-        </>
+        </div>
         {serviceOpen.open && (
           <WorkOrderDetailDialog
             workOrderId={serviceOpen?.id}
