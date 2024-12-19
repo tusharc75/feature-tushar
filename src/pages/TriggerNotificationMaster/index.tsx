@@ -189,6 +189,11 @@ const TriggerNotificationMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -236,7 +241,8 @@ const TriggerNotificationMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.triggerNotificationMaster?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.triggerNotificationMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.resource || ''}` : `selected ${resources?.triggerNotificationMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

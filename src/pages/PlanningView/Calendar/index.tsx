@@ -2,6 +2,7 @@ import {
   Box,
   Checkbox,
   CircularProgress,
+  IconButton,
   Popover,
   Table,
   TableBody,
@@ -16,8 +17,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Calendar, View, momentLocalizer } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import { View, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,10 +28,11 @@ import CustomCalendar from 'src/components/CustomCalendar';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, sidebarResource } from 'src/constants/helpers';
+import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-
+import CloseIcon from '@material-ui/icons/Close';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const localizer = momentLocalizer(moment);
 const formats = {
@@ -174,7 +175,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     endDate: moment().add(1, 'months').format('MM/DD/YYYY')
   });
 
-  const [isOpen, setOpen] = useState({ open: false, data: [], type: '' });
+  const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -323,7 +324,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     resource: selectedResource.resource,
                     type: 'debit',
                     data: d?.debit,
-                    isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                    //isRedAlert: debitQty > d?.availableByPlanning ? true : false
                   });
                 }
               }
@@ -365,15 +366,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }
               }
               else if (property === 'availableByPlanning') {
-                if (d?.availableByPlanning) {
-                  otherData.push({
-                    title: `Planned Quantity ${d?.availableByPlanning}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
-                    allDay: true,
-                    resource: selectedResource.resource
-                  });
-                }
+                otherData.push({
+                  title: `Planned Available ${d?.availableByPlanning || 0}`,
+                  start: new Date(d['date']),
+                  end: new Date(d['date']),
+                  allDay: true,
+                  type: 'availableByPlanning',
+                  resource: selectedResource.resource,
+                  isRedAlert: d?.availableByPlanning < 0 ? true : false
+                });
               }
               else if (['assetCount', 'date']?.includes(property)) {
               }
@@ -432,7 +433,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -484,10 +487,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
         window.open(`${routes.serializedAsset.path}${query}`);
       }
+      else if (data?.type === 'availableByPlanning') { }
       else if (data?.type) {
         setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
-        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
       }
     } else {
       if (data.resource) {
@@ -645,6 +649,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         backgroundColor = 'var(--success-light) ';
       } else if (obj?.type === 'reserved') {
         backgroundColor = 'var(--warning-light)';
+      } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+        backgroundColor = 'var(--danger-light)';
+        color = 'white';
       } else if (obj?.type === 'debit' && obj?.isRedAlert) {
         backgroundColor = 'var(--danger-light)';
         color = 'white';
@@ -837,22 +844,25 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               />
             </div>
           )}
-          {/* {isDataFetching && (
-            <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
-              <CircularProgress />
-            </span>
-          )} */}
         </div>
         {isOpen.open && (
           <Popover
             open={isOpen.open}
             anchorEl={anchor}
             onClose={() => {
-              setOpen({ open: false, data: [], type: '' });
+              setOpen({ open: false, data: [], eventData: null });
             }}
             style={{ minWidth: '300px' }}
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
+              <div className="flex justify-between items-center pt-1 pb-1 pr-1">
+                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
+                <HtmlTooltip title='Close'>
+                  <IconButton size='small' onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
+                    <CloseIcon fontSize='small' />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMore />}>
@@ -866,7 +876,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </Box>
           </Popover>
         )}
-      </div>
+      </div >
     </>
   );
 }

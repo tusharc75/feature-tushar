@@ -16,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateProductCategory from './CreateProductCategory';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,6 +26,8 @@ const ProductCategoryDetailPage = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [productCategoryData, setProductCategoryData] = useState(null);
@@ -163,7 +166,8 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.warehouse?.titleSingular?.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${headingLbl}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

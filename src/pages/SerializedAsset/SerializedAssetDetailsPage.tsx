@@ -632,7 +632,7 @@ const SerializedAssetDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.serializedAsset?.titleSingular} ?`}
+          message={`Are you sure you want to delete ${resources?.serializedAsset?.titleSingular?.toLowerCase()} : ${assetDetails?.assetNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

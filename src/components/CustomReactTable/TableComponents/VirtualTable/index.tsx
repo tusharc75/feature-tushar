@@ -43,12 +43,18 @@ export const VirtualTable = forwardRef(function (
     footerRowFound,
     stickyColumns,
     handleChangeCurrentEditingCellPosition,
-    vtableData
+    vtableData,
+    expanderWithCustomContent = false,
+    customContentHeight = 300,
+    customContent = () => null
   }: RnderTableProps & {
     columns: Column<any, unknown>[];
     sizes: number[];
     handleChangeCurrentEditingCellPosition: (rowId: string, colId: string) => void;
     vtableData: any[];
+    expanderWithCustomContent: boolean;
+    customContentHeight: number;
+    customContent: ({ row }: { row: any }) => React.ReactNode;
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -62,7 +68,11 @@ export const VirtualTable = forwardRef(function (
     count: isFooterVisible ? rows.length + 2 : rows.length + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
-    overscan: 2
+    overscan: 2,
+    measureElement:
+      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined
   });
 
   const columnVirtualizer = useVirtualizer({
@@ -190,6 +200,10 @@ export const VirtualTable = forwardRef(function (
               vtableData={vtableData}
               virtualPaddingLeft={virtualPaddingLeft}
               virtualPaddingRight={virtualPaddingRight}
+              rowVirtualizer={rowVirtualizer}
+              expanderWithCustomContent={expanderWithCustomContent}
+              customContentHeight={customContentHeight}
+              customContent={customContent}
             />
           </TableBody>
           {isFooterVisible && (

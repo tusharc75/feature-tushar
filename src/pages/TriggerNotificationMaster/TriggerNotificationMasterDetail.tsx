@@ -136,7 +136,7 @@ const TriggerNotificationMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.triggerNotificationMaster?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.triggerNotificationMaster?.titleSingular?.toLowerCase()} : ${triggerNotificationMasterData?.resource} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

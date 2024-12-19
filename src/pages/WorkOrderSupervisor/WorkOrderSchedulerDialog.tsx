@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import {
   ASSET_STATUS,
   CustomDialogTransition,
+  dateFormatForInputControl,
   serializedAsset,
   sidebarResource,
   workOrder
@@ -17,12 +18,21 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form} from 'formik';
+import moment from 'moment';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
+
+  const [initialData, setInitialData] = useState({
+    product: '',
+    asset: '',
+    service: [],
+    date: new Date()
+  });
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [servicesOptions, setServicesOptions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
@@ -56,11 +66,15 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`)
       .then(({ data: { data: lookupSerializedAssets } }) => {
-        setAssetOptions(lookupSerializedAssets['Serialized Asset'] || []);
+        let serializedAssets = lookupSerializedAssets['Serialized Asset'] || [];
+        const filteredAssets = serializedAssets?.filter(asset => asset?.product === selectedProduct);
+        setAssetOptions(filteredAssets || []);
         setLoading(false);
       })
-      .catch((err) => toastConfig.setToastConfig(err));
-  }, []);
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }, [selectedProduct]);
 
   useEffect(() => {
     axiosInstance()
@@ -80,6 +94,28 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       .catch((error) => toastConfig.setToastConfig(error));
   };
 
+  function validate(values) {
+    const errors = {};
+
+    if (!values.product) {
+      errors['product'] = 'Please select product';
+    }
+    if (!values.asset) {
+      errors['asset'] = 'Please select asset';
+    }
+    if (values.service.length === 0) {
+      errors['service'] = 'Please select service';
+    }
+    if (!values.date || !moment(values.date).isValid()) {
+      errors['date'] = 'Please select date';
+    } else if (moment(values.date).isBefore(moment(), 'day')) {
+      errors['date'] = 'Date cannot be in the past';
+    }
+
+    return errors;
+  };
+
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -93,16 +129,14 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       {productOptions.length > 0 ? (
         <Fragment>
           <Formik
-            initialValues={{
-              product: '',
-              asset: '',
-              service: [],
-              date: null
-            }}
+            initialValues={initialData}
+            validateOnMount
+            validate={validate}
             onSubmit={handleSubmit}
           >
-            {({ values, setFieldValue }) => (
-              <Form style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+            {({ touched, errors, values, setFieldValue }) => (
+              <Form autoComplete="off" autoCorrect="off" noValidate style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <CustomDialogHeader
                   isMinimized={!fullScreen}
                   onMinimizeMaximize={() => setFullScreen((prevState) => !prevState)}
@@ -119,9 +153,20 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           options={productOptions}
                           value={productOptions.find((data) => data.optionValue === values.product) || null}
                           getOptionLabel={(option) => option?.optionLabel || ''}
-                          onChange={(e, val) => setFieldValue('product', val?.optionValue || '')}
+                          onChange={(e, val) => {
+                            setFieldValue('product', val?.optionValue || '')
+                            setSelectedProduct(val?.optionValue);
+                          }}
                           renderInput={(params) => (
-                            <TextField {...params} label="Select Product" variant="outlined" required />
+                            <TextField
+                              {...params}
+                              label="Product"
+                              variant="outlined"
+                              required
+                              error={Boolean(errors.product && touched.product)}
+                              helperText={touched.product && errors.product}
+                            />
+
                           )}
                         />
                       </Grid>
@@ -134,7 +179,15 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) => setFieldValue('asset', val?.optionValue || '')}
                           renderInput={(params) => (
-                            <TextField {...params} label="Select Serialized Asset" variant="outlined" required />
+                            <TextField
+                              {...params}
+                              label="Serialized Asset"
+                              variant="outlined"
+                              required
+                              error={Boolean(errors.asset && touched.asset)}
+                              helperText={touched.asset && errors.asset}
+                            />
+
                           )}
                         />
                       </Grid>
@@ -151,8 +204,10 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Select Service"
+                              label="Service *"
                               variant="outlined"
+                              error={Boolean(errors.service && touched.service)}
+                              helperText={touched.service && errors.service}
                             />
                           )}
                         />
@@ -160,18 +215,23 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                       </Grid>
                       <Grid item xs={12}>
                         <KeyboardDatePicker
-                          required
+                          variant="inline" // Ensures the calendar is displayed inside the text field (no footer).
                           fullWidth
-                          autoOk
-                          clearable
                           size="small"
+                          margin="dense"
+                          autoOk
+                          required
                           inputVariant="outlined"
-                          value={values.date}
-                          label="Select Date"
+                          value={values.customDate}
+                          name="Date"
+                          label="Date"
+                          format={dateFormatForInputControl}
                           minDate={new Date()}
+                          error={touched['customDate'] && Boolean(errors['customDate'])}
+                          helperText={touched['customDate'] && errors['customDate']}
                           onChange={(date) => setFieldValue('date', date)}
-                          format="MM/dd/yyyy"
                         />
+
                       </Grid>
                     </Grid>
                   </div>

@@ -143,7 +143,7 @@ const WellMasterDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.wellMaster?.titleSingular.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.wellMaster?.titleSingular.toLowerCase()} : ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

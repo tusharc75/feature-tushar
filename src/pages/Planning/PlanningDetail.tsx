@@ -19,7 +19,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Step from '../DynamicForm/Step';
 import ManagePlanning from './ManagePlanning';
 import Material from './Material';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const PlanningDetail = () => {
   const renderedFrom = camelCase(sidebarResource.planning);
@@ -30,8 +29,6 @@ const PlanningDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [planningData, setPlanningData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -237,7 +234,7 @@ const PlanningDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.planning?.titleSingular?.toLowerCase()} : ${planningData?.planningNumber || ''}` : `selected ${resources?.planning?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.planning?.titleSingular?.toLowerCase()} : ${planningData?.planningNumber || ''} ?`}            
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -123,7 +123,7 @@ const TaxMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.taxMaster?.titleSingular?.toLowerCase()} ${taxMasterData.taxCode} ?`}
+          message={`Are you sure you want to delete ${resources?.taxMaster?.titleSingular?.toLowerCase()} : ${taxMasterData?.taxCode} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

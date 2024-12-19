@@ -397,7 +397,7 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete role ${deleteRecord?.name || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.role?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.role?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

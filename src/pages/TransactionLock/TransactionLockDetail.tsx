@@ -104,7 +104,7 @@ const TransactionLockDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${resources?.transactionLock?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.transactionLock?.titleSingular?.toLowerCase()} : ${transactionLockData?.lockNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

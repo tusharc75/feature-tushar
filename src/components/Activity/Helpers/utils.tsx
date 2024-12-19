@@ -1,12 +1,16 @@
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE } from '../../../constants/helpers';
-import routes from '../../Helpers/Routes';
 
-export const get_activity_resource = (permissions) => {
+export const get_activity_resource = (permissions, resources, singlular = true) => {
   var data = [];
   for (var key in ACTIVITY_RESOURCE) {
     if (permissions[key === 'quote' ? 'quoteBuilder' : key] && permissions[key === 'quote' ? 'quoteBuilder' : key]?.isRead === true) {
-      data.push({ optionLabel: routes[key].title, optionValue: key });
+      data.push({
+        optionLabel: singlular
+          ? resources[key === 'quote' ? 'quoteBuilder' : key]?.titleSingular
+          : resources[key === 'quote' ? 'quoteBuilder' : key]?.titlePlural,
+        optionValue: key
+      });
     }
   }
   return data;

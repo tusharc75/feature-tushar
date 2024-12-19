@@ -18,14 +18,11 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Approver from './Approver';
 import ManageIrtTicket from './ManageIrtTicket';
 import IrtTicketView from './View';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.irtTicket]);
   const [irtTicketData, setIrtTicketData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -157,7 +154,7 @@ const IrtTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.irtTicket?.titleSingular?.toLowerCase()} : ${irtTicketData?.irtTicketNumber}` : `selected ${resources?.irtTicket?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.irtTicket?.titleSingular?.toLowerCase()} : ${irtTicketData?.irtTicketNumber} ?`}          
           onClose={() => {
             setShowConfirmBox(false);
           }}
