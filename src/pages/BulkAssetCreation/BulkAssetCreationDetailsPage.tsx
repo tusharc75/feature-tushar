@@ -165,7 +165,12 @@ const BulkAssetCreationDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.bulkAssetCreation, title: resources?.bulkAssetCreation?.titlePlural }, { title: `${bulkAssetCreationData?.baNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.bulkAssetCreation, title: resources?.bulkAssetCreation?.titlePlural },
+              { title: `${bulkAssetCreationData?.baNumber}` }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -186,12 +191,8 @@ const BulkAssetCreationDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -205,14 +206,15 @@ const BulkAssetCreationDetailsPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
             {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
+              <>
                 <Steps
                   isNextStep={false}
                   nextStep={nextStep}
@@ -220,35 +222,34 @@ const BulkAssetCreationDetailsPage = () => {
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   isStepEnded={['Completed']?.includes(bulkAssetCreationData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
+                  stepFullScreen={stepFullScreen}
+                  setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
                   updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.bulkAssetCreation, bulkAssetCreationSteps[step]?.name, id)
+                    dynamicFormUpdateProcessStatus(sidebarResource.bulkAssetCreation, bulkAssetCreationSteps[step]?.name, id);
                   }}
                 />
-                <ContentFullScreen title={bulkAssetCreationStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                  {currentStep === 0 && (
-                    <Product
-                      bulkAssetCreationData={bulkAssetCreationData}
-                      setNextStep={setNextStep}
-                      renderedFrom={`${renderedFrom}_grid-1`}
-                      handleUpdateData={handleUpdateData}
-                      fetchData={fetchData}
-                      allowedToEdit={allowedToEdit}
-                    />
-                  )}
-                  {currentStep === 1 && (
-                    <SerializedAsset
-                      bulkAssetCreationData={bulkAssetCreationData}
-                      renderedFrom={`${renderedFrom}_grid-2`}
-                      allowedToEdit={allowedToEdit}
-                      stepFullScreen={stepFullScreen}
-                    />
-                  )}
-                </ContentFullScreen>
-              </Grid>
+                {currentStep === 0 && (
+                  <Product
+                    bulkAssetCreationData={bulkAssetCreationData}
+                    setNextStep={setNextStep}
+                    renderedFrom={`${renderedFrom}_grid-1`}
+                    handleUpdateData={handleUpdateData}
+                    fetchData={fetchData}
+                    allowedToEdit={allowedToEdit}
+                  />
+                )}
+                {currentStep === 1 && (
+                  <SerializedAsset
+                    bulkAssetCreationData={bulkAssetCreationData}
+                    renderedFrom={`${renderedFrom}_grid-2`}
+                    allowedToEdit={allowedToEdit}
+                    stepFullScreen={stepFullScreen}
+                  />
+                )}
+              </>
             )}
-          </Grid>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {

@@ -22,61 +22,14 @@ const PadData = ({ handleClose, column, data }) => {
   }, [data]);
 
   const fetchColumns = () => {
-    const newColumn = [
-      {
-        accessor: 'padName',
-        Header: 'Pad Name',
-        width: 200,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.padName?.optionLabel ? (
-              <p
-                className="link text-truncate"
-                onClick={() => {
-                  window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`);
-                }}
-              >
-                {row?.original?.padName?.optionLabel}
-              </p>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      },
-      {
-        accessor: 'customerAccount',
-        Header: 'Customer Account',
-        width: 200,
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.customerAccount?.optionLabel ? (
-              <p
-                className="link text-truncate"
-                onClick={() => {
-                  window.open(`${routes.customerAccountDetail.path}/${row?.original?.customerAccount?.optionValue}`);
-                }}
-              >
-                {row?.original?.customerAccount?.optionLabel}
-              </p>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      },
-      ...column
-    ];
+    const newColumn = [...column];
     const footerData = data;
     const dataKeys = Object.keys(footerData);
     const updatedColumn = newColumn?.map((col, index) => {
-      if (index === 0) {
-        return { ...col, Footer: 'Total' };
-      }
       if (dataKeys.includes(col.accessor)) {
         return {
           ...col,
-          Footer:
+          Footer: () =>
             footerData[col.accessor] && isNumber(footerData[col.accessor]) ? (
               col?.type === 'currencyNumber' ? (
                 `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}`
@@ -87,6 +40,9 @@ const PadData = ({ handleClose, column, data }) => {
               <NoDataCell />
             )
         };
+      }
+      if (col.accessor === 'asset' && col.Footer === 'Total') {
+        return { ...col, Footer: () => '' };
       }
       return col;
     });
@@ -101,27 +57,29 @@ const PadData = ({ handleClose, column, data }) => {
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`Pad Wise Data`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        <Grid item xs={12} md={12} sm={12} className="mt-3">
+        <div className="mt-2">
           {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              showArrangeView={false}
-              refreshGrid={fetchRecords}
-              hideSelection={true}
-              hideAction={true}
-              pagination={false}
-            />
+            <>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                showArrangeView={false}
+                refreshGrid={fetchRecords}
+                hideSelection={true}
+                hideAction={true}
+                pagination={false}
+              />
+            </>
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-        </Grid>
+        </div>
       </CustomDialogContent>
     </Dialog>
   );

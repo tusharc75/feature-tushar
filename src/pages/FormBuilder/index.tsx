@@ -29,6 +29,7 @@ const FormBuilder = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
   let { dynamicResource }: any = queryString.parse(history.location.search);
+  const { search } = state;
 
   const {
     state: { permissions, user, resources }
@@ -89,11 +90,15 @@ const FormBuilder = () => {
 
   useEffect(() => {
     fetchGetBrandResource();
-  }, []);
+  }, [ search ]);
 
   const closeHandler = () => {
     setArrangeViewOpen(false);
     fetchGetBrandResource();
+  };
+  
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const fetchGetBrandResource = () => {
@@ -136,24 +141,6 @@ const FormBuilder = () => {
             Add
           </Button>
         )}
-        <Button
-          variant="outlined"
-          className={'btn-outline-v1'}
-          onClick={() => {
-            setArrangeViewOpen(true);
-          }}
-        >
-          Change Resource Order
-        </Button>
-        <Button
-          variant="outlined"
-          className={'btn-outline-v1'}
-          onClick={() => {
-            setOpenSectionMaster(true);
-          }}
-        >
-          Sections
-        </Button>
       </>
     );
   };
@@ -162,9 +149,34 @@ const FormBuilder = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }]} />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outlined"
+            className={'btn-outline-v1'}
+            onClick={() => {
+              setArrangeViewOpen(true);
+            }}
+          >
+            Change Resource Order
+          </Button>
+          <Button
+            variant="outlined"
+            className={'btn-outline-v1'}
+            onClick={() => {
+              setOpenSectionMaster(true);
+            }}
+          >
+            Sections
+          </Button>
+        </div>
       </div>
       <CustomContainer>
-        <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
+        <ListingPageHeader 
+          rightSideContents={<RightSideContents />} 
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false} isAddButtonVisible={false} 
+        />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
         {openSectionMaster && <SectionMaster close={() => setOpenSectionMaster(false)} />}
         {columns ? (

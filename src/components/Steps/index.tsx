@@ -18,6 +18,7 @@ const Steps = ({
   setCurrentStep,
   isStepEnded,
   setStepFullScreen = null,
+  stepFullScreen = false,
   updateStatus = null,
   isPrevStep = true,
   handleNext = null,
@@ -81,7 +82,7 @@ const Steps = ({
         document.body.classList.remove('has-mobile-step');
       };
     } else {
-      return () => {};
+      return () => { };
     }
   }, [isMobile && !isTablet]);
 
@@ -110,11 +111,10 @@ const Steps = ({
       {isMobile && !isTablet ? (
         <MobileSteps
           id={steps[currentStep]?.title ? steps[currentStep]?.title : ''}
-          stepName={`${
-            activeStep + 1 > steps.length || isStepEnded
-              ? 'Completed'
-              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-          }`}
+          stepName={`${activeStep + 1 > steps.length || isStepEnded
+            ? 'Completed'
+            : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+            }`}
           nextButton={
             <Button
               size="small"
@@ -215,7 +215,7 @@ const Steps = ({
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (
-                      <HtmlTooltip title={`Full Screen`}>
+                      <HtmlTooltip title={`${stepFullScreen ? `Exit full` : `Full`} screen`}>
                         <Box className={styles.fullScrceen}>
                           <IconButton aria-label="Full Screen" onClick={setStepFullScreen} size="small">
                             <FiMaximize2 />

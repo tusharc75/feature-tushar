@@ -173,7 +173,11 @@ const TransferInventoryDetailPage = () => {
         }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
-        setAllowedToDelete(permissions?.transferInventory?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) && data?.canEdit);
+        setAllowedToDelete(
+          permissions?.transferInventory?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+            data?.canEdit
+        );
         setTransferInventoryData(data);
       })
       .catch((err) => {
@@ -227,7 +231,12 @@ const TransferInventoryDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.transferInventory, title: resources?.transferInventory?.titlePlural }, { title: transferInventoryData?.transferNumber }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.transferInventory, title: resources?.transferInventory?.titlePlural },
+              { title: transferInventoryData?.transferNumber }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -268,12 +277,8 @@ const TransferInventoryDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -287,23 +292,24 @@ const TransferInventoryDetailPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          {transferInventoryData && (
-            <Box>
-              <Steps
-                steps={transferInventorySteps}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                isNextStep={false}
-                nextStep={nextStep}
-                nextStepToolTip={nextStepToolTip}
-                updateStatus={(step: number) => {
-                  dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
-                }}
-                isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
-                setStepFullScreen={() => setStepFullScreen(true)}
-              />
-              <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            {transferInventoryData && (
+              <Box>
+                <Steps
+                  steps={transferInventorySteps}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  isNextStep={false}
+                  nextStep={nextStep}
+                  nextStepToolTip={nextStepToolTip}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
+                  }}
+                  isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+                  stepFullScreen={stepFullScreen}
+                  setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                />
                 {stepNames[currentStep] === 'Add Products' && (
                   <Products
                     transferInventoryData={transferInventoryData}
@@ -327,10 +333,10 @@ const TransferInventoryDetailPage = () => {
                     stepFullScreen={stepFullScreen}
                   />
                 )}
-              </ContentFullScreen>
-            </Box>
-          )}
-        </TabPanel>
+              </Box>
+            )}
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {

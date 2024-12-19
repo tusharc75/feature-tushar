@@ -14,7 +14,7 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import Filter from 'src/components/Filter';
+import Filter, { getErrors } from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -62,7 +62,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    selectedEntity
+    selectedEntity,
+    navigateToMainPage
   } = reportState;
 
   const resourceCamelCase = camelCase(selectedReport.resource);
@@ -568,19 +569,23 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         toastConfig.setToastConfig(err);
       });
   };
+
   const getFilteredColumn = (column) => {
     let tempColumn = column;
     if (resourceCamelCase === 'dailyVolumeReport') {
-      if (!selectedData?.dayWise?.value) {
+      const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise')
+      if (!dayWiseFilter || (dayWiseFilter && dayWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
-      if (selectedData?.padWise?.value) {
+      const padWiseFilter = deepFilters?.find((e) => e.field === 'padWise')
+      if (padWiseFilter && padWiseFilter?.term === 'Yes') {
         tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
       }
       return tempColumn;
     }
     if (resourceCamelCase === 'volumeReport') {
-      if (!selectedData?.unitWise?.value) {
+      const unitWiseFilter = deepFilters?.find((e) => e.field === 'unitWise')
+      if (!unitWiseFilter || (unitWiseFilter && unitWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['asset', 'padName', 'customerAccount']?.includes(e.accessor));
       }
       return tempColumn;
@@ -593,7 +598,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, []);
 
   React.useEffect(() => {
-    if (showGrid) {
+    if (showGrid && getErrors(defaultColumns, deepFilters).errorColumns.length === 0) {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
@@ -763,6 +768,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           setFilterTerm={setFilterTerm}
           defaultColumns={defaultColumns}
           reportConfig={reportConfig}
+          onCloseWithErrors={navigateToMainPage}
         />
       )}
       {showPriceHistory.open && (

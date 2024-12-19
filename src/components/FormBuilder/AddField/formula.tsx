@@ -1,69 +1,57 @@
-import { useState, useRef } from "react";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import Box from "@material-ui/core/Box";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import { checkFormula } from "../../../constants/formulaUtility";
-import Chip from "@material-ui/core/Chip";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import Grid from "@material-ui/core/Grid";
-import HtmlTooltip from "src/components/CustomTooltipTitle";
-import { IconButton } from "@material-ui/core";
+import { useState, useRef } from 'react';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import Box from '@material-ui/core/Box';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import { checkFormula } from '../../../constants/formulaUtility';
+import Chip from '@material-ui/core/Chip';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import Grid from '@material-ui/core/Grid';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { IconButton } from '@material-ui/core';
 import { FiMaximize2 } from 'react-icons/fi';
-import ContentFullScreen from "src/components/ContentFullScreen";
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
-
   const [formulaError, setFormulaError] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const inputRef = useRef<any>();
 
   const handleCheckSyntax = () => {
-    if (values["formula"] && values["formula"] !== "") {
+    if (values['formula'] && values['formula'] !== '') {
       let inputValues = {};
-      values["inputFields"] &&
-        values["inputFields"].forEach((_input) => {
+      values['inputFields'] &&
+        values['inputFields'].forEach((_input) => {
           inputValues[_input] = 1;
         });
-      if (checkFormula(values["formula"], inputValues)) {
-        setFormulaError("Valid Formula");
+      if (checkFormula(values['formula'], inputValues)) {
+        setFormulaError('Valid Formula');
       } else {
-        setFormulaError("Invalid Formula");
+        setFormulaError('Invalid Formula');
       }
     }
   };
 
   const handleAddInputField = (field) => {
     let pushPosition = inputRef.current.selectionStart;
-    if (!values["formula"]) {
-      values["formula"] = "";
+    if (!values['formula']) {
+      values['formula'] = '';
     }
-    var new_formula = [
-      values["formula"].slice(0, pushPosition),
-      field,
-      values["formula"].slice(pushPosition),
-    ].join("");
-    setFieldValue("formula", new_formula);
+    var new_formula = [values['formula'].slice(0, pushPosition), field, values['formula'].slice(pushPosition)].join('');
+    setFieldValue('formula', new_formula);
     inputRef.current.focus();
   };
 
   const convertLabeltoValue = (value) => {
     const result = [];
     value.forEach((_v) => {
-      if (
-        fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)
-          .length
-      ) {
-        result.push(
-          fields.filter(
-            (data) => data.fieldLabel === _v || data.fieldName === _v
-          )[0].fieldName
-        );
+      if (fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v).length) {
+        result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldName);
       } else {
         result.push(_v);
       }
@@ -75,11 +63,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
     const result = [];
     value.forEach((_v) => {
       if (fields.filter((data) => data.fieldName === _v).length) {
-        result.push(
-          fields.filter(
-            (data) => data.fieldLabel === _v || data.fieldName === _v
-          )[0].fieldLabel
-        );
+        result.push(fields.filter((data) => data.fieldLabel === _v || data.fieldName === _v)[0].fieldLabel);
       } else {
         result.push(_v);
       }
@@ -91,8 +75,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
     const data = fields?.find((d) => d.fieldName === label);
     if (data) {
       return `${data.fieldLabel} - ${label}`;
-    }
-    else {
+    } else {
       return `${label}`;
     }
   };
@@ -101,15 +84,18 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
     <Box>
       <Grid container justifyContent="flex-end">
         <HtmlTooltip title={`Full Screen`}>
-          <IconButton aria-label="Full Screen" onClick={() => {
-            setStepFullScreen(true)
-          }}
-            size="small">
+          <IconButton
+            aria-label="Full Screen"
+            onClick={() => {
+              setStepFullScreen(true);
+            }}
+            size="small"
+          >
             <FiMaximize2 />
           </IconButton>
         </HtmlTooltip>
       </Grid>
-      <ContentFullScreen title={'Formula'} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+      <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
         <Box>
           <FormControl variant="outlined" fullWidth margin="dense">
             <Autocomplete
@@ -125,23 +111,11 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                   })
               }
               getOptionLabel={(option) => option}
-              value={
-                values["inputFields"]
-                  ? convertValuetoLabel(values["inputFields"])
-                  : []
-              }
+              value={values['inputFields'] ? convertValuetoLabel(values['inputFields']) : []}
               renderTags={(value: string[], getTagProps) =>
-                value.map((option: string, index: number) => (
-                  <Chip
-                    variant="outlined"
-                    label={option}
-                    {...getTagProps({ index })}
-                  />
-                ))
+                value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
               }
-              onChange={(e, value) =>
-                setFieldValue("inputFields", convertLabeltoValue(value))
-              }
+              onChange={(e, value) => setFieldValue('inputFields', convertLabeltoValue(value))}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -156,15 +130,10 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               )}
             />
           </FormControl>
-          {values["inputFields"] && values["inputFields"].length > 0 && (
+          {values['inputFields'] && values['inputFields'].length > 0 && (
             <Box pt={0.5} pb={0.5}>
-              {values["inputFields"].map((_field) => (
-                <Chip
-                  className="ml-1 cursor-pointer mb-1"
-                  key={_field}
-                  label={generateLabel(_field)}
-                  onClick={() => handleAddInputField(_field)}
-                />
+              {values['inputFields'].map((_field) => (
+                <Chip className="mb-1 ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
               ))}
             </Box>
           )}
@@ -181,21 +150,21 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               type="text"
               placeholder="Formula (return field1 + field2)"
               inputRef={inputRef}
-              value={values["formula"]}
+              value={values['formula']}
               error={touched['formula'] && Boolean(errors['formula'])}
               helperText={touched['formula'] && errors['formula']}
               onKeyPress={(event) => {
                 event.stopPropagation();
               }}
               onChange={(e) => {
-                setFieldValue("formula", e.target.value);
+                setFieldValue('formula', e.target.value);
               }}
             />
             <Grid container>
               <Grid item xs={6}>
                 {formulaError && (
                   <Typography variant="caption" display="block">
-                    {formulaError}{" "}
+                    {formulaError}{' '}
                   </Typography>
                 )}
                 <Button size="small" onClick={handleCheckSyntax} color="primary">
@@ -203,25 +172,18 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                {values["type"] === "currencyAmount" && (
+                {values['type'] === 'currencyAmount' && (
                   <FormControl fullWidth margin="dense" variant="outlined">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Formula applied on Currency
-                    </InputLabel>
+                    <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={values["formulaOnCurrency"]}
-                      onChange={(e) =>
-                        setFieldValue("formulaOnCurrency", e.target.value)
-                      }
+                      value={values['formulaOnCurrency']}
+                      onChange={(e) => setFieldValue('formulaOnCurrency', e.target.value)}
                       label="Formula applied on Currency"
                       name="formulaOnCurrency"
                     >
-                      {values["displayCurrency"] &&
-                        values["displayCurrency"].map((_currency) => (
-                          <MenuItem value={_currency}>{_currency}</MenuItem>
-                        ))}
+                      {values['displayCurrency'] && values['displayCurrency'].map((_currency) => <MenuItem value={_currency}>{_currency}</MenuItem>)}
                     </Select>
                   </FormControl>
                 )}

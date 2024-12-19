@@ -4,6 +4,7 @@ import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
 import styles from './index.module.scss';
 import { uniqBy } from 'lodash';
+import { cn } from 'src/constants/helpers';
 
 export * from './hooks/useCardReducer';
 
@@ -94,8 +95,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   }, [containerRef]);
 
   return (
-    <div className={`${styles.container} ${className}`} {...others} ref={containerRef}>
-      <div className="flex snap-x  snap-mandatory gap-[10px] overflow-auto py-4 md:scroll-px-[24px]">
+    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
+      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
           return (
             <div
@@ -114,7 +115,11 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   <span>
                     <Checkbox
                       size="small"
-                      checked={selectedRecords?.length && data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length}
+                      checked={
+                        selectedRecords?.length &&
+                        selectedRecords?.filter((r) => r?.status === col)?.length &&
+                        data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length
+                      }
                       onChange={(e) => {
                         if (e?.target?.checked) {
                           dispatch({ type: 'selection', selectedRecords: [...uniqBy([...selectedRecords, ...data[col]], '_id')] });

@@ -26,7 +26,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
   const findSteps = () => {
     setStepLoading(true);
     let api = `/dynamic-form/steps?resourcePolicyId=${resourcePolicyId}&tabId=${tab?._id}`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}` 
+    if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
     axiosInstance()
       .get(api)
       .then((res) => {
@@ -43,7 +43,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
   };
 
   useEffect(() => {
-    if ((tab?._id && (resourcePolicyId || workflowId))) {
+    if (tab?._id && (resourcePolicyId || workflowId)) {
       findSteps();
     }
   }, [tab, resourcePolicyId, workflowId]);
@@ -60,7 +60,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
     <>
       {steps && steps?.length ? (
         tab?.stepsStyle === STEPS_STYLE.step ? (
-          <>
+          <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             <Steps
               isNextStep={false}
               nextStep={steps[currentStep]?.stepDataRequired ? nextStep : true}
@@ -68,21 +68,20 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               isStepEnded={false}
-              setStepFullScreen={() => setStepFullScreen(true)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
             />
-            <ContentFullScreen title={steps[currentStep]?.stepName} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              <View
-                step={steps[currentStep]}
-                allowedToEdit={allowedToEdit}
-                data={data}
-                resource={resource}
-                resourceId={resourceId}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-                referenceData={referenceData}
-              />
-            </ContentFullScreen>
-          </>
+            <View
+              step={steps[currentStep]}
+              allowedToEdit={allowedToEdit}
+              data={data}
+              resource={resource}
+              resourceId={resourceId}
+              setNextStep={setNextStep}
+              stepFullScreen={stepFullScreen}
+              referenceData={referenceData}
+            />
+          </ContentFullScreen>
         ) : tab?.stepsStyle === STEPS_STYLE.sideBar ? (
           <>
             <div className={`grid ${isExpanded ? 'md:grid-cols-[300px_1fr]' : 'md:grid-cols-[100px_1fr]'} gap-3 transition-[all] duration-300`}>

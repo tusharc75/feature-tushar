@@ -229,52 +229,49 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
 
   return (
     <>
-      <div>
-        <Box display="flex" flexDirection="column"></Box>
-        <div className={cn('relative min-h-[400px] [&_.rbc-agenda-empty]:hidden')}>
-          <CustomCalendar
-            defaultDate={defaultDate}
-            defaultView={'month'}
-            events={events}
-            formats={formats}
-            localizer={localizer}
-            popup={!(isMobile || isTablet)}
-            messages={{
-              agenda: 'List'
-            }}
-            views={['month', 'week', 'day', 'agenda']}
-            onView={setView}
-            view={view}
-            eventPropGetter={(obj: any) => {
-              const style = setEventStyle();
-              return {
-                style
-              };
-            }}
-            components={{
-              agenda: {
-                event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
-              }
-            }}
-            onNavigate={(date) => {
-              onNavigate(date);
-            }}
-            onSelectEvent={(data: any, event: any) => {
-              if (reference === 'repairOrder') {
-                fetchRepairOrderCompetencies(data.id);
-                setAnchor(event.nativeEvent.target);
-              } else {
-                setOpen({ open: true, id: data.id });
-              }
-            }}
-          />
+      <div className={cn('relative min-h-[400px] [&_.rbc-toolbar]:pt-0')}>
+        <CustomCalendar
+          defaultDate={defaultDate}
+          defaultView={'month'}
+          events={events}
+          formats={formats}
+          localizer={localizer}
+          popup={!(isMobile || isTablet)}
+          messages={{
+            agenda: 'List'
+          }}
+          views={['month', 'week', 'day', 'agenda']}
+          onView={setView}
+          view={view}
+          eventPropGetter={(obj: any) => {
+            const style = setEventStyle();
+            return {
+              style
+            };
+          }}
+          components={{
+            agenda: {
+              event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
+            }
+          }}
+          onNavigate={(date) => {
+            onNavigate(date);
+          }}
+          onSelectEvent={(data: any, event: any) => {
+            if (reference === 'repairOrder') {
+              fetchRepairOrderCompetencies(data.id);
+              setAnchor(event.nativeEvent.target);
+            } else {
+              setOpen({ open: true, id: data.id });
+            }
+          }}
+        />
 
-          {isDataFetching && (
-            <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
-              <CircularProgress />
-            </span>
-          )}
-        </div>
+        {isDataFetching && (
+          <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
+            <CircularProgress />
+          </span>
+        )}
       </div>
       {openRepairPopup.open && (
         <Popover
@@ -305,7 +302,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
                       </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <RenderTable data={d.competencies} resources={resources}/>
+                      <RenderTable data={d.competencies} resources={resources} />
                     </AccordionDetails>
                   </Accordion>
                 ))

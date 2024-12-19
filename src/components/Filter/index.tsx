@@ -1,8 +1,7 @@
 import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
-import { isArray, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import { MdChevronRight } from 'react-icons/md';
 import { TbLayoutSidebarFilled } from 'react-icons/tb';
@@ -13,44 +12,10 @@ import CheckBox from 'src/components/Filter/CheckBox';
 import DateTime from 'src/components/Filter/DateTime';
 import DropDown from 'src/components/Filter/DropDown';
 import SingleLine from 'src/components/Filter/SingleLine';
+import { getErrors, getLabel, isCLearFilterButtonVisible, useClassForFewSeconds } from 'src/components/Filter/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
-
-const getLabel = (field, deepFilters, filterByIds) => {
-  if (field?.type === 'singleLine' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length > 0) {
-    return isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
-      ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
-      : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (field?.type === 'checkBox' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term) {
-    return deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (
-    ['dropDown', 'multiSelect']?.includes(field?.type) &&
-    field?.lookup &&
-    filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length > 0
-  ) {
-    return filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length;
-  }
-  if (['dropDown', 'multiSelect']?.includes(field?.type) && !field?.lookup && deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length) {
-    return isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
-      ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
-      : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (['date'].includes(field.type)) {
-    const found = deepFilters?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
-    if (found.length > 0) {
-      return found.length;
-    }
-  }
-  return '';
-};
-
-const isCLearFilterButtonVisible = (defaultColumnsMap: { [key: string]: boolean }, deepFilters = [], filterByIds = []) => {
-  const newData = uniqBy([...deepFilters, ...filterByIds], (d) => d.field).map((d) => d.field.replace('from_', '').replace('to_', ''));
-  return newData.filter((d) => !defaultColumnsMap[d]).length > 0;
-};
 
 const Filter = ({
   onClose,
@@ -66,13 +31,22 @@ const Filter = ({
   defaultColumns = [],
   reportConfig = null,
   filterTitle = '',
-  loading = false
+  loading = false,
+  onCloseWithErrors = null
 }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [searchVal, setSearchVal] = useState('');
   const isMobile = useMediaQuery('(max-width:767px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+  const [checkForErrors, setCheckForErrors] = useState(false);
+  const { addClass, className } = useClassForFewSeconds('animate-shake', 200);
+
+  const uniqueValues = useMemo(() => {
+    return uniqBy([...deepFilters, ...filterByIds], (d) => d.field);
+  }, [deepFilters, filterByIds]);
+
   const defaultColumnsMap = useMemo(() => {
     return defaultColumns?.reduce((a, c) => {
       a[c.fieldName] = true;
@@ -139,6 +113,48 @@ const Filter = ({
     setIsSidebarOpen((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (checkForErrors) {
+      const { errors } = getErrors(defaultColumns, uniqueValues);
+      setErrors(errors);
+    }
+  }, [checkForErrors, defaultColumns, uniqueValues]);
+
+  const handleApplyFilter = () => {
+    if (defaultColumns?.length > 0) {
+      const { errors, errorColumns } = getErrors(defaultColumns, uniqueValues);
+      setErrors(errors);
+      setCheckForErrors(true);
+      if (errorColumns.length > 0) {
+        setSelectedField(errorColumns[0]);
+        addClass();
+      } else {
+        onApplyFilter();
+      }
+    } else {
+      onApplyFilter();
+    }
+  };
+
+  const handleClose = () => {
+    if (defaultColumns?.length > 0) {
+      const { errors, errorColumns } = getErrors(defaultColumns, uniqueValues);
+      setErrors(errors);
+      setCheckForErrors(true);
+      if (errorColumns.length > 0) {
+        if (typeof onCloseWithErrors === 'function') {
+          onCloseWithErrors();
+        } else {
+          onClose();
+        }
+      } else {
+        handleApplyFilter();
+      }
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <Dialog
       open={true}
@@ -148,7 +164,7 @@ const Filter = ({
       fullScreen={isMobile}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          onClose();
+          handleClose();
         }
       }}
       PaperProps={{
@@ -167,7 +183,7 @@ const Filter = ({
             See results in your view based on the filters you select here.
           </p>
         </div>
-        <IconButton onClick={onClose} size="small">
+        <IconButton onClick={handleClose} size="small">
           <Close />
         </IconButton>
       </div>
@@ -192,33 +208,36 @@ const Filter = ({
                 <SearchBox value={searchVal} onChange={handleSearch} disabled={loading} />
                 {isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
               </div>
-              <ul className={cn(' space-y-2 overflow-y-auto', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
+              <ul className={cn(' space-y-2 overflow-y-auto overflow-x-hidden', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
                 {!loading
                   ? filteredOptions?.map((o, i) => {
-                    return (
-                      <li
-                        key={i}
-                        className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
-                        data-active={selectedField?.fieldName === o?.fieldName}
-                        onClick={() => {
-                          setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
-                          setIsSidebarOpen(false);
-                        }}
-                      >
-                        <img src={listFilter} alt={''} />
-                        {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                        <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
-                          {getLabel(o, deepFilters, filterByIds)}
-                        </span>
-                        <MdChevronRight className="ml-auto text-[--new-theme-color]" />
-                      </li>
-                    );
-                  })
+                      return (
+                        <li
+                          key={i}
+                          className={cn(
+                            'flex cursor-pointer list-none items-center gap-[5px] rounded-lg px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800',
+                            errors[o?.fieldName] ? ` ${className} border border-red-500` : 'border'
+                          )}
+                          data-active={selectedField?.fieldName === o?.fieldName}
+                          onClick={() => {
+                            setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
+                            setIsSidebarOpen(false);
+                          }}
+                        >
+                          <img src={listFilter} alt={''} />
+                          {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
+                          <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                            {getLabel(o, uniqueValues)}
+                          </span>
+                          <MdChevronRight className="ml-auto text-[--new-theme-color]" />
+                        </li>
+                      );
+                    })
                   : [...Array(9).keys()].map((l) => (
-                    <li className="list-none">
-                      <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
-                    </li>
-                  ))}
+                      <li className="list-none">
+                        <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
+                      </li>
+                    ))}
               </ul>
             </div>
           </div>
@@ -293,7 +312,7 @@ const Filter = ({
         </div>
       </CustomDialogContent>
       <div className="flex justify-between px-[--px] py-[--py] pt-0">
-        {isCLearFilterButtonVisible(defaultColumnsMap, deepFilters, filterByIds) ? (
+        {isCLearFilterButtonVisible(defaultColumnsMap, uniqueValues) ? (
           <ThemeButton iconForMobile={false} onClick={handleClearAllFilter}>
             Clear Filters
           </ThemeButton>
@@ -305,41 +324,7 @@ const Filter = ({
           borderColor="none"
           color="primary"
           onClick={() => {
-            if (defaultColumns?.length > 0) {
-              let isValid = true;
-              for (const c of defaultColumns) {
-                if (
-                  c?.type === 'date' &&
-                  !(
-                    deepFilters?.find((d) => d?.field === `from_${c?.fieldName}`)?.term &&
-                    deepFilters?.find((d) => d?.field === `to_${c?.fieldName}`)?.term
-                  )
-                ) {
-                  isValid = false;
-                  setSelectedField(c);
-                  return;
-                }
-                if (['singleLine']?.includes(c?.type) && !deepFilters?.find((d) => d?.field === c?.fieldName)?.term?.length) {
-                  isValid = false;
-                  setSelectedField(c);
-                  return;
-                }
-                if (
-                  ['dropDown', 'multiSelect']?.includes(c?.type) &&
-                  !c?.lookup &&
-                  !deepFilters?.find((d) => d?.field === c?.fieldName)?.term?.length
-                ) {
-                  isValid = false;
-                  setSelectedField(c);
-                  return;
-                }
-              }
-              if (isValid) {
-                onApplyFilter();
-              }
-            } else {
-              onApplyFilter();
-            }
+            handleApplyFilter();
           }}
         >
           Apply Filters
@@ -378,3 +363,5 @@ const ToggleSidebar = ({ toggleSidebar }) => (
     <TbLayoutSidebarFilled className="text-[--new-theme-color]" />
   </IconButton>
 );
+
+export { getErrors };

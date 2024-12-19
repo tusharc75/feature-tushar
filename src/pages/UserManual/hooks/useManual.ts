@@ -27,7 +27,7 @@ const reducer = (state: UseManualState, action: ManualActions) => {
       const pageData = getPageDataByUrl(state.manualData, action.payload);
       const updatedState = { ...state, currentRoute: action.payload };
       const sections = getSectionFromUrl(action.payload);
-      document.title = `${sections?.[1] ? sections[1] + ' | ' : ''} ${pageTitle}`;
+      document.title = `${sections?.[0] ? sections?.[0] + ' | ' : ''} ${pageTitle}`;
       if (pageData) {
         updatedState.pageData = [...pageData];
       }
@@ -78,6 +78,7 @@ const useManual = () => {
       const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
+  
       if (scrollKey) {
         setTimeout(() => {
           const element = document.querySelector(scrollKey);
@@ -87,8 +88,8 @@ const useManual = () => {
         }, 0);
       }
     }
-
   }, []);
+  
 
   useEffect(() => {
     const handlePopstate = () => {

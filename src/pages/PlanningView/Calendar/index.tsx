@@ -47,57 +47,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-        {
-          label: resources?.warehouse?.titlePlural,
-          value: 'Warehouse',
-          key: 'warehouse'
-        }
-      ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-        {
-          label: resources?.product?.titlePlural,
-          value: 'Product',
-          key: 'product'
-        }
-      ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-        {
-          label: resources?.serializedAsset?.titlePlural,
-          value: 'Serialized Asset',
-          key: 'asset'
-        }
-      ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-        {
-          label: resources?.serviceMaster?.titlePlural,
-          value: 'Service Master',
-          key: 'service'
-        }
-      ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-        {
-          label: resources?.customerAccount?.titlePlural,
-          value: 'Customer Account',
-          key: 'customerAccount'
-        }
-      ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-        {
-          label: resources?.competencies?.titlePlural,
-          value: 'Competencies',
-          key: 'competencies'
-        }
-      ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
       : [])
   ];
 
@@ -323,12 +323,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     allDay: true,
                     resource: selectedResource.resource,
                     type: 'debit',
-                    data: d?.debit,
+                    data: d?.debit
                     //isRedAlert: debitQty > d?.availableByPlanning ? true : false
                   });
                 }
-              }
-              else if (property === 'credit') {
+              } else if (property === 'credit') {
                 if (d?.credit?.length) {
                   otherData.push({
                     title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
@@ -340,8 +339,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     data: d?.credit
                   });
                 }
-              }
-              else if (property === 'reserved') {
+              } else if (property === 'reserved') {
                 if (d?.reserved?.length) {
                   otherData.push({
                     title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
@@ -353,8 +351,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     data: d?.reserved
                   });
                 }
-              }
-              else if (property === 'inventory') {
+              } else if (property === 'inventory') {
                 if (d?.inventory) {
                   otherData.push({
                     title: `Inventory ${d?.inventory}`,
@@ -364,8 +361,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     resource: selectedResource.resource
                   });
                 }
-              }
-              else if (property === 'availableByPlanning') {
+              } else if (property === 'availableByPlanning') {
                 otherData.push({
                   title: `Planned Available ${d?.availableByPlanning || 0}`,
                   start: new Date(d['date']),
@@ -375,10 +371,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   resource: selectedResource.resource,
                   isRedAlert: d?.availableByPlanning < 0 ? true : false
                 });
-              }
-              else if (['assetCount', 'date']?.includes(property)) {
-              }
-              else if (d[property]) {
+              } else if (['assetCount', 'date']?.includes(property)) {
+              } else if (d[property]) {
                 otherData.push({
                   title: `${property} ${d[property]}`,
                   start: new Date(d['date']),
@@ -478,17 +472,28 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const handleClick = (data, target) => {
     if (selectedResource.resource === sidebarResource.product) {
       if (data?.type === 'assetStatus') {
-        let query = `?assetStatus=${data?.status}`
+        let query = `?assetStatus=${data?.status}`;
         if (selectedLookUpResourceData?.product) {
-          query += `&product=${encodeURIComponent(JSON.stringify(selectedLookUpResourceData?.product?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } })))}`
+          query += `&product=${encodeURIComponent(
+            JSON.stringify(
+              selectedLookUpResourceData?.product?.map((e) => {
+                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+              })
+            )
+          )}`;
         }
         if (selectedLookUpResourceData?.warehouse) {
-          query += `&warehouse=${encodeURIComponent(JSON.stringify(selectedLookUpResourceData?.warehouse?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } })))}`
+          query += `&warehouse=${encodeURIComponent(
+            JSON.stringify(
+              selectedLookUpResourceData?.warehouse?.map((e) => {
+                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+              })
+            )
+          )}`;
         }
         window.open(`${routes.serializedAsset.path}${query}`);
-      }
-      else if (data?.type === 'availableByPlanning') { }
-      else if (data?.type) {
+      } else if (data?.type === 'availableByPlanning') {
+      } else if (data?.type) {
         setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
@@ -814,7 +819,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               />
             </>
           ) : (
-            <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
+            <div className="relative min-h-[500px] ">
               <CustomCalendar
                 defaultDate={defaultDate}
                 defaultView={'month'}
@@ -839,7 +844,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   onNavigate(date);
                 }}
                 onSelectEvent={(data: any, event: any) => {
-                  handleClick(data, event.nativeEvent.target)
+                  handleClick(data, event.nativeEvent.target);
                 }}
               />
             </div>
@@ -855,11 +860,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             style={{ minWidth: '300px' }}
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
-              <div className="flex justify-between items-center pt-1 pb-1 pr-1">
+              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
                 <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
-                <HtmlTooltip title='Close'>
-                  <IconButton size='small' onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
-                    <CloseIcon fontSize='small' />
+                <HtmlTooltip title="Close">
+                  <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
+                    <CloseIcon fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
               </div>
@@ -876,7 +881,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </Box>
           </Popover>
         )}
-      </div >
+      </div>
     </>
   );
 }

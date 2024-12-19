@@ -1,12 +1,14 @@
-import { groupBy, uniqBy } from 'lodash';
+import { groupBy, kebabCase, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import routes from 'src/components/Helpers/Routes';
 import { REPORT_LIST } from 'src/constants/helpers';
 import { CustomReport, FavouriteReport, Report, ReportState, ReportWithSection, UseReportActions } from 'src/pages/ReportsNew/types';
 import { createUserFavouriteObj, handleGetRoute } from 'src/pages/ReportsNew/utils';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const initialState: ReportState = {
   customReports: [],
@@ -49,6 +51,10 @@ const reducer = (state: ReportState, action: UseReportActions) => {
 };
 
 const useReport = () => {
+  const history = useHistory();
+  const location = useLocation();
+  const { pathname } = location;
+
   const {
     state: { permissions, selectedEntity, resources }
   } = useData();
@@ -56,7 +62,8 @@ const useReport = () => {
   const reportList = useMemo(() => {
     return REPORT_LIST.filter((f) => permissions[f.permission]?.isRead).map((d) => ({
       ...d,
-      label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title
+      label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title,
+      route: `/reports${d.type !== 'dynamic' ? `/${kebabCase(d.key)}/` + kebabCase(d.type) : routes[d.key]?.path}`
     }));
   }, [permissions, resources]);
   const data = useMemo(() => groupBy(reportList, 'section'), [reportList]);
@@ -83,6 +90,7 @@ const useReport = () => {
   const setColumns = useCallback((payload: TColType[] | null) => dispatch({ type: 'setColumns', payload }), []);
   const setIsColumnsLoading = useCallback((payload: boolean) => dispatch({ type: 'setIsColumnsLoading', payload }), []);
   const setFavouritList = useCallback((payload: string[]) => dispatch({ type: 'setFavouritList', payload }), []);
+  const navigateToMainPage = useCallback((): void => history.push(routes.reports.path), [history]);
 
   const filterRecords = useCallback(
     (searchQuery = ''): ReportWithSection[] => {
@@ -100,13 +108,15 @@ const useReport = () => {
       setResourceColumns(null);
       if (selectedReport?.route === payload.route) {
         dispatch({ type: 'setSelectedReport', payload: null });
+        navigateToMainPage();
       } else {
         const data = handleGetRoute(payload);
         dispatch({ type: 'setSelectedReport', payload: data });
         setIsColumnsLoading(true);
+        history.push(payload.route);
       }
     },
-    [setColumns, setResourceColumns, selectedReport?.route, setIsColumnsLoading]
+    [setColumns, setResourceColumns, selectedReport?.route, setIsColumnsLoading, history, navigateToMainPage]
   );
 
   const filterValues = useCallback(
@@ -141,8 +151,9 @@ const useReport = () => {
     let {
       data: { data }
     } = await axiosInstance().get(`custom-report`);
-    setCustomReports(data);
-    setFilteredCustomReports(data);
+    const customReports = data?.map((report) => ({ ...report, route: `/reports/custom-report/${report._id}`, label: report.customReportName }));
+    setCustomReports(customReports);
+    setFilteredCustomReports(customReports);
   }, [setCustomReports, setFilteredCustomReports]);
 
   const fetchFavourites = useCallback(() => {
@@ -210,6 +221,25 @@ const useReport = () => {
     filterValues(searchQuery);
   }, [searchQuery, filterValues]);
 
+  // to sync with route
+  useEffect(() => {
+    if (selectedReport?.route !== pathname) {
+      setColumns(null);
+      setResourceColumns(null);
+      const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
+      if (currentRouteData) {
+        const data = handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
+        dispatch({ type: 'setSelectedReport', payload: data });
+        setIsColumnsLoading(true);
+      }
+    }
+    if (pathname === routes.reports.path) {
+      setColumns(null);
+      setResourceColumns(null);
+      dispatch({ type: 'setSelectedReport', payload: null });
+    }
+  }, [customReports, pathname, reportList, selectedReport?.route, setColumns, setIsColumnsLoading, setResourceColumns]);
+
   return {
     ...state,
     resources,
@@ -224,7 +254,8 @@ const useReport = () => {
     setColumns,
     setIsColumnsLoading,
     setUserFavourites,
-    isFavourite
+    isFavourite,
+    navigateToMainPage
   };
 };
 
