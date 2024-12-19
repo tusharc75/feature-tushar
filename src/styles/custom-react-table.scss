@@ -592,9 +592,6 @@ $isAppliedBillDark: #234623;
   tbody tr:not(:last-child) td {
     // border-bottom: 1px solid var(--common-border-color);
   }
-  tbody.with-footer tr:last-child {
-    border-bottom: 0px;
-  }
 
   tfoot {
     tr {

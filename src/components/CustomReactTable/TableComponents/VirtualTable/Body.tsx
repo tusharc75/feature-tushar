@@ -42,6 +42,7 @@ export const VirtualTableBody = memo(
               key={virtualRow.index}
               data-index={virtualRow.index}
               ref={rowVirtualizer.measureElement}
+              className="tr"
               style={{ transform: `translateY(${virtualRow.start}px)`, position: 'absolute', willChange: 'transform', width: '100%' }}
             >
               <TableRow
