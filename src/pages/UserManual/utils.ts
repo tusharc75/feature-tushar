@@ -6,8 +6,8 @@ function getLastPart(url: string): string | null {
   if (pos === -1) {
     return '/';
   }
-  const lastPart = url.substring(pos + homeLink.length);
-  return decodeURIComponent(lastPart);
+  const lastPart = url.substring(pos);
+  return lastPart;
 }
 
 
@@ -18,6 +18,7 @@ export const createURl = (url: string) => {
 };
 
 export const getCurrentManualUrl = () => {
+  console.log(window.location.href);
   return getLastPart(window.location.href);
 };
 
