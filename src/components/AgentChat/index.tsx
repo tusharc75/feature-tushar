@@ -1,7 +1,6 @@
 import { Button, Grow } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { useState } from 'react';
-import { RiBrainLine } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
 import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

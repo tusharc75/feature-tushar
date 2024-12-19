@@ -18,17 +18,12 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Formik, Form} from 'formik';
+import { Formik, Form } from 'formik';
 import moment from 'moment';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
 
-  const [initialData, setInitialData] = useState({
-    product: '',
-    asset: '',
-    service: [],
-    date: new Date()
-  });
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
@@ -36,6 +31,10 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const [servicesOptions, setServicesOptions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     const deepFilter = [{ field: 'serializedProduct', term: { $in: [true] } }];
@@ -77,16 +76,14 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   }, [selectedProduct]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
       .then(({ data: { data } }) => {
         setServicesOptions(data['Service Master'] || []);
       });
   }, []);
 
   const handleSubmit = (values) => {
-    axiosInstance()
-      .post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
+    axiosInstance().post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
       .then(({ data }) => {
         onSuccess();
         toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
@@ -96,7 +93,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
 
   function validate(values) {
     const errors = {};
-
     if (!values.product) {
       errors['product'] = 'Please select product';
     }
@@ -111,7 +107,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
     } else if (moment(values.date).isBefore(moment(), 'day')) {
       errors['date'] = 'Date cannot be in the past';
     }
-
     return errors;
   };
 
@@ -129,12 +124,16 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       {productOptions.length > 0 ? (
         <Fragment>
           <Formik
-            initialValues={initialData}
+            initialValues={{
+              product: '',
+              asset: '',
+              service: [],
+              date: new Date()
+            }}
             validateOnMount
             validate={validate}
             onSubmit={handleSubmit}
           >
-
             {({ touched, errors, values, setFieldValue }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <CustomDialogHeader
@@ -142,7 +141,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   onMinimizeMaximize={() => setFullScreen((prevState) => !prevState)}
                   showManimizeMaximize={true}
                   onClose={onClose}
-                  title={`Work Order Scheduler`}
+                  title={`${resources?.workOrder?.titleSingular} Scheduler`}
                 />
                 <CustomDialogContent style={{ flex: 1, overflowY: 'auto' }}>
                   <div className="flex flex-col p-3">
@@ -166,7 +165,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                               error={Boolean(errors.product && touched.product)}
                               helperText={touched.product && errors.product}
                             />
-
                           )}
                         />
                       </Grid>
@@ -181,13 +179,12 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Serialized Asset"
+                              label="Asset"
                               variant="outlined"
                               required
                               error={Boolean(errors.asset && touched.asset)}
                               helperText={touched.asset && errors.asset}
                             />
-
                           )}
                         />
                       </Grid>
@@ -204,18 +201,18 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Service *"
+                              label="Service"
                               variant="outlined"
+                              required
                               error={Boolean(errors.service && touched.service)}
                               helperText={touched.service && errors.service}
                             />
                           )}
                         />
-
                       </Grid>
                       <Grid item xs={12}>
                         <KeyboardDatePicker
-                          variant="inline" // Ensures the calendar is displayed inside the text field (no footer).
+                          variant="inline"
                           fullWidth
                           size="small"
                           margin="dense"
@@ -231,7 +228,6 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           helperText={touched['customDate'] && errors['customDate']}
                           onChange={(date) => setFieldValue('date', date)}
                         />
-
                       </Grid>
                     </Grid>
                   </div>
