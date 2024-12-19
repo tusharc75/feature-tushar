@@ -170,8 +170,8 @@ const IrtTicketView = ({ id }) => {
           s?.status === IRT_APPROVER_STATUS.send
             ? customNodeStyles.send
             : s?.status === IRT_APPROVER_STATUS.approved
-            ? customNodeStyles.approve
-            : customNodeStyles.decline
+              ? customNodeStyles.approve
+              : customNodeStyles.decline
       });
 
       flowEdge.push({
@@ -231,7 +231,7 @@ const IrtTicketView = ({ id }) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={false}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

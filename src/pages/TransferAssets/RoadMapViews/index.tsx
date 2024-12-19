@@ -67,12 +67,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'transferAsset',
             ref_id: tAId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.transferAsset.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {tANumber ?? tANumber}
-                       </Typography>
-                    </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.transferAsset.name}</Typography>
+                <Typography variant="subtitle2">{tANumber ?? tANumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 30 },
           style: customNodeStyles.transferAsset
@@ -90,12 +90,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'asset',
             ref_id: asset._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.productAssets}</Typography>
-                       <Typography variant="subtitle2">
-                       {asset.assetNumber}
-                       </Typography>
-                    </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.productAssets}</Typography>
+                <Typography variant="subtitle2">{asset.assetNumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: aIdx * 70 },
           style: customNodeStyles.productAssets
@@ -117,12 +117,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'loadingTicket',
             ref_id: loadingTicket._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.loadingTicket.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {loadingTicket.ticketName}
-                       </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.loadingTicket.name}</Typography>
+                <Typography variant="subtitle2">{loadingTicket.ticketName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: lIdx * 70 },
           style: customNodeStyles.loadingTicket
@@ -146,12 +146,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'transferAsset',
             ref_id: tAId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.closedTransferAsset.name}</Typography>
-                       <Typography variant="subtitle2">
-                        {tANumber ?? tANumber}
-                       </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.closedTransferAsset.name}</Typography>
+                <Typography variant="subtitle2">{tANumber ?? tANumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 30 },
           style: customDeliveredNodeStyle.closedTransferAsset
@@ -192,7 +192,7 @@ const TransferAssetViews = (props) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={false}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

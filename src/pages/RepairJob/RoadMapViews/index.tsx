@@ -75,12 +75,12 @@ const RepairJobViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: repairId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {repairJobName ?? repairJobName}
-                       </Typography>
-                    </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
+                <Typography variant="subtitle2">{repairJobName ?? repairJobName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.repairJob
@@ -89,7 +89,9 @@ const RepairJobViews = (props) => {
       var flowEdge: any[] = [];
 
       const assets = await axiosInstance().get(`repair-job/${repairId}/assets`);
-      const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairJob}&referenceId=${repairId}`);
+      const tickets = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairJob}&referenceId=${repairId}`
+      );
 
       if (assets?.data?.data?.length) xPosition += 300;
       assets?.data?.data?.map((item, index) => {
@@ -105,9 +107,7 @@ const RepairJobViews = (props) => {
               <HtmlTooltip arrow placement="top" title={item?.status}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography variant="body2">{customNodeStyles.asset.name}</Typography>
-                  <Typography variant="subtitle2">
-                  {item.assetNumber}
-                  </Typography>
+                  <Typography variant="subtitle2">{item.assetNumber}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -167,25 +167,19 @@ const RepairJobViews = (props) => {
                   title={
                     <>
                       <p>
-                      <Typography variant="body2">From:</Typography>
-                       <Typography variant="subtitle2">
-                       {item?.pickupFrom}
-                       </Typography>
+                        <Typography variant="body2">From:</Typography>
+                        <Typography variant="subtitle2">{item?.pickupFrom}</Typography>
                       </p>
                       <p>
-                      <Typography variant="body2">To:</Typography>
-                       <Typography variant="subtitle2">
-                       {item?.deliveryTo}
-                       </Typography>
+                        <Typography variant="body2">To:</Typography>
+                        <Typography variant="subtitle2">{item?.deliveryTo}</Typography>
                       </p>
                     </>
                   }
                 >
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      <Typography variant="body2">{item.ticketType} Ticket</Typography>
-                       <Typography variant="subtitle2">
-                       {item.ticketName}
-                       </Typography>
+                    <Typography variant="body2">{item.ticketType} Ticket</Typography>
+                    <Typography variant="subtitle2">{item.ticketName}</Typography>
                   </div>
                 </HtmlTooltip>
               )
@@ -227,12 +221,12 @@ const RepairJobViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: repairId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                       <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
-                       <Typography variant="subtitle2">
-                       {repairJobName ?? repairJobName}
-                       </Typography>
-                    </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.repairJob.name}</Typography>
+                <Typography variant="subtitle2">{repairJobName ?? repairJobName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.closedRepairJob
@@ -271,78 +265,80 @@ const RepairJobViews = (props) => {
     }
   };
 
-  return (<ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
-    <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
-      <Box>
-        <Button
-          variant={'outlined'}
-          color="default"
-          size="small"
-          onClick={() => {
-            setColorInfo(!colorInfo);
-          }}
-          aria-controls="action-menu"
-        >
-          {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
-        </Button>
-      </Box>
-      {colorInfo && (
+  return (
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={false}>
+      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
-            <Paper elevation={3} variant="outlined">
-              <Box display="flex" flexDirection="column">
-                {Object.keys(customNodeStyles).map((key) => {
-                  return (
-                    <Box p={1}>
-                      <div
-                        style={{
-                          display: 'inline-flex',
-                          height: '12px',
-                          width: '12px',
-                          marginRight: '5px',
-                          borderRadius: '100%',
-                          background: `${customNodeStyles[key].background}`,
-                          borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                        }}
-                      ></div>
-                      {customNodeStyles[key].name}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
-          </div>
+          <Button
+            variant={'outlined'}
+            color="default"
+            size="small"
+            onClick={() => {
+              setColorInfo(!colorInfo);
+            }}
+            aria-controls="action-menu"
+          >
+            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+          </Button>
         </Box>
-      )}
-    </Box>
-    <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
-      {!loading ? (flowData.length ? (
-        <Fragment>
-          <ReactFlowProvider>
-            <ReactFlow
-              elements={flowData || []}
-              onLoad={onLoad}
-              selectNodesOnDrag={false}
-              snapToGrid={true}
-              snapGrid={[15, 15]}
-              onElementClick={onElementClick}
-            >
-              <Controls>
-                <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
-                  <MdZoomOutMap />
-                </ControlButton>
-              </Controls>
-            </ReactFlow>
-          </ReactFlowProvider>
-        </Fragment>
-      ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-      )
-      ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-      )}
-    </div>
-  </ContentFullScreen>
+        {colorInfo && (
+          <Box>
+            <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+              <Paper elevation={3} variant="outlined">
+                <Box display="flex" flexDirection="column">
+                  {Object.keys(customNodeStyles).map((key) => {
+                    return (
+                      <Box p={1}>
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            height: '12px',
+                            width: '12px',
+                            marginRight: '5px',
+                            borderRadius: '100%',
+                            background: `${customNodeStyles[key].background}`,
+                            borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                          }}
+                        ></div>
+                        {customNodeStyles[key].name}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Paper>
+            </div>
+          </Box>
+        )}
+      </Box>
+      <div style={fullScreenOpen ? { height: '95vh' } : { height: '68vh' }}>
+        {!loading ? (
+          flowData.length ? (
+            <Fragment>
+              <ReactFlowProvider>
+                <ReactFlow
+                  elements={flowData || []}
+                  onLoad={onLoad}
+                  selectNodesOnDrag={false}
+                  snapToGrid={true}
+                  snapGrid={[15, 15]}
+                  onElementClick={onElementClick}
+                >
+                  <Controls>
+                    <ControlButton onClick={() => (fullScreenOpen ? setFullScreenOpen(false) : setFullScreenOpen(true))}>
+                      <MdZoomOutMap />
+                    </ControlButton>
+                  </Controls>
+                </ReactFlow>
+              </ReactFlowProvider>
+            </Fragment>
+          ) : (
+            <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+          )
+        ) : (
+          <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+        )}
+      </div>
+    </ContentFullScreen>
   );
 };
 export default RepairJobViews;

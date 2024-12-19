@@ -30,11 +30,10 @@ const customNodeStyles = {
   repairOrderClosed: {
     name: `${sidebarResource?.repairOrder} Closed`,
     ...COLOUR_MASTER.closedRepairJob
-  },
+  }
 };
 
 const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [flowData, setFlowData] = useState([]);
@@ -45,7 +44,6 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
   useEffect(() => {
     fetchData();
   }, [repairOrderNumber]);
-
 
   const fetchData = async () => {
     setLoading(true);
@@ -59,7 +57,8 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       const allLoadingTicket = loadingTicket?.data?.data || [];
 
       const serializedAsset = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset)?.map((material) => material.serializedAssetDetail);
-      const workOrders = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset && s?.workOrder)?.map((material) => material?.workOrder) || [];
+      const workOrders =
+        material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset && s?.workOrder)?.map((material) => material?.workOrder) || [];
 
       var xPosition = 0;
       var flow: any[] = [
@@ -74,9 +73,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
-                <Typography  variant="subtitle2">
-                  {repairOrderNumber}
-                </Typography>
+                <Typography variant="subtitle2">{repairOrderNumber}</Typography>
               </div>
             )
           },
@@ -100,9 +97,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
               <HtmlTooltip arrow placement="top" title={`Asset`}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography variant="body2">{'Asset'}</Typography>
-                  <Typography variant="subtitle2">
-                    {asset?.assetNumber}
-                  </Typography>
+                  <Typography variant="subtitle2">{asset?.assetNumber}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -119,7 +114,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       });
 
       if (workOrders.length > 0) xPosition += 300;
-      const allWorkOrders = []
+      const allWorkOrders = [];
       workOrders?.map((workOrder, index) => {
         allWorkOrders.push(`${workOrder._id}`);
         flow.push({
@@ -134,9 +129,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
               <HtmlTooltip arrow placement="top" title={'Work Order'}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography variant="body2">{workOrder.status || ''}</Typography>
-                  <Typography  variant="subtitle2">
-                    {workOrder.workOrderNumber || ''}
-                  </Typography>
+                  <Typography variant="subtitle2">{workOrder.workOrderNumber || ''}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -167,9 +160,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
               <HtmlTooltip arrow placement="top" title={'Loading Ticket'}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography variant="body2">{'Loading Ticket'}</Typography>
-                  <Typography variant="subtitle2">
-                    {loadingTicket.ticketName}
-                  </Typography>
+                  <Typography variant="subtitle2">{loadingTicket.ticketName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -206,9 +197,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             label: (
               <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
-                <Typography variant="subtitle2">
-                  {repairOrderNumber}
-                </Typography>
+                <Typography variant="subtitle2">{repairOrderNumber}</Typography>
               </div>
             )
           },
@@ -222,7 +211,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             target: `${repairOrderId}-closed`,
             arrowHeadType: 'arrow'
           });
-         })
+        });
         allLoadingTicket?.map((loadingTicket) => {
           flowEdge.push({
             id: `repairOrder-closed-${loadingTicket._id}-${repairOrderId}`,
@@ -239,7 +228,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       setLoading(false);
       toastConfig.setToastConfig(err);
     }
-  }
+  };
 
   const onLoad = (reactFlowInstance) => {
     reactFlowInstance.fitView({ padding: 0.1 });
@@ -260,7 +249,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={false}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

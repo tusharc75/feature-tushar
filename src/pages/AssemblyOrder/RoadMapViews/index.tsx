@@ -29,7 +29,7 @@ const AssemblyOrderViews = (props) => {
   }, []);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   const customNodeStyles = {
@@ -56,7 +56,7 @@ const AssemblyOrderViews = (props) => {
     parentManagedpackage: {
       name: 'Parent Managed package',
       ...COLOUR_MASTER.receivingTicket
-    },
+    }
     // closed: {
     //   name: 'Closed',
     //   background: themeColor === 'dark' ? 'rgb(219,175,175)' : '#FFEAEA',
@@ -118,8 +118,8 @@ const AssemblyOrderViews = (props) => {
             label: (
               <HtmlTooltip arrow placement="top" title={resources?.assemblyOrder?.titlePlural}>
                 <div>
-                <Typography variant="body2">{resources?.assemblyOrder?.titlePlural}</Typography>
-                <Typography variant="subtitle2">{assemblyOrderNumber}</Typography>
+                  <Typography variant="body2">{resources?.assemblyOrder?.titlePlural}</Typography>
+                  <Typography variant="subtitle2">{assemblyOrderNumber}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -177,7 +177,9 @@ const AssemblyOrderViews = (props) => {
               <HtmlTooltip arrow placement="top" title={_.startCase(_.camelCase(item.type))}>
                 <div>
                   <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.productDetail?.productName || item.packageDetail?.packageName}
+                  </Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -209,7 +211,9 @@ const AssemblyOrderViews = (props) => {
               <HtmlTooltip arrow placement="top" title={'Work Order'}>
                 <div>
                   <Typography variant="body2">{'Work Order'}</Typography>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.optionLabel}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {w.optionLabel}
+                  </Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -296,8 +300,8 @@ const AssemblyOrderViews = (props) => {
         const childPacks = childProductPackages?.filter((d) => d.parentId === pmp.id);
         childPacks?.forEach((c) => {
           flowEdge.push({
-            id: `parentManagedPackage-child-${pmp.optionValue}-${c.type===MATERIAL_TYPE.product ?c.workOrder._id : c.managedPackageDetail._id}`,
-            source: c.type===MATERIAL_TYPE.product ? `${c.workOrder._id}` : `${c.managedPackageDetail._id}`,
+            id: `parentManagedPackage-child-${pmp.optionValue}-${c.type === MATERIAL_TYPE.product ? c.workOrder._id : c.managedPackageDetail._id}`,
+            source: c.type === MATERIAL_TYPE.product ? `${c.workOrder._id}` : `${c.managedPackageDetail._id}`,
             arrowHeadType: 'arrow',
             target: `${pmp.optionValue}`
           });
@@ -334,7 +338,7 @@ const AssemblyOrderViews = (props) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={false}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

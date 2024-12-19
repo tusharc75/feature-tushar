@@ -2,10 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  quotation,
-  QUOTATION_STATUS
-} from '../../../constants/helpers';
+import { quotation, QUOTATION_STATUS } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,7 +25,7 @@ const QuotationViews = (props) => {
   const [colorInfo, setColorInfo] = useState(false);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -49,7 +46,7 @@ const QuotationViews = (props) => {
     asset: {
       name: 'Serialized Asset',
       background: '#ffd65b',
-      borderColor: 'green',
+      borderColor: 'green'
     },
     package: {
       name: 'Package',
@@ -80,7 +77,7 @@ const QuotationViews = (props) => {
       const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quoteId}/${versionId}`);
       let parent = viewsData.data.data.material?.filter((item) => item?.parentId === null);
       let additionalData = additionalCost?.data?.data || [];
-      parent = [...parent, ...additionalData]
+      parent = [...parent, ...additionalData];
 
       const parentIds = parent?.map((item) => `${item?.id}`);
       const child = viewsData.data.data.material?.filter((item) => item?.parentId !== null);
@@ -151,9 +148,14 @@ const QuotationViews = (props) => {
       const childData = {};
       const removeEdge = [];
       child?.map((item: any, cIdx) => {
-        const xPositionView = item.type === 'serializedAsset' ? xPosition + 300 : childData[item.parentId.toString()] ? childData[item.parentId.toString()] + 300 : xPosition;
+        const xPositionView =
+          item.type === 'serializedAsset'
+            ? xPosition + 300
+            : childData[item.parentId.toString()]
+              ? childData[item.parentId.toString()] + 300
+              : xPosition;
         if (childData[item.parentId.toString()]) {
-          removeEdge.push(item.parentId.toString())
+          removeEdge.push(item.parentId.toString());
         }
         if (xPositionView > maxXPosition) maxXPosition = xPositionView;
         const yPositionView = item.type === 'serializedAsset' ? maxYAssetPosition : cIdx;
@@ -172,7 +174,10 @@ const QuotationViews = (props) => {
                 <div>
                   <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
                   <Typography variant="subtitle2">
-                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName || item.serializedAssetDetail?.assetNumber}
+                    {item.productDetail?.productName ||
+                      item.packageDetail?.packageName ||
+                      item.serviceDetail?.serviceName ||
+                      item.serializedAssetDetail?.assetNumber}
                   </Typography>
                 </div>
               </HtmlTooltip>
@@ -182,7 +187,14 @@ const QuotationViews = (props) => {
             x: xPositionView,
             y: yPositionView * 80
           },
-          style: item.type === 'service' ? customNodeStyles.service : item.type === 'package' ? customNodeStyles.package : item.type === 'serializedAsset' ? customNodeStyles.asset : customNodeStyles.product
+          style:
+            item.type === 'service'
+              ? customNodeStyles.service
+              : item.type === 'package'
+                ? customNodeStyles.package
+                : item.type === 'serializedAsset'
+                  ? customNodeStyles.asset
+                  : customNodeStyles.product
         });
         flowEdge.push({
           id: `parent-child-${item._id}-${item.parentId}`,
@@ -236,7 +248,7 @@ const QuotationViews = (props) => {
               arrowHeadType: 'arrow',
               target: `${quoteId}-output`
             });
-           }
+          }
         });
       }
 
@@ -267,7 +279,7 @@ const QuotationViews = (props) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={false}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button
