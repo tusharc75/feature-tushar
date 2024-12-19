@@ -8,7 +8,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, gridLoadingTimeout, UnCamelCase } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 
@@ -195,12 +195,12 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                   }
                 });
                 if (u?.changes?.every((e: any) => e?.type === 'add')) {
-                  const materialSet = new Set(u?.changes?.map((e: any) => `${upperFirst(e?.referenceType)}(s)`));
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
                   u.action = "add";
                   changeString.push(`${[...materialSet].join(', ')} Added`);
                 }
                 if (u?.changes?.every((e: any) => e?.type === 'delete')) {
-                  const materialSet = new Set(u?.changes?.map((e: any) => `${upperFirst(e?.referenceType)}(s)`));
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
                   u.action = "delete";
                   changeString.push(`${[...materialSet].join(', ')} Deleted`);
                 }
