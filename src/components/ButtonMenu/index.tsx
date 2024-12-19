@@ -5,22 +5,24 @@ import { BiChevronDown } from 'react-icons/bi';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
-export type ButtonMenuProps<D extends string> = {
+export type ButtonMenuProps<D> = {
   items: Items<D>[];
   menuProps?: MenuProps;
   iconForMobile?: React.ReactElement | boolean;
   onItemClick?: (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: Items<D>) => void;
-  slot?: ((props: any) => JSX.Element) | undefined;
+  slot?: (props: any) => JSX.Element;
   showChevron?: boolean;
+  horizontal?: 'left' | 'right' | 'center';
 } & Omit<ButtonType, 'iconForMobile'>;
 
-type Items<D extends string> = {
-  label: D;
+export type Items<D> = {
+  label: React.ReactNode;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  value?: D;
 } & Omit<MenuItemProps, 'children' | 'button'>;
 
-const ButtonMenu = <D extends string>({
+const ButtonMenu = <D,>({
   items,
   iconForMobile = false,
   children,
@@ -29,6 +31,7 @@ const ButtonMenu = <D extends string>({
   onItemClick = () => {},
   slot = undefined,
   showChevron = false,
+  horizontal = 'left',
   ...rest
 }: ButtonMenuProps<D>) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -62,11 +65,11 @@ const ButtonMenu = <D extends string>({
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left'
+          horizontal: horizontal
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left'
+          horizontal: horizontal
         }}
         keepMounted={false}
         {...menuProps}

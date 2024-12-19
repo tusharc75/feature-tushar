@@ -13,6 +13,7 @@ type DateRanges = DateRange | undefined;
 type DateRangePicerProps = {
   date: DateRanges;
   setDate: (date: DateRanges) => void;
+  horizontal?: 'right' | 'left' | 'center';
 } & React.HTMLAttributes<HTMLDivElement>;
 
 type TimeFrame = 'custom' | '1-month' | '3-months' | '6-months' | '1-year';
@@ -27,7 +28,7 @@ const timeframeList = [
 
 type TimeFrameList = (typeof timeframeList)[number];
 
-function DateRangePicker({ className, date, setDate }: DateRangePicerProps) {
+function DateRangePicker({ className, date, setDate, horizontal = 'center' }: DateRangePicerProps) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
   const [timeFrame, setTimeFrame] = React.useState<TimeFrameList>({ label: 'Custom', value: 'custom' });
@@ -115,7 +116,7 @@ function DateRangePicker({ className, date, setDate }: DateRangePicerProps) {
             <span>Pick a date</span>
           )}
         </span>
-        {<BiChevronDown size={18} className={cn(open ? '[transform:rotate(180deg)]' : '')} />}
+        {<BiChevronDown size={18} className={cn('ml-2', open ? '[transform:rotate(180deg)]' : '')} />}
       </ThemeButton>
       <Popover
         id={id}
@@ -124,11 +125,11 @@ function DateRangePicker({ className, date, setDate }: DateRangePicerProps) {
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center'
+          horizontal: horizontal
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center'
+          horizontal: horizontal
         }}
         PaperProps={{
           className: 'rounded-md shadow-md'
