@@ -75,7 +75,7 @@ const useManual = () => {
 
   const navigate = useCallback((url, scrollKey = null) => {
     if (url) {
-      const parsedUrl = createURl(url); // Standardized encoding
+      const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
   
