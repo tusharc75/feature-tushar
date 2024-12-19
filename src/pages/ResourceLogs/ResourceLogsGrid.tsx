@@ -194,13 +194,15 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     operations.push(e);
                   }
                 });
+                if (u?.changes?.every((e: any) => e?.type === 'add')) u.action = "add";
+                if (u?.changes?.every((e: any) => e?.type === 'delete')) u.action = "delete";
               } else {
                 operations.push({ ...u?.changes });
               }
               if (changeString?.length) {
                 u.changeString = changeString?.toString();
               } else {
-                u.changeString = 'Click View for check changes';
+                u.changeString = 'Click View to check changes';
               }
               if (u?.action == 'create') {
                 u.changeString = 'Created';
