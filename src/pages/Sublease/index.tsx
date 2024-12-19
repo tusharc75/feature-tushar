@@ -239,6 +239,11 @@ const Sublease = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -324,7 +329,8 @@ const Sublease = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.sublease?.titleSingular?.toLowerCase()} ? `}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.subleaseName || ''}` : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

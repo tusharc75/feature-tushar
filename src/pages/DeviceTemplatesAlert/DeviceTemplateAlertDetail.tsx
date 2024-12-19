@@ -14,14 +14,11 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const DeviceTemplateAlertDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [deviceTemplateAlertData, setDeviceTemplateAlertData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -127,8 +124,7 @@ const DeviceTemplateAlertDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-        message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
-              ${deviceTemplateAlertData?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}  
+        message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} : ${deviceTemplateAlertData?.alertNumber} ?`} 
           onClose={() => {
             setShowConfirmBox(false);
           }}

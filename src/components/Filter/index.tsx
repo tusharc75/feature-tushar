@@ -173,7 +173,7 @@ const Filter = ({
         <div className="flex-grow">
           <h6 className="mb-[5px] text-[20px] font-semibold leading-[22px]">Filters for {filterTitle}</h6>
           <p className="text-[12px] font-normal leading-[14px] text-[#777575] dark:text-gray-400 max-sm:hidden">
-            See results in your view based on the filters your select here.
+            See results in your view based on the filters you select here.
           </p>
         </div>
         <IconButton onClick={onClose} size="small">
@@ -204,30 +204,30 @@ const Filter = ({
               <ul className={cn(' space-y-2 overflow-y-auto', isMobile ? 'h-[--content-max-h]' : 'max-h-[--content-max-h]')}>
                 {!loading
                   ? filteredOptions?.map((o, i) => {
-                      return (
-                        <li
-                          key={i}
-                          className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
-                          data-active={selectedField?.fieldName === o?.fieldName}
-                          onClick={() => {
-                            setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
-                            setIsSidebarOpen(false);
-                          }}
-                        >
-                          <img src={listFilter} alt={''} />
-                          {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
-                          <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
-                            {getLabel(o, deepFilters, filterByIds)}
-                          </span>
-                          <MdChevronRight className="ml-auto text-[--new-theme-color]" />
-                        </li>
-                      );
-                    })
-                  : [...Array(9).keys()].map((l) => (
-                      <li className="list-none">
-                        <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
+                    return (
+                      <li
+                        key={i}
+                        className="flex cursor-pointer list-none items-center gap-[5px] rounded-lg border px-[14px] py-2 text-[12px] font-medium leading-[14.5px] hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-800 data-[active=true]:dark:bg-gray-800"
+                        data-active={selectedField?.fieldName === o?.fieldName}
+                        onClick={() => {
+                          setSelectedField((prev) => (prev?.fieldName === o?.fieldName ? null : o));
+                          setIsSidebarOpen(false);
+                        }}
+                      >
+                        <img src={listFilter} alt={''} />
+                        {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
+                        <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
+                          {getLabel(o, deepFilters, filterByIds)}
+                        </span>
+                        <MdChevronRight className="ml-auto text-[--new-theme-color]" />
                       </li>
-                    ))}
+                    );
+                  })
+                  : [...Array(9).keys()].map((l) => (
+                    <li className="list-none">
+                      <div className="h-[39px] w-full animate-pulse rounded-lg bg-gray-200" />
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>

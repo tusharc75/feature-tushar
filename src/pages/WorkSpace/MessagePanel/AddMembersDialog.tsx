@@ -23,7 +23,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         page = 0;
         setCurrentPage(0);
       }
-      let query = `user?limit=25&page=${page}&search=${searchKey}&withoutRoleLookup=true&ignoreIds=${JSON.stringify(ignoreIds)}`;
+      let query = `user?limit=25&page=${page}&search=${searchKey}&ignoreIds=${JSON.stringify(ignoreIds)}`;
       const response = await axiosInstance().get(query);
       let optionsData = response?.data?.data?.map((user) => ({
         optionLabel: user.firstName + ' ' + user.lastName,

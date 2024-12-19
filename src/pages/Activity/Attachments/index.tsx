@@ -46,7 +46,8 @@ export default function Attachment() {
   const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
   const [attachmentData, setAttachmentData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendMail, setSendMail] = useState(false);
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
@@ -135,7 +136,7 @@ export default function Attachment() {
                   <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                  <Chip color="primary" label={`${routes[d?.type]?.title}`} />
+                  <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
                 </div>
               );
             })
@@ -247,7 +248,7 @@ export default function Attachment() {
             )}
             {row.original.canEdit ? (
               <HtmlTooltip title="Delete">
-                <IconButton size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
+                <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
               </HtmlTooltip>
@@ -283,7 +284,7 @@ export default function Attachment() {
   };
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {

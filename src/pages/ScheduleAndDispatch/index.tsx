@@ -4,7 +4,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import Scheduler from 'src/pages/ScheduleAndDispatch/Scheduler';
-import Dispatch from 'src/pages/ScheduleAndDispatch/Dispatch';
+import Dispatch from 'src/pages/ScheduleAndDispatch/Dispatch/index';
 import CustomContainer from 'src/components/CustomContainer';
 
 const JobType = [

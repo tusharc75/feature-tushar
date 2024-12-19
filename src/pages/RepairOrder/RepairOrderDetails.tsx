@@ -549,7 +549,7 @@ const RepairOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this repair order: ${repairOrderData?.repairOrderNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.repairOrder?.titleSingular?.toLowerCase()}: ${repairOrderData?.repairOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

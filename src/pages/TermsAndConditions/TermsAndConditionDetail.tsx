@@ -125,7 +125,7 @@ const TermsAndConditionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.termsAndConditions?.titleSingular?.toLowerCase()} ${termsAndConditionData.name} ?`}
+          message={`Are you sure you want to delete ${resources?.termsAndConditions?.titleSingular?.toLowerCase()} : ${termsAndConditionData.name} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

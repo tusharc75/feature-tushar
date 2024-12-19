@@ -337,8 +337,8 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resources?.transferAsset?.titleSingular?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}` : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

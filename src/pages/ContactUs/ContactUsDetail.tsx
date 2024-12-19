@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageContactUs from './ManageContactUs';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 
 const BlogDetail = () => {
@@ -24,8 +23,6 @@ const BlogDetail = () => {
   const [contactUsData, setContactUsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
@@ -139,7 +136,7 @@ const BlogDetail = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()} : ${contactUsData.name}` : `selected ${resources?.contact?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${resources?.contact?.titleSingular?.toLowerCase()} : ${contactUsData?.name} ?`}            
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}

@@ -61,7 +61,14 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
     }
 
     axiosInstance().post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
-      .then(() => { handleClose() })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        handleClose();
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         handleClose();

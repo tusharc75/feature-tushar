@@ -169,7 +169,7 @@ const ZoneDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.zone?.titleSingular?.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.zone?.titleSingular?.toLowerCase()} : ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

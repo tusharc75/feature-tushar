@@ -126,8 +126,7 @@ const BlogDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.blog?.titleSingular?.toLowerCase()} :
-            ${blogData?.title}` : `selected ${resources?.blog?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${resources?.blog?.titleSingular?.toLowerCase()} : ${blogData?.title} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

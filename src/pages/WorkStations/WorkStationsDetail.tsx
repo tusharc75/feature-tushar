@@ -139,7 +139,7 @@ const WorkStationsDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.workStations?.titleSingular?.toLowerCase()} ${workStationsData.workStationName} ?`}
+          message={`Are you sure you want to delete ${resources?.workStations?.titleSingular?.toLowerCase()} : ${workStationsData.workStationName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -16,10 +16,10 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
 
 const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
@@ -55,18 +55,21 @@ const ScheduleReport = () => {
         accessor: 'scheduleName',
         Header: 'Schedule Name',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          row?.original?.scheduleName ? <p
-            className="text-truncate link"
-            onClick={() => {
-              if (permissions?.scheduleReport?.isUpdate) {
-                setShowManageDialog({ open: true, id: row?.original?._id });
-              }
-            }}
-          >
-            {row.original.scheduleName}
-          </p>
-            : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.scheduleName ? (
+            <p
+              className="text-truncate link"
+              onClick={() => {
+                if (permissions?.scheduleReport?.isUpdate) {
+                  setShowManageDialog({ open: true, id: row?.original?._id });
+                }
+              }}
+            >
+              {row.original.scheduleName}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'resource',
@@ -96,7 +99,8 @@ const ScheduleReport = () => {
         accessor: 'reportAction',
         Header: 'Report Action',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>)
+        Cell: ({ row }) =>
+          row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>
       },
       {
         accessor: 'time',
@@ -148,7 +152,9 @@ const ScheduleReport = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
 
-          finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+          finalObject.resource = resources[camelCase(finalObject.resource)]?.titleSingular
+            ? resources[camelCase(finalObject.resource)]?.titleSingular
+            : finalObject.resource;
           finalObject.subscribeUsers = finalObject.subscribeUsers.length
             ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
             : [];
@@ -206,6 +212,11 @@ const ScheduleReport = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -258,7 +269,7 @@ const ScheduleReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${resources?.scheduleReport?.titleSingular?.toLowerCase().toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.scheduleReport?.titleSingular?.toLowerCase()} : ${deleteRecord?.scheduleName || ''}` : `selected ${resources?.scheduleReport?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

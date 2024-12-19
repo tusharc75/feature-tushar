@@ -82,11 +82,11 @@ export default function Account(props) {
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
-  const [singleAccountDelete, setSingleAccountDelete] = useState({
-    id: null,
-    show: false,
-    accountName: ''
-  });
+  // const [singleAccountDelete, setSingleAccountDelete] = useState({
+  //   id: null,
+  //   show: false,
+  //   accountName: ''
+  // });
   const [singleApproveDisapproveAccount, setSingleApproveDisapproveAccount] = useState<any>({
     show: false,
     approved: false,
@@ -255,11 +255,7 @@ export default function Account(props) {
             disabled={accountPermissions?.isDelete && row?.original?.canDelete ? false : true}
             aria-label="Delete"
             onClick={() => {
-              setSingleAccountDelete({
-                show: true,
-                id: row?.original?._id,
-                accountName: row?.original?.accountName
-              });
+              setShowDeleteConfirmBox(true);
             }}
           >
             <DeleteIcon color={accountPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
@@ -416,26 +412,26 @@ export default function Account(props) {
     }
   };
 
-  const handleSingleDeleteAccounts = async () => {
-    axiosInstance()
-      .put(`/${accountApi}/remove`, { ids: [singleAccountDelete.id] })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchAccounts();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-      .finally(() => {
-        setShowDeleteConfirmBox(false);
-      });
-    setSingleAccountDelete({ id: null, show: false, accountName: '' });
-  };
+  // const handleSingleDeleteAccounts = async () => {
+  //   axiosInstance()
+  //     .put(`/${accountApi}/remove`, { ids: [singleAccountDelete.id] })
+  //     .then(({ data }) => {
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: 'success',
+  //         message: data.message
+  //       });
+  //       dispatch({ type: 'selection', selectedRecords: [] });
+  //       fetchAccounts();
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     })
+  //     .finally(() => {
+  //       setShowDeleteConfirmBox(false);
+  //     });
+  //   // setSingleAccountDelete({ id: null, show: false, accountName: '' });
+  // };
 
   const handleSingleApproveDisapproveAccount = () => {
     axiosInstance()
@@ -630,7 +626,7 @@ export default function Account(props) {
           />
         ) : null}
 
-        {singleAccountDelete.show ? (
+        {/* {singleAccountDelete.show ? (
           <ConfirmationDialog
             open={singleAccountDelete.show}
             message={`Are you sure you want to delete the account: ${singleAccountDelete.accountName} ? `}
@@ -643,7 +639,7 @@ export default function Account(props) {
             }
             onOk={handleSingleDeleteAccounts}
           />
-        ) : null}
+        ) : null} */}
 
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog

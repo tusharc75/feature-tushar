@@ -10,7 +10,6 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
 import { camelCase, startCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
@@ -29,7 +28,7 @@ const CustomReport = () => {
   const { selectedRecords } = state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,7 +115,9 @@ const CustomReport = () => {
         let count = data?.length;
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+          finalObject.resource = resources[camelCase(finalObject.resource)]?.titleSingular
+            ? resources[camelCase(finalObject.resource)]?.titleSingular
+            : finalObject.resource;
           finalObject.column = finalObject.column
             ?.split(',')
             ?.map((s: string) => startCase(s))
@@ -230,6 +231,11 @@ const CustomReport = () => {
                     >
                       <MenuItem
                         onClick={() => {
+                          if (selectedRecords.length === 1){
+                            setDeleteRecord(selectedRecords[0]);
+                            }else{
+                              setDeleteRecord(null)
+                            }
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
@@ -263,7 +269,7 @@ const CustomReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete custom report ${deleteRecord?.customReportName || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.reportCustom?.titleSingular?.toLowerCase()} : ${deleteRecord?.customReportName || ''}` : `selected ${resources?.reportCustom?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

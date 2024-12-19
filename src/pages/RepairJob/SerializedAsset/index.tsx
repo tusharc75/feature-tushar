@@ -118,8 +118,6 @@ const SerializedAsset = ({
         coloum.push({
           accessor: 'assetNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row }) => (
             <>
               {row.original.assetNumber ? (
@@ -145,8 +143,6 @@ const SerializedAsset = ({
         coloum.push({
           accessor: 'serialNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row }) => (
             <>
               {row.original.serialNumber ? (
@@ -165,8 +161,6 @@ const SerializedAsset = ({
       coloum.push({
         accessor: ele?.fieldName,
         Header: ele?.fieldLabel,
-        sticky: 'none',
-        width: 200,
         Cell: ({ row }) => (
           <>
             {row.original[ele?.fieldName] ? (
@@ -183,8 +177,6 @@ const SerializedAsset = ({
     coloum.push({
       accessor: 'status',
       Header: 'Status',
-      sticky: 'none',
-      width: 100,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p className="text-truncate">{row.original.status}</p>
@@ -634,9 +626,8 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${
-            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-          } ? `}
+          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+            } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

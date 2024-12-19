@@ -728,7 +728,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''}` : `selected ${resources?.opportunity?.titlePlural?.toLowerCase()}`} ?`}              
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}           
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

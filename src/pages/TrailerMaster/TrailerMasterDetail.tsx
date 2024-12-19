@@ -263,7 +263,7 @@ const TrailerMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.trailerMaster?.titleSingular?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.trailerMaster?.titleSingular?.toLowerCase()} : ${trailerMasterData?.trailerName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

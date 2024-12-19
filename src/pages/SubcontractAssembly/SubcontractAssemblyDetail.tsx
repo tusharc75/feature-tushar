@@ -311,7 +311,7 @@ const SubcontractAssemblyDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${subcontractAssemblyData['subcontractAssemblyNumber']}  ?`}
+          message={`Are you sure you want to delete ${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} : ${subcontractAssemblyData['subcontractAssemblyNumber']} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

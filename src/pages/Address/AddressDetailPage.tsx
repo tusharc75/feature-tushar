@@ -15,7 +15,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,8 +24,6 @@ const AddressDetailPage = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [loading, setLoading] = useState(false);
   const [addressData, setAddressData] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -198,8 +195,7 @@ const AddressDetailPage = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.address?.titleSingular?.toLowerCase()} :
-            ${addressData?.fullAddress}` : `selected ${resources?.address?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete this ${resources?.address?.titleSingular?.toLowerCase()}: ${addressData?.fullAddress} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
           }}
