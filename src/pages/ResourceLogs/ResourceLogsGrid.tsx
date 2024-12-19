@@ -194,8 +194,16 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     operations.push(e);
                   }
                 });
-                if (u?.changes?.every((e: any) => e?.type === 'add')) u.action = "add";
-                if (u?.changes?.every((e: any) => e?.type === 'delete')) u.action = "delete";
+                if (u?.changes?.every((e: any) => e?.type === 'add')) {
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${upperFirst(e?.referenceType)}(s)`));
+                  u.action = "add";
+                  changeString.push(`${[...materialSet].join(', ')} Added`);
+                }
+                if (u?.changes?.every((e: any) => e?.type === 'delete')) {
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${upperFirst(e?.referenceType)}(s)`));
+                  u.action = "delete";
+                  changeString.push(`${[...materialSet].join(', ')} Deleted`);
+                }
               } else {
                 operations.push({ ...u?.changes });
               }
