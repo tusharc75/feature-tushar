@@ -59,7 +59,6 @@ const WorkOrderViews = (props) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const {
     state: { user }
@@ -252,7 +251,7 @@ const WorkOrderViews = (props) => {
   };
 
   return (
-    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

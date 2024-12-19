@@ -200,7 +200,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   };
 
   return (
-    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

@@ -192,7 +192,7 @@ const TransferAssetViews = (props) => {
   };
 
   return (
-    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button
