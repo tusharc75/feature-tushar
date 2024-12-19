@@ -1,29 +1,10 @@
+import { startCase } from 'lodash';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-export const getLabel = (field, deepFilters, filterByIds) => {
-  if (field?.type === 'singleLine' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length > 0) {
-    return Array.isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
-      ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
-      : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (field?.type === 'checkBox' && deepFilters?.find((d) => d?.field === field?.fieldName)?.term) {
-    return deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (
-    ['dropDown', 'multiSelect']?.includes(field?.type) &&
-    field?.lookup &&
-    filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length > 0
-  ) {
-    return filterByIds?.find((d) => d?.field === field?.fieldName)?.term?.length;
-  }
-  if (['dropDown', 'multiSelect']?.includes(field?.type) && !field?.lookup && deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length) {
-    return Array.isArray(deepFilters?.find((d) => d?.field === field?.fieldName)?.term)
-      ? deepFilters?.find((d) => d?.field === field?.fieldName)?.term?.length
-      : deepFilters?.find((d) => d?.field === field?.fieldName)?.term;
-  }
-  if (['date'].includes(field.type)) {
-    const found = deepFilters?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
+export const getLabel = (field: ColumnDefaultT, values: { field: string; term: string | any[] }[]) => {
+  if (field?.type === 'date') {
+    const found = values?.filter((d) => [`from_${field?.fieldName}`, `to_${field?.fieldName}`].includes(d?.field)).filter((d) => d.term);
     if (found.length > 0) {
       let formattedMessage = '';
       found.forEach((d) => {
@@ -33,7 +14,34 @@ export const getLabel = (field, deepFilters, filterByIds) => {
           formattedMessage += `${found.length === 2 ? ', ' : ''}To: ${d.term}`;
         }
       });
-      return <HtmlTooltip title={formattedMessage}>{found.length}</HtmlTooltip>;
+      return (
+        <HtmlTooltip title={formattedMessage}>
+          <span>{found.length}</span>
+        </HtmlTooltip>
+      );
+    }
+  } else {
+    const value = values?.find((d) => d?.field === field?.fieldName)?.term;
+    if (!value) return '';
+    if (field?.type === 'checkBox' && value) {
+      return (
+        <HtmlTooltip title={value}>
+          <span>1</span>
+        </HtmlTooltip>
+      );
+    }
+    if (Array.isArray(value)) {
+      return value.length;
+    }
+    if (typeof value === 'string' && value) {
+      return (
+        <HtmlTooltip title={startCase(value)}>
+          <span>1</span>
+        </HtmlTooltip>
+      );
+    }
+    if (typeof value === 'object' || Object.keys(value).length) {
+      return Object.keys(value).length;
     }
   }
   return '';
@@ -77,23 +85,32 @@ export const getErrors = (
   const errorColumns: ColumnDefaultT[] = [];
 
   for (const c of defaultColumns) {
-    if (
-      c?.type === 'date' &&
-      !(values?.find((d) => d?.field === `from_${c?.fieldName}`)?.term && values?.find((d) => d?.field === `to_${c?.fieldName}`)?.term)
-    ) {
-      errors[c.fieldName] = true;
-      errorColumns.push(c);
-      continue;
-    }
-    if (['singleLine']?.includes(c?.type) && !values?.find((d) => d?.field === c?.fieldName)?.term?.length) {
-      errors[c.fieldName] = true;
-      errorColumns.push(c);
-      continue;
-    }
-    if (['dropDown', 'multiSelect']?.includes(c?.type) && !c?.lookup && !values?.find((d) => d?.field === c?.fieldName)?.term?.length) {
-      errors[c.fieldName] = true;
-      errorColumns.push(c);
-      continue;
+    if (c?.type === 'date') {
+      const isBothValuePresent =
+        values?.find((d) => d?.field === `from_${c?.fieldName}`)?.term && values?.find((d) => d?.field === `to_${c?.fieldName}`)?.term;
+      if (!isBothValuePresent) {
+        errors[c.fieldName] = true;
+        errorColumns.push(c);
+        continue;
+      }
+    } else {
+      const value = values?.find((d) => d?.field === c?.fieldName)?.term;
+      if (!value) {
+        errors[c.fieldName] = true;
+        errorColumns.push(c);
+        console.log(c);
+        continue;
+      }
+      if ((typeof value === 'string' || Array.isArray(value)) && value.length === 0) {
+        errors[c.fieldName] = true;
+        errorColumns.push(c);
+        continue;
+      }
+      if (typeof value === 'object' && Object.keys(value).length === 0) {
+        errors[c.fieldName] = true;
+        errorColumns.push(c);
+        continue;
+      }
     }
   }
   return { errors, errorColumns };

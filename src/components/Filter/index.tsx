@@ -31,7 +31,8 @@ const Filter = ({
   defaultColumns = [],
   reportConfig = null,
   filterTitle = '',
-  loading = false
+  loading = false,
+  onCloseWithErrors = null
 }) => {
   const [selectedField, setSelectedField] = useState(null);
   const [filteredOptions, setFilteredOptions] = useState([]);
@@ -141,10 +142,13 @@ const Filter = ({
       setErrors(errors);
       setCheckForErrors(true);
       if (errorColumns.length > 0) {
-        setSelectedField(errorColumns[0]);
-        addClass();
+        if (typeof onCloseWithErrors === 'function') {
+          onCloseWithErrors();
+        } else {
+          onClose();
+        }
       } else {
-        onClose();
+        handleApplyFilter();
       }
     } else {
       onClose();
@@ -223,7 +227,7 @@ const Filter = ({
                           <img src={listFilter} alt={''} />
                           {o?.fieldLabel} {defaultColumns?.some?.((d) => d?.fieldName === o?.fieldName) && <span style={{ color: 'red' }}>*</span>}{' '}
                           <span className="block min-w-[14px] rounded-[4px] bg-[--dark-secondary,#E3F3F2] px-[2px] text-center text-[10px] font-bold leading-[14px] text-[--new-theme-color]">
-                            {getLabel(o, deepFilters, filterByIds)}
+                            {getLabel(o, uniqueValues)}
                           </span>
                           <MdChevronRight className="ml-auto text-[--new-theme-color]" />
                         </li>

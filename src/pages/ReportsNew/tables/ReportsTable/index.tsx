@@ -22,8 +22,17 @@ let cancelTokenSource = null;
 const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableCommonProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { selectedReport, columns, resourceColumns, setColumns, setResourceColumns, setIsColumnsLoading, permissions, isColumnsLoading } =
-    reportState;
+  const {
+    selectedReport,
+    columns,
+    resourceColumns,
+    setColumns,
+    setResourceColumns,
+    setIsColumnsLoading,
+    permissions,
+    isColumnsLoading,
+    navigateToMainPage
+  } = reportState;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
@@ -449,6 +458,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           setFilterByIds={setFilterByIds}
           filterTerm={filterTerm}
           setFilterTerm={setFilterTerm}
+          onCloseWithErrors={navigateToMainPage}
         />
       )}
     </MuiPickersUtilsProvider>
