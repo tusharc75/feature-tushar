@@ -63,10 +63,10 @@ const IrtTicketView = ({ salesOrderData }) => {
     const materialData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/material/${salesOrderData?._id}`);
     const additionalcostData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/additionalcost/${salesOrderData?._id}`);
 
-    const costData = additionalcostData?.data?.data || []
+    const costData = additionalcostData?.data?.data || [];
     costData?.forEach((e) => {
-      e.type = MATERIAL_TYPE.manualEntry
-    })
+      e.type = MATERIAL_TYPE.manualEntry;
+    });
     const materials = [...(materialData?.data?.data?.material || []), ...costData];
 
     var xPosition = 0;
@@ -126,17 +126,14 @@ const IrtTicketView = ({ salesOrderData }) => {
           ref_type: material?.type,
           ref_id: material?.materialId,
           label: (
-            <HtmlTooltip
-              arrow
-              placement="top"
-              title={startCase(material?.type)}
-            >
+            <HtmlTooltip arrow placement="top" title={startCase(material?.type)}>
               <div>
-                <Typography variant="body2">
-                  {startCase(material?.type)}
-                </Typography>
+                <Typography variant="body2">{startCase(material?.type)}</Typography>
                 <Typography variant="subtitle2">
-                  {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName || material?.description}
+                  {material?.productDetail?.productName ||
+                    material?.packageDetail?.packageName ||
+                    material?.serviceDetail?.serviceName ||
+                    material?.description}
                 </Typography>
               </div>
             </HtmlTooltip>
@@ -217,7 +214,7 @@ const IrtTicketView = ({ salesOrderData }) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

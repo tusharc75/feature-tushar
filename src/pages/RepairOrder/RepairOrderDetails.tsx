@@ -297,7 +297,9 @@ const RepairOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }, { title: repairOrderData?.repairOrderNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes?.repairOrder, title: resources?.repairOrder?.titlePlural }, { title: repairOrderData?.repairOrderNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1 ">
@@ -415,32 +417,33 @@ const RepairOrderDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            isPrevStep={prevStep}
-            steps={stepList}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            handlePrev={
-              stepNames[currentStep] === 'Quotation' &&
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              isPrevStep={prevStep}
+              steps={stepList}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              handlePrev={
+                stepNames[currentStep] === 'Quotation' &&
                 allowedToEdit &&
                 [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                   quotationVersionData?.status
                 )
-                ? () => {
-                  setShowQuotationConfirmBox(true);
-                }
-                : null
-            }
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[step], id);
-            }}
-          />
-          <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                  ? () => {
+                      setShowQuotationConfirmBox(true);
+                    }
+                  : null
+              }
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[step], id);
+              }}
+            />
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <>
                 <Productpackage
@@ -472,8 +475,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }
@@ -522,8 +525,8 @@ const RepairOrderDetails = () => {
                 updateOrderStatus={updateOrderStatus}
               />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Box>
             <View repairOrderNumber={repairOrderData?.repairOrderNumber || ''} repairOrderId={id} repairOrderStatus={repairOrderData?.status} />

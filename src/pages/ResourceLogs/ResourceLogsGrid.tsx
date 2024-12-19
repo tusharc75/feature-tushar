@@ -8,7 +8,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, gridLoadingTimeout, UnCamelCase } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 
@@ -194,13 +194,23 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     operations.push(e);
                   }
                 });
+                if (u?.changes?.every((e: any) => e?.type === 'add')) {
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
+                  u.action = "add";
+                  changeString.push(`${[...materialSet].join(', ')} Added`);
+                }
+                if (u?.changes?.every((e: any) => e?.type === 'delete')) {
+                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
+                  u.action = "delete";
+                  changeString.push(`${[...materialSet].join(', ')} Deleted`);
+                }
               } else {
                 operations.push({ ...u?.changes });
               }
               if (changeString?.length) {
                 u.changeString = changeString?.toString();
               } else {
-                u.changeString = 'Click View for check changes';
+                u.changeString = 'Click View to check changes';
               }
               if (u?.action == 'create') {
                 u.changeString = 'Created';

@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, IconButtonProps, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore, MoreVert } from '@material-ui/icons';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -12,7 +12,7 @@ import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import ButtonMenu from 'src/components/ButtonMenu';
+import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import CardColTimeline, { datarowInterface, useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -25,7 +25,7 @@ import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetail
 import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import { MATERIAL_SUB_TYPE, WORKORDER_SERVICE_STATUS, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
+import { MATERIAL_SUB_TYPE, WORKORDER_SERVICE_STATUS, cn, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 
@@ -35,6 +35,7 @@ import { useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { colormap } from 'src/pages/WorkOrderSupervisor/constants';
 
 const LIMIT = 25;
 
@@ -86,7 +87,6 @@ const WorkOrderSupervisor = () => {
   });
   const [resourceType, setResourceType] = useState('workOrder');
   const [isOpen, setOpen] = useState({ open: false, id: null });
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const ref: any = useRef();
 
@@ -326,8 +326,9 @@ const WorkOrderSupervisor = () => {
   };
 
   const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
-    const items = {
+    const data: NewActionButtonProps<string> = {
       disabled: selectedRecords?.length === 0,
+      horizontal: 'right',
       items: [
         {
           label: 'Assign Technician',
@@ -362,15 +363,86 @@ const WorkOrderSupervisor = () => {
           : [])
       ]
     };
-    return items;
+    return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, viewType]);
+
+  const statusMenuItems = useMemo(() => {
+    return [
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
+            {WORKORDER_SERVICE_STATUS.pending}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
+        value: WORKORDER_SERVICE_STATUS.pending
+      },
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
+            {WORKORDER_SERVICE_STATUS.inProgress}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
+        value: WORKORDER_SERVICE_STATUS.inProgress
+      },
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
+            {WORKORDER_SERVICE_STATUS.completed}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
+        value: WORKORDER_SERVICE_STATUS.completed
+      }
+    ];
+  }, [tableViewStatus]);
+
+  const moreButtonMenuItems: ButtonMenuProps<string>['items'] = useMemo(() => {
+    const items: ButtonMenuProps<string>['items'] = [];
+    if (permissions?.repairOrder?.isCreate) {
+      items.push({
+        label: `${resources?.repairOrder?.titlePlural}`,
+        onClick: () => {
+          window.open(`${routes?.repairOrder?.path}`);
+        }
+      });
+    }
+    if (permissions?.productionOrder?.isCreate) {
+      items.push({
+        label: `${resources?.productionOrder?.titlePlural}`,
+        onClick: () => {
+          window.open(`${routes?.productionOrder?.path}`);
+        }
+      });
+    }
+    if (permissions?.assemblyOrder?.isCreate) {
+      items.push({
+        label: `${resources?.assemblyOrder?.titlePlural}`,
+        onClick: () => {
+          window.open(`${routes?.assemblyOrder?.path}`);
+        }
+      });
+    }
+    return items;
+  }, [
+    permissions?.assemblyOrder?.isCreate,
+    permissions?.productionOrder?.isCreate,
+    permissions?.repairOrder?.isCreate,
+    resources?.assemblyOrder?.titlePlural,
+    resources?.productionOrder?.titlePlural,
+    resources?.repairOrder?.titlePlural
+  ]);
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <section className="main-container-v1">
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {permissions?.workOrder?.isCreate && (
               <Button
                 variant="outlined"
@@ -393,60 +465,20 @@ const WorkOrderSupervisor = () => {
                 {`${resources?.workOrder?.titlePlural}`}
               </Button>
             )}
-            <Box>
-              <HtmlTooltip title="More">
-                <IconButton aria-haspopup="true" color="primary" size="small" title="More" onClick={(event) => setAnchorEl(event.currentTarget)}>
-                  <MoreVert />
-                </IconButton>
-              </HtmlTooltip>
-              <Menu
-                id="menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center'
-                }}
-                onClose={() => setAnchorEl(null)}
-              >
-                {permissions?.repairOrder?.isCreate && (
-                  <MenuItem
-                    onClick={() => {
-                      setAnchorEl(null);
-                      window.open(`${routes?.repairOrder?.path}`);
-                    }}
-                  >
-                    {`${resources?.repairOrder?.titlePlural}`}
-                  </MenuItem>
-                )}
-                {permissions?.productionOrder?.isCreate && (
-                  <MenuItem
-                    onClick={() => {
-                      setAnchorEl(null);
-                      window.open(`${routes?.productionOrder?.path}`);
-                    }}
-                  >
-                    {`${resources?.productionOrder?.titlePlural}`}
-                  </MenuItem>
-                )}
-                {permissions?.assemblyOrder?.isCreate && (
-                  <MenuItem
-                    onClick={() => {
-                      setAnchorEl(null);
-                      window.open(`${routes?.assemblyOrder?.path}`);
-                    }}
-                  >
-                    {`${resources?.assemblyOrder?.titlePlural}`}
-                  </MenuItem>
-                )}
-              </Menu>
-            </Box>
+            <ButtonMenu
+              showChevron={true}
+              items={moreButtonMenuItems}
+              horizontal="right"
+              slot={
+                ((props) => (
+                  <HtmlTooltip title={'More'}>
+                    <IconButton aria-haspopup="true" color="primary" size="small" title="More" {...props}>
+                      <MoreVert />
+                    </IconButton>
+                  </HtmlTooltip>
+                )) as any
+              }
+            />
           </div>
         </div>
         <div className="main-container">
@@ -455,20 +487,19 @@ const WorkOrderSupervisor = () => {
               <div className="flex gap-2">
                 {['card-view', 'table-view'].includes(viewType) ? (
                   <>
-                    <DateRangePicker date={globalFilters} setDate={setGlobalFilters} />
+                    <DateRangePicker horizontal="left" date={globalFilters} setDate={setGlobalFilters} />
                     {viewType === 'table-view' && (
                       <ButtonMenu
                         showChevron={true}
-                        items={[
-                          { label: WORKORDER_SERVICE_STATUS.pending, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending },
-                          { label: WORKORDER_SERVICE_STATUS.inProgress, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress },
-                          { label: WORKORDER_SERVICE_STATUS.completed, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed }
-                        ]}
+                        items={statusMenuItems}
                         onItemClick={(e, item) => {
-                          setTableViewStatus(item.label);
+                          setTableViewStatus(item.value);
                         }}
                       >
-                        Status: {tableViewStatus}
+                        <span className="flex items-center gap-2">
+                          <span className={cn('block h-2 w-2 rounded-full', colormap[tableViewStatus].indicator)} />
+                          Status: {tableViewStatus}
+                        </span>
                       </ButtonMenu>
                     )}
                   </>
@@ -486,10 +517,7 @@ const WorkOrderSupervisor = () => {
                 )}
               </div>
 
-              <div className="flex flex-grow items-center gap-2 max-[600px]:flex-wrap">
-                <div className="flex-grow">
-                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
-                </div>
+              <div className="ml-auto flex items-center gap-2">
                 <IconButtonTabs
                   onItemClick={resetSelectedRecords}
                   items={
@@ -521,50 +549,81 @@ const WorkOrderSupervisor = () => {
                 </HtmlTooltip>
               </div>
             </div>
-            <div className="min-h-[48px]">
+          </div>
+          {viewType !== 'table-view' && (
+            <div className="min-h-[32px]">
               <DetailsPageHeader
                 isAddButtonVisible={false}
                 isActionButtonVisible={false}
                 isNewActionButtonVisible={selectedRecords.length > 0}
                 newActionButtonProps={newActionButtonProps}
                 actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                leftSideContents={
+                  <div className="flex-grow">
+                    <CustomFilter position="right" field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                  </div>
+                }
                 hasXpadding={false}
+                hasYpadding={false}
+                className="pt-4"
               />
             </div>
-          </div>
+          )}
           {viewType === 'card-view' && (
-            <CardColTimeline
-              fetchSingleColumn={fetchSingleColumn}
-              state={state}
-              dispatch={dispatch}
-              passFailStatus={true}
-              passFailAccessor="serviceStatus"
-              cardOnClick={(e, data) => {
-                setOpen({ open: true, id: data.workOrder });
-              }}
-            />
+            <div className="pt-2">
+              <CardColTimeline
+                fetchSingleColumn={fetchSingleColumn}
+                state={state}
+                dispatch={dispatch}
+                passFailStatus={true}
+                passFailAccessor="serviceStatus"
+                cardOnClick={(e, data) => {
+                  setOpen({ open: true, id: data.workOrder });
+                }}
+              />
+            </div>
           )}
           {viewType === 'calendar-view' && (
-            <WorkOrderCalendar
-              getFilterQuery={getQueryString}
-              filterResourceQuery={filterResourceQuery}
-              reference={resourceType}
-              ref={ref}
-              setOpen={setOpen}
-            />
+            <div className="pt-2">
+              <WorkOrderCalendar
+                getFilterQuery={getQueryString}
+                filterResourceQuery={filterResourceQuery}
+                reference={resourceType}
+                ref={ref}
+                setOpen={setOpen}
+              />
+            </div>
           )}
           {viewType === 'table-view' && (
-            <WorkOrderList
-              renderedFrom={renderedFrom}
-              state={tableState}
-              dispatch={tableDispatch}
-              filterResourceQuery={filterResourceQuery}
-              globalFilters={globalFilters}
-              ref={workOrderListRef}
-              status={tableViewStatus}
-              consumablesDialog={consumablesDialog}
-              setConsumablesDialog={setConsumablesDialog}
-            />
+            <div className="pt-4">
+              <WorkOrderList
+                renderedFrom={renderedFrom}
+                state={tableState}
+                dispatch={tableDispatch}
+                filterResourceQuery={filterResourceQuery}
+                globalFilters={globalFilters}
+                ref={workOrderListRef}
+                status={tableViewStatus}
+                consumablesDialog={consumablesDialog}
+                setConsumablesDialog={setConsumablesDialog}
+                tableHead={
+                  <DetailsPageHeader
+                    isAddButtonVisible={false}
+                    isActionButtonVisible={false}
+                    isNewActionButtonVisible={selectedRecords.length > 0}
+                    newActionButtonProps={newActionButtonProps}
+                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    leftSideContents={
+                      <div className="flex-grow">
+                        <CustomFilter position="right" field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                      </div>
+                    }
+                    hasXpadding={false}
+                    hasYpadding={false}
+                  />
+                }
+              />
+            </div>
           )}
         </div>
         {assignTechnicianDialog.open && (

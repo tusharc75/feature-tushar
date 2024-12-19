@@ -4,6 +4,7 @@ import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
 import styles from './index.module.scss';
 import { uniqBy } from 'lodash';
+import { cn } from 'src/constants/helpers';
 
 export * from './hooks/useCardReducer';
 
@@ -94,8 +95,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   }, [containerRef]);
 
   return (
-    <div className={`${styles.container} ${className}`} {...others} ref={containerRef}>
-      <div className="flex snap-x  snap-mandatory gap-[10px] overflow-auto py-4 md:scroll-px-[24px]">
+    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
+      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
           return (
             <div

@@ -381,23 +381,24 @@ const InvoiceDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {invoiceData ? (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={invoiceProcessSteps}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                  updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
-                  }}
-                />
-                <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {invoiceData ? (
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={invoiceProcessSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+                    stepFullScreen={stepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
+                    }}
+                  />
                   {currentStep === 0 && invoiceData && (
                     <Material
                       invoiceData={invoiceData}
@@ -416,15 +417,15 @@ const InvoiceDetails = () => {
                       statusOptions={statusOptions}
                     />
                   )}
-                </ContentFullScreen>
-              </Grid>
-            ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            )}
-          </Grid>
-        </TabPanel>
+                </Grid>
+              ) : (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <CreditMemo
             invoiceData={invoiceData}
@@ -451,7 +452,7 @@ const InvoiceDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}             
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

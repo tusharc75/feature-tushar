@@ -36,7 +36,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Step from '../DynamicForm/Step'
+import Step from '../DynamicForm/Step';
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -108,8 +108,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-        data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+          data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -184,7 +184,12 @@ const SubcontractAssemblyDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.subcontractAssembly, title: resources?.subcontractAssembly?.titlePlural }, { title: subcontractAssemblyData?.subcontractAssemblyNumber }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.subcontractAssembly, title: resources?.subcontractAssembly?.titlePlural },
+              { title: subcontractAssemblyData?.subcontractAssemblyNumber }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -193,7 +198,8 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   [SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) &&
-                  subcontractAssemblyData?.material?.length > 0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
+                  subcontractAssemblyData?.material?.length > 0 &&
+                  subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
@@ -230,11 +236,7 @@ const SubcontractAssemblyDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
+          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -246,20 +248,21 @@ const SubcontractAssemblyDetail = () => {
             <DetailsPage data={subcontractAssemblyData} fields={fields} />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={subcontractAssemblySteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.subcontractAssembly, subcontractAssemblySteps[step]?.name, id);
-            }}
-          />
-          <ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={subcontractAssemblySteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.subcontractAssembly, subcontractAssemblySteps[step]?.name, id);
+              }}
+            />
             {currentStep === 0 && subcontractAssemblyData && (
               <Material
                 subcontractAssemblyData={subcontractAssemblyData}
@@ -286,8 +289,8 @@ const SubcontractAssemblyDetail = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           {subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
         </TabPanel>

@@ -108,6 +108,7 @@ const useReport = () => {
       setResourceColumns(null);
       if (selectedReport?.route === payload.route) {
         dispatch({ type: 'setSelectedReport', payload: null });
+        navigateToMainPage();
       } else {
         const data = handleGetRoute(payload);
         dispatch({ type: 'setSelectedReport', payload: data });
@@ -115,7 +116,7 @@ const useReport = () => {
         history.push(payload.route);
       }
     },
-    [setColumns, setResourceColumns, selectedReport?.route, setIsColumnsLoading, history]
+    [setColumns, setResourceColumns, selectedReport?.route, setIsColumnsLoading, history, navigateToMainPage]
   );
 
   const filterValues = useCallback(
@@ -223,6 +224,8 @@ const useReport = () => {
   // to sync with route
   useEffect(() => {
     if (selectedReport?.route !== pathname) {
+      setColumns(null);
+      setResourceColumns(null);
       const currentRouteData = [...reportList, ...customReports].find((d) => d.route === pathname);
       if (currentRouteData) {
         const data = handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
@@ -231,9 +234,11 @@ const useReport = () => {
       }
     }
     if (pathname === routes.reports.path) {
+      setColumns(null);
+      setResourceColumns(null);
       dispatch({ type: 'setSelectedReport', payload: null });
     }
-  }, [customReports, pathname, reportList, selectedReport?.route, setIsColumnsLoading]);
+  }, [customReports, pathname, reportList, selectedReport?.route, setColumns, setIsColumnsLoading, setResourceColumns]);
 
   return {
     ...state,

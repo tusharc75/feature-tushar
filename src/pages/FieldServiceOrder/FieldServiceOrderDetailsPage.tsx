@@ -133,14 +133,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-        data.canDelete &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
@@ -231,7 +231,12 @@ const ServiceOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes?.fieldServiceOrder, title: resources?.fieldServiceOrder?.titlePlural }, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes?.fieldServiceOrder, title: resources?.fieldServiceOrder?.titlePlural },
+              { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           {!isOffline && (
@@ -266,17 +271,9 @@ const ServiceOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {!(isMobile && !isTablet) && !isOffline && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {!(isMobile && !isTablet) && !isOffline && <CustomTab value={2}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -290,22 +287,24 @@ const ServiceOrderDetailsPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={steps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            updateStatus={(step: number) => {
-              if (!isOffline) {
-                dynamicFormUpdateProcessStatus(sidebarResource.fieldServiceOrder, steps[step]?.name, id);
-              }
-            }}
-          />
-          <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={steps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              updateStatus={(step: number) => {
+                if (!isOffline) {
+                  dynamicFormUpdateProcessStatus(sidebarResource.fieldServiceOrder, steps[step]?.name, id);
+                }
+              }}
+            />
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
               <FieldTicket
                 serviceOrderData={serviceOrderData}
@@ -373,8 +372,8 @@ const ServiceOrderDetailsPage = () => {
                 fetchParentData={fetchServiceOrderData}
               />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
         </TabPanel>
@@ -398,7 +397,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount} ?`}          
+          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

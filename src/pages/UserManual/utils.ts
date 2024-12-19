@@ -6,8 +6,8 @@ function getLastPart(url: string): string | null {
   if (pos === -1) {
     return '/';
   }
-  const lastPart = url.substring(pos + homeLink.length);
-  return decodeURIComponent(lastPart);
+  const lastPart = url.substring(pos);
+  return lastPart;
 }
 
 

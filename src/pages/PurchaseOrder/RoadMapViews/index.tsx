@@ -11,12 +11,11 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 import { useData } from 'src/StateProvider/Provider';
 
-
 const PurchaseOrderViews = ({ purchaseOrderData }) => {
   const {
     state: { resources }
   }: any = useData();
-  
+
   const customNodeStyles = {
     purchaseOrder: {
       name: resources?.purchaseOrder?.titleSingular,
@@ -80,12 +79,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'purchaseOrder',
             ref_id: purchaseOrderData?._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="body2">{customNodeStyles.purchaseOrder.name}</Typography>
-              <Typography variant="subtitle2">
-                {purchaseOrderData?.purchaseOrderNumber}
-              </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.purchaseOrder.name}</Typography>
+                <Typography variant="subtitle2">{purchaseOrderData?.purchaseOrderNumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.purchaseOrder
@@ -108,12 +107,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'product',
             ref_id: item?.productId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="body2">{customNodeStyles.product.name}</Typography>
-              <Typography variant="subtitle2">
-                {item?.productDetail?.productName}
-              </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.product.name}</Typography>
+                <Typography variant="subtitle2">{item?.productDetail?.productName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: yPosition },
           style: customNodeStyles.product
@@ -135,12 +134,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'service',
             ref_id: item?.serviceId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="body2">{customNodeStyles.service.name}</Typography>
-              <Typography variant="subtitle2">
-                {item?.serviceDetail?.serviceName}
-              </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.service.name}</Typography>
+                <Typography variant="subtitle2">{item?.serviceDetail?.serviceName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: yPosition },
           style: customNodeStyles.service
@@ -162,12 +161,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           data: {
             ref_type: 'manualEntry',
             ref_id: item?._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <Typography variant="body2">{customNodeStyles.manualEntry.name}</Typography>
-              <Typography variant="subtitle2">
-                {item?.description}
-              </Typography>
-            </div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.manualEntry.name}</Typography>
+                <Typography variant="subtitle2">{item?.description}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: yPosition },
           style: customNodeStyles.manualEntry
@@ -199,9 +198,7 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
                 <HtmlTooltip arrow placement="top" title={item?.status}>
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     <Typography variant="body2">{customNodeStyles.assets.name}</Typography>
-                    <Typography variant="subtitle2">
-                      {item?.assetNumber}
-                    </Typography>
+                    <Typography variant="subtitle2">{item?.assetNumber}</Typography>
                   </div>
                 </HtmlTooltip>
               )
@@ -227,12 +224,12 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
             data: {
               ref_type: 'serialNumber',
               ref_id: item?._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Typography variant="body2">{customNodeStyles.serialNumber.name}</Typography>
-                <Typography variant="subtitle2">
-                  {item?.serialNumber}
-                </Typography>
-              </div>
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{customNodeStyles.serialNumber.name}</Typography>
+                  <Typography variant="subtitle2">{item?.serialNumber}</Typography>
+                </div>
+              )
             },
             position: { x: xPosition, y: assetYIdx * 80 },
             style: customNodeStyles.serialNumber
@@ -259,9 +256,7 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
           label: (
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <Typography variant="body2">Status</Typography>
-              <Typography variant="subtitle2">
-                {purchaseOrderData?.status}
-              </Typography>
+              <Typography variant="subtitle2">{purchaseOrderData?.status}</Typography>
             </div>
           )
         },
@@ -329,16 +324,16 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'product':
-        window.open(`${routes.productDetail.path}/${element.data.ref_id}`)
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`)
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'service':
-        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`)
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
-        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`)
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'serialNumber':
         break;
@@ -348,7 +343,7 @@ const PurchaseOrderViews = ({ purchaseOrderData }) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button
