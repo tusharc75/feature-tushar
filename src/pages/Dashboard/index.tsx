@@ -94,9 +94,7 @@ const Dashboard = () => {
             setKpis(
               data[0]?.charts
                 ?.filter((chart) => chart?.hasFilters)
-                ?.map((chart) => {
-                  camelCase(chart?.kpi?.name);
-                })
+                ?.map((chart) => camelCase(chart?.kpi?.name))
             );
             setSelectedDashboardId(data[0]?._id);
           }
