@@ -21,7 +21,6 @@ import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   checkIsAllowedToDelete,
@@ -494,7 +493,7 @@ export default function Contact(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
+              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteContact}
             />

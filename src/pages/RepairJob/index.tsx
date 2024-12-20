@@ -16,7 +16,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   checkIsAllowedToDelete,
   customerAccount,
@@ -141,7 +140,7 @@ const RepairJob = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-         <HtmlTooltip title={permissions?.repairJob?.isCreate ? 'Clone' : cloneDisable}>
+        <HtmlTooltip title={permissions?.repairJob?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -412,7 +411,7 @@ const RepairJob = () => {
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairJobName}` : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`} ?`}
-            onClose={() =>{
+            onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
             }}

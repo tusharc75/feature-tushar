@@ -11,7 +11,8 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomDialogTransition, dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { CreditDebitRenderer, ReferenceRenderer } from 'src/pages/ReportsNew/tables/StandardReportTable/helperComponents';
+import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
+import { CreditDebitRenderer } from 'src/pages/ReportsNew/tables/StandardReportTable/helperComponents';
 import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'product_price_history';
