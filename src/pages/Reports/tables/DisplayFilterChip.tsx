@@ -130,7 +130,7 @@ const DisplayFilterChip = ({
         );
       })}
       {filters.dates?.map((d) => {
-        return <RenderDates sign={''} colNameMap={colNameMap} key={d.field} data={d} handleClearFilter={handleClearFilter} />;
+        return <RenderDates sign={':'} colNameMap={colNameMap} key={d.field} data={d} handleClearFilter={handleClearFilter} />;
       })}
     </div>
   );
