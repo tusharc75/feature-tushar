@@ -13,7 +13,7 @@ import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { serializedAsset } from '../../constants/helpers';
-import cardStyle from '../ReportMaster/index.module.scss';
+import cardStyle from './index.module.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';

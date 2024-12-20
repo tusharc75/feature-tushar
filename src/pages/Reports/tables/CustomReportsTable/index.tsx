@@ -11,7 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, downloadExcel, gridLoadingTimeout, prepareDataForGrid, primaryFields, REPORT_LIST } from 'src/constants/helpers';
-import { TableCommonProps } from 'src/pages/ReportsNew/types';
+import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 let cancelTokenSource = null;

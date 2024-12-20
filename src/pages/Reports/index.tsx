@@ -1,12 +1,12 @@
 import { Box, Button } from '@material-ui/core';
 import { AiFillCalendar } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
-import Layout from 'src/pages/ReportsNew/Layout';
-import SidebarContent from 'src/pages/ReportsNew/SidebarContent';
-import SidebarHead from 'src/pages/ReportsNew/SidebarHead';
-import useReport from 'src/pages/ReportsNew/useReport';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ReportsContent from 'src/pages/ReportsNew/ReportsContent';
+import Layout from 'src/pages/Reports/Layout';
+import SidebarContent from 'src/pages/Reports/SidebarContent';
+import SidebarHead from 'src/pages/Reports/SidebarHead';
+import useReport from 'src/pages/Reports/useReport';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ReportsContent from 'src/pages/Reports/ReportsContent';
 import routes from 'src/components/Helpers/Routes';
 import { useMemo } from 'react';
 

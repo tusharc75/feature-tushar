@@ -1,7 +1,7 @@
 import { IconButton } from '@material-ui/core';
 import { TbLayoutSidebarFilled } from 'react-icons/tb';
 import { cn } from 'src/constants/helpers';
-import { LayoutComponentProps } from 'src/pages/ReportsNew/Layout/types';
+import { LayoutComponentProps } from 'src/pages/Reports/Layout/types';
 
 const Content = ({ children, state }: LayoutComponentProps) => {
   const { toggleSidebar, isSidebarOpen, isMobile } = state;

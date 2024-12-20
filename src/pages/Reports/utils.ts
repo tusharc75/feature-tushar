@@ -1,4 +1,4 @@
-import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/ReportsNew/types';
+import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/Reports/types';
 
 export const handleGetRoute = ({ route, title }: { route: string; title: string }): SelectedReport => {
   const data: SelectedReport = {

@@ -4,7 +4,7 @@ import { FaChevronDown } from 'react-icons/fa';
 import { TbStar, TbStarFilled } from 'react-icons/tb';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
-import ViewAllDialog from 'src/pages/ReportsNew/SidebarContent/ViewAllDialog';
+import ViewAllDialog from 'src/pages/Reports/SidebarContent/ViewAllDialog';
 
 export type SectionProps<I> = {
   title: string;
@@ -25,7 +25,9 @@ const Section = <T,>({
   getTitle,
   selectedTitle,
   isFilled = () => false,
-  onButtonClick = (data) => { () => { } }
+  onButtonClick = (data) => {
+    () => {};
+  }
 }: SectionProps<T>) => {
   const [open, setOpen] = React.useState(true);
   const firstFewItems = useMemo(() => [...items].slice(0, ITEMS_TO_SHOW), [items]);

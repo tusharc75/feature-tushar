@@ -11,11 +11,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
-import { TableCommonProps } from 'src/pages/ReportsNew/types';
+import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DisplayFilterChip from 'src/pages/ReportsNew/tables/DisplayFilterChip';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
 let cancelTokenSource = null;
 
@@ -408,7 +408,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => { }}
+              afterImportCompleted={() => {}}
               onlyExport={true}
             />
           </>
