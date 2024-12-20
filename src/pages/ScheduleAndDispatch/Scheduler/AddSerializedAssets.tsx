@@ -38,6 +38,7 @@ const AddSerializedAssets = ({
   const [columns, setColumns] = useState(null);
   const [isAutoSelectAsset, setIsAutoSelectAsset] = useState(false);
   const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
+  const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -62,6 +63,7 @@ const AddSerializedAssets = ({
       setSelectedAssets([]);
       dispatch({ type: 'selection', selectedRecords: [] });
       setIsVirtualizedTableView(false);
+      setIsAutoSelectAsset(false);
     }
   }, [selectedProduct, selectedWarehouse, submitLoad]);
 
@@ -182,7 +184,7 @@ const AddSerializedAssets = ({
               )}
             />
           )}
-          {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
+          {selectedProduct && selectedWarehouse && (
             <FormControlLabel
               control={
                 <Checkbox
@@ -190,6 +192,12 @@ const AddSerializedAssets = ({
                   checked={isAutoSelectAsset}
                   name={`Auto Select Asset`}
                   onChange={(e) => {
+                    if (e.target.checked) {
+                      setOpenAssetQtyDialog(true);
+                    } else {
+                      setIsVirtualizedTableView(false);
+                      setSelectedAssets([]);
+                    }
                     setIsAutoSelectAsset(e.target.checked);
                   }}
                 />
@@ -197,24 +205,7 @@ const AddSerializedAssets = ({
               label={`Auto Select Asset`}
             />
           )}
-          {isVirtualizedTableView && (
-            <Button
-              disabled={false}
-              variant="contained"
-              size="small"
-              color="primary"
-              onClick={() => {
-                setIsVirtualizedTableView(false);
-                setSelectedAssets([]);
-              }}
-              style={{
-                display: 'block',
-                alignSelf: 'center'
-              }}
-            >
-              Reset
-            </Button>
-          )}
+
         </div>
         {isVirtualizedTableView ? (
           <RenderVirtualizedAssetTable selectedAssets={selectedAssets} />
@@ -247,15 +238,18 @@ const AddSerializedAssets = ({
         </div>
       </CollapsibleWrapper>
 
-      {isAutoSelectAsset && (
+      {openAssetQtyDialog && (
         <AssetQtyDialog
           warehouse={selectedWarehouse}
           product={selectedProduct}
-          handleClose={() => setIsAutoSelectAsset(false)}
+          handleClose={() => {
+            setIsAutoSelectAsset(false);
+            setOpenAssetQtyDialog(false);
+          }}
           handleSuccess={(data) => {
             setSelectedAssets(data);
             setIsVirtualizedTableView(true);
-            setIsAutoSelectAsset(false);
+            setOpenAssetQtyDialog(false);
           }}
         />
       )}
@@ -289,7 +283,7 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
-  
+
   return (
     <div
       style={{
@@ -310,7 +304,7 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
             width: '100%'
           }}
         >
-          <TableRow className="h-[40px] bg-gray-200">
+          <TableRow className="h-[40px] bg-gray-100">
             <TableCell key="no" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
               S no.
             </TableCell>
