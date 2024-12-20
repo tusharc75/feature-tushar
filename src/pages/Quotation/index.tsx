@@ -33,16 +33,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const Quotation = () => {
-  const types = [
-    {
-      key: `My ${sidebarResource?.quotation}`,
-      value: 1
-    },
-    {
-      key: `All ${sidebarResource?.quotation}`,
-      value: 2
-    }
-  ];
+
 
   const renderedFrom = camelCase(sidebarResource?.quotation);
   const toastConfig = useContext(CustomToastContext);
@@ -65,6 +56,17 @@ const Quotation = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+
+  const types = [
+    {
+      key: `My ${resources?.quotation?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.quotation?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     fetchGridColumns();

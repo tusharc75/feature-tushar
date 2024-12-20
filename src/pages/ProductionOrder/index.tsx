@@ -35,18 +35,6 @@ const ProductionOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
   const toastConfig = useContext(CustomToastContext);
 
-  const types = [
-    {
-      key: `My ${sidebarResource?.productionOrder}`,
-      value: 1
-    },
-    {
-      key: `All ${sidebarResource?.productionOrder}`,
-      value: 2
-    }
-  ];
-
-  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -64,6 +52,17 @@ const ProductionOrder = () => {
 
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
+
+  const types = [
+    {
+      key: `My ${resources?.productionOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.productionOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     dispatch({ type: 'filter', filters: { status: { filter: [PRODUCTION_ORDER_STATUS.new, PRODUCTION_ORDER_STATUS.inProgress] } } });
@@ -241,11 +240,11 @@ const ProductionOrder = () => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null)
+            }
             showConfirmBox();
           }}
         >
