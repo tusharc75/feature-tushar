@@ -129,7 +129,7 @@ const Dashboard = () => {
     <div className="main-container-v1">
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
+          <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
         </div>
         <div className="detail-container-v1">
           {!userLoading ? (
@@ -142,7 +142,7 @@ const Dashboard = () => {
               />
               <Box pt={1}>
                 {dashboardLoading ? (
-                  <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+                  <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboard..." />
                 ) : dashboardList.length === 0 ? (
                   <Box
                     style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
