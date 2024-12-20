@@ -30,6 +30,7 @@ import {
   REPORT_LIST,
   sidebarResource
 } from 'src/constants/helpers';
+import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
 import AverageCostHistory from 'src/pages/ReportsNew/tables/AverageCostHistory';
 import DisplayFilterChip from 'src/pages/ReportsNew/tables/DisplayFilterChip';
 import PadData from 'src/pages/ReportsNew/tables/PadData';
@@ -38,7 +39,6 @@ import {
   CreditDebitTypeRenderer,
   PackageRenderer,
   ProductRenderer,
-  ReferenceRenderer,
   SerializedAssetRenderer,
   SerialNumberRenderer,
   ServiceRenderer,
