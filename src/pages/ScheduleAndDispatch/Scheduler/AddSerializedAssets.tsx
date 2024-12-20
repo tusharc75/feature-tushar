@@ -1,15 +1,20 @@
-import { Box, Button, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControlLabel, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import axios, { CancelTokenSource } from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import MaUTable from '@material-ui/core/Table';
+
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import AssetQtyDialog from './AssetQtyDialog';
 import { ACCORDION_TYPE, CollapsibleWrapper } from 'src/pages/ScheduleAndDispatch/Scheduler/helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
+import { FiExternalLink } from 'react-icons/fi';
 
 const AddSerializedAssets = ({
   setSelectedAssets,
@@ -20,6 +25,7 @@ const AddSerializedAssets = ({
   selectedWarehouse,
   setSelectedProduct,
   selectedProduct,
+  selectedAssets,
   warehouseOptions,
   productOptions,
   submitLoad
@@ -30,6 +36,9 @@ const AddSerializedAssets = ({
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+  const [isAutoSelectAsset, setIsAutoSelectAsset] = useState(false);
+  const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
+  const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -43,7 +52,9 @@ const AddSerializedAssets = ({
   }, []);
 
   const handleAdd = () => {
-    setSelectedAssets(selectedRecords);
+    if (!isVirtualizedTableView) {
+      setSelectedAssets(selectedRecords);
+    }
     handleOpen(ACCORDION_TYPE.service);
   };
 
@@ -51,6 +62,8 @@ const AddSerializedAssets = ({
     if (submitLoad || selectedProduct || selectedWarehouse) {
       setSelectedAssets([]);
       dispatch({ type: 'selection', selectedRecords: [] });
+      setIsVirtualizedTableView(false);
+      setIsAutoSelectAsset(false);
     }
   }, [selectedProduct, selectedWarehouse, submitLoad]);
 
@@ -99,7 +112,7 @@ const AddSerializedAssets = ({
     if (selectedProduct) {
       filterByIds.push({ field: 'product', term: selectedProduct });
     }
-    deepFilters.push({ field: 'status', term: ASSET_STATUS.available });
+    deepFilters.push({ field: 'status', term: [ASSET_STATUS.available, ASSET_STATUS.new] });
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -171,9 +184,32 @@ const AddSerializedAssets = ({
               )}
             />
           )}
-        </div>
+          {selectedProduct && selectedWarehouse && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={isAutoSelectAsset}
+                  name={`Auto Select Asset`}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setOpenAssetQtyDialog(true);
+                    } else {
+                      setIsVirtualizedTableView(false);
+                      setSelectedAssets([]);
+                    }
+                    setIsAutoSelectAsset(e.target.checked);
+                  }}
+                />
+              }
+              label={`Auto Select Asset`}
+            />
+          )}
 
-        {columns ? (
+        </div>
+        {isVirtualizedTableView ? (
+          <RenderVirtualizedAssetTable selectedAssets={selectedAssets} />
+        ) : columns ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
@@ -190,13 +226,131 @@ const AddSerializedAssets = ({
         )}
 
         <div className="flex justify-end">
-          <Button disabled={!selectedRecords?.length} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
+          <Button
+            disabled={!selectedAssets?.length && !selectedRecords?.length}
+            variant="contained"
+            size="small"
+            color="primary"
+            onClick={() => handleAdd()}
+          >
             Save & Next
           </Button>
         </div>
       </CollapsibleWrapper>
+
+      {openAssetQtyDialog && (
+        <AssetQtyDialog
+          warehouse={selectedWarehouse}
+          product={selectedProduct}
+          handleClose={() => {
+            setIsAutoSelectAsset(false);
+            setOpenAssetQtyDialog(false);
+          }}
+          handleSuccess={(data) => {
+            setSelectedAssets(data);
+            setIsVirtualizedTableView(true);
+            setOpenAssetQtyDialog(false);
+          }}
+        />
+      )}
     </>
   );
 };
 
 export default AddSerializedAssets;
+
+const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const data: { assetNumber: string; _id: string }[] = useMemo(
+    () =>
+      selectedAssets?.map((s, idx: number) => ({
+        assetNumber: s.assetNumber,
+        _id: s._id
+      })) || [],
+    [selectedAssets]
+  );
+
+  const rowVirtualizer = useVirtualizer({
+    count: data?.length,
+    estimateSize: () => 40,
+    getScrollElement: () => scrollContainerRef.current,
+    measureElement:
+      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+    overscan: 5
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+
+  return (
+    <div
+      style={{
+        display: 'block',
+        overflow: 'auto',
+        height: 'calc(100vh - 393px)',
+        marginTop: '10px'
+      }}
+      ref={scrollContainerRef}
+      className="custom-react-table editable-table-v1 w-full border"
+    >
+      <MaUTable className="w-full border-separate border-spacing-0" size="small">
+        <TableHead
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1,
+            width: '100%'
+          }}
+        >
+          <TableRow className="h-[40px] bg-gray-100">
+            <TableCell key="no" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
+              S no.
+            </TableCell>
+            <TableCell key="asset" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
+              Asset
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            position: 'relative',
+            width: '100%'
+          }}
+        >
+          {virtualRows?.map((virtualRow) => {
+            const row = data[virtualRow.index];
+            return (
+              <TableRow
+                key={row._id}
+                ref={(node) => rowVirtualizer.measureElement(node)}
+                style={{
+                  position: 'absolute',
+                  transform: `translateY(${virtualRow.start}px)`,
+                  display: 'flex',
+                  width: '100%'
+                }}
+              >
+                <TableCell className="flex items-center border-b border-gray-300" style={{ flex: '1 1 20%', maxWidth: '50%' }}>
+                  {virtualRow.index + 1}
+                </TableCell>
+                <TableCell className="flex items-center border-b border-gray-300" style={{ flex: '1 1 80%', maxWidth: '50%' }}>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate" title={row.assetNumber}>
+                      {row.assetNumber}
+                    </p>
+                    <IconButton size="small" onClick={() => window.open(`${routes.serializedAssetDetail.path}/${row?._id}`)}>
+                      <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </MaUTable>
+    </div>
+  );
+};

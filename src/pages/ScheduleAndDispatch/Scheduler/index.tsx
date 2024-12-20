@@ -96,6 +96,7 @@ const Scheduler = () => {
           <div>
             <AddSerializedAssets
               setSelectedAssets={setSelectedAssets}
+              selectedAssets={selectedAssets}
               isExpand={isExpand.asset}
               resources={resources}
               handleOpen={handleOpen}
