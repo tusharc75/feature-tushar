@@ -34,7 +34,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -175,7 +175,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    !invoiceId ? `Create ${routes.invoice.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`
+                    !invoiceId ? `Create ${resources?.invoice?.titleSingular}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${invoiceData?.invoiceNumber}`}`
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) {

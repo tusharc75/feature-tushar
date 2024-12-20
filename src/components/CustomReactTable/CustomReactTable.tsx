@@ -85,7 +85,11 @@ const CustomReactTable = ({
   showOnlyMobileView = false,
   onRowClick = null,
   enableGlobalSearch = true,
-  pagination = true
+  pagination = true,
+  topLeftSlot = null,
+  expanderWithCustomContent = false,
+  customContentHeight = 300,
+  customContent = null
 }) => {
   const {
     currentEditingCellPosition,
@@ -127,7 +131,8 @@ const CustomReactTable = ({
     isClientSideGrid,
     toggleExpandChange,
     resource,
-    renderedFrom
+    renderedFrom,
+    expanderWithCustomContent
   });
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -518,6 +523,9 @@ const CustomReactTable = ({
             resource={resource}
             expander={expander}
             hideSelection={hideSelection}
+            expanderWithCustomContent={false}
+            customContentHeight={customContentHeight}
+            customContent={customContent}
           />
         </div>
       )}
@@ -541,6 +549,7 @@ const CustomReactTable = ({
             state={state}
             expander={expander}
             hideExportTable={hideExportTable}
+            topLeftSlot={topLeftSlot}
           />
           {!isMobileView && !showOnlyMobileView && (
             <div className="relative" ref={tableContainerRef}>
@@ -563,6 +572,9 @@ const CustomReactTable = ({
                 pagination={pagination}
                 expander={expander}
                 hideSelection={hideSelection}
+                expanderWithCustomContent={expanderWithCustomContent}
+                customContentHeight={customContentHeight}
+                customContent={customContent}
               />
             </div>
           )}

@@ -15,55 +15,12 @@ import { FiExternalLink } from 'react-icons/fi';
 import axios, { CancelTokenSource } from 'axios';
 import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
 
-const FIELD_TO_FILTER = [
-  {
-    fieldName: '_id',
-    fieldLabel: routes.workOrder.title,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'warehouse',
-    fieldLabel: routes.warehouse.title,
-    resource: sidebarResource.warehouse,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'serializedAsset',
-    fieldLabel: routes.serializedAsset.title,
-    resource: sidebarResource.serializedAsset,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'productCategory',
-    fieldLabel: routes.productCategory.title,
-    resource: sidebarResource.productCategory,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'product',
-    fieldLabel: routes.product.title,
-    resource: sidebarResource.product,
-    type: 'dropDown'
-  },
-  {
-    fieldName: 'createDate',
-    fieldLabel: 'Create Date',
-    type: 'date'
-  }
-  // {
-  //   fieldName: 'requestDate',
-  //   fieldLabel: 'Request Date',
-  //   type: 'date'
-  // },
-];
-
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [filterQuery, setFilterQuery] = useState({
@@ -134,11 +91,54 @@ const MaterialHandling = () => {
       });
   };
 
+  const FIELD_TO_FILTER = [
+    {
+      fieldName: '_id',
+      fieldLabel: resources?.workOrder?.titlePlural,
+      resource: sidebarResource.workOrder,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'warehouse',
+      fieldLabel: resources?.warehouse?.titlePlural,
+      resource: sidebarResource.warehouse,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'serializedAsset',
+      fieldLabel: resources?.serializedAsset?.titlePlural,
+      resource: sidebarResource.serializedAsset,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'productCategory',
+      fieldLabel: resources?.productCategory?.titlePlural,
+      resource: sidebarResource.productCategory,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'product',
+      fieldLabel: resources?.product?.titlePlural,
+      resource: sidebarResource.product,
+      type: 'dropDown'
+    },
+    {
+      fieldName: 'createDate',
+      fieldLabel: 'Create Date',
+      type: 'date'
+    }
+    // {
+    //   fieldName: 'requestDate',
+    //   fieldLabel: 'Request Date',
+    //   type: 'date'
+    // },
+  ];
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.materialHandling.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.materialHandling?.titlePlural }]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
@@ -204,7 +204,7 @@ const MaterialHandling = () => {
                                   onClick={() => {
                                     let route;
                                     if (data?.referenceType === sidebarResource.workOrder) {
-                                      route = routes.workOrderDetail.path;
+                                      route = routes?.workOrderDetail?.path;
                                     } else if (data?.referenceType === sidebarResource.fieldTicket) {
                                       route = routes.fieldTicketDetail.path;
                                     }
@@ -242,7 +242,7 @@ const MaterialHandling = () => {
                               </>
                             )}
                             <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
-                              {routes.warehouse.title} :{' '}
+                              {resources?.warehouse?.titleSingular} :{' '}
                               <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
                             </Typography>
                           </Box>

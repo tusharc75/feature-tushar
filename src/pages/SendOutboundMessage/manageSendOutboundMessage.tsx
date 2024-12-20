@@ -11,21 +11,15 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import routes from 'src/components/Helpers/Routes';
 import { uniqBy } from 'lodash';
-import { object, string } from 'yup';
-
-const schema = object().shape({
-  serializedAsset: string().required(`${routes?.serializedAsset?.title} is required`),
-  messageType: string().required(`Type is required`),
-  messageId: string().required(`Description is required`),
-  messageValue: string().required(`Value is required`),
-});
-
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
-
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [serializedAssetOptions, setSerializedAssetOptions] = useState([]);
@@ -34,20 +28,23 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset`).then(({ data: { data } }) => {
-      setSerializedAssetOptions(data['Serialized Asset']);
-    })
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetOptions(data['Serialized Asset']);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }, []);
 
   useEffect(() => {
-    axiosInstance().get(`/dynamic-form`, {
-      headers: {
-        Resource: 'Outbound Message'
-      }
-    })
+    axiosInstance()
+      .get(`/dynamic-form`, {
+        headers: {
+          Resource: 'Outbound Message'
+        }
+      })
       .then(({ data: { data } }) => {
         const aa = uniqBy(data, 'type');
         setOutBoundMessageTypeOptions(uniqBy(data, 'type')?.map((d: any) => d?.type));
@@ -67,18 +64,37 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    axiosInstance().post(`/iot-out-bound-message`, {
-      asset: values['serializedAsset'],
-      messageId: values['messageId'],
-      messageValue: values['messageValue']
-    }).then(() => {
-      setIsSubmitting(false);
-      onSuccess();
-    })
+    axiosInstance()
+      .post(`/iot-out-bound-message`, {
+        asset: values['serializedAsset'],
+        messageId: values['messageId'],
+        messageValue: values['messageValue']
+      })
+      .then(() => {
+        setIsSubmitting(false);
+        onSuccess();
+      })
       .catch((error) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const validate = (values) => {
+    const errors = {};
+    if (!values?.serializedAsset) {
+      errors['serializedAsset'] = `${resources?.serializedAsset?.titleSingular} is required`;
+    }
+    if (!values?.messageType) {
+      errors['messageType'] = `Type is required`;
+    }
+    if (!values?.messageId) {
+      errors['messageId'] = `Description is required`;
+    }
+    if (!values?.messageValue) {
+      errors['messageValue'] = `Value is required`;
+    }
+    return errors;
   };
 
   return (
@@ -102,7 +118,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
             messageId: '',
             messageValue: ''
           }}
-          validationSchema={schema}
+          validateOnMount
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, touched, errors, setFieldValue, submitForm, setValues }) => (
@@ -138,7 +155,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             {...params}
                             margin="dense"
                             name="serializedAsset"
-                            label={routes.serializedAsset.title}
+                            label={resources?.serializedAsset?.titleSingular}
                             variant="outlined"
                             error={touched['serializedAsset'] && Boolean(errors['serializedAsset'])}
                             helperText={touched['serializedAsset'] && errors['serializedAsset']}
@@ -159,9 +176,9 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         }
                         onChange={(e, val) => {
                           const result: any = {};
-                          result['messageType'] = val ? val : ''
-                          result['messageId'] = ''
-                          result['messageValue'] = ''
+                          result['messageType'] = val ? val : '';
+                          result['messageId'] = '';
+                          result['messageValue'] = '';
                           setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (
@@ -181,17 +198,20 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                     </Grid>
                     <Grid item md={12} lg={12} sm={12}>
                       <Autocomplete
-                        options={values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions}
+                        options={
+                          values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
+                        }
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
                         getOptionSelected={(option: any, val) => option?.optionValue === val}
-                        value={outBoundMessageOptions?.filter((data) => values['messageId'] === data?.optionValue).length
-                          ? outBoundMessageOptions?.find((data) => values['messageId'] === data?.optionValue)
-                          : ''
+                        value={
+                          outBoundMessageOptions?.filter((data) => values['messageId'] === data?.optionValue).length
+                            ? outBoundMessageOptions?.find((data) => values['messageId'] === data?.optionValue)
+                            : ''
                         }
                         onChange={(e, val) => {
                           const result: any = {};
-                          result['messageId'] = val && val?.optionValue ? val?.optionValue : ''
-                          result['messageValue'] = val?.outboundMessageNumber ? val?.outboundMessageNumber : ''
+                          result['messageId'] = val && val?.optionValue ? val?.optionValue : '';
+                          result['messageValue'] = val?.outboundMessageNumber ? val?.outboundMessageNumber : '';
                           setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (

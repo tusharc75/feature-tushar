@@ -21,7 +21,7 @@ import ManageProductAuction from './ManageProductAuction';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductAuction = () => {
-  const renderedFrom = camelCase(routes?.productAuction.title);
+  const renderedFrom = camelCase(sidebarResource.productAuction);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -30,7 +30,7 @@ const ProductAuction = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,6 +191,11 @@ const ProductAuction = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -203,10 +208,10 @@ const ProductAuction = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productAuction]} />
+        <CustomBreadCrumbs routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productAuction}
-          module={routes.productAuction.title}
+          module={resources?.productAuction?.titlePlural}
           api={productAuction.api}
           afterImportCompleted={() => {
             fetchData();
@@ -255,7 +260,7 @@ const ProductAuction = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productAuction?.title} ${deleteRecord?.auctionNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productAuction?.titleSingular?.toLowerCase()} : ${deleteRecord?.auctionNumber || ''}` : `selected ${resources?.productAuction?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

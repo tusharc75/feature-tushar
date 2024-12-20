@@ -37,20 +37,25 @@ import './style.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.opportunity.title);
+const renderedFrom = camelCase(sidebarResource.opportunity);
 
 const Opportunities = () => {
+
+  const {
+    state: { user, selectedEntity, permissions, resources }
+  }: any = useData()
+
   const types = [
     {
-      key: `My ${routes.opportunity.title}`,
+      key: `My ${resources?.opportunity?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.opportunity.title}`,
+      key: `All ${resources?.opportunity?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${routes.opportunity.title}`,
+      key: `Closed ${resources?.opportunity?.titlePlural}`,
       value: 3
     }
   ];
@@ -58,9 +63,7 @@ const Opportunities = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const {
-    state: { user, selectedEntity, permissions }
-  }: any = useData();
+  ;
   const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
@@ -86,7 +89,7 @@ const Opportunities = () => {
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
     let data = response?.data?.data;
-    const newColumns = generateColumns(routes.opportunity.title, data, routes.opportunityDetail.path, true);
+    const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
         (o.disabled = true),
@@ -99,7 +102,7 @@ const Opportunities = () => {
     });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.opportunity.title, field));
+      newColumns.push(checkStaticField(sidebarResource.opportunity, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };
@@ -294,6 +297,11 @@ const Opportunities = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setIsConformDialogVisible(true);
           }}
         >
@@ -314,7 +322,7 @@ const Opportunities = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.opportunity]} />
+        <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.opportunity}
           module="opportunities"
@@ -377,8 +385,7 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.opportunity?.titleSingular?.toLowerCase()} : ${deleteRecord?.opportunityName || ''}` : `selected ${resources?.opportunity?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

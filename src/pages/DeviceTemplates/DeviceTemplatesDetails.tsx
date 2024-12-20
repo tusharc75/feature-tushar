@@ -25,10 +25,9 @@ export default function DeviceTemplatesDetails() {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
-
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.deviceTemplates]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titlePlural }]);
   const [loading, setLoading] = useState(false);
   const [deviceTemplatesData, setDeviceTemplatesData] = useState(null);
   const [fields, setFields] = useState([]);
@@ -50,7 +49,7 @@ export default function DeviceTemplatesDetails() {
         data: { data }
       } = await axiosInstance().get(`${routes.deviceTemplates.path}/${id}`);
       setDeviceTemplatesData(data);
-      setCustomizedRoutes([routes.deviceTemplates, { title: data.templateName }]);
+      setCustomizedRoutes([{ ...routes.deviceTemplates, title: resources?.deviceTemplates?.titlePlural }, { title: data.templateName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -127,7 +126,7 @@ export default function DeviceTemplatesDetails() {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          <CustomTab value={1} label={routes.iotDataPoints.title} />
+          <CustomTab value={1} label={resources?.iotDataPoints?.titlePlural} />
           <CustomTab value={2} label={'Rules'} />
           <CustomTab value={3} label={'Alerts'} />
         </CustomTabs>
@@ -169,7 +168,7 @@ export default function DeviceTemplatesDetails() {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.deviceTemplates.title.toLowerCase()} ${deviceTemplatesData?.templateName}?`}
+          message={`Are you sure you want to delete ${resources?.deviceTemplates?.titleSingular?.toLowerCase()} : ${deviceTemplatesData?.templateName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

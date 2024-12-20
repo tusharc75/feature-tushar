@@ -24,7 +24,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -157,7 +157,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
             <Fragment>
               <CustomDialogHeader
                 title={
-                  productAuctionId ? (isClone ? 'Clone' : `Update ${productAuctionData?.productAuction}`) : 'Create ' + routes.productAuction.title
+                  productAuctionId ? (isClone ? 'Clone' : `Update ${productAuctionData?.productAuction}`) : 'Create ' + resources?.productAuction?.titleSingular
                 }
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {

@@ -23,9 +23,19 @@ import ManageAssetDialog from './ManageAssetDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerialisedAsset, generateAddNewSerialisedAsset, generateEditSerialisedAsset } from '../walkmeSteps';
+import { repairJobMessage } from 'src/constants/messageHelpers';
 
-
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
+const SerializedAsset = ({
+  repairJobData,
+  setNextStep,
+  setNextStepToolTip,
+  updateJobStatus,
+  renderedFrom,
+  allowedToEdit,
+  stepFullScreen,
+  alloweOperation,
+  fetchRepairJobData
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -39,7 +49,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({
     open: false,
@@ -66,19 +76,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   }, [columns]);
 
   useEffect(() => {
-    let stepData = [
-      generateAddExistingSerialisedAsset(),
-      generateAddNewSerialisedAsset()
-    ];
+    let stepData = [generateAddExistingSerialisedAsset(), generateAddNewSerialisedAsset()];
     if (dataRows?.length) {
       if (permissions?.repairJob?.isUpdate) {
         stepData.push(generateEditSerialisedAsset(false, 0));
-
       }
     }
     setWalkmeData(stepData);
   }, [dataRows]);
-
 
   const fetchFields = async () => {
     setColumns(null);
@@ -127,8 +132,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         coloum.push({
           accessor: 'assetNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row, table }) => (
             <div className="flex items-center gap-2">
               {row.original.assetNumber ? (
@@ -172,8 +175,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         coloum.push({
           accessor: 'serialNumber',
           Header: ele?.fieldLabel,
-          sticky: 'none',
-          width: 200,
           Cell: ({ row }) => (
             <>
               {row.original.serialNumber ? (
@@ -192,8 +193,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       coloum.push({
         accessor: ele?.fieldName,
         Header: ele?.fieldLabel,
-        sticky: 'none',
-        width: 200,
         Cell: ({ row }) => (
           <>
             {row.original[ele?.fieldName] ? (
@@ -210,8 +209,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     coloum.push({
       accessor: 'status',
       Header: 'Status',
-      sticky: 'none',
-      width: 100,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p className="text-truncate">{row.original.status}</p>
@@ -241,7 +238,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 }}
                 id={`edit-button-${row.index || 0}`}
               >
-                <Edit color="primary" fontSize='small' />
+                <Edit color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
           }
@@ -254,7 +251,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                   setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
                 }}
               >
-                <DeleteIcon color="error" fontSize='small' />
+                <DeleteIcon color="error" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -269,6 +266,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     dispatch({ type: 'selection', selectedRecords: [] });
 
     setNextStep(false);
+    setNextStepToolTip(null);
     var data: any = [];
     const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`);
     data = response?.data?.data;
@@ -282,6 +280,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     });
     if (data.filter((_rows) => _rows.isValid === false).length > 0 || data.length === 0) {
       setNextStep(false);
+      setNextStepToolTip(repairJobMessage.repairProcess);
     } else {
       setNextStep(true);
     }
@@ -300,6 +299,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         setOkBtnLoading(false);
         setShowAssetRemoveConfirmationDialog({ open: false, id: null, ids: [] });
         fetchRecords();
+        fetchRepairJobData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -329,6 +329,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           updateJobStatus(REPAIR_JOB_STATUS.inProgress);
         }
         fetchRecords();
+        fetchRepairJobData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -392,7 +393,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           }}
           id={'add-existing-serialised-asset-menu-item'}
         >
-          Add Existing {routes.serializedAsset.title}
+          Add Existing {resources?.serializedAsset?.titlePlural}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
           <MenuItem
@@ -401,7 +402,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             }}
             id={'add-new-serialised-asset-menu-item'}
           >
-            Add New {routes.serializedAsset.title}
+            Add New {resources?.serializedAsset?.titleSingular}
           </MenuItem>
         )}
       </>
@@ -479,6 +480,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           selectedProducts={[]}
           filterByPlant={repairJobData.warehouse}
           chartOfAccount={repairJobData?.chartOfAccount}
+          ids={dataRows?.map((d) => d?._id)}
         />
       )}
       {addNewSerializedAssetDialog && (

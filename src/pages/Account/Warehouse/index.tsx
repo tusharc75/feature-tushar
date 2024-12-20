@@ -10,20 +10,20 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
 import WarhouseList from './WarhouseList';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const Warehouse = ({ reference, api, id, accountId = '' }) => {
-  const renderedFrom = camelCase(routes?.warehouse.title);
+  const renderedFrom = camelCase(sidebarResource?.warehouse);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -173,7 +173,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
             setOpenAssignWarehouse(true);
           }}
         >
-          {`Assign ${routes.warehouse.title}`}
+          {`Assign ${resources?.warehouse?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -206,7 +206,8 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}
-          message={`Are you sure you want to delete this ${routes.warehouse.title}?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.warehouseName}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
           okBtnLoading={isSubmitting}
           onClose={() => {
             setDeleteRecord(null);

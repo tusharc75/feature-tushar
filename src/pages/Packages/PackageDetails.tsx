@@ -23,13 +23,12 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
 
 const PackageDetails = () => {
-  const renderedFrom = camelCase(routes?.packages.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [packagesLoading, setPackagesLoading] = useState(false);
@@ -76,7 +75,7 @@ const PackageDetails = () => {
       .then(({ data: { data } }) => {
         setPackageData(data);
         setHeadingLabel(data.packageName);
-        setCustomizedRoutes([routes.packages, { title: data.packageName }]);
+        setCustomizedRoutes([{ ...routes?.packages, title: resources?.packages?.titlePlural }, { title: data.packageName }]);
         fetchFields();
       })
       .catch((err) => {
@@ -133,18 +132,10 @@ const PackageDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Individual Services
-          </CustomTab>
-          <CustomTab value={2}>
-            Individual Products
-          </CustomTab>
-          <CustomTab value={3}>
-            Sub Packages
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Individual Services</CustomTab>
+          <CustomTab value={2}>Individual Products</CustomTab>
+          <CustomTab value={3}>Sub Packages</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12}>
@@ -173,7 +164,7 @@ const PackageDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this package: ${headingLabel} ?`}
+          message={`Are you sure you want to delete ${resources?.packages?.titleSingular?.toLowerCase()} : ${headingLabel || ''} ?`}           
           onClose={() => {
             setShowConfirmBox(false);
           }}

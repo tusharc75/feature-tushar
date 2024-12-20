@@ -1,6 +1,6 @@
 import { Button, IconButton, useMediaQuery } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { sidebarResource } from 'src/constants/helpers';
@@ -36,6 +36,7 @@ type GridHeaderProps = {
   state: any;
   handleTableExport: () => void;
   hideExportTable: boolean;
+  topLeftSlot: React.ReactNode;
 };
 
 const GridHeader = ({
@@ -55,7 +56,8 @@ const GridHeader = ({
   expander,
   state,
   handleTableExport,
-  hideExportTable = false
+  hideExportTable = false,
+  topLeftSlot = null
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
@@ -85,6 +87,8 @@ const GridHeader = ({
 
   useEffect(() => {
     if (!resource || !showFilters) return;
+    const filters = getTempFilter(resource);
+
     const applyDefaultFilter = async () => {
       try {
         const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
@@ -105,6 +109,9 @@ const GridHeader = ({
               });
             }
           }
+        } else if (filters) {
+          if (filters.formValues) setCurrentFomValue(filters.formValues);
+          if (filters.filters) dispatch({ type: 'filter', filters: filters.filters });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
@@ -125,6 +132,7 @@ const GridHeader = ({
               selectedRecords={selectedRecords?.length}
             />
           )}
+          {topLeftSlot}
           <DisplayFilters
             columns={newColumns}
             customFilters={customFilters}

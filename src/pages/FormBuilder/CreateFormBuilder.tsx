@@ -22,6 +22,9 @@ import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import { Settings } from '@material-ui/icons';
+import SettingDialog from './SettingDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateFormBuilder = () => {
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const classes = useStyles();
@@ -89,6 +92,8 @@ const CreateFormBuilder = () => {
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
   const [sectionNameList, setSectionNameList] = useState([]);
+  const [settingDialog, setSettingDialog] = useState(false);
+
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -181,7 +186,11 @@ const CreateFormBuilder = () => {
 
   const handleSave = async () => {
     if (resourceLabel === '') {
-      alert('Please enter resource label');
+      alert('Please enter Resource label');
+      return;
+    }
+    if (homePageLabel === '') {
+      alert('Please enter Home Page label');
       return;
     }
     let data = [];
@@ -313,7 +322,7 @@ const CreateFormBuilder = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.formBuilder, { title: isNew ? 'New' : resource }]}
+              routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }, { title: isNew ? 'New' : resource }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 if (!isEqual(orisection, section) && permissions?.isUpdate?.isUpdate) {
@@ -390,7 +399,7 @@ const CreateFormBuilder = () => {
                     <TextField
                       variant="outlined"
                       type="text"
-                      label="Resource Label"
+                      label="Resource Label (Singular)"
                       required={true}
                       name="name"
                       fullWidth
@@ -405,7 +414,8 @@ const CreateFormBuilder = () => {
                     <TextField
                       variant="outlined"
                       type="text"
-                      label="Home Page Label"
+                      label="Resource Label (Plural)"
+                      required={true}
                       name="homePageLabel"
                       fullWidth
                       margin="dense"
@@ -463,6 +473,20 @@ const CreateFormBuilder = () => {
                         {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
                       </Button>
                     </Box>
+                    <Box ml={2} mt={0.5}>
+                      <HtmlTooltip title="Settings">
+                        <IconButton
+                          aria-label="setting"
+                          onClick={() => {
+                            setSettingDialog(true);
+                          }}
+                          color='primary'
+                          size='small'
+                        >
+                          <Settings fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
                   </Grid>
                 </Grid>
               </Box>
@@ -506,6 +530,13 @@ const CreateFormBuilder = () => {
                   }}
                 />
               ) : null}
+              {settingDialog && (
+                <SettingDialog
+                  entities={user?.entity}
+                  resource={isNew ? startCase(toLower(resourceLabel)) : resource}
+                  handleClose={() => setSettingDialog(false)}
+                />
+              )}
             </Fragment>
           ) : (
             <Box p={2} height={500}>

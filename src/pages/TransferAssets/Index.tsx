@@ -1,4 +1,4 @@
-import { Box, Chip } from '@material-ui/core';
+import { Box, Chip, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -31,21 +31,21 @@ import ManageTransferAsset from './ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 
 const TransferAsset = () => {
+  let renderedFrom = camelCase(sidebarResource.transferAsset);
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes.transferAsset.title}`,
+      key: `My ${resources?.transferAsset?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.transferAsset.title}`,
+      key: `All ${resources?.transferAsset?.titlePlural}`,
       value: 2
     }
   ];
-
-  let renderedFrom = camelCase(routes?.transferAsset.title);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -199,20 +199,22 @@ const TransferAsset = () => {
     } else {
       ids = selectedRecords.map((d) => d._id);
     }
-    setDeleting(true);
-    axiosInstance()
-      .put(`${transferAsset.api}/remove`, { ids: ids })
-      .then(() => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setDeleting(false);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-      });
+    if (ids?.length > 0) {
+      setDeleting(true);
+      axiosInstance()
+        .put(`${transferAsset.api}/remove`, { ids: ids })
+        .then(() => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleting(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleSearch = (e) => {
@@ -241,13 +243,32 @@ const TransferAsset = () => {
     }
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.transferAsset]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transferAsset, title: resources?.transferAsset?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transferAsset}
-          module={routes.transferAsset.title}
+          module={resources?.transferAsset?.titlePlural}
           api={transferAsset.api}
           afterImportCompleted={() => {
             fetchData();
@@ -273,7 +294,9 @@ const TransferAsset = () => {
           }
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
           }}
@@ -314,9 +337,8 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}` : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

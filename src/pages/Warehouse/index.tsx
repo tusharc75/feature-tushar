@@ -23,7 +23,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
-const renderedFrom = camelCase(routes?.warehouse.title);
+const renderedFrom = camelCase(sidebarResource?.warehouse);
 
 const Warehouse = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -33,7 +33,7 @@ const Warehouse = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,7 +105,7 @@ const Warehouse = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize='small' color={row.original?.deleted ? 'disabled' : 'error'} />
+              <DeleteIcon fontSize="small" color={row.original?.deleted ? 'disabled' : 'error'} />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -218,10 +218,10 @@ const Warehouse = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.warehouse]} />
+        <CustomBreadCrumbs routes={[{ ...routes.warehouse, title: resources?.warehouse?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.warehouse}
-          module={routes.warehouse.title}
+          module={resources?.warehouse?.titlePlural}
           api={routes?.warehouse.path}
           afterImportCompleted={() => {
             fetchData();
@@ -314,8 +314,8 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
-            } ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.warehouseName : ''}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}  
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

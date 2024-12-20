@@ -21,7 +21,7 @@ const ZoneDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
   const [activeTable, setActiveTable] = useState('Details');
   const [tabValue, setTabValue] = useState(0);
@@ -50,7 +50,7 @@ const ZoneDetailPage = () => {
       handleMainPoints(data);
       setHeadingLbl(data.name);
       setZoneData(data);
-      setCustomizedRoutes([routes.zone, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.zone, title: resources?.zone?.titlePlural }, { title: data.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -169,7 +169,7 @@ const ZoneDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.zone.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.zone?.titleSingular?.toLowerCase()} : ${headingLbl}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

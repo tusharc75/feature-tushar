@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, Button, Chip, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Chip, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { BiFilterAlt } from 'react-icons/bi';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -9,13 +9,14 @@ import { isArray, isEmpty } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import CloseIcon from '@material-ui/icons/Close';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateFormat } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { ThemeButton } from './Buttons';
 import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
+import { Close } from '@material-ui/icons';
 
-const CustomFilter = ({ field, setFilterQuery }) => {
+const CustomFilter = ({ field, setFilterQuery, position = 'left' }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [formValues, setFormValues] = useState({});
@@ -177,10 +178,12 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <Box className="flex items-start justify-between gap-2">
-        <Box minWidth="70%">
-          <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
-        </Box>
+      <Box className="flex items-center justify-between gap-2">
+        {position === 'left' && (
+          <div className="flex-grow">
+            <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
+          </div>
+        )}
         <ThemeButton
           tooltip="Apply Filters"
           startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
@@ -192,6 +195,11 @@ const CustomFilter = ({ field, setFilterQuery }) => {
         >
           Filters
         </ThemeButton>
+        {position !== 'left' && (
+          <div className="flex-grow">
+            <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
+          </div>
+        )}
       </Box>
       {isFilterOpen && (
         <Dialog
@@ -362,20 +370,43 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
 export default CustomFilter;
 
+const buttonStyle: React.CSSProperties = {
+  borderRadius: 50,
+  position: 'absolute',
+  right: 5,
+  top: '50%',
+  transform: 'translateY(-50%)',
+  fontSize: 16,
+  color: 'var(--primary)'
+};
+
 const DisplyaFilters = ({ chipData, handleFilterOpen, clearSingleFilter }) => {
   return (
     <div className="custom-filter">
       {chipData?.length > 0 && (
-        <div className={'flex min-h-[26px] min-w-0 flex-wrap gap-2'}>
+        <div className={'max-w-[200px flex min-h-[26px] min-w-0 flex-wrap gap-2'}>
           {chipData?.map((filter) => (
-            <Chip
-              style={{ minWidth: 0 }}
+            <div
+              key={filter?.title}
+              className={`relative max-w-[200px] cursor-pointer rounded-[6px] bg-[--new-theme-secondary-color] p-[5px_7px] pr-[26px] [border:1px_solid_var(--new-theme-secondary-border-color)]`}
+              title={filter?.value}
               onClick={handleFilterOpen}
-              className={'filter-chip'}
-              deleteIcon={<CloseIcon />}
-              label={`${filter?.title}=${filter?.value}`}
-              onDelete={() => clearSingleFilter(filter.name)}
-            />
+            >
+              <span className={`line-clamp-1 text-[12px] font-medium leading-[14px] text-[--primary]`}>
+                {filter?.title}={filter?.value}
+              </span>
+              <IconButton
+                size="small"
+                style={buttonStyle}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  clearSingleFilter(filter.name);
+                }}
+              >
+                <Close fontSize="inherit" />
+              </IconButton>
+            </div>
           ))}
         </div>
       )}

@@ -39,7 +39,7 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user }
+      user: { user }, resources
     }
   } = useData();
   const history = useHistory();
@@ -69,7 +69,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setFilter([]);
     }
@@ -94,7 +94,7 @@ const BigCalendar = () => {
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => {});
+        .catch(() => { });
     },
     [type, filter]
   );
@@ -132,12 +132,10 @@ const BigCalendar = () => {
     fetchBoard();
   };
 
-  // const get;
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.calendar?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (

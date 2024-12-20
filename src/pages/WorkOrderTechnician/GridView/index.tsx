@@ -8,7 +8,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -22,9 +21,7 @@ import TechnicianDialog from '../TechnicianDialog';
 import axios, { CancelTokenSource } from 'axios';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
-const renderedFrom = camelCase(routes?.workOrderTechnician.title);
-
-const GridView = ({ serviceStatus, filterQuery, permissions }) => {
+const GridView = ({ renderedFrom, state, dispatch, status, filterQuery, permissions }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -34,10 +31,8 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, sorting, selectedRecords, filters } = state;
 
-  const [tabValue, setTabValue] = useState('');
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -45,25 +40,17 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
-    setTabValue(serviceStatus[0]);
-  }, [serviceStatus]);
-
-  useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     fetchGridColumns(cancelToken);
     return () => cancelToken.cancel();
   }, []);
-
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: string) => {
-    setTabValue(newValue);
-  };
 
   const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
     data = response?.data?.data;
 
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
     const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
 
     const extraColumns = [
@@ -116,16 +103,19 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) =>
-          row.original['assignedWorkStations'] ? <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'assignedWorkStations',
-              lookupResource: sidebarResource.workStations
-            }}
-            original={row?.original}
-          />
-            : <NoDataCell />
+          row.original['assignedWorkStations'] ? (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedWorkStations',
+                lookupResource: sidebarResource.workStations
+              }}
+              original={row?.original}
+            />
+          ) : (
+            <NoDataCell />
+          )
       }
     ];
     const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
@@ -163,18 +153,18 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
-    if (tabValue) {
+    if (status) {
       fetchData(cancelToken);
     }
     return () => cancelToken.cancel();
-  }, [page, limit, sorting, tabValue, filterQuery, filters]);
+  }, [page, limit, sorting, status, filterQuery, filters]);
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: [] });
-  }, [tabValue]);
+  }, [status]);
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&status=${tabValue}`;
+    let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterQuery?.filterById?.length) {
       filterQuery?.filterById?.forEach((e) => {
@@ -213,7 +203,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
           finalObject['uniqueId'] = matchedTempMaterial?._id;
-          delete workOrderDetailData?._id
+          delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
           return { ...finalObject, ...workOrderDetailData };
         });
@@ -267,7 +257,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           }}
           disabled={
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true
           }
@@ -280,55 +270,47 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
 
   return (
     <>
-      {serviceStatus?.length ? (
-        <Box>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            {serviceStatus?.map((status, i) => {
-              return <CustomTab key={status} label={status} value={status} />;
-            })}
-          </CustomTabs>
-          <DetailsPageHeader
-            isAddButtonVisible={false}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
-            rightSideContents={
-              user?.user?.brandPolicy?.workOrderStepDataImport && (
-                <ImportExportMenu
-                  permissions={permissions}
-                  module={sidebarResource.workOrderTechnician}
-                  api={`work-order-technician`}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  disabled={selectedRecords.length !== 1}
-                  additionalParams={`${selectedRecords[0]?.repairOrderId
+      <Box>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: status !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
+          rightSideContents={
+            user?.user?.brandPolicy?.workOrderStepDataImport && (
+              <ImportExportMenu
+                permissions={permissions}
+                module={sidebarResource.workOrderTechnician}
+                api={`work-order-technician`}
+                afterImportCompleted={() => {
+                  fetchData();
+                }}
+                disabled={selectedRecords.length !== 1}
+                additionalParams={`${
+                  selectedRecords[0]?.repairOrderId
                     ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
                     : `productionOrder=${selectedRecords[0]?.productionOrderId}`
-                    }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
-                />
-              )
-            }
-            hasXpadding
+                }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+              />
+            )
+          }
+          hasXpadding
+        />
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 300px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
           />
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 300px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Box>
-      ) : (
-        <p>Please Select Status </p>
-      )}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Box>
       {showServiceCompleteConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isSubmitting}

@@ -31,7 +31,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -181,7 +181,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update  ${bulkAssetCreationData?.baNumber || ''}`
-                    : 'Create ' + routes.bulkAssetCreation.title
+                    : 'Create ' + resources?.bulkAssetCreation?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

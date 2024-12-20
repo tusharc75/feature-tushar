@@ -44,25 +44,23 @@ import { RiExchangeBoxFill } from 'react-icons/ri';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.invoice.title);
+  const renderedFrom = camelCase(sidebarResource.invoice);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
-
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [invoiceFields, setInvoiceFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
@@ -137,8 +135,6 @@ const InvoiceDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
       }
       setHeadingLabel(data.invoiceNumber);
-      setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
-
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       setAllowedToDelete(
         permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete
@@ -237,7 +233,7 @@ const InvoiceDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.invoice, title: resources?.invoice?.titlePlural }, { title: invoiceData?.invoiceNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -368,7 +364,7 @@ const InvoiceDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{routes.creditMemo.title}</CustomTab>}
+          {permissions?.creditMemo?.isRead && <CustomTab value={2}>{resources?.creditMemo?.titlePlural}</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
@@ -385,23 +381,24 @@ const InvoiceDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {invoiceData ? (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={invoiceProcessSteps}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                  updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
-                  }}
-                />
-                <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {invoiceData ? (
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={invoiceProcessSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+                    stepFullScreen={stepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
+                    }}
+                  />
                   {currentStep === 0 && invoiceData && (
                     <Material
                       invoiceData={invoiceData}
@@ -420,15 +417,15 @@ const InvoiceDetails = () => {
                       statusOptions={statusOptions}
                     />
                   )}
-                </ContentFullScreen>
-              </Grid>
-            ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            )}
-          </Grid>
-        </TabPanel>
+                </Grid>
+              ) : (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <CreditMemo
             invoiceData={invoiceData}
@@ -455,7 +452,7 @@ const InvoiceDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this invoice: ${headingLabel} ?`}
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import routes from 'src/components/Helpers/Routes';
 import MessagePanel from 'src/pages/WorkSpace/MessagePanel';
 import Sidebar from 'src/pages/WorkSpace/Sidebar';
 import { TChannel } from 'src/pages/WorkSpace/types';
@@ -20,7 +19,7 @@ const Workspace = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [socket, setSocket] = useState<Socket>(null);
-  const { state: { user: { user } } } = useData();
+  const { state: { user: { user }, resources } } = useData();
 
   const token = localStorage.getItem('token');
 
@@ -35,7 +34,7 @@ const Workspace = () => {
   const fetchChannels = async () => {
     const { data } = await axiosInstance().get('/work-space/channel');
     setChannels(data.data || []);
-    if(data?.data?.length) setSelectedChannel(data?.data[0]);
+    if (data?.data?.length) setSelectedChannel(data?.data[0]);
   };
 
   const handleDeleteChannels = async (channelIds: string[]) => {
@@ -53,7 +52,7 @@ const Workspace = () => {
           setChannels((prev) => {
             const updatedChannels = [...prev];
             const index = prev.findIndex((c) => c._id === channel);
-            if(index !== -1) {
+            if (index !== -1) {
               const updatedChannel = {
                 ...updatedChannels[index],
                 notifications: (updatedChannels[index]?.notifications || 0) + 1,
@@ -92,11 +91,12 @@ const Workspace = () => {
     setSocket(s);
   }, [token]);
 
+
   return (
     <>
       <div className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.workSpace.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.workSpace?.titlePlural }]} />
         </div>
         <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] [--sidebar-width:270px] max-[768px]:[--container-height:calc(100vh-179px)]">
           <div

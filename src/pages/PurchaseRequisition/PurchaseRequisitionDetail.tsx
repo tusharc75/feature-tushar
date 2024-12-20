@@ -14,7 +14,15 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, PURCHASE_REQUISITION_STATUS, checkIsAllowedToDelete, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  MATERIAL_TYPE,
+  PURCHASE_REQUISITION_STATUS,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  purchaseRequisitionSteps,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -27,7 +35,6 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Step from '../DynamicForm/Step';
 
 const PurchaseRequisitionDetail = () => {
-
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -49,7 +56,7 @@ const PurchaseRequisitionDetail = () => {
   const [stepList, setStepList] = useState(purchaseRequisitionSteps);
   const [DOAData, setDOAData] = useState(null);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -111,9 +118,14 @@ const PurchaseRequisitionDetail = () => {
       setCurrentStep(getIndex(data?.processStatus, tempStepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
-      setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
+      setAllowedToDelete(
+        permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
+      );
       setPurchaseRequisitionData(data);
-      setCustomizedRoutes([routes.purchaseRequisition, { title: data?.purchaseRequisitionNumber }]);
+      setCustomizedRoutes([
+        { ...routes.purchaseRequisition, title: resources?.purchaseRequisition?.titlePlural },
+        { title: data?.purchaseRequisitionNumber }
+      ]);
 
       if (data?.doaSetup) {
         const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
@@ -164,20 +176,23 @@ const PurchaseRequisitionDetail = () => {
 
   const handleConvertSuccess = (data: any) => {
     setOrderDialog({ open: false });
-    axiosInstance().put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
-      _id: id,
-      purchaseOrder: data?._id,
-      status: PURCHASE_REQUISITION_STATUS.converted
-    }).then(({ data }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: `${sidebarResource.purchaseOrder} has been created successfully`
+    axiosInstance()
+      .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
+        _id: id,
+        purchaseOrder: data?._id,
+        status: PURCHASE_REQUISITION_STATUS.converted
+      })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `${sidebarResource.purchaseOrder} has been created successfully`
+        });
+      })
+      .catch((err) => {
+        fetchData();
       });
-    }).catch((err) => {
-      fetchData();
-    });
   };
 
   return (
@@ -189,7 +204,7 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {purchaseRequisitionData?.material?.length > 0 &&
+              {purchaseRequisitionData?.material?.length > 0 && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
@@ -201,15 +216,13 @@ const PurchaseRequisitionDetail = () => {
                 >
                   {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                 </Button>
-              }
+              )}
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {allowedToDelete && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
                 referenceId={purchaseRequisitionData?._id}
                 resource={ACTIVITY_RESOURCE.purchaseRequisition}
@@ -221,12 +234,8 @@ const PurchaseRequisitionDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -240,41 +249,42 @@ const PurchaseRequisitionDetail = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {!purchaseRequisitionData ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <>
-                {stepList[currentStep]?.name === 'DOA' && (
-                  <Box
-                    style={{
-                      marginLeft: 'auto',
-                      maxWidth: 'max-content',
-                      marginTop: '-30px'
-                    }}
-                  >
-                    <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
-                  </Box>
-                )}
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    nextStepToolTip={nextStepToolTip}
-                    steps={stepList}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isPrevStep={prevStep}
-                    setStepFullScreen={() => setStepFullScreen(true)}
-                    isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
-                    updateStatus={(step: number) => {
-                      dynamicFormUpdateProcessStatus(sidebarResource.purchaseRequisition, stepList[step]?.name, id);
-                    }}
-                  />
-                  <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {!purchaseRequisitionData ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <>
+                  {stepList[currentStep]?.name === 'DOA' && (
+                    <Box
+                      style={{
+                        marginLeft: 'auto',
+                        maxWidth: 'max-content',
+                        marginTop: '-30px'
+                      }}
+                    >
+                      <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
+                    </Box>
+                  )}
+                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Steps
+                      isNextStep={false}
+                      nextStep={nextStep}
+                      nextStepToolTip={nextStepToolTip}
+                      steps={stepList}
+                      currentStep={currentStep}
+                      setCurrentStep={setCurrentStep}
+                      isPrevStep={prevStep}
+                      stepFullScreen={stepFullScreen}
+                      setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                      isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
+                      updateStatus={(step: number) => {
+                        dynamicFormUpdateProcessStatus(sidebarResource.purchaseRequisition, stepList[step]?.name, id);
+                      }}
+                    />
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
                       <Material
                         allowedToEdit={allowedToEdit}
@@ -314,12 +324,12 @@ const PurchaseRequisitionDetail = () => {
                         setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
-                  </ContentFullScreen>
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </TabPanel>
+                  </Grid>
+                </>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -345,12 +355,16 @@ const PurchaseRequisitionDetail = () => {
           onSuccess={(data: any) => {
             handleConvertSuccess(data);
           }}
-          products={purchaseRequisitionData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.product)?.map((e) => {
-            return { ...e, product: e.materialId };
-          })}
-          services={purchaseRequisitionData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.service)?.map((e) => {
-            return { ...e, service: e.materialId };
-          })}
+          products={purchaseRequisitionData?.material
+            ?.filter((item: any) => item?.type == MATERIAL_TYPE.product)
+            ?.map((e) => {
+              return { ...e, product: e.materialId };
+            })}
+          services={purchaseRequisitionData?.material
+            ?.filter((item: any) => item?.type == MATERIAL_TYPE.service)
+            ?.map((e) => {
+              return { ...e, service: e.materialId };
+            })}
           currency={purchaseRequisitionData.currency}
           warehouseId={purchaseRequisitionData?.warehouse?.optionValue}
         />
@@ -358,7 +372,7 @@ const PurchaseRequisitionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.purchaseRequisition?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.purchaseRequisition?.titleSingular?.toLowerCase()} : ${purchaseRequisitionData?.purchaseRequisitionNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

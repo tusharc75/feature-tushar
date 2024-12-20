@@ -6,6 +6,8 @@ import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import NewActionButton, { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import { cn } from 'src/constants/helpers';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -17,6 +19,7 @@ type ButtonPropsWithTooltip = {
 
 type DetailsPageHeaderProps = {
   isAddButtonVisible: boolean;
+  isNewActionButtonVisible?: boolean;
   addButtonMenuItems?: ReactNode;
   addButtonProps?: ButtonPropsWithTooltip;
   isActionButtonVisible: boolean;
@@ -26,6 +29,9 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
+  newActionButtonProps?: NewActionButtonProps<any>;
+  hasYpadding?: boolean;
+  className?: string;
 };
 
 const DetailsPageHeader = ({
@@ -38,19 +44,15 @@ const DetailsPageHeader = ({
   previewDownloadProps,
   leftSideContents,
   rightSideContents,
-  hasXpadding = true
+  hasXpadding = true,
+  isNewActionButtonVisible = false,
+  newActionButtonProps,
+  hasYpadding = true,
+  className = ''
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
-  const {
-    tooltip: addButtonTooltip,
-    onClick: addButtonOnClick,
-    placement = 'left',
-    introWrapper = false,
-    introWrapperTitle = '',
-    introWrapperContent = '',
-    ...restOfAddButtonProps
-  } = addButtonProps || {};
+  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, placement = 'left', ...restOfAddButtonProps } = addButtonProps || {};
 
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -79,7 +81,14 @@ const DetailsPageHeader = ({
   };
 
   return (
-    <div className={`details-page-header flex flex-wrap items-center justify-between gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
+    <div
+      className={cn(
+        `details-page-header flex flex-wrap items-center justify-between gap-2`,
+        hasXpadding ? 'px-2' : '',
+        hasYpadding ? 'py-2' : '',
+        className
+      )}
+    >
       <div className="flex flex-grow flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'left' ? (
           <>
@@ -147,6 +156,7 @@ const DetailsPageHeader = ({
         ) : null}
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
         {rightSideContents}
+        {isNewActionButtonVisible && <NewActionButton {...newActionButtonProps} />}
         {isActionButtonVisible ? (
           <>
             <HtmlTooltip title={actionButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>

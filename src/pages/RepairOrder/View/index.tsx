@@ -12,30 +12,28 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 
 const customNodeStyles = {
   repairOrder: {
-    name: routes.repairOrder.title,
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    name: sidebarResource?.repairOrder,
+    ...COLOUR_MASTER.purchaseOrder
   },
   productAssets: {
     name: 'Assets',
     ...COLOUR_MASTER.assets
   },
   workOrder: {
-    name: routes.workOrder.title,
-    ...COLOUR_MASTER.repairJob
+    name: sidebarResource?.workOrder,
+    ...COLOUR_MASTER.service
   },
   loadingTicket: {
     name: 'Loading Ticket',
     ...COLOUR_MASTER.loadingTicket
   },
   repairOrderClosed: {
-    name: `${routes.repairOrder.title} Closed`,
-    ...COLOUR_MASTER.repairJob
-  },
+    name: `${sidebarResource?.repairOrder} Closed`,
+    ...COLOUR_MASTER.closedRepairJob
+  }
 };
 
 const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [flowData, setFlowData] = useState([]);
@@ -46,7 +44,6 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
   useEffect(() => {
     fetchData();
   }, [repairOrderNumber]);
-
 
   const fetchData = async () => {
     setLoading(true);
@@ -60,7 +57,8 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       const allLoadingTicket = loadingTicket?.data?.data || [];
 
       const serializedAsset = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset)?.map((material) => material.serializedAssetDetail);
-      const workOrders = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset && s?.workOrder)?.map((material) => material?.workOrder) || [];
+      const workOrders =
+        material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset && s?.workOrder)?.map((material) => material?.workOrder) || [];
 
       var xPosition = 0;
       var flow: any[] = [
@@ -73,11 +71,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_type: 'repairOrder',
             ref_id: repairOrderId,
             label: (
-              <div>
-                <Typography variant="body2">{routes.repairOrder.title}</Typography>
-                <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="subtitle2">
-                  {repairOrderNumber}
-                </Typography>
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
+                <Typography variant="subtitle2">{repairOrderNumber}</Typography>
               </div>
             )
           },
@@ -99,11 +95,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: asset._id,
             label: (
               <HtmlTooltip arrow placement="top" title={`Asset`}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
-                    {asset?.assetNumber}
-                  </Typography>
-                  <Typography variant="subtitle2">{'Asset'}</Typography>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{'Asset'}</Typography>
+                  <Typography variant="subtitle2">{asset?.assetNumber}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -120,7 +114,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       });
 
       if (workOrders.length > 0) xPosition += 300;
-      const allWorkOrders = []
+      const allWorkOrders = [];
       workOrders?.map((workOrder, index) => {
         allWorkOrders.push(`${workOrder._id}`);
         flow.push({
@@ -133,11 +127,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: workOrder?._id,
             label: (
               <HtmlTooltip arrow placement="top" title={'Work Order'}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
-                    {workOrder.workOrderNumber || ''}
-                  </Typography>
-                  <Typography variant="subtitle2">{workOrder.status || ''}</Typography>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{workOrder.status || ''}</Typography>
+                  <Typography variant="subtitle2">{workOrder.workOrderNumber || ''}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -166,11 +158,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_id: loadingTicket._id,
             label: (
               <HtmlTooltip arrow placement="top" title={'Loading Ticket'}>
-                <div>
-                  <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
-                    {loadingTicket.ticketName}
-                  </Typography>
-                  <Typography variant="subtitle2">{'Loading Ticket'}</Typography>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{'Loading Ticket'}</Typography>
+                  <Typography variant="subtitle2">{loadingTicket.ticketName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -205,11 +195,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_type: 'repairJob',
             ref_id: repairOrderId,
             label: (
-              <div>
-                <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
-                  {repairOrderNumber}
-                </Typography>
-                <Typography variant="subtitle2">{routes.repairOrder.title}</Typography>
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{sidebarResource?.repairOrder}</Typography>
+                <Typography variant="subtitle2">{repairOrderNumber}</Typography>
               </div>
             )
           },
@@ -223,7 +211,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             target: `${repairOrderId}-closed`,
             arrowHeadType: 'arrow'
           });
-         })
+        });
         allLoadingTicket?.map((loadingTicket) => {
           flowEdge.push({
             id: `repairOrder-closed-${loadingTicket._id}-${repairOrderId}`,
@@ -240,7 +228,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       setLoading(false);
       toastConfig.setToastConfig(err);
     }
-  }
+  };
 
   const onLoad = (reactFlowInstance) => {
     reactFlowInstance.fitView({ padding: 0.1 });
@@ -252,7 +240,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'workorder':
-        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes?.workOrderDetail?.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
         window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
@@ -261,7 +249,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

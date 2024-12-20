@@ -10,11 +10,11 @@ function getLastPart(url: string): string | null {
   return lastPart;
 }
 
+
 export const createURl = (url: string) => {
   if (!url) return '/';
-  const origin = window.location.origin;
-  const parsedUrl = new URL(`${origin}/${homeLink}${url}`);
-  return getLastPart(parsedUrl.href);
+  const cleanedUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${homeLink}${encodeURI(cleanedUrl)}`;
 };
 
 export const getCurrentManualUrl = () => {
@@ -22,21 +22,22 @@ export const getCurrentManualUrl = () => {
 };
 
 export const getSectionFromUrl = (url: string = getCurrentManualUrl()): string[] => {
-  const decodedURl = decodeURIComponent(url);
-  const list = decodedURl.split('#')[0].split('/');
-  const sections: string[] = [];
-  for (const item of list) {
-    if (item === homeLink.substring(1)) continue;
-    if (item) sections.push(item);
-  }
+  const decodedUrl = decodeURIComponent(url);
+  const list = decodedUrl.split('#')[0].split('/');
+  const sections: string[] = list.filter((item) => item && item !== homeLink.substring(1));
   return sections;
 };
+
 
 export const getPageDataByUrl = (data: TManualData[] = [], url?: string) => {
   const sections = getSectionFromUrl(url);
   if (sections.length === 0) return homepageData;
+
   if (sections.length === 2) {
-    const pageData = data?.find((e) => e.sectionName === sections[0])?.resource?.find((e) => e.resourceLabel === sections[1])?.sections;
+    const [sectionName, resourceLabel] = sections.map(decodeURIComponent);
+    const pageData = data
+      ?.find((e) => e.sectionName === sectionName)
+      ?.resource?.find((e) => e.resourceLabel === resourceLabel)?.sections;
     return pageData;
   }
   return null;

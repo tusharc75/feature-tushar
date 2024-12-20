@@ -17,13 +17,13 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 
-const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
+const renderedFrom = `${camelCase(sidebarResource?.generateInvoice)}_invoice`;
 
 const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -232,7 +232,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+          message={`Are you sure you want to delete ${resources?.invoice?.titleSingular?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setIsConformDialogVisible(false);

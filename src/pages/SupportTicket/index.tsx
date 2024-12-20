@@ -22,28 +22,29 @@ import ManageSupportTicket from './ManageSupportTicket';
 import axios, { CancelTokenSource } from 'axios';
 
 const SupportTicket = () => {
-  const renderedFrom = camelCase(routes?.supportTicket.title);
+
+  const renderedFrom = camelCase(sidebarResource.supportTicket);
   const toastConfig = useContext(CustomToastContext);
 
-  const types = [
-    {
-      key: `My ${routes.supportTicket.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.supportTicket.title}`,
-      value: 2
-    }
-  ];
-
-  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
+
+
+  const types = [
+    {
+      key: `My ${resources?.supportTicket?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.supportTicket?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   const [selectedType, setSelectedType] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -226,9 +227,11 @@ const SupportTicket = () => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -241,12 +244,12 @@ const SupportTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.supportTicket]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.supportTicket?.titlePlural }]} />
         <ImportExportLinks
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
-          module={routes.supportTicket.title}
+          module={resources?.supportTicket?.titlePlural}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -295,7 +298,8 @@ const SupportTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.supportTicket?.title} ${deleteRecord?.supportTicketNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.supportTicketNumber || ''}` : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

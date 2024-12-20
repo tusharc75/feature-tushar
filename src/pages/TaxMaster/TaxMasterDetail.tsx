@@ -18,15 +18,15 @@ const TaxMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.taxMaster]);
   const [taxMasterData, setTaxMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.taxMaster, title: resources?.taxMaster?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -53,7 +53,7 @@ const TaxMasterDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.taxMaster.path}/${id}`);
       setTaxMasterData(data);
-      setCustomizedRoutes([routes.taxMaster, { title: data?.taxCode }]);
+      setCustomizedRoutes([{ ...routes.taxMaster, title: resources?.taxMaster?.titlePlural }, { title: data?.taxCode }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -123,7 +123,7 @@ const TaxMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.taxMaster?.title?.toLowerCase()} ${taxMasterData.taxCode} ?`}
+          message={`Are you sure you want to delete ${resources?.taxMaster?.titleSingular?.toLowerCase()} : ${taxMasterData?.taxCode} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -34,17 +34,7 @@ import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeS
 
 const TransferInventory = () => {
   const { setWalkmeData } = useSetWalkmeData();
-  const types = [
-    {
-      key: `My ${routes.transferInventory.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.transferInventory.title}`,
-      value: 2
-    }
-  ];
-  const renderedFrom = camelCase(routes?.transferInventory.title);
+  const renderedFrom = camelCase(sidebarResource.transferInventory);
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferInventoryDialog, setShowManageTransferInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -56,8 +46,19 @@ const TransferInventory = () => {
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
+
+  const types = [
+    {
+      key: `My ${resources?.transferInventory?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.transferInventory?.titlePlural}`,
+      value: 2
+    }
+  ];
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.transferInventory));
 
   const { generateColumns } = useColumns();
@@ -76,7 +77,7 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
-        setWalkmeData([createTransferInventoryFlow(data)]);
+        setWalkmeData([createTransferInventoryFlow(data, resources?.transferInventory?.titleSingular)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
@@ -194,20 +195,22 @@ const TransferInventory = () => {
     } else {
       ids = selectedRecords.map((d) => d._id);
     }
-    setDeleting(true);
-    axiosInstance()
-      .put(`${transferInventory.api}/remove`, { ids: ids })
-      .then(() => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setDeleting(false);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-      });
+    if (ids?.length > 0) {
+      setDeleting(true);
+      axiosInstance()
+        .put(`${transferInventory.api}/remove`, { ids: ids })
+        .then(() => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          setDeleting(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleSearch = (e) => {
@@ -218,10 +221,29 @@ const TransferInventory = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          if (selectedRecords?.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          }
+          else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.transferInventory]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transferInventory, title: resources?.transferInventory?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transferInventory}
           module="transfer inventory"
@@ -249,9 +271,9 @@ const TransferInventory = () => {
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
-          isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageTransferInventoryDialog({ open: true, isClone: false, idToClone: null });
@@ -292,8 +314,8 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferInventory?.title?.toLowerCase()} 
-          ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}` : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

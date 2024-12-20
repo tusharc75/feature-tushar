@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, productInventory } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Dialog from '@material-ui/core/Dialog';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -19,7 +19,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
-  const renderedFrom = `${camelCase(routes?.productInventory.title)}_history`;
+  const renderedFrom = `${camelCase(sidebarResource?.productInventory)}_history`;
 
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
@@ -27,7 +27,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -123,7 +123,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       },
       {
         accessor: 'warehouse',
-        Header: routes?.warehouse?.title,
+        Header: resources?.warehouse?.titleSingular,
         width: 200,
         disabled: true,
         Cell: ({ row }) => {
@@ -147,7 +147,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                   <Link
                     className="link"
                     title={row?.original?.storageLocation}
-                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                    to={`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`}
                   >
                     {row?.original?.storageLocation}
                   </Link>

@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  Menu,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
@@ -114,7 +105,7 @@ export default function QuoteDetail() {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom: '' });
   const [quoteData, setQuoteData] = useState(null);
@@ -340,7 +331,7 @@ export default function QuoteDetail() {
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([
-              { title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
+              { title: resources?.quoteBuilder?.titlePlural, path: routes.quoteBuilder.path },
               { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }
             ]);
             fetchDoaLimit();
@@ -504,8 +495,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {
-      })
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -766,22 +756,14 @@ export default function QuoteDetail() {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            Quote Versions
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>Quote Versions</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <>
             {quoteData && (
-              <QuoteDetailPage
-                quoteData={quoteData}
-                selectedEntity={selectedEntity}
-                ifQuoteApprovedAapproved={ifQuoteApproved.approved}
-              />
+              <QuoteDetailPage quoteData={quoteData} selectedEntity={selectedEntity} ifQuoteApprovedAapproved={ifQuoteApproved.approved} />
             )}
             {permissions?.projectSales?.isRead && (
               <div className="pt-3 ">
@@ -793,6 +775,7 @@ export default function QuoteDetail() {
                   permissions={permissions}
                   isAddProjectSale={true}
                   isAllowedToEdit={allowedToEdit}
+                  resources={resources}
                 />
               </div>
             )}
@@ -831,20 +814,22 @@ export default function QuoteDetail() {
             />
           )}
         </TabPanel>
-        {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => {
-          return (
-            <TabPanel value={tabValue} index={i + 2}>
-              <Step
-                tab={tab}
-                resourcePolicyId={resourceData?._id}
-                resourceId={id}
-                resource={sidebarResource.quoteBuilder}
-                data={quoteData}
-                allowedToEdit={permissions?.quoteBuilder?.isUpdate}
-              />
-            </TabPanel>
-          );
-        })}
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.quoteBuilder}
+                  data={quoteData}
+                  allowedToEdit={permissions?.quoteBuilder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -888,16 +873,15 @@ export default function QuoteDetail() {
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           onClose={() => {
-            setReopenReasonDialog(false)
+            setReopenReasonDialog(false);
           }}
           open={reopenReasonDialog}
         >
           <CustomDialogHeader
             title="Reason for Re-Open"
             onClose={() => {
-              setReopenReasonDialog(false)
+              setReopenReasonDialog(false);
             }}
-
             showManimizeMaximize={false}
           />
           <CustomDialogContent>
@@ -917,13 +901,7 @@ export default function QuoteDetail() {
             <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
               Close
             </Button>
-            <Button
-              size="small"
-              variant='contained'
-              disabled={reopenReason === ''}
-              onClick={handleReOpenQuote}
-              color="primary"
-            >
+            <Button size="small" variant="contained" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
               Save
             </Button>
           </CustomDialogFooter>

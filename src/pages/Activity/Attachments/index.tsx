@@ -45,15 +45,15 @@ export default function Attachment() {
   const [filter, setFilter] = useState(null);
   const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
   const [attachmentData, setAttachmentData] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendMail, setSendMail] = useState(false);
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
@@ -136,7 +136,7 @@ export default function Attachment() {
                   <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                  <Chip color="primary" label={`${routes[d?.type]?.title}`} />
+                  <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
                 </div>
               );
             })
@@ -284,7 +284,7 @@ export default function Attachment() {
   };
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {
@@ -599,7 +599,7 @@ export default function Attachment() {
         setDeleteRecord(row);
       }
     }
-    setIsConfirmDialogVisible(true);
+    setShowDeleteConfirmBox(true);
   };
 
   const handleDelete = async () => {
@@ -613,14 +613,14 @@ export default function Attachment() {
             type: 'success',
             message: 'Deleted Successfully'
           });
-          setIsConfirmDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord(null);
           fetchAttachments();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsConfirmDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
         });
   };
@@ -643,12 +643,12 @@ export default function Attachment() {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.attachment?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.attachment}
-          module="Attachment"
+          module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -839,13 +839,13 @@ export default function Attachment() {
             />
           </Dialog>
         )}
-        {isConfirmDialogVisible ? (
+        {showDeleteConfirmBox ? (
           <ConfirmationDialog
-            open={isConfirmDialogVisible}
+            open={showDeleteConfirmBox}
             message={`Are you sure you want to delete this attachment(s)?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord(null);
-              setIsConfirmDialogVisible(false);
+              setShowDeleteConfirmBox(false);
             }}
             okBtnLoading={deleteLoading}
             onOk={handleDelete}

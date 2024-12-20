@@ -38,15 +38,19 @@ import axios, { CancelTokenSource } from 'axios';
 let jobTimeout;
 
 const Job = () => {
-  const renderedFrom = camelCase(routes?.job.title);
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
+  const renderedFrom = camelCase(sidebarResource.job);
   const toastConfig = useContext(CustomToastContext);
   const JobType = [
     {
-      key: `My ${routes?.job.title}`,
+      key: `My ${resources?.job?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes?.job.title}`,
+      key: `All ${resources?.job?.titlePlural}`,
       value: 2
     }
   ];
@@ -56,10 +60,6 @@ const Job = () => {
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, rowCount, page, loading, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.job));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -289,7 +289,7 @@ const Job = () => {
               history.push(`${routes.fleetDispatch.path}`);
             }}
           >
-            <span>{routes.fleetDispatch.title}</span>
+            <span>{resources?.fleetDispatch?.titlePlural}</span>
           </Button>
         )}
         {permissions?.fleetReceiver?.isRead && (
@@ -299,7 +299,7 @@ const Job = () => {
               history.push(`${routes.fleetReceiver.path}`);
             }}
           >
-            <span>{routes.fleetReceiver.title}</span>
+            <span>{resources?.fleetDispatch?.titlePlural}</span>
           </Button>
         )}
 
@@ -329,6 +329,11 @@ const Job = () => {
     return (
       <MenuItem
         onClick={() => {
+          if (selectedRecords.length === 1){
+            setDeleteRecord(selectedRecords[0]);
+            }else{
+              setDeleteRecord(null)
+            }
           showConfirmBox();
         }}
       >
@@ -340,7 +345,7 @@ const Job = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.job]} />
+        <CustomBreadCrumbs routes={[{ ...routes.job, title: resources?.job?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.job}
           module="job"
@@ -414,7 +419,7 @@ const Job = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'} ${deleteRecord.jobNumber || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${singleJobDelete?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}              
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -428,21 +433,6 @@ const Job = () => {
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-
-        {singleJobDelete.show ? (
-          <ConfirmationDialog
-            open={singleJobDelete.show}
-            message={`Are you sure you want to delete Job: ${singleJobDelete.jobNumber}?`}
-            onClose={() =>
-              setSingleJobDelete({
-                id: null,
-                show: false,
-                jobNumber: ''
-              })
-            }
-            onOk={handleSingleDeleteJob}
           />
         ) : null}
       </CustomContainer>

@@ -30,7 +30,7 @@ const AssignPackageDialog = ({
   isSubmitting = false,
   hideQty = false
 }) => {
-  const renderedFrom = `${camelCase(routes.packages?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -42,7 +42,7 @@ const AssignPackageDialog = ({
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   const {
-    state: { selectedEntity }
+    state: { selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -230,7 +230,12 @@ const AssignPackageDialog = ({
       onClose={handleClose}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`Add ${resources?.packages?.titlePlural}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+      />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           showSearchInMobile={true}

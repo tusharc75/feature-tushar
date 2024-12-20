@@ -39,7 +39,7 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 
 const AssemblyOrderDetail = () => {
-  const renderedFrom = camelCase(routes?.assemblyOrder.title);
+  const renderedFrom = camelCase(sidebarResource.assemblyOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,17 +48,16 @@ const AssemblyOrderDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allFields, setAllFields] = useState([]);
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -153,12 +152,12 @@ const AssemblyOrderDetail = () => {
     axiosInstance()
       .put(`${routes.assemblyOrder.path}/remove`, { ids: [id] })
       .then(() => {
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
         history.push(routes.assemblyOrder.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
+        setShowDeleteConfirmBox(false);
       });
   };
 
@@ -174,7 +173,9 @@ const AssemblyOrderDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.assemblyOrder, { title: assemblyOrderData?.assemblyOrderNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.assemblyOrder, title: resources?.assemblyOrder?.titlePlural }, { title: assemblyOrderData?.assemblyOrderNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -190,7 +191,7 @@ const AssemblyOrderDetail = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -207,7 +208,7 @@ const AssemblyOrderDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {!(isMobile && !isTablet) && (<CustomTab value={2} label={'Views'} />)}
+          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -221,28 +222,29 @@ const AssemblyOrderDetail = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={assemblyOrderSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={false}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            handleNext={
-              assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-              !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
-                ? () => {
-                    setOpenManagedPackageDialog(true);
-                  }
-                : null
-            }
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblyOrderProcessStepsNames[step], id);
-            }}
-          />
-          <ContentFullScreen title={assemblyOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={assemblyOrderSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={false}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              handleNext={
+                assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
+                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                  ? () => {
+                      setOpenManagedPackageDialog(true);
+                    }
+                  : null
+              }
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblyOrderProcessStepsNames[step], id);
+              }}
+            />
             {assemblyOrderProcessStepsNames[currentStep] === 'Add' && assemblyOrderData && (
               <Material
                 assemblyOrderData={assemblyOrderData}
@@ -274,14 +276,10 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && (
               <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <Box>
-            {assemblyOrderData && (
-              <RoadmapViews assemblyOrderNumber={assemblyOrderData?.assemblyOrderNumber} id={id} />
-            )}
-          </Box>
+          <Box>{assemblyOrderData && <RoadmapViews assemblyOrderNumber={assemblyOrderData?.assemblyOrderNumber} id={id} />}</Box>
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
@@ -300,12 +298,12 @@ const AssemblyOrderDetail = () => {
             );
           })}
       </Box>
-      {showConfirmBox && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this assembly order: ${assemblyOrderData?.assemblyOrderNumber} ?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete this ${resources?.assemblyOrder?.titleSingular?.toLowerCase()}: ${assemblyOrderData?.assemblyOrderNumber} ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
         />

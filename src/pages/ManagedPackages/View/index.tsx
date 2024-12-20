@@ -7,11 +7,11 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { MATERIAL_TYPE, COLOUR_MASTER, } from 'src/constants/helpers';
+import { MATERIAL_TYPE, COLOUR_MASTER } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase, startCase } from 'lodash';
 import { useAppTheme } from 'src/constants/AppConfig';
-
+import { useData } from 'src/StateProvider/Provider';
 
 const ManagedPackagesView = ({ managedPackagesData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -21,16 +21,18 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   const customNodeStyles = {
     managedPackage: {
       name: 'Managed Package',
-      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
-      borderColor: '#9789F0'
+      ...COLOUR_MASTER.purchaseOrder
     },
     product: {
       name: 'Product',
-      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
-      borderColor: '#8BCBDF'
+      ...COLOUR_MASTER.product
     },
     serializedAsset: {
       name: 'Serialized Asset',
@@ -38,9 +40,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     },
     package: {
       name: 'Package',
-      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
-      borderColor: '#66CDB7'
-    },
+      ...COLOUR_MASTER.package
+    }
   };
 
   useEffect(() => {
@@ -53,7 +54,11 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
       const allAssetsResponse = await axiosInstance().get(`/managed-packages/${managedPackagesData?._id}/assets`);
       const assets = allAssetsResponse?.data?.data || [];
 
-      const { data: { data: { material } } } = await axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`);
+      const {
+        data: {
+          data: { material }
+        }
+      } = await axiosInstance().get(`/managed-packages/${managedPackagesData?.package?.optionValue}/package-material`);
 
       let xPosition = 0;
       let flow = [
@@ -66,10 +71,12 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
             ref_type: 'managedPackages',
             ref_id: managedPackagesData?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={routes.managedPackages.title}>
+              <HtmlTooltip arrow placement="top" title={resources?.managedPackages?.titleSingular}>
                 <div>
-                  <Typography variant="body2">{routes.managedPackages.title}</Typography>
-                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{managedPackagesData?.managedPackageName}</Typography>
+                  <Typography variant="body2">{resources?.managedPackages?.titleSingular}</Typography>
+                  <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {managedPackagesData?.managedPackageName}
+                  </Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -86,20 +93,11 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
       let rows = material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = parent.type === MATERIAL_TYPE.product ?
-          parent?.productName : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageName
-            : '';
+        parent.detail =
+          parent.type === MATERIAL_TYPE.product ? parent?.productName : parent.type === MATERIAL_TYPE.package ? parent?.packageName : '';
         parent.subRows = generateNestedData(material, assets, parent);
       });
-      generateFlowData(
-        rows,
-        xPosition,
-        flow,
-        flowEdge,
-        managedPackagesData._id,
-        yPrev
-      );
+      generateFlowData(rows, xPosition, flow, flowEdge, managedPackagesData._id, yPrev);
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (err) {
@@ -125,15 +123,20 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
             <HtmlTooltip arrow placement="top" title={startCase(camelCase(node.type))}>
               <div>
                 <Typography variant="body2">{startCase(camelCase(node.type))}</Typography>
-                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{node.detail}</Typography>
+                <Typography variant="subtitle2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {node.detail}
+                </Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: yPosition },
-        style: node.type === MATERIAL_TYPE.product ?
-          customNodeStyles.product : node.type === MATERIAL_TYPE.package ?
-            customNodeStyles.package : customNodeStyles.serializedAsset,
+        style:
+          node.type === MATERIAL_TYPE.product
+            ? customNodeStyles.product
+            : node.type === MATERIAL_TYPE.package
+              ? customNodeStyles.package
+              : customNodeStyles.serializedAsset
       });
 
       if (sourceId) {
@@ -141,20 +144,12 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
           id: `${sourceId}-${node?._id}-edge`,
           source: sourceId,
           target: node?._id,
-          arrowHeadType: 'arrow',
+          arrowHeadType: 'arrow'
         });
       }
       if (node.subRows?.length) {
         let childYPosition = yPosition;
-        const childHeight = generateFlowData(
-          node.subRows,
-          xPosition + 300,
-          flow,
-          flowEdge,
-          node?._id,
-          childYPosition,
-          level + 1
-        );
+        const childHeight = generateFlowData(node.subRows, xPosition + 300, flow, flowEdge, node?._id, childYPosition, level + 1);
         yPosition += childHeight;
       }
       yPosition += 100;
@@ -166,11 +161,8 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.package
-        ? _subRow?.packageName
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productName
-          : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageName : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productName : '';
       _subRow.subRows = generateNestedData(material, assets, _subRow);
     });
     if (assets?.length > 0) {
@@ -182,7 +174,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
         _subRow.parentId = _subRow?.product;
-        subRows.push(_subRow)
+        subRows.push(_subRow);
       });
     }
     return subRows;
@@ -208,7 +200,7 @@ const ManagedPackagesView = ({ managedPackagesData }) => {
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

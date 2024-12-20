@@ -18,7 +18,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.termsAndConditions.title);
+const renderedFrom = camelCase(sidebarResource.termsAndConditions);
 
 const TermsAndCondition = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,7 +28,7 @@ const TermsAndCondition = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,9 +192,11 @@ const TermsAndCondition = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) {
+            if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
-            }
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -207,7 +209,7 @@ const TermsAndCondition = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.termsAndConditions]} />
+        <CustomBreadCrumbs routes={[{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -244,7 +246,8 @@ const TermsAndCondition = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.termsAndConditions?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.termsAndConditions?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.name || ''}` : `selected ${resources?.termsAndConditions?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

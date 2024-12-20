@@ -42,7 +42,7 @@ const creditMemoDetail = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -76,7 +76,7 @@ const creditMemoDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.creditMemo.path}/${id}`);
       setCreditMemoData(data);
-      setCustomizedRoutes([routes.creditMemo, { title: data?.creditMemoNumber }]);
+      setCustomizedRoutes([{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }, { title: data?.creditMemoNumber }]);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.creditMemo, data));
       setAllowedToDelete(permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete);
       setLoading(false);
@@ -305,7 +305,7 @@ const creditMemoDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.creditMemo?.title?.toLowerCase()} ${creditMemoData.creditMemoNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.creditMemo?.titleSingular?.toLowerCase()} : ${creditMemoData?.creditMemoNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

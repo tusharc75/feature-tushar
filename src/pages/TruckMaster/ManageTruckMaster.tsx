@@ -21,7 +21,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle(`Create ${routes.truckMaster.title}`);
+          setTitle(`Create ${resources?.truckMaster?.titleSingular}`);
           let initialData = { ...getObjKeys('', fieldsDataForCreate) };
           setInitialData({
             fields: fieldsDataForCreate,

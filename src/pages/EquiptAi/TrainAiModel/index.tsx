@@ -20,14 +20,14 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ManageTrainAiModel from './ManageTrainAiModel';
 
-let renderedFrom = camelCase(routes.trainAiModel?.title);
+let renderedFrom = camelCase(sidebarResource.trainAiModel);
 
 const TrainAiModel = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   let { referenceId }: any = queryString.parse(history.location.search);
   const [showManageTrainAiModelDialog, setShowManageTrainAiModelDialog] = useState({ open: false });
@@ -167,6 +167,11 @@ const TrainAiModel = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -179,7 +184,7 @@ const TrainAiModel = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.trainAiModel]} />
+        <CustomBreadCrumbs routes={[{ ...routes.trainAiModel, title: resources?.trainAiModel?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -224,7 +229,7 @@ const TrainAiModel = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.trainAiModel?.titleSingular?.toLowerCase()} : ${deleteRecord?.topic}` : `selected ${resources?.trainAiModel?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

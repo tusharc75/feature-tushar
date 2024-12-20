@@ -55,11 +55,11 @@ const getWarningList = (row?: any) => {
 };
 
 const Units = () => {
-  const renderedFrom = camelCase(routes?.units.title);
+  const renderedFrom = camelCase(sidebarResource?.units);
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -110,12 +110,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
@@ -279,6 +279,11 @@ const Units = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -291,10 +296,10 @@ const Units = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.units.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.units?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.units}
-          module={routes.units.title}
+          module={resources?.units?.titlePlural}
           api={'units'}
           afterImportCompleted={() => {
             fetchData();
@@ -355,7 +360,8 @@ const Units = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.units.title?.toLowerCase()} ${deleteRecord?.unitNumber || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.units?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.unitNumber || ''}` : `selected ${resources?.units?.titlePlural?.toLowerCase()}`} ?`}  
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

@@ -21,7 +21,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const EmployeeMaster = () => {
-  const renderedFrom = camelCase(routes?.employeeMaster.title);
+  const renderedFrom = camelCase(sidebarResource?.employeeMaster);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const EmployeeMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,7 +191,11 @@ const EmployeeMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -204,10 +208,10 @@ const EmployeeMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.employeeMaster]} />
+        <CustomBreadCrumbs routes={[{ ...routes.employeeMaster, title: resources?.employeeMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.employeeMaster}
-          module={routes.employeeMaster.title}
+          module={resources?.employeeMaster?.titlePlural}
           api={employeeMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -263,7 +267,7 @@ const EmployeeMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.employeeMaster?.title} ${deleteRecord?.employeeNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.employeeMaster?.titleSingular?.toLowerCase()} : ${deleteRecord?.employeeNumber}` : `selected ${resources?.employeeMaster?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

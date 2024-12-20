@@ -9,12 +9,12 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CustomButton from 'src/components/Helpers/CustomButton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { ASSET_STATUS, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
 const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementData, assets, assetPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_TransferToAnotherPackage`;
+  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_TransferToAnotherPackage`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;

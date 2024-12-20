@@ -38,7 +38,7 @@ interface Props {
 
 const ManageTransferAsset: FC<Props> = (props) => {
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const {
     isClone = false,
@@ -309,8 +309,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   transferAssetId
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${routes.transferAsset.title} (${number})`
-                    : 'Create ' + routes.transferAsset.title
+                      : `Update ${resources?.transferAsset?.titleSingular} (${number})`
+                    : 'Create ' + resources?.transferAsset?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

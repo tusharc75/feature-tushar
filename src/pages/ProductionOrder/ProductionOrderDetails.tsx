@@ -37,9 +37,10 @@ import WorkOrder from './WorkOrder';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ProductionOrderDetails = () => {
-  const renderedFrom = camelCase(routes?.productionOrder.title);
+  const renderedFrom = camelCase(sidebarResource?.productionOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -48,9 +49,10 @@ const ProductionOrderDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [productionOrderData, setProductionOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -128,7 +130,7 @@ const ProductionOrderDetails = () => {
 
   const fetchProductionOrderData = () => {
     axiosInstance()
-      .get(`${routes.productionOrder.path}/${id}`)
+      .get(`${routes?.productionOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket');
         setProductionOrderProcessSteps(tempStepList);
@@ -142,7 +144,11 @@ const ProductionOrderDetails = () => {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
-        setAllowedToDelete(permissions?.productionOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) && data?.canDelete);
+        setAllowedToDelete(
+          permissions?.productionOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+            data?.canDelete
+        );
         setProductionOrderData({ ...data });
       })
       .catch((err) => {
@@ -155,7 +161,7 @@ const ProductionOrderDetails = () => {
       .put(`${productionOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(routes.productionOrder.path);
+        history.push(routes?.productionOrder?.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -191,7 +197,12 @@ const ProductionOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.productionOrder, { title: productionOrderData?.productionOrderNumber }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes?.productionOrder, title: resources?.productionOrder?.titlePlural },
+              { title: productionOrderData?.productionOrderNumber }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -224,9 +235,7 @@ const ProductionOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -241,13 +250,9 @@ const ProductionOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -260,40 +265,42 @@ const ProductionOrderDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={productionOrderProcessSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            handleNext={
-              productionOrderProcessStepsNames[currentStep] === 'Add'
-                ? () => {
-                  setNextStep(false);
-                  axiosInstance()
-                    .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                    .then(({ data: { data } }) => {
-                      if (data) {
-                        setCurrentStep((prevStep) => {
-                          const newStep = prevStep + 1;
-                          return newStep;
+
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={productionOrderProcessSteps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              handleNext={
+                productionOrderProcessStepsNames[currentStep] === 'Add'
+                  ? () => {
+                      setNextStep(false);
+                      axiosInstance()
+                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                        .then(({ data: { data } }) => {
+                          if (data) {
+                            setCurrentStep((prevStep) => {
+                              const newStep = prevStep + 1;
+                              return newStep;
+                            });
+                          }
+                        })
+                        .catch((err) => {
+                          toastConfig.setToastConfig(err);
                         });
-                      }
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                    });
-                }
-                : null
-            }
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[step], id);
-            }}
-          />
-          <ContentFullScreen title={productionOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    }
+                  : null
+              }
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[step], id);
+              }}
+            />
             {productionOrderProcessStepsNames[currentStep] === 'Add' && productionOrderData && (
               <Material
                 productionOrderData={productionOrderData}
@@ -327,8 +334,8 @@ const ProductionOrderDetails = () => {
             {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
               <Invoice productionOrderData={productionOrderData} renderedFrom={`${renderedFrom}_grid-2`} stepFullScreen={stepFullScreen} />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -349,7 +356,7 @@ const ProductionOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this production order: ${productionOrderData?.productionOrderNumber} ?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} : ${productionOrderData?.productionOrderNumber}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

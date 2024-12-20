@@ -23,9 +23,8 @@ const ProductAuctionDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-
   const [productAuctionData, setProductAuctionData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -84,7 +83,7 @@ const ProductAuctionDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.productAuction, { title: `${productAuctionData?.auctionNumber}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }, { title: `${productAuctionData?.auctionNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -138,7 +137,7 @@ const ProductAuctionDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.productAuction?.title} ?`}
+          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''} ?`}             
           onClose={() => {
             setShowConfirmBox(false);
           }}

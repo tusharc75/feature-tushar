@@ -15,19 +15,19 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, quoteBuilder, quotePdfTemplate } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, quoteBuilder, quotePdfTemplate, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const QuotePdfTemplate = () => {
-  const renderedFrom = camelCase(routes?.quotePdfTemplate.title);
+  const renderedFrom = camelCase(sidebarResource?.quotePdfTemplate);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -247,7 +247,11 @@ const QuotePdfTemplate = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -260,7 +264,7 @@ const QuotePdfTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.quotePdfTemplate]} />
+        <CustomBreadCrumbs routes={[{ ...routes.quotePdfTemplate, title: resources?.quotePdfTemplate?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -300,7 +304,7 @@ const QuotePdfTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.quotePdfTemplate?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotePdfTemplate?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.quotePdfTemplate?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -16,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateProductCategory from './CreateProductCategory';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,8 +24,10 @@ const ProductCategoryDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [productCategoryData, setProductCategoryData] = useState(null);
@@ -33,7 +36,7 @@ const ProductCategoryDetailPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productCategoryResource, setProductCategoryResource] = useState(null);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.productCategory]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.productCategory, title: resources?.productCategory?.titlePlural }]);
 
   useEffect(() => {
     if (id) {
@@ -52,7 +55,7 @@ const ProductCategoryDetailPage = () => {
       setHeadingLbl(data.name);
       setProductCategoryData(data);
       setProductCategoryResource({ id: data._id });
-      setCustomizedRoutes([routes.productCategory, { title: data.name }]);
+      setCustomizedRoutes([{ ...routes.productCategory, title: resources?.productCategory?.titlePlural }, { title: data.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -163,7 +166,8 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.warehouse.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${headingLbl}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -24,23 +24,23 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 const SubcontractAssembly = () => {
   const { setWalkmeData } = useSetWalkmeData();
 
+  const {
+    state: { permissions, selectedEntity, user, resources }
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes.subcontractAssembly.title}`,
+      key: `My ${resources?.subcontractAssembly?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.subcontractAssembly.title}`,
+      key: `All ${resources?.subcontractAssembly?.titlePlural}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.subcontractAssembly.title);
+  const renderedFrom = camelCase(sidebarResource?.subcontractAssembly);
   const toastConfig = useContext(CustomToastContext);
-
-  const {
-    state: { permissions, selectedEntity, user }
-  }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -70,7 +70,7 @@ const SubcontractAssembly = () => {
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
-    setWalkmeData([createAddItemStepdata(routes.subcontractAssembly, data)]);
+    setWalkmeData([createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, data)]);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -201,6 +201,11 @@ const SubcontractAssembly = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -239,10 +244,10 @@ const SubcontractAssembly = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.subcontractAssembly.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.subcontractAssembly?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.subcontractAssembly}
-          module={routes.subcontractAssembly.title}
+          module={resources?.subcontractAssembly?.titlePlural}
           api={routes.subcontractAssembly.path}
           afterImportCompleted={() => {
             fetchData();
@@ -293,9 +298,8 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.subcontractAssemblyNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.subcontractAssemblyNumber || ''}` : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

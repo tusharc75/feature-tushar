@@ -28,7 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -444,7 +444,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.planning.title}-${planningData?.planningNumber}`,
+    fileName: `${resources?.planning?.titlePlural}-${planningData?.planningNumber}`,
     resource: sidebarResource.planning,
     referenceId: planningData._id,
     columns: columns,

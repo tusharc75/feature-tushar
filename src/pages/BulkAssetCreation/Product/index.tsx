@@ -22,7 +22,7 @@ import { FiExternalLink } from 'react-icons/fi';
 const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -347,7 +347,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
             setShowCreateConfirmBox(true);
           }}
         >
-          {`Create ${routes.serializedAsset.title}`}
+          {`Create ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -411,7 +411,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete?`}
+          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.product?.titleSingular?.toLowerCase()} : ${selectedProductData?.productName}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />

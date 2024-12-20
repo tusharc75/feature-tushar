@@ -34,23 +34,24 @@ import axios, { CancelTokenSource } from 'axios';
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
-  const types = [
-    {
-      key: `My ${routes.deliveryTicket.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.deliveryTicket.title}`,
-      value: 2
-    }
-  ];
-  let renderedFrom = camelCase(routes?.deliveryTicket.title);
+  let renderedFrom = camelCase(sidebarResource?.deliveryTicket);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
+  const types = [
+    {
+      key: `My ${resources?.deliveryTicket?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.deliveryTicket?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.deliveryTicket));
   const [renderCount, setRenderCount] = useState(0);
@@ -334,10 +335,10 @@ const DeliveryTicket = () => {
     <>
       <section className="main-container-v1">
         <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
+          <CustomBreadCrumbs routes={[{ ...routes.deliveryTicket, title: resources?.deliveryTicket?.titlePlural }]} />
           <ImportExportLinks
             permissions={deliveryPermissions}
-            module="deliveryTicket"
+            module={resources?.deliveryTicket?.titlePlural}
             api={deliveryTicket.api}
             afterImportCompleted={fetchData}
             isExportAllOrSomeFeature={true}
@@ -393,9 +394,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
-                deleteRecord.ticketName || ''
-              } ?`}
+                message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
+                  ${deleteRecord?.ticketName || ''}` : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`} ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

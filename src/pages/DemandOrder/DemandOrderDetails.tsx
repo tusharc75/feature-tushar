@@ -40,9 +40,8 @@ const DemandOrderDetails = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [resourceData, setResourceData] = useState(null);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-
   const [loading, setLoading] = useState(false);
   const [demandOrderData, setDemandOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -158,7 +157,7 @@ const DemandOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.demandOrder, { title: `${demandOrderData?.demandOrderNumber}` }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.demandOrder, title: resources?.demandOrder?.titlePlural }, { title: `${demandOrderData?.demandOrderNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -196,7 +195,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.purchaseOrder });
                     }}
                   >
-                    {routes.purchaseOrder.title}
+                    {resources?.purchaseOrder?.titleSingular}
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
@@ -204,7 +203,7 @@ const DemandOrderDetails = () => {
                       setConvertDialog({ open: true, type: sidebarResource.productionOrder });
                     }}
                   >
-                    {routes.productionOrder.title}
+                    {resources?.productionOrder?.titleSingular}
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
@@ -259,6 +258,7 @@ const DemandOrderDetails = () => {
               allowedToEdit={
                 allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false
               }
+              resources={resources}
             />
           )}
         </TabPanel>
@@ -273,7 +273,7 @@ const DemandOrderDetails = () => {
                   resourceId={id}
                   resource={sidebarResource.demandOrder}
                   data={demandOrderData}
-                  allowedToEdit={permissions?.demandOrder?.isUpdate }
+                  allowedToEdit={permissions?.demandOrder?.isUpdate}
                 />
               </TabPanel>
             );
@@ -282,7 +282,7 @@ const DemandOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this demand order: ${demandOrderData?.demandOrderNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.demandOrder?.titleSingular?.toLowerCase()} : ${demandOrderData?.demandOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

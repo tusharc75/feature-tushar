@@ -14,39 +14,39 @@ import { Autocomplete } from '@material-ui/lab';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
-const TECHNICIAN_RESOURCE = [
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    path: routes.fieldTicketDetail.path,
-    title: routes.fieldTicket.title
-  },
-  {
-    key: 'workOrder',
-    resource: sidebarResource.workOrder,
-    path: routes.workOrderDetail.path,
-    title: routes.workOrder.title
-  },
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    path: routes.rentalManagementDetail.path,
-    title: routes.rentalManagement.title
-  }
-];
-
-const renderedFrom = `${camelCase(routes?.employeeMaster.title)}_History`;
+const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
 
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions,resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
+
+  const TECHNICIAN_RESOURCE = [
+  {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    path: routes.fieldTicketDetail.path,
+    title: resources?.fieldTicket?.titlePlural
+  },
+  {
+    key: 'workOrder',
+    resource: sidebarResource.workOrder,
+    path: routes.workOrderDetail.path,
+    title: resources?.workOrder?.titlePlural
+  },
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    path: routes.rentalManagementDetail.path,
+    title: resources?.rentalManagement?.titlePlural
+  }
+];
 
   const columns = [
     {
@@ -80,7 +80,7 @@ const History = ({ id }) => {
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       minWidth: 200,
       width: 200,
       disabled: true,

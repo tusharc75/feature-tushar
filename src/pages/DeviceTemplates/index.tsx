@@ -22,10 +22,10 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 export default function DeviceTemplates() {
-  const renderedFrom = camelCase(routes?.deviceTemplates.title);
+  const renderedFrom = camelCase(sidebarResource.deviceTemplates);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, resources }
   }: any = useData();
   const { generateColumns } = useColumns();
 
@@ -187,6 +187,11 @@ export default function DeviceTemplates() {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -199,10 +204,10 @@ export default function DeviceTemplates() {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.deviceTemplates.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.deviceTemplates?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.warehouse}
-          module={routes.warehouse.title}
+          module={resources?.warehouse?.titlePlural}
           api={routes?.warehouse.path}
           afterImportCompleted={() => {
             fetchData();
@@ -215,7 +220,7 @@ export default function DeviceTemplates() {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
-          title={routes.deviceTemplates.title}
+          title={resources?.deviceTemplates?.titlePlural}
         />
       </div>
       <CustomContainer>
@@ -273,9 +278,8 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-          }?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplates?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.templateName}` : `selected ${resources?.deviceTemplates?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -41,14 +41,13 @@ import Step from 'src/pages/DynamicForm/Step';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.salesOrder.title);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -177,7 +176,9 @@ const SalesOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.salesOrder, { title: `${salesOrderData?.salesOrderNo}` }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.salesOrder, title: resources?.salesOrder?.titlePlural }, { title: `${salesOrderData?.salesOrderNo}` }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -237,18 +238,10 @@ const SalesOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={tabIndexValue(resourceData, 2)}>
-              Views
-            </CustomTab>
-          )}
+          {!(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 2)}>Views</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -263,20 +256,21 @@ const SalesOrderDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={steps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
-            setStepFullScreen={() => setStepFullScreen(true)}
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.salesOrder, salesOrderProcessStepsNames[step], id);
-            }}
-          />
-          <ContentFullScreen title={salesOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Steps
+              isNextStep={false}
+              nextStep={nextStep}
+              steps={steps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.salesOrder, salesOrderProcessStepsNames[step], id);
+              }}
+            />
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[0].name && salesOrderData && (
               <Material
                 salesOrderData={salesOrderData}
@@ -296,8 +290,8 @@ const SalesOrderDetails = () => {
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
               <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
             )}
-          </ContentFullScreen>
-        </TabPanel>
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -321,7 +315,7 @@ const SalesOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this sales order: ${salesOrderData?.salesOrderNo} ?`}
+          message={`Are you sure you want to delete ${resources?.salesOrder?.titleSingular?.toLowerCase()} : ${salesOrderData?.salesOrderNo} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

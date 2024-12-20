@@ -20,7 +20,7 @@ import PricingConditionsDialog from './PricingConditionsDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const PricingCondition = () => {
-  const renderedFrom = camelCase(routes?.pricingCondition.title);
+  const renderedFrom = camelCase(sidebarResource?.pricingCondition);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,7 +28,7 @@ const PricingCondition = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,7 +96,7 @@ const PricingCondition = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -189,7 +189,11 @@ const PricingCondition = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -202,7 +206,7 @@ const PricingCondition = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.pricingCondition]} />
+        <CustomBreadCrumbs routes={[{ ...routes.pricingCondition, title: resources?.pricingCondition?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.pricingCondition}
           module="pricingCondition(s)"
@@ -301,7 +305,7 @@ const PricingCondition = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.pricingCondition?.title?.toLowerCase()}  ${deleteRecord?.conditionName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.pricingCondition?.titleSingular?.toLowerCase()} : ${deleteRecord?.conditionName || ''}` : `selected ${resources?.pricingCondition?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

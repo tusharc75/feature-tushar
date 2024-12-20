@@ -4,6 +4,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import Roadmap from './Roadmap';
 import ServiceOrder from './ServiceOrder';
+import { useData } from 'src/StateProvider/Provider';
 
 function TechnicianScheduler() {
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldTicket: '' });
@@ -16,11 +17,16 @@ function TechnicianScheduler() {
   const updateSelectedRecord = (records) => {
     setSelectedRecords(records);
   };
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.technicianScheduler.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">

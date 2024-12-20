@@ -20,6 +20,7 @@ import Steps from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_ASSET_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
   transferAsset,
@@ -34,17 +35,17 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const TransferAssetDetailPage = () => {
-  const renderedFrom = camelCase(routes?.transferAsset.title);
+  const renderedFrom = camelCase(sidebarResource.transferAsset);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -60,6 +61,7 @@ const TransferAssetDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [isProcessor, setProcessor] = useState(false);
   const [canReceive, setCanReceive] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
@@ -198,6 +200,9 @@ const TransferAssetDetailPage = () => {
         } else {
           setTransferIsEnded(false);
         }
+        setAllowedToDelete(
+          permissions?.transferAsset?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferAsset, data.owner.optionValue) && data?.canEdit
+        );
         setTransferAssetData(data);
       })
       .catch((err) => {
@@ -233,7 +238,8 @@ const TransferAssetDetailPage = () => {
 
   const updateTransferStatus = (status) => {
     const body: any = { status };
-    axiosInstance().put(`${routes.transferAsset.path}/${id}/status`, body)
+    axiosInstance()
+      .put(`${routes.transferAsset.path}/${id}/status`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -251,7 +257,9 @@ const TransferAssetDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.transferAsset, { title: transferAssetData?.transferAssetNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.transferAsset, title: resources?.transferAsset?.titlePlural }, { title: transferAssetData?.transferAssetNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -268,26 +276,25 @@ const TransferAssetDetailPage = () => {
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate &&
-              allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
-                <ButtonWithPulse
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={() => {
-                    setShowReopenCloseConfirmation({ open: true, type: 'close' });
-                  }}
-                  className={'btn-outline-v1'}
-                >
-                  Close
-                </ButtonWithPulse>
-              )}
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => {
+                  setShowReopenCloseConfirmation({ open: true, type: 'close' });
+                }}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>
+            )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -298,17 +305,9 @@ const TransferAssetDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              Views
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -322,8 +321,8 @@ const TransferAssetDetailPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Box my={2}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
             <Steps
               isNextStep={false}
               nextStep={isNextStep}
@@ -331,55 +330,56 @@ const TransferAssetDetailPage = () => {
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               isStepEnded={isTransferEnded}
-              setStepFullScreen={() => setStepFullScreen(true)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               updateStatus={(step: number) => {
                 dynamicFormUpdateProcessStatus(sidebarResource.transferAsset, stepNames[step], id);
               }}
             />
-            <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && transferAssetData && (
-                <AssetsGrid
-                  permissions={permissions}
-                  setNextStep={setNextStep}
-                  updateTransferStatus={updateTransferStatus}
-                  transferAssetData={transferAssetData}
-                  renderedFrom={`${renderedFrom}_grid-1`}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
-                />
-              )}
-              {currentStep === 1 && transferAssetData && (
-                <LoadingTicketGrid
-                  currentStep={currentStep}
-                  transferAssetId={id}
-                  transferAssetData={transferAssetData}
-                  permissions={permissions}
-                  setNextStep={setNextStep}
-                  updateTransferStatus={updateTransferStatus}
-                  isTransferEnded={isTransferEnded}
-                  renderedFrom={`${renderedFrom}_grid-2`}
-                  allowedToEdit={allowedToEdit || isProcessor}
-                  canReceive={canReceive}
-                  stepFullScreen={stepFullScreen}
-                  setAllAssetsDelivered={setAllAssetsDelivered}
-                />
-              )}
-              {currentStep === 2 && transferAssetData && (
-                <ReceivingTicketGrid
-                  currentStep={currentStep}
-                  transferAssetId={id}
-                  transferAssetData={transferAssetData}
-                  setNextStep={setNextStep}
-                  updateTransferStatus={updateTransferStatus}
-                  isTransferEnded={isTransferEnded}
-                  renderedFrom={`${renderedFrom}_grid-3`}
-                  allowedToEdit={allowedToEdit || isProcessor}
-                  stepFullScreen={stepFullScreen}
-                />
-              )}
-            </ContentFullScreen>
-          </Box>
-        </TabPanel>
+            {currentStep === 0 && transferAssetData && (
+              <AssetsGrid
+                permissions={permissions}
+                setNextStep={setNextStep}
+                updateTransferStatus={updateTransferStatus}
+                transferAssetData={transferAssetData}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
+                stepFullScreen={stepFullScreen}
+              />
+            )}
+            {currentStep === 1 && transferAssetData && (
+              <LoadingTicketGrid
+                currentStep={currentStep}
+                transferAssetId={id}
+                transferAssetData={transferAssetData}
+                permissions={permissions}
+                resources={resources}
+                setNextStep={setNextStep}
+                updateTransferStatus={updateTransferStatus}
+                isTransferEnded={isTransferEnded}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                allowedToEdit={allowedToEdit || isProcessor}
+                canReceive={canReceive}
+                stepFullScreen={stepFullScreen}
+                setAllAssetsDelivered={setAllAssetsDelivered}
+              />
+            )}
+            {currentStep === 2 && transferAssetData && (
+              <ReceivingTicketGrid
+                currentStep={currentStep}
+                transferAssetId={id}
+                transferAssetData={transferAssetData}
+                setNextStep={setNextStep}
+                updateTransferStatus={updateTransferStatus}
+                isTransferEnded={isTransferEnded}
+                renderedFrom={`${renderedFrom}_grid-3`}
+                allowedToEdit={allowedToEdit || isProcessor}
+                stepFullScreen={stepFullScreen}
+                resources={resources}
+              />
+            )}
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Box>
             <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
@@ -407,7 +407,7 @@ const TransferAssetDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${transferAssetData?.transferAssetNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.transferAsset?.titleSingular?.toLowerCase()}: ${transferAssetData?.transferAssetNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

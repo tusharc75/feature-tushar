@@ -198,134 +198,128 @@ const MapView = (props: MapViewProps) => {
         </MarkerClusterer>
 
         {selectedBase && (
-        <InfoWindow
-        position={new google.maps.LatLng(selectedBase?.location.latitude, selectedBase?.location.longitude)}
-        onCloseClick={() => {
-          if (isFetching) return;
-          setSelectedBase(null);
-          setSelectedAsset([]);
-        }}
-      >
-        <div
-          ref={(ref) => {
-            if (ref) {
-              const infoWindowContent = (ref.closest('.gm-style-iw') as HTMLElement);
-      
-              if (infoWindowContent) {
-                infoWindowContent.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                infoWindowContent.style.borderRadius = '8px'; 
-                infoWindowContent.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
-                if (themeColor === 'dark') {
-                  infoWindowContent.style.backgroundColor = 'rgba(14, 14, 35, 0.9)';
-                  infoWindowContent.style.color = '#fff'; 
-                  infoWindowContent.style.borderColor = '#0056b3';
+          <InfoWindow
+            position={new google.maps.LatLng(selectedBase?.location.latitude, selectedBase?.location.longitude)}
+            onCloseClick={() => {
+              if (isFetching) return;
+              setSelectedBase(null);
+              setSelectedAsset([]);
+            }}
+          >
+            <div
+              ref={(ref) => {
+                if (ref) {
+                  const infoWindowContent = (ref.closest('.gm-style-iw') as HTMLElement);
+
+                  if (infoWindowContent) {
+                    infoWindowContent.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                    infoWindowContent.style.borderRadius = '8px';
+                    infoWindowContent.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
+                    if (themeColor === 'dark') {
+                      infoWindowContent.style.backgroundColor = 'rgba(14, 14, 35, 0.9)';
+                      infoWindowContent.style.color = '#fff';
+                      infoWindowContent.style.borderColor = '#0056b3';
+                    }
+                  }
                 }
-              }
-            }
-          }}
-        >
-          {selectedAsset.length > 0 || !isFetching ? (
-            <Box textAlign={'left'} maxWidth={250} padding={0} margin={0}>
-              <Typography color="textPrimary" variant="body1" style={{ marginBottom: '8px' }} >
-                {`"${selectedBase?.location.concatedName}"`}
-              </Typography>
-              <Table
-                style={{
-                  borderCollapse: 'collapse',
-                  width: '100%',
-                  border: '1px solid #ccc',
-                  tableLayout: 'auto',
-                }}
-              >
-                <TableBody>
-                  <TableRow
+              }}
+            >
+              {selectedAsset.length > 0 || !isFetching ? (
+                <Box textAlign={'left'} maxWidth={250} padding={0} margin={0}>
+                  <Typography color="textPrimary" variant="body1" style={{ marginBottom: '8px' }} >
+                    {`"${selectedBase?.location.concatedName}"`}
+                  </Typography>
+                  <Table
                     style={{
-                      height: '28px',
-                      borderBottom: '1px solid #ddd',
+                      borderCollapse: 'collapse',
+                      width: '100%',
+                      border: '1px solid #ccc',
+                      tableLayout: 'auto',
                     }}
                   >
-                    <TableCell
-                      style={{
-                        padding: '2px 6px',
-                        borderRight: '1px solid #ddd',
-                      }}
-                    >
-                      <Typography variant="body2" color="textPrimary">
-                        <strong>Total Asset</strong>
-                      </Typography>
-                    </TableCell>
-                    <TableCell style={{ padding: '2px 6px' }}>
-                      <Box display="flex">
-                        <Typography variant="body2">
-                          {selectedBase?.count?.toLocaleString()}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() =>
-                            window.open(
-                              `${routes.serializedAsset.path}?currentLocation=${selectedBase?.location.concatedName}&currentLocationId=${selectedBase?.location?._id}`,
-                              '_blank'
-                            )
-                          }
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                  {selectedAsset.map((d) => (
-                    <TableRow
-                      key={d.status}
-                      style={{
-                        height: '28px',
-                        borderBottom: '1px solid #ddd',
-                      }}
-                    >
-                      <TableCell
+                    <TableBody>
+                      <TableRow
                         style={{
-                          padding: '2px 6px',
-                          borderRight: '1px solid #ddd',
+                          height: '28px',
+                          borderBottom: '1px solid #ddd',
                         }}
                       >
-                        <Typography variant="body2" color="textPrimary">
-                          <strong>{d.status}</strong>
-                        </Typography>
-                      </TableCell>
-                      <TableCell style={{ padding: '2px 6px' }}>
-                        <Box display="flex" alignItems="center">
-                          <Typography variant="body2" style={{ marginRight: 8 }}>
-                            {d.count?.toLocaleString()}
+                        <TableCell
+                          style={{
+                            padding: '2px 6px',
+                            borderRight: '1px solid #ddd',
+                          }}
+                        >
+                          <Typography variant="body2" color="textPrimary">
+                            <strong>Total Asset</strong>
                           </Typography>
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() =>
-                              window.open(
-                                `${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${selectedBase?.location.concatedName}&currentLocationId=${selectedBase?.location?._id}`,
-                                '_blank'
-                              )
-                            }
+                        </TableCell>
+                        <TableCell style={{ padding: '2px 6px' }}>
+                          <Box display="flex">
+                            <Typography variant="body2">
+                              {selectedBase?.count?.toLocaleString()}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() =>
+                                window.open(`${routes.serializedAsset.path}?currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`, '_blank')
+                              }
+                            >
+                              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                            </IconButton>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                      {selectedAsset.map((d) => (
+                        <TableRow
+                          key={d.status}
+                          style={{
+                            height: '28px',
+                            borderBottom: '1px solid #ddd',
+                          }}
+                        >
+                          <TableCell
+                            style={{
+                              padding: '2px 6px',
+                              borderRight: '1px solid #ddd',
+                            }}
                           >
-                            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          ) : (
-            <Box width={150} height={150} p={2} display={'flex'} justifyContent={'center'}>
-              <CircularProgress size={18} color="primary" />
-            </Box>
-          )}
-        </div>
-      </InfoWindow>      
+                            <Typography variant="body2" color="textPrimary">
+                              <strong>{d.status}</strong>
+                            </Typography>
+                          </TableCell>
+                          <TableCell style={{ padding: '2px 6px' }}>
+                            <Box display="flex" alignItems="center">
+                              <Typography variant="body2" style={{ marginRight: 8 }}>
+                                {d.count?.toLocaleString()}
+                              </Typography>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() =>
+                                  window.open(`${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`, '_blank')
+                                }
+                              >
+                                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                              </IconButton>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
+              ) : (
+                <Box width={150} height={150} p={2} display={'flex'} justifyContent={'center'}>
+                  <CircularProgress size={18} color="primary" />
+                </Box>
+              )}
+            </div>
+          </InfoWindow>
         )}
       </GoogleMap>
-    </Box>
+    </Box >
   );
 };
 

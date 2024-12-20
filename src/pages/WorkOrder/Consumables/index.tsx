@@ -52,7 +52,7 @@ const Consumables = ({
   workOrderData,
   serialNumberRequired = false
 }) => {
-  let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
+  let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_consumable`;
 
   const workOrderId = workOrderData?._id;
   const warehouse = workOrderData?.warehouse;
@@ -75,7 +75,7 @@ const Consumables = ({
   const open = Boolean(anchorEl);
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -625,7 +625,7 @@ const Consumables = ({
                   handleCloseAction();
                 }}
               >
-                Assign {routes.serializedAsset.title}
+                Assign {resources?.serializedAsset?.titlePlural}
               </MenuItem>
               <MenuItem
                 disabled={

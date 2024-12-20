@@ -101,7 +101,7 @@ const AddExistingProduct = (props) => {
           setIsProductTemplate(false);
         }
         const newColumns = generateColumns(
-          routes.product.title,
+          sidebarResource.product,
           data?.filter((d) => !ignoreField?.includes(d?.fieldData?.fieldName)),
           routes.productDetail.path
         );

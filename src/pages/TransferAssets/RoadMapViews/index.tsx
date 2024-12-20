@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
 const customDeliveredNodeStyle = {
@@ -21,7 +21,7 @@ const customDeliveredNodeStyle = {
 const customNodeStyles = {
   transferAsset: {
     name: 'Transfer Asset',
-    ...COLOUR_MASTER.transferAsset
+    ...COLOUR_MASTER.purchaseOrder
   },
   productAssets: {
     name: 'Assets',
@@ -67,7 +67,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'transferAsset',
             ref_id: tAId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tANumber ?? tANumber}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.transferAsset.name}</Typography>
+                <Typography variant="subtitle2">{tANumber ?? tANumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 30 },
           style: customNodeStyles.transferAsset
@@ -85,7 +90,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'asset',
             ref_id: asset._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{asset.assetNumber}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.productAssets}</Typography>
+                <Typography variant="subtitle2">{asset.assetNumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: aIdx * 70 },
           style: customNodeStyles.productAssets
@@ -107,7 +117,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'loadingTicket',
             ref_id: loadingTicket._id,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{loadingTicket.ticketName}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.loadingTicket.name}</Typography>
+                <Typography variant="subtitle2">{loadingTicket.ticketName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: lIdx * 70 },
           style: customNodeStyles.loadingTicket
@@ -131,7 +146,12 @@ const TransferAssetViews = (props) => {
           data: {
             ref_type: 'transferAsset',
             ref_id: tAId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tANumber ?? tANumber}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.closedTransferAsset.name}</Typography>
+                <Typography variant="subtitle2">{tANumber ?? tANumber}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 30 },
           style: customDeliveredNodeStyle.closedTransferAsset
@@ -163,16 +183,16 @@ const TransferAssetViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

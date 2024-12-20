@@ -45,13 +45,12 @@ const minHeight = '250px';
 const ProductDetailsPage = () => {
   const [themeColor] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.product.title);
+  const renderedFrom = camelCase(sidebarResource.product);
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
-  const parsed = queryString.parse(history.location.search);
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingWarehouse, setLoadingWarehouse] = useState(false);
@@ -159,7 +158,7 @@ const ProductDetailsPage = () => {
                 ? `${data.productData?.productName} - ${data.productData?.productNumber}`
                 : data.productData?.productName
             );
-            setCustomizedRoutes([routes.product, { title: `${data.productData.productName}` }]);
+            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
             if (data?.productData?.entity && data?.productData?.entity !== undefined) {
               data.productData.entity = user.entity
                 ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
@@ -298,7 +297,7 @@ const ProductDetailsPage = () => {
                             <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                               <Box display="flex" alignItems="center">
                                 <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                                  {productData?.expenseItem ? 'Expense Quantity' : routes?.productInventory?.title}
+                                  {productData?.expenseItem ? 'Expense Quantity' : resources?.productInventory?.titleSingular}
                                 </Typography>
                                 <Box pl={1} display="flex">
                                   <IconButton
@@ -321,9 +320,9 @@ const ProductDetailsPage = () => {
                                 {productInventoryData?.filter((d) => d.inventory)?.length ? (
                                   <>
                                     <Box display="flex" justifyContent="space-between">
-                                      <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
+                                      <Typography className="table-head-v1">{resources?.warehouse?.titleSingular}</Typography>
                                       {user?.user?.brandPolicy?.storageLocation && (
-                                        <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
+                                        <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
                                       )}
                                       <Typography className="table-head-v1">Qty</Typography>
                                     </Box>
@@ -368,11 +367,11 @@ const ProductDetailsPage = () => {
                         <Grid item xs={12} sm={6} md={4} xl={3}>
                           <Box className="single-form-v1">
                             <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
-                              <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                              <Typography variant="subtitle2">{resources?.serializedAsset?.titlePlural}</Typography>
                               <Box>
                                 {permissions?.serializedAsset?.isCreate && (
                                   <IconButton
-                                    title={`Create ${routes.serializedAsset.title}`}
+                                    title={`Create ${resources?.serializedAsset?.titleSingular}`}
                                     color="primary"
                                     size="small"
                                     onClick={() => {
@@ -420,14 +419,18 @@ const ProductDetailsPage = () => {
                                               <IconButton
                                                 size="small"
                                                 onClick={() => {
-                                                  if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
-                                                    setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
+                                                  if (selectedWarehouse !== warehouse?.optionValue) {
+                                                    setSelectedWarehouse(warehouse?.optionValue);
                                                   } else {
                                                     setSelectedWarehouse(null);
                                                   }
                                                 }}
                                               >
-                                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                                {(selectedWarehouse === warehouse?.optionValue) ? (
+                                                  <ExpandLess />
+                                                ) : (
+                                                  <ExpandMore />
+                                                )}
                                               </IconButton>
                                             </Box>
                                             <Box ml={1} display="flex" alignItems="center">
@@ -462,7 +465,7 @@ const ProductDetailsPage = () => {
                                       </Grid>
                                     </Box>
                                     <Box p={1} className="flex flex-wrap gap-2">
-                                      {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
+                                      {(selectedWarehouse === warehouse?.optionValue) ? (
                                         inventoriesWarehouseLoading ? (
                                           <Typography
                                             variant="subtitle2"
@@ -484,11 +487,15 @@ const ProductDetailsPage = () => {
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
-                                                      history.push(`${routes.serializedAsset.path}`, {
-                                                        warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
-                                                          .warehouse,
-                                                        product: { id: id, name: headingLabel }
-                                                      });
+                                                      const warehouseFilter = [{
+                                                        optionLabel: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)?.warehouse?.optionLabel,
+                                                        optionValue: selectedWarehouse
+                                                      }]
+                                                      const productFilter = [{
+                                                        optionLabel: productData?.productName,
+                                                        optionValue: id
+                                                      }]
+                                                      window.open(`${routes.serializedAsset.path}?warehouse=${encodeURIComponent(JSON.stringify(warehouseFilter))}&product=${encodeURIComponent(JSON.stringify(productFilter))}`, '_blank')
                                                     }}
                                                   >
                                                     View All
@@ -517,7 +524,7 @@ const ProductDetailsPage = () => {
                                 ))
                               ) : (
                                 <Box textAlign="center" padding={2} minHeight={100}>
-                                  <Typography>No {routes.serializedAsset.title} Found</Typography>
+                                  <Typography>No {resources?.serializedAsset?.titlePlural} Found</Typography>
                                 </Box>
                               )}
                             </Box>
@@ -591,7 +598,7 @@ const ProductDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this product ${headingLabel} ?`}
+          message={`Are you sure you want to delete this product : ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

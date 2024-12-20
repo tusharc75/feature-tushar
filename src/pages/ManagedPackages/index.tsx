@@ -19,7 +19,7 @@ import ManageManagedPackages from './ManageManagedPackages';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.managedPackages.title);
+const renderedFrom = camelCase(sidebarResource?.managedPackages);
 
 const ManagedPackages = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const ManagedPackages = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,6 +193,11 @@ const ManagedPackages = () => {
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
+              if (selectedRecords.length === 1){
+                setDeleteRecord(selectedRecords[0]);
+                }else{
+                  setDeleteRecord(null)
+                }
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -206,10 +211,10 @@ const ManagedPackages = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.managedPackages]} />
+        <CustomBreadCrumbs routes={[{ ...routes.managedPackages, title: resources?.managedPackages?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.managedPackages}
-          module={routes.managedPackages.title}
+          module={resources?.managedPackages?.titlePlural}
           api={routes.managedPackages.path}
           afterImportCompleted={() => {
             fetchData();
@@ -256,7 +261,7 @@ const ManagedPackages = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.managedPackages?.title} ${deleteRecord?.managedPackageName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${deleteRecord?.managedPackageName || ''}` : `selected ${resources?.managedPackages?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

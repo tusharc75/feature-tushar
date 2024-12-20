@@ -29,11 +29,11 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
-  const renderedFrom = `${camelCase(routes?.creditMemo.title)}_Material`;
+  const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions,resources }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -605,7 +605,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.creditMemo.title}-${creditMemoData?.invoiceNumber}`,
+    fileName: `${resources?.creditMemo?.titlePlural}-${creditMemoData?.invoiceNumber}`,
     resource: sidebarResource.creditMemo,
     referenceId: creditMemoData?._id,
     columns: columns,

@@ -39,13 +39,13 @@ import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.purchaseOrder.title);
+  const renderedFrom = camelCase(sidebarResource.purchaseOrder);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
@@ -151,16 +151,19 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const updateStatus = (status) => {
-    axiosInstance().patch(`${purchaseOrder.api}/status/${id}`, { status: status }).then(({ data: { data } }) => {
-      fetchPurchaseOrderData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: `Status changed to ${status}`
+    axiosInstance()
+      .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchPurchaseOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const checkReceivedProduct = (data) => {
@@ -188,7 +191,12 @@ const PurchaseOrderDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.purchaseOrder, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.purchaseOrder, title: resources?.purchaseOrder?.titlePlural },
+              { title: `${purchaseOrderData?.purchaseOrderNumber}` }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -209,7 +217,11 @@ const PurchaseOrderDetailsPage = () => {
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
               <HtmlTooltip
-                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}
+                title={
+                  permissions?.purchaseOrder?.isUpdate && allowedToEdit
+                    ? ''
+                    : `Owner or Collaborator can edit ${resources?.purchaseOrder?.titleSingular}`
+                }
               >
                 <span>
                   <Button
@@ -224,7 +236,11 @@ const PurchaseOrderDetailsPage = () => {
               </HtmlTooltip>
             ) : (
               <HtmlTooltip
-                title={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}
+                title={
+                  permissions?.purchaseOrder?.isUpdate && allowedToEdit
+                    ? ''
+                    : `Owner or Collaborator can reopen ${resources?.purchaseOrder?.titleSingular}`
+                }
               >
                 <span>
                   <Button
@@ -248,31 +264,11 @@ const PurchaseOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          {purchaseOrderData?.deleted ? null : (
-            <CustomTab value={1}>
-              Details
-            </CustomTab>
-          )}
-          {purchaseOrderData?.deleted ? null : (
-            <CustomTab value={2}>
-              Invoice
-            </CustomTab>
-          )}
-          {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
-            <CustomTab value={3}>
-              Views
-            </CustomTab>
-          )}
-          {resourceData &&
-            resourceData?.tabs?.length &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 4}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          {purchaseOrderData?.deleted ? null : <CustomTab value={1}>Details</CustomTab>}
+          {purchaseOrderData?.deleted ? null : <CustomTab value={2}>Invoice</CustomTab>}
+          {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : <CustomTab value={3}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -285,27 +281,28 @@ const PurchaseOrderDetailsPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {!purchaseOrderData || !purchaseOrderFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={purchaseOrderSteps}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                  updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.purchaseOrder, purchaseOrderStepNames[step], id);
-                  }}
-                />
-                <ContentFullScreen title={purchaseOrderStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {!purchaseOrderData || !purchaseOrderFields.length ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={purchaseOrderSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                    stepFullScreen={stepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.purchaseOrder, purchaseOrderStepNames[step], id);
+                    }}
+                  />
                   {currentStep === 0 && (
                     <Product
                       purchaseOrderData={purchaseOrderData}
@@ -324,11 +321,11 @@ const PurchaseOrderDetailsPage = () => {
                       checkReceivedProduct={checkReceivedProduct}
                     />
                   )}
-                </ContentFullScreen>
-              </Grid>
-            )}
-          </Grid>
-        </TabPanel>
+                </Grid>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Box>{purchaseOrderData && <Invoice allowedToEdit={allowedToEdit} purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
@@ -355,7 +352,7 @@ const PurchaseOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.purchaseOrder?.title} ?`}
+          message={`Are you sure you want to delete this ${resources?.purchaseOrder?.titleSingular} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

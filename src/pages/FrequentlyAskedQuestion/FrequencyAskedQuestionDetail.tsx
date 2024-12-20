@@ -25,7 +25,7 @@ const FrequencyAskedQuestionDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const FrequencyAskedQuestionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/frequently-asked-question/${id}`);
       setFrequentlyAskedQuestionData(data);
-      setCustomizedRoutes([routes.frequentlyAskedQuestion, { title: data?.label }]);
+      setCustomizedRoutes([{ ...routes.frequentlyAskedQuestion, title: resources?.frequentlyAskedQuestion?.titlePlural }, { title: data?.label }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -123,7 +123,7 @@ const FrequencyAskedQuestionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.frequentlyAskedQuestion?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}            
           onClose={() => {
             setShowConfirmBox(false);
           }}

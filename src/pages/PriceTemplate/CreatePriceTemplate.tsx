@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Grid, Typography, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import { FormBuilder } from '../../components/FormBuilder';
 import { Formik, Form } from 'formik';
@@ -15,10 +15,9 @@ import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility'
 import { useData } from '../../StateProvider/Provider';
 import HistoryButton from '../../components/Helpers/HistoryButton';
 import HistoryDialog from '../../components/Activity/History';
-import { fieldLabelToFieldName, priceTemplate } from '../../constants/helpers';
+import { checkIsAllowedToEdit, fieldLabelToFieldName, priceTemplate, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { camelCase } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
@@ -80,7 +79,7 @@ const PriceTemplate = () => {
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [priceTemplatePermissions, setpriceTemplatePermissions] = useState({
     isCreate: false,
@@ -191,11 +190,8 @@ const PriceTemplate = () => {
             setInitialValues(data);
             handleProductTemplateField(data.productTemplate);
             setSection(JSON.parse(JSON.stringify(data.section)));
-            if (data?.owner && data?.owner !== undefined && user.user._id !== data?.owner && !data?.collaborator?.some((d) => d === user.user._id)) {
-              setHasPermissionToUpdate(false);
-            } else {
-              setHasPermissionToUpdate(true);
-            }
+            var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.priceTemplate, data);
+            setHasPermissionToUpdate(isAllowedToEdit && permissions?.priceTemplate?.isUpdate);
           }
         })
         .catch((error) => {
@@ -325,7 +321,7 @@ const PriceTemplate = () => {
             <CustomBreadCrumbs
               routes={[
                 {
-                  title: routes.priceTemplate.title,
+                  title: resources?.priceTemplate?.titlePlural,
                   path: routes.priceTemplate.path
                 },
                 {

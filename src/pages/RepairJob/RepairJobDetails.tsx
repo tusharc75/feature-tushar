@@ -20,6 +20,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   REPAIR_JOB_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   repairJob,
   repairJobProcessSteps,
@@ -33,10 +34,11 @@ import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Step from '../DynamicForm/Step'
+import Step from '../DynamicForm/Step';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const RepairJobDetails = () => {
-  const renderedFrom = camelCase(routes?.repairJob.title);
+  const renderedFrom = camelCase(sidebarResource?.repairJob);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -45,7 +47,7 @@ const RepairJobDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -57,8 +59,10 @@ const RepairJobDetails = () => {
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -141,7 +145,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const fetchRepairJobData = () => {
@@ -151,6 +155,9 @@ const RepairJobDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
         setAlloweOperation(data?.workOrder ? false : true);
+        setAllowedToDelete(
+          permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, data.owner.optionValue) && data?.canDelete
+        );
         setRepairJobData({ ...data });
       })
       .catch((err) => {
@@ -186,7 +193,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -207,7 +214,7 @@ const RepairJobDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.repairJob, { title: repairJobData?.repairJobName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes?.repairJob, title: resources?.repairJob?.titlePlural }, { title: repairJobData?.repairJobName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -217,7 +224,7 @@ const RepairJobDetails = () => {
                   {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               )}
-              {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />
             </>
           </Box>
@@ -225,20 +232,10 @@ const RepairJobDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          <CustomTab value={2}>
-            {routes.deliveryTicket.title}
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab value={3}>
-              Views
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={3}>Views</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -252,47 +249,49 @@ const RepairJobDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
             <Steps
               isNextStep={false}
               nextStep={nextStep}
+              nextStepToolTip={nextStepToolTip}
               steps={repairJobProcessSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
-              setStepFullScreen={() => setStepFullScreen(true)}
+              stepFullScreen={stepFullScreen}
+              setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               updateStatus={(step: number) => {
                 dynamicFormUpdateProcessStatus(sidebarResource.repairJob, repairJobProcessStepsNames[step], id);
               }}
             />
-            <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && repairJobData && (
-                <AddSerializedAsset
-                  repairJobData={repairJobData}
-                  setNextStep={setNextStep}
-                  updateJobStatus={updateJobStatus}
-                  renderedFrom={`${renderedFrom}_grid-1`}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
-                  alloweOperation={alloweOperation}
-                />
-              )}
-              {currentStep === 1 && repairJobData && (
-                <SerializedAsset
-                  repairJobData={repairJobData}
-                  fetchRepairJobData={fetchRepairJobData}
-                  repairedAssetStatus={repairedAssetStatus}
-                  renderedFrom={`${renderedFrom}_grid-2`}
-                  allowedToEdit={allowedToEdit}
-                  allowUpdateStatus={allowUpdateStatus}
-                  stepFullScreen={stepFullScreen}
-                  alloweOperation={alloweOperation}
-                />
-              )}
-            </ContentFullScreen>
-          </Grid>
-        </TabPanel>
+            {currentStep === 0 && repairJobData && (
+              <AddSerializedAsset
+                repairJobData={repairJobData}
+                setNextStep={setNextStep}
+                setNextStepToolTip={setNextStepToolTip}
+                updateJobStatus={updateJobStatus}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
+                stepFullScreen={stepFullScreen}
+                alloweOperation={alloweOperation}
+                fetchRepairJobData={fetchRepairJobData}
+              />
+            )}
+            {currentStep === 1 && repairJobData && (
+              <SerializedAsset
+                repairJobData={repairJobData}
+                fetchRepairJobData={fetchRepairJobData}
+                repairedAssetStatus={repairedAssetStatus}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                allowedToEdit={allowedToEdit}
+                allowUpdateStatus={allowUpdateStatus}
+                stepFullScreen={stepFullScreen}
+                alloweOperation={alloweOperation}
+              />
+            )}
+          </TabPanel>
+        </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
@@ -323,7 +322,7 @@ const RepairJobDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this repair job: ${repairJobData?.repairJobName} ?`}
+          message={`Are you sure you want to delete this ${resources?.repairJob?.titleSingular?.toLowerCase()}: ${repairJobData?.repairJobName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -51,14 +51,14 @@ import {
 
 const SubleaseDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.sublease.title);
+  const renderedFrom = camelCase(sidebarResource.sublease);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [subleaseSteps, setSubleaseSteps] = useState([]);
@@ -194,7 +194,7 @@ const SubleaseDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.sublease, { title: subleaseData?.subleaseName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.sublease, title: resources?.sublease?.titlePlural }, { title: subleaseData?.subleaseName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -227,7 +227,7 @@ const SubleaseDetailsPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          <CustomTab value={2}>{routes.deliveryTicket.title}</CustomTab>
+          <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
           <CustomTab value={3}>Invoices</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
@@ -250,24 +250,25 @@ const SubleaseDetailsPage = () => {
           </Box>
           <Grid container spacing={2}></Grid>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {subleaseData ? (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={subleaseSteps}
-                  nextStepToolTip={nextStepToolTip}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                  updateStatus={(step: number) => {
-                    dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
-                  }}
-                />
-                <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              {subleaseData ? (
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={subleaseSteps}
+                    nextStepToolTip={nextStepToolTip}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
+                    stepFullScreen={stepFullScreen}
+                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
+                    }}
+                  />
                   {subleaseStepsNames[currentStep] === 'Add Products' && subleaseData && (
                     <Productpackage
                       subleaseData={subleaseData}
@@ -343,15 +344,16 @@ const SubleaseDetailsPage = () => {
                       updateStatus={updateStatus}
                     />
                   )}
-                </ContentFullScreen>
-              </Grid>
-            ) : (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            )}
-          </Grid>
-        </TabPanel>
+                </Grid>
+              ) : (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              )}
+            </Grid>
+          </TabPanel>
+        </ContentFullScreen>
+
         <TabPanel value={tabValue} index={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
@@ -394,7 +396,7 @@ const SubleaseDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.sublease?.title} ?`}
+          message={`Are you sure you want to delete ${resources?.sublease?.titleSingular?.toLowerCase()} : ${subleaseData?.subleaseName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

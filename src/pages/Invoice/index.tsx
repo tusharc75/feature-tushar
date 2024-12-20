@@ -35,29 +35,19 @@ import axios, { CancelTokenSource } from 'axios';
 let invoiceTimeout;
 
 const Invoice = () => {
-  const types = [
-    {
-      key: `My ${routes.invoice.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.invoice.title}`,
-      value: 2
-    }
-  ];
 
-  const renderedFrom = camelCase(routes?.invoice.title);
+
+  const renderedFrom = camelCase(sidebarResource.invoice);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.invoice));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -69,6 +59,18 @@ const Invoice = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
+
+  const types = [
+    {
+      key: `My ${resources?.invoice?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.invoice?.titlePlural}`,
+      value: 2
+    }
+  ];
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -260,14 +262,6 @@ const Invoice = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
-  };
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
   };
@@ -278,7 +272,13 @@ const Invoice = () => {
         <MenuItem
           disabled={!selectedRecords?.every((d) => d?.canDelete)}
           onClick={() => {
-            showConfirmBox();
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -339,7 +339,7 @@ const Invoice = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.invoice]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.invoice?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.invoice}
           module="invoice"
@@ -404,17 +404,11 @@ const Invoice = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.invoiceNumber}` : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

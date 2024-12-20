@@ -13,129 +13,9 @@ import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
 
-const PLANNING_RESOURCE = [
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    title: routes.rentalManagementDetail.title,
-    path: routes.rentalManagementDetail.path,
-    fieldName: 'rentalJobName',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  },
-  {
-    key: 'planning',
-    resource: sidebarResource.planning,
-    title: routes.planningDetail.title,
-    path: routes.planningDetail.path,
-    fieldName: 'planningNumber',
-    start: 'startDate',
-    end: 'endDate'
-  },
-  {
-    key: 'demandOrder',
-    resource: sidebarResource.demandOrder,
-    title: routes.demandOrderDetail.title,
-    path: routes.demandOrderDetail.path,
-    fieldName: 'demandOrderNumber',
-    start: 'createDate',
-    end: 'estimateDeliveryDate'
-  },
-  {
-    key: 'productionOrder',
-    resource: sidebarResource.productionOrder,
-    title: routes.productionOrderDetail.title,
-    path: routes.productionOrderDetail.path,
-    fieldName: 'productionOrderNumber',
-    start: 'createDate',
-    end: 'estimateDeliveryDate'
-  },
-  {
-    key: 'purchaseRequisition',
-    resource: sidebarResource.purchaseRequisition,
-    title: routes.purchaseRequisitionDetail.title,
-    path: routes.purchaseRequisitionDetail.path,
-    fieldName: 'purchaseRequisitionNumber',
-    start: 'createDate',
-    end: 'estimateDeliveryDate'
-  },
-  {
-    key: 'purchaseOrder',
-    resource: sidebarResource.purchaseOrder,
-    title: routes.purchaseOrderDetail.title,
-    path: routes.purchaseOrderDetail.path,
-    fieldName: 'purchaseOrderNumber',
-    start: 'purchaseOrderDate',
-    end: 'deliveryDate'
-  },
-  {
-    key: 'repairJob',
-    resource: sidebarResource.repairJob,
-    title: routes.repairJobDetail.title,
-    path: routes.repairJobDetail.path,
-    fieldName: 'repairJobName',
-    start: 'startDate',
-    end: 'expectedCompletionDate'
-  },
-  {
-    key: 'sublease',
-    resource: sidebarResource.sublease,
-    title: routes.subleaseDetail.title,
-    path: routes.subleaseDetail.path,
-    fieldName: 'subleaseName',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  },
-  {
-    key: 'projectSales',
-    resource: sidebarResource.projectSales,
-    title: routes.projectSalesDetail.title,
-    path: routes.projectSalesDetail.path,
-    fieldName: 'projectName',
-    start: 'startDate',
-    end: 'endDate'
-  },
-  {
-    key: 'fieldServiceOrder',
-    resource: sidebarResource.fieldServiceOrder,
-    title: routes.fieldServiceOrderDetail.title,
-    path: routes.fieldServiceOrderDetail.path,
-    fieldName: 'fieldServiceOrderNumber',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  },
-  {
-    key: 'quotation',
-    resource: sidebarResource.quotation,
-    title: routes.quotationDetail.title,
-    path: routes.quotationDetail.path,
-    fieldName: 'quotationNumber',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  },
-  {
-    key: 'serializedAsset',
-    resource: sidebarResource.serializedAsset,
-    title: routes.serializedAsset.title,
-    path: routes.serializedAssetDetail.path,
-    fieldName: 'assetNumber',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  },
-  {
-    key: 'product',
-    resource: sidebarResource.product,
-    title: routes.product.title,
-    path: routes.productDetail.path,
-    fieldName: 'productName',
-    start: 'estimateStartDate',
-    end: 'estimateEndDate'
-  }
-];
-
 function PlanningView() {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const history = useHistory();
@@ -147,11 +27,131 @@ function PlanningView() {
   const [view, setView] = useState('calendar');
   const ref: any = useRef();
 
+  const PLANNING_RESOURCE = [
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      title: resources?.rentalManagement?.titlePlural,
+      path: routes.rentalManagementDetail.path,
+      fieldName: 'rentalJobName',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    },
+    {
+      key: 'planning',
+      resource: sidebarResource.planning,
+      title: resources?.planning?.titlePlural,
+      path: routes.planningDetail.path,
+      fieldName: 'planningNumber',
+      start: 'startDate',
+      end: 'endDate'
+    },
+    {
+      key: 'demandOrder',
+      resource: sidebarResource.demandOrder,
+      title: resources?.demandOrder?.titlePlural,
+      path: routes.demandOrderDetail.path,
+      fieldName: 'demandOrderNumber',
+      start: 'createDate',
+      end: 'estimateDeliveryDate'
+    },
+    {
+      key: 'productionOrder',
+      resource: sidebarResource.productionOrder,
+      title: resources?.productionOrder?.titlePlural,
+      path: routes?.productionOrderDetail?.path,
+      fieldName: 'productionOrderNumber',
+      start: 'createDate',
+      end: 'estimateDeliveryDate'
+    },
+    {
+      key: 'purchaseRequisition',
+      resource: sidebarResource.purchaseRequisition,
+      title: resources?.purchaseRequisition?.titlePlural,
+      path: routes.purchaseRequisitionDetail.path,
+      fieldName: 'purchaseRequisitionNumber',
+      start: 'createDate',
+      end: 'estimateDeliveryDate'
+    },
+    {
+      key: 'purchaseOrder',
+      resource: sidebarResource.purchaseOrder,
+      title: resources?.purchaseOrder?.titlePlural,
+      path: routes.purchaseOrderDetail.path,
+      fieldName: 'purchaseOrderNumber',
+      start: 'purchaseOrderDate',
+      end: 'deliveryDate'
+    },
+    {
+      key: 'repairJob',
+      resource: sidebarResource.repairJob,
+      title: resources?.repairJob?.titlePlural,
+      path: routes.repairJobDetail.path,
+      fieldName: 'repairJobName',
+      start: 'startDate',
+      end: 'expectedCompletionDate'
+    },
+    {
+      key: 'sublease',
+      resource: sidebarResource.sublease,
+      title: resources?.sublease?.titlePlural,
+      path: routes.subleaseDetail.path,
+      fieldName: 'subleaseName',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    },
+    {
+      key: 'projectSales',
+      resource: sidebarResource.projectSales,
+      title: resources?.projectSales?.titlePlural,
+      path: routes.projectSalesDetail.path,
+      fieldName: 'projectName',
+      start: 'startDate',
+      end: 'endDate'
+    },
+    {
+      key: 'fieldServiceOrder',
+      resource: sidebarResource.fieldServiceOrder,
+      title: resources?.fieldServiceOrder?.titlePlural,
+      path: routes?.fieldServiceOrderDetail?.path,
+      fieldName: 'fieldServiceOrderNumber',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    },
+    {
+      key: 'quotation',
+      resource: sidebarResource.quotation,
+      title: resources?.quotation?.titlePlural,
+      path: routes?.quotationDetail.path,
+      fieldName: 'quotationNumber',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    },
+    {
+      key: 'serializedAsset',
+      resource: sidebarResource.serializedAsset,
+      title: resources?.serializedAsset?.titlePlural,
+      path: routes.serializedAssetDetail.path,
+      fieldName: 'assetNumber',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    },
+    {
+      key: 'product',
+      resource: sidebarResource.product,
+      title: resources?.product?.titlePlural,
+      path: routes.productDetail.path,
+      fieldName: 'productName',
+      start: 'estimateStartDate',
+      end: 'estimateEndDate'
+    }
+  ];
+
   useEffect(() => {
     const options: any = [];
     PLANNING_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setResourceList(options);
@@ -175,15 +175,15 @@ function PlanningView() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
+            <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
-              module={routes.planningView.title}
+              module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />

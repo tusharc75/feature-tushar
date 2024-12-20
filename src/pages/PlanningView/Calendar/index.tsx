@@ -2,6 +2,7 @@ import {
   Box,
   Checkbox,
   CircularProgress,
+  IconButton,
   Popover,
   Table,
   TableBody,
@@ -16,8 +17,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Calendar, View, momentLocalizer } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import { View, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,11 +28,11 @@ import CustomCalendar from 'src/components/CustomCalendar';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, sidebarResource } from 'src/constants/helpers';
+import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-
-const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+import CloseIcon from '@material-ui/icons/Close';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const localizer = momentLocalizer(moment);
 const formats = {
@@ -41,14 +41,14 @@ const formats = {
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
           {
-            label: routes.warehouse.title,
+            label: resources?.warehouse?.titlePlural,
             value: 'Warehouse',
             key: 'warehouse'
           }
@@ -57,7 +57,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.product?.isRead
       ? [
           {
-            label: routes.product.title,
+            label: resources?.product?.titlePlural,
             value: 'Product',
             key: 'product'
           }
@@ -66,7 +66,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serializedAsset?.isRead
       ? [
           {
-            label: routes.serializedAsset.title,
+            label: resources?.serializedAsset?.titlePlural,
             value: 'Serialized Asset',
             key: 'asset'
           }
@@ -75,7 +75,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.serviceMaster?.isRead
       ? [
           {
-            label: routes.serviceMaster.title,
+            label: resources?.serviceMaster?.titlePlural,
             value: 'Service Master',
             key: 'service'
           }
@@ -84,7 +84,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.customerAccount?.isRead
       ? [
           {
-            label: routes.customerAccount.title,
+            label: resources?.customerAccount?.titlePlural,
             value: 'Customer Account',
             key: 'customerAccount'
           }
@@ -93,7 +93,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ...(permissions?.competencies?.isRead
       ? [
           {
-            label: routes.competencies.title,
+            label: resources?.competencies?.titlePlural,
             value: 'Competencies',
             key: 'competencies'
           }
@@ -103,7 +103,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const ASSET_FILTERS = [
     {
-      label: routes.serializedAsset.title,
+      label: resources?.serializedAsset?.titlePlural,
       value: 'Serialized Asset',
       key: 'assetIds'
     }
@@ -111,12 +111,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const PRODUCT_FILTERS = [
     {
-      label: routes.product.title,
+      label: resources?.product?.titlePlural,
       value: 'Product',
       key: 'product'
     },
     {
-      label: routes.warehouse.title,
+      label: resources?.warehouse?.titlePlural,
       value: 'Warehouse',
       key: 'warehouse'
     }
@@ -124,12 +124,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const RENTAL_JOB_FILTERS = [
     {
-      label: routes.rentalManagement.title,
+      label: resources?.rentalManagement?.titlePlural,
       value: 'Rental Management',
       key: 'rentalJob'
     },
     {
-      label: routes.padMaster.title,
+      label: resources?.padMaster?.titlePlural,
       value: 'Pad Master',
       key: 'padMaster'
     }
@@ -175,7 +175,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     endDate: moment().add(1, 'months').format('MM/DD/YYYY')
   });
 
-  const [isOpen, setOpen] = useState({ open: false, data: [], type: '' });
+  const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -312,67 +312,77 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             };
           }
           if (selectedResource.resource === sidebarResource.product) {
-            if (d?.inventory) {
-              otherData.push({
-                title: `Inventory ${d?.inventory}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
-            }
-            if (d?.available) {
-              otherData.push({
-                title: `Available ${d?.available}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
-            }
-            if (d?.reserved?.length) {
-              otherData.push({
-                title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'reserved',
-                data: d?.reserved
-              });
-            }
-            if (d?.debit?.length) {
-              const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
-              otherData.push({
-                title: `↓ Planned ${debitQty}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'debit',
-                data: d?.debit,
-                isRedAlert: debitQty > d?.available ? true : false
-              });
-            }
-            if (d?.credit?.length) {
-              otherData.push({
-                title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource,
-                type: 'credit',
-                data: d?.credit
-              });
-            }
-            if (d?.repair) {
-              otherData.push({
-                title: `Repair/Review ${d?.repair}`,
-                start: new Date(d['date']),
-                end: new Date(d['date']),
-                allDay: true,
-                resource: selectedResource.resource
-              });
+            for (const property in d) {
+              if (property === 'debit') {
+                if (d?.debit?.length) {
+                  const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
+                  otherData.push({
+                    title: `↓ Planned ${debitQty}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'debit',
+                    data: d?.debit
+                    //isRedAlert: debitQty > d?.availableByPlanning ? true : false
+                  });
+                }
+              } else if (property === 'credit') {
+                if (d?.credit?.length) {
+                  otherData.push({
+                    title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'credit',
+                    data: d?.credit
+                  });
+                }
+              } else if (property === 'reserved') {
+                if (d?.reserved?.length) {
+                  otherData.push({
+                    title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource,
+                    type: 'reserved',
+                    data: d?.reserved
+                  });
+                }
+              } else if (property === 'inventory') {
+                if (d?.inventory) {
+                  otherData.push({
+                    title: `Inventory ${d?.inventory}`,
+                    start: new Date(d['date']),
+                    end: new Date(d['date']),
+                    allDay: true,
+                    resource: selectedResource.resource
+                  });
+                }
+              } else if (property === 'availableByPlanning') {
+                otherData.push({
+                  title: `Planned Available ${d?.availableByPlanning || 0}`,
+                  start: new Date(d['date']),
+                  end: new Date(d['date']),
+                  allDay: true,
+                  type: 'availableByPlanning',
+                  resource: selectedResource.resource,
+                  isRedAlert: d?.availableByPlanning < 0 ? true : false
+                });
+              } else if (['assetCount', 'date']?.includes(property)) {
+              } else if (d[property]) {
+                otherData.push({
+                  title: `${property} ${d[property]}`,
+                  start: new Date(d['date']),
+                  end: new Date(d['date']),
+                  allDay: true,
+                  type: 'assetStatus',
+                  status: property,
+                  resource: selectedResource.resource
+                });
+              }
             }
           }
           let title = d[selectedResource.fieldName];
@@ -417,7 +427,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => {})
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -452,22 +464,39 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
       element[i].onclick = (clickEvent) => {
         const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent);
-        // let path = selectedResource.path;
-        // if(selectedResource.resource === sidebarResource.serializedAsset){
-        //   path = routes[`${camelCase(event.resource)}Detail`]?.path
-        // }
-        // window.open(`${path}/${event.id}`);
+        handleClick(data, clickEvent?.target);
       };
     }
   };
 
-  const handleClick = (data, event) => {
+  const handleClick = (data, target) => {
     if (selectedResource.resource === sidebarResource.product) {
-      setAnchor(event.target);
-      if (data?.type) {
+      if (data?.type === 'assetStatus') {
+        let query = `?assetStatus=${data?.status}`;
+        if (selectedLookUpResourceData?.product) {
+          query += `&product=${encodeURIComponent(
+            JSON.stringify(
+              selectedLookUpResourceData?.product?.map((e) => {
+                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+              })
+            )
+          )}`;
+        }
+        if (selectedLookUpResourceData?.warehouse) {
+          query += `&warehouse=${encodeURIComponent(
+            JSON.stringify(
+              selectedLookUpResourceData?.warehouse?.map((e) => {
+                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+              })
+            )
+          )}`;
+        }
+        window.open(`${routes.serializedAsset.path}${query}`);
+      } else if (data?.type === 'availableByPlanning') {
+      } else if (data?.type) {
+        setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
-        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
       }
     } else {
       if (data.resource) {
@@ -625,6 +654,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         backgroundColor = 'var(--success-light) ';
       } else if (obj?.type === 'reserved') {
         backgroundColor = 'var(--warning-light)';
+      } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+        backgroundColor = 'var(--danger-light)';
+        color = 'white';
       } else if (obj?.type === 'debit' && obj?.isRedAlert) {
         backgroundColor = 'var(--danger-light)';
         color = 'white';
@@ -787,7 +819,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               />
             </>
           ) : (
-            <div className="relative min-h-[500px] [&_.rbc-agenda-empty]:hidden">
+            <div className="relative min-h-[500px] ">
               <CustomCalendar
                 defaultDate={defaultDate}
                 defaultView={'month'}
@@ -812,47 +844,37 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   onNavigate(date);
                 }}
                 onSelectEvent={(data: any, event: any) => {
-                  if (selectedResource.resource === sidebarResource.product) {
-                    setAnchor(event.nativeEvent.target);
-                    if (data?.type) {
-                      const newData: OnSelectDataType[] = data.data;
-                      setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
-                    }
-                  } else {
-                    if (data.resource) {
-                      const resource = resourceList?.find((r) => r.resource === data.resource);
-                      window.open(`${resource.path}/${data.id}`);
-                    } else {
-                      window.open(`${selectedResource.path}/${data.id}`);
-                    }
-                  }
+                  handleClick(data, event.nativeEvent.target);
                 }}
               />
             </div>
           )}
-          {/* {isDataFetching && (
-            <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
-              <CircularProgress />
-            </span>
-          )} */}
         </div>
         {isOpen.open && (
           <Popover
             open={isOpen.open}
             anchorEl={anchor}
             onClose={() => {
-              setOpen({ open: false, data: [], type: '' });
+              setOpen({ open: false, data: [], eventData: null });
             }}
             style={{ minWidth: '300px' }}
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
+              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
+                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
+                <HtmlTooltip title="Close">
+                  <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMore />}>
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} />
+                    <RenderTable data={d.items} resources={resources} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -866,7 +888,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data }) => {
+const RenderTable = ({ data, resources }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -874,8 +896,8 @@ const RenderTable = ({ data }) => {
           <TableRow>
             <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
-            <TableCell>{routes.warehouse.title}</TableCell>
-            <TableCell>{routes.customerAccount.title}</TableCell>
+            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
+            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
             {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>
@@ -892,11 +914,11 @@ const RenderTable = ({ data }) => {
                     } else if (row?.resource === sidebarResource.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.demandOrder) {
                       window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.repairJob) {
                       window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
                     } else if (row?.resource === sidebarResource.salesOrder) {

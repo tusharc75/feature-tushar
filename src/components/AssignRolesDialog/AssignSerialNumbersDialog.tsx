@@ -42,7 +42,7 @@ const AssignSerialNumbersDialog = ({
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { selectedEntity }
+    state: { selectedEntity, resources }
   }: any = useData();
 
   const [products, setProducts] = useState([]);
@@ -71,7 +71,7 @@ const AssignSerialNumbersDialog = ({
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       Cell: ({ row }) => (
         <>
           {row?.original?.warehouse ? (
@@ -132,7 +132,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -259,31 +259,32 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -308,8 +309,8 @@ const AssignSerialNumbersDialog = ({
                   {...params}
                   margin="dense"
                   name="plant"
-                  placeholder={routes.warehouse.title}
-                  label={routes.warehouse.title}
+                  placeholder={resources?.warehouse?.titleSingular}
+                  label={resources?.warehouse?.titleSingular}
                   variant="outlined"
                   fullWidth
                 />
@@ -373,7 +374,7 @@ const AssignSerialNumbersDialog = ({
       product: product?.id,
       qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
       serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
-    }))
+    }));
     axiosInstance()
       .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
         products: data?.filter((e) => e?.qty)

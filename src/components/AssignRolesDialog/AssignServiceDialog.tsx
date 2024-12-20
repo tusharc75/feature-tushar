@@ -6,7 +6,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { CustomDialogTransition, formatAmountWithCurrency, gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  formatAmountWithCurrency,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serviceMaster,
+  sidebarResource
+} from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
@@ -30,7 +37,7 @@ const AssignServiceDialog = ({
   pricingCondition = null,
   currency = null
 }) => {
-  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -38,12 +45,12 @@ const AssignServiceDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions, selectedEntity, user, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null })
+  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null });
   const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
@@ -62,7 +69,7 @@ const AssignServiceDialog = ({
 
   useEffect(() => {
     fetchGridColumns();
-  }, [tabValue])
+  }, [tabValue]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -72,7 +79,7 @@ const AssignServiceDialog = ({
 
   const fetchGridColumns = async () => {
     try {
-      setColumns(null)
+      setColumns(null);
       let data, pricingConditionData;
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
@@ -275,7 +282,7 @@ const AssignServiceDialog = ({
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${routes.serviceMaster.title}`}
+        title={`Add ${resources?.serviceMaster?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -302,7 +309,7 @@ const AssignServiceDialog = ({
         {pricingCondition && !isOffline && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} label={`${routes.pricingCondition.title} Services`} />
+              <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Services`} />
               <CustomTab value={1} className={'tabLayout'} label={'All Services'} />
             </CustomTabs>
           </Box>
@@ -344,13 +351,13 @@ const AssignServiceDialog = ({
           horizontal: 'right'
         }}
       >
-        <div className="p-3 border-b overflow-auto">
+        <div className="overflow-auto border-b p-3">
           <table className="min-w-full table-auto border-collapse border border-gray-300">
             <thead>
               <tr>
                 <th className="border border-gray-300 px-4 py-2"></th>
                 {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
-                  <th key={index} className="border border-gray-300 px-4 py-2 whitespace-nowrap">
+                  <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
                     {method}
                   </th>
                 ))}
@@ -362,7 +369,12 @@ const AssignServiceDialog = ({
                   <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
                   {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
                     <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                      <p>{formatAmountWithCurrency(currency, openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`])?.fullFormatAmount || ''}</p>
+                      <p>
+                        {formatAmountWithCurrency(
+                          currency,
+                          openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`]
+                        )?.fullFormatAmount || ''}
+                      </p>
                     </td>
                   ))}
                 </tr>

@@ -15,12 +15,12 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageRules from './ManageRules';
 
 export default function Rules({ deviceTemplate }) {
-  const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;
+  const renderedFrom = `${camelCase(sidebarResource.deviceTemplateAlert)}_rules`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -223,7 +223,11 @@ export default function Rules({ deviceTemplate }) {
       <>
         <MenuItem
           onClick={() => {
-            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -279,7 +283,7 @@ export default function Rules({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${'Rule'.toLowerCase()} ?`}
+          message={`Are you sure you want to delete the selected ${'Rule'.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

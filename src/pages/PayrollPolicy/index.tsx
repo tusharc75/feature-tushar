@@ -21,7 +21,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const PayrollPolicy = () => {
-  const renderedFrom = camelCase(routes?.payrollPolicy.title);
+  const renderedFrom = camelCase(sidebarResource.payrollPolicy);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const PayrollPolicy = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -189,6 +189,11 @@ const PayrollPolicy = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -201,7 +206,7 @@ const PayrollPolicy = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.payrollPolicy]} />
+        <CustomBreadCrumbs routes={[{ ...routes.payrollPolicy, title: resources?.payrollPolicy?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -244,7 +249,7 @@ const PayrollPolicy = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.payrollPolicy?.title} ${deleteRecord?.payrollPolicyName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.payrollPolicy?.titleSingular?.toLowerCase()} : ${deleteRecord?.payrollPolicyName || ''}` : `selected ${resources?.payrollPolicy?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

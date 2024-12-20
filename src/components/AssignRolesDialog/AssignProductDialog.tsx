@@ -28,7 +28,7 @@ const AssignProductDialog = ({
   hideQty = false,
   pricingCondition = null
 }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -36,7 +36,7 @@ const AssignProductDialog = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -151,7 +151,7 @@ const AssignProductDialog = ({
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (extraDeepFilter?.length > 0) {
@@ -165,16 +165,41 @@ const AssignProductDialog = ({
         term: 'Part'
       });
     }
+
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
         updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
       if (serialized != null) {
-        updatedDeepFilters.push({
-          field: 'serializedProduct',
-          term: `${serialized === true ? 'Yes' : 'No'}`
-        });
+        const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct')
+        updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct')
+        if (serializedProductFilter) {
+          if (serialized && serializedProductFilter?.term?.toLowerCase() !== 'yes') {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: ``
+            });
+          }
+          else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: ``
+            });
+          }
+          else {
+            updatedDeepFilters.push({
+              field: 'serializedProduct',
+              term: `${serialized === true ? 'Yes' : 'No'}`
+            });
+          }
+        }
+        else {
+          updatedDeepFilters.push({
+            field: 'serializedProduct',
+            term: `${serialized === true ? 'Yes' : 'No'}`
+          });
+        }
       }
     }
     if (extraFilterById && extraFilterById?.length) {
@@ -248,7 +273,7 @@ const AssignProductDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
+      <CustomDialogHeader title={`Add ${resources?.product?.titlePlural}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
@@ -269,11 +294,10 @@ const AssignProductDialog = ({
             isAddButtonVisible
             setQueryString={false}
           />
-
           {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} label={`${routes.pricingCondition.title} Products`} />
+                <CustomTab value={0} label={`${resources?.pricingCondition?.titleSingular} Products`} />
                 <CustomTab value={1} className={'tabLayout'} label={'All Products'} />
               </CustomTabs>
             </Box>

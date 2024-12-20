@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { Box, Button, Paper } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
 const customNodeStyles = {
@@ -85,11 +85,11 @@ const customDeliveredNodeStyle = {
   },
   cancelledRentalJob: {
     name: 'Return Ticket',
-    ...COLOUR_MASTER.cancelledRentalJob
+    ...COLOUR_MASTER.rejected
   },
   closedRentalJob: {
     name: 'Return Ticket',
-    ...COLOUR_MASTER.closedRentalJob
+    ...COLOUR_MASTER.accepted
   }
 };
 
@@ -135,7 +135,12 @@ const RentalManagementViews = (props) => {
           data: {
             ref_type: 'rentalJob',
             ref_id: rentalId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.rentalJob.name}</Typography>
+                <Typography variant="subtitle2">{rentalName ?? rentalName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.rentalJob
@@ -195,9 +200,8 @@ const RentalManagementViews = (props) => {
               ref_id: item.materialId,
               label: (
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item.productDetail?.productName || item.packageDetail?.packageName}
-                  <br />
-                  {_.startCase(_.camelCase(item.type))}
+                  <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                  <Typography variant="subtitle2">{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
                 </div>
               )
             },
@@ -243,7 +247,12 @@ const RentalManagementViews = (props) => {
             data: {
               ref_type: 'bulkAsset',
               ref_id: item._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.baNumber}</div>
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{customNodeStyles.bulkAsset.name}</Typography>
+                  <Typography variant="subtitle2">{item.baNumber}</Typography>
+                </div>
+              )
             },
             position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
             style: customNodeStyles.bulkAsset
@@ -277,7 +286,12 @@ const RentalManagementViews = (props) => {
             data: {
               ref_type: 'sublease',
               ref_id: item._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.subleaseName}</div>
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{customNodeStyles.sublease.name}</Typography>
+                  <Typography variant="subtitle2">{item.subleaseName}</Typography>
+                </div>
+              )
             },
             position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
             style: customNodeStyles.sublease
@@ -314,7 +328,12 @@ const RentalManagementViews = (props) => {
             data: {
               ref_type: 'transferAsset',
               ref_id: item._id,
-              label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.transferAssetNumber}</div>
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">{customNodeStyles.transferAsset.name}</Typography>
+                  <Typography variant="subtitle2">{item.transferAssetNumber}</Typography>
+                </div>
+              )
             },
             position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
             style: customNodeStyles.transferAsset
@@ -348,7 +367,10 @@ const RentalManagementViews = (props) => {
             ref_id: item.inventory,
             label: (
               <HtmlTooltip arrow placement="top" title={item?.inventoryDetail?.status}>
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.inventoryDetail.assetNumber}</div>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography variant="body2">Asset</Typography>
+                  <Typography variant="subtitle2">{item.inventoryDetail.assetNumber}</Typography>
+                </div>
               </HtmlTooltip>
             )
           },
@@ -407,13 +429,13 @@ const RentalManagementViews = (props) => {
       });
 
       var loadingProductData = [];
-      const productServices = {}
+      const productServices = {};
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && i.type !== 'package')
         ?.map((item) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
             // loadingProductData.push(`${item.materialId}`);
-            productServices[item.productDetail?.productName || item.serviceDetail?.serviceName] = item._id
+            productServices[item.productDetail?.productName || item.serviceDetail?.serviceName] = item._id;
             flow.push({
               id: item._id,
               // id: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
@@ -425,9 +447,10 @@ const RentalManagementViews = (props) => {
                 ref_id: item.materialId,
                 label: (
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
-                    <br />
-                    {_.startCase(_.camelCase(item.type))}
+                    <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                    <Typography variant="subtitle2">
+                      {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
+                    </Typography>
                   </div>
                 )
               },
@@ -449,35 +472,33 @@ const RentalManagementViews = (props) => {
             target: `${assetsInLoading[item?.materialId]}`
           });
         });
-        
-      additionalCost
-        ?.map((item) => {
-          flow.push({
-            id: item._id,
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            type: 'default',
-            data: {
-              label: (
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item?.detail || ''}
-                  <br />
-                  {_.startCase(MATERIAL_TYPE.manualEntry)}
-                </div>
-              )
-            },
-            position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
-            style: customNodeStyles.product
-          });
-          beforeLoadingAssetIdx += 1;
 
-          flowEdge.push({
-            id: `edge-additionalCost-${item._id}`,
-            source: rentalId,
-            arrowHeadType: 'arrow',
-            target: item._id
-          });
+      additionalCost?.map((item) => {
+        flow.push({
+          id: item._id,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{_.startCase(MATERIAL_TYPE.manualEntry)}</Typography>
+                <Typography variant="subtitle2">{item?.detail || ''}</Typography>
+              </div>
+            )
+          },
+          position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
+          style: customNodeStyles.product
         });
+        beforeLoadingAssetIdx += 1;
+
+        flowEdge.push({
+          id: `edge-additionalCost-${item._id}`,
+          source: rentalId,
+          arrowHeadType: 'arrow',
+          target: item._id
+        });
+      });
 
       var loadingAssets = 0;
       if (loadingTicket?.length) xPosition += 300;
@@ -497,18 +518,19 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                      <Typography variant="body2">From:</Typography>
+                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                      <Typography variant="body2">From:</Typography>
+                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }
               >
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item.ticketName}
-                  <br />
-                  {item.ticketType} Ticket
+                  <Typography variant="body2">{item.ticketType} Ticket</Typography>
+                  <Typography variant="subtitle2">{item.ticketName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -528,7 +550,16 @@ const RentalManagementViews = (props) => {
               ref_id: asset.optionValue,
               label: (
                 <HtmlTooltip arrow placement="top" title={productsWithStatus[asset.optionValue]}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{asset.optionLabel}</div>
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Typography variant="body2">
+                      {productsWithStatus[asset.optionValue] === ASSET_STATUS.lost || productsWithStatus[asset.optionValue] === ASSET_STATUS.scrap
+                        ? productsWithStatus[asset.optionValue] === ASSET_STATUS.lost
+                          ? customNodeStyles.lostAssets.name
+                          : customNodeStyles.scrapAssets.name
+                        : customNodeStyles.productAssets.name}
+                    </Typography>
+                    <Typography variant="subtitle2">{asset.optionLabel}</Typography>
+                  </div>
                 </HtmlTooltip>
               )
             },
@@ -576,9 +607,8 @@ const RentalManagementViews = (props) => {
                 ref_id: item.materialId,
                 label: (
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.productDetail?.productName || item.packageDetail?.packageName}
-                    <br />
-                    {_.startCase(_.camelCase(item.type))}
+                    <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
+                    <Typography variant="subtitle2">{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
                   </div>
                 )
               },
@@ -626,18 +656,19 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                      <Typography variant="body2">From:</Typography>
+                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                      <Typography variant="body2">To:</Typography>
+                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }
               >
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item.ticketName}
-                  <br />
-                  {item.ticketType} Ticket
+                  <Typography variant="body2">{item.ticketType} Ticket</Typography>
+                  <Typography variant="subtitle2">{item.ticketName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -673,9 +704,8 @@ const RentalManagementViews = (props) => {
                 ref_id: item.materialId,
                 label: (
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.productDetail?.productName || item.packageDetail?.packageName}
-                    <br />
-                    {_.startCase(_.camelCase(item.type))}
+                    <Typography variant="body2"> {_.startCase(_.camelCase(item.type))}</Typography>
+                    <Typography variant="subtitle2">{item.productDetail?.productName || item.packageDetail?.packageName}</Typography>
                   </div>
                 )
               },
@@ -714,18 +744,19 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      From: <b>{item?.pickupFrom?.optionLabel}</b>
+                      <Typography variant="body2">From:</Typography>
+                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      To: <b>{item?.deliveryTo?.optionLabel}</b>
+                      <Typography variant="body2">To:</Typography>
+                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }
               >
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {item.ticketName}
-                  <br />
-                  {item.ticketType} Ticket
+                  <Typography variant="body2">{item.ticketType} Ticket</Typography>
+                  <Typography variant="subtitle2">{item.ticketName}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -757,7 +788,7 @@ const RentalManagementViews = (props) => {
             label: (
               <HtmlTooltip arrow placement="top" title={<>Consume Products</>}>
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  Consume Products
+                  <Typography variant="body2">Consume Products</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -781,7 +812,12 @@ const RentalManagementViews = (props) => {
           data: {
             ref_type: 'rentalJob',
             ref_id: rentalId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rentalName ?? rentalName}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.rentalJob.name}</Typography>
+                <Typography variant="subtitle2">{rentalName ?? rentalName}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: RENTAL_STATUS.cancelled ? customDeliveredNodeStyle.cancelledRentalJob : customDeliveredNodeStyle.closedRentalJob
@@ -828,43 +864,43 @@ const RentalManagementViews = (props) => {
       case 'rentalJob':
         break;
       case 'product':
-        history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.productDetail.path}/${element.data.ref_id}`);
         break;
       case 'service':
-        history.push(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
-        history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.packagesDetail.path}/${element.data.ref_id}`);
         break;
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'loading':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'receiving':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'return':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'purchaseOrder':
-        history.push(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);
         break;
       case 'sublease':
-        history.push(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.subleaseDetail.path}/${element.data.ref_id}`);
         break;
       case 'transferAsset':
-        history.push(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.transferAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'bulkAsset':
-        history.push(`${routes.bulkAssetCreationDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.bulkAssetCreationDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullDialogueOpen} setFullScreen={setFullDialogueOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

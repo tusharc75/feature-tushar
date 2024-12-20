@@ -17,7 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 
 const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user }
+    state: { user,resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -139,7 +139,7 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create Survey`
+                      : `Create ${resources?.surveys?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

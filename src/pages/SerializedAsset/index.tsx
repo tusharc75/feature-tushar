@@ -5,10 +5,9 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import queryString from 'query-string';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { camelCase, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -33,7 +32,6 @@ import {
   INVENTORY_OWNER_TYPE,
   gridLoadingTimeout,
   prepareDataForGrid,
-  product,
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
@@ -41,19 +39,19 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.serializedAsset.title);
+const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
 const SerializedAsset = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  let { assetStatus, currentLocation, currentLocationId }: any = queryString.parse(history.location.search);
+  let { assetStatus, product, warehouse, currentLocation }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -70,14 +68,6 @@ const SerializedAsset = () => {
   const [showScrapAsset, setShowScrapAsset] = useState(false);
 
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
-  const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
-  const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
-    productId: history.location?.state?.productId,
-    productName: history.location?.state?.productName,
-    pOId: history.location?.state?.pOId,
-    pOName: history.location?.state?.pOName
-  });
-  const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [otherStatusOptions, setOtherStatusOptions] = useState(null);
@@ -91,22 +81,44 @@ const SerializedAsset = () => {
   }, [permissions, selectedEntity]);
 
   useEffect(() => {
-    if (assetStatus || currentLocation) {
+    if (assetStatus || product || warehouse || currentLocation) {
       const filterVal = {};
-
       if (assetStatus) {
         filterVal['status'] = { filter: [assetStatus] };
       }
-
-      if (currentLocation && currentLocationId) {
-        filterVal['currentLocation'] = {
-          operator: 'OR',
-          condition1: {
-            filter: [{ optionLabel: currentLocation, optionValue: currentLocationId }]
-          }
-        };
+      if (product) {
+        const productFilter = JSON.parse(product)
+        if (isArray(productFilter)) {
+          filterVal['product'] = {
+            operator: 'OR',
+            condition1: {
+              filter: productFilter
+            }
+          };
+        }
       }
-
+      if (warehouse) {
+        const warehouseFilter = JSON.parse(warehouse)
+        if (isArray(warehouseFilter)) {
+          filterVal['warehouse'] = {
+            operator: 'OR',
+            condition1: {
+              filter: warehouseFilter
+            }
+          };
+        }
+      }
+      if (currentLocation) {
+        const currentLocationFilter = JSON.parse(currentLocation)
+        if (isArray(currentLocationFilter)) {
+          filterVal['currentLocation'] = {
+            operator: 'OR',
+            condition1: {
+              filter: currentLocationFilter
+            }
+          };
+        }
+      }
       dispatch({ type: 'filter', filters: filterVal });
     }
   }, []);
@@ -122,11 +134,8 @@ const SerializedAsset = () => {
     limit,
     filters,
     sorting,
-    warehouse,
     selectedWarehouse,
     selectedEntity,
-    redirectProduct,
-    fromPurchaseOrder,
     productCategory,
     productFilter,
     subleaseAsset,
@@ -332,14 +341,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -367,22 +376,9 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&hideScrapAsset=true`;
     }
 
-    if (warehouse?.optionValue) {
-      filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
-    }
     if (selectedWarehouse && selectedWarehouse !== '') {
       filterByIds.push({ field: 'warehouse', term: selectedWarehouse });
     }
-    if (redirectProduct?.id) {
-      filterByIds.push({ field: 'product', term: redirectProduct?.id });
-    }
-    if (fromPurchaseOrder?.pOId) {
-      filterByIds.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
-    }
-    if (fromPurchaseOrder?.productId) {
-      filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
-    }
-
     if (productCategory && productCategory !== '') {
       filterByIds.push({ field: 'productCategory', term: productCategory });
     }
@@ -477,6 +473,166 @@ const SerializedAsset = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+        {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
+          <>
+            <MenuItem
+              onClick={() => {
+                handleStatusChange(ASSET_STATUS.available);
+              }}
+              disabled={
+                selectedRecords?.filter(
+                  (o) =>
+                    [
+                      ASSET_STATUS.underReview,
+                      ASSET_STATUS.new,
+                      ASSET_STATUS.needRepair,
+                      ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                    ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+                ).length === selectedRecords?.length
+                  ? false
+                  : true
+              }
+            >
+              {`Status Change - ${ASSET_STATUS.available}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleStatusChange(ASSET_STATUS.needRepair);
+              }}
+              disabled={
+                selectedRecords?.filter((o) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRecert,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+                ).length === selectedRecords?.length
+                  ? false
+                  : true
+              }
+            >
+              {`Status Change - ${ASSET_STATUS.needRepair}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleStatusChange(ASSET_STATUS.needRecert);
+              }}
+              disabled={
+                selectedRecords?.filter((o) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRepair,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+                ).length === selectedRecords?.length
+                  ? false
+                  : true
+              }
+            >
+              {`Status Change - ${ASSET_STATUS.needRecert}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleStatusChange(ASSET_STATUS.scrap);
+              }}
+              disabled={
+                selectedRecords?.filter((o) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.needRepair,
+                    ASSET_STATUS.needRecert,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+                ).length === selectedRecords?.length
+                  ? false
+                  : true
+              }
+            >
+              {`Status Change - ${ASSET_STATUS.scrap}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleStatusChange(ASSET_STATUS.lost);
+              }}
+              disabled={
+                selectedRecords?.filter((o) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRepair,
+                    ASSET_STATUS.needRecert,
+                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                  ].includes(o.status)
+                ).length === selectedRecords?.length
+                  ? false
+                  : true
+              }
+            >
+              {`Status Change - ${ASSET_STATUS.lost}`}
+            </MenuItem>
+            {otherStatusOptions?.map((status) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    handleStatusChange(status?.optionValue);
+                  }}
+                  disabled={
+                    !selectedRecords?.every((r) =>
+                      [
+                        ASSET_STATUS.new,
+                        ASSET_STATUS.available,
+                        ASSET_STATUS.underReview,
+                        ASSET_STATUS.scrap,
+                        ASSET_STATUS.needRepair,
+                        ASSET_STATUS.needRecert,
+                        ...(otherStatusOptions?.filter((o) => o?.optionValue != status?.optionValue)?.map((o) => o?.optionValue) || [])
+                      ]?.includes(r?.status)
+                    )
+                  }
+                >
+                  {`Status Change - ${status?.optionLabel}`}
+                </MenuItem>
+              );
+            })}
+          </>
+        )}
+        {permissions?.serializedAsset?.isUpdate && selectedRecords?.length && columns?.some((e) => e.field === 'certificationSupplier') && (
+          <MenuItem
+            disabled={!permissions?.serializedAsset?.isUpdate}
+            onClick={() => {
+              setOpenSupplierAccountDialog(true);
+            }}
+          >
+            {`Assign Certification Supplier`}
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+  
+
   const handleCertificationSupplier = async (data) => {
     const ids = selectedRecords?.map((item) => item?._id);
     const certificationSupplier = data?.map((item) => item?._id);
@@ -502,10 +658,10 @@ const SerializedAsset = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.serializedAsset}
-          module={routes?.serializedAsset.title}
+          module={resources?.serializedAsset?.titlePlural}
           api={serializedAsset.api}
           afterImportCompleted={() => {
             fetchData();
@@ -525,12 +681,6 @@ const SerializedAsset = () => {
           leftSideContents={
             <LeftSideContent
               {...{
-                warehouse,
-                fromPurchaseOrder,
-                setWarehouse,
-                redirectProduct,
-                setRedirectProduct,
-                setFromPurchaseOrder,
                 permissions,
                 productCategoryList,
                 productCategory,
@@ -544,7 +694,8 @@ const SerializedAsset = () => {
                 subleaseAsset,
                 setSubleaseAsset,
                 showScrapAsset,
-                setShowScrapAsset
+                setShowScrapAsset,
+                resources
               }}
             />
           }
@@ -553,18 +704,7 @@ const SerializedAsset = () => {
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={
-            <ActionMenuItems
-              {...{
-                selectedRecords,
-                setShowDeleteConfirmBox,
-                permissions,
-                allowUpdateStatus,
-                handleStatusChange,
-                columns,
-                setOpenSupplierAccountDialog,
-                otherStatusOptions
-              }}
-            />
+            <ActionMenuItems/>
           }
           addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
           addButtonOnclick={() => {
@@ -607,9 +747,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}` : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -649,12 +788,6 @@ const SerializedAsset = () => {
 export default SerializedAsset;
 
 const LeftSideContent = ({
-  warehouse,
-  fromPurchaseOrder,
-  setWarehouse,
-  redirectProduct,
-  setRedirectProduct,
-  setFromPurchaseOrder,
   permissions,
   productCategoryList,
   productCategory,
@@ -668,306 +801,108 @@ const LeftSideContent = ({
   subleaseAsset,
   setSubleaseAsset,
   showScrapAsset,
-  setShowScrapAsset
+  setShowScrapAsset,
+  resources
 }) => {
   return (
     <>
-      {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
-        <Fragment>
-          {warehouse && (
-            <Chip
-              className="ml-3"
-              color="primary"
-              label={`Plants : ${warehouse.optionLabel}`}
-              onDelete={() => {
-                setWarehouse(null);
-              }}
-            />
-          )}
-          {redirectProduct && (
-            <Chip
-              className="ml-3"
-              color="primary"
-              label={`Product : ${redirectProduct.name}`}
-              onDelete={() => {
-                setRedirectProduct(null);
-              }}
-            />
-          )}
-          {fromPurchaseOrder?.productId && (
-            <Fragment>
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Product : ${fromPurchaseOrder.productName}`}
-                onDelete={() => {
-                  setFromPurchaseOrder(null);
-                }}
-              />
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
-                onDelete={() => {
-                  setFromPurchaseOrder(null);
-                }}
-              />
-            </Fragment>
-          )}
-        </Fragment>
-      ) : (
-        <Fragment>
-          {permissions?.productCategory?.isRead && (
-            <Autocomplete
-              className={`w-full lg:w-[230px]`}
-              options={productCategoryList}
-              getOptionLabel={(option: any) => (option ? option.name : '')}
-              getOptionSelected={(option: any, val) => option._id === val}
-              value={
-                productCategoryList.filter((data) => data._id === productCategory).length
-                  ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setProductCategory(val && val._id ? val._id : '');
-              }}
-              renderInput={(params) => (
-                <TextField {...params} size="small" margin="none" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-              )}
-            />
-          )}
-          {productCategory && (
-            <Autocomplete
-              className={`w-full lg:w-[230px]`}
-              options={productFilterList}
-              size="small"
-              getOptionLabel={(option: any) => (option ? option.productName : '')}
-              getOptionSelected={(option: any, val) => option._id === val}
-              value={
-                productFilterList.filter((data) => data._id === productFilter).length
-                  ? productFilterList.filter((data) => data._id === productFilter)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setProductFilter(val && val._id ? val._id : '');
-              }}
-              renderInput={(params) => (
-                <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
-              )}
-            />
-          )}
+      <Fragment>
+        {permissions?.productCategory?.isRead && (
           <Autocomplete
             className={`w-full lg:w-[230px]`}
-            options={warehouseOptions}
-            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            options={productCategoryList}
+            getOptionLabel={(option: any) => (option ? option.name : '')}
+            getOptionSelected={(option: any, val) => option._id === val}
             value={
-              warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+              productCategoryList.filter((data) => data._id === productCategory).length
+                ? productCategoryList.filter((data) => data._id === productCategory)[0]
                 : ''
             }
             onChange={(e, val) => {
-              setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+              setProductCategory(val && val._id ? val._id : '');
             }}
             renderInput={(params) => (
-              <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+              <TextField {...params} size="small" margin="none" name="productCategory" label="Product Category" variant="outlined" fullWidth />
             )}
           />
-          {permissions?.sublease && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="subleaseAsset"
-                  checked={subleaseAsset}
-                  onChange={(e) => {
-                    setSubleaseAsset(e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-              label="Sublease Assets"
+        )}
+        {productCategory && (
+          <Autocomplete
+            className={`w-full lg:w-[230px]`}
+            options={productFilterList}
+            size="small"
+            getOptionLabel={(option: any) => (option ? option.productName : '')}
+            getOptionSelected={(option: any, val) => option._id === val}
+            value={
+              productFilterList.filter((data) => data._id === productFilter).length
+                ? productFilterList.filter((data) => data._id === productFilter)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setProductFilter(val && val._id ? val._id : '');
+            }}
+            renderInput={(params) => (
+              <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
+            )}
+          />
+        )}
+        <Autocomplete
+          className={`w-full lg:w-[230px]`}
+          options={warehouseOptions}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+              ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="none"
+              size="small"
+              name="plant"
+              label={resources?.warehouse?.titleSingular}
+              variant="outlined"
+              fullWidth
             />
           )}
+        />
+        {permissions?.sublease && (
           <FormControlLabel
             control={
               <Checkbox
-                name="showScrapAsset"
-                checked={showScrapAsset}
+                name="subleaseAsset"
+                checked={subleaseAsset}
                 onChange={(e) => {
-                  setShowScrapAsset(e.target.checked);
+                  setSubleaseAsset(e.target.checked);
                 }}
                 color="primary"
               />
             }
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-            label={`Scrap ${routes.serializedAsset.title}`}
+            label="Sublease Assets"
           />
-        </Fragment>
-      )}
+        )}
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="showScrapAsset"
+              checked={showScrapAsset}
+              onChange={(e) => {
+                setShowScrapAsset(e.target.checked);
+              }}
+              color="primary"
+            />
+          }
+          style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
+          label={`Scrap ${resources?.serializedAsset?.titleSingular}`}
+        />
+      </Fragment>
     </>
   );
 };
 
-const ActionMenuItems = ({
-  selectedRecords,
-  setShowDeleteConfirmBox,
-  permissions,
-  allowUpdateStatus,
-  handleStatusChange,
-  columns,
-  setOpenSupplierAccountDialog,
-  otherStatusOptions
-}) => {
-  return (
-    <>
-      <MenuItem
-        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-        onClick={() => {
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
-      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
-        <>
-          <MenuItem
-            onClick={() => {
-              handleStatusChange(ASSET_STATUS.available);
-            }}
-            disabled={
-              selectedRecords?.filter(
-                (o) =>
-                  [
-                    ASSET_STATUS.underReview,
-                    ASSET_STATUS.new,
-                    ASSET_STATUS.needRepair,
-                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status) && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
-              ).length === selectedRecords?.length
-                ? false
-                : true
-            }
-          >
-            {`Status Change - ${ASSET_STATUS.available}`}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleStatusChange(ASSET_STATUS.needRepair);
-            }}
-            disabled={
-              selectedRecords?.filter((o) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRecert,
-                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status)
-              ).length === selectedRecords?.length
-                ? false
-                : true
-            }
-          >
-            {`Status Change - ${ASSET_STATUS.needRepair}`}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleStatusChange(ASSET_STATUS.needRecert);
-            }}
-            disabled={
-              selectedRecords?.filter((o) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRepair,
-                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status)
-              ).length === selectedRecords?.length
-                ? false
-                : true
-            }
-          >
-            {`Status Change - ${ASSET_STATUS.needRecert}`}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleStatusChange(ASSET_STATUS.scrap);
-            }}
-            disabled={
-              selectedRecords?.filter((o) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.needRepair,
-                  ASSET_STATUS.needRecert,
-                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status)
-              ).length === selectedRecords?.length
-                ? false
-                : true
-            }
-          >
-            {`Status Change - ${ASSET_STATUS.scrap}`}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              handleStatusChange(ASSET_STATUS.lost);
-            }}
-            disabled={
-              selectedRecords?.filter((o) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRepair,
-                  ASSET_STATUS.needRecert,
-                  ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                ].includes(o.status)
-              ).length === selectedRecords?.length
-                ? false
-                : true
-            }
-          >
-            {`Status Change - ${ASSET_STATUS.lost}`}
-          </MenuItem>
-          {otherStatusOptions?.map((status) => {
-            return (
-              <MenuItem
-                onClick={() => {
-                  handleStatusChange(status?.optionValue);
-                }}
-                disabled={
-                  !selectedRecords?.every((r) =>
-                    [
-                      ASSET_STATUS.new,
-                      ASSET_STATUS.available,
-                      ASSET_STATUS.underReview,
-                      ASSET_STATUS.scrap,
-                      ASSET_STATUS.needRepair,
-                      ASSET_STATUS.needRecert,
-                      ...(otherStatusOptions?.filter((o) => o?.optionValue != status?.optionValue)?.map((o) => o?.optionValue) || [])
-                    ]?.includes(r?.status)
-                  )
-                }
-              >
-                {`Status Change - ${status?.optionLabel}`}
-              </MenuItem>
-            );
-          })}
-        </>
-      )}
-      {permissions?.serializedAsset?.isUpdate && selectedRecords?.length && columns?.some((e) => e.field === 'certificationSupplier') && (
-        <MenuItem
-          disabled={!permissions?.serializedAsset?.isUpdate}
-          onClick={() => {
-            setOpenSupplierAccountDialog(true);
-          }}
-        >
-          {`Assign Certification Supplier`}
-        </MenuItem>
-      )}
-    </>
-  );
-};

@@ -17,16 +17,15 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 const LIMIT = 25;
 
 const CardView = (props, ref) => {
-  const { serviceStatus, filterQuery } = props;
+  const { state, dispatch, serviceStatus, filterQuery } = props;
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { workOrder, uniqueId } = parsed;
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
-  const { state, dispatch } = useCardReducer();
   const { limit } = state;
 
   const [serviceOpen, setServiceOpen] = useState(false);
@@ -52,9 +51,9 @@ const CardView = (props, ref) => {
     return [
       { accessor: 'serviceName', type: 'title' },
       { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-      { accessor: 'productionOrderNumber', title: routes.productionOrder.title, type: 'text' },
+      { accessor: 'productionOrderNumber', title: resources?.productionOrder?.titleSingular, type: 'text' },
       { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
-      { accessor: 'repairOrderNumber', title: routes.repairOrder.title, type: 'text' },
+      { accessor: 'repairOrderNumber', title: resources?.repairOrder?.titleSingular, type: 'text' },
       { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {
@@ -77,7 +76,7 @@ const CardView = (props, ref) => {
             )}
             {data?.canPerformInfo ? (
               <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                <Info className="[font-size:20px_!important] text-red-500" />
+                <Info className="text-red-500 [font-size:20px_!important]" />
               </HtmlTooltip>
             ) : null}
           </>

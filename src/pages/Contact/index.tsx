@@ -54,7 +54,7 @@ export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity, permissions, resources },
     dispatch: entityDispatch
   }: any = useData();
   const {
@@ -147,7 +147,7 @@ export default function Contact(props) {
     }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
     setColumns([...newColumns, ActionsRenderer]);
   };
@@ -241,21 +241,14 @@ export default function Contact(props) {
               aria-label="Clone"
               disabled={contactPermissions?.isDelete && row?.original?.canDelete ? false : true}
               onClick={() => {
-                setSingleContactDelete({
-                  show: true,
-                  id: row?.original?._id,
-                  contactedName: row?.original?.concatedName
-                });
+                setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon
-                fontSize="small"
-                color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'}
-              />
+              <DeleteIcon fontSize="small" color={contactPermissions?.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}    >
+        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.canEdit ? 'Entity' : entityDisable}>
           <span>
             <IconButton
               size="small"
@@ -363,26 +356,6 @@ export default function Contact(props) {
       });
   };
 
-  const handleSingleDeleteContacts = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`/${contactApi}/remove`, { ids: [singleContactDelete.id] })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        getContacts();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
-    setSingleContactDelete({ id: null, show: false, contactedName: '' });
-  };
-
   const clickCreateNew = () => {
     setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
@@ -445,7 +418,7 @@ export default function Contact(props) {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources[contactResource]?.titlePlural }]} />
         <ImportExportLinks
           permissions={contactPermissions}
           module="contact(s)"
@@ -488,7 +461,8 @@ export default function Contact(props) {
                 permissions,
                 setOpenAddPlantsDialog,
                 setEntities,
-                setShowEntityDialog
+                setShowEntityDialog,
+                resources
               }}
             />
           }
@@ -516,22 +490,11 @@ export default function Contact(props) {
         )}
 
         <Box component="div">
-          {showDeleteWarningConfirmBox?.show ? (
-            <MessageDialog
-              open={showDeleteWarningConfirmBox?.show}
-              message={
-                showDeleteWarningConfirmBox?.isDelete
-                  ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
-                  : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
-              }
-              onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
-            />
-          ) : null}
 
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete selected Contacts ?`}
+              message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.contact?.titleSingular?.toLowerCase()}` : resources?.contact?.titlePlural?.toLowerCase()} ?`}              
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={handleDeleteContact}
             />
@@ -579,21 +542,6 @@ export default function Contact(props) {
               />
             </Dialog>
           )}
-
-          {singleContactDelete.show ? (
-            <ConfirmationDialog
-              open={singleContactDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactedName} ?`}
-              onClose={() =>
-                setSingleContactDelete({
-                  id: null,
-                  show: false,
-                  contactedName: ''
-                })
-              }
-              onOk={handleSingleDeleteContacts}
-            />
-          ) : null}
 
           {openAddPlantsDialog && (
             <WarhouseList
@@ -653,7 +601,8 @@ const ActionMenuItems = ({
   permissions,
   setOpenAddPlantsDialog,
   setEntities,
-  setShowEntityDialog
+  setShowEntityDialog,
+  resources
 }) => {
   return (
     <>
@@ -683,7 +632,7 @@ const ActionMenuItems = ({
             setOpenAddPlantsDialog(true);
           }}
         >
-          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
+          Assign {resources?.warehouse?.titlePlural} &nbsp; <Chip size="small" label={selectedRecords?.length} />
         </MenuItem>
       )}
       {contactPermissions?.isUpdate && (

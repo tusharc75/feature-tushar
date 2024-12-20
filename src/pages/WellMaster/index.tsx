@@ -19,7 +19,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageWellMaster from './ManageWellMaster';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.wellMaster.title);
+const renderedFrom = camelCase(sidebarResource.wellMaster);
 
 const WellMaster = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const WellMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,7 +191,11 @@ const WellMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -204,10 +208,10 @@ const WellMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.wellMaster]} />
+        <CustomBreadCrumbs routes={[{ ...routes.wellMaster, title: resources?.wellMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.wellMaster}
-          module={routes.wellMaster.title}
+          module={resources?.wellMaster?.titlePlural}
           api={wellMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -256,7 +260,8 @@ const WellMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.wellMaster?.title.toLowerCase()} ${deleteRecord?.wellName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.wellMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.wellName || ''}` : `selected ${resources?.wellMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

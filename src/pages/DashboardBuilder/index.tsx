@@ -18,6 +18,7 @@ import { baseURL } from './builderHelpers';
 import axios, { CancelTokenSource } from 'axios';
 
 const DashBoards = () => {
+
   const renderedFrom = 'dashboard-builder';
   const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +27,7 @@ const DashBoards = () => {
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,7 +162,11 @@ const DashBoards = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -174,7 +179,7 @@ const DashBoards = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: 'Dashboard Master' }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.dashboardMaster?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -205,7 +210,8 @@ const DashBoards = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.dashboardMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.name}` : `selected ${resources?.dashboardMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

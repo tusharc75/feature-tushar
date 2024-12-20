@@ -14,19 +14,19 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductTemplate = () => {
-  const renderedFrom = camelCase(routes?.productTemplate.title);
+  const renderedFrom = camelCase(sidebarResource.productTemplate);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,11 +56,11 @@ const ProductTemplate = () => {
         width: 120,
         order: 1,
         Cell: ({ row }) => (
-          <>
+          <div>
             <Link className="link" to={`${routes.productTemplate.path}/${row?.original?._id}`} title={row?.original?.name}>
               {row?.original?.name}
             </Link>
-          </>
+          </div>
         )
       },
       ...getStaticFields(),
@@ -105,7 +105,7 @@ const ProductTemplate = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -147,10 +147,9 @@ const ProductTemplate = () => {
       .get(`${productTemplateApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.productTemplate?.isUpdate;
-          finalObject['canDelete'] = permissions?.productTemplate.isDelete && user?.user?._id === finalObject['owner'];
+          finalObject['canDelete'] = permissions?.productTemplate?.isDelete && checkIsAllowedToDelete(user, sidebarResource.productTemplate, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -206,7 +205,11 @@ const ProductTemplate = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -219,7 +222,7 @@ const ProductTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productTemplate]} />
+        <CustomBreadCrumbs routes={[{ ...routes.productTemplate, title: resources?.productTemplate?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -252,7 +255,7 @@ const ProductTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productTemplate?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productTemplate?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.productTemplate?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

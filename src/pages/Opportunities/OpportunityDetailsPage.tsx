@@ -45,6 +45,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from '../DynamicForm/Step';
 import QuotationInAccordion from 'src/components/QuotationInAccordion/QuotationInAccordion';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -61,9 +62,10 @@ function OpportunityDetailsPage() {
   let { id } = useParams();
 
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, resources }
   }: any = useData();
-
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [copyOfOpportunityData, setCopyOfOpportunityData] = useState(null);
@@ -553,7 +555,7 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[routes.opportunity, { title: opportunityData?.opportunityName }]} />
+            <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]} />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
@@ -671,6 +673,7 @@ function OpportunityDetailsPage() {
                     accountId={opportunityData?._id}
                     accountName={opportunityData?.opportunityName}
                     resource={sidebarResource.opportunity}
+                    resources={resources}
                   />
                 </Box>
               )}
@@ -725,7 +728,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this opportunity`}
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}           
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

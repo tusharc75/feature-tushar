@@ -37,19 +37,19 @@ const tabs = {
 };
 
 const Email = () => {
-  const renderedFrom = camelCase(routes?.activityEmail.title);
+  const renderedFrom = camelCase(sidebarResource.email);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
 
   const [filter, setFilter] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -69,7 +69,7 @@ const Email = () => {
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    setResourceOptions(get_activity_resource(permissions, resources));
   }, []);
 
   useEffect(() => {
@@ -184,7 +184,7 @@ const Email = () => {
         Cell: ({ row }) => (
           <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
             <span>
-              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => setDeleteRecord(row.original)}>
                 <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
@@ -300,12 +300,12 @@ const Email = () => {
 
   const showConfirmBox = (row) => {
     if (row) {
-      setIsConformDialogVisible(true);
+      setShowDeleteConfirmBox(true);
       if (row && row.id) {
         setDeleteRecord(row);
       }
     } else {
-      setIsConformDialogVisible(true);
+      setShowDeleteConfirmBox(true);
     }
   };
 
@@ -338,14 +338,14 @@ const Email = () => {
             message: data.message
           });
           dispatch({ type: 'selection', selectedRecords: [] });
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
           setDeleteRecord(null);
           fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
+          setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
         });
     }
@@ -378,7 +378,7 @@ const Email = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.email?.titlePlural }]} />
       </div>
       <CustomContainer>
         {filter && (
@@ -431,13 +431,13 @@ const Email = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
-        {isConfirmDialogVisible ? (
+        {showDeleteConfirmBox ? (
           <ConfirmationDialog
-            open={isConfirmDialogVisible}
+            open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord?.id ? 'this email' : 'these emails'}?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
+              setShowDeleteConfirmBox(false);
             }}
             okBtnLoading={deleteLoading}
             onOk={handleDeleteEmails}

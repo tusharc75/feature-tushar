@@ -21,7 +21,7 @@ import ManageBlog from './ManageBlog';
 import axios, { CancelTokenSource } from 'axios';
 
 const Blog = () => {
-  const renderedFrom = camelCase(routes?.blog.title);
+  const renderedFrom = camelCase(sidebarResource?.blog);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const Blog = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,8 +191,12 @@ const Blog = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
-            setShowDeleteConfirmBox(true);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              } 
+              setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -204,10 +208,10 @@ const Blog = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.blog]} />
+        <CustomBreadCrumbs routes={[{ ...routes.blog, title: resources?.blog?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.blog}
-          module={routes.blog.title}
+          module={resources?.blog?.titlePlural}
           api={routes?.blog.path}
           afterImportCompleted={() => {
             fetchData();
@@ -256,7 +260,8 @@ const Blog = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.blog?.title} ${deleteRecord?.title || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.blog?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.title || ''}` : `selected ${resources?.blog?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

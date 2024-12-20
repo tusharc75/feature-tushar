@@ -62,6 +62,9 @@ export const staticSidebarData = (user: any, permissions: any, isOffline: boolea
 
 export const isSectionActive = (pathName: string, location: string, section: TSidebarSection) => {
   const hasChild = Boolean(section.items);
+  if (section.link === routes.reports.path) {
+    return location.startsWith(routes.reports.path);
+  }
   if (hasChild) {
     const items = section.items?.map((item) => item.name.toLowerCase().split(' ').join('-')) || [];
     return items.some((item) => pathName === item);

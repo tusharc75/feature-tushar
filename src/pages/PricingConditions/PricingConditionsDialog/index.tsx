@@ -29,7 +29,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -140,10 +140,10 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
                   isClone
                     ? 'Clone'
                     : pricingConditionId
-                    ? !isUpdateDisabled
-                      ? 'Update ' + routes.pricingCondition.title
-                      : values['name']
-                    : 'Create ' + routes.pricingCondition.title
+                      ? !isUpdateDisabled
+                        ? 'Update ' + resources?.pricingCondition?.titleSingular
+                        : values['name']
+                      : 'Create ' + resources?.pricingCondition?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

@@ -13,11 +13,14 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageBlog from './ManageBlog';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const { state } = useTableReducer();
+  const { selectedRecords } = state;
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [blogData, setBlogData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -25,7 +28,7 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -53,7 +56,7 @@ const BlogDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/blog/${id}`);
       setBlogData(data);
-      setCustomizedRoutes([routes.blog, { title: data?.title }]);
+      setCustomizedRoutes([{ ...routes.blog, title: resources?.blog?.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -123,7 +126,7 @@ const BlogDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.blog?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.blog?.titleSingular?.toLowerCase()} : ${blogData?.title} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

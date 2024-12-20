@@ -20,6 +20,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_INVENTORY_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
   transferInventory,
@@ -34,17 +35,17 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import Step from '../DynamicForm/Step';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import {
-  createTransferInventoryFlow,
   generateAddExistingProduct,
   generateCompleteButtonStep,
   generateLoadingStepCreateLoadingTicket,
   generateLoadingStepReceive,
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
-  const renderedFrom = camelCase(routes?.transferInventory.title);
+  const renderedFrom = camelCase(sidebarResource.transferInventory);
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -53,7 +54,7 @@ const TransferInventoryDetailPage = () => {
   const { tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const [resourceData, setResourceData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -69,6 +70,7 @@ const TransferInventoryDetailPage = () => {
   const [nextStep, setNextStep] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [stepNames, setStepNames] = useState(transferInventorySteps?.map((item) => item.name));
@@ -110,10 +112,10 @@ const TransferInventoryDetailPage = () => {
   useEffect(() => {
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.insertAtCurrentIndex([
-        ...generateAddExistingProduct(false).steps,
+        ...generateAddExistingProduct(false, resources?.transferInventory?.titleSingular).steps,
         nextButtonStep(false),
-        ...generateLoadingStepCreateLoadingTicket(0).steps,
-        ...generateLoadingStepReceive(0).steps,
+        ...generateLoadingStepCreateLoadingTicket(0, resources?.transferInventory?.titleSingular).steps,
+        ...generateLoadingStepReceive(0, resources?.transferInventory?.titleSingular).steps,
         ...generateCompleteButtonStep().steps
       ]);
       walkmeInstance.handleNext();
@@ -171,6 +173,11 @@ const TransferInventoryDetailPage = () => {
         }
 
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
+        setAllowedToDelete(
+          permissions?.transferInventory?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+            data?.canEdit
+        );
         setTransferInventoryData(data);
       })
       .catch((err) => {
@@ -224,7 +231,12 @@ const TransferInventoryDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.transferInventory, { title: transferInventoryData?.transferNumber }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.transferInventory, title: resources?.transferInventory?.titlePlural },
+              { title: transferInventoryData?.transferNumber }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -254,6 +266,7 @@ const TransferInventoryDetailPage = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={transferInventoryData?._id}
               resource={ACTIVITY_RESOURCE.transferInventory}
@@ -264,12 +277,8 @@ const TransferInventoryDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -283,23 +292,24 @@ const TransferInventoryDetailPage = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          {transferInventoryData && (
-            <Box>
-              <Steps
-                steps={transferInventorySteps}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                isNextStep={false}
-                nextStep={nextStep}
-                nextStepToolTip={nextStepToolTip}
-                updateStatus={(step: number) => {
-                  dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
-                }}
-                isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
-                setStepFullScreen={() => setStepFullScreen(true)}
-              />
-              <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <TabPanel value={tabValue} index={1}>
+            {transferInventoryData && (
+              <Box>
+                <Steps
+                  steps={transferInventorySteps}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  isNextStep={false}
+                  nextStep={nextStep}
+                  nextStepToolTip={nextStepToolTip}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
+                  }}
+                  isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+                  stepFullScreen={stepFullScreen}
+                  setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                />
                 {stepNames[currentStep] === 'Add Products' && (
                   <Products
                     transferInventoryData={transferInventoryData}
@@ -323,10 +333,10 @@ const TransferInventoryDetailPage = () => {
                     stepFullScreen={stepFullScreen}
                   />
                 )}
-              </ContentFullScreen>
-            </Box>
-          )}
-        </TabPanel>
+              </Box>
+            )}
+          </TabPanel>
+        </ContentFullScreen>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
@@ -348,7 +358,7 @@ const TransferInventoryDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer inventory: ${transferInventoryData?.transferNumber} ?`}
+          message={`Are you sure you want to delete this ${resources?.transferInventory?.titleSingular?.toLowerCase()}: ${transferInventoryData?.transferNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

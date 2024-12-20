@@ -5,6 +5,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -33,6 +34,10 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -419,7 +424,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             setAddSerializedAssetDialog(true);
           }}
         >
-          {`Assign ${routes.serializedAsset.title}`}
+          {`Assign ${resources?.serializedAsset?.titleSingular}`}
         </Button>
       </>
     );

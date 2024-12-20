@@ -19,7 +19,7 @@ import routes from 'src/components/Helpers/Routes';
 const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [cloneHeading, setCloneHeading] = useState('');
   const [loading, setLoading] = useState(false);
@@ -131,7 +131,13 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? `Clone - ${cloneHeading}` : warehouseId ? `Update ${initialData?.values['warehouseName'] ?? ''}` : `Create ${routes.warehouse.title}`}
+                title={
+                  isClone
+                    ? `Clone - ${cloneHeading}`
+                    : warehouseId
+                      ? `Update ${initialData?.values['warehouseName'] ?? ''}`
+                      : `Create ${resources?.warehouse?.titleSingular}`
+                }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) close();
                   else setShowConfirmDialog(true);

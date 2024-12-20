@@ -9,6 +9,7 @@ import ManageFleetReceiverDialog from './ReceiverDialog';
 import moment from 'moment';
 import { dateFormat } from 'src/constants/helpers';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
   fleetBox: {
@@ -62,6 +63,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FleetReceiver = () => {
+    const {
+    state: { resources }
+  }: any = useData();
+  
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -91,7 +96,7 @@ const FleetReceiver = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.fleetReceiver.title }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.fleetReceiver?.titlePlural }]} />
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

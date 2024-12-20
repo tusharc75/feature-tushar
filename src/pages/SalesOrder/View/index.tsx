@@ -9,43 +9,36 @@ import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { lowerFirst, startCase } from 'lodash';
-import { MATERIAL_TYPE } from 'src/constants/helpers';
+import { COLOUR_MASTER, MATERIAL_TYPE } from 'src/constants/helpers';
 
 const customNodeStyles = {
   salesOrder: {
     name: 'Sales Order',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
+    ...COLOUR_MASTER.purchaseOrder
   },
   package: {
     name: 'Package',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
+    ...COLOUR_MASTER.package
   },
   product: {
     name: 'Product',
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
+    ...COLOUR_MASTER.product
   },
   service: {
     name: 'Service',
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+    ...COLOUR_MASTER.service
   },
   demandOrder: {
     name: 'Demand Order',
-    background: '#fad8b6',
-    borderColor: '#ff8000'
+    ...COLOUR_MASTER.repairJob
   },
   productionOrder: {
     name: 'Production Order',
-    background: '#fcecc0',
-    borderColor: '#ffbb00'
+    ...COLOUR_MASTER.assets
   },
   purchaseRequisition: {
     name: 'Purchase Requisition',
-    background: '#f0c9f5',
-    borderColor: '#e200ff'
+    ...COLOUR_MASTER.bulkAsset
   }
   // decline: {
   //   name: 'Approver-Declined',
@@ -70,10 +63,10 @@ const IrtTicketView = ({ salesOrderData }) => {
     const materialData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/material/${salesOrderData?._id}`);
     const additionalcostData: any = await axiosInstance().get(`${routes?.salesOrder?.path}/additionalcost/${salesOrderData?._id}`);
 
-    const costData = additionalcostData?.data?.data || []
+    const costData = additionalcostData?.data?.data || [];
     costData?.forEach((e) => {
-      e.type = MATERIAL_TYPE.manualEntry
-    })
+      e.type = MATERIAL_TYPE.manualEntry;
+    });
     const materials = [...(materialData?.data?.data?.material || []), ...costData];
 
     var xPosition = 0;
@@ -89,7 +82,7 @@ const IrtTicketView = ({ salesOrderData }) => {
           label: (
             <HtmlTooltip arrow placement="top" title={'Sales Order'}>
               <div>
-                <Typography variant="body2">Sales Order</Typography>
+                <Typography variant="body2">{customNodeStyles.salesOrder.name}</Typography>
                 <Typography variant="subtitle2">{salesOrderData?.salesOrderNo}</Typography>
               </div>
             </HtmlTooltip>
@@ -133,17 +126,14 @@ const IrtTicketView = ({ salesOrderData }) => {
           ref_type: material?.type,
           ref_id: material?.materialId,
           label: (
-            <HtmlTooltip
-              arrow
-              placement="top"
-              title={startCase(material?.type)}
-            >
+            <HtmlTooltip arrow placement="top" title={startCase(material?.type)}>
               <div>
-                <Typography variant="body2">
-                  {startCase(material?.type)}
-                </Typography>
+                <Typography variant="body2">{startCase(material?.type)}</Typography>
                 <Typography variant="subtitle2">
-                  {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName || material?.description}
+                  {material?.productDetail?.productName ||
+                    material?.packageDetail?.packageName ||
+                    material?.serviceDetail?.serviceName ||
+                    material?.description}
                 </Typography>
               </div>
             </HtmlTooltip>
@@ -207,24 +197,24 @@ const IrtTicketView = ({ salesOrderData }) => {
 
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'product') {
-      history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.productDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'package') {
-      history.push(`${routes.packagesDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.packagesDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'service') {
-      history.push(`${routes.serviceMasterDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.serviceMasterDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'salesOrder') {
-      history.push(`${routes.salesOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.salesOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'demandOrder') {
-      history.push(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'productionOrder') {
-      history.push(`${routes.productionOrderDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes?.productionOrderDetail?.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'purchaseRequisition') {
-      history.push(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
+      window.open(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
     }
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

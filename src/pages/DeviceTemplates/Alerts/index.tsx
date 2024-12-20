@@ -20,11 +20,11 @@ import ManageDeviceTemplateAlert from 'src/pages/DeviceTemplatesAlert/ManageDevi
 import axios, { CancelTokenSource } from 'axios';
 
 export default function Alerts({ deviceTemplate }) {
-  const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_alerts`;
+  const renderedFrom = `${camelCase(sidebarResource.deviceTemplateAlert)}_alerts`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
   const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly, search } = state;
   const [columns, setColumns] = useState(null);
@@ -231,7 +231,11 @@ export default function Alerts({ deviceTemplate }) {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){ 
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -305,7 +309,8 @@ export default function Alerts({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.deviceTemplateAlert?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.alertNumber}` : `selected ${resources?.deviceTemplateAlert?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

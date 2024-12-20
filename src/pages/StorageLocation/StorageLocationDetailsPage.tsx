@@ -20,7 +20,7 @@ const StorageLocationDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [storageLocationData, setStorageLocationData] = useState(null);
@@ -72,7 +72,7 @@ const StorageLocationDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.storageLocation, { title: storageLocationData?.storageLocationName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.storageLocation, title: resources?.storageLocation?.titlePlural }, { title: storageLocationData?.storageLocationName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -105,7 +105,7 @@ const StorageLocationDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this ${routes.storageLocation?.title} ?`}
+          message={`Are you sure you want to delete ${resources?.storageLocation?.titleSingular?.toLowerCase()} : ${storageLocationData?.storageLocationName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -24,7 +24,7 @@ const PricingConditionsDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [headingLabel, setHeadingLabel] = useState('');
   const [detailData, setDetailData] = useState(null);
@@ -61,7 +61,7 @@ const PricingConditionsDetails = () => {
       .then(({ data: { data } }) => {
         setDetailData(data);
         setHeadingLabel(data.conditionName);
-        setCustomizedRoutes([routes.pricingCondition, { title: data.conditionName }]);
+        setCustomizedRoutes([{ ...routes.pricingCondition, title: resources?.pricingCondition?.titlePlural }, { title: data.conditionName }]);
         getResourceFields();
       })
       .catch((err) => {
@@ -115,12 +115,8 @@ const PricingConditionsDetails = () => {
         ) : (
           <>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0}>
-                Header
-              </CustomTab>
-              <CustomTab value={1}>
-                Details
-              </CustomTab>
+              <CustomTab value={0}>Header</CustomTab>
+              <CustomTab value={1}>Details</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={detailData} fields={fields} />
@@ -134,7 +130,7 @@ const PricingConditionsDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this : ${headingLabel} ?`}
+          message={`Are you sure you want to delete ${resources?.pricingCondition?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}           
           onClose={() => {
             setShowConfirmBox(false);
           }}

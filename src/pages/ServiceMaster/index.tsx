@@ -22,7 +22,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
-const renderedFrom = camelCase(routes?.serviceMaster.title);
+const renderedFrom = camelCase(sidebarResource?.serviceMaster);
 
 const ServiceMaster = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -32,7 +32,7 @@ const ServiceMaster = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -54,10 +54,10 @@ const ServiceMaster = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.serviceMaster}`);
     data = response?.data?.data;
-    setWalkmeData([createResourceFlow(sidebarResource.serviceMaster, data, false, false)]);
-    let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
+    setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, data, false, false)]);
+    let newColumns = generateColumns(renderedFrom, data, routes?.serviceMasterDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -199,7 +199,11 @@ const ServiceMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -220,10 +224,10 @@ const ServiceMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.serviceMaster]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.serviceMaster, title: resources?.serviceMaster?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.serviceMaster}
-          module={routes.serviceMaster.title}
+          module={resources?.serviceMaster?.titlePlural}
           api={serviceMaster.api}
           afterImportCompleted={() => {
             fetchData();
@@ -244,9 +248,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Step Export',
-              api: `${serviceMaster.api}/steps/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/steps/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -261,9 +264,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Consumable Export',
-              api: `${serviceMaster.api}/product/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/product/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -307,7 +309,8 @@ const ServiceMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.serviceMaster?.title.toLowerCase()} ${deleteRecord?.serviceName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.serviceName || ''}` : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

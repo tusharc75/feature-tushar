@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.inventoryCycle.title);
+const renderedFrom = camelCase(sidebarResource?.inventoryCycle);
 
 const InventoryCycle = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +31,7 @@ const InventoryCycle = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -191,6 +191,11 @@ const InventoryCycle = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -203,10 +208,10 @@ const InventoryCycle = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
+        <CustomBreadCrumbs routes={[{ ...routes.inventoryCycle, title: resources?.inventoryCycle?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.inventoryCycle}
-          module={routes.inventoryCycle.title}
+          module={resources?.inventoryCycle?.titlePlural}
           api={routes?.inventoryCycle?.path}
           afterImportCompleted={() => {
             fetchData();
@@ -262,7 +267,7 @@ const InventoryCycle = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.inventoryCycle?.title} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${deleteRecord?.cycleCode}` : `selected ${resources?.inventoryCycle?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

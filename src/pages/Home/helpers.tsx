@@ -159,13 +159,13 @@ export const setDataBySectionName = (secName, index = 0, className = '') => {
       sideBarIcon = <ServiceOperationManagementIcon size={20} className={className} />;
       break;
     }
-    case compareName(['Purchasing Management'], secName): {
+    case compareName(['Purchasing Management', 'Purchase Management'], secName): {
       text = 'Manage working capital effectively';
       icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <PurchasingManagementIcon size={20} className={className} />;
       break;
     }
-    case compareName(['Planning & Forecasting', 'Forecasting & Planning'], secName): {
+    case compareName(['Planning & Forecasting', 'Plan & Forecast', 'Forecasting & Planning'], secName): {
       text = 'Plan and Schedule your workforce productively';
       icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
       sideBarIcon = <MdOutlineEventAvailable size={20} className={className} />;
@@ -187,7 +187,7 @@ export const setDataBySectionName = (secName, index = 0, className = '') => {
       sideBarIcon = <ServiceManagementIcon size={18} className={className} />;
       break;
     }
-    case compareName(['Setups & Administration'], secName): {
+    case compareName(['Setup & Administration'], secName): {
       sideBarIcon = <BiCog size={20} className={className} />;
       break;
     }

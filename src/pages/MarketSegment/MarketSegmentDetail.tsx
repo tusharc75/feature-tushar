@@ -20,15 +20,15 @@ const MarketSegmentDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.marketSegment]);
+  const {
+    state: { permissions, user, resources }
+  }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.marketSegment, title: resources?.marketSegment?.titlePlural }]);
   const [marketSegmentData, setMarketSegmentData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -139,7 +139,7 @@ const MarketSegmentDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.marketSegment?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.marketSegment?.titleSingular?.toLowerCase()} : ${fields?.name} ?`}            
           onClose={() => {
             setShowConfirmBox(false);
           }}

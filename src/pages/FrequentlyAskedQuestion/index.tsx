@@ -21,12 +21,12 @@ import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
+const renderedFrom = camelCase(sidebarResource?.frequentlyAskedQuestion);
 
 const FrequentlyAskedQuestion = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -201,7 +201,11 @@ const FrequentlyAskedQuestion = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }            
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -214,7 +218,7 @@ const FrequentlyAskedQuestion = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.frequentlyAskedQuestion]} />
+        <CustomBreadCrumbs routes={[{ ...routes.frequentlyAskedQuestion, title: resources?.frequentlyAskedQuestion?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions.frequentlyAskedQuestion}
           module="frequentlyAskedQuestion"
@@ -268,7 +272,7 @@ const FrequentlyAskedQuestion = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.frequentlyAskedQuestion?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${deleteRecord?.label}` : `selected ${resources?.frequentlyAskedQuestion?.titlePlural?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

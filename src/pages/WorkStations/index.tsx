@@ -19,7 +19,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageWorkStations from './ManageWorkStations';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = camelCase(routes?.workStations.title);
+const renderedFrom = camelCase(sidebarResource.workStations);
 
 const WorkStations = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +27,7 @@ const WorkStations = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -188,6 +188,11 @@ const WorkStations = () => {
       <>
         <MenuItem
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -200,10 +205,10 @@ const WorkStations = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workStations]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workStations, title: resources?.workStations?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.workStations}
-          module={routes.workStations.title}
+          module={resources?.workStations?.titlePlural}
           api={routes?.workStations?.path}
           afterImportCompleted={() => {
             fetchData();
@@ -252,7 +257,8 @@ const WorkStations = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.workStations?.title} ${deleteRecord?.workStationName || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.workStations?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.workStationName || ''}` : `selected ${resources?.workStations?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

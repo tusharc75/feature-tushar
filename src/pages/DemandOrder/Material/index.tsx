@@ -22,8 +22,8 @@ import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
-  const renderedFrom = `${camelCase(routes?.demandOrder.title)}_material`;
+const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resources }) => {
+  const renderedFrom = `${camelCase(sidebarResource?.demandOrder)}_material`;
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -367,7 +367,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`,
+    fileName: `${resources?.demandOrder?.titlePlural}-${demandOrderData?.demandOrderNumber}`,
     resource: sidebarResource.demandOrder,
     referenceId: demandOrderData?._id,
     columns: columns
@@ -441,7 +441,8 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       {deleteData && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete the record(s)?`}
+          message={`Are you sure you want to delete ${deleteData ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+            ${deleteData?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

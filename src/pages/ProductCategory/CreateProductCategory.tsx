@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 const CreateProductCategory = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const { productCategoryId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
@@ -143,9 +143,9 @@ const CreateProductCategory = (props) => {
                     ? `Clone - ${cloneHeading}`
                     : productCategoryId
                     ? !isUpdateDisabled
-                      ? 'Update ' + routes.productCategory.title
+                      ? 'Update ' + resources?.productCategory?.titleSingular
                       : values['name']
-                    : 'Create ' + routes.productCategory.title
+                    : 'Create ' + resources?.productCategory?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

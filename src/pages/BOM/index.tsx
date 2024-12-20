@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import { product, prepareDataForGrid, gridLoadingTimeout } from '../../constants/helpers';
+import { product, prepareDataForGrid, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
@@ -18,20 +18,22 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomContainer from 'src/components/CustomContainer';
 
 const BOMTable = () => {
   const { id } = useParams();
 
-  const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
+  const renderedFrom = `${camelCase(sidebarResource.product)}_bom`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -85,7 +87,8 @@ const BOMTable = () => {
             size="small"
             aria-label="Delete"
             onClick={() => {
-              setShowConfirmBox({ open: true, data: [row?.original] });
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
             }}
           >
             <Delete fontSize="small" color="error" />
@@ -116,7 +119,7 @@ const BOMTable = () => {
       .then(({ data: { data } }) => {
         const { productData } = data;
         setCustomizedRoutes([
-          { title: 'Product Master', path: routes.product.path },
+          { title: resources?.product?.titlePlural, path: routes.product.path },
           { title: productData?.productName, path: `${routes.productDetail.path}/${id}` },
           { title: 'Child Product' }
         ]);
@@ -235,85 +238,90 @@ const BOMTable = () => {
         <CustomBreadCrumbs routes={customizedRoutes} />
       </div>
       <div className="main-container">
-        <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className={'align-items-center flex w-full justify-between gap-1'}>
-                <AiOutlineApartment className="headerLogo" />
-                <span className="listingHeader">Child Product</span>
-              </div>
-              <div className="flex flex-wrap justify-end gap-[8px]">
-                <div className="flex flex-wrap items-center gap-[8px]">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setOpenAssignProductDialog(true);
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length ? false : true}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
-                      {`Delete (${selectedRecords?.length})`}
-                    </MenuItem>
-                  </Menu>
-                </div>
+        <div className="header-panel">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className={'align-items-center flex w-full justify-between gap-1'}>
+              <AiOutlineApartment className="headerLogo" />
+              <span className="listingHeader">Child Product</span>
+            </div>
+            <div className="flex flex-wrap justify-end gap-[8px]">
+              <div className="flex flex-wrap items-center gap-[8px]">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setOpenAssignProductDialog(true);
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem onClick={() =>{     
+                          if (selectedRecords.length === 1){ 
+                          setDeleteRecord(selectedRecords[0]);
+                          }else{
+                            setDeleteRecord(null)
+                          }
+                          setShowDeleteConfirmBox(true);}}>
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
           </div>
-
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 350px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              onSaveEdit={handleValueUpdate}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              refreshGrid={fetchBOMData}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </CustomContainer>
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 350px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            onSaveEdit={handleValueUpdate}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchBOMData}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </div>
-      {showConfirmBox.open && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
-          open={true}
-          message={`Are you sure you want to delete this product?`}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productName || ''}` : resources?.product?.titlePlural?.toLowerCase()} ?`}
           okBtnLoading={isDeleting}
           onClose={() => {
-            setShowConfirmBox({ open: false, data: null });
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
           onOk={handleRemove}
         />

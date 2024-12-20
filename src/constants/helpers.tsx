@@ -346,7 +346,6 @@ export const sidebarResource = {
   fieldTicket: 'Field Ticket',
   fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
-  rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
   userDownloadRequest: 'User Download Request',
   truckMaster: `Truck Master`,
@@ -386,7 +385,18 @@ export const sidebarResource = {
   managedPackages: 'Managed Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
-  packageInventory: 'Package Inventory'
+  packageInventory: 'Package Inventory',
+  scheduleAndDispatch: 'Schedule And Dispatch',
+  iotChart: 'Iot Chart',
+  sendOutboundMessage: 'Send Outbound Message',
+  materialHandling: 'Material Handling',
+  generateInvoice: 'Generate Invoice',
+  dataList: 'DataList',
+  dataListitems: 'DataList Items',
+  workSpace: 'Work Space',
+  workflow: 'Workflow',
+  workflowReport: 'Workflow Report',
+  equiptAi: 'Equipt Ai',
 };
 
 export const primaryFields = {
@@ -396,148 +406,6 @@ export const primaryFields = {
   repairJob: 'repairJobName',
   purchaseOrder: 'purchaseOrderNumber',
   deliveryTicket: 'ticketName'
-};
-
-export const RESOURCE_LABEL = {
-  account: 'Supplier Accounts',
-  userDownloadRequest: 'User Download Request',
-  warehouse: 'Plants',
-  customerAccount: 'Customer Accounts',
-  user: 'Users',
-  contact: 'Supplier Contacts',
-  customerContact: 'Customer Contacts',
-  brand: 'Brands',
-  entity: 'Entities',
-  role: 'Roles',
-  lead: 'Leads',
-  opportunity: 'Opportunities',
-  field: 'Fields',
-  productCategory: 'Product Categories',
-  productInventory: 'Product Inventory',
-  packageInventory: 'Package Inventory',
-  serializedAsset: 'Serialized Assets',
-  serializedAssetsCertification: 'Serialized Assets Certification',
-  priceTemplate: 'Price Templates',
-  product: 'Product Master',
-  productTemplate: 'Product Templates',
-  doa: 'DOA',
-  termsAndConditions: 'Terms And Conditions',
-  equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectSales: 'Project Sales',
-  productBuilder: 'Price Builder',
-  formBuilder: 'Form Builder',
-  forms: 'Forms',
-  currencyConverter: 'Currency Converter',
-  quoteBuilder: 'Quotes',
-  PNQBuilder: 'PNQ Builder',
-  DOARequest: 'DOA Requests',
-  task: 'Tasks',
-  case: 'Cases',
-  note: 'Notes',
-  event: 'Events',
-  email: 'Emails',
-  attachment: 'Attachments',
-  reminder: 'Reminders',
-  calendar: 'Calendar',
-  dashboard: 'Dashboards',
-  budget: 'Budgets',
-  marketSegment: 'Market Segments',
-  quotePdfTemplate: 'PDF Templates',
-  rentalManagement: 'Rental Job',
-  rentalManagementInvoice: 'Rental Management Invoice',
-  deliveryTicket: 'Delivery Tickets',
-  pricingCondition: 'Pricing Setup',
-  repairJob: 'Repair Jobs',
-  salesOrder: 'Sales Order',
-  invoice: 'Invoice',
-  eCommercePolicy: 'e-Commerce Policy',
-  packages: 'Packages',
-  purchaseOrder: 'Purchase Orders',
-  transferAsset: 'Transfer Assets',
-  address: 'Addresses',
-  sublease: 'Sublease',
-  subleaseInvoice: 'Sublease Invoice',
-  transferInventory: 'Transfer Inventory',
-  zone: 'Zone',
-  wellMaster: 'Well Master',
-  bulkAssetCreation: 'Bulk Asset Creation',
-  pos: 'eRECS',
-  repairType: 'Repair Types',
-  report: 'Report',
-  scheduleReport: 'Schedule Report',
-  resourceCalendar: 'Resource Calendar',
-  scheduleCalendar: 'Schedule Calendar',
-  cageManagement: 'Cage Management',
-  productAuction: 'Product Auction',
-  inventoryToAsset: 'Inventory to Asset',
-  importExport: 'Import-Export',
-  inventoryCycle: 'Inventory Cycle',
-  cycleCountDetermination: 'Cycle Count Determination',
-  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
-  quotation: 'Quotation',
-  serviceMaster: 'Service Master',
-  repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
-  fieldServiceOrder: 'Field Service Order',
-  workOrder: 'Work Order',
-  workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician',
-  frequentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog',
-  eCommerceHome: 'e-Commerce Home',
-  surveys: 'Surveys',
-  contactUs: 'Contact Us',
-  supportTicket: 'Support Ticket',
-  demandOrder: 'Demand Order',
-  employeeMaster: 'Employee Master',
-  competencyType: 'Competency Type',
-  technicianScheduler: 'Technician Scheduler',
-  irtTicket: 'IRT Ticket',
-  purchaseRequisition: 'Purchase Requisition',
-  planning: 'Planning',
-  fieldTicket: 'Field Ticket',
-  fieldTicketInvoice: 'Field Ticket Invoice',
-  fieldServiceTechnician: `Field Service Technician`,
-  fleetDispatch: `Fleet Dispatch`,
-  resourceLogs: `Resource Logs`,
-  truckMaster: `Truck Master`,
-  job: 'Job',
-  fleetReceiver: 'Fleet Receiver',
-  storageLocation: 'Storage Location',
-  transactionLock: 'Transaction Lock',
-  wellNumber: 'Well Number',
-  taxMaster: 'Tax Master',
-  competencies: 'Competencies',
-  materialHandling: 'Material Handling',
-  padMaster: 'Pad Master',
-  driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master',
-  iotDataPoints: 'IoT Data Points',
-  iotChart: 'IoT Chart',
-  sendOutboundMessage: 'Send Outbound Message',
-  deviceTemplates: 'Device Templates',
-  workStations: 'Work Stations',
-  deviceTemplateAlert: 'Device Template Alert',
-  chartOfAccount: 'Chart Of Account',
-  creditMemo: 'Credit Memo',
-  generateInvoice: 'Generate Invoice',
-  repairOrderInvoice: 'Repair Order Invoice',
-  payrollPolicy: 'Payroll Policy',
-  triggerNotificationMaster: 'Trigger Notification Master',
-  triggerNotificationHistory: 'Trigger Notification History',
-  userAttendance: 'User Attendance',
-  dataList: 'Data List',
-  dataListitems: 'Data List Items',
-  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
-  managedPackages: 'Managed Packages',
-  integration: 'Integration',
-  equiptAi: 'Equipt Genie',
-  trainAiModel: 'Train Ai Model',
-  workSpace: 'Work Space',
-  workflow: 'Workflow',
-  workflowReport: 'Workflow Report',
-  assemblyOrder: 'Assembly Order',
-  workAutomation: 'Work Automation'
 };
 
 export const CHILD_RESOURCE = {
@@ -1609,11 +1477,24 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+interface IRoutesAndTitle {
+  [key: string]: {
+    titlePlural: string;
+    titleSingular: string;
+  };
+}
+
+interface IGetPermissionsReturn {
+  permissions: IPermission;
+  resources: IRoutesAndTitle;
+}
+
+export const getPermissions = (user, selectedEntity = undefined): IGetPermissionsReturn | null => {
   if (user) {
     try {
       let permissions = {};
       let routesAndTitle = {};
+      let resources = {};
 
       let data = [...user?.role?.sideBar];
 
@@ -1647,8 +1528,9 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
               permission['approveAccount'] = hasApproveAccountPermission;
             }
             permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
-            routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-              title: d.resourceLabel || d.name
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           } else {
             let permission = {
@@ -1662,15 +1544,14 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             }
             const k = lowerFirst(d.name.replace(/ /g, ''));
             permissions[k] = permission;
-            routesAndTitle[k] = {
-              title: d.resourceLabel || d.name
+            resources[sidebarFieldsKeys[indexOfPermission]] = {
+              titlePlural: d.homePageLabel || d.resourceLabel || d.name,
+              titleSingular: d.resourceLabel || d.name
             };
           }
         });
       }
-
-      localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-      return permissions;
+      return { permissions, resources };
     } catch (e) {
       console.log(e);
     }
@@ -2543,198 +2424,244 @@ export const IOT_REPORT_LIST = [
   }
 ];
 
+export const REPORT_SECTIONS = {
+  rental: 'Rental',
+  sales: 'Sales',
+  inventory: 'Inventory',
+  asset: 'Asset',
+  purchase: 'Purchase',
+  fieldService: 'Field Service',
+  production: 'Production',
+  deals: 'Deals',
+  user: 'User',
+  integration: 'Integration',
+  iot: 'Iot'
+};
+
 export const REPORT_LIST = [
   {
-    title: sidebarResource.rentalManagement,
-    permission: 'rentalManagement',
-    key: 'rentalManagement',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.quotation,
-    permission: 'quotation',
-    key: 'quotation',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.salesOrder,
-    permission: 'salesOrder',
-    key: 'salesOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.serializedAsset,
-    permission: 'serializedAsset',
-    key: 'serializedAsset',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.transferAsset,
-    permission: 'transferAsset',
-    key: 'transferAsset',
-    type: 'dynamic'
+    title: sidebarResource.projectSales,
+    permission: 'projectSales',
+    key: 'projectSales',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.quotation,
+    permission: 'quotation',
+    key: 'quotation',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
-    title: sidebarResource.projectSales,
-    permission: 'projectSales',
-    key: 'projectSales',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.workOrder,
-    permission: 'workOrder',
-    key: 'workOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.purchaseOrder,
-    permission: 'purchaseOrder',
-    key: 'purchaseOrder',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.productionOrder,
-    permission: 'productionOrder',
-    key: 'productionOrder',
-    type: 'dynamic'
+    title: sidebarResource.salesOrder,
+    permission: 'salesOrder',
+    key: 'salesOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: sidebarResource.invoice,
     permission: 'invoice',
     key: 'invoice',
-    type: 'dynamic'
-  },
-  {
-    title: sidebarResource.fieldTicket,
-    permission: 'fieldTicket',
-    key: 'fieldTicket',
-    type: 'dynamic'
+    type: 'dynamic',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Details',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceDetails'
+    type: 'invoiceDetails',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Invoice Backlog',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'invoiceBacklog'
-  },
-  {
-    title: 'Syteline Invoice Integration',
-    permission: 'invoice',
-    key: 'standardReport',
-    type: 'sytelineInvoiceIntegration'
+    type: 'invoiceBacklog',
+    section: REPORT_SECTIONS.sales
   },
   {
     title: 'Revenue By Customer',
     permission: 'invoice',
     key: 'standardReport',
-    type: 'revenueByCustomer'
+    type: 'revenueByCustomer',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: 'Sales Funnel Report',
+    permission: 'lead',
+    key: 'standardReport',
+    type: 'salesFunnel',
+    section: REPORT_SECTIONS.sales
+  },
+  {
+    title: sidebarResource.rentalManagement,
+    permission: 'rentalManagement',
+    key: 'rentalManagement',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.rental
+  },
+  {
+    title: sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'serializedAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Lost Assets',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'lostAssets'
-  },
-  {
-    title: 'Purchase Order Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderDetails'
-  },
-  {
-    title: 'Purchase Order Actual Received Details',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'purchaseOrderActualReceivedDetails'
-  },
-  {
-    title: 'Inventory Evaluation',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryEvaluation'
-  },
-  {
-    title: 'Inventory History',
-    permission: 'productInventory',
-    key: 'standardReport',
-    type: 'inventoryHistory'
-  },
-  {
-    title: 'Average Price By Supplier',
-    permission: 'purchaseOrder',
-    key: 'standardReport',
-    type: 'averagePriceBySupplier'
+    type: 'lostAssets',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'numberOfAssetsByStatus'
+    type: 'numberOfAssetsByStatus',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'assetUtilization'
+    type: 'assetUtilization',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'Asset Statistics',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'serializedAssetStatistics'
-  },
-  {
-    title: 'Work Order Service',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderService'
-  },
-  {
-    title: 'Work Order Technician Work Hours',
-    permission: 'workOrder',
-    key: 'standardReport',
-    type: 'workOrderTechnicianWorkHours'
-  },
-  {
-    title: 'User Session',
-    permission: 'user',
-    key: 'standardReport',
-    type: 'userSession'
+    type: 'serializedAssetStatistics',
+    section: REPORT_SECTIONS.asset
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'inUsedSerializedAsset'
+    type: 'inUsedSerializedAsset',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: sidebarResource.fieldTicket,
+    permission: 'fieldTicket',
+    key: 'fieldTicket',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.workOrder,
+    permission: 'workOrder',
+    key: 'workOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Service',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderService',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours',
+    section: REPORT_SECTIONS.fieldService
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'averagePriceBySupplier',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: sidebarResource.productionOrder,
+    permission: 'productionOrder',
+    key: 'productionOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.purchase
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryEvaluation',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'Inventory History',
+    permission: 'productInventory',
+    key: 'standardReport',
+    type: 'inventoryHistory',
+    section: REPORT_SECTIONS.inventory
+  },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'standardReport',
+    type: 'userSession',
+    section: REPORT_SECTIONS.user
   },
   {
     title: 'Fleet Report',
     permission: 'deals',
     key: 'standardReport',
-    type: 'fleetReport'
+    type: 'fleetReport',
+    section: REPORT_SECTIONS.deals
   },
   {
     title: 'Daily Volume Report',
@@ -2743,7 +2670,8 @@ export const REPORT_LIST = [
     type: 'dailyVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Volume Report',
@@ -2753,13 +2681,15 @@ export const REPORT_LIST = [
     defaultColumn: true,
     notMultiSelectFields: ['frequency'],
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotUnitDowntimeReport'
+    type: 'iotUnitDowntimeReport',
+    section: REPORT_SECTIONS.iot
   },
   {
     title: `Pad Job Volume Report`,
@@ -2768,7 +2698,8 @@ export const REPORT_LIST = [
     type: 'rentalVolumeReport',
     defaultColumn: true,
     isExportPdf: true,
-    isSendMail: true
+    isSendMail: true,
+    section: REPORT_SECTIONS.iot
   },
   {
     title: 'IOT Data Points',
@@ -2776,13 +2707,16 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true,
-    notMultiSelectFields: ['asset', 'interval']
+    notMultiSelectFields: ['asset', 'interval'],
+    section: REPORT_SECTIONS.iot
   },
+
   {
-    title: 'Sales Funnel Report',
-    permission: 'lead',
+    title: 'Syteline Invoice Integration',
+    permission: 'invoice',
     key: 'standardReport',
-    type: 'salesFunnel'
+    type: 'sytelineInvoiceIntegration',
+    section: REPORT_SECTIONS.integration
   }
 ];
 
@@ -2820,8 +2754,8 @@ export const PDF_RESOURCE_LIST = [
 
 export const COLOUR_MASTER = {
   rentalJob: {
-    background: '#c3d5e6',
-    borderColor: '#6c89a6'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   cancelledRentalJob: {
     background: '#00FF00',
@@ -2844,12 +2778,16 @@ export const COLOUR_MASTER = {
     borderColor: '#81afb8'
   },
   product: {
-    background: '#97c9bf',
-    borderColor: '#70948d'
+    background: '#E2F8FF',
+    borderColor: '#8BCBDF'
+  },
+  service: {
+    background: '#FFF7D9',
+    borderColor: '#FDD33E'
   },
   assets: {
-    background: '#ffd65b',
-    borderColor: '#f5c431'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   lostAssets: {
     background: 'var(--error-bg)',
@@ -2860,16 +2798,16 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   purchaseOrder: {
-    background: '#FFA500',
-    borderColor: '#6c89a6'
+    background: '#E6E8F5',
+    borderColor: '#9789F0'
   },
   sublease: {
     background: '#FFE4C0',
     borderColor: '#FFE4C0'
   },
   transferAsset: {
-    background: 'var(--transferAsset-bg)',
-    borderColor: '#d98298'
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
   },
   bulkAsset: {
     background: '#FFA500',
@@ -2883,9 +2821,21 @@ export const COLOUR_MASTER = {
     background: '#e6c6e6',
     borderColor: '#b38fb3'
   },
+  accepted: {
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
+  },
+  rejected: {
+    background: '#FFEAEA',
+    borderColor: '#FFA0A0'
+  },
+  skipped: {
+    background: '#ffd65b',
+    borderColor: 'grey'
+  },
   receivingTicket: {
-    background: '#cfdb7f',
-    borderColor: '#aeb86e'
+    background: '#EDFFE1',
+    borderColor: '#86DB71'
   },
   deliveredReceivingTicket: {
     background: '#cfdb7f',
@@ -2902,6 +2852,14 @@ export const COLOUR_MASTER = {
   replaceAssetColor: {
     background: 'var(--replaceAsset-bg)',
     borderColor: 'var(--replaceAsset-bg)'
+  },
+  preWork: {
+    background: 'rgba(254, 249, 230, 1)',
+    borderColor: '#C0C0C0'
+  },
+  postWork: {
+    background: 'rgba(222, 249, 255, 1)',
+    borderColor: 'green'
   }
 };
 
@@ -2942,7 +2900,7 @@ export const WORKORDER_SERVICE_STATUS = {
   failed: 'Failed',
   skipped: 'Skipped',
   inProgressByOther: 'In-Progress By Other'
-};
+} as const;
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
   start: 'start',
@@ -3333,7 +3291,12 @@ export function clamp(val: number, min: number, max: number) {
 }
 
 export const getResourceLabel = (resource, user) => {
-  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource;
+  const resourceData = user?.role?.selectedEntity?.resource?.find((e) => e.name === resource);
+  if (resourceData) {
+    return { titleSingular: resourceData?.resourceLabel, titlePlural: resourceData?.homePageLabel || resourceData?.resourceLabel };
+  } else {
+    return { titleSingular: resource, titlePlural: resource };
+  }
 };
 
 export const ASSET_APPROVAL_STATUS = {

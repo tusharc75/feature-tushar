@@ -1,5 +1,5 @@
 import { IconButton, useMediaQuery } from '@material-ui/core';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { childrenProperty, insertChildRowIntoTable } from '../utils';
@@ -16,13 +16,60 @@ export const useCreateColumns = ({
   toggleExpandChange,
   resource,
   state,
-  renderedFrom
+  renderedFrom,
+  expanderWithCustomContent
 }) => {
-  const { dataRows: allRows } = state;
+  const { dataRows: allRows, customExpanderRowData } = state;
   const isMobile = useMediaQuery('(max-width:768px)');
+
+  const handleToggleAllCustomExpnader = useCallback(() => {
+    if (customExpanderRowData !== 'all') {
+      dispatch({ type: 'setCustomExpanderRowData', data: 'all' });
+    } else {
+      dispatch({ type: 'setCustomExpanderRowData', data: null });
+    }
+  }, [customExpanderRowData, dispatch]);
+
+  const handleToggleSingleCustomExpnader = useCallback(
+    (rowid) => {
+      if (!customExpanderRowData) {
+        dispatch({ type: 'setCustomExpanderRowData', data: { [rowid]: true } });
+      } else if (customExpanderRowData === 'all') {
+        dispatch({ type: 'setCustomExpanderRowData', data: null });
+      } else if (customExpanderRowData[rowid]) {
+        const newData = { ...customExpanderRowData };
+        delete newData[rowid];
+        if (Object.keys(newData).length === 0) {
+          dispatch({ type: 'setCustomExpanderRowData', data: null });
+          return;
+        } else {
+          dispatch({ type: 'setCustomExpanderRowData', data: newData });
+        }
+      } else {
+        dispatch({ type: 'setCustomExpanderRowData', data: { ...customExpanderRowData, [rowid]: true } });
+      }
+    },
+    [customExpanderRowData, dispatch]
+  );
+
+  const isAllCustomExpanderExpanded = useMemo(() => customExpanderRowData === 'all', [customExpanderRowData]);
+  const isSingleCustomExpanderExpanded = useCallback(
+    (rowid) => customExpanderRowData?.[rowid] || isAllCustomExpanderExpanded,
+    [customExpanderRowData, isAllCustomExpanderExpanded]
+  );
 
   const newColumns: TColType[] = useMemo(() => {
     const updatedColumn = [];
+    if (expanderWithCustomContent) {
+      updatedColumn.push(
+        expanderColumnWithCustomComponent({
+          handleToggleAllCustomExpnader,
+          handleToggleSingleCustomExpnader,
+          isAllCustomExpanderExpanded,
+          isSingleCustomExpanderExpanded
+        })
+      );
+    }
     if (expander) {
       updatedColumn.push(expanderColumn({ fetchChildAttachment, isMobile, fetchChildAttachmentWrapper, toggleExpandChange, allRows, dispatch }));
     }
@@ -37,6 +84,7 @@ export const useCreateColumns = ({
         e.id = e.id ?? e.accessor;
         e.cell = e.cell ?? e.Cell;
         e.header = e.header ?? e.Header;
+        e.customContentExpanded = false;
 
         e.maxSize = e.maxSize ?? e.maxWidth;
         e.size = e.size || e.width || 200;
@@ -94,7 +142,15 @@ export const useCreateColumns = ({
     }
 
     return updatedColumn;
-  }, [columns, expander, hideSelection]);
+  }, [
+    columns,
+    expander,
+    hideSelection,
+    handleToggleAllCustomExpnader,
+    handleToggleSingleCustomExpnader,
+    isAllCustomExpanderExpanded,
+    isSingleCustomExpanderExpanded
+  ]);
 
   return newColumns;
 };
@@ -114,17 +170,19 @@ const selectionColumn = ({ resource, renderedFrom }) => ({
   filterFn: null,
   sortingFn: null,
   canDrag: false,
-  header: ({ table }) => (
-    <IndeterminateCheckbox
-      {...{
-        checked: table.getIsAllRowsSelected() ? true : false,
-        indeterminate: table.getIsSomeRowsSelected(),
-        onChange: table.getToggleAllRowsSelectedHandler(),
-        id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
-      }}
-      className="mx-auto text-center [&_svg]:[font-size:20px] "
-    />
-  ),
+  header: ({ table, ...rest }) => {
+    return (
+      <IndeterminateCheckbox
+        {...{
+          checked: table.getIsAllRowsSelected() ? true : false,
+          indeterminate: table.getIsSomeRowsSelected(),
+          onChange: table.getToggleAllRowsSelectedHandler(),
+          id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
+        }}
+        className="mx-auto text-center [&_svg]:[font-size:20px] "
+      />
+    );
+  },
   cell: ({ row }) => (
     <div className="mx-auto justify-center text-center" key={`${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`}>
       {row.original.hideSelection ? (
@@ -194,6 +252,44 @@ const expanderColumn = ({ fetchChildAttachment, isMobile, fetchChildAttachmentWr
           {row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
         </IconButton>
       ) : null}
+    </div>
+  )
+});
+
+const expanderColumnWithCustomComponent = ({
+  handleToggleAllCustomExpnader,
+  handleToggleSingleCustomExpnader,
+  isAllCustomExpanderExpanded,
+  isSingleCustomExpanderExpanded
+}) => ({
+  id: 'expander',
+  enableResizing: false,
+  header: () => (
+    <IconButton size="small" onClick={() => handleToggleAllCustomExpnader()}>
+      {isAllCustomExpanderExpanded ? (
+        <FaAngleDown className="cursor-pointer text-[var(--primary-text)]" />
+      ) : (
+        <FaAngleRight className="cursor-pointer text-[var(--primary-text)]" />
+      )}
+    </IconButton>
+  ),
+  sticky: 'left',
+  size: 70,
+  minSize: 70,
+  maxSize: 70,
+  minWidth: 70,
+  width: 70,
+  maxWidth: 70,
+  disableFilters: true,
+  disableSortBy: true,
+  filterFn: null,
+  sortingFn: null,
+  canDrag: false,
+  cell: ({ row }) => (
+    <div>
+      <IconButton size="small" style={{ fontSize: 13 }} onClick={() => handleToggleSingleCustomExpnader(row.id)}>
+        {isSingleCustomExpanderExpanded(row.id) ? <FaAngleDown /> : <FaAngleRight />}
+      </IconButton>
     </div>
   )
 });

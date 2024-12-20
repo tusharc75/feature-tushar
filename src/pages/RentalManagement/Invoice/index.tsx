@@ -25,7 +25,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -55,7 +55,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   const addWalkmeData = () => {
     const sendEmailSteps = createSendEmailStep();
-    const closeSteps = createCloseStep(routes.rentalManagement.title);
+    const closeSteps = createCloseStep(resources?.rentalManagement?.titleSingular);
     const stepData = [sendEmailSteps];
 
     if (
@@ -310,7 +310,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
   };
 
   const previewDownloadProps = {
-    fileName: `${routes.rentalManagement.title}-${rentalManagementData?.rentalJobName}`,
+    fileName: `${resources?.rentalManagement?.titleSingular}-${rentalManagementData?.rentalJobName}`,
     resource: sidebarResource.rentalManagement,
     referenceId: rentalManagementData._id,
     columns: columns,

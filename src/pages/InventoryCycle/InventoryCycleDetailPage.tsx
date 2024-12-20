@@ -20,9 +20,8 @@ const InventoryCycleDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
-
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -58,7 +57,7 @@ const InventoryCycleDetailPage = () => {
       } = await axiosInstance().get(`/inventory-cycle/${id}`);
       setHeadingLbl(data.cycleCode);
       setInventoryCycleData(data);
-      setCustomizedRoutes([routes.inventoryCycle, { title: data.cycleCode }]);
+      setCustomizedRoutes([{ ...routes?.inventoryCycle, title: resources?.inventoryCycle?.titlePlural }, { title: data.cycleCode }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -148,7 +147,7 @@ const InventoryCycleDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes.inventoryCycle.title.toLowerCase()} ${headingLbl}?`}
+          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}          
           onClose={() => {
             setShowConfirmBox(false);
           }}

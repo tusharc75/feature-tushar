@@ -1,47 +1,44 @@
-import React, { useEffect } from 'react';
-import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, Button, Box, IconButton, CircularProgress } from '@material-ui/core';
-import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
-import axios from 'axios';
-import moment from 'moment';
-import { MdDescription, MdFilterList } from 'react-icons/md';
-import styles from 'src/pages/Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomContainer from 'src/components/CustomContainer';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  prepareDataForGrid,
-  gridLoadingTimeout,
-  downloadExcel,
-  isObjectEmpty,
-  sidebarResource,
-  REPORT_LIST,
-  formatAmountWithCurrency,
-  CustomDialogTransition
-} from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import ReportFilters from '../ReportFilters';
-import AverageCostHistory from '../AverageCostHistory';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { useAppTheme } from 'src/constants/AppConfig';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DialogContent from '@material-ui/core/DialogContent';
+import { Box, Button, CircularProgress, Grid, IconButton } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
-import PadData from 'src/pages/Report/PadData';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios from 'axios';
+import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
+import moment from 'moment';
+import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { MdDescription, MdFilterList } from 'react-icons/md';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Filter from 'src/components/Filter';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import { useAppTheme } from 'src/constants/AppConfig';
+import {
+  CustomDialogTransition,
+  REPORT_LIST,
+  downloadExcel,
+  formatAmountWithCurrency,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
+import PadData from 'src/pages/Report/PadData';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import AverageCostHistory from '../AverageCostHistory';
 import SendMailMenu from './SendMailMenu';
 
 let cancelTokenSource = null;
@@ -52,7 +49,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { selectedEntity, permissions }
+    state: { selectedEntity, permissions, resources }
   } = useData();
   const { type } = useParams();
   const history = useHistory();
@@ -92,6 +89,9 @@ const Report = () => {
   const [htmlContent, setHtmlContent] = React.useState(null);
 
   const [isProcessing, setIsProcessing] = React.useState(null);
+  const [deepFilters, setDeepFilters] = React.useState([]);
+  const [filterByIds, setFilterByIds] = React.useState([]);
+  const [filterTerm, setFilterTerm] = React.useState({});
 
   const fetchGridColumns = async () => {
     try {
@@ -179,7 +179,8 @@ const Report = () => {
 
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
-        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        // setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData));
         setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
       }
       setColumns(columns);
@@ -395,7 +396,7 @@ const Report = () => {
               className="link"
               target="_blank"
               title={row?.original?.reference}
-              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+              to={`${routes?.workOrderDetail?.path}/${row?.original?.referenceId}`}
             >
               {row?.original?.reference}
             </Link>
@@ -687,6 +688,58 @@ const Report = () => {
         });
       });
     }
+
+    if (filterByIds?.length > 0) {
+      const filterById = filterByIds
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          return {
+            field: f?.field,
+            term: {
+              [term]: f?.term.map((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+      }
+    }
+
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+
+    if (deepFilters?.length > 0) {
+      deepFilter = [
+        ...deepFilter,
+        ...deepFilters
+          ?.filter((d) => {
+            const hasTermLength = d?.term?.length ? true : false;
+            if (isStatusPeriod) {
+              return hasTermLength && !['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field);
+            }
+            return hasTermLength;
+          })
+          ?.map((d) => {
+            if (filterTerm[d?.field] === '$nin' && isArray(d?.term)) {
+              return {
+                ...d,
+                term: { $nin: d?.term }
+              };
+            }
+            return d;
+          })
+      ];
+    }
+
+    if (isStatusPeriod && deepFilters?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
+      deepFilters
+        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+        ?.forEach((ele) => {
+          filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
+        });
+    }
+
     if (deepFilter && deepFilter.length > 0) {
       filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
@@ -877,9 +930,9 @@ const Report = () => {
                   subResource={type}
                   referenceId={null}
                   permissions={permissions?.report}
-                  module={routes.productionOrder.title}
+                  module={resources?.productionOrder?.titlePlural}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -943,7 +996,7 @@ const Report = () => {
               </Grid>
             </Grid>
           </div>
-          {!showGrid && (
+          {/* {!showGrid && (
             <Dialog
               open={true}
               maxWidth="md"
@@ -1003,6 +1056,24 @@ const Report = () => {
                 </DialogContent>
               </div>
             </Dialog>
+          )} */}
+          {!showGrid && (
+            <Filter
+              onClose={() => {
+                setShowGrid(true);
+              }}
+              resource={sidebarResource[resourceCamelCase]}
+              columns={resourceColumns}
+              onApplyFilter={fetchResourceData}
+              deepFilters={deepFilters}
+              setDeepFilters={setDeepFilters}
+              filterByIds={filterByIds}
+              setFilterByIds={setFilterByIds}
+              filterTerm={filterTerm}
+              setFilterTerm={setFilterTerm}
+              defaultColumns={defaultColumns}
+              reportConfig={reportConfig}
+            />
           )}
           <div>
             {columns ? (

@@ -19,16 +19,15 @@ const TermsAndConditionDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.termsAndConditions]);
   const [termsAndConditionData, setTermsAndConditionData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
-
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
@@ -57,12 +56,11 @@ const TermsAndConditionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${termsAndCondition.api}/${id}`);
 
-     
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.termsAndConditions, data));
       setAllowedToDelete(permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue));
 
       setTermsAndConditionData(data);
-      setCustomizedRoutes([routes.termsAndConditions, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -108,7 +106,7 @@ const TermsAndConditionDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              { allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -127,7 +125,7 @@ const TermsAndConditionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.termsAndConditions?.title?.toLowerCase()} ${termsAndConditionData.name} ?`}
+          message={`Are you sure you want to delete ${resources?.termsAndConditions?.titleSingular?.toLowerCase()} : ${termsAndConditionData.name} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

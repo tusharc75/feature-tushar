@@ -21,7 +21,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [] }) => {
-  const renderedFrom = `${routes.serializedAsset.title}`;
+  const renderedFrom = `${sidebarResource?.serializedAsset}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -29,7 +29,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, resources }
   }: any = useData();
 
   const [disableSaveButton, setDisableSaveButton] = useState(false);
@@ -280,7 +280,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${routes.serializedAsset.title}`}
+        title={`Add ${resources?.serializedAsset?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

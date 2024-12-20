@@ -149,7 +149,7 @@ const Sidebar = ({
               </List>
               {channels?.length === 0 && (
                 <div>
-                  <h6 className="py-[60px] text-center text-[25px] text-gray-400 dark:text-gray-600">No channels found</h6>
+                  <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No channels found</h6>
                 </div>
               )}
             </Collapse>

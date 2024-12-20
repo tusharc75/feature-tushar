@@ -1,8 +1,10 @@
-import { BoxProps, Typography } from '@material-ui/core';
+import { BoxProps, Checkbox, Typography } from '@material-ui/core';
 import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
 import styles from './index.module.scss';
+import { uniqBy } from 'lodash';
+import { cn } from 'src/constants/helpers';
 
 export * from './hooks/useCardReducer';
 
@@ -48,6 +50,8 @@ type TLink = TCommon & {
 };
 type TTitle = TCommon & {
   type: 'title';
+  link?: (data: any) => string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
 };
 type TLinkTitle = TCommon & {
   type: 'linkTitle';
@@ -76,7 +80,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { count, columnOrder, visibleColumns } = state;
+  const { data, selectedRecords, count, columnOrder, visibleColumns } = state;
 
   // sort columns
   const columns = useMemo(() => {
@@ -91,13 +95,13 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   }, [containerRef]);
 
   return (
-    <div className={`${styles.container} ${className}`} {...others} ref={containerRef}>
-      <div className="py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x">
+    <div className={cn(`${styles.container}`, className)} {...others} ref={containerRef}>
+      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
         {columns.map((col) => {
           return (
             <div
               key={col}
-              className={`${styles.singleCol} snap-start min-w-[min(90%,350px)] max-w-[350px]`}
+              className={`${styles.singleCol} min-w-[min(90%,350px)] max-w-[350px] snap-start`}
               style={
                 {
                   '--bg': col === 'Pending' ? '#F8A300' : col === 'In-Progress' ? '#F16A9A' : col === 'Completed' ? '#31AC1D' : '#7F76EB',
@@ -106,9 +110,25 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                 } as React.CSSProperties
               }
             >
-              <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px] min-h-full">
+              <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px]">
                 <Typography className={styles.colTitle}>
-                  <span></span>
+                  <span>
+                    <Checkbox
+                      size="small"
+                      checked={
+                        selectedRecords?.length &&
+                        selectedRecords?.filter((r) => r?.status === col)?.length &&
+                        data[col]?.length === selectedRecords?.filter((r) => r?.status === col)?.length
+                      }
+                      onChange={(e) => {
+                        if (e?.target?.checked) {
+                          dispatch({ type: 'selection', selectedRecords: [...uniqBy([...selectedRecords, ...data[col]], '_id')] });
+                        } else {
+                          dispatch({ type: 'selection', selectedRecords: selectedRecords?.filter((r) => r?.status != col) });
+                        }
+                      }}
+                    />
+                  </span>
                   {col} ({count[col] || 0})
                 </Typography>
                 <RenderColumns

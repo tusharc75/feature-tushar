@@ -21,7 +21,7 @@ import ManageTransactionLock from './ManageTransactionLock';
 import axios, { CancelTokenSource } from 'axios';
 
 const TransactionLock = () => {
-  const renderedFrom = camelCase(routes?.transactionLock.title);
+  const renderedFrom = camelCase(sidebarResource.transactionLock);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -30,7 +30,7 @@ const TransactionLock = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,7 +192,11 @@ const TransactionLock = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -205,10 +209,10 @@ const TransactionLock = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.transactionLock]} />
+        <CustomBreadCrumbs routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.transactionLock}
-          module={routes.transactionLock.title}
+          module={resources?.transactionLock?.titlePlural}
           api={routes.transactionLock.path}
           afterImportCompleted={() => {
             fetchData();
@@ -257,7 +261,8 @@ const TransactionLock = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.transactionLock?.title} ${deleteRecord?.lockNumber || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.lockNumber || ''}` : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -12,7 +12,6 @@ import Chart from './Chart';
 import { assignIconAndText, getAllData, groupByKey } from './helpers';
 import SideCard from 'src/pages/Home/SideCard';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.png';
-
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 
@@ -61,7 +60,7 @@ function Dashboard() {
             <div className={'grid gap-5 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1'}>
               {aiPermission && (
                 <SideCard
-                  heading={routes.equiptAi.title}
+                  heading={"Equipt Genie"}
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">
@@ -76,18 +75,18 @@ function Dashboard() {
               <WorkspaceCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} />
               {formPermission && (
                 <SideCard
-                  heading="Dynamic Form"
+                  heading="Dynamic Forms"
                   href={`${routes.formBuilder.path}`}
                   icon={
                     <div className="max-w-[60px]">
-                      <img src={dynamicFormImage} alt={'Setups & Administration Logo'} className="max-w-full" />
+                      <img src={dynamicFormImage} alt={'Setup & Administration Logo'} className="max-w-full" />
                     </div>
                   }
                   description="Design and customize forms effortlessly, capturing data dynamically."
                   gradientColors={['#ffd064', '#f4fbff']}
                 />
               )}
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setup & Administration" />
               <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
             </div>
           </div>

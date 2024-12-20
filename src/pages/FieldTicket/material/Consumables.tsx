@@ -37,7 +37,7 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild }) => {
-  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
+  const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);

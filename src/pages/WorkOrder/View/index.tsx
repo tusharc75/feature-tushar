@@ -14,40 +14,39 @@ import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
-  workOrder: { name: 'Work Order', ...COLOUR_MASTER.repairJob },
+  workOrder: {
+    name: 'Work Order',
+    ...COLOUR_MASTER.repairJob
+  },
   workOrderClosed: {
-    name: 'Work Order Closed', ...COLOUR_MASTER.repairJob
+    name: 'Work Order Closed',
+    ...COLOUR_MASTER.closedRepairJob
   },
   preWorkService: {
     name: 'Pre Work Service',
-    background: WORKORDER_SERVICE_COLOR.preWork,
-    borderColor: '#C0C0C0'
+    ...COLOUR_MASTER.preWork
   },
   postWorkService: {
     name: 'Post Work Service',
-    background: WORKORDER_SERVICE_COLOR.postWork,
-    borderColor: 'green'
+    ...COLOUR_MASTER.postWork
   },
   stepPassed: {
     name: 'Step Passed',
-    background: '#ffd65b',
-    borderColor: 'green',
+    ...COLOUR_MASTER.accepted,
     cursor: 'pointer'
   },
   stepFailed: {
     name: 'Step Failed',
-    background: '#ffd65b',
-    borderColor: 'red',
+    ...COLOUR_MASTER.rejected,
     cursor: 'pointer'
   },
   stepSkipped: {
     name: 'Step Skipped',
-    background: '#ffd65b',
-    borderColor: 'grey'
+    ...COLOUR_MASTER.skipped
   },
   step: {
     name: 'Step',
-    ...COLOUR_MASTER.assets,
+    ...COLOUR_MASTER.service,
     cursor: 'pointer'
   }
 };
@@ -60,7 +59,6 @@ const WorkOrderViews = (props) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
   const {
     state: { user }
@@ -78,7 +76,7 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
-      const allDetails: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/detail`);
+      const allDetails: any = await axiosInstance().get(`${routes?.workOrder?.path}/${workOrderId}/detail`);
       const stepData = allDetails?.data?.data?.stepData;
       const stepDatas = {};
 
@@ -98,7 +96,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workOrderName ?? ''}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.workOrder.name}</Typography>
+                <Typography variant="subtitle2">{workOrderName ?? ''}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrder
@@ -106,16 +109,16 @@ const WorkOrderViews = (props) => {
       ];
       var flowEdge: any[] = [];
 
-      const allServices =  allDetails?.data?.data?.services || [];
+      const allServices = allDetails?.data?.data?.services || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;
       const allStepsIds = [];
-      const servicesWithNoSteps = []
+      const servicesWithNoSteps = [];
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
         const serviceId = `${s?._id}_${s?.uniqueId}`;
-        if (!s?.steps?.length) servicesWithNoSteps.push(serviceId)
+        if (!s?.steps?.length) servicesWithNoSteps.push(serviceId);
         flow.push({
           id: `${serviceId}`,
           sourcePosition: 'right',
@@ -125,14 +128,10 @@ const WorkOrderViews = (props) => {
             ref_type: 'service',
             ref_id: s?._id,
             label: (
-              <HtmlTooltip
-                arrow
-                placement="top"
-                title={capitalize(s.type)}
-              >
-                <div >
-                  <Typography variant="body2">{s?.serviceName || ''}</Typography>
-                  <Typography variant="subtitle2">{s?.status || ''}</Typography>
+              <HtmlTooltip arrow placement="top" title={capitalize(s.type)}>
+                <div>
+                  <Typography variant="body2">{s?.status || ''}</Typography>
+                  <Typography variant="subtitle2">{s?.serviceName || ''}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -157,14 +156,10 @@ const WorkOrderViews = (props) => {
             data: {
               ref_type: 'step',
               label: (
-                <HtmlTooltip
-                  arrow
-                  placement="top"
-                  title={'Step'}
-                >
+                <HtmlTooltip arrow placement="top" title={'Step'}>
                   <div>
-                    <Typography variant="body2">{step?.stepName || ''}</Typography>
-                    <Typography variant="subtitle2">{s?.status || ''}</Typography>
+                    <Typography variant="body2">{s?.status || ''}</Typography>
+                    <Typography variant="subtitle2">{step?.stepName || ''}</Typography>
                   </div>
                 </HtmlTooltip>
               )
@@ -199,7 +194,12 @@ const WorkOrderViews = (props) => {
           data: {
             ref_type: 'repairJob',
             ref_id: workOrderId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workOrderName ?? ''}</div>
+            label: (
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">{customNodeStyles.workOrderClosed.name}</Typography>
+                <Typography variant="subtitle2">{workOrderName ?? ''}</Typography>
+              </div>
+            )
           },
           position: { x: xPosition, y: 70 },
           style: customNodeStyles.workOrderClosed
@@ -211,17 +211,16 @@ const WorkOrderViews = (props) => {
             source: `${id}`,
             arrowHeadType: 'arrow',
             target: `${workOrderId}-closed`
-          })
-        })
+          });
+        });
         servicesWithNoSteps?.map((id, idx) => {
           flowEdge.push({
             id: `workOrder-service-steps-${workOrderId}-${id}`,
             source: `${id}`,
             arrowHeadType: 'arrow',
             target: `${workOrderId}-closed`
-          })
-        })
-
+          });
+        });
       }
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
@@ -240,16 +239,19 @@ const WorkOrderViews = (props) => {
       case 'repairJob':
         break;
       case 'deliveryTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
       case 'serializedAsset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'service':
+        window.open(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
 
   return (
-    <ContentFullScreen title="Views" fullScreen={fullScreenOpen} setFullScreen={false} isheader={false}>
+    <ContentFullScreen fullScreen={fullScreenOpen} setFullScreen={setFullScreenOpen}>
       <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
           <Button

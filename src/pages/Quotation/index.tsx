@@ -38,27 +38,26 @@ import axios, { CancelTokenSource } from 'axios';
 const Quotation = () => {
   const types = [
     {
-      key: `My ${routes.quotation.title}`,
+      key: `My ${sidebarResource?.quotation}`,
       value: 1
     },
     {
-      key: `All ${routes.quotation.title}`,
+      key: `All ${sidebarResource?.quotation}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.quotation.title);
+  const renderedFrom = camelCase(sidebarResource?.quotation);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quotation));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -92,14 +91,14 @@ const Quotation = () => {
               <>
                 {moment(row.original?.estimateEndDate).isBefore(moment(), 'day') && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} Expired`} enterTouchDelay={0} arrow placement="top">
+                    <HtmlTooltip title={`${resources?.quotation?.titleSingular} Expired`} enterTouchDelay={0} arrow placement="top">
                       <Warning className=" cursor-pointer text-[22px] md:text-[14px]" fontSize="small" color="error" />
                     </HtmlTooltip>
                   </Box>
                 )}
                 {isDateWithinNext15Days(row.original?.estimateEndDate) && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} about to renew`} enterTouchDelay={0} arrow placement="top">
+                    <HtmlTooltip title={`${resources?.quotation?.titleSingular} about to renew`} enterTouchDelay={0} arrow placement="top">
                       <span className=" block cursor-pointer text-yellow-600 dark:text-yellow-500">
                         <Help className=" text-[22px] md:text-[14px]" fontSize="small" />
                       </span>
@@ -293,14 +292,6 @@ const Quotation = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
-  };
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
   };
@@ -331,7 +322,13 @@ const Quotation = () => {
       <>
         <MenuItem
           onClick={() => {
-            showConfirmBox();
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -343,7 +340,7 @@ const Quotation = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.quotation]} />
+        <CustomBreadCrumbs routes={[{ ...routes?.quotation, title: resources?.quotation?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.quotation}
           module="quotation"
@@ -398,17 +395,11 @@ const Quotation = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.quotation?.title?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.quotationNumber}` : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

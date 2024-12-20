@@ -37,11 +37,11 @@ const DynamicForm = () => {
 
   const DynamicFormType = [
     {
-      key: `My ${resource}`,
+      key: `My ${resourceLabel?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${resource}`,
+      key: `All ${resourceLabel?.titlePlural}`,
       value: 2
     }
   ];
@@ -274,6 +274,11 @@ const DynamicForm = () => {
     return (
       <MenuItem
         onClick={() => {
+          if (selectedRecords.length === 1){
+            setDeleteRecord(selectedRecords[0]);
+            }else{
+              setDeleteRecord(null)
+            }
           setShowDeleteConfirmBox(true);
         }}
       >
@@ -285,7 +290,7 @@ const DynamicForm = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resourceLabel, path: `/${route}` }]} />
+        <CustomBreadCrumbs routes={[{ title: resourceLabel?.titlePlural, path: `/${route}` }]} />
         <ImportExportLinks
           permissions={permissions[renderedFrom]}
           module={renderedFrom}
@@ -344,7 +349,7 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${resource?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resource?.toLowerCase()} : ${deleteRecord.dynamicNumber}` : `selected ${resource?.toLowerCase()}`} ?`}              
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

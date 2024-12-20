@@ -59,7 +59,7 @@ const Quotation = ({
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const isMobileScreen = useMediaQuery('(max-width: 767px)');
@@ -428,7 +428,6 @@ const Quotation = ({
               isBulkedit: false,
               showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
             });
-
           } else {
             const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
@@ -608,7 +607,7 @@ const Quotation = ({
       {invoiceStep ? (
         <Box p={2}>
           <PreviewDownload
-            fileName={`${routes.repairOrder.title}-${repairOrderData?.repairOrderNumber}`}
+            fileName={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.repairOrderNumber}`}
             resource={sidebarResource.repairOrder}
             referenceId={repairOrderData?._id}
             columns={columns}

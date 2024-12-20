@@ -21,14 +21,14 @@ import CreateProductCategory from './CreateProductCategory';
 import axios, { CancelTokenSource } from 'axios';
 
 const ProductCategory = () => {
-  const renderedFrom = camelCase(routes?.productCategory.title);
+  const renderedFrom = camelCase(sidebarResource.productCategory);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -188,7 +188,11 @@ const ProductCategory = () => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -201,10 +205,10 @@ const ProductCategory = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.productCategory]} />
+        <CustomBreadCrumbs routes={[{ ...routes.productCategory, title: resources?.productCategory?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.productCategory}
-          module={routes.productCategory.title}
+          module={resources?.productCategory?.titlePlural}
           api={productCategory.api}
           afterImportCompleted={() => {
             fetchData();
@@ -253,7 +257,8 @@ const ProductCategory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.productCategory?.title?.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productCategory?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.name || ''}` : `selected ${resources?.productCategory?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

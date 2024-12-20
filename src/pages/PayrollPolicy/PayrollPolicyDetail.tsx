@@ -24,7 +24,7 @@ const PayrollPolicyDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [payrollPolicyData, setPayrollPolicyData] = useState(null);
@@ -103,7 +103,7 @@ const PayrollPolicyDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.payrollPolicy, { title: payrollPolicyData?.payrollPolicyName }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.payrollPolicy, title: resources?.payrollPolicy?.titlePlural }, { title: payrollPolicyData?.payrollPolicyName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -114,11 +114,6 @@ const PayrollPolicyDetail = () => {
                 </Button>
               )}
               {permissions?.payrollPolicy?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              {/* <ActivityButton
-                referenceId={planningData?._id}
-                resource={ACTIVITY_RESOURCE.payrollPolicy}
-                resourceLabel={planningData?.planningNumber}
-              /> */}
             </>
           </Box>
         </Box>
@@ -162,7 +157,7 @@ const PayrollPolicyDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.payrollPolicy?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${resources?.payrollPolicy?.titleSingular?.toLowerCase()} : ${payrollPolicyData?.payrollPolicyName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -36,8 +36,8 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
   for (const row of rowDef) {
     const ignoredRows = ['title', 'linkTitle', 'tooltip'];
     const isRowDataPresent = data ? Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false) : false;
-    const isRowExternalLink = row.type === 'link' && (Object.hasOwn(row, 'target') && row.target === '_blank');
-    
+    const isRowExternalLink = row.type === 'link' && Object.hasOwn(row, 'target') && row.target === '_blank';
+
     switch (true) {
       case ignoredRows.includes(row.type):
         break;
@@ -73,9 +73,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column,
+  column
 }) => {
-  const { data, count, loading, page, filterQuery, rowDef, refreshDataCount } = state;
+  const { data, count, loading, page, filterQuery, rowDef, selectedRecords, refreshDataCount } = state;
 
   const isInitialLoading = loading[column] === undefined || data[column] === undefined;
 
@@ -85,6 +85,17 @@ const RenderColumns: React.FC<colDataInterface> = ({
   const resetIndex = useRef(0);
   const listRef = useRef<any>(null);
 
+  const cardOnSelect = (data) => {
+    let records: any = [...selectedRecords];
+    if (records?.find((r) => r?._id === data?._id)) {
+      records = records?.filter((r) => r?._id != data?._id);
+    } else {
+      records.push({ ...data });
+    }
+
+    dispatch({ type: 'selection', selectedRecords: [...records] });
+  };
+
   const Row = ({ index, style }) => {
     const colData = data[column][index];
 
@@ -93,6 +104,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
         key={index}
         data={colData}
         cardOnClick={cardOnClick}
+        cardOnSelect={cardOnSelect}
+        selectedRecords={selectedRecords}
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
@@ -136,7 +149,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
               <div
                 key={item}
                 style={{ maxHeight: cardHeight, height: cardHeight }}
-                className="loader-skeleton bg-[var(--dark-primary,_white)] overflow-hidden rounded-[8px] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)]"
+                className="loader-skeleton overflow-hidden rounded-[8px] bg-[var(--dark-primary,_white)] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)]"
               >
                 <div className="overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
                   <Skeleton variant="text" width="100px" height="16px" />

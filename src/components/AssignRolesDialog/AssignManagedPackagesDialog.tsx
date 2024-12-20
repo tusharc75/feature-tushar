@@ -11,9 +11,10 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { useData } from 'src/StateProvider/Provider';
 
 const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmitting = false }) => {
-  const renderedFrom = `${camelCase(routes.managedPackages?.title)}`;
+  const renderedFrom = `${camelCase(sidebarResource?.managedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -21,6 +22,10 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -108,7 +113,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Assign ${routes.managedPackages.title}`}
+        title={`Add ${resources?.managedPackages?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}

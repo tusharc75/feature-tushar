@@ -19,7 +19,7 @@ import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const CreateWorkFlow = () => {
   const {
-    state: { permissions, user }
+    state: { permissions, resources }
   }: any = useData();
 
   const history = useHistory();
@@ -59,7 +59,7 @@ const CreateWorkFlow = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workflow, { title: workFlowData ? workFlowData.workflowName : '' }]}
+              routes={[{ ...routes.workflow, title: resources?.workflow?.titlePlural }, { title: workFlowData ? workFlowData.workflowName : '' }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 history.push({ pathname: path });
@@ -83,9 +83,9 @@ const CreateWorkFlow = () => {
                         fullWidth
                         margin="dense"
                         value={workFlowData.workflowName || ''}
-                        // onChange={(e) => {
-                        //   setWorkFlowName(e.target.value.trimStart());
-                        // }}
+                      // onChange={(e) => {
+                      //   setWorkFlowName(e.target.value.trimStart());
+                      // }}
                       />
                     </Grid>
                     <Grid item xs={6} md={4}>
@@ -157,7 +157,7 @@ const CreateWorkFlow = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <DynamicTabs workflowId = {id} resource = {workFlowData?.workflowResoure?.optionValue} />
+                  <DynamicTabs workflowId={id} resource={workFlowData?.workflowResoure?.optionValue} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Notifications resource={workFlowData?.workflowResource?.optionValue} id={id} />

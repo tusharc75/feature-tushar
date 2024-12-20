@@ -31,20 +31,21 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import axios, { CancelTokenSource } from 'axios';
 
 const BulkAssetCreation = () => {
+  let renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
+  const {
+    state: { user, permissions, selectedEntity, resources }
+  }: any = useData();
+
   const types = [
     {
-      key: `My ${routes.bulkAssetCreation.title}`,
+      key: `My ${resources?.bulkAssetCreation?.titlePlural}`,
       value: 1
     },
     {
-      key: `All ${routes.bulkAssetCreation.title}`,
+      key: `All ${resources?.bulkAssetCreation?.titlePlural}`,
       value: 2
     }
   ];
-  let renderedFrom = camelCase(routes.bulkAssetCreation?.title);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -247,6 +248,11 @@ const BulkAssetCreation = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -259,10 +265,10 @@ const BulkAssetCreation = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.bulkAssetCreation]} />
+        <CustomBreadCrumbs routes={[{ ...routes.bulkAssetCreation, title: resources?.bulkAssetCreation?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.bulkAssetCreation}
-          module={routes.bulkAssetCreation.title}
+          module={resources?.bulkAssetCreation?.titlePlural}
           api={bulkAssetCreation.api}
           afterImportCompleted={() => {
             fetchData();
@@ -332,10 +338,9 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-            deleteRecord?._id ? deleteRecord?.baNumber : ''
-          } ? `}
-          onClose={() => {
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.baNumber}` : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`} ?`}          
+            onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
