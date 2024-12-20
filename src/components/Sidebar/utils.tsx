@@ -40,9 +40,9 @@ export const staticSidebarData = (user: any, permissions: any, isOffline: boolea
   ];
   if (permissions?.dashboard?.isRead && !isOffline) {
     data.push({
-      name: `Dashboards`,
+      name: `Dashboard`,
       link: '/dashboards',
-      sectionName: `Dashboards`,
+      sectionName: `Dashboard`,
       items: null,
       icon: <MdOutlineDashboard size={20} />
     });
