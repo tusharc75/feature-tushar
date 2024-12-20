@@ -60,7 +60,7 @@ const SerializedAsset = ({
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -216,7 +216,8 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : alloweOperation &&
+            ) : alloweOperation && allowedToEdit &&
+              repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
               ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&

@@ -38,17 +38,6 @@ import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const types = [
-  {
-    key: 'My Contacts',
-    value: 1
-  },
-  {
-    key: 'All Contacts',
-    value: 2
-  }
-];
-
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -56,25 +45,17 @@ export default function Contact(props) {
     state: { user, selectedEntity, permissions, resources },
     dispatch: entityDispatch
   }: any = useData();
-  const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute },
-    account
-  } = props;
+  const { contact: { contactApi, contactResource, contactPermission, contactRoute } } = props;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource[contactResource]));
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [singleContactDelete, setSingleContactDelete] = useState({
-    id: null,
-    show: false,
-    contactedName: ''
-  });
 
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName
   });
+
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: permissions[contactResource]?.isCreate,
     isUpdate: permissions[contactResource]?.isUpdate,
@@ -87,6 +68,17 @@ export default function Contact(props) {
   const [entities, setEntities] = useState([]);
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
+
+  const types = [
+    {
+      key: `My ${resources[contactResource]?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources[contactResource]?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   const renderedFrom = camelCase(contactResource);
 
@@ -452,7 +444,6 @@ export default function Contact(props) {
               {...{
                 contactPermissions,
                 selectedRecords,
-                setShowDeleteWarningConfirmBox,
                 setShowDeleteConfirmBox,
                 user,
                 handleAccessToPortal,
@@ -592,7 +583,6 @@ export default function Contact(props) {
 const ActionMenuItems = ({
   contactPermissions,
   selectedRecords,
-  setShowDeleteWarningConfirmBox,
   setShowDeleteConfirmBox,
   user,
   handleAccessToPortal,
@@ -607,13 +597,9 @@ const ActionMenuItems = ({
     <>
       {contactPermissions?.isDelete && (
         <MenuItem
-          disabled={selectedRecords?.length === 0}
+          disabled={selectedRecords?.every((e => e?.canDelete)) ? false : true}
           onClick={() => {
-            if (selectedRecords?.some((d) => d.canDelete === false)) {
-              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-            } else {
-              setShowDeleteConfirmBox(true);
-            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -638,24 +624,20 @@ const ActionMenuItems = ({
         <MenuItem
           disabled={selectedRecords?.length === 0}
           onClick={() => {
-            if (selectedRecords?.some((d) => d.isUpdate === false)) {
-              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-            } else {
-              if (selectedRecords?.length) {
-                let entities = [];
-                selectedRecords?.map((current) => {
-                  if (current?.entityId) {
-                    entities = [...entities, current?.entityId];
-                  }
-                  if (current?.restentity) {
-                    let restEntities = current?.restentity.map((o) => o?.optionValue);
-                    entities = [...entities, ...restEntities];
-                  }
-                });
-                setEntities([...entities]);
-              }
-              setShowEntityDialog(true);
+            if (selectedRecords?.length) {
+              let entities = [];
+              selectedRecords?.map((current) => {
+                if (current?.entityId) {
+                  entities = [...entities, current?.entityId];
+                }
+                if (current?.restentity) {
+                  let restEntities = current?.restentity.map((o) => o?.optionValue);
+                  entities = [...entities, ...restEntities];
+                }
+              });
+              setEntities([...entities]);
             }
+            setShowEntityDialog(true);
           }}
         >
           Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />

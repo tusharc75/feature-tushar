@@ -38,19 +38,8 @@ import { createFieldServiceOrderFlow } from './walkmeSteps';
 let serviceOrderTimeout;
 
 const ServiceOrder = () => {
-  const types = [
-    {
-      key: `My ${sidebarResource?.fieldServiceOrder}`,
-      value: 1
-    },
-    {
-      key: `All ${sidebarResource?.fieldServiceOrder}`,
-      value: 2
-    }
-  ];
 
   const { setWalkmeData } = useSetWalkmeData();
-
   const renderedFrom = camelCase(sidebarResource?.fieldServiceOrder);
 
   const toastConfig = useContext(CustomToastContext);
@@ -70,6 +59,17 @@ const ServiceOrder = () => {
   const { generateColumns, checkStaticField } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const types = [
+    {
+      key: `My ${resources?.fieldServiceOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.fieldServiceOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     setUpindexDB();
