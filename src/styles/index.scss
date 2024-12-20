@@ -4750,3 +4750,35 @@ td.google-visualization-orgchart-node {
 .rbc-agenda-empty {
   display: none;
 }
+
+.btn-theme-outline-v1 {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: 1px solid var(--new_theme_color);
+  color: var(--new_theme_color);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 22px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  transition:
+    background 0.3s,
+    color 0.3s;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  outline-color: var(--new_theme_color);
+  &:hover {
+    background: var(--new_theme_color);
+    color: white;
+  }
+  &:disabled {
+    background: transparent;
+    color: var(--new_theme_color);
+    opacity: 0.6;
+    cursor: auto;
+    pointer-events: none;
+  }
+}

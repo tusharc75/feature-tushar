@@ -1,27 +1,27 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import DescriptionIcon from '@material-ui/icons/Description';
-import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import axios, { CancelTokenSource } from 'axios';
+import React, { useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns } from 'src/components/CustomReactTable';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
-import axios, { CancelTokenSource } from 'axios';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
-const GridView = ({ renderedFrom, state, dispatch, status, filterQuery, permissions }) => {
+export type GridViewRef = {
+  refreshGrid: () => void;
+};
+
+const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, status, filterQuery, permissions, tableHead = null }, ref) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -31,10 +31,7 @@ const GridView = ({ renderedFrom, state, dispatch, status, filterQuery, permissi
     state: { user }
   }: any = useData();
 
-  const { page, limit, sorting, selectedRecords, filters } = state;
-
-  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { page, limit, sorting, filters } = state;
   const [columns, setColumns] = useState(null);
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -219,109 +216,31 @@ const GridView = ({ renderedFrom, state, dispatch, status, filterQuery, permissi
       });
   };
 
-  const handleCompleteService = () => {
-    setIsSubmitting(true);
-    const data = selectedRecords
-      ?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
-      ?.map((_s) => ({
-        workOrder: _s?.workOrderId,
-        service: _s?.materialId,
-        uniqueId: _s?._id,
-        status: WORKORDER_SERVICE_STATUS.completed
-      }));
-    axiosInstance()
-      .put(`${workOrder.api}/service/work-orders-services-status`, data)
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        setShowServiceCompleteConfirmBox(false);
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowServiceCompleteConfirmBox(true);
-          }}
-          disabled={
-            selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
-              ? false
-              : true
-          }
-        >
-          Complete Service(s)
-        </MenuItem>
-      </>
-    );
-  };
+  useImperativeHandle(ref, () => ({
+    refreshGrid() {
+      fetchData();
+    }
+  }));
 
   return (
     <>
-      <Box>
-        <DetailsPageHeader
-          isAddButtonVisible={false}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: status !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
-          rightSideContents={
-            user?.user?.brandPolicy?.workOrderStepDataImport && (
-              <ImportExportMenu
-                permissions={permissions}
-                module={sidebarResource.workOrderTechnician}
-                api={`work-order-technician`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                disabled={selectedRecords.length !== 1}
-                additionalParams={`${
-                  selectedRecords[0]?.repairOrderId
-                    ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
-                    : `productionOrder=${selectedRecords[0]?.productionOrderId}`
-                }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
-              />
-            )
-          }
-          hasXpadding
-        />
+      <div className="[&_.table-container-v1>div]:mt-0">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 300px)'}
             columns={columns}
+            topLeftSlot={tableHead}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </Box>
-      {showServiceCompleteConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isSubmitting}
-          open={showServiceCompleteConfirmBox}
-          message={`Are you sure you want to Complete this Service(s)`}
-          onClose={() => {
-            setShowServiceCompleteConfirmBox(false);
-          }}
-          onOk={handleCompleteService}
-        />
-      )}
+      </div>
+
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
@@ -347,6 +266,6 @@ const GridView = ({ renderedFrom, state, dispatch, status, filterQuery, permissi
       )}
     </>
   );
-};
+});
 
 export default GridView;
