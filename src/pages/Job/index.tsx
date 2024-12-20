@@ -1,12 +1,9 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import AppsIcon from '@material-ui/icons/Apps';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ViewListIcon from '@material-ui/icons/ViewList';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -25,7 +22,6 @@ import {
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
-  // getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -329,11 +325,11 @@ const Job = () => {
     return (
       <MenuItem
         onClick={() => {
-          if (selectedRecords.length === 1){
+          if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-            }else{
-              setDeleteRecord(null)
-            }
+          } else {
+            setDeleteRecord(null)
+          }
           showConfirmBox();
         }}
       >
@@ -419,7 +415,7 @@ const Job = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${singleJobDelete?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}              
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${singleJobDelete?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

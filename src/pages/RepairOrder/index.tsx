@@ -22,7 +22,6 @@ import CustomReactTable, {
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
@@ -126,8 +125,8 @@ const RepairOrder = () => {
               aria-label="Delete"
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -349,19 +348,19 @@ const RepairOrder = () => {
             }}
           />
         )}
-         {showDeleteConfirmBox && (
+        {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairOrderNumber}` : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`} ?`}
-            onClose={() =>{
+            onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
             }}
             okBtnLoading={deleteLoading}
             onOk={handleDeleteRepairOrder}
           />
-          )}
+        )}
       </CustomContainer>
     </section>
   );
