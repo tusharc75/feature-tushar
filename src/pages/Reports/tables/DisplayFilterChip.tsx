@@ -2,7 +2,9 @@ import { IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { camelCase, startCase, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
+import { ResourceColumn } from 'src/pages/Reports/types';
 
 type Dates = {
   field: string;
@@ -26,12 +28,16 @@ type Object = {
   order: number;
   default: boolean;
 };
+
+type FilterTerm = { [key: string]: '$in' | '$nin' };
 type DisplayFilterChipProps = {
   deepFilters: Filter[];
   filterByIds: Filter[];
+  resourceColumns: ResourceColumn[];
   setDeepFilters: React.Dispatch<React.SetStateAction<any[]>>;
   setFilterByIds: React.Dispatch<React.SetStateAction<any[]>>;
   fetchResourceData: (deepFilters?: Filter[], filterByIds?: Filter[]) => void;
+  filterTerm: FilterTerm;
 };
 
 const textClassName = 'text-[12px] font-medium leading-[14px] text-[--primary] line-clamp-1';
@@ -47,16 +53,32 @@ const buttonStyle: React.CSSProperties = {
 const chipClassName =
   'relative max-w-[200px] rounded-[6px] bg-[--new-theme-secondary-color] p-[5px_7px] pr-[26px] [border:1px_solid_var(--new-theme-secondary-border-color)]';
 
-const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDeepFilters, setFilterByIds }: DisplayFilterChipProps) => {
+const SPLIT_SIGN = ' =|= ';
+const DisplayFilterChip = ({
+  deepFilters,
+  filterByIds,
+  resourceColumns = [],
+  filterTerm = {},
+  fetchResourceData,
+  setDeepFilters,
+  setFilterByIds
+}: DisplayFilterChipProps) => {
   const uniqueFilters = useMemo(() => uniqBy([...deepFilters, ...filterByIds], (d) => d.field), [deepFilters, filterByIds]);
   const [filters, setFilters] = useState<{ dates: Dates[]; otherData: Filter[] }>({ dates: [], otherData: [] });
+  const colNameMap = useMemo(() => {
+    const map: { [key: string]: string } = {};
+    for (const col of resourceColumns) {
+      map[col.fieldData.fieldName] = col.fieldData.fieldLabel;
+    }
+    return map;
+  }, [resourceColumns]);
 
   const createFiltersData = useCallback(() => {
     const otherData = [],
       dateObj = {};
     uniqueFilters?.forEach((d) => {
       if (d.field.startsWith('from_') || d.field.startsWith('to_')) {
-        const title = startCase(d.field.replace('from_', '').replace('to_', ''));
+        const title = d.field.replace('from_', '').replace('to_', '');
         dateObj[title] = dateObj[title] ? `${dateObj[title]} - ${d.term}` : d.term;
       } else {
         otherData.push(d);
@@ -85,16 +107,27 @@ const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDee
   return (
     <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-100px)]">
       {filters.otherData?.map((d) => {
+        const sign = filterTerm[d.field] === '$nin' ? '≠' : '=';
         if (typeof d.term === 'string') {
-          return <RenderSringType key={d.field} data={d as Dates} handleClearFilter={handleClearFilter} />;
+          return <RenderSringType sign={sign} colNameMap={colNameMap} key={d.field} data={d as Dates} handleClearFilter={handleClearFilter} />;
         }
         if (Array.isArray(d.term) && typeof d.term[0] === 'string') {
-          return <RenderStringArray key={d.field} data={d as FilterStringArray} handleClearFilter={handleClearFilter} />;
+          return (
+            <RenderStringArray
+              sign={sign}
+              colNameMap={colNameMap}
+              key={d.field}
+              data={d as FilterStringArray}
+              handleClearFilter={handleClearFilter}
+            />
+          );
         }
-        return <RenderObjectArray key={d.field} data={d as FilterObjectArray} handleClearFilter={handleClearFilter} />;
+        return (
+          <RenderObjectArray sign={sign} colNameMap={colNameMap} key={d.field} data={d as FilterObjectArray} handleClearFilter={handleClearFilter} />
+        );
       })}
       {filters.dates?.map((d) => {
-        return <RenderDates key={d.field} data={d} handleClearFilter={handleClearFilter} />;
+        return <RenderDates sign={''} colNameMap={colNameMap} key={d.field} data={d} handleClearFilter={handleClearFilter} />;
       })}
     </div>
   );
@@ -102,62 +135,106 @@ const DisplayFilterChip = ({ deepFilters, filterByIds, fetchResourceData, setDee
 
 export default DisplayFilterChip;
 
-const RenderSringType = ({ data, handleClearFilter }: { data: Dates; handleClearFilter: (keys: string[]) => void }) => {
-  const title = startCase(data.field);
+type ChipProps<D> = { data: D; handleClearFilter: (keys: string[]) => void; colNameMap: { [key: string]: string }; sign: React.ReactNode };
+
+const RenderSringType = <D extends Dates>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
   if (!data?.term) return null;
   return (
-    <div className={cn(chipClassName)} title={data.term}>
-      <span className={cn(textClassName)}>
-        {title}: {data.term}
-      </span>
-      <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-        <Close fontSize="inherit" />
-      </IconButton>
-    </div>
+    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term}>
+      <div className={cn(chipClassName)}>
+        <span className={cn(textClassName)}>
+          {colNameMap[data.field]}&nbsp;{sign}&nbsp;{data.term}
+        </span>
+        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+          <Close fontSize="inherit" />
+        </IconButton>
+      </div>
+    </Tooltip>
   );
 };
-const RenderDates = ({ data, handleClearFilter }: { data: Dates; handleClearFilter: (keys: string[]) => void }) => {
+const RenderDates = <D extends Dates>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
   if (!data?.term) return null;
+
   return (
-    <div className={cn(chipClassName)} title={data.term}>
-      <span className={cn(textClassName)}>
-        {data.field}: {data.term}
-      </span>
-      <IconButton
-        size="small"
-        style={buttonStyle}
-        onClick={() => handleClearFilter([`from_${camelCase(data.field)}`, `to_${camelCase(data.field)}`])}
-      >
-        <Close fontSize="inherit" />
-      </IconButton>
-    </div>
+    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term}>
+      <div className={cn(chipClassName)}>
+        <span className={cn(textClassName)}>
+          {colNameMap[data.field]}&nbsp;{sign}&nbsp;
+          {data.term}
+        </span>
+        <IconButton
+          size="small"
+          style={buttonStyle}
+          onClick={() => handleClearFilter([`from_${camelCase(data.field)}`, `to_${camelCase(data.field)}`])}
+        >
+          <Close fontSize="inherit" />
+        </IconButton>
+      </div>
+    </Tooltip>
   );
 };
-const RenderStringArray = ({ data, handleClearFilter }: { data: FilterStringArray; handleClearFilter: (keys: string[]) => void }) => {
-  const title = startCase(data.field);
+const RenderStringArray = <D extends FilterStringArray>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
   if (data?.term?.length === 0) return null;
   return (
-    <div className={cn(chipClassName)} title={data.term.join(', ')}>
-      <span className={cn(textClassName)}>
-        {title}: {data.term.join(', ')}
-      </span>
-      <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-        <Close fontSize="inherit" />
-      </IconButton>
-    </div>
+    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term.join(SPLIT_SIGN)}>
+      <div className={cn(chipClassName)}>
+        <span className={cn(textClassName)}>
+          {colNameMap[data.field]}&nbsp;{sign}&nbsp;
+          {data.term.join(', ')}
+        </span>
+        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+          <Close fontSize="inherit" />
+        </IconButton>
+      </div>
+    </Tooltip>
   );
 };
-const RenderObjectArray = ({ data, handleClearFilter }: { data: FilterObjectArray; handleClearFilter: (keys: string[]) => void }) => {
-  const title = startCase(data.field);
+const RenderObjectArray = <D extends FilterObjectArray>({ data, handleClearFilter, colNameMap, sign }: ChipProps<D>) => {
   if (data?.term?.length === 0) return null;
   return (
-    <div className={cn(chipClassName)} title={data.term?.map?.((d) => d?.optionLabel).join(', ') || ''}>
-      <span className={cn(textClassName)}>
-        {title}: {data.term?.map?.((d) => d?.optionLabel).join(', ') || ''}
-      </span>
-      <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
-        <Close fontSize="inherit" />
-      </IconButton>
-    </div>
+    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term?.map?.((d) => d?.optionLabel).join(SPLIT_SIGN) || ''}>
+      <div className={cn(chipClassName)}>
+        <span className={cn(textClassName)}>
+          {colNameMap[data.field]}&nbsp;{sign}&nbsp;
+          {data.term?.map?.((d) => d?.optionLabel).join(', ') || ''}
+        </span>
+        <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>
+          <Close fontSize="inherit" />
+        </IconButton>
+      </div>
+    </Tooltip>
+  );
+};
+
+const Tooltip = ({
+  value,
+  sign,
+  label,
+  children
+}: {
+  value: string;
+  sign: '=' | '≠' | '';
+  label: string;
+  children: React.ReactElement<any, any>;
+}) => {
+  const valueArr = useMemo(() => value.split(SPLIT_SIGN), [value]);
+  return (
+    <HtmlTooltip
+      title={
+        <div className={cn('flex w-[200px] flex-col p-2 text-center')}>
+          {sign && (
+            <span className="mx-auto mb-2 block max-w-fit rounded-md bg-gray-700 px-3 py-1 text-xs">{sign === '=' ? 'Include' : 'Exclude'}</span>
+          )}
+          {label && <h6 className="mb-1 border-b pb-1 text-sm font-semibold ">{label}</h6>}
+          <ul className={cn('flex-grow space-y-1 overflow-y-auto  text-xs', valueArr.length > 1 ? 'mt-1 list-disc pl-4 text-left' : 'list-none')}>
+            {valueArr.map((d) => (
+              <li>{d}</li>
+            ))}
+          </ul>
+        </div>
+      }
+    >
+      {children}
+    </HtmlTooltip>
   );
 };
