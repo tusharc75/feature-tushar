@@ -32,16 +32,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import axios, { CancelTokenSource } from 'axios';
 
 const WorkOrder = () => {
-  const types = [
-    {
-      key: `My ${sidebarResource?.workOrder}`,
-      value: 1
-    },
-    {
-      key: `All ${sidebarResource?.workOrder}`,
-      value: 2
-    }
-  ];
+
 
   let renderedFrom = camelCase(sidebarResource?.workOrder);
 
@@ -63,6 +54,17 @@ const WorkOrder = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [alloweToCreate, setAlloweToCreate] = useState(false);
+
+  const types = [
+    {
+      key: `My ${resources?.workOrder?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.workOrder?.titlePlural}`,
+      value: 2
+    }
+  ];
 
   useEffect(() => {
     fetchGridColumns();
@@ -267,11 +269,11 @@ const WorkOrder = () => {
       <MenuItem
         disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
         onClick={() => {
-          if (selectedRecords.length === 1){
+          if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-            }else{
-              setDeleteRecord(null)
-            }
+          } else {
+            setDeleteRecord(null)
+          }
           setIsConformDialogVisible(true);
         }}
       >
