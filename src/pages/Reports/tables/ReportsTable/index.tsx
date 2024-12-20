@@ -229,6 +229,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
       let filterQuery = `page=${page}&`;
       let deepFilter = [];
+      let newDeepFilter = [...deepFiltersP];
 
       if (!isExport) {
         filterQuery = `${filterQuery}limit=${limit}&`;
@@ -241,6 +242,12 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
 
       if (!isObjectEmpty(filters)) {
+        for (let i = 0; i < deepFiltersP.length; i++) {
+          const tempFilter = deepFiltersP[i];
+          if (filters[tempFilter.field]) {
+            newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+          }
+        }
         Object.keys(filters).forEach((field) => {
           deepFilter.push({
             field: field,
@@ -301,7 +308,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
       }
-      return `?${filterQuery}`;
+
+      return { query: `?${filterQuery}`, deepFilter: newDeepFilter };
     },
     [deepFilters, filterByIds, filterTerm, filters, limit, page, resourceColumns, resourceStartCase, search, sorting]
   );
@@ -310,7 +318,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
       setShowGrid(true);
 
-      let filterQuery = getFilter(false, deepFiltersP, filterByIdsP);
+      let { query, deepFilter } = getFilter(false, deepFiltersP, filterByIdsP);
+      setDeepFilters(deepFilter);
 
       if (cancelTokenSource) {
         cancelTokenSource.cancel();
@@ -318,11 +327,11 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       cancelTokenSource = axios.CancelToken.source();
       dispatch({ type: 'loading', loading: true });
 
-      let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
+      let api = `/report${routes[resourceCamelCase].path}${query}`;
       if (resourceCamelCase === 'quotes') {
-        api = `/report/quote-builder/${filterQuery}`;
+        api = `/report/quote-builder/${query}`;
       } else {
-        api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
+        api = `/report${routes[resourceCamelCase].path}${query}`;
       }
 
       axiosInstance()
@@ -363,7 +372,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
         }
       }
     }
-    let filterQuery = getFilter(true);
+    let { query: filterQuery } = getFilter(true);
     let api = null;
     if (resourceCamelCase === 'quotes') {
       api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;

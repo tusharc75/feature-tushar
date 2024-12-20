@@ -4,13 +4,43 @@ import { kebabCase } from 'lodash';
 import { useState } from 'react';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
 
+const LazyImage = ({ src, alt }: { src: string; alt?: string }) => {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className="relative">
+      {!loaded && <div className="absolute inset-0 h-full w-full bg-gray-300 animate-pulse rounded"></div>}
+      <img
+        src={src}
+        alt={alt || 'Image'}
+        loading="lazy"
+        className={`transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+      />
+    </div>
+  );
+};
+
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
   const [zoomedImage, setZoomedImage] = useState(null);
+
   const handleClick = (e) => {
     if (e.target.tagName === 'IMG') {
       setZoomedImage(e.target);
     }
+  };
+
+  const renderContent = (content: string) => {
+    const regex = /<img[^>]+src="([^">]+)"[^>]*>/g;
+    return content.split(regex).map((part, index) => {
+      const match = regex.exec(content);
+      if (match) {
+        return <LazyImage key={index} src={match[1]} alt={match[2] || 'Image'} />;
+      }
+      return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />;
+    });
   };
 
   return (
@@ -23,31 +53,15 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
         <div className="mx-auto flex w-full flex-grow flex-wrap p-2">
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
-              <>
-                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="scroll-m-[calc(var(--manual-head-height)+20px)]">
-                  <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
-                  <div
-                    className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
-                    dangerouslySetInnerHTML={{ __html: e.content }}
-                    onClick={handleClick}
-                  ></div>
+              <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="scroll-m-[calc(var(--manual-head-height)+20px)]">
+                <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
+                <div
+                  className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
+                  onClick={handleClick}
+                >
+                  {renderContent(e.content)}
                 </div>
-                {e.subSections?.length > 0 &&
-                  e.subSections.map((subSection, i) => (
-                    <div
-                      key={subSection._id}
-                      id={kebabCase(`${subSection.sectionName}-section-id`)}
-                      className="scroll-m-[calc(var(--manual-head-height)+20px)]"
-                    >
-                      <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
-                      <div
-                        className="prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full &_img]:cursor-pointer"
-                        onClick={handleClick}
-                        dangerouslySetInnerHTML={{ __html: subSection.content }}
-                      ></div>
-                    </div>
-                  ))}
-              </>
+              </div>
             ))}
           </div>
           <div className="basis-full px-4 lg:basis-1/4">

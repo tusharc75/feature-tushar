@@ -76,7 +76,7 @@ import ReceivingServices from './ReceivingServices';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
-import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
+import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/ChangePreviousAssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
 import WarningIcon from '@material-ui/icons/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
@@ -2728,7 +2728,7 @@ const ReceivingTicket = ({
         />
       )}
       {openAssetDataDialog && (
-        <AssetDataDialog
+        <ChangePreviousAssetDataDialog
           onClose={() => {
             setOpenAssetDataDialog(false);
           }}
