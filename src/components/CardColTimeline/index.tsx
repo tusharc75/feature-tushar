@@ -111,8 +111,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
               }
             >
               <div className="min-h-full rounded-[8px] bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px]">
-                <Typography className={styles.colTitle}>
-                  <span>
+                <h6 className={styles.colTitle}>
+                  <span className="absolute left-2">
                     <Checkbox
                       size="small"
                       checked={
@@ -129,8 +129,10 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                       }}
                     />
                   </span>
-                  {col} ({count[col] || 0})
-                </Typography>
+                  <span className="pl-9">
+                    {col} ({count[col] || 0})
+                  </span>
+                </h6>
                 <RenderColumns
                   column={col}
                   cardOnClick={cardOnClick}

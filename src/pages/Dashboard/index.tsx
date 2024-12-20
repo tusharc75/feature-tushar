@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import placeholder_img from 'src/assets/PerformanceTuning.png';
 import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
-import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
+import AssetStats from './AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
 import { camelCase, set } from 'lodash';

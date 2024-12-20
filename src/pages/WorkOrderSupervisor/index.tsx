@@ -1,6 +1,6 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Box, Button, IconButton, IconButtonProps, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore, MoreVert } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
@@ -17,25 +17,31 @@ import CardColTimeline, { datarowInterface, useCardReducer } from 'src/component
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import IconButtonTabs from 'src/components/IconButtonTabs';
+import {
+  MATERIAL_SUB_TYPE,
+  WORKORDER_SERVICE_STATUS,
+  cn,
+  sidebarResource,
+  workOrder,
+  workOrderColormap,
+  workOrderSupervisor
+} from 'src/constants/helpers';
 import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import { MATERIAL_SUB_TYPE, WORKORDER_SERVICE_STATUS, cn, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 
-import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
 import { camelCase, uniqBy } from 'lodash';
-import { useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { colormap } from 'src/pages/WorkOrderSupervisor/constants';
+import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
 
 const LIMIT = 25;
 
@@ -371,7 +377,7 @@ const WorkOrderSupervisor = () => {
       {
         label: (
           <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
             {WORKORDER_SERVICE_STATUS.pending}
           </span>
         ),
@@ -381,7 +387,7 @@ const WorkOrderSupervisor = () => {
       {
         label: (
           <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
             {WORKORDER_SERVICE_STATUS.inProgress}
           </span>
         ),
@@ -391,7 +397,7 @@ const WorkOrderSupervisor = () => {
       {
         label: (
           <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', colormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
             {WORKORDER_SERVICE_STATUS.completed}
           </span>
         ),
@@ -497,7 +503,7 @@ const WorkOrderSupervisor = () => {
                         }}
                       >
                         <span className="flex items-center gap-2">
-                          <span className={cn('block h-2 w-2 rounded-full', colormap[tableViewStatus].indicator)} />
+                          <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[tableViewStatus].indicator)} />
                           Status: {tableViewStatus}
                         </span>
                       </ButtonMenu>
@@ -543,8 +549,8 @@ const WorkOrderSupervisor = () => {
                   value={viewType}
                 />
                 <HtmlTooltip title={'Refresh'}>
-                  <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
-                    <RefreshIcon />
+                  <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
+                    <RefreshIcon fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
               </div>
