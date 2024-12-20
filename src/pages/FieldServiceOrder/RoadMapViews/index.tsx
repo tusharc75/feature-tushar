@@ -55,8 +55,6 @@ function ServiceOrderViews({ serviceData }) {
         ])}`
       );
        const invoices = permissions?.invoice?.isRead && await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`) ;
-      // const invoices = permissions?.invoice?.isRead ? await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`) : {};
-      // const invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`);
 
       var xPosition = 0;
       var flowEdge: any[] = [];
