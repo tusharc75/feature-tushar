@@ -1,6 +1,6 @@
 import { useMediaQuery } from '@material-ui/core';
 import React from 'react';
-import { LayoutActions, LayoutState } from 'src/pages/ReportsNew/Layout/types';
+import { LayoutActions, LayoutState } from 'src/pages/Reports/Layout/types';
 
 const initialState: LayoutState = {
   isSidebarOpen: true,

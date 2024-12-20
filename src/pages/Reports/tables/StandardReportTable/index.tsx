@@ -31,9 +31,9 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
-import AverageCostHistory from 'src/pages/ReportsNew/tables/AverageCostHistory';
-import DisplayFilterChip from 'src/pages/ReportsNew/tables/DisplayFilterChip';
-import PadData from 'src/pages/ReportsNew/tables/PadData';
+import AverageCostHistory from 'src/pages/Reports/tables/AverageCostHistory';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import PadData from 'src/pages/Reports/tables/PadData';
 import {
   CreditDebitRenderer,
   CreditDebitTypeRenderer,
@@ -43,9 +43,9 @@ import {
   SerialNumberRenderer,
   ServiceRenderer,
   UnitNameRenderer
-} from 'src/pages/ReportsNew/tables/StandardReportTable/helperComponents';
-import SendMailMenu from 'src/pages/ReportsNew/tables/StandardReportTable/SendMailMenu';
-import { TableCommonProps } from 'src/pages/ReportsNew/types';
+} from 'src/pages/Reports/tables/StandardReportTable/helperComponents';
+import SendMailMenu from 'src/pages/Reports/tables/StandardReportTable/SendMailMenu';
+import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 let cancelTokenSource = null;
@@ -241,7 +241,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   };
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-
     let filterQuery = ``;
     let deepFilter = [];
 
@@ -284,7 +283,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
     }
 
-    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -310,7 +310,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
-      deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+      deepFiltersP
+        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
         ?.forEach((ele) => {
           filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
         });
@@ -522,18 +523,18 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const getFilteredColumn = (column) => {
     let tempColumn = column;
     if (resourceCamelCase === 'dailyVolumeReport') {
-      const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise')
+      const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise');
       if (!dayWiseFilter || (dayWiseFilter && dayWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
       }
-      const padWiseFilter = deepFilters?.find((e) => e.field === 'padWise')
+      const padWiseFilter = deepFilters?.find((e) => e.field === 'padWise');
       if (padWiseFilter && padWiseFilter?.term === 'Yes') {
         tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor));
       }
       return tempColumn;
     }
     if (resourceCamelCase === 'volumeReport') {
-      const unitWiseFilter = deepFilters?.find((e) => e.field === 'unitWise')
+      const unitWiseFilter = deepFilters?.find((e) => e.field === 'unitWise');
       if (!unitWiseFilter || (unitWiseFilter && unitWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['asset', 'padName', 'customerAccount']?.includes(e.accessor));
       }
@@ -605,7 +606,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}

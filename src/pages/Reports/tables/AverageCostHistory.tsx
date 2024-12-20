@@ -12,13 +12,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomDialogTransition, dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
-import { CreditDebitRenderer } from 'src/pages/ReportsNew/tables/StandardReportTable/helperComponents';
+import { CreditDebitRenderer } from 'src/pages/Reports/tables/StandardReportTable/helperComponents';
 import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'product_price_history';
 
 const AverageCostHistory = ({ handleClose, product, productName, deepFilters, filterByIds }) => {
-
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
     state: { user, resources }
@@ -47,7 +46,7 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    const warehouseField = filterByIds?.find((e) => e.field === 'warehouse')
+    const warehouseField = filterByIds?.find((e) => e.field === 'warehouse');
     if (warehouseField) {
       deepFilter = `${deepFilter}&warehouse=${warehouseField?.term?.map((d) => d.optionValue)}`;
     }

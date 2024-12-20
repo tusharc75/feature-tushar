@@ -198,11 +198,7 @@ import RepairOrder from './pages/RepairOrder';
 import RepairOrderDetails from './pages/RepairOrder/RepairOrderDetails';
 import RepairType from './pages/RepairType';
 import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
-import Report from './pages/Report';
-import StandardReportView from './pages/Report/StandardReport';
 import CustomReport from './pages/ReportCustom';
-import CustomReports from './pages/ReportCustom/CustomReport';
-import ReportMaster from './pages/ReportMaster';
 import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
 import ResourceDoaRequest from './pages/ResourceDoaRequest';
@@ -279,7 +275,7 @@ import { VITE_APP_ENV } from 'src/config';
 import PackageInventory from 'src/pages/PackageInventory';
 import UserManual from './pages/UserManual';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
-import ReportsCenter from 'src/pages/ReportsNew';
+import ReportsCenter from 'src/pages/Reports';
 
 var notificationInterval: any = null;
 
@@ -793,24 +789,12 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}*`}>
               <ReportsCenter />
             </PrivateRoute>
-            {/* <PrivateRoute exact path={`${routes.reports.path}`}>
-              <ReportMaster />
-            </PrivateRoute> */}
-            {/* <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
-              <Report />
-            </PrivateRoute> */}
-            {/* <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
-              <StandardReportView />
-            </PrivateRoute> */}
-            <PrivateRoute exact path={`/schedule-report`}>
-              <ScheduleReport />
-            </PrivateRoute>
             <PrivateRoute exact path={`/custom-report`}>
               <CustomReport />
             </PrivateRoute>
-            {/* <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
-              <CustomReports />
-            </PrivateRoute> */}
+            <PrivateRoute exact path={`/schedule-report`}>
+              <ScheduleReport />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
             </PrivateRoute>

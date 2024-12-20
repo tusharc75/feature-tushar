@@ -1,5 +1,5 @@
-import Section from 'src/pages/ReportsNew/SidebarContent/Section';
-import { UseReport } from 'src/pages/ReportsNew/types';
+import Section from 'src/pages/Reports/SidebarContent/Section';
+import { UseReport } from 'src/pages/Reports/types';
 
 type SidebarContentProps = {
   state: UseReport;

@@ -1,7 +1,7 @@
 import { cn } from 'src/constants/helpers';
-import Content from 'src/pages/ReportsNew/Layout/Content';
-import Sidebar from 'src/pages/ReportsNew/Layout/Sidebar';
-import useLayout from 'src/pages/ReportsNew/Layout/useLayout';
+import Content from 'src/pages/Reports/Layout/Content';
+import Sidebar from 'src/pages/Reports/Layout/Sidebar';
+import useLayout from 'src/pages/Reports/Layout/useLayout';
 
 const Layout = ({ sidebarContent, children, sidebarHead }) => {
   const state = useLayout();

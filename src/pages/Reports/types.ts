@@ -1,5 +1,5 @@
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import useReport from 'src/pages/ReportsNew/useReport';
+import useReport from 'src/pages/Reports/useReport';
 
 export type Report = {
   title?: string;
