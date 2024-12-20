@@ -10,12 +10,11 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, getObjKeysWithValues, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { read, utils, writeFile } from 'xlsx';
 
-const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids, onSuccess, loading }) => {
+const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids, onSuccess, loading }) => {
   const {
     state: { resources }
   }: any = useData();
@@ -24,7 +23,6 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
   const [initialData, setInitialData] = useState({ fields: [], values: { assetData: [] } });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
-  const [decimalFields, setDecimalFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -45,30 +43,17 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     const fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
     const values = { assetData: [] };
-    let tempAssetData = [];
-    const decimalField = [];
 
+    let tempAssetData = [];
     assetData?.forEach((data) => {
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
-      if (statusPolicy?.sumDecimalField || statusPolicy?.autoIncrementDecimalField) {
-        fieldsDataForUpdate?.forEach((e) => {
-          if (e?.type === 'decimal' && statusPolicy?.sumDecimalField) {
-            decimalField.push(e.fieldName);
-            initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
-            initialValues[e.fieldName] = 0;
-          } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
-            initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
-          }
-        });
-      }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
       initialValues['productName'] = data?.product?.optionLabel;
-
       tempAssetData.push(initialValues);
     });
     values['assetData'] = tempAssetData;
-    setDecimalFields(decimalField);
+
     fieldsDataForUpdate?.forEach((element) => {
       if (element?.lookup && staticLookUpFilters[element?.fieldName] && isArray(staticLookUpFilters[element?.fieldName])) {
         element.option = element.option?.filter((ele) => staticLookUpFilters[element?.fieldName]?.includes(ele.optionValue));
@@ -209,11 +194,7 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
     values?.assetData?.forEach((ele) => {
       const obj: any = { _id: ele._id };
       statusPolicy?.fields?.forEach((fieldName) => {
-        if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
-          obj[fieldName] = parseFloat(ele[fieldName] || 0) + parseFloat(ele[`${fieldName}_orignal`] || 0);
-        } else {
-          obj[fieldName] = ele[fieldName];
-        }
+        obj[fieldName] = ele[fieldName];
       });
       data.push({ ...obj });
     });
@@ -261,7 +242,7 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={resources?.serializedAsset?.titleSingular}
+                title={resources?.serializedAsset?.titlePlural}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -394,4 +375,4 @@ const AssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilters = {}, ids,
   );
 };
 
-export default AssetDataDialog;
+export default ChangePreviousAssetDataDialog;
