@@ -189,10 +189,6 @@ const CreateFormBuilder = () => {
       alert('Please enter Resource label');
       return;
     }
-    if (homePageLabel === '') {
-      alert('Please enter Home Page label');
-      return;
-    }
     let data = [];
     let order = 0;
     section.forEach((_section) => {
@@ -415,7 +411,6 @@ const CreateFormBuilder = () => {
                       variant="outlined"
                       type="text"
                       label="Resource Label (Plural)"
-                      required={true}
                       name="homePageLabel"
                       fullWidth
                       margin="dense"
@@ -432,7 +427,13 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" required margin="dense" fullWidth />}
+                      renderInput={(params) => <TextField
+                        {...params}
+                        label="Section Name"
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth />
+                      }
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);

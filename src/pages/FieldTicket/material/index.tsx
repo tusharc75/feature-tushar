@@ -293,6 +293,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       });
       data = [...response?.data?.data?.material, ...costData];
     }
+
+    const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+
     let rows = data?.filter((d: any) => !d.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -315,9 +318,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             ? parent?.packageDetail?.packageDescription || ''
             : parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-      parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       parent.canDelete = parent.canDelete ?? true;
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generateNestedData(data, parent, isPriceRequired);
     });
     if (rows?.length) {
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
@@ -331,7 +334,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     setRefreshChild(!refreshChild);
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, isPriceRequired) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -339,9 +342,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
       _subRow.qty = _subRow.qty * parent.qty;
-      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.canDelete = _subRow.canDelete ?? true;
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow, isPriceRequired);
     });
     return subRows;
   };
