@@ -21,9 +21,11 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 
-const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
 const ScheduleReport = () => {
+
+  const renderedFrom = camelCase(sidebarResource.scheduleReport);
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
@@ -135,7 +137,7 @@ const ScheduleReport = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -212,11 +214,11 @@ const ScheduleReport = () => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null)
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
