@@ -297,6 +297,9 @@ const User: FC = () => {
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
 
+          console.log(allRegionalWideRoles)
+          console.log(allAssignedEntities)
+
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
@@ -305,8 +308,8 @@ const User: FC = () => {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
             isBrandAdmin: u.userType === userType.brandAdmin,
-            assignedEntity: allAssignedEntities?.map((e) => { return { optionLabel: e?.entityName, optionValue: e?._id } }),
-            regionalWideRole: allRegionalWideRoles?.map((e) => { return { optionLabel: e?.name, optionValue: e?._id } }),
+            assignedEntity: allAssignedEntities?.filter((e) => e)?.map((e) => { return { optionLabel: e?.entityName, optionValue: e?._id } }),
+            regionalWideRole: allRegionalWideRoles?.filter((e) => e)?.map((e) => { return { optionLabel: e?.name, optionValue: e?._id } }),
           };
           return res;
         });

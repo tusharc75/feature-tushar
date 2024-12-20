@@ -441,17 +441,16 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
             : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.manualEntry
-              ? parent.detail
-              : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -480,17 +479,7 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
-      // parent.hideSelection =
-      //   parent.type === MATERIAL_TYPE.service && parent?.serviceLog
-      //     ? true
-      //     : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
-      //       ? true
-      //       : parent?.status
-      //         ? true
-      //         : parent?.invoiceCreated
-      //           ? true
-      //           : false;
+        data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.canDelete =
         parent.type === MATERIAL_TYPE.service && parent?.serviceLog
           ? false
@@ -503,13 +492,13 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-        !parent.serializedProduct &&
-        parent.assetQty === 0 &&
-        parent?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -559,15 +548,14 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.product
-              ? _subRow.productDetail?.productName
-              : ''
-      } `;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -589,13 +577,13 @@ const Productpackage = ({
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-        !_subRow.serializedProduct &&
-        _subRow.assetQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          !_subRow.serializedProduct &&
+          _subRow.assetQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
