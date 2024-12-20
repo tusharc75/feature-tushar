@@ -4,28 +4,26 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import routes from 'src/components/Helpers/Routes';
-import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition, dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CreditDebitRenderer, ReferenceRenderer } from 'src/pages/ReportsNew/tables/StandardReportTable/helperComponents';
 import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'product_price_history';
 
-const AverageCostHistory = ({ handleClose, product, productName, showPricefilter }) => {
-  const [themeColor] = useAppTheme();
-  const isDarkTheme = themeColor === 'dark';
+const AverageCostHistory = ({ handleClose, product, productName, deepFilters, filterByIds }) => {
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
+
+  const { page, limit, filters, sorting } = state;
 
   useEffect(() => {
     fetchRecords();
@@ -33,29 +31,32 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-
-    let data;
-    let query = '';
-    if (showPricefilter?.warehouse || showPricefilter?.fromDate) {
-      query = '?';
-      if (showPricefilter?.warehouse) {
-        query = query + `warehouse=${JSON.stringify(showPricefilter?.warehouse)}&`;
-      }
-      if (showPricefilter?.fromDate) {
-        query = query + `from=${showPricefilter?.fromDate}&to=${showPricefilter?.toDate}`;
-      }
-    }
-    const response = await axiosInstance().get(`/report/inventory-evaluation-by-product/${product}${query}`);
-    data = response?.data?.data;
-    let rows = data.map((u) => {
+    const queryString = getQueryString();
+    const response = await axiosInstance().get(`/history/product-ledger/${product}${queryString}`);
+    let rows = response?.data?.data?.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
       finalObject.type = capitalize(u.type);
       return finalObject;
     });
-    dispatch({ type: 'initialize', data: rows, count: rows.length });
+    dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    const warehouseField = filterByIds?.find((e) => e.field === 'warehouse')
+    if (warehouseField) {
+      deepFilter = `${deepFilter}&warehouse=${warehouseField?.term?.map((d) => d.optionValue)}`;
+    }
+    if (deepFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    return deepFilter;
   };
 
   const curr = user?.user?.brandCurrency || '';
@@ -92,88 +93,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       Header: 'Reference',
       disableFilters: true,
       disableSortBy: false,
-      Cell: ({ row }) =>
-        row?.original?.reference ? (
-          row?.original?.referenceType === 'Purchase Order' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Transfer Inventory' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Transfer Asset' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Sales Order' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Serialized Asset' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Rental Job' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Work Order' ? (
-            <Link
-              className="link"
-              title={row?.original?.reference}
-              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
-              target="_blank"
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : (
-            row?.original?.reference
-          )
-        ) : row?.original?.referenceType === 'Product Inventory' ? (
-          <p>Manual Entry</p>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => ReferenceRenderer(row)
     },
     {
       accessor: 'type',
@@ -192,31 +112,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       Header: 'Quantity',
       disableFilters: true,
       disableSortBy: false,
-      Cell: ({ row }) =>
-        row?.original?.qty ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor:
-                row?.original?.type === 'Credit'
-                  ? isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
-                  : row?.original?.type === 'Debit'
-                    ? isDarkTheme
-                      ? 'hsl(1 100% 65% / 1)'
-                      : '#FFCCCB'
-                    : ''
-            }}
-          >
-            <h5 className="text-truncate" title={row?.original?.qty}>
-              {row?.original?.qty}
-            </h5>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => CreditDebitRenderer(row, 'qty')
     },
     {
       accessor: 'price',
@@ -237,35 +133,11 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       Header: `Amount ${curr}`,
       disableFilters: true,
       disableSortBy: false,
-      Cell: ({ row }) =>
-        row?.original?.totalPrice ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor:
-                row?.original?.type === 'Credit'
-                  ? isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
-                  : row?.original?.type === 'Debit'
-                    ? isDarkTheme
-                      ? 'hsl(1 100% 65% / 1)'
-                      : '#FFCCCB'
-                    : ''
-            }}
-          >
-            <h5 className="text-truncate" title={row?.original?.totalPrice}>
-              {row?.original?.type === 'Debit' ? `-${row?.original?.totalPrice}` : row?.original?.totalPrice}
-            </h5>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
+      cell: ({ row }) => CreditDebitRenderer(row, 'totalPrice')
     },
     {
       accessor: 'warehouse',
-      Header: routes.warehouse.title,
+      Header: resources?.warehouse?.titleSingular,
       Cell: ({ row }) =>
         row?.original?.warehouse ? (
           <h5 className="text-truncate" title={row?.original?.warehouse}>
@@ -305,7 +177,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                 state={state}
                 dispatch={dispatch}
                 renderedFrom={renderedFrom}
-                isClientSideGrid={true}
                 refreshGrid={fetchRecords}
                 hideSelection={true}
                 hideAction={true}
