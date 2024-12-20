@@ -27,7 +27,7 @@ interface Props {
 
 const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM, kpi, kpiFilters, fetchKpiFilters }: Props) => {
   const {
-    state: { selectedEntity }
+    state: { resources }
   } = useData();
   const [inputValues, setInputValues] = useState({});
   const [selectedKpiFilter, setSelectedKpiFilter] = useState(null);
@@ -153,7 +153,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   errors={false}
                   touched={false}
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
-                  fieldLabel={routes[filter.key] ? routes[filter.key]?.title : filter.title}
+                  fieldLabel={resources[filter.key] ? resources[filter.key]?.titlePlural : filter.title}
                   onChange={(e, val) => {
                     handleChange(filter.key, val);
                     setInputValues((prevValues) => ({ ...prevValues, [filter.key]: val }));
@@ -180,7 +180,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                       {...params}
                       margin="none"
                       size="small"
-                      label={routes[filter.key] ? routes[filter.key]?.title : filter.title}
+                      label={resources[filter.key] ? resources[filter.key]?.titlePlural : filter.title}
                       variant="outlined"
                     />
                   )}
