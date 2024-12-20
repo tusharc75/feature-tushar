@@ -8,7 +8,7 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { camelCase, startCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -20,15 +20,17 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
 
-const renderedFrom = 'custom-report';
 
 const CustomReport = () => {
+
+  const renderedFrom = 'custom-report';
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { selectedEntity, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,7 +102,7 @@ const CustomReport = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon color="error" fontSize='small' />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -231,11 +233,11 @@ const CustomReport = () => {
                     >
                       <MenuItem
                         onClick={() => {
-                          if (selectedRecords.length === 1){
+                          if (selectedRecords.length === 1) {
                             setDeleteRecord(selectedRecords[0]);
-                            }else{
-                              setDeleteRecord(null)
-                            }
+                          } else {
+                            setDeleteRecord(null)
+                          }
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
@@ -269,7 +271,7 @@ const CustomReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.reportCustom?.titleSingular?.toLowerCase()} : ${deleteRecord?.customReportName || ''}` : `selected ${resources?.reportCustom?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.customReportName || ''}` : `selected records`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
