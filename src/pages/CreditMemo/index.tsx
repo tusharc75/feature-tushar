@@ -18,7 +18,6 @@ import routes from './../../components/Helpers/Routes';
 import ManageCreditMemo from './ManageCreditMemo';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@material-ui/icons';
 
@@ -223,11 +222,11 @@ const CreditMemo = () => {
         <MenuItem
           disabled={!selectedRecords?.every((d) => d?.canDelete)}
           onClick={() => {
-            if (selectedRecords.length === 1){ 
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null)
+            }
             showConfirmBox();
           }}
         >
