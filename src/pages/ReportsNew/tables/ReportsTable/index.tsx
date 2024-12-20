@@ -408,13 +408,12 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => {}}
+              afterImportCompleted={() => { }}
               onlyExport={true}
             />
           </>
         )}
       </div>
-
       {columns ? (
         <CustomReactTable
           topLeftSlot={

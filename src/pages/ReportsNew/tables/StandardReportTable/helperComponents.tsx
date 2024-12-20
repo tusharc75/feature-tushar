@@ -88,6 +88,15 @@ export const ReferenceRenderer = (row) => {
           >
             {row?.original?.reference}
           </Link>
+        ) : row?.original?.referenceType === sidebarResource.subcontractAssembly ? (
+          <Link
+            className="link"
+            target="_blank"
+            title={row?.original?.reference}
+            to={`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`}
+          >
+            {row?.original?.reference}
+          </Link>
         ) : (
           row?.original?.reference
         )
@@ -133,17 +142,17 @@ export const SerialNumberRenderer = (row) => {
   );
 };
 
-export const CreditDebitRenderer = (row) => {
+export const CreditDebitRenderer = (row, key) => {
   return (
     <div
       className={cn(
-        row?.original?.type === 'credit' && 'bg-[#90ee90] dark:bg-[hsl(120_73%_40%_/_1)]',
-        row?.original?.type === 'debit' && 'bg-[#FFCCCB] dark:bg-[hsl(1_100%_65%_/_1)]'
+        row?.original?.type?.toLowerCase() === 'credit' && 'bg-[#90ee90] dark:bg-[hsl(120_73%_40%_/_1)]',
+        row?.original?.type?.toLowerCase() === 'debit' && 'bg-[#FFCCCB] dark:bg-[hsl(1_100%_65%_/_1)]'
       )}
     >
       {row?.original?.qty ? (
-        <h5 className="text-truncate" title={row?.original?.qty}>
-          {row?.original?.type === 'debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+        <h5 className="text-truncate" title={row?.original?.[key]}>
+          {row?.original?.type?.toLowerCase() === 'debit' ? `-${row?.original?.[key]}` : row?.original?.[key]}
         </h5>
       ) : (
         <NoDataCell />
