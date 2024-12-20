@@ -263,8 +263,8 @@ const WorkOrderTechnician = () => {
                 value={viewType}
               />
               <HtmlTooltip title={'Refresh'}>
-                <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
-                  <RefreshIcon />
+                <IconButton size="small" onClick={onClickRefreshIcon} style={{ width: 32, height: 32 }}>
+                  <RefreshIcon fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             </div>

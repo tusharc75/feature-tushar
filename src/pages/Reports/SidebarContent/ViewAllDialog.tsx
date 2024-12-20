@@ -5,7 +5,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { TbStar, TbStarFilled } from 'react-icons/tb';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
-import { SectionProps } from 'src/pages/ReportsNew/SidebarContent/Section';
+import { SectionProps } from 'src/pages/Reports/SidebarContent/Section';
 
 type ViewAllDialogProps<D> = {
   onClose: () => void;

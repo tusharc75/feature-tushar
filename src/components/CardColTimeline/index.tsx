@@ -124,7 +124,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                         if (e?.target?.checked) {
                           dispatch({ type: 'selection', selectedRecords: [...uniqBy([...selectedRecords, ...data[col]], '_id')] });
                         } else {
-                          dispatch({ type: 'selection', selectedRecords: selectedRecords?.filter((r) => r?.status != col) });
+                          dispatch({ type: 'selection', selectedRecords: selectedRecords?.filter((r) => r?.status !== col) });
                         }
                       }}
                     />

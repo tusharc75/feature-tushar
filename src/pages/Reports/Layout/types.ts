@@ -1,5 +1,5 @@
 import React from 'react';
-import useLayout from 'src/pages/ReportsNew/Layout/useLayout';
+import useLayout from 'src/pages/Reports/Layout/useLayout';
 
 export type LayoutState = {
   isSidebarOpen: boolean;
