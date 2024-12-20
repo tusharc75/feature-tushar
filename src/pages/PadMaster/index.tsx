@@ -140,7 +140,7 @@ const PadMaster = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {row.original.canDelete && (
+        {row?.original?.canDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
               size="small"

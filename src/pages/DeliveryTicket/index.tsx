@@ -66,7 +66,6 @@ const DeliveryTicket = () => {
   });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
   const [columns, setColumns] = useState(null);
 
@@ -274,13 +273,6 @@ const DeliveryTicket = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setIsConformDialogVisible(true);
-    }
-  };
 
   const handleDelete = async () => {
     setDeleteLoading(true);
@@ -384,13 +376,6 @@ const DeliveryTicket = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-          {showDeleteWarningConfirmBox ? (
-            <MessageDialog
-              open={showDeleteWarningConfirmBox}
-              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-              onClose={() => setShowDeleteWarningConfirmBox(false)}
-            />
-          ) : null}
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}

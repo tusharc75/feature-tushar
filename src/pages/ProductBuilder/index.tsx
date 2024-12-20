@@ -35,7 +35,6 @@ const ProductBuilder = () => {
   const [isCreate, setIsCreate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [okButtonLoading] = useState(false);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -193,33 +192,18 @@ const ProductBuilder = () => {
     }
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setShowDeleteConfirmBox(true);
-      if (row) {
-        setDeleteRecord({ id: row.id, name: row.name });
-      }
-    } else {
-      const notYou = selectedRecords.filter((d) => d.createdById !== user?._id);
-      if (notYou.length) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setShowDeleteConfirmBox(true);
-      }
-    }
-  };
-
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
               }else{
                 setDeleteRecord(null)
               }
-            showConfirmBox(null);
+              setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -259,13 +243,6 @@ const ProductBuilder = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
