@@ -54,6 +54,7 @@ const chipClassName =
   'relative max-w-[200px] rounded-[6px] bg-[--new-theme-secondary-color] p-[5px_7px] pr-[26px] [border:1px_solid_var(--new-theme-secondary-border-color)]';
 
 const SPLIT_SIGN = ' =|= ';
+
 const DisplayFilterChip = ({
   deepFilters,
   filterByIds,
@@ -65,12 +66,14 @@ const DisplayFilterChip = ({
 }: DisplayFilterChipProps) => {
   const uniqueFilters = useMemo(() => uniqBy([...deepFilters, ...filterByIds], (d) => d.field), [deepFilters, filterByIds]);
   const [filters, setFilters] = useState<{ dates: Dates[]; otherData: Filter[] }>({ dates: [], otherData: [] });
-  const colNameMap = useMemo(() => {
+  const { map: colNameMap, colTypeMap } = useMemo(() => {
     const map: { [key: string]: string } = {};
+    const colTypeMap: { [key: string]: string } = {};
     for (const col of resourceColumns) {
       map[col.fieldData.fieldName] = col.fieldData.fieldLabel;
+      colTypeMap[col.fieldData.fieldName] = col.fieldData.type;
     }
-    return map;
+    return { map, colTypeMap };
   }, [resourceColumns]);
 
   const createFiltersData = useCallback(() => {
@@ -104,10 +107,12 @@ const DisplayFilterChip = ({
     [fetchResourceData, setDeepFilters, setFilterByIds, deepFilters, filterByIds]
   );
 
+  console.log(colTypeMap);
+
   return (
     <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-100px)]">
       {filters.otherData?.map((d) => {
-        const sign = filterTerm[d.field] === '$nin' ? '≠' : '=';
+        const sign = ['checkBox'].includes(colTypeMap[d.field]) ? '=' : filterTerm[d.field] === '$nin' ? '≠' : '=';
         if (typeof d.term === 'string') {
           return <RenderSringType sign={sign} colNameMap={colNameMap} key={d.field} data={d as Dates} handleClearFilter={handleClearFilter} />;
         }
@@ -213,7 +218,7 @@ const Tooltip = ({
   children
 }: {
   value: string;
-  sign: '=' | '≠' | '';
+  sign: '=' | '≠' | '' | '=';
   label: string;
   children: React.ReactElement<any, any>;
 }) => {
@@ -222,7 +227,7 @@ const Tooltip = ({
     <HtmlTooltip
       title={
         <div className={cn('flex w-[200px] flex-col p-2 text-center')}>
-          {sign && (
+          {sign && sign !== '=' && (
             <span className="mx-auto mb-2 block max-w-fit rounded-md bg-gray-700 px-3 py-1 text-xs">{sign === '=' ? 'Include' : 'Exclude'}</span>
           )}
           {label && <h6 className="mb-1 border-b pb-1 text-sm font-semibold ">{label}</h6>}
