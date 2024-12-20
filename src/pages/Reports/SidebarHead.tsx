@@ -1,5 +1,5 @@
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { UseReport } from 'src/pages/ReportsNew/types';
+import { UseReport } from 'src/pages/Reports/types';
 
 type SidebarHeadProps = {
   state: UseReport;

@@ -218,7 +218,9 @@ export const VirtualTable = forwardRef(function (
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
                     <tr key={footerGroup.id} className="!flex ">
-                      {virtualPaddingLeft ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} /> : null}
+                      {virtualPaddingLeft && left.length === 0 ? (
+                        <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingLeft }} />
+                      ) : null}
                       {virtualColumns.map((vc) => {
                         const header = footerGroup.headers[vc?.index];
                         if (!header) return null;
@@ -252,7 +254,9 @@ export const VirtualTable = forwardRef(function (
                           </Fragment>
                         );
                       })}
-                      {virtualPaddingRight ? <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} /> : null}
+                      {virtualPaddingRight && right.length === 0 ? (
+                        <th className="virtual-p-h" style={{ display: 'flex', width: virtualPaddingRight }} />
+                      ) : null}
                     </tr>
                   );
                 })}
