@@ -81,15 +81,23 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
   const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
-  const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
+
   const [footerData, setFooterData] = React.useState<Record<string, number>>(null);
   const [emailAttachments, setEmailAttachments] = React.useState([]);
   const [isProcessing, setIsProcessing] = React.useState(null);
   const [isSendMail, setIsSendMail] = React.useState(false);
   const [htmlContent, setHtmlContent] = React.useState(null);
-  const [selectedData, setSelectedData] = React.useState(null);
-  const [selectedResources, setSelectedResources] = React.useState([]);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  React.useEffect(() => {
+    if (showGrid && getErrors(defaultColumns, deepFilters).errorColumns.length === 0) {
+      fetchResourceData();
+    }
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -152,7 +160,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             o.cell = ({ row }) => CreditDebitTypeRenderer(row);
           }
           if (o?.accessor === 'qty') {
-            o.cell = ({ row }) => CreditDebitRenderer(row);
+            o.cell = ({ row }) => CreditDebitRenderer(row, 'qty');
           }
         }
         if (resourceCamelCase === 'fleetReport') {
@@ -223,7 +231,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       setResourceColumns(filterFields);
       if (reportConfig?.defaultColumn) {
         setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData));
-        setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
       }
       setColumns(columns);
       setIsColumnsLoading(false);
@@ -234,9 +241,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   };
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    if (!isExport) {
-      setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
-    }
+
     let filterQuery = ``;
     let deepFilter = [];
 
@@ -251,60 +256,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
-    }
-    if (selectedResources.length > 0) {
-      if (selectedData) {
-        const keys = selectedData ? Object.keys(selectedData) : [];
-        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup && selectedData[key]?.value?.length > 0);
-        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-        let filterById = idFilter.map((key) => {
-          if (key === 'warehouse') {
-            if (!isExport) {
-              setShowPricefilter((prevState) => ({
-                ...prevState,
-                warehouse: selectedData[key]?.value?.map((d: any) => d.optionValue)
-              }));
-            }
-          }
-          if (!Array.isArray(selectedData[key].value)) {
-            return { field: key, term: selectedData[key].value.optionValue };
-          }
-          return {
-            field: key,
-            term: {
-              $in: selectedData[key]?.value?.map((d: any) => d.optionValue)
-            }
-          };
-        });
-
-        forDeepFilter.forEach((key) => {
-          if (selectedData[key].type === 'checkBox') {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value ? 'Yes' : 'No'
-            });
-          } else if (selectedData[key].type === 'singleLine') {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value
-            });
-          } else if (!Array.isArray(selectedData[key].value)) {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key]?.value
-            });
-          } else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d?.optionValue || d)
-            });
-          }
-        });
-
-        if (filterById.length > 0) {
-          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-        }
-      }
     }
 
     if (!isObjectEmpty(filters)) {
@@ -333,8 +284,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
     }
 
-    const isStatusPeriod =
-      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -360,8 +310,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (isStatusPeriod && deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))) {
-      deepFiltersP
-        ?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
+      deepFiltersP?.filter((d) => d?.term && ['from_statusPeriod', 'to_statusPeriod']?.includes(d?.field))
         ?.forEach((ele) => {
           filterQuery = `${filterQuery}${ele?.field}=${ele?.term}&`;
         });
@@ -389,23 +338,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     return `?${filterQuery}`;
-  };
-
-  const generateBase64forFile = (blobData, fileName, extension) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data: any = reader.result;
-      const attachments = {
-        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-        contentType: base64data.split(';')[0].split(':')[1],
-        extension: `.${extension}`,
-        name: fileName
-      };
-      setEmailAttachments((prevState) => {
-        return [...prevState, attachments];
-      });
-    };
   };
 
   const fetchResourceData = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
@@ -494,6 +426,23 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           toastConfig.setToastConfig(err);
         }
       });
+  };
+
+  const generateBase64forFile = (blobData, fileName, extension) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      const attachments = {
+        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${extension}`,
+        name: fileName
+      };
+      setEmailAttachments((prevState) => {
+        return [...prevState, attachments];
+      });
+    };
   };
 
   const exportData = (exportType = 'excel', processType = 'excel') => {
@@ -592,33 +541,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
     return column;
   };
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  React.useEffect(() => {
-    if (showGrid && getErrors(defaultColumns, deepFilters).errorColumns.length === 0) {
-      fetchResourceData();
-    }
-  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
-
-  React.useEffect(() => {
-    if (!selectedData) return;
-    setSelectedData((prevState: any) => {
-      const dataKeys = Object.keys(prevState);
-      const selectedKeys = Object.keys(selectedResources);
-
-      if (selectedResources.length > 0 && dataKeys.length > 0) {
-        dataKeys.forEach((key) => {
-          if (selectedKeys.includes(key) && prevState?.hasOwnProperty(key)) {
-            delete prevState[key];
-          }
-        });
-      }
-      return prevState;
-    });
-  }, [selectedData, selectedResources]);
 
   useEffect(() => {
     if (emailAttachments?.length > 0 || htmlContent) {
@@ -778,7 +700,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           handleClose={() => {
             setShowPriceHistory({ open: false, product: '', productName: '' });
           }}
-          showPricefilter={showPricefilter}
+          deepFilters={deepFilters}
+          filterByIds={filterByIds}
         />
       )}
       {showPadData.open && (
