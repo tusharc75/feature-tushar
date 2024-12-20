@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, Paper } from '@material-ui/core';
-import styles from '../KpiDashboard/dashboard.module.scss';
+import styles from './dashboard.module.scss';
 
 const StaticCards = ({ chartData }: any) => {
   if (!chartData) {
