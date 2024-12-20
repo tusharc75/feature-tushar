@@ -479,11 +479,11 @@ const SerializedAsset = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null)
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -631,7 +631,7 @@ const SerializedAsset = () => {
       </>
     );
   };
-  
+
 
   const handleCertificationSupplier = async (data) => {
     const ids = selectedRecords?.map((item) => item?._id);
@@ -704,7 +704,7 @@ const SerializedAsset = () => {
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={
-            <ActionMenuItems/>
+            <ActionMenuItems />
           }
           addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
           addButtonOnclick={() => {
@@ -884,7 +884,7 @@ const LeftSideContent = ({
               />
             }
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-            label="Sublease Assets"
+            label={`Subleased ${resources?.serializedAsset?.titlePlural}`}
           />
         )}
         <FormControlLabel
@@ -899,7 +899,7 @@ const LeftSideContent = ({
             />
           }
           style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-          label={`Scrap ${resources?.serializedAsset?.titleSingular}`}
+          label={`Scrapped ${resources?.serializedAsset?.titlePlural}`}
         />
       </Fragment>
     </>

@@ -9,6 +9,7 @@ import { MdZoomOutMap } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
   fieldServiceOrder: {
@@ -36,6 +37,8 @@ function ServiceOrderViews({ serviceData }) {
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
 
+  const { state:{permissions} }:any =  useData();
+
   useEffect(() => {
     fetchData();
   }, [serviceData._id]);
@@ -51,8 +54,7 @@ function ServiceOrderViews({ serviceData }) {
           }
         ])}`
       );
-
-      const invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`);
+       const invoices = permissions?.invoice?.isRead && await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`) ;
 
       var xPosition = 0;
       var flowEdge: any[] = [];
