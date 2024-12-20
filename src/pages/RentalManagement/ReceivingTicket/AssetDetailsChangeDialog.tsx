@@ -22,7 +22,6 @@ import { CircularProgress, Typography } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isArray, isEqual, isString } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 import { useData } from 'src/StateProvider/Provider';
@@ -47,6 +46,8 @@ export default function AssetDetailsChangeDialog({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [decimalFields, setDecimalFields] = useState([]);
+  const [autoIncrementFieldNameValue, setAutoIncrementFieldNameValues] = useState({});
+
   const [allFields, setAllFields] = useState([]);
 
   const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
@@ -76,6 +77,7 @@ export default function AssetDetailsChangeDialog({
     let j = 0;
     let index = null;
     let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : '';
+    const autoIncrementFieldNameValue: any = {}
 
     assetData?.forEach((data) => {
       if (product !== data?.product?.optionValue) {
@@ -93,6 +95,7 @@ export default function AssetDetailsChangeDialog({
             initialValues[e.fieldName] = 0;
           } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
             if (!ticketType || (ticketType && ticketType !== DELIVERY_TICKET_TYPE.return)) {
+              autoIncrementFieldNameValue[`${e.fieldName}_${data?._id}`] = initialValues[e.fieldName] || 0;
               initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
             }
           }
@@ -133,6 +136,7 @@ export default function AssetDetailsChangeDialog({
     });
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
+    setAutoIncrementFieldNameValues(autoIncrementFieldNameValue);
     fieldsDataForUpdate?.forEach((element) => {
       if (element?.lookup && staticLookUpFilters[element?.fieldName] && isArray(staticLookUpFilters[element?.fieldName])) {
         element.option = element.option?.filter((ele) => staticLookUpFilters[element?.fieldName]?.includes(ele.optionValue));
@@ -391,7 +395,14 @@ export default function AssetDetailsChangeDialog({
                                   <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                     <FormTypes
                                       {...field}
-                                      fieldData={field}
+                                      fieldData={{
+                                        ...field,
+                                        isWarningTooltip: autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`]
+                                          || autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0 ? true : field?.isWarningTooltip,
+                                        warningTooltipMessage: autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`]
+                                          || autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0 ?
+                                          `Auto Increment (Previous Value ${(autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0)})` : field?.warningTooltipMessage
+                                      }}
                                       values={data}
                                       errors={(errors['assetData'] && errors['assetData'][index]) ?? {}}
                                       touched={(touched['assetData'] && touched['assetData'][index]) ?? {}}

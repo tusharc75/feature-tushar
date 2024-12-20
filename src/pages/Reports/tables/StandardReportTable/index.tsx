@@ -243,6 +243,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     let filterQuery = ``;
     let deepFilter = [];
+    let newDeepFilter = [...deepFiltersP];
 
     if (!isExport) {
       filterQuery = `page=${page}&limit=${limit}&`;
@@ -258,6 +259,13 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (!isObjectEmpty(filters)) {
+      for (let i = 0; i < deepFiltersP.length; i++) {
+        const tempFilter = deepFiltersP[i];
+        if (filters[tempFilter.field]) {
+          newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+        }
+      }
+
       Object.keys(filters).forEach((field) => {
         deepFilter.push({
           field: field,
@@ -322,7 +330,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     }
 
     if (resourceCamelCase === 'userSession') {
-      return `?column=true&${filterQuery}`;
+      return { query: `?column=true&${filterQuery}`, newDeepFilter };
     }
 
     if (isExport) {
@@ -338,12 +346,13 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
     }
 
-    return `?${filterQuery}`;
+    return { query: `?${filterQuery}`, newDeepFilter };
   };
 
   const fetchResourceData = (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
     setShowGrid(true);
-    let filterQuery = getQueryString(false, deepFiltersP, filterByIdsP);
+    const { query: filterQuery, newDeepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+    setDeepFilters(newDeepFilter);
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -455,7 +464,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     setIsProcessing(processType);
 
-    let filterQuery = getQueryString(true);
+    let { query: filterQuery } = getQueryString(true);
 
     var api = '';
     if (exportType === 'pdf') {
@@ -611,7 +620,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   exportCount={0}
                   ids={[]}
                   onlyExport={true}
-                  additionalParams={getQueryString(true)}
+                  additionalParams={getQueryString(true).query}
                 />
               ) : (
                 <>

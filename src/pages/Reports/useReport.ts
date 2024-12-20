@@ -60,7 +60,7 @@ const useReport = () => {
   } = useData();
 
   const reportList = useMemo(() => {
-    return REPORT_LIST.filter((f) => permissions[f.permission]?.isRead).map((d) => ({
+    return REPORT_LIST.filter((f) => permissions?.[f.permission]?.isRead).map((d) => ({
       ...d,
       label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title,
       route: `/reports${d.type !== 'dynamic' ? `/${kebabCase(d.key)}/` + kebabCase(d.type) : routes[d.key]?.path}`

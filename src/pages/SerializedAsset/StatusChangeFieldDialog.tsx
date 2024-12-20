@@ -30,6 +30,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     let initialValues = getObjKeysWithValues(serializedAssetData, fieldsDataForUpdate);
     const decimalField = [];
+
     if (statusPolicy?.sumDecimalField || statusPolicy?.autoIncrementDecimalField) {
       fieldsDataForUpdate?.forEach((e) => {
         if (e?.type === 'decimal' && statusPolicy?.sumDecimalField) {
@@ -38,6 +39,8 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
           initialValues[e.fieldName] = 0;
         }
         else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
+          e.isWarningTooltip = true;
+          e.warningTooltipMessage = `Auto Increment (Previous Value ${(initialValues[e.fieldName] || 0)})`
           initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
         }
       })
