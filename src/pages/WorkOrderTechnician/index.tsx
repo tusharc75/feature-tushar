@@ -2,27 +2,34 @@ import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from 
 import { Close } from '@material-ui/icons';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useData } from 'src/StateProvider/Provider';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
-import routes from 'src/components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
-import CardView from './CardView';
-import GridView from './GridView';
-import IconButtonTabs from 'src/components/IconButtonTabs';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
-import ButtonMenu from 'src/components/ButtonMenu';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { camelCase } from 'lodash';
-import { useCardReducer } from 'src/components/CardColTimeline';
-import { useTableReducer } from 'src/components/CustomReactTable';
-import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ButtonMenu from 'src/components/ButtonMenu';
+import { useCardReducer } from 'src/components/CardColTimeline';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomFilter from 'src/components/Helpers/CustomFilter';
+import routes from 'src/components/Helpers/Routes';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
+import {
+  WORKORDER_SERVICE_STATUS,
+  WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  cn,
+  sidebarResource,
+  workOrder,
+  workOrderColormap
+} from 'src/constants/helpers';
+import CardView from './CardView';
+import GridView, { GridViewRef } from './GridView';
 
 const FIELD_TO_FILTER = [
   {
@@ -71,6 +78,7 @@ const WorkOrderTechnician = () => {
   const { selectedRecords: cardSelectedRecords } = state;
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords: tableSelectedRecords } = tableState;
+  const gridViewRef = useRef<GridViewRef>();
 
   const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
 
@@ -111,8 +119,11 @@ const WorkOrderTechnician = () => {
   }, []);
 
   const onClickRefreshIcon = () => {
-    if (ref?.current) {
+    if (viewType === 'card-view') {
       ref?.current?.childFunction();
+    }
+    if (viewType === 'table-view') {
+      gridViewRef?.current?.refreshGrid();
     }
   };
 
@@ -131,7 +142,7 @@ const WorkOrderTechnician = () => {
       .then(({ data }) => {
         setIsSubmitting(false);
         setShowServiceCompleteConfirmBox(false);
-        dispatch({ type: 'selection', selectedRecords: [] });
+        resetSelectedRecords();
         onClickRefreshIcon();
       })
       .catch((error) => {
@@ -143,23 +154,64 @@ const WorkOrderTechnician = () => {
     const items = {
       disabled: selectedRecords?.length === 0,
       items: [
-        ...(['card-view']?.includes(viewType)
-          ? [
-              {
-                disabled:
-                  selectedRecords?.length &&
-                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
-                    ? false
-                    : true,
-                label: `Complete Service(s)`,
-                onClick: () => setShowServiceCompleteConfirmBox(true)
-              }
-            ]
-          : [])
+        {
+          disabled:
+            selectedRecords?.length &&
+            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              ? false
+              : true,
+          label: `Complete Service(s)`,
+          onClick: () => setShowServiceCompleteConfirmBox(true)
+        }
       ]
     };
     return items;
-  }, [selectedRecords, viewType]);
+  }, [selectedRecords]);
+
+  const statusMenuItems = useMemo(() => {
+    return [
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
+            {WORKORDER_SERVICE_STATUS.pending}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
+        value: WORKORDER_SERVICE_STATUS.pending
+      },
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
+            {WORKORDER_SERVICE_STATUS.inProgress}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
+        value: WORKORDER_SERVICE_STATUS.inProgress
+      },
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
+            {WORKORDER_SERVICE_STATUS.completed}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
+        value: WORKORDER_SERVICE_STATUS.completed
+      },
+      {
+        label: (
+          <span className="flex items-center gap-2">
+            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicator)} />
+            {WORKORDER_SERVICE_STATUS.inProgressByOther}
+          </span>
+        ),
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther,
+        value: WORKORDER_SERVICE_STATUS.inProgressByOther
+      }
+    ];
+  }, [tableViewStatus]);
 
   return (
     <Box className="main-container-v1">
@@ -175,24 +227,19 @@ const WorkOrderTechnician = () => {
               {viewType === 'table-view' && (
                 <ButtonMenu
                   showChevron={true}
-                  items={[
-                    { label: WORKORDER_SERVICE_STATUS.pending, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending },
-                    { label: WORKORDER_SERVICE_STATUS.inProgress, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress },
-                    { label: WORKORDER_SERVICE_STATUS.completed, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed },
-                    { label: WORKORDER_SERVICE_STATUS.inProgressByOther, selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther }
-                  ]}
+                  items={statusMenuItems}
                   onItemClick={(e, item) => {
-                    setTableViewStatus(item.label);
+                    setTableViewStatus(item.value);
                   }}
                 >
-                  Status: {tableViewStatus}
+                  <span className="flex items-center gap-2">
+                    <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[tableViewStatus].indicator)} />
+                    Status: {tableViewStatus}
+                  </span>
                 </ButtonMenu>
               )}
             </div>
-            <div className="flex flex-grow items-center gap-2 max-[600px]:flex-wrap">
-              <div className="flex-grow">
-                <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterQuery} />
-              </div>
+            <div className="ml-auto flex items-center gap-2">
               {viewType === 'card-view' && (
                 <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
               )}
@@ -223,31 +270,57 @@ const WorkOrderTechnician = () => {
             </div>
           </div>
           {viewType === 'card-view' && (
-            <div className="min-h-[48px]">
-              <DetailsPageHeader
-                isAddButtonVisible={false}
-                isActionButtonVisible={false}
-                isNewActionButtonVisible={selectedRecords.length > 0}
-                newActionButtonProps={newActionButtonProps}
-                actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                hasXpadding={false}
-              />
-            </div>
+            <DetailsPageHeader
+              isAddButtonVisible={false}
+              isActionButtonVisible={false}
+              isNewActionButtonVisible={selectedRecords.length > 0}
+              newActionButtonProps={newActionButtonProps}
+              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+              leftSideContents={
+                <div className="flex-grow">
+                  <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                </div>
+              }
+              hasXpadding={false}
+              hasYpadding={false}
+              className="pt-4"
+            />
           )}
         </div>
 
         {viewType === 'card-view' && (
-          <CardView state={state} dispatch={dispatch} serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />
+          <div className="pt-2">
+            <CardView state={state} dispatch={dispatch} serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />
+          </div>
         )}
         {viewType === 'table-view' && (
-          <GridView
-            renderedFrom={renderedFrom}
-            state={tableState}
-            dispatch={tableDispatch}
-            status={tableViewStatus}
-            filterQuery={filterQuery}
-            permissions={permissions?.workOrderTechnician}
-          />
+          <div className="pt-4">
+            <GridView
+              renderedFrom={renderedFrom}
+              state={tableState}
+              tableHead={
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <div className="flex-grow">
+                      <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                    </div>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                />
+              }
+              ref={gridViewRef}
+              dispatch={tableDispatch}
+              status={tableViewStatus}
+              filterQuery={filterQuery}
+              permissions={permissions?.workOrderTechnician}
+            />
+          </div>
         )}
       </Box>
       {showServiceCompleteConfirmBox && (
