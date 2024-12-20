@@ -649,6 +649,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           <CustomReactTable
             topLeftSlot={
               <DisplayFilterChip
+                filterTerm={filterTerm}
+                resourceColumns={resourceColumns}
                 deepFilters={deepFilters}
                 filterByIds={filterByIds}
                 fetchResourceData={fetchResourceData}
