@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
-import { camelCase, capitalize, isArray, isString } from 'lodash';
+import { camelCase, capitalize, isArray, isNumber, isString } from 'lodash';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -36,7 +36,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                     <TableRow key={index}>
                       <TableCell data-th="Field Name">{data?.fieldLabel}</TableCell>
                       <TableCell data-th="Old Value">
-                        {data?.oldValue ? (
+                        {data?.oldValue || data?.oldValue === 0 ? (
                           data?.type === 'date' ? (
                             moment(data?.oldValue).format(dateFormat)
                           ) : data?.type === 'gpsLocation' ? (
@@ -68,14 +68,14 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               );
                             })
                           ) : (
-                            isString(data?.oldValue) ? data?.oldValue : <NoDataCell />
+                            isString(data?.oldValue) || isNumber(data?.oldValue) ? data?.oldValue : <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
                         )}
                       </TableCell>
                       <TableCell data-th="New Value">
-                        {data?.newValue ? (
+                        {data?.newValue || data?.newValue === 0 ? (
                           data?.type === 'date' ? (
                             moment(data?.newValue).format(dateFormat)
                           ) : data?.type === 'gpsLocation' ? (
@@ -122,7 +122,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               );
                             })
                           ) : (
-                            isString(data?.newValue) ? data?.newValue : <NoDataCell />
+                            isString(data?.newValue) || isNumber(data?.oldValue) ? data?.newValue : <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -172,7 +172,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                     <TableRow key={index}>
                                       <TableCell>{data?.fieldLabel}</TableCell>
                                       <TableCell>
-                                        {data?.oldValue ? (
+                                        {data?.oldValue || data?.oldValue === 0 ? (
                                           data?.type === 'date' ? (
                                             moment(data?.oldValue).format(dateFormat)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
@@ -194,7 +194,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                         )}
                                       </TableCell>
                                       <TableCell>
-                                        {data?.newValue ? (
+                                        {data?.newValue || data?.newValue === 0 ? (
                                           data?.type === 'date' ? (
                                             moment(data?.newValue).format(dateFormat)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
