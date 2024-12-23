@@ -33,6 +33,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import ReceiveDialog from './ReceiveDialog';
+import { transferAssetMessage } from 'src/constants/messageHelpers';
 
 interface LoadingGridProps {
   permissions: any;
@@ -48,6 +49,7 @@ interface LoadingGridProps {
   canReceive: boolean;
   stepFullScreen: any;
   setAllAssetsDelivered: any;
+  setNextStepToolTip: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -63,7 +65,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     allowedToEdit,
     canReceive,
     stepFullScreen,
-    setAllAssetsDelivered
+    setAllAssetsDelivered,
+    setNextStepToolTip
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -267,6 +270,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           setNextStep(true);
         } else {
           setNextStep(false);
+          setNextStepToolTip(transferAssetMessage.deliverLoadingTicketStep);
         }
       }
 
