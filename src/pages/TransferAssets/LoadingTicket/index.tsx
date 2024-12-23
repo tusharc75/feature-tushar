@@ -225,15 +225,21 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       let assetData = result?.data?.data?.assets;
       let replaceAssetLog = result?.data?.data?.replaceAssetLog ? result?.data?.data?.replaceAssetLog : [];
       let ticketData: any = await fetchLoadingTickets();
-      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading);
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
-            assetData[j].loadingTicket = ticketData[i].ticketName;
-            assetData[j].loadingTicketId = ticketData[i]._id;
-            assetData[j].loadingTicketStatus = ticketData[i].status;
-            assetData[j].createDate = ticketData[i]?.createDate || ticketData[i]?.createdBy?.date;
-            assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
+            if(ticketData[i].ticketType === DELIVERY_TICKET_TYPE.loading){
+              assetData[j].loadingTicket = ticketData[i].ticketName;
+              assetData[j].loadingTicketId = ticketData[i]._id;
+              assetData[j].loadingTicketStatus = ticketData[i].status;
+              assetData[j].createDate = ticketData[i]?.createDate || ticketData[i]?.createdBy?.date;
+              assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
+            }
+            if(ticketData[i].ticketType === DELIVERY_TICKET_TYPE.receiving){
+              assetData[j].receivingTicket = ticketData[i].ticketName;
+              assetData[j].receivingTicketId = ticketData[i]._id;
+              assetData[j].receivingTicketStatus = ticketData[i].status;
+            }
           }
         }
       }
@@ -543,7 +549,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered)
+            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e:any)=> e.receivingTicketId))
           }
           onClick={() => {
             setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });
