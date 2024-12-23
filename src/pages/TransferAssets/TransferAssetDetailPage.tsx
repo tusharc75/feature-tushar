@@ -72,6 +72,7 @@ const TransferAssetDetailPage = () => {
   const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -277,7 +278,7 @@ const TransferAssetDetailPage = () => {
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
               <ButtonWithPulse
                 variant={'outlined'}
                 color="default"
@@ -380,6 +381,7 @@ const TransferAssetDetailPage = () => {
                 allowedToEdit={allowedToEdit || isProcessor}
                 stepFullScreen={stepFullScreen}
                 resources={resources}
+                setAllAssetsReceived={setAllAssetsReceived}
               />
             )}
           </TabPanel>
