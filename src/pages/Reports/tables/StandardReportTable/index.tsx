@@ -263,6 +263,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         const tempFilter = deepFiltersP[i];
         if (filters[tempFilter.field]) {
           newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+          deepFiltersP = newDeepFilter;
         }
       }
 

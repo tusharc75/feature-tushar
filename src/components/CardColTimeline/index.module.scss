@@ -1,16 +1,18 @@
 .singleCard {
   --card-padding: 15px;
   padding: var(--card-padding, 8px);
+  margin-inline: 6px;
   margin-bottom: 15px;
   position: relative;
   border-radius: 8px;
-  box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--dark-mode-border-color, var(--border, red));
+  border: 1px solid var(--common-border-color);
   background-color: var(--dark-primary, white);
-  transition: transform 0.2s, background 0.3s;
+  transition:
+    transform 0.2s,
+    background 0.3s;
 
   &:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
   }
 
   .passFail {
@@ -69,23 +71,13 @@
   background-color: var(--section-bg);
   padding: 14px 13px;
   z-index: 5;
-  margin-left: -6px !important;
-  margin-right: -6px !important;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
-
-  // span {
-  //   width: 20px;
-  //   height: 20px;
-  //   display: block;
-  //   border-radius: 100vmax;
-  //   background-color: var(--bg, red);
-  // }
 }
 
 .container {
-  --section-bg: var(--dark-secondary, #f1f5ff);
+  --section-bg: transparent;
   padding: 0 0px;
   height: max(74vh, 600px);
   overflow: hidden;
