@@ -7,7 +7,7 @@ import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
-import { CompletedIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
+import { CompletedIcon, InProgressByOtherIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
 import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -3823,7 +3823,7 @@ export const workOrderColormap = {
   [WORKORDER_SERVICE_STATUS.pending]: { color: 'text-[#B66A11]', background: 'bg-[#FFF1E0]', indicator: 'bg-[#B66A11]' },
   [WORKORDER_SERVICE_STATUS.inProgress]: { color: 'text-[#0273FF]', background: 'bg-[#D6F1FF]', indicator: 'bg-[#0273FF]' },
   [WORKORDER_SERVICE_STATUS.completed]: { color: 'text-[#0A983E]', background: 'bg-[#E2FDEC]', indicator: 'bg-[#0A983E]' },
-  [WORKORDER_SERVICE_STATUS.inProgressByOther]: { color: 'text-[#0273FF]', background: 'bg-[#D6F1FF]', indicator: 'bg-[#0273FF]' }
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: { color: 'text-[#6D29F6]', background: 'bg-[#D6F1FF]', indicator: 'bg-[#6D29F6]' }
 };
 
 export const workOrderIconMap = {
@@ -3831,6 +3831,6 @@ export const workOrderIconMap = {
   [WORKORDER_SERVICE_STATUS.inProgress]: <InProgressIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].color}`} />,
   [WORKORDER_SERVICE_STATUS.completed]: <CompletedIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].color}`} />,
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: (
-    <InProgressIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].color}`} />
+    <InProgressByOtherIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].color}`} />
   )
 };
