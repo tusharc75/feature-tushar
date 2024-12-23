@@ -50,7 +50,6 @@ import ManageAccountDialog from './ManageAccount/index';
 import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
-import accountClass from './account.module.scss';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -110,10 +109,8 @@ export default function AccountDetailPage(props) {
   const [quotes, setQuotes] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] = useState(false);
   const [accountFields, setAccountFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState({});
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
   const [accountHierarchyData, setAccountHierarchyData] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -132,7 +129,7 @@ export default function AccountDetailPage(props) {
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [showAtLast, setShowAtLast] = useState(false);
-  const [deleteAccount, setDeleteAccountId] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false);
 
@@ -154,18 +151,6 @@ export default function AccountDetailPage(props) {
       type: accountResource
     }
   ];
-
-  useEffect(() => {
-    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
-      setShowConfirmBox(true);
-    }
-  }, [deleteAccount]);
-
-  useEffect(() => {
-    if (deleteAccount && deleteAccount?._id && !showConfirmBox) {
-      setShowConfirmBox(true);
-    }
-  }, [deleteAccount]);
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -281,7 +266,6 @@ export default function AccountDetailPage(props) {
     const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
     data = response?.data?.data;
     setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
-    handleMainPonts(data);
     setAccountData(data);
     setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource[accountResource], data));
     setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource[accountResource], data?.owner?.optionValue));
@@ -331,19 +315,6 @@ export default function AccountDetailPage(props) {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const handleMainPonts = (data) => {
-    let mainPoints = {
-      Phone: data.phone || ''
-    };
-    if (data?.parentAccount?.optionLabel) {
-      mainPoints['Parent Account'] = data.parentAccount.optionLabel;
-    }
-    if (data?.owner?.optionLabel) {
-      mainPoints['Primary Owner'] = data.owner.optionLabel;
-    }
-    setMainPoints(mainPoints);
   };
 
   const getAccountFields = async (accountData = {}) => {
@@ -472,33 +443,26 @@ export default function AccountDetailPage(props) {
     }
   ].filter((d) => d.show);
 
-  const handleDeleteAcc = () => {
-    let deleteId = deleteAccount && deleteAccount?._id ? deleteAccount._id : accountData?._id;
-    if (deleteId) {
-      axiosInstance()
-        .put(`/${accountApi}/remove`, { ids: [deleteId] })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setDeleteAccountId({});
-          let fetchData = deleteAccount && deleteAccount?._id && deleteAccount?._id !== accountData?._id;
-          if (fetchData) {
-            fetchAccountData();
-          } else {
-            goBackToListing();
-          }
-          setShowConfirmBox(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowConfirmBox(false);
-        });
-    } else {
-      setShowConfirmBox(false);
-    }
+  const handleDeleteAccout = () => {
+    axiosInstance().put(`/${accountApi}/remove`, { ids: [deleteRecord?._id] }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      if (deleteRecord?._id !== accountData?._id) {
+        fetchAccountData();
+      } else {
+        goBackToListing();
+      }
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+      });
   };
 
   const handleApproveDisapprove = () => {
@@ -688,7 +652,12 @@ export default function AccountDetailPage(props) {
               </Button>
             )}
             {permissions && permissions[accountResource] && permissions[accountResource].isDelete && allowedToDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
+              <DeleteButton
+                text="Delete"
+                onClick={() => {
+                  setDeleteRecord(accountData)
+                  setShowDeleteConfirmBox(true)
+                }} />
             )}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
@@ -905,7 +874,8 @@ export default function AccountDetailPage(props) {
                   canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
                   canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
                   handleDelete={(data) => {
-                    setDeleteAccountId(data);
+                    setDeleteRecord(data);
+                    setShowDeleteConfirmBox(true)
                   }}
                   accountResource={accountResource}
                 />
@@ -960,13 +930,12 @@ export default function AccountDetailPage(props) {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteAccount ? `${resources?.account?.titleSingular?.toLowerCase()} :
-              ${deleteAccount?.accountName}` : `selected ${resources?.account?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName} ?`}
           onClose={() => {
             setShowDeleteConfirmBox(false);
-            setDeleteAccountId({});
+            setDeleteRecord(null);
           }}
-          onOk={handleDeleteAcc}
+          onOk={handleDeleteAccout}
         />
       ) : null}
       {showApproveDisapproveConfirmBox ? (

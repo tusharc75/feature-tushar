@@ -74,7 +74,6 @@ export default function Account(props) {
 
   const [cloneId, setCloneId] = useState('');
   const [menuType, setMenuType] = useState(options[0]);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource[accountResource]));
@@ -82,17 +81,19 @@ export default function Account(props) {
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
-  // const [singleAccountDelete, setSingleAccountDelete] = useState({
-  //   id: null,
-  //   show: false,
-  //   accountName: ''
-  // });
+
   const [singleApproveDisapproveAccount, setSingleApproveDisapproveAccount] = useState<any>({
     show: false,
     approved: false,
     id: null,
     accountName: ''
   });
+
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 });
 
   const [accountPermissions, setAccountPermissions] = useState({
@@ -255,6 +256,7 @@ export default function Account(props) {
             disabled={accountPermissions?.isDelete && row?.original?.canDelete ? false : true}
             aria-label="Delete"
             onClick={() => {
+              setDeleteRecord(row?.original)
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -389,49 +391,33 @@ export default function Account(props) {
   };
 
   const handleDeleteAccounts = async () => {
-    let selectedAccounts = selectedRecords?.map((cr) => cr._id);
-    if (selectedAccounts.length > 0) {
-      axiosInstance()
-        .put(`/${accountApi}/remove`, {
-          ids: [...selectedAccounts]
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setShowDeleteConfirmBox(false);
-          dispatch({ type: 'selection', selectedRecords: [] });
-          fetchAccounts();
-        })
-        .catch((error) => {
-          setShowDeleteConfirmBox(false);
-          toastConfig.setToastConfig(error);
-        });
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
     }
+    axiosInstance().put(`/${accountApi}/remove`, {
+      ids
+    }).then(({ data }) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchAccounts();
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
+
   };
 
-  // const handleSingleDeleteAccounts = async () => {
-  //   axiosInstance()
-  //     .put(`/${accountApi}/remove`, { ids: [singleAccountDelete.id] })
-  //     .then(({ data }) => {
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: data.message
-  //       });
-  //       dispatch({ type: 'selection', selectedRecords: [] });
-  //       fetchAccounts();
-  //     })
-  //     .catch((error) => {
-  //       toastConfig.setToastConfig(error);
-  //     })
-  //     .finally(() => {
-  //       setShowDeleteConfirmBox(false);
-  //     });
-  //   // setSingleAccountDelete({ id: null, show: false, accountName: '' });
-  // };
 
   const handleSingleApproveDisapproveAccount = () => {
     axiosInstance()
@@ -531,24 +517,23 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                  {
-                    title: 'Supplier View Template',
-                    api: `${accountApi}/items/unknown/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Supplier View Export',
-                    api: `${accountApi}/items/unknown/template?export=true${
-                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Supplier View Template',
+                  api: `${accountApi}/items/unknown/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Supplier View Export',
+                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Supplier View Import',
-                    api: `${accountApi}/items/unknown/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Supplier View Import',
+                  api: `${accountApi}/items/unknown/import`,
+                  type: 'import'
+                }
+              ]
               : [])
           ]}
         />
@@ -570,6 +555,7 @@ export default function Account(props) {
               {...{
                 accountPermissions,
                 selectedRecords,
+                setDeleteRecord,
                 setMultipleApproveDisapproveAccount,
                 setShowDeleteWarningConfirmBox,
                 setShowDeleteConfirmBox,
@@ -586,7 +572,6 @@ export default function Account(props) {
           addButtonOnclick={clickCreateNew}
           isAddButtonVisible={true}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -604,7 +589,6 @@ export default function Account(props) {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox?.show}
@@ -616,37 +600,25 @@ export default function Account(props) {
             onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
           />
         ) : null}
-
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the selected account(s) ?`}
-            onClose={() => setShowDeleteConfirmBox(false)}
+            message={`Are you sure you want to delete ${deleteRecord ?
+              `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}` :
+              `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`} ?`}
+            onClose={() => {
+              setShowDeleteConfirmBox(false)
+              setDeleteRecord(null)
+            }}
+            okBtnLoading={isSubmitting}
             onOk={handleDeleteAccounts}
           />
         ) : null}
-
-        {/* {singleAccountDelete.show ? (
-          <ConfirmationDialog
-            open={singleAccountDelete.show}
-            message={`Are you sure you want to delete the account: ${singleAccountDelete.accountName} ? `}
-            onClose={() =>
-              setSingleAccountDelete({
-                id: null,
-                show: false,
-                accountName: ''
-              })
-            }
-            onOk={handleSingleDeleteAccounts}
-          />
-        ) : null} */}
-
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -661,9 +633,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -808,6 +779,7 @@ const LeftSideContents = ({ selectedIndex, setSelectedIndex, menuOptionSelection
 const ActionMenuItems = ({
   accountPermissions,
   selectedRecords,
+  setDeleteRecord,
   setMultipleApproveDisapproveAccount,
   setShowDeleteWarningConfirmBox,
   setShowDeleteConfirmBox,
@@ -850,13 +822,14 @@ const ActionMenuItems = ({
       )}
       {accountPermissions?.isDelete && (
         <MenuItem
-          disabled={selectedRecords?.length === 0}
+          disabled={selectedRecords?.every((e => e?.canDelete)) ? false : true}
           onClick={() => {
-            if (selectedRecords?.some((d) => d.canDelete === false)) {
-              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
             } else {
-              setShowDeleteConfirmBox(true);
+              setDeleteRecord(null)
             }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}

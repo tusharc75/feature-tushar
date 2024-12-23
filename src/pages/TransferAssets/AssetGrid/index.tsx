@@ -22,6 +22,7 @@ import {
   transferAsset
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
+import { transferAssetMessage } from 'src/constants/messageHelpers';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -31,6 +32,7 @@ interface AssetsGridProps {
   renderedFrom?: string;
   allowedToEdit: boolean;
   stepFullScreen: any;
+  setNextStepToolTip: any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = ({
@@ -40,7 +42,8 @@ const AssetsGrid: FC<AssetsGridProps> = ({
   updateTransferStatus,
   transferAssetData,
   renderedFrom,
-  stepFullScreen
+  stepFullScreen,
+  setNextStepToolTip
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -192,6 +195,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
         setNextStep(true);
       } else {
         setNextStep(false);
+        setNextStepToolTip(transferAssetMessage.addSerializedAssets);
       }
 
       if (assets.length === 0 && transferAssetData?.status !== TRANSFER_ASSET_STATUS.new) {

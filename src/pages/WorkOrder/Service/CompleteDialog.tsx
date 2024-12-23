@@ -1,6 +1,4 @@
-import React from 'react';
 import { Dialog, Button, Box, TextField, Typography } from '@material-ui/core';
-
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -13,17 +11,13 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
       TransitionComponent={CustomDialogTransition}
       fullWidth
       maxWidth="sm"
-      // onClose={(e, reason) => {
-      //   if (reason !== 'backdropClick') {
-      //     handleClose()
-      //   }
-      // }}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose()
+        }
+      }}
     >
-      <CustomDialogHeader
-        title="Confirmation"
-        showRequiredLabel={false}
-        // onClose={handleClose}
-      />
+      <CustomDialogHeader title="Confirmation" showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         <Box>
           <Typography>
@@ -49,9 +43,9 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        {/* <Button variant="outlined" size="small" onClick={handleClose} color='primary'>
+        <Button variant="outlined" size="small" onClick={handleClose} color='primary'>
           Cancel
-        </Button> */}
+        </Button>
         <Button variant="contained" size="small" onClick={updateStatus} color="primary">
           Complete
         </Button>
