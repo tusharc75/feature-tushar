@@ -26,7 +26,8 @@ import {
   cn,
   sidebarResource,
   workOrder,
-  workOrderColormap
+  workOrderColormap,
+  workOrderIconMap
 } from 'src/constants/helpers';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
@@ -171,44 +172,28 @@ const WorkOrderTechnician = () => {
   const statusMenuItems = useMemo(() => {
     return [
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
-            {WORKORDER_SERVICE_STATUS.pending}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
-        value: WORKORDER_SERVICE_STATUS.pending
+        value: WORKORDER_SERVICE_STATUS.pending,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.pending]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
-            {WORKORDER_SERVICE_STATUS.inProgress}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.inProgress,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
-        value: WORKORDER_SERVICE_STATUS.inProgress
+        value: WORKORDER_SERVICE_STATUS.inProgress,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgress]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
-            {WORKORDER_SERVICE_STATUS.completed}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.completed,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
-        value: WORKORDER_SERVICE_STATUS.completed
+        value: WORKORDER_SERVICE_STATUS.completed,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].indicator)} />
-            {WORKORDER_SERVICE_STATUS.inProgressByOther}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.inProgressByOther,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther,
-        value: WORKORDER_SERVICE_STATUS.inProgressByOther
+        value: WORKORDER_SERVICE_STATUS.inProgressByOther,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgressByOther]
       }
     ];
   }, [tableViewStatus]);
@@ -233,7 +218,7 @@ const WorkOrderTechnician = () => {
                   }}
                 >
                   <span className="flex items-center gap-2">
-                    <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[tableViewStatus].indicator)} />
+                    {workOrderIconMap[tableViewStatus]}
                     Status: {tableViewStatus}
                   </span>
                 </ButtonMenu>

@@ -6,7 +6,7 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Info } from '@material-ui/icons';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase } from 'lodash';
 import TechnicianDialog from '../TechnicianDialog';
@@ -167,6 +167,7 @@ const CardView = (props, ref) => {
     <>
       <CardColTimeline
         fetchSingleColumn={fetchSingleColumn}
+        getColColors={(colName) => workOrderColormap[colName]}
         state={state}
         dispatch={dispatch}
         passFailStatus={true}
