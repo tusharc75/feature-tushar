@@ -252,7 +252,7 @@ const Entity: FC = () => {
     return (
       <>
         <MenuItem
-          disabled={permissions[entityResource]?.isDelete && selectedRecords.length ? true : false}
+          disabled={permissions[entityResource]?.isDelete && selectedRecords.length ? false : true}
           onClick={() => {
             if (selectedRecords[0] && selectedRecords[0]?._id) {
               setDeleteEntity(selectedRecords[0]);
@@ -260,8 +260,8 @@ const Entity: FC = () => {
             }
           }}
         >
-          Delete
-        </MenuItem>
+          {`Delete (${selectedRecords.length})`}
+          </MenuItem>
         <MenuItem
           disabled={!(permissions[entityResource]?.isUpdate && selectedRecords?.length)}
           onClick={() => {
