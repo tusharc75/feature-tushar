@@ -222,7 +222,7 @@ const DynamicFormDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${detailData[primaryFieldName] || resource?.toLowerCase()}  ?`}
+          message={`Are you sure you want to delete ${detailData[primaryFieldName] || resourceLabel?.titleSingular?.toLowerCase()}  ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -58,6 +58,7 @@ const DynamicForm = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
   const [columns, setColumns] = useState(null);
 
@@ -82,6 +83,10 @@ const DynamicForm = () => {
     const newColumns = generateColumns(renderedFrom, data, detailPagePath, true);
     if (newColumns?.some((ele) => ele.accessor === 'owner')) {
       setShowToggleButtons(true);
+    }
+    const primaryField = data?.find((e) => e?.fieldData?.primaryField);
+    if (primaryField) {
+      setPrimaryFieldName(primaryField?.fieldData?.fieldName);
     }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -276,11 +281,11 @@ const DynamicForm = () => {
       <MenuItem
         disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
         onClick={() => {
-          if (selectedRecords.length === 1){
+          if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-            }else{
-              setDeleteRecord(null)
-            }
+          } else {
+            setDeleteRecord(null)
+          }
           setShowDeleteConfirmBox(true);
         }}
       >
@@ -351,7 +356,8 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resource?.toLowerCase()} : ${deleteRecord.dynamicNumber}` : `selected ${resource?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}` :
+            `selected ${resourceLabel?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
