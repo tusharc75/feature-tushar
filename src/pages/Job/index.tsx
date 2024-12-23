@@ -62,14 +62,8 @@ const Job = () => {
   const [showManageJobDialog, setShowManageJobDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [singleJobDelete, setSingleJobDelete] = useState({
-    id: null,
-    show: false,
-    jobNumber: ''
-  });
   const [renderCount, setRenderCount] = useState(0);
   const [viewType, setViewType] = useState(1);
 
@@ -105,29 +99,6 @@ const Job = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleSingleDeleteJob = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${routes.job.path}/remove`, {
-        ids: [singleJobDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchJob();
-        dispatch({ type: 'loading', loading: false });
-        setSingleJobDelete({ id: null, show: false, jobNumber: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -153,22 +124,19 @@ const Job = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title="Delete">
+        {permissions?.job?.isDelete && <HtmlTooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
             disabled={row?.original?.canDelete ? false : true}
             onClick={() => {
-              setSingleJobDelete({
-                show: true,
-                id: row.original._id,
-                jobNumber: `${row.original.jobNumber}`
-              });
+              setDeleteRecord(row.data);
+              setShowDeleteConfirmBox(true);
             }}
           >
             <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
-        </HtmlTooltip>
+        </HtmlTooltip>}
       </>
     )
   };
@@ -235,14 +203,6 @@ const Job = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-  };
-
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
   };
 
   const handleDeleteJob = () => {
@@ -324,13 +284,14 @@ const Job = () => {
   const ActionMenuItems = () => {
     return (
       <MenuItem
+        disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
         onClick={() => {
           if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
           } else {
             setDeleteRecord(null)
           }
-          showConfirmBox();
+          setShowDeleteConfirmBox(true);
         }}
       >
         {`Delete (${selectedRecords?.length})`}
@@ -383,7 +344,7 @@ const Job = () => {
           <CardView
             jobs={dataRows}
             setShowManageJobDialog={setShowManageJobDialog}
-            setSingleJobDelete={setSingleJobDelete}
+            setSingleJobDelete={deleteRecord}
             dispatch={dispatch}
             loading={loading}
           />
@@ -415,7 +376,7 @@ const Job = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${singleJobDelete?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.job?.titleSingular?.toLowerCase()} : ${deleteRecord?.jobNumber}` : `selected ${resources?.job?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -424,13 +385,6 @@ const Job = () => {
             onOk={handleDeleteJob}
           />
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
       </CustomContainer>
       {showManageJobDialog.open && (
         <ManageJobDialog

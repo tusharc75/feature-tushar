@@ -62,7 +62,6 @@ const User: FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [unAssignLoading, setUnAssignLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [entityRoleRedirectDetails, setEntityRoleRedirectDetails] = useState({
     id: history.location?.state?.id,
     name: history.location?.state?.name,
@@ -535,9 +534,11 @@ const User: FC = () => {
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords) {
-              setDeleteUser(selectedRecords);
+              setDeleteUser(selectedRecords[0]);
+              }else{
+                setDeleteUser(null)
+                }
               setShowDeleteDialog(true);
-            }
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -725,14 +726,6 @@ const User: FC = () => {
             </Box>
           )}
         </CustomContainer>
-
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
 
         {isConfirmDialogVisible ? (
           <ConfirmationDialog

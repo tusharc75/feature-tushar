@@ -49,7 +49,6 @@ const AssemblyOrder = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
@@ -213,20 +212,13 @@ const AssemblyOrder = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            showConfirmBox();
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -305,13 +297,6 @@ const AssemblyOrder = () => {
           onOk={handleDelete}
         />
       )}
-      {showDeleteWarningConfirmBox ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox}
-          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-          onClose={() => setShowDeleteWarningConfirmBox(false)}
-        />
-      ) : null}
 
       {showManageDialog.open && (
         <ManageAssemblyOrder

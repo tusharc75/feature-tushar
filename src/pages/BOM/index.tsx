@@ -282,7 +282,9 @@ const BOMTable = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  <MenuItem onClick={() =>{     
+                  <MenuItem
+                   disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
+                   onClick={() =>{     
                           if (selectedRecords.length === 1){ 
                           setDeleteRecord(selectedRecords[0]);
                           }else{

@@ -213,6 +213,7 @@ const ScheduleReport = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);

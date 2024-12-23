@@ -190,6 +190,7 @@ const ProductAuction = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
