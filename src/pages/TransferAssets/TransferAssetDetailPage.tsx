@@ -70,6 +70,7 @@ const TransferAssetDetailPage = () => {
   const [stepList, setStepList] = useState([]);
   const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
   const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
+  const [isAllAssetsReceived, setAllAssetsReceived] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -276,7 +277,7 @@ const TransferAssetDetailPage = () => {
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
               <ButtonWithPulse
                 variant={'outlined'}
                 color="default"
@@ -376,6 +377,7 @@ const TransferAssetDetailPage = () => {
                 allowedToEdit={allowedToEdit || isProcessor}
                 stepFullScreen={stepFullScreen}
                 resources={resources}
+                setAllAssetsReceived={setAllAssetsReceived}
               />
             )}
           </TabPanel>
