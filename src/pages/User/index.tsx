@@ -296,9 +296,6 @@ const User: FC = () => {
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
 
-          console.log(allRegionalWideRoles)
-          console.log(allAssignedEntities)
-
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
@@ -535,10 +532,10 @@ const User: FC = () => {
           onClick={() => {
             if (selectedRecords) {
               setDeleteUser(selectedRecords[0]);
-              }else{
-                setDeleteUser(null)
-                }
-              setShowDeleteDialog(true);
+            } else {
+              setDeleteUser(null)
+            }
+            setShowDeleteDialog(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
