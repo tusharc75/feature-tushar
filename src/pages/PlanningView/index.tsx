@@ -12,6 +12,11 @@ import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
+import { FaRegCalendar } from 'react-icons/fa';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import { useCardReducer } from 'src/components/CardColTimeline';
 
 function PlanningView() {
   const {
@@ -19,6 +24,12 @@ function PlanningView() {
   }: any = useData();
 
   const history = useHistory();
+  const { dispatch } = useCardReducer();
+  const { dispatch: tableDispatch } = useTableReducer();
+  const resetSelectedRecords = () => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+    tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
 
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
@@ -190,28 +201,33 @@ function PlanningView() {
           )}
         </Box>
         <Box className={`detail-container-v1`}>
-          <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px] ">
-            <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
-              <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
-                <RefreshIcon color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-            <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
-              <span>
-                <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
-                  <DateRangeIcon color={view === 'calendar' ? 'disabled' : 'primary'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-            <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
-              <span>
-                <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
-                  <FormatListNumbered color={view === 'table' ? 'disabled' : 'primary'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          </div>
-          {view === 'calendar' ? (
+        <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px]">
+                <IconButtonTabs
+                  onItemClick={resetSelectedRecords}
+                  items={
+                    [
+                      {
+                        value: 'list',
+                        icon: <TfiLayoutListThumbAlt />,
+                        tooltip: 'List View'
+                      },
+                      {
+                        value: 'calendar',
+                        icon: <FaRegCalendar />,
+                        tooltip: 'Calendar View'
+                      }
+                    ] as const
+                  }
+                  setValue={setView}
+                  value={view}
+                />
+                <HtmlTooltip title={'Refresh'}>
+                  <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
+                    <RefreshIcon fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
+          {view === 'calendar' && (
             <CalendarView
               resourceList={resourceList}
               selectedResource={selectedResource}
@@ -219,7 +235,8 @@ function PlanningView() {
               setQueryString={setQueryString}
               ref={ref}
             />
-          ) : (
+          ) }
+          {view === 'list' &&(
             <ListView
               resourceList={resourceList}
               selectedResource={selectedResource}
