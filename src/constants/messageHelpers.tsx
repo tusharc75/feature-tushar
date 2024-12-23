@@ -139,8 +139,8 @@ export const transferInventoryMessage = {
 };
 
 export const transferAssetMessage = {
-  addSerializedAssets: 'Please assign or add assets to proceed',
-  deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
+  addSerializedAssets: 'Please add assets to proceed',
+  deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
 };
 
 export const salesOrderActions = {

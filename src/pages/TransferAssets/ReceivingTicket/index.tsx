@@ -301,24 +301,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       setLoadingTicketsNotDelivered(loadingTicketsNotDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
-
-    if (dataRows?.length > 0) {
-      const inventoryWithNoTicket = dataRows?.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
-      const inventoryDelivered = dataRows?.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
-      if (inventoryWithNoTicket.length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-      // if (transferAssetData?.transferType.includes('External')) {
-      //   if (
-      //     transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed &&
-      //     inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length
-      //   ) {
-      //     updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
-      //   }
-      // }
-    }
   }, [dataRows, selectedRecords]);
 
   const createReceivingTicket = () => {
@@ -481,7 +463,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive ${selectedRecords?.length==1 ? 'asset' : 'assets'}?`}
+          message={`Are you sure you want to receive ${selectedRecords?.length == 1 ? 'asset' : 'assets'}?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

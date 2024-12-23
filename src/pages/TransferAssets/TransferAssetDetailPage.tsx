@@ -70,8 +70,8 @@ const TransferAssetDetailPage = () => {
   const [stepList, setStepList] = useState([]);
   const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
   const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
+  const [isAllAssetsReceived, setAllAssetsReceived] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
-
 
   useEffect(() => {
     return history.listen((location) => {

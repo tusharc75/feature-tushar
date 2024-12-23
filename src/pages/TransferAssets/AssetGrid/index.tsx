@@ -48,7 +48,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   const {
     state: { resources }
@@ -193,6 +193,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
       dispatch({ type: 'loading', loading: false });
       if (assets?.length > 0) {
         setNextStep(true);
+        setNextStepToolTip(null)
       } else {
         setNextStep(false);
         setNextStepToolTip(transferAssetMessage.addSerializedAssets);
