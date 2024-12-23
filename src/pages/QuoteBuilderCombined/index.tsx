@@ -68,7 +68,6 @@ const QuoteBuilders = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [isClone, setIsClone] = useState(false);
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -561,13 +560,6 @@ const QuoteBuilders = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}

@@ -58,7 +58,6 @@ const Roles: FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [showUpdateResourceDialog, setShowUpdateResourceDialog] = useState({ open: false, action: null });
 
@@ -157,7 +156,8 @@ const Roles: FC = () => {
                 aria-label="Delete"
                 disabled={!(permissions?.role.isDelete && rolePermissionArray.indexOf(row?.original?.permission) < 0)}
                 onClick={() => {
-                  showConfirmBox(row?.original);
+                  setDeleteRecord(row.original);
+                  setIsConformDialogVisible(true);
                 }}
               >
                 <DeleteIcon
@@ -229,21 +229,6 @@ const Roles: FC = () => {
       });
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row.id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.allowToDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
   const handleDeleteRole = async () => {
     setDeleteLoading(true);
     let records = [];
@@ -297,6 +282,63 @@ const Roles: FC = () => {
   const updateResourceOpen = (props: any) => {
     setShowUpdateResourceDialog({ open: true, action: props.action });
   };
+
+  const ActionMenuItems = () => {
+    const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
+    return (
+      <>
+        <MenuItem
+          disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
+          onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null);
+              }
+              setIsConformDialogVisible(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={!permissions?.role?.isUpdate}
+          onClick={() => {
+            userDialogOpen();
+          }}
+        >
+          Assign Users
+        </MenuItem>
+        <MenuItem
+          disabled={
+            permissions?.role?.isUpdate &&
+              permissions?.role?.isDelete &&
+              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+              ? true
+              : false
+          }
+          onClick={() => {
+            updateResourceOpen({ action: 'Assign' });
+          }}
+        >
+          Assign Resource
+        </MenuItem>
+        <MenuItem
+          disabled={
+            permissions?.role?.isUpdate &&
+              permissions?.role?.isDelete &&
+              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+              ? true
+              : false
+          }
+          onClick={() => {
+            updateResourceOpen({ action: 'Remove' });
+          }}
+        >
+          Remove Resource
+        </MenuItem>
+      </>
+    );
+  };  
 
   return (
     <>
@@ -361,7 +403,7 @@ const Roles: FC = () => {
             onSearch={handleSearch}
             isActionButtonVisible={true}
             actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-            actionMenuItems={<ActionMenuItems {...{ selectedRecords, showConfirmBox, permissions, userDialogOpen, updateResourceOpen }} />}
+            actionMenuItems={<ActionMenuItems />}
             addButtonProps={{ disabled: !(permissions?.role?.isCreate && (selectedType === 1 || (selectedType === 2 && selectedEntity))) }}
             addButtonOnclick={() => {
               setIsOpen({ open: true, isClone: false, idToClone: null });
@@ -386,14 +428,6 @@ const Roles: FC = () => {
           )}
         </CustomContainer>
 
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
@@ -412,55 +446,3 @@ const Roles: FC = () => {
 };
 
 export default Roles;
-
-const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDialogOpen, updateResourceOpen }) => {
-  const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
-  return (
-    <>
-      <MenuItem
-        disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
-        onClick={() => {
-          showConfirmBox(null);
-        }}
-      >
-        Delete
-      </MenuItem>
-      <MenuItem
-        disabled={!permissions?.role?.isUpdate}
-        onClick={() => {
-          userDialogOpen();
-        }}
-      >
-        Assign Users
-      </MenuItem>
-      <MenuItem
-        disabled={
-          permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
-            ? true
-            : false
-        }
-        onClick={() => {
-          updateResourceOpen({ action: 'Assign' });
-        }}
-      >
-        Assign Resource
-      </MenuItem>
-      <MenuItem
-        disabled={
-          permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
-            ? true
-            : false
-        }
-        onClick={() => {
-          updateResourceOpen({ action: 'Remove' });
-        }}
-      >
-        Remove Resource
-      </MenuItem>
-    </>
-  );
-};

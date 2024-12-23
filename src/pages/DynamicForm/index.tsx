@@ -132,6 +132,7 @@ const DynamicForm = () => {
         {permissions[renderedFrom]?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
+              disabled={!row?.original?.canDelete}
               size="small"
               aria-label="Delete"
               onClick={() => {
@@ -273,6 +274,7 @@ const DynamicForm = () => {
   const ActionMenuItems = () => {
     return (
       <MenuItem
+        disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
         onClick={() => {
           if (selectedRecords.length === 1){
             setDeleteRecord(selectedRecords[0]);

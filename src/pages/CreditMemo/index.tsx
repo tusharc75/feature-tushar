@@ -52,7 +52,6 @@ const CreditMemo = () => {
 
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -204,13 +203,6 @@ const CreditMemo = () => {
       });
   };
 
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
-  };
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
@@ -227,7 +219,7 @@ const CreditMemo = () => {
             } else {
               setDeleteRecord(null)
             }
-            showConfirmBox();
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}

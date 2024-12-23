@@ -33,7 +33,6 @@ const IotDataPoints = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
@@ -114,14 +113,6 @@ const IotDataPoints = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
-      setShowDeleteWarningConfirmBox(true);
-    } else {
-      setShowDeleteConfirmBox(true);
-    }
   };
 
   const ActionsRenderer = {
@@ -208,13 +199,14 @@ const IotDataPoints = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             if (selectedRecords.length === 1){
               setDeleteRecord(selectedRecords[0]);
               }else{
                 setDeleteRecord(null)
               }
-            showConfirmBox();
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -279,13 +271,6 @@ const IotDataPoints = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
