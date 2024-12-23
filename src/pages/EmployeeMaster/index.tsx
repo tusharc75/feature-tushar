@@ -90,6 +90,7 @@ const EmployeeMaster = () => {
         {permissions?.employeeMaster?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
+              disabled={!row?.original?.canDelete}
               size="small"
               aria-label="Delete"
               onClick={() => {

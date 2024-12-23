@@ -167,7 +167,7 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={permissions?.product.isDelete ? 'error' : 'disabled'} />
+              <DeleteIcon color={permissions?.product?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -290,6 +290,36 @@ const Product = () => {
       });
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            if (selectedRecords.length === 1){
+              setDeleteRecord(selectedRecords[0]);
+              }else{
+                setDeleteRecord(null)
+              }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        {permissions?.repairType?.isRead && (
+          <MenuItem
+            disabled={!permissions?.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
+            onClick={() => {
+              setOpenAddDialog(true);
+            }}
+          >
+            {`Assign ${resources?.repairType?.titleSingular} (${selectedRecords.length})`}
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -409,7 +439,7 @@ const Product = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          actionMenuItems={<ActionMenuItems {...{ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox, resources }} />}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setOpen(true);
           }}
@@ -551,31 +581,6 @@ const LeftSideContent = ({
             <TextField {...params} margin="none" size={'small'} name="productType" label="Product Type" variant="outlined" fullWidth />
           )}
         />
-      )}
-    </>
-  );
-};
-
-const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox, resources }) => {
-  return (
-    <>
-      <MenuItem
-        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-        onClick={() => {
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords.length})`}
-      </MenuItem>
-      {permissions?.repairType?.isRead && (
-        <MenuItem
-          disabled={!permissions?.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
-          onClick={() => {
-            setOpenAddDialog(true);
-          }}
-        >
-          {`Assign ${resources?.repairType?.titleSingular} (${selectedRecords.length})`}
-        </MenuItem>
       )}
     </>
   );

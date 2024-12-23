@@ -365,6 +365,7 @@ const Email = () => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             showConfirmBox(null);
           }}

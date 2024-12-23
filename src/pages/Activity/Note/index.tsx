@@ -298,7 +298,7 @@ const Note = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.some((e) => !e.canDelete) ? true : false}
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
             showConfirmBox(selectedRecords);
           }}

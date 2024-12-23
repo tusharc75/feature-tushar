@@ -629,7 +629,7 @@ export default function Attachment() {
     return (
       <>
         <MenuItem
-          disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
+          disabled={permissions?.attachment?.isDelete ? !selectedRecords?.every((records) => records?.canEdit) : true}
           onClick={() => {
             showConfirmBox(null);
           }}

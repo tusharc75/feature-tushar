@@ -215,6 +215,40 @@ const Warehouse = () => {
       });
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        {permissions?.warehouse?.isDelete && (
+          <MenuItem
+            disabled={
+              !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)
+            }
+            onClick={() => {
+              if (selectedRecords.length === 1){
+                setDeleteRecord(selectedRecords[0]);
+                }else{
+                  setDeleteRecord(null)
+                }
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            {`Delete (${selectedRecords?.length})`}
+          </MenuItem>
+        )}
+        {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
+          <MenuItem
+            onClick={() => {
+              setUserAssignDialog(true);
+            }}
+          >
+            Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+  
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -265,15 +299,7 @@ const Warehouse = () => {
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={
-            <ActionMenuItems
-              {...{
-                permissions,
-                selectedRecords,
-                setShowDeleteConfirmBox,
-                user,
-                setUserAssignDialog
-              }}
-            />
+            <ActionMenuItems/>
           }
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
@@ -349,36 +375,3 @@ const Warehouse = () => {
 
 export default Warehouse;
 
-const ActionMenuItems = ({
-  permissions,
-  selectedRecords,
-  setShowDeleteConfirmBox,
-  user,
-  setUserAssignDialog
-}) => {
-  return (
-    <>
-      {permissions?.warehouse?.isDelete && (
-        <MenuItem
-          disabled={
-            !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)
-          }
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      )}
-      {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
-        <MenuItem
-          onClick={() => {
-            setUserAssignDialog(true);
-          }}
-        >
-          Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
-        </MenuItem>
-      )}
-    </>
-  );
-};

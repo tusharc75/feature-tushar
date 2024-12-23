@@ -52,7 +52,6 @@ const ProjectSales: FC = () => {
   const [selectedType, setselectedType] = useState(1);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [projectSalesId, setProjectSalesId] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [entities, setEntities] = useState([]);
@@ -312,7 +311,7 @@ const ProjectSales: FC = () => {
             disabled={selectedRecords.length === 0}
             onClick={() => {
               if (selectedRecords.some((d) => d.isUpdate === false)) {
-                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                setShowDeleteConfirmBox(true);
               } else {
                 if (selectedRecords.length) {
                   let entities = [];
@@ -399,18 +398,6 @@ const ProjectSales: FC = () => {
           </Box>
         )}
       </CustomContainer>
-
-      {showDeleteWarningConfirmBox?.show ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox?.show}
-          message={
-            showDeleteWarningConfirmBox?.isDelete
-              ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
-              : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
-          }
-          onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
-        />
-      ) : null}
 
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
