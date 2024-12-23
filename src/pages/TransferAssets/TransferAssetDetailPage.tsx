@@ -70,6 +70,7 @@ const TransferAssetDetailPage = () => {
   const [stepList, setStepList] = useState([]);
   const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
   const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -329,6 +330,7 @@ const TransferAssetDetailPage = () => {
               steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
+              nextStepToolTip={nextStepToolTip}
               isStepEnded={isTransferEnded}
               stepFullScreen={stepFullScreen}
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
@@ -345,6 +347,7 @@ const TransferAssetDetailPage = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 stepFullScreen={stepFullScreen}
+                setNextStepToolTip={setNextStepToolTip}
               />
             )}
             {currentStep === 1 && transferAssetData && (
@@ -362,6 +365,7 @@ const TransferAssetDetailPage = () => {
                 canReceive={canReceive}
                 stepFullScreen={stepFullScreen}
                 setAllAssetsDelivered={setAllAssetsDelivered}
+                setNextStepToolTip={setNextStepToolTip}
               />
             )}
             {currentStep === 2 && transferAssetData && (
