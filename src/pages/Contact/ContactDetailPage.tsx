@@ -61,6 +61,8 @@ const ContactDetailsPage = (props) => {
   }: any = useData();
 
   const [contactData, setContactData] = useState<any>({});
+  const [contactName, setContactName] = useState<any>('');
+
   const [loading, setLoading] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -181,6 +183,7 @@ const ContactDetailsPage = (props) => {
           { id: data?.accountName?.optionValue, type: accountResource }
         ]);
         setCustomizedRoutes([contactBreadcrumb, { title: [data.firstName, data.lastName].filter((d) => d).join(' ') }]);
+        setContactName([data.firstName, data.lastName].filter((d) => d).join(' '))
         let orgChartData = [];
         let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
@@ -787,7 +790,7 @@ const ContactDetailsPage = (props) => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${resources?.contact?.titleSingular?.toLowerCase()} : ${contactData?.name} ?`}
+          message={`Are you sure you want to delete ${resources?.[contactResource]?.titleSingular?.toLowerCase()} : ${contactName} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDeleteContact}
         />

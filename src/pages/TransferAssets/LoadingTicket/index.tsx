@@ -33,6 +33,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import ReceiveDialog from './ReceiveDialog';
+import { transferAssetMessage } from 'src/constants/messageHelpers';
 
 interface LoadingGridProps {
   permissions: any;
@@ -48,6 +49,7 @@ interface LoadingGridProps {
   canReceive: boolean;
   stepFullScreen: any;
   setAllAssetsDelivered: any;
+  setNextStepToolTip: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -63,7 +65,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     allowedToEdit,
     canReceive,
     stepFullScreen,
-    setAllAssetsDelivered
+    setAllAssetsDelivered,
+    setNextStepToolTip
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -228,14 +231,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
           if (ticketData[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
-            if(ticketData[i].ticketType === DELIVERY_TICKET_TYPE.loading){
+            if (ticketData[i].ticketType === DELIVERY_TICKET_TYPE.loading) {
               assetData[j].loadingTicket = ticketData[i].ticketName;
               assetData[j].loadingTicketId = ticketData[i]._id;
               assetData[j].loadingTicketStatus = ticketData[i].status;
               assetData[j].createDate = ticketData[i]?.createDate || ticketData[i]?.createdBy?.date;
               assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
             }
-            if(ticketData[i].ticketType === DELIVERY_TICKET_TYPE.receiving){
+            if (ticketData[i].ticketType === DELIVERY_TICKET_TYPE.receiving) {
               assetData[j].receivingTicket = ticketData[i].ticketName;
               assetData[j].receivingTicketId = ticketData[i]._id;
               assetData[j].receivingTicketStatus = ticketData[i].status;
@@ -265,8 +268,10 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       if (assetData?.length && transferAssetData?.transferType !== 'Internal') {
         if (assetData?.filter((asset: any) => asset['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered).length > 0) {
           setNextStep(true);
+          setNextStepToolTip(null);
         } else {
           setNextStep(false);
+          setNextStepToolTip(transferAssetMessage.deliverLoadingTicketStep);
         }
       }
 
@@ -524,8 +529,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -549,7 +554,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e:any)=> e.receivingTicketId))
+            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId))
           }
           onClick={() => {
             setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });
