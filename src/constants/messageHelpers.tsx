@@ -138,6 +138,11 @@ export const transferInventoryMessage = {
   assignSerialNumbers: 'Assign Serial Numbers to proceed'
 };
 
+export const transferAssetMessage = {
+  addSerializedAssets: 'Please add assets to proceed',
+  deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
+};
+
 export const salesOrderActions = {
   createLoadingTicket: 'Create Loading Ticket',
   deliveredLoadingTicket: 'Delivered Loading Ticket'
