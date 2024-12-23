@@ -466,7 +466,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
+          message={`Are you sure you want to receive ${selectedRecords?.length==1 ? 'asset' : 'assets'}?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}
