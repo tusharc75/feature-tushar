@@ -3,11 +3,9 @@ import { Link } from 'react-router-dom';
 import { Box, Button, Card, CardContent, Grid, List, ListItemIcon, Typography } from '@material-ui/core';
 import accountClass from './account.module.scss';
 import { useHistory } from 'react-router-dom';
-import { FaEye } from 'react-icons/fa';
 import { BsPerson } from 'react-icons/bs';
 import { BiFace } from 'react-icons/bi';
 import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
