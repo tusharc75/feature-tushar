@@ -114,7 +114,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
         });
     }
   };
-  
+
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -158,7 +158,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
             <Fragment>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
