@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -336,8 +336,7 @@ const RepairJob = () => {
         onClick={() => {
           if (selectedRecords?.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-          }
-          else {
+          } else {
             setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
@@ -409,8 +408,12 @@ const RepairJob = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.repairJobName}` : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.repairJobName}`
+                : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -93,7 +93,7 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
               <ImportExportMenu
                 permissions={{ isRead: false, isCreate: true }}
                 module="merge"
-                api={"/merge"}
+                api={'/merge'}
                 afterImportCompleted={() => {
                   onClose();
                   onSuccess();

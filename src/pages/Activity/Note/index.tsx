@@ -1,5 +1,5 @@
-import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
+import { Chip, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';

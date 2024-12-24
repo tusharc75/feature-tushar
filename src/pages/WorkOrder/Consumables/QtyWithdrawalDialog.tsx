@@ -1,4 +1,4 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Button, Dialog, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -10,100 +10,95 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
-    const [loading, setLoading] = useState(false);
-    const toastConfig = useContext(CustomToastContext);
-
-
-    function validate(values) {
-        const errors = {};
-        if (values.qty <= 0) {
-            errors['qty'] = 'Please enter valid qty';
-        }
-        if (parseInt(values.qty) > (parseInt(data?.qty) - parseInt(data?.processedQty || 0))) {
-            errors['qty'] = 'Insufficient Quantity !';
-        }
-        return errors;
+  function validate(values) {
+    const errors = {};
+    if (values.qty <= 0) {
+      errors['qty'] = 'Please enter valid qty';
     }
-
-    const handleSubmit = (values) => {
-        setLoading(true)
-        const postData: any = {
-            referenceType: referenceType,
-            referenceId: referenceId,
-            requests: [{
-                uniqueId: data.uniqueId,
-                _id: data._id,
-                qty: parseInt(values?.qty)
-            }]
-        };
-        axiosInstance().put(`material-handling/withdrawal-request`, postData)
-            .then(({ data }) => {
-                setLoading(false)
-                onSuccess();
-            })
-            .catch((error) => {
-                setLoading(false)
-                toastConfig.setToastConfig(error);
-            });
+    if (parseInt(values.qty) > parseInt(data?.qty) - parseInt(data?.processedQty || 0)) {
+      errors['qty'] = 'Insufficient Quantity !';
     }
+    return errors;
+  }
 
-    return (
-        <Dialog open={true} fullWidth TransitionComponent={CustomDialogTransition}>
-            <CustomDialogHeader
-                onClose={onClose}
-                title={`Close Request`}
-                showManimizeMaximize={false}
-                showRequiredLabel={false}
-            />
-            <Formik initialValues={{ qty: (parseInt(data?.qty) - parseInt(data?.processedQty || 0)) }} onSubmit={handleSubmit} validateOnMount validate={validate}>
-                {({ touched, errors, setFieldValue, values }) => (
-                    <Form autoComplete="off" autoCorrect="off" noValidate>
-                        <CustomDialogContent>
-                            <TextField
-                                margin="dense"
-                                type="number"
-                                label="Qty"
-                                name="qty"
-                                required
-                                fullWidth
-                                variant="outlined"
-                                value={values['qty']}
-                                error={touched['qty'] && Boolean(errors['qty'])}
-                                helperText={touched['qty'] && errors['qty']}
-                                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                onChange={(e) => {
-                                    setFieldValue('qty', e.target.value?.replace(/\D/g, ''));
-                                }}
-                            />
-                        </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Button
-                                type="button"
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                onClick={() => {
-                                    onClose()
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <CustomButton
-                                loading={loading}
-                                variant="contained"
-                                color="primary"
-                                disabled={loading}
-                                type="submit"
-                            >
-                                Close Request
-                            </CustomButton>
-                        </CustomDialogFooter>
-                    </Form>
-                )}
-            </Formik>
-        </Dialog>
-    );
+  const handleSubmit = (values) => {
+    setLoading(true);
+    const postData: any = {
+      referenceType: referenceType,
+      referenceId: referenceId,
+      requests: [
+        {
+          uniqueId: data.uniqueId,
+          _id: data._id,
+          qty: parseInt(values?.qty)
+        }
+      ]
+    };
+    axiosInstance()
+      .put(`material-handling/withdrawal-request`, postData)
+      .then(({ data }) => {
+        setLoading(false);
+        onSuccess();
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  return (
+    <Dialog open={true} fullWidth TransitionComponent={CustomDialogTransition}>
+      <CustomDialogHeader onClose={onClose} title={`Close Request`} showManimizeMaximize={false} showRequiredLabel={false} />
+      <Formik
+        initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0) }}
+        onSubmit={handleSubmit}
+        validateOnMount
+        validate={validate}
+      >
+        {({ touched, errors, setFieldValue, values }) => (
+          <Form autoComplete="off" autoCorrect="off" noValidate>
+            <CustomDialogContent>
+              <TextField
+                margin="dense"
+                type="number"
+                label="Qty"
+                name="qty"
+                required
+                fullWidth
+                variant="outlined"
+                value={values['qty']}
+                error={touched['qty'] && Boolean(errors['qty'])}
+                helperText={touched['qty'] && errors['qty']}
+                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                onChange={(e) => {
+                  setFieldValue('qty', e.target.value?.replace(/\D/g, ''));
+                }}
+              />
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button
+                type="button"
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  onClose();
+                }}
+              >
+                Cancel
+              </Button>
+              <CustomButton loading={loading} variant="contained" color="primary" disabled={loading} type="submit">
+                Close Request
+              </CustomButton>
+            </CustomDialogFooter>
+          </Form>
+        )}
+      </Formik>
+    </Dialog>
+  );
 }
 
 export default QtyWithdrawalDialog;

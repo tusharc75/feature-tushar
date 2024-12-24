@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Chip, Dialog, IconButton, Typography } from '@material-ui/core';
+import { Box, Chip, Dialog, IconButton, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -8,7 +8,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import moment from 'moment';
-import { TextField, Button, Grid } from '@material-ui/core';
+import { TextField, Button, Grid } from '@mui/material';
 import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
 import PersonIcon from '@material-ui/icons/Person';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
@@ -147,7 +147,7 @@ const InventoryCycleDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}          
+          message={`Are you sure you want to delete ${resources?.inventoryCycle?.titleSingular?.toLowerCase()} : ${headingLbl} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, IconButton, Typography, useMediaQuery } from '@mui/material';
 import { camelCase, orderBy, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';

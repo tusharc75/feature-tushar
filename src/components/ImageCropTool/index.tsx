@@ -1,6 +1,6 @@
 import { useState, useCallback, useContext, Fragment } from 'react';
 import Cropper from 'react-easy-crop';
-import { Button, Box, Grid, Typography, Slider } from '@material-ui/core';
+import { Button, Box, Grid, Typography, Slider } from '@mui/material';
 import getCropppedImg from './cropImage';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

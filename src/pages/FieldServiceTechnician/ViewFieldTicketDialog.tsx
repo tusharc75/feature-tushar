@@ -1,4 +1,4 @@
-import { Button, Dialog } from '@material-ui/core';
+import { Button, Dialog } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -15,7 +15,11 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   useEffect(() => {
-    setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, serviceOrderData) && ![SERVICE_ORDER_STATUS.closed]?.includes(serviceOrderData?.status));
+    setAllowedToEdit(
+      permissions?.fieldTicket?.isUpdate &&
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, serviceOrderData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(serviceOrderData?.status)
+    );
   }, [serviceOrderData]);
 
   return (
@@ -29,10 +33,10 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
         <CustomDialogContent>
           <FieldTicket
             serviceOrderData={serviceOrderData}
-            setNextStep={() => { }}
+            setNextStep={() => {}}
             allowedToEdit={allowedToEdit}
-            handleChangeStatus={() => { }}
-            fetchServiceOrderData={() => { }}
+            handleChangeStatus={() => {}}
+            fetchServiceOrderData={() => {}}
             resource={sidebarResource.fieldServiceTechnician}
           />
         </CustomDialogContent>

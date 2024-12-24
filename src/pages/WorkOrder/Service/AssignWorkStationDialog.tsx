@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
-import { Box, Dialog, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@mui/material';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -13,7 +13,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 
 const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handleClose, handleSucess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [workStationList, setworkStationList] = useState([]);
   const [selectedWorkStations, setSelectedWorkStations] = useState(workStations);
@@ -52,12 +51,11 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
   };
 
   const handleAssign = () => {
-
     const api = `${routes?.workOrder?.path}/service/assign-work-station`;
     const payload = {
       workStations: selectedWorkStations?.map((d) => d.optionValue),
       workOrder: workOrderData
-    }
+    };
     axiosInstance()
       .put(api, payload)
       .then(({ data }) => {
@@ -100,7 +98,9 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
             }}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
             getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-            renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="workStationList" label={'Select Work Stations'} />}
+            renderInput={(props) => (
+              <TextField {...props} placeholder={''} variant="outlined" name="workStationList" label={'Select Work Stations'} />
+            )}
           />
         </Box>
       </CustomDialogContent>

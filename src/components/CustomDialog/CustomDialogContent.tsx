@@ -1,9 +1,8 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core';
-import MuiDialogContent, { DialogContentProps } from '@material-ui/core/DialogContent';
+import MuiDialogContent, { DialogContentProps } from '@mui/material/DialogContent';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { CSSProperties } from '@material-ui/core/styles/withStyles';
 import { isMobile, isTablet } from 'react-device-detect';
+import { withStyles, CSSProperties } from '@mui/styles';
 
 const DialogContent = withStyles((theme) => ({
   root: {

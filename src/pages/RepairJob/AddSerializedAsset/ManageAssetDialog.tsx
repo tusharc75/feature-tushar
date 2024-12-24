@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect, Fragment,useRef } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { useContext, useState, useEffect, Fragment, useRef } from 'react';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -18,8 +18,17 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
-export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, selectedRecords, showSaveAndNext, isBulkedit, data }) {
-
+export default function ManageAssetDialog({
+  allFields,
+  onClose,
+  repairJobData,
+  handleSaveData,
+  loadingEdit,
+  selectedRecords,
+  showSaveAndNext,
+  isBulkedit,
+  data
+}) {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [customFields, setCustomFields] = useState([]);
@@ -140,7 +149,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                           <Box marginY={2}>
                             <Grid spacing={3} container>
                               {section.sectionFields &&
-                                section.sectionFields.map((field) => (
+                                section.sectionFields.map((field) =>
                                   field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
                                     <FormTypes
                                       fields={initialData.fields}
@@ -216,7 +225,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                                       </Box>
                                     </Grid>
                                   )
-                                ))}
+                                )}
                             </Grid>
                           </Box>
                         </div>
@@ -253,7 +262,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
                       setSaveAndNext(false);
                       submitForm();
                     }}
-                    id={"dialog-save-button"}
+                    id={'dialog-save-button'}
                   >
                     Save
                   </CustomButton>

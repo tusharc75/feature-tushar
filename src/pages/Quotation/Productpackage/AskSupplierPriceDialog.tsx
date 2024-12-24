@@ -1,6 +1,6 @@
 import MomentUtils from '@date-io/moment';
-import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvider';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';

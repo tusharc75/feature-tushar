@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -83,7 +83,9 @@ const ProductAuctionDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }, { title: `${productAuctionData?.auctionNumber}` }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.productAuction, title: resources?.productAuction?.titlePlural }, { title: `${productAuctionData?.auctionNumber}` }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -114,12 +116,8 @@ const ProductAuctionDetailsPage = () => {
         {productAuctionData && fields.length ? (
           <>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0}>
-                Header
-              </CustomTab>
-              <CustomTab value={1}>
-                Bids
-              </CustomTab>
+              <CustomTab value={0}>Header</CustomTab>
+              <CustomTab value={1}>Bids</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={productAuctionData} fields={fields} />
@@ -137,7 +135,7 @@ const ProductAuctionDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''} ?`}             
+          message={`Are you sure you want to delete ${resources?.productAuction?.titleSingular?.toLowerCase()} : ${productAuctionData?.auctionNumber || ''} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

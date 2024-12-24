@@ -1,7 +1,7 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
+import { makeStyles } from '@mui/styles';
+import DialogContent from '@mui/material/DialogContent';
+import Dialog from '@mui/material/Dialog';
 import { IoCloudOfflineOutline } from 'react-icons/io5';
 import { CustomDialogTransition } from 'src/constants/helpers';
 

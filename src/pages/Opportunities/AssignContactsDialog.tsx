@@ -11,7 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

@@ -1,4 +1,4 @@
-import { Dialog } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 import moment from 'moment';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -29,10 +29,7 @@ const ChangesDialog = ({ open, onClose, data }) => {
         onClose={onClose}
       />
       <CustomDialogContent isFooterPresent={false}>
-        <ChangesDialogContent
-          changes={data?.changes || []}
-          operations={data?.operations || []}
-          updatedBy={data?.updatedBy?.optionValue} />
+        <ChangesDialogContent changes={data?.changes || []} operations={data?.operations || []} updatedBy={data?.updatedBy?.optionValue} />
       </CustomDialogContent>
     </Dialog>
   );

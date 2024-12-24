@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import WarningIcon from '@material-ui/icons/Warning';
 import { camelCase } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -124,12 +124,12 @@ const Deals = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );

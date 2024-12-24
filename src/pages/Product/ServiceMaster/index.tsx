@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';

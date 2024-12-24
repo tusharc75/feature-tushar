@@ -1,4 +1,4 @@
-import { Button, TextField } from '@material-ui/core';
+import { Button, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';

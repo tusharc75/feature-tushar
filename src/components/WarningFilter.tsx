@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, FormGroup, Menu, MenuItem } from '@material-ui/core';
+import { Checkbox, FormControlLabel, FormGroup, Menu, MenuItem } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { ReactNode, memo, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';

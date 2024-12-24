@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
 import CachedIcon from '@material-ui/icons/Cached';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';

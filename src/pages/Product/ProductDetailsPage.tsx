@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
 import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Skeleton } from '@material-ui/lab';
@@ -426,11 +426,7 @@ const ProductDetailsPage = () => {
                                                   }
                                                 }}
                                               >
-                                                {(selectedWarehouse === warehouse?.optionValue) ? (
-                                                  <ExpandLess />
-                                                ) : (
-                                                  <ExpandMore />
-                                                )}
+                                                {selectedWarehouse === warehouse?.optionValue ? <ExpandLess /> : <ExpandMore />}
                                               </IconButton>
                                             </Box>
                                             <Box ml={1} display="flex" alignItems="center">
@@ -465,7 +461,7 @@ const ProductDetailsPage = () => {
                                       </Grid>
                                     </Box>
                                     <Box p={1} className="flex flex-wrap gap-2">
-                                      {(selectedWarehouse === warehouse?.optionValue) ? (
+                                      {selectedWarehouse === warehouse?.optionValue ? (
                                         inventoriesWarehouseLoading ? (
                                           <Typography
                                             variant="subtitle2"
@@ -487,15 +483,24 @@ const ProductDetailsPage = () => {
                                                     color="primary"
                                                     size="small"
                                                     onClick={() => {
-                                                      const warehouseFilter = [{
-                                                        optionLabel: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)?.warehouse?.optionLabel,
-                                                        optionValue: selectedWarehouse
-                                                      }]
-                                                      const productFilter = [{
-                                                        optionLabel: productData?.productName,
-                                                        optionValue: id
-                                                      }]
-                                                      window.open(`${routes.serializedAsset.path}?warehouse=${encodeURIComponent(JSON.stringify(warehouseFilter))}&product=${encodeURIComponent(JSON.stringify(productFilter))}`, '_blank')
+                                                      const warehouseFilter = [
+                                                        {
+                                                          optionLabel: productWarehouseData.find(
+                                                            (d) => d?.warehouse?.optionValue === selectedWarehouse
+                                                          )?.warehouse?.optionLabel,
+                                                          optionValue: selectedWarehouse
+                                                        }
+                                                      ];
+                                                      const productFilter = [
+                                                        {
+                                                          optionLabel: productData?.productName,
+                                                          optionValue: id
+                                                        }
+                                                      ];
+                                                      window.open(
+                                                        `${routes.serializedAsset.path}?warehouse=${encodeURIComponent(JSON.stringify(warehouseFilter))}&product=${encodeURIComponent(JSON.stringify(productFilter))}`,
+                                                        '_blank'
+                                                      );
                                                     }}
                                                   >
                                                     View All

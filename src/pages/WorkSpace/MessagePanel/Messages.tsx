@@ -1,4 +1,4 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@material-ui/core';
+import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
 import { MoreVert, Delete, GetApp } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';

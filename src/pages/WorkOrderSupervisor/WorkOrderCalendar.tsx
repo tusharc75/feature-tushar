@@ -10,7 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow
-} from '@material-ui/core';
+} from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import moment from 'moment';

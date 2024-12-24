@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, IconButton, Typography } from '@material-ui/core';
+import { Box, IconButton, Typography } from '@mui/material';
 import { HiArrowRight } from 'react-icons/hi';
 import { getColors } from '../Home/helpers';
 import styles from './index.module.scss';

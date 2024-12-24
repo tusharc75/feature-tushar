@@ -1,5 +1,5 @@
-import { Box, Button, Grid, IconButton, InputAdornment } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid, IconButton, InputAdornment } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import InfoIcon from '@material-ui/icons/Info';
@@ -542,11 +542,11 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                        // doNotShowInfoTooltip={true}
-                                        // onChange={(e, value) => {
-                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                        //   setFieldValue("customerContactName", [])
-                                        // }}
+                                          // doNotShowInfoTooltip={true}
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          //   setFieldValue("customerContactName", [])
+                                          // }}
                                         />
                                       ) : field.fieldName === 'opportunity' ? (
                                         <Grid container spacing={1}>
@@ -787,8 +787,8 @@ export default function ManageQuoteDialog({
                                           size="small"
                                         />
                                       ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
-                                        field?.fieldName
-                                      ) >= 0 ? (
+                                          field?.fieldName
+                                        ) >= 0 ? (
                                         <FormTypes
                                           {...field}
                                           // {...rest}
@@ -812,8 +812,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                           customError={customError}
@@ -902,8 +902,8 @@ export default function ManageQuoteDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                           fieldData={field}

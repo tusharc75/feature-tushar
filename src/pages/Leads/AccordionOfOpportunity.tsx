@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Card, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
@@ -80,7 +80,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                                   <Typography>{opportunity?.opportunityName}</Typography>
                                 </Link>
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography>{opportunity.opportunityName}</Typography>{' '}
                                   <HtmlTooltip title={`${opportunity.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />
@@ -90,13 +90,13 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                             </div>
                             {opportunity?.estimatedAmount && (
                               <p
-                                className="font-semibold text-[14px] text-gray-400"
+                                className="text-[14px] font-semibold text-gray-400"
                                 title={formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
                               >
                                 Estimated Amount : {formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
                               </p>
                             )}
-                            <div className="grid max-[500px]:grid-cols-1 max-[960px]:grid-cols-2 min-[1153px]:grid-cols-2">
+                            <div className="grid max-[960px]:grid-cols-2 max-[500px]:grid-cols-1 min-[1153px]:grid-cols-2">
                               <div>
                                 {opportunity?.stage ? (
                                   <DisplayData label="Stage" value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} />

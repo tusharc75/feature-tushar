@@ -1,4 +1,4 @@
-import { Popover, Popper } from '@material-ui/core';
+import { Popover, Popper } from '@mui/material';
 import { camelCase, isArray, isObject } from 'lodash';
 import { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';

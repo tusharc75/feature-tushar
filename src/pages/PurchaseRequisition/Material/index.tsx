@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, map, startCase, uniq } from 'lodash';

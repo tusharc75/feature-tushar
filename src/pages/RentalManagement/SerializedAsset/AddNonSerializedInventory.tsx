@@ -12,7 +12,7 @@ import {
   TableRow,
   TextField,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';

@@ -1,4 +1,4 @@
-import { CssBaseline } from '@material-ui/core';
+import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';

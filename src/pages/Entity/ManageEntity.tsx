@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Dialog, Button, CircularProgress, useTheme, Box } from '@material-ui/core';
+import { Dialog, Button, CircularProgress, useTheme, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -129,7 +129,13 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? `Clone - ${cloneHeading}` : isNew ? `Create New ${resources?.entity?.titleSingular}` : `Update ${resources?.entity?.titleSingular}`}
+                title={
+                  isClone
+                    ? `Clone - ${cloneHeading}`
+                    : isNew
+                      ? `Create New ${resources?.entity?.titleSingular}`
+                      : `Update ${resources?.entity?.titleSingular}`
+                }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) close();
                   else setShowConfirmDialog(true);
@@ -168,13 +174,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={submitForm}
-                  disabled={isSubmitting || loading}
-                >
+                <Button variant="contained" color="primary" size="small" onClick={submitForm} disabled={isSubmitting || loading}>
                   {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
                 </Button>
               </CustomDialogFooter>

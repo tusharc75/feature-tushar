@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -64,7 +64,9 @@ const SupportTicketDetail = () => {
         [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) &&
         data?.status !== SUPPORT_TICKET_STATUS.completed;
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed);
+      setAllowedToDelete(
+        checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed
+      );
       setSupportTicketData(data);
       setLoading(false);
     } catch (error) {
@@ -139,7 +141,9 @@ const SupportTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.supportTicket, title: resources?.supportTicket?.titlePlural }, { title: supportTicketData?.supportTicketNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.supportTicket, title: resources?.supportTicket?.titlePlural }, { title: supportTicketData?.supportTicketNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -159,12 +163,8 @@ const SupportTicketDetail = () => {
       </Box>
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            Activity
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>Activity</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

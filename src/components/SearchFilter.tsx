@@ -1,5 +1,5 @@
-import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import axios from 'axios';
 import { camelCase, startCase } from 'lodash';

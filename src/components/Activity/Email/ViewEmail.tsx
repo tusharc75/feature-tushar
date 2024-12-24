@@ -1,12 +1,12 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import DateUtils from '@date-io/date-fns';
-import { CircularProgress, IconButton } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { CircularProgress, IconButton } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios, { CancelTokenSource } from 'axios';
@@ -459,7 +459,7 @@ export const ViewEmail = ({
                                       <AttachmentThumbnail
                                         attachments={otherAttachments}
                                         canEdit={false}
-                                        handleDeleteAttachment={(attachment) => { }}
+                                        handleDeleteAttachment={(attachment) => {}}
                                       />
                                     }
                                     <ImageAttachments

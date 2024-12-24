@@ -1,4 +1,4 @@
-import { FormControl, MenuItem, Select, IconButton } from '@material-ui/core';
+import { FormControl, MenuItem, Select, IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 import React, { FC, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDebounce } from 'src/hooks';

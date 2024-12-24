@@ -18,7 +18,7 @@ import {
   TableCell,
   TableRow,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 
 const ShowNonSerializeAssets = ({ data, onClose, title }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);

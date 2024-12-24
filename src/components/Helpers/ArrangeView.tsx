@@ -1,6 +1,6 @@
-import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
+import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
 import { DragIndicator } from '@material-ui/icons';
 import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

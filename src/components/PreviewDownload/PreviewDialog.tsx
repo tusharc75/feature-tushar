@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog, Grid } from '@mui/material';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -47,7 +47,11 @@ export const PreviewDialog = ({
   const [sortBy, setSortBy] = useState(null);
   const [orderBy, setOrderBy] = useState(null);
 
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   useEffect(() => {
     setDefaultColumns();
@@ -100,7 +104,7 @@ export const PreviewDialog = ({
           .filter((col) => col !== undefined)
       );
       if (data?.sortBy) {
-        setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
+        setSortBy(allColumn.find((col) => col.fieldName === data?.sortBy));
       }
       if (data?.orderBy) {
         setOrderBy(data?.orderBy);
@@ -115,12 +119,12 @@ export const PreviewDialog = ({
     }
     for (const col of visibleColumns) {
       const column = selectedView?.columns?.find((e) => e?.name === col?.fieldName);
-      if (!column || ((column?.customLabel || null) !== (col?.customLabel || null)) || ((column?.width || null) !== (col?.width || null))) {
+      if (!column || (column?.customLabel || null) !== (col?.customLabel || null) || (column?.width || null) !== (col?.width || null)) {
         return false;
       }
     }
     return true;
-  }
+  };
 
   return (
     <>
@@ -195,23 +199,28 @@ export const PreviewDialog = ({
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          {(type?.includes('Excel') || type?.includes('PDF')) && (selectedExcelView || selectedPdfView) && !checkVisibleColumnsSame(type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf, type?.includes('Excel') ? selectedExcelView : selectedPdfView) && (
-            <>
-              <CustomButton
-                id={'show-column-dialog-save-update-button'}
-                onClick={() => {
-                  const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
-                  delete selectedView._id;
-                  setShowSaveViewDialog({ open: true, data: selectedView });
-                }}
-                disabled={sortBy && !orderBy}
-                size="small"
-                className="yellow-button"
-              >
-                Save as New View
-              </CustomButton>
-            </>
-          )}
+          {(type?.includes('Excel') || type?.includes('PDF')) &&
+            (selectedExcelView || selectedPdfView) &&
+            !checkVisibleColumnsSame(
+              type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf,
+              type?.includes('Excel') ? selectedExcelView : selectedPdfView
+            ) && (
+              <>
+                <CustomButton
+                  id={'show-column-dialog-save-update-button'}
+                  onClick={() => {
+                    const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
+                    delete selectedView._id;
+                    setShowSaveViewDialog({ open: true, data: selectedView });
+                  }}
+                  disabled={sortBy && !orderBy}
+                  size="small"
+                  className="yellow-button"
+                >
+                  Save as New View
+                </CustomButton>
+              </>
+            )}
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
               <>

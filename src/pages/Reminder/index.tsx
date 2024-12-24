@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import moment from 'moment';
 import { useLocation, useHistory } from 'react-router-dom';
 
@@ -31,15 +31,15 @@ const Reminder = () => {
   searchData = searchData ? searchData[1].split('&') : null;
   searchData = searchData
     ? searchData.map((q) => {
-      let obj: any = {};
-      if (q.includes('type')) {
-        obj['type'] = q.split('=')[1];
-      }
-      if (q.includes('id')) {
-        obj['id'] = q.split('=')[1];
-      }
-      return obj;
-    })
+        let obj: any = {};
+        if (q.includes('type')) {
+          obj['type'] = q.split('=')[1];
+        }
+        if (q.includes('id')) {
+          obj['id'] = q.split('=')[1];
+        }
+        return obj;
+      })
     : null;
   searchData = searchData ? Object.assign({}, { ...searchData[0], ...searchData[1] }) : null;
 

@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -175,7 +175,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
             const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;

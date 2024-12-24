@@ -1,4 +1,5 @@
-import { IconButton, Menu, MenuItem, makeStyles, useMediaQuery } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Grid, IconButton, MenuItem } from '@mui/material';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -441,8 +441,12 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit, resourc
       {deleteData && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete ${deleteData ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
-            ${deleteData?.demandOrderNumber || ''}` : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteData
+              ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+            ${deleteData?.demandOrderNumber || ''}`
+              : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

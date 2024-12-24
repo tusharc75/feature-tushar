@@ -1,5 +1,5 @@
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Button, Menu, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -37,10 +37,9 @@ import axios, { CancelTokenSource } from 'axios';
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
 const Opportunities = () => {
-
   const {
     state: { user, selectedEntity, permissions, resources }
-  }: any = useData()
+  }: any = useData();
 
   const types = [
     {
@@ -60,7 +59,6 @@ const Opportunities = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  ;
   const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
@@ -187,8 +185,7 @@ const Opportunities = () => {
         field: 'outcome',
         term: ['Won', 'Lost']
       });
-    }
-    else {
+    } else {
       deepFilter = `${deepFilter}&pendingOutcome=1`;
     }
 
@@ -296,7 +293,7 @@ const Opportunities = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setIsConformDialogVisible(true);
           }}

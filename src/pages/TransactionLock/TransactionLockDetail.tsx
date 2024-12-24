@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -71,7 +71,9 @@ const TransactionLockDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }, { title: transactionLockData?.lockNumber }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.transactionLock, title: resources?.transactionLock?.titlePlural }, { title: transactionLockData?.lockNumber }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

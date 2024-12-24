@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, MenuItem, Typography } from '@material-ui/core';
+import { Button, Dialog, Grid, MenuItem, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';

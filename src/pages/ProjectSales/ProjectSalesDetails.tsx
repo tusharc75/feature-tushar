@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Paper, Typography } from '@mui/material';
 import { ControlPoint } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import React, { useContext, useEffect, useState } from 'react';

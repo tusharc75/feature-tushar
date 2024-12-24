@@ -1,5 +1,5 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, IconButton } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, Menu, Popover } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, Popover } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

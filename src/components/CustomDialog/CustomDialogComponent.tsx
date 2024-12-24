@@ -5,7 +5,7 @@ import CustomDialogFooter from './CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 
 import PropTypes from 'prop-types';
-import { Button, Dialog } from '@material-ui/core';
+import { Button, Dialog } from '@mui/material';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition } from 'src/constants/helpers';
 

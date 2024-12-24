@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

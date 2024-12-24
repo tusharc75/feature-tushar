@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { isEqual } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -18,7 +18,6 @@ import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
 
 const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -114,7 +113,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
         });
     }
   };
-  
+
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -158,7 +157,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
             <Fragment>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {

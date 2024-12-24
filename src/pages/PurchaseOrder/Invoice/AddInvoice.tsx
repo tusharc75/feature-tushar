@@ -1,11 +1,11 @@
 import { useState, useContext, Fragment } from 'react';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
-import { Button, Grid, TextField } from '@material-ui/core';
+import { Button, Grid, TextField } from '@mui/material';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -159,13 +159,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                 >
                   Cancel
                 </Button>
-                <CustomButton
-                  loading={loading}
-                  disabled={loading}
-                  variant="contained"
-                  type="button"
-                  onClick={submitForm}
-                  color="primary" >
+                <CustomButton loading={loading} disabled={loading} variant="contained" type="button" onClick={submitForm} color="primary">
                   Save
                 </CustomButton>
               </CustomDialogFooter>

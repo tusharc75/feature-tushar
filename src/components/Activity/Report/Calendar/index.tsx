@@ -1,4 +1,4 @@
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import axios, { CancelTokenSource } from 'axios';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -102,7 +102,9 @@ const WorkFlowReportDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

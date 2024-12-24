@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Typography } from '@material-ui/core';
+import { Box, Button, Divider, Typography } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';

@@ -1,6 +1,6 @@
 import { useState, useContext, Fragment } from 'react';
-import { Box, Divider, TextField, Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Divider, TextField, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -58,7 +58,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
     >
       <Formik initialValues={{ serialNumber: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ touched, errors, setFieldValue, values, submitForm }) => (
-          <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
+          <Form autoComplete="off" autoCorrect="off" noValidate className="flex min-h-full flex-col">
             <CustomDialogHeader
               title={'Add Serial Numbers'}
               onClose={(e, reason) => {

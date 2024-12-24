@@ -1,4 +1,4 @@
-import { CircularProgress, TextField } from '@material-ui/core';
+import { CircularProgress, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';

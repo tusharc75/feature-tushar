@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -56,13 +56,16 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
     }
   }, [initialData]);
 
-
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     data = data?.filter((f) => f?.isRead);
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
-      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
+    if (
+      (fieldTicketData?.taxCode ||
+        (fieldTicketData?.billingAddress &&
+          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
+      !isOffline
+    ) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -121,7 +124,13 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount validate={validate} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          validate={validate}
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -146,11 +155,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                       if (name === 'taxCode') {
                         const taxCode = initialData?.fields?.find((e) => e?.fieldName === 'taxCode')?.option.find((d) => d.optionValue === value);
                         setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                        const result = autoCalculateSpecificFields(
-                          { ['taxPercentage']: taxCode?.taxRate || 0 },
-                          values,
-                          initialData.fields
-                        );
+                        const result = autoCalculateSpecificFields({ ['taxPercentage']: taxCode?.taxRate || 0 }, values, initialData.fields);
                         if (Object.keys(result).length >= 1) {
                           for (var x in result) {
                             setFieldValue(x, result[x]);

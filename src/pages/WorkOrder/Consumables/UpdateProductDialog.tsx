@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -13,7 +13,6 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 
 const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -41,7 +40,6 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
     });
     setFields(customData);
   };
-
 
   return (
     <Dialog
@@ -77,17 +75,17 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <InputField
-                        errors={errors}
-                        values={values}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        touched={touched}
-                        fieldsData={initialData.fields}
-                        size="small"
-                        fullWidth
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

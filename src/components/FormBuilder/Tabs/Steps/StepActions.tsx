@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -13,7 +13,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export default function Actions({ resource, onClose, onSuccess, stepData }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -24,13 +23,16 @@ export default function Actions({ resource, onClose, onSuccess, stepData }) {
 
   const fetchResourceFields = async () => {
     setResourceFieldsLoading(true);
-    await axiosInstance().get(`/field?resource=${resource}&view=false`).then(({ data }) => {
-      setResourceFields(data?.data?.map(({ fieldData }) => fieldData));
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
+    await axiosInstance()
+      .get(`/field?resource=${resource}&view=false`)
+      .then(({ data }) => {
+        setResourceFields(data?.data?.map(({ fieldData }) => fieldData));
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
     setResourceFieldsLoading(false);
-  }
+  };
 
   useEffect(() => {
     fetchResourceFields();
@@ -99,12 +101,9 @@ export default function Actions({ resource, onClose, onSuccess, stepData }) {
               <Typography variant="subtitle2">Create Actions</Typography>
             </Box>
             <Box>
-              <HtmlTooltip title='Add'>
-                <IconButton
-                  size="small"
-                  aria-label="setting"
-                  onClick={() => addRemove('create', 'add', createActions?.length)}>
-                  <AddCircleOutlineIcon color='primary' fontSize="small" />
+              <HtmlTooltip title="Add">
+                <IconButton size="small" aria-label="setting" onClick={() => addRemove('create', 'add', createActions?.length)}>
+                  <AddCircleOutlineIcon color="primary" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             </Box>
@@ -148,24 +147,27 @@ export default function Actions({ resource, onClose, onSuccess, stepData }) {
 }
 
 const Card = ({ state, setState, index, addRemove, actionType, error, fields, resourceFields, resourceFieldsLoading }) => {
-
   const [resourceFieldOptions, setResourceFieldOptions] = useState([]);
 
   useEffect(() => {
     if (state[index]?.formField) {
       const fieldType = fields?.find((f) => f.fieldName === state[index]?.formField)?.type;
-      setResourceFieldOptions(resourceFields?.filter(f => f?.type === fieldType));
+      setResourceFieldOptions(resourceFields?.filter((f) => f?.type === fieldType));
     }
   }, [state[index]?.formField, resourceFields]);
 
   return (
     <>
-      <Box p={1}
-        border={1} borderColor="var(--common-border-color)"
+      <Box
+        p={1}
+        border={1}
+        borderColor="var(--common-border-color)"
         mb={1}
         mt={1}
         display={'flex'}
-        justifyContent={'space-between'} alignItems={'center'}>
+        justifyContent={'space-between'}
+        alignItems={'center'}
+      >
         <Box width={'94%'}>
           <Grid container spacing={2}>
             <Grid item sm={6} md={6} lg={6}>
@@ -240,7 +242,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
           </Grid>
         </Box>
         <Box>
-          <HtmlTooltip title='Remove'>
+          <HtmlTooltip title="Remove">
             <IconButton aria-label="setting" onClick={() => addRemove(actionType, 'remove', index)}>
               <RemoveCircleOutlineIcon fontSize="small" />
             </IconButton>

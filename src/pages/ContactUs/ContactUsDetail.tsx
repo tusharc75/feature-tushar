@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
+import { Box, Button, Grid, Paper } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageContactUs from './ManageContactUs';
-
 
 const BlogDetail = () => {
   const { id } = useParams();

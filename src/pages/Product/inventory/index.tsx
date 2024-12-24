@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField, Typography } from '@mui/material';
 import { isEqual } from 'lodash';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

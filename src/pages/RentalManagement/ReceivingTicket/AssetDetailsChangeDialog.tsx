@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import {
   CustomDialogTransition,
   getObjKeysWithValues,
@@ -11,14 +11,14 @@ import {
   getObjKeys,
   DELIVERY_TICKET_TYPE
 } from '../../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress, Typography } from '@material-ui/core';
+import { CircularProgress, Typography } from '@mui/material';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isArray, isEqual, isString } from 'lodash';
@@ -77,7 +77,7 @@ export default function AssetDetailsChangeDialog({
     let j = 0;
     let index = null;
     let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : '';
-    const autoIncrementFieldNameValue: any = {}
+    const autoIncrementFieldNameValue: any = {};
 
     assetData?.forEach((data) => {
       if (product !== data?.product?.optionValue) {
@@ -397,11 +397,16 @@ export default function AssetDetailsChangeDialog({
                                       {...field}
                                       fieldData={{
                                         ...field,
-                                        isWarningTooltip: autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`]
-                                          || autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0 ? true : field?.isWarningTooltip,
-                                        warningTooltipMessage: autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`]
-                                          || autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0 ?
-                                          `Auto Increment (Previous Value ${(autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0)})` : field?.warningTooltipMessage
+                                        isWarningTooltip:
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            ? true
+                                            : field?.isWarningTooltip,
+                                        warningTooltipMessage:
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            ? `Auto Increment (Previous Value ${autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0})`
+                                            : field?.warningTooltipMessage
                                       }}
                                       values={data}
                                       errors={(errors['assetData'] && errors['assetData'][index]) ?? {}}

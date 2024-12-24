@@ -1,21 +1,8 @@
 import React, { useEffect, useContext, useState, Fragment } from 'react';
-import {
-  Box,
-  Button,
-  capitalize,
-  Chip,
-  Dialog,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography
-} from '@material-ui/core';
+import { Box, Button, capitalize, Chip, Dialog, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
 import ImageIcon from '@material-ui/icons/Image';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

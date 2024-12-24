@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -97,8 +97,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
       .then(({ data: { data } }) => {
         if (data?.length) {
           setChartData(transformData(data));
-        }
-        else {
+        } else {
           setChartData({ active: [], inactive: [] });
         }
       })
@@ -108,7 +107,6 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   };
 
   function transformData(piData) {
-
     const dataPointsFieldName: any = dataPoints?.map((e) => e.fieldName);
 
     if (!piData) return null;
@@ -118,7 +116,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     let inactiveIntervals = [];
 
     for (let key of statusKeys) {
-      const fieldLabel = dataPoints?.find((e) => e?.fieldName === key)?.fieldLabel || key
+      const fieldLabel = dataPoints?.find((e) => e?.fieldName === key)?.fieldLabel || key;
 
       let currentIntervalStart = new Date(piData[0].time).getTime();
       let currentStatus = piData[0][key];
@@ -175,7 +173,8 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
             }
           ]}
           type="rangeBar"
-          height={500} />
+          height={500}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

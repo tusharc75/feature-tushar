@@ -1,4 +1,4 @@
-import { CircularProgress, useMediaQuery } from '@material-ui/core';
+import { CircularProgress, useMediaQuery } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Calendar, CalendarProps } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,37 +1,27 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Grid,
-  Typography,
-  TextField,
-  FormControl,
-  Select,
-  MenuItem,
-  Box,
-  IconButton,
-  InputAdornment,
-} from "@material-ui/core";
+import React, { useState } from 'react';
+import { makeStyles } from '@mui/styles';
+import { Grid, Typography, TextField, FormControl, Select, MenuItem, Box, IconButton, InputAdornment } from '@mui/material';
 
-import BoxWithBorder from "../BoxWithBorder";
-import { SVG } from "../../assets";
-import { Add, FilterList, SortByAlpha, Search } from "@material-ui/icons";
+import BoxWithBorder from '../BoxWithBorder';
+import { SVG } from '../../assets';
+import { Add, FilterList, SortByAlpha, Search } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   customers: {
-    textAlign: "center",
+    textAlign: 'center'
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120
   },
   table: {
-    marginTop: theme.spacing(4),
-  },
+    marginTop: theme.spacing(4)
+  }
 }));
 
 const Contacts = () => {
   const classes = useStyles();
-  const [contacts, setContacts] = useState("All");
+  const [contacts, setContacts] = useState('All');
 
   const handleChange = (event) => {
     setContacts(event.target.value);
@@ -51,12 +41,7 @@ const Contacts = () => {
               <Grid container justify="space-between">
                 <Grid item>
                   <FormControl className={classes.formControl}>
-                    <Select
-                      labelId="select-label"
-                      id="select"
-                      value={contacts}
-                      onChange={handleChange}
-                    >
+                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange}>
                       <MenuItem value="All">All Contacts</MenuItem>
                     </Select>
                   </FormControl>
@@ -81,13 +66,13 @@ const Contacts = () => {
                         <InputAdornment position="start">
                           <Search color="disabled" />
                         </InputAdornment>
-                      ),
+                      )
                     }}
                   />
                 </Grid>
               </Grid>
               <Box className={classes.table}>
-                <img src={SVG("Contacts Placeholder")} alt="Contacts" />
+                <img src={SVG('Contacts Placeholder')} alt="Contacts" />
               </Box>
             </Box>
           </BoxWithBorder>
@@ -103,12 +88,7 @@ const Contacts = () => {
               <Grid container justify="space-between">
                 <Grid item>
                   <FormControl className={classes.formControl}>
-                    <Select
-                      labelId="select-label"
-                      id="select"
-                      value={contacts}
-                      onChange={handleChange}
-                    >
+                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange}>
                       <MenuItem value="All">All Contacts</MenuItem>
                     </Select>
                   </FormControl>
@@ -133,13 +113,13 @@ const Contacts = () => {
                         <InputAdornment position="start">
                           <Search color="disabled" />
                         </InputAdornment>
-                      ),
+                      )
                     }}
                   />
                 </Grid>
               </Grid>
               <Box className={classes.table}>
-                <img src={SVG("Contacts Placeholder")} alt="Contacts" />
+                <img src={SVG('Contacts Placeholder')} alt="Contacts" />
               </Box>
             </Box>
           </BoxWithBorder>
@@ -151,7 +131,7 @@ const Contacts = () => {
             <Typography variant="h6" style={{ marginBottom: 20 }}>
               Timeline
             </Typography>
-            <img src={SVG("Timeline Placeholder")} alt="Timeline" />
+            <img src={SVG('Timeline Placeholder')} alt="Timeline" />
           </BoxWithBorder>
         </Grid>
       </Grid>

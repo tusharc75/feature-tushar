@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Chip, Box, Typography } from '@material-ui/core';
-import { purple } from '@material-ui/core/colors';
+import { makeStyles } from '@mui/styles';
+import { Chip, Box, Typography } from '@mui/material';
+import { purple } from '@mui/material/colors';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 import { kebabCase, startCase } from 'lodash';

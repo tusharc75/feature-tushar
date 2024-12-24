@@ -1,5 +1,5 @@
-import { IconButton, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import { IconButton, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { Edit } from '@material-ui/icons';
 import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

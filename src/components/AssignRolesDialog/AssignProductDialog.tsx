@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -172,29 +172,26 @@ const AssignProductDialog = ({
       }
     } else {
       if (serialized != null) {
-        const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct')
-        updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct')
+        const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct');
+        updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct');
         if (serializedProductFilter) {
           if (serialized && serializedProductFilter?.term?.toLowerCase() !== 'yes') {
             updatedDeepFilters.push({
               field: 'serializedProduct',
               term: ``
             });
-          }
-          else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
+          } else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
             updatedDeepFilters.push({
               field: 'serializedProduct',
               term: ``
             });
-          }
-          else {
+          } else {
             updatedDeepFilters.push({
               field: 'serializedProduct',
               term: `${serialized === true ? 'Yes' : 'No'}`
             });
           }
-        }
-        else {
+        } else {
           updatedDeepFilters.push({
             field: 'serializedProduct',
             term: `${serialized === true ? 'Yes' : 'No'}`
@@ -273,7 +270,12 @@ const AssignProductDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Add ${resources?.product?.titlePlural}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
+      <CustomDialogHeader
+        title={`Add ${resources?.product?.titlePlural}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleCloseDialog}
+      />
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader

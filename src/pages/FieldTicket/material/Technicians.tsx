@@ -1,6 +1,6 @@
-import { IconButton, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { IconButton, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

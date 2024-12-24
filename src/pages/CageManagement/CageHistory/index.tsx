@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Dialog, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@material-ui/core';
+import { Avatar, Box, Button, Dialog, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
 import moment from 'moment';
 import { Fragment, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

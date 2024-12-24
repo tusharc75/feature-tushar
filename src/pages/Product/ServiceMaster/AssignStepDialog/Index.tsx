@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField, Typography } from '@mui/material';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import React, { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

@@ -3,7 +3,7 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl, Typography } from '@material-ui/core';
+import { Box, Button, FormControl, Typography } from '@mui/material';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -400,8 +400,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   return (
     <Box>
-      <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
-        <div className={'flex gap-2 flex-wrap'}>
+      <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
+        <div className={'flex flex-wrap gap-2'}>
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
             Add Text
           </Button>
@@ -452,7 +452,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
           </Box>
         )}
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <CustomButton
             disabled={isSubmitting || loading}
             loading={isSubmitting}

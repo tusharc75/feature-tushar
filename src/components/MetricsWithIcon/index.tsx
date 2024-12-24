@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import { PressureIcon, TemperatureIcon, VolumeIcon } from 'src/assets/svg/svgIcons';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import styles from './index.module.scss';
 
 interface MetricsWithIconProps extends React.HTMLAttributes<HTMLDivElement> {

@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Warning } from '@material-ui/icons';
 import { capitalize, isArray } from 'lodash';
 import { FiExternalLink } from 'react-icons/fi';

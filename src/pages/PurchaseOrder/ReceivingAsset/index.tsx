@@ -1,5 +1,5 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import { Button, Grid, IconButton } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { Cancel } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
@@ -62,15 +62,15 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       let receiveIndex = dataRows.findIndex((e) => e.qty - (e?.actualReceived || 0) > 0);
       let rejectIndex = dataRows.findIndex((e) => e.qty - (e?.rejectQuantity || 0) > 0);
       let stepData = [];
-      if(receiveIndex > -1) {
+      if (receiveIndex > -1) {
         stepData.push(generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, receiveIndex, resources?.purchaseOrder?.titleSingular));
       }
-      if(rejectIndex > -1) {
+      if (rejectIndex > -1) {
         stepData.push(generateRejectProduct(user?.user?.brandPolicy?.storageLocation, rejectIndex, resources?.purchaseOrder?.titleSingular));
       }
       if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
-        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation,0, resources?.purchaseOrder?.titleSingular).steps;
+        let steps = generateReceiveProduct(user?.user?.brandPolicy?.storageLocation, 0, resources?.purchaseOrder?.titleSingular).steps;
         walkmeInstance.instance.push(steps);
         walkmeInstance.handleNext();
       }

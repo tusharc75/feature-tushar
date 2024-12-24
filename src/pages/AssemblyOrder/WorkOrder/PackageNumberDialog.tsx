@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -57,7 +57,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       ]
     });
     const managedPackageField = data?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
-    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel)
+    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel);
   };
 
   const validate = (values) => {

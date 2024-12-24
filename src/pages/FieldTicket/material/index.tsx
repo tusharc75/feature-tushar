@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, isArray, isObject } from 'lodash';
@@ -18,7 +18,17 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource, treeToFlatArray } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  FIELD_TICKET_STATUS,
+  MATERIAL_TYPE,
+  SERVICE_TYPE,
+  asyncForEach,
+  fieldTicket,
+  restoreObjKeysWithValues,
+  sidebarResource,
+  treeToFlatArray
+} from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';

@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -224,11 +224,11 @@ const Warehouse = () => {
               !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)
             }
             onClick={() => {
-              if (selectedRecords.length === 1){
+              if (selectedRecords.length === 1) {
                 setDeleteRecord(selectedRecords[0]);
-                }else{
-                  setDeleteRecord(null)
-                }
+              } else {
+                setDeleteRecord(null);
+              }
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -247,7 +247,6 @@ const Warehouse = () => {
       </>
     );
   };
-  
 
   return (
     <section className="main-container-v1">
@@ -271,23 +270,24 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                {
-                  title: 'Assign Users Template',
-                  api: `warehouse/user/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Assign Users Export',
-                  api: `warehouse/user/template?export=true${selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Assign Users Template',
+                    api: `warehouse/user/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Assign Users Export',
+                    api: `warehouse/user/template?export=true${
+                      selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Assign Users Import',
-                  api: `warehouse/user/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Assign Users Import',
+                    api: `warehouse/user/import`,
+                    type: 'import'
+                  }
+                ]
               : []
           }
         />
@@ -298,9 +298,7 @@ const Warehouse = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={
-            <ActionMenuItems/>
-          }
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
@@ -340,8 +338,12 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?._id ? deleteRecord?.warehouseName : ''}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}  
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.warehouseName : ''}`
+              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -374,4 +376,3 @@ const Warehouse = () => {
 };
 
 export default Warehouse;
-

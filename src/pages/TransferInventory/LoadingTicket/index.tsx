@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -20,7 +20,7 @@ import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

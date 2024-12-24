@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Formik, Form } from 'formik';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
   getObjKeys,

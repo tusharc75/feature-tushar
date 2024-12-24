@@ -1,8 +1,8 @@
-import { Box, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography } from '@mui/material';
 import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -293,7 +293,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -307,7 +307,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }

@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment } from 'react';
-import { Button, Dialog, Box } from '@material-ui/core';
+import { Button, Dialog, Box } from '@mui/material';
 import { arrayToDropwdownOption, CHILD_RESOURCE } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';

@@ -1,5 +1,5 @@
-import { Box, Chip, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Chip, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -464,11 +464,11 @@ const QuoteBuilders = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setIsConformDialogVisible(true);
           }}
         >
@@ -538,7 +538,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -611,7 +611,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => { }}
+          fetchQuoteData={() => {}}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,

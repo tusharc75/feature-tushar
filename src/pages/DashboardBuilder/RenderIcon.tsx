@@ -1,4 +1,4 @@
-import { SvgIconProps } from '@material-ui/core';
+import { SvgIconProps } from '@mui/material';
 import { DonutLarge, PieChart, BarChart, Map, Timeline, List } from '@material-ui/icons';
 
 interface Props extends SvgIconProps {

@@ -1,11 +1,12 @@
-import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
-import { Fragment, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
 const useStyles = makeStyles((theme) => ({
@@ -115,7 +116,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowManageDialog({open: true, isClone: true, idToClone:trailerMaster?._id })
+                          setShowManageDialog({ open: true, isClone: true, idToClone: trailerMaster?._id });
                         }}
                       >
                         <FileCopyIcon />

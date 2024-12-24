@@ -15,7 +15,7 @@ import {
   useMediaQuery,
   Menu,
   MenuItem
-} from '@material-ui/core';
+} from '@mui/material';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { AiOutlineImport } from 'react-icons/ai';

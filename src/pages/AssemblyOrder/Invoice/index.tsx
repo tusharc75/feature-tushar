@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -19,7 +19,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   const [columns, setColumns] = useState(null);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {

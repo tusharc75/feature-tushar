@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { AiFillCalendar } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import Layout from 'src/pages/Reports/Layout';

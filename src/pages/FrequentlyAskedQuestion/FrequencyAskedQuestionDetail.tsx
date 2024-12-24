@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -123,7 +123,7 @@ const FrequencyAskedQuestionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}            
+          message={`Are you sure you want to delete ${resources?.frequentlyAskedQuestion?.titleSingular?.toLowerCase()} : ${frequentlyAskedQuestionData?.label} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

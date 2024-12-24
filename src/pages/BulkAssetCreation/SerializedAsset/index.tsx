@@ -1,5 +1,5 @@
-import { Grid } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import { Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';

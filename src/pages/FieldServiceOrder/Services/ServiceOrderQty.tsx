@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -95,7 +95,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
       });
     } else {
       let unitOptions: any = [];
-      let pricingMethodOptions: any = []
+      let pricingMethodOptions: any = [];
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }

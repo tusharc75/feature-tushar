@@ -1,6 +1,6 @@
-import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Dialog from '@material-ui/core/Dialog';
+import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
 import { AddOutlined, Delete as DeleteIcon } from '@material-ui/icons';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';

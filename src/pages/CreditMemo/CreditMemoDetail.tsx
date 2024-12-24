@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -78,7 +78,9 @@ const creditMemoDetail = () => {
       setCreditMemoData(data);
       setCustomizedRoutes([{ ...routes.creditMemo, title: resources?.creditMemo?.titlePlural }, { title: data?.creditMemoNumber }]);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.creditMemo, data));
-      setAllowedToDelete(permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, data?.owner?.optionValue) && data?.canDelete
+      );
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -161,7 +163,6 @@ const creditMemoDetail = () => {
       });
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -174,7 +175,6 @@ const creditMemoDetail = () => {
     const currIdx = statusOptions.findIndex((status) => status.optionValue === creditMemoData.status);
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
-
 
   return (
     <Box className="main-container-v1">

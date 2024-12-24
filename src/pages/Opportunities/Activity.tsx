@@ -1,14 +1,15 @@
-import React from "react";
-import { Paper, Tab, Tabs, makeStyles, withStyles } from "@material-ui/core";
-import { Call, Assessment, Email, Event } from "@material-ui/icons";
+import { Assessment, Call, Email, Event } from '@material-ui/icons';
+import { Paper, Tab, Tabs } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import React from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     maxWidth: 445,
     margin: theme.spacing(1),
-    border: "1px solid #dadada",
-  },
+    border: '1px solid #dadada'
+  }
 }));
 
 // withStyles((theme) => ({
@@ -26,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 //   },
 //   selected: {},
 // }))
-const StyledTab = ((props) => <Tab disableRipple {...props} />);
+const StyledTab = (props) => <Tab disableRipple {...props} />;
 
 const Activity = () => {
   const classes = useStyles();
@@ -39,12 +40,7 @@ const Activity = () => {
   return (
     <div>
       <Paper square elevation={0} className={classes.root}>
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          indicatorColor="primary"
-          textColor="primary"
-        >
+        <Tabs value={value} onChange={handleChange} indicatorColor="primary" textColor="primary">
           <StyledTab icon={<Call />} label="Call a log" />
           <StyledTab icon={<Assessment />} label="New Task" />
           <StyledTab icon={<Email />} label="Email" />

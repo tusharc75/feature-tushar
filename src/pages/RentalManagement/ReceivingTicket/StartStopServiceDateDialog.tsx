@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import moment from 'moment';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
-
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
@@ -17,12 +16,12 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       setInitialValues({
         startDate: new Date(data.startDate),
         ...(data?.endDate && { endDate: new Date(data.endDate) })
-      })
+      });
     } else {
       setInitialValues({
         startDate: minStartDate ? new Date(minStartDate) : new Date(),
         ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
-      })
+      });
     }
   }, [data, type]);
 
@@ -58,11 +57,22 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
         }
       }}
       maxWidth="sm"
-      fullWidth>
-      <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
+      fullWidth
+    >
+      <Formik
+        initialValues={initialValues}
+        onSubmit={(val) => {
+          onSubmit(val);
+        }}
+        enableReinitialize={true}
+        validate={validate}
+      >
         {({ values, errors, touched, setFieldValue }) => (
-          <Form >
-            <CustomDialogHeader title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`} onClose={onClose} />
+          <Form>
+            <CustomDialogHeader
+              title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
+              onClose={onClose}
+            />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
@@ -85,8 +95,8 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                       />
                     </Grid>
                   )}
-                  {(type === 'startStop' || type === 'stop') &&
-                    (<Grid item xs={12} sm={12}>
+                  {(type === 'startStop' || type === 'stop') && (
+                    <Grid item xs={12} sm={12}>
                       <FormTypes
                         size="small"
                         fullWidth
@@ -104,7 +114,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         {...(maxEndDate ? { maxDate: maxEndDate } : {})}
                       />
                     </Grid>
-                    )}
+                  )}
                 </Grid>
               </Box>
             </CustomDialogContent>

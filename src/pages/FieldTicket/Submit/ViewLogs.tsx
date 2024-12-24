@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -133,7 +133,9 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
     let rows = [];
     if (isOffline) {
       rows = await findAll(objectStore.fieldTicketLogs);
-      rows = rows?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
+      rows = rows
+        ?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)
+        ?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
     } else {
       const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
       rows = data?.data;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, Box, Grid, TextField, Button } from '@material-ui/core';
+import { Dialog, Box, Grid, TextField, Button } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import ConfirmCancelDialog from '../../../ConfirmCancelDialog';

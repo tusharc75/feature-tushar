@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -206,8 +206,12 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
-             ${deleteRecord?.warehouseName}` : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.warehouseName}`
+              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+          } ?`}
           okBtnLoading={isSubmitting}
           onClose={() => {
             setDeleteRecord(null);

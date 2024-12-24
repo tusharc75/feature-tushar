@@ -1,7 +1,7 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid/Grid';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, deliveryTicket, sidebarResource, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';

@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { camelCase, isArray, upperFirst } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -196,12 +196,12 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                 });
                 if (u?.changes?.every((e: any) => e?.type === 'add')) {
                   const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
-                  u.action = "add";
+                  u.action = 'add';
                   changeString.push(`${[...materialSet].join(', ')} Added`);
                 }
                 if (u?.changes?.every((e: any) => e?.type === 'delete')) {
                   const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
-                  u.action = "delete";
+                  u.action = 'delete';
                   changeString.push(`${[...materialSet].join(', ')} Deleted`);
                 }
               } else {
@@ -253,11 +253,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
         </Box>
       )}
       {openDialog?.open && (
-        <ChangesDialog
-          open={openDialog?.open}
-          onClose={() => setOpenDialog({ open: false, data: null })}
-          data={openDialog?.data}
-        />
+        <ChangesDialog open={openDialog?.open} onClose={() => setOpenDialog({ open: false, data: null })} data={openDialog?.data} />
       )}
     </>
   );

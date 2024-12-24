@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -18,7 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 
 const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -45,11 +45,11 @@ const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
             required: true,
             tooltipMessage: '',
             sectionName: 'Data list',
-            type: 'singleLine',
+            type: 'singleLine'
           },
           isCreate: true,
           isDelete: true,
-          isUpdate: true,
+          isUpdate: true
         }
       ];
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);

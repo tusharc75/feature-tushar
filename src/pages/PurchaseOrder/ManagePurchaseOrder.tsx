@@ -1,24 +1,18 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  purchaseOrder,
-  PURCHASE_ORDER_STATUS,
-  GenerateResourceLineNumber,
-  sidebarResource,
-} from '../../constants/helpers';
+import { CustomDialogTransition, purchaseOrder, PURCHASE_ORDER_STATUS, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -63,7 +57,6 @@ const ManagePurchaseOrder = ({
       walkmeInstance.handleNext();
     }
   }, [initialData]);
-
 
   useEffect(() => {
     axiosInstance()
@@ -117,8 +110,7 @@ const ManagePurchaseOrder = ({
           }
           if (currency) {
             createValues['currency'] = currency;
-          }
-          else {
+          } else {
             if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
               createValues['currency'] = user.user?.brandCurrency;
             }
@@ -159,24 +151,26 @@ const ManagePurchaseOrder = ({
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       if (products?.length) {
         values.products = products;
       }
       if (services?.length) {
         values.services = services;
       }
-      axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
-        setLoading(false);
-        if (isRedirectTodetailPage) {
-          history.push(`${purchaseOrder.api}/detail/${data._id}`);
-        }
-        onSuccess(data);
-      }).catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
+      axiosInstance()
+        .post(`${purchaseOrder.api}`, values)
+        .then(({ data: { data } }) => {
+          setLoading(false);
+          if (isRedirectTodetailPage) {
+            history.push(`${purchaseOrder.api}/detail/${data._id}`);
+          }
+          onSuccess(data);
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
@@ -195,14 +189,13 @@ const ManagePurchaseOrder = ({
   function validate(values) {
     const errors = {};
     if (requiredCustomerAndProject) {
-      const customerAccountField = initialData.fields?.find((e) => e.fieldName === 'customerAccount')
+      const customerAccountField = initialData.fields?.find((e) => e.fieldName === 'customerAccount');
       if (requiredCustomerAndProject && !values.customerAccount) {
         errors['customerAccount'] = `${customerAccountField?.fieldLabel} is required`;
       }
-      const projectField = initialData.fields?.find((e) => e.fieldName === 'project')
+      const projectField = initialData.fields?.find((e) => e.fieldName === 'project');
       if (!values.project) {
         errors['project'] = `${projectField?.fieldLabel} is required`;
-
       }
     }
     return errors;
@@ -223,7 +216,13 @@ const ManagePurchaseOrder = ({
       fullWidth
     >
       {initialData && initialData.fields.length ? (
-        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+        <Formik
+          validate={validate}
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
@@ -252,14 +251,13 @@ const ManagePurchaseOrder = ({
                     setFieldValue={(name, value) => {
                       setFieldValue(name, value);
                       if (name === 'chartOfAccount') {
-                        const chartOfAccountField = initialData.fields?.find((e) => e.fieldName === 'chartOfAccount')
+                        const chartOfAccountField = initialData.fields?.find((e) => e.fieldName === 'chartOfAccount');
                         if (chartOfAccountField) {
-                          const chartOfAccount = chartOfAccountField?.option?.filter((e) => value?.includes(e.optionValue))
+                          const chartOfAccount = chartOfAccountField?.option?.filter((e) => value?.includes(e.optionValue));
                           if (chartOfAccount?.find((e) => e?.optionLabel.includes('55050'))) {
-                            setRequiredCustomerAndProject(true)
-                          }
-                          else {
-                            setRequiredCustomerAndProject(false)
+                            setRequiredCustomerAndProject(true);
+                          } else {
+                            setRequiredCustomerAndProject(false);
                           }
                         }
                       }

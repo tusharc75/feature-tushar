@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, Button, TextField, CircularProgress } from '@material-ui/core';
+import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, Button, TextField, CircularProgress } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

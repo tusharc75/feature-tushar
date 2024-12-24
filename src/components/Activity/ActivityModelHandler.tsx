@@ -5,7 +5,7 @@ import { CreateNote } from './Note/CreateNote';
 import { CreateEmail } from './Email/CreateEmail';
 import ManageAttachment from './Attachments/ManageAttachment';
 
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import { useState } from 'react';

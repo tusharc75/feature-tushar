@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
+import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition } from 'src/constants/helpers';

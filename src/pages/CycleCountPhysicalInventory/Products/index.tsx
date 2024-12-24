@@ -12,7 +12,7 @@ import {
   TableHead,
   TableRow,
   TextField
-} from '@material-ui/core';
+} from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, cycleCountPhysicalInventory } from 'src/constants/helpers';

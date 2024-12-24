@@ -1,17 +1,16 @@
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { LOG_RESOURCE, } from 'src/constants/helpers';
+import { LOG_RESOURCE } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ResourceLogsGrid from './ResourceLogsGrid';
 
 const ResourceLogs = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, resources }
@@ -68,9 +67,11 @@ const ResourceLogs = () => {
 
   useEffect(() => {
     if (selectedResource) {
-      axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`).then(({ data: { data } }) => {
-        setUserOptions(data["User"])
-      })
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=User`)
+        .then(({ data: { data } }) => {
+          setUserOptions(data['User']);
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -84,7 +85,7 @@ const ResourceLogs = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[8px]">
+          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-4">
             <Autocomplete
               fullWidth
               options={resourceOptions}
@@ -139,7 +140,12 @@ const ResourceLogs = () => {
             )}
           </div>
         </div>
-        <ResourceLogsGrid selectedResource={selectedResource} selectedOption={selectedOption?.optionValue} selectedAction={selectedAction?.optionValue} selectedUser={selectedUser?.optionValue} />
+        <ResourceLogsGrid
+          selectedResource={selectedResource}
+          selectedOption={selectedOption?.optionValue}
+          selectedAction={selectedAction?.optionValue}
+          selectedUser={selectedUser?.optionValue}
+        />
       </CustomContainer>
     </section>
   );

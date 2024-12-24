@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { CalendarToday, List } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -16,7 +16,7 @@ const HistoryDialog = ({ close, product, warehouse, storageLocation, productName
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`History - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        <Box className={`flex justify-end items-center min-h-[50px] ${currentView !== 'calendar' && 'md:absolute md:top-[65px] md:right-[16px]'} `}>
+        <Box className={`flex min-h-[50px] items-center justify-end ${currentView !== 'calendar' && 'md:absolute md:right-[16px] md:top-[65px]'} `}>
           <Box display="flex">
             <ToggleButtonGroup size="small" exclusive value={currentView} onChange={(e, newVal) => {}}>
               <ToggleButton value={'list'} onClick={() => setCurrentView('list')}>

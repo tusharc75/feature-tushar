@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography } from '@material-ui/core';
+import { Box, IconButton, Typography } from '@mui/material';
 import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';

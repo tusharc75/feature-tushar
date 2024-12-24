@@ -1,6 +1,6 @@
-import { IconButton } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { IconButton } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -16,9 +16,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 
-
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
-
   const renderedFrom = `${camelCase(sidebarResource.invoice)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -218,11 +216,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
 
   return (
     <Fragment>
-      <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={false}
-        previewDownloadProps={previewDownloadProps}
-        hasXpadding />
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5}>

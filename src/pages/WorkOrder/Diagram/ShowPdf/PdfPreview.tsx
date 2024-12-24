@@ -3,7 +3,7 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { asyncForEach, b64toBlob, convertBlobToBase64 } from 'src/constants/helpers';
-import { Box, Button, FormControl, Grid, Typography } from '@material-ui/core';
+import { Box, Button, FormControl, Grid, Typography } from '@mui/material';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
@@ -196,11 +196,13 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       }
     });
 
-    axiosInstance().post('/user/pdf', { images: imageData, fileName: data?.url, attachmentId: data?.attachmentId }).then(() => {
-      setSelectedAttachment(null);
-      fetchData();
-      setSubmitting(false);
-    })
+    axiosInstance()
+      .post('/user/pdf', { images: imageData, fileName: data?.url, attachmentId: data?.attachmentId })
+      .then(() => {
+        setSelectedAttachment(null);
+        fetchData();
+        setSubmitting(false);
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setSubmitting(false);
@@ -410,8 +412,8 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
 
   return (
     <Box>
-      <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
-        <div className={'flex gap-2 flex-wrap'}>
+      <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
+        <div className={'flex flex-wrap gap-2'}>
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
             Add Text
           </Button>
@@ -481,7 +483,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           </Box>
         )}
 
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <CustomButton
             disabled={isSubmitting || loading}
             loading={isSubmitting}

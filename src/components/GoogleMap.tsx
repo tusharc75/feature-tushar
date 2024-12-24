@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition, mapDarkTheme, mapLightTheme } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
-
   const [themeColor] = useAppTheme();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -40,7 +39,7 @@ const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
               options={{
                 mapTypeId: google.maps.MapTypeId.SATELLITE,
                 gestureHandling: 'cooperative',
-                styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
+                styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme
               }}
               mapContainerStyle={{
                 height: '100%',
@@ -55,7 +54,7 @@ const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
         </CustomDialogContent>
       </Dialog>
     </>
-  )
-}
+  );
+};
 
 export default GoogleMaps;

@@ -1,9 +1,8 @@
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { Fragment, useState } from 'react';
 import MergeRecordsDialog from './MergeRecordsDialog';
 
 const MergeRecords = ({ selectedRecords, resource, closeActions, onSuccess }) => {
-
   const [open, setOpen] = useState(false);
 
   return (
@@ -17,14 +16,9 @@ const MergeRecords = ({ selectedRecords, resource, closeActions, onSuccess }) =>
       >
         {`Merge (${selectedRecords?.length})`}
       </MenuItem>
-      {open &&
-        <MergeRecordsDialog
-          ids={selectedRecords?.map((e) => e?._id)}
-          onClose={() => setOpen(false)}
-          resource={resource}
-          onSuccess={onSuccess}
-        />
-      }
+      {open && (
+        <MergeRecordsDialog ids={selectedRecords?.map((e) => e?._id)} onClose={() => setOpen(false)} resource={resource} onSuccess={onSuccess} />
+      )}
     </Fragment>
   );
 };

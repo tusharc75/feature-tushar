@@ -1,7 +1,7 @@
 import { Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/core/styles';
 import { RiSpaceShipLine } from 'react-icons/ri';
 import { displayDate } from '../constants/helpers';
+import { makeStyles } from '@mui/styles';
 // import styles from './CustomTimeline.scss';
 
 const useStyles = makeStyles(() => ({

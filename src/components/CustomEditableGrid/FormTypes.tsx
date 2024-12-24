@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@material-ui/core';
+import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';

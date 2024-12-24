@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useEffect, useState } from 'react';
@@ -202,7 +202,7 @@ export default function OpportunityInAccordian({
                                   </Link>
                                 )
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
                                   <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />

@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, Typography } from '@mui/material';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
@@ -289,9 +289,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);

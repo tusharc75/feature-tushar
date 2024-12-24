@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog} from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -68,7 +68,6 @@ const DemandOrderQtyDialog = ({ onClose, materialData, demandOrderData, handleUp
       });
     }
   };
-
 
   const handleSubmit = (values) => {
     let returnData = [];

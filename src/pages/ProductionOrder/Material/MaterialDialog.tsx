@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -46,7 +46,7 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      data = data.filter((e: any) => (!e.isUneditable && !e.disableOnEdit));
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       data = data.filter((e: any) => e.fieldName !== 'workOrderNumber');
       setInitialData({
         fields: data,

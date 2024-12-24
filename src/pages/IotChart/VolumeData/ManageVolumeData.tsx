@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -42,11 +42,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'date',
+        type: 'date'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -58,11 +58,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -74,11 +74,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -91,11 +91,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         defaultValue: 0,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -108,11 +108,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: false,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -124,11 +124,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
+      isUpdate: true
     },
     {
       fieldData: {
@@ -140,31 +140,31 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
         required: true,
         tooltipMessage: '',
         sectionName: 'Volume Data',
-        type: 'number',
+        type: 'number'
       },
       isCreate: true,
       isDelete: true,
-      isUpdate: true,
-    },
-  ]
+      isUpdate: true
+    }
+  ];
 
   const fetchFields = async () => {
-      let fieldsDataForCreate = columns.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      let fieldsDataForUpdate = columns.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    let fieldsDataForCreate = columns.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+    let fieldsDataForUpdate = columns.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      if (data) {
-        fieldsDataForUpdate[0].isUneditable = true;
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
-      } else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempInitialData
-        });
-      }
+    if (data) {
+      fieldsDataForUpdate[0].isUneditable = true;
+      setInitialData({
+        fields: fieldsDataForUpdate,
+        values: getObjKeysWithValues(data, fieldsDataForUpdate)
+      });
+    } else {
+      const tempInitialData = getObjKeys('', fieldsDataForCreate);
+      setInitialData({
+        fields: fieldsDataForCreate,
+        values: tempInitialData
+      });
+    }
   };
 
   const handleSubmit = (values) => {
@@ -178,11 +178,11 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
       minid: parseInt(values.minid) || 0,
       date: values.date,
       asset: assetId
-    }
-  
+    };
+
     if (data) {
       axiosInstance()
-        .put(`${routes.serializedAsset?.path}/iot-volume`, {_id: data?._id,messageId:data.messageId, ...updatedValues})
+        .put(`${routes.serializedAsset?.path}/iot-volume`, { _id: data?._id, messageId: data.messageId, ...updatedValues })
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();

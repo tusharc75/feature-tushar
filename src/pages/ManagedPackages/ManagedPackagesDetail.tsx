@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -111,11 +111,7 @@ const ManagedPackagedDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.managedPackages?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
@@ -133,7 +129,7 @@ const ManagedPackagedDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'Products'} />
-          {!(isMobile && !isTablet) && (<CustomTab value={2} label={'Views'} />)}
+          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -156,7 +152,7 @@ const ManagedPackagedDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName} ?`}             
+          message={`Are you sure you want to delete ${resources?.managedPackages?.titleSingular?.toLowerCase()} : ${managedPackagesData?.managedPackageName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,4 +1,4 @@
-import { Collapse, TableRow } from '@material-ui/core';
+import { Collapse, TableRow } from '@mui/material';
 import { Fragment, memo } from 'react';
 import { CellRenderer } from '../TableHelperComponents';
 
