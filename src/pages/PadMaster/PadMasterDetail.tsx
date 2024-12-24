@@ -1,13 +1,12 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -16,6 +15,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagePadMaster from './ManagePadMaster';
 import Step from '../DynamicForm/Step';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Grid from '@mui/material/Grid2';
 
 const PadMasterDetail = () => {
   const { id } = useParams();
@@ -117,14 +117,17 @@ const PadMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.padMaster?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.padMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+            {permissions?.padMaster?.isUpdate && (
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                variant={'outlined'}
+                onClick={handleOpenUpdateDialog}
+                tooltip={'Edit'}
+              >
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.padMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
