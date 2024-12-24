@@ -21,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { sortBy } from 'lodash';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
 
 const AttachmentSchema = object().shape({

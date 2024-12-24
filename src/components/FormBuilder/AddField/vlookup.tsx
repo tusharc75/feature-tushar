@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { read, utils, writeFile } from 'xlsx';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';

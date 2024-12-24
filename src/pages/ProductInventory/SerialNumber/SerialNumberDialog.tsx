@@ -7,7 +7,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 

@@ -7,7 +7,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FieldArray, Form, Formik } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';

@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import { AddOutlined, Delete as DeleteIcon } from '@material-ui/icons';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

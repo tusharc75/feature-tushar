@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@mui/material';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
 import moment from 'moment';

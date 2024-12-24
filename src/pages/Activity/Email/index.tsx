@@ -14,7 +14,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { RiBillLine } from 'react-icons/ri';

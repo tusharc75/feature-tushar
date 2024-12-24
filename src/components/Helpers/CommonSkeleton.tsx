@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, GridSize } from '@mui/material';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 function CommonSkeleton({

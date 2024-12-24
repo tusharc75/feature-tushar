@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@mui/material/FormControlLabel';

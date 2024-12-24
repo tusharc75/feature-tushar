@@ -1,5 +1,5 @@
 import { IconButton, Typography } from '@mui/material';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { useContext, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
 import Markdown from 'react-markdown';

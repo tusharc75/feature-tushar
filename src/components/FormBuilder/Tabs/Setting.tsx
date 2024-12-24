@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);

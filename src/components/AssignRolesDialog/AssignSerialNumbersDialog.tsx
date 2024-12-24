@@ -19,7 +19,7 @@ import {
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

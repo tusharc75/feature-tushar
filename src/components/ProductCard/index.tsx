@@ -1,7 +1,7 @@
 import routes from '../Helpers/Routes';
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { BsFillCircleFill, BsImage } from 'react-icons/bs';
 import { useHistory } from 'react-router-dom';

@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { Add, Delete } from '@material-ui/icons';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';

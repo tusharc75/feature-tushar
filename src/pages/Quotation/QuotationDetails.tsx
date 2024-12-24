@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@mui/material';
 import CachedIcon from '@material-ui/icons/Cached';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';

@@ -1,6 +1,6 @@
 import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

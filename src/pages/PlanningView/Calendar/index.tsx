@@ -13,7 +13,7 @@ import {
   TextField
 } from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';

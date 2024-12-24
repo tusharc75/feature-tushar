@@ -1,7 +1,7 @@
 import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
 import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';

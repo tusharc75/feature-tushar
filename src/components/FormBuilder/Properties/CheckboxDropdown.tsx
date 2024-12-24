@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useState } from 'react';
 
 const checkboxValuesOptions = [{ label: 'Yes', value: true }];

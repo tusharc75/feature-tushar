@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
 
 const NotifSendType = [

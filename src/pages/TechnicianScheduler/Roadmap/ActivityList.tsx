@@ -1,11 +1,9 @@
-import { useState } from 'react';
-import { makeStyles } from '@mui/styles';
-import { Typography, Box, Button, Dialog, Avatar, IconButton } from '@mui/material';
-import { TreeView, TreeItem } from '@material-ui/lab';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import moment from 'moment';
 import { Image, Map } from '@material-ui/icons';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Avatar, Box, IconButton, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { camelCase, startCase } from 'lodash';
 import React from 'react';

@@ -1,6 +1,6 @@
 import { Box, Button, Grid, IconButton, Paper, Typography } from '@mui/material';
 import { ControlPoint } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 

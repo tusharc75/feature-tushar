@@ -22,7 +22,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';

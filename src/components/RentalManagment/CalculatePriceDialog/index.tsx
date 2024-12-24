@@ -15,7 +15,7 @@ import {
   Typography,
   TextField
 } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

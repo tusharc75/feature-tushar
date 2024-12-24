@@ -1,6 +1,6 @@
 import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
 import { camelCase, startCase } from 'lodash';
 import React, { useEffect } from 'react';

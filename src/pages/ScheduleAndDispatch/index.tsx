@@ -2,7 +2,7 @@ import { useState } from 'react';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import Scheduler from 'src/pages/ScheduleAndDispatch/Scheduler/index';
 import Dispatch from 'src/pages/ScheduleAndDispatch/Dispatch/index';
 import CustomContainer from 'src/components/CustomContainer';

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

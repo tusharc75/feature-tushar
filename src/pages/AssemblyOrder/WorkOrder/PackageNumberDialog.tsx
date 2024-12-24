@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

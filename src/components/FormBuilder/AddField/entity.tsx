@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Checkbox, FormControlLabel } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 

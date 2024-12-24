@@ -7,7 +7,7 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import InfoIcon from '@material-ui/icons/Info';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {
   Avatar,

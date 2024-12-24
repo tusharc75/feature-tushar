@@ -17,7 +17,7 @@ import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
 import CircularProgress from '@mui/material/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';

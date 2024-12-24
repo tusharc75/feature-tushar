@@ -17,7 +17,7 @@ import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
 import TextField from '@mui/material/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';

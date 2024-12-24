@@ -16,7 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import CancelIcon from '@material-ui/icons/Cancel';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
