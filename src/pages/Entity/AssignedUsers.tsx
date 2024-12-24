@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },

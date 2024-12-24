@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery } from '@mui/material';
+import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import { FormBuilder } from '../../components/FormBuilder';
@@ -22,7 +22,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     flexGrow: 1,
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },

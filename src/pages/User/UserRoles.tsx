@@ -1,11 +1,11 @@
 import { makeStyles } from '@mui/styles';
-import { Typography, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton } from '@mui/material';
+import { Typography, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Theme } from '@mui/material';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },

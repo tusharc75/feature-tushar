@@ -1,6 +1,6 @@
 import { makeStyles } from '@mui/styles';
 import List from '@mui/material/List';
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 import BoxWithBorder from '../../components/BoxWithBorder';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },

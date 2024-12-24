@@ -1,9 +1,9 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Box, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: 'flex',
     width: '100%',

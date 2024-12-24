@@ -1,4 +1,4 @@
-import { Box, Button, Grid, TextField } from '@mui/material';
+import { Box, Button, Grid, TextField, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept
 import QuotationSupplierPrice from './QuotationSupplierPrice';
 import QuoteSupplierPrice from './QuoteSupplierPrice';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   header: {
     background: '#163340',
     textAlign: 'center',

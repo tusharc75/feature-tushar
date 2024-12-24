@@ -1,5 +1,5 @@
 import { makeStyles } from '@mui/styles';
-import { Typography, Box, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Chip, Grid } from '@mui/material';
+import { Typography, Box, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Chip, Grid, Theme } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
@@ -7,7 +7,7 @@ import BoxWithBorder from '../../components/BoxWithBorder';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 import { isMobile, isTablet } from 'react-device-detect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },

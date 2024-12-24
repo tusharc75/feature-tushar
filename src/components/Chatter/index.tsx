@@ -4,8 +4,9 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import SendIcon from '@mui/icons-material/Send';
 import { CgSearchLoading } from 'react-icons/cg';
 import { makeStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   loadingContent: {
     display: 'flex',
     alignItems: 'center',

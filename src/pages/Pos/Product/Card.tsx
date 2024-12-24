@@ -5,8 +5,9 @@ import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import styles from '../pos-page.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   flexGrow1: {
     flex: 1,
     flexGrow: 1,

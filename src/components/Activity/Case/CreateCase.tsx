@@ -1,4 +1,3 @@
-import DateUtils from '@date-io/date-fns';
 import {
   Box,
   Breadcrumbs,
@@ -14,7 +13,7 @@ import {
   Typography
 } from '@mui/material';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -85,7 +84,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',
@@ -165,201 +164,199 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <MuiPickersUtilsProvider utils={DateUtils}>
-                    <Box padding={1}>
-                      <Box mb={2}>
-                        <Breadcrumbs separator=">" aria-label="breadcrumb">
-                          {initialValues.parent &&
-                            initialValues.parent.map((_p, index) => {
-                              return (
-                                <Button variant="text" key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)}>
-                                  {_p.name}
-                                </Button>
-                              );
-                            })}
-                        </Breadcrumbs>
-                      </Box>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} md={7} sm={6}>
+                  <Box padding={1}>
+                    <Box mb={2}>
+                      <Breadcrumbs separator=">" aria-label="breadcrumb">
+                        {initialValues.parent &&
+                          initialValues.parent.map((_p, index) => {
+                            return (
+                              <Button variant="text" key={index} className="cursor-pointer uppercase" onClick={() => setId(_p._id)}>
+                                {_p.name}
+                              </Button>
+                            );
+                          })}
+                      </Breadcrumbs>
+                    </Box>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={7} sm={6}>
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label="Case Name"
+                          required={true}
+                          name="name"
+                          fullWidth
+                          margin="dense"
+                          value={values['name']}
+                          error={touched['name'] && Boolean(errors['name'])}
+                          helperText={touched['name'] && errors['name']}
+                          onChange={(e) => {
+                            setFieldValue('name', e.target.value.trimStart());
+                          }}
+                        />
+                        <Box pt={1}>
                           <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Case Name"
-                            required={true}
-                            name="name"
                             fullWidth
                             margin="dense"
-                            value={values['name']}
-                            error={touched['name'] && Boolean(errors['name'])}
-                            helperText={touched['name'] && errors['name']}
+                            type="text"
+                            multiline
+                            rows={3}
+                            label="Description"
+                            value={values['description']}
+                            name="description"
+                            variant="outlined"
                             onChange={(e) => {
-                              setFieldValue('name', e.target.value.trimStart());
+                              setFieldValue('description', e.target.value);
                             }}
                           />
-                          <Box pt={1}>
-                            <TextField
-                              fullWidth
-                              margin="dense"
-                              type="text"
-                              multiline
-                              rows={3}
-                              label="Description"
-                              value={values['description']}
-                              name="description"
-                              variant="outlined"
-                              onChange={(e) => {
-                                setFieldValue('description', e.target.value);
-                              }}
-                            />
-                          </Box>
-                          {id && (
-                            <Fragment>
-                              <Box mt={1}>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  disableElevation
-                                  onClick={() => setOpenAddSub(true)}
-                                  startIcon={<TableChartIcon />}
-                                >
-                                  {' '}
-                                  Add a child Case
-                                </Button>
-                              </Box>
-                              <Box mt={2}>
-                                <SubCase
-                                  openAddSub={openAddSub}
-                                  setOpenAddSub={setOpenAddSub}
-                                  data={initialValues}
-                                  fetchCaseDetail={fetchCaseDetail}
-                                  setId={setId}
-                                />
-                              </Box>
-                              {initialValues?.relatedTo && initialValues.relatedTo.length ? (
-                                <Box mt={2}>
-                                  <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                </Box>
-                              ) : null}
-                              <Box mt={2}>
-                                <Divider />
-                                <Box mt={1}>
-                                  <Comment referenceId={id} />
-                                </Box>
-                              </Box>
-                            </Fragment>
-                          )}
-                        </Grid>
-                        <Grid item xs={12} md={5} sm={6}>
-                          <Box pt={1}>
-                            <FormControl variant="outlined" fullWidth>
-                              <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                margin="dense"
-                                label="Status"
-                                value={values['status']}
-                                name="status"
-                                onChange={(e) => {
-                                  setFieldValue('status', e.target.value);
-                                }}
+                        </Box>
+                        {id && (
+                          <Fragment>
+                            <Box mt={1}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                disableElevation
+                                onClick={() => setOpenAddSub(true)}
+                                startIcon={<TableChartIcon />}
                               >
-                                {statusList.map((_status, index) => (
-                                  <MenuItem key={index} value={_status.status}>
-                                    {_status.status}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          </Box>
-                          <Box pt={1}>
-                            <UserDropdown
-                              name="assignee"
-                              label="Assignee"
-                              errors={errors}
-                              touched={touched}
-                              required={false}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              multiple={true}
-                              value={values['assignee']}
-                              email={[]}
-                            />
-                          </Box>
-                          <Box pt={1}>
-                            <UserDropdown
-                              name="reporter"
-                              label="Reporter"
-                              errors={errors}
-                              touched={touched}
-                              required={true}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              multiple={false}
-                              value={values['reporter']}
-                            />
-                          </Box>
-                          <Box pt={1}>
-                            <KeyboardDatePicker
-                              label="Start Date"
-                              name="startDate"
-                              autoOk
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              value={values.startDate}
-                              format={dateFormatForInputControl}
-                              //minDate={new Date()}
-                              onChange={(value) => {
-                                setFieldValue('startDate', value);
-                                setFieldValue('dueDate', value);
-                              }}
-                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                            />
-                          </Box>
-                          <Box pt={1}>
-                            <KeyboardDatePicker
-                              label="Due Date"
-                              name="dueDate"
-                              autoOk
-                              variant="inline"
-                              value={values.dueDate}
-                              inputVariant="outlined"
-                              fullWidth
-                              margin="dense"
-                              format={dateFormatForInputControl}
-                              minDate={values.startDate}
-                              maxDate={initialValues.parentData && initialValues.parentData.dueDate}
-                              onChange={(value) => {
-                                setFieldValue('dueDate', value);
-                              }}
-                            />
-                          </Box>
-                          {id && (
-                            <Fragment>
-                              {initialValues.createdBy && initialValues.createdBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">
-                                    Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}
-                                  </Typography>
-                                </Box>
-                              )}
-                              {initialValues.updatedBy && initialValues.updatedBy.date && (
-                                <Box mt={1} color="text.secondary">
-                                  <Typography variant="body2">
-                                    Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}
-                                  </Typography>
-                                </Box>
-                              )}
-                            </Fragment>
-                          )}
-                        </Grid>
+                                {' '}
+                                Add a child Case
+                              </Button>
+                            </Box>
+                            <Box mt={2}>
+                              <SubCase
+                                openAddSub={openAddSub}
+                                setOpenAddSub={setOpenAddSub}
+                                data={initialValues}
+                                fetchCaseDetail={fetchCaseDetail}
+                                setId={setId}
+                              />
+                            </Box>
+                            {initialValues?.relatedTo && initialValues.relatedTo.length ? (
+                              <Box mt={2}>
+                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                              </Box>
+                            ) : null}
+                            <Box mt={2}>
+                              <Divider />
+                              <Box mt={1}>
+                                <Comment referenceId={id} />
+                              </Box>
+                            </Box>
+                          </Fragment>
+                        )}
                       </Grid>
-                    </Box>
-                  </MuiPickersUtilsProvider>
+                      <Grid item xs={12} md={5} sm={6}>
+                        <Box pt={1}>
+                          <FormControl variant="outlined" fullWidth>
+                            <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              margin="dense"
+                              label="Status"
+                              value={values['status']}
+                              name="status"
+                              onChange={(e) => {
+                                setFieldValue('status', e.target.value);
+                              }}
+                            >
+                              {statusList.map((_status, index) => (
+                                <MenuItem key={index} value={_status.status}>
+                                  {_status.status}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Box>
+                        <Box pt={1}>
+                          <UserDropdown
+                            name="assignee"
+                            label="Assignee"
+                            errors={errors}
+                            touched={touched}
+                            required={false}
+                            setFieldValue={(name, value) => {
+                              setFieldValue(name, value);
+                            }}
+                            multiple={true}
+                            value={values['assignee']}
+                            email={[]}
+                          />
+                        </Box>
+                        <Box pt={1}>
+                          <UserDropdown
+                            name="reporter"
+                            label="Reporter"
+                            errors={errors}
+                            touched={touched}
+                            required={true}
+                            setFieldValue={(name, value) => {
+                              setFieldValue(name, value);
+                            }}
+                            multiple={false}
+                            value={values['reporter']}
+                          />
+                        </Box>
+                        <Box pt={1}>
+                          <DatePicker
+                            label="Start Date"
+                            name="startDate"
+                            autoOk
+                            variant="inline"
+                            inputVariant="outlined"
+                            fullWidth
+                            margin="dense"
+                            value={values.startDate}
+                            format={dateFormatForInputControl}
+                            //minDate={new Date()}
+                            onChange={(value) => {
+                              setFieldValue('startDate', value);
+                              setFieldValue('dueDate', value);
+                            }}
+                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                          />
+                        </Box>
+                        <Box pt={1}>
+                          <DatePicker
+                            label="Due Date"
+                            name="dueDate"
+                            autoOk
+                            variant="inline"
+                            value={values.dueDate}
+                            inputVariant="outlined"
+                            fullWidth
+                            margin="dense"
+                            format={dateFormatForInputControl}
+                            minDate={values.startDate}
+                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
+                            onChange={(value) => {
+                              setFieldValue('dueDate', value);
+                            }}
+                          />
+                        </Box>
+                        {id && (
+                          <Fragment>
+                            {initialValues.createdBy && initialValues.createdBy.date && (
+                              <Box mt={1} color="text.secondary">
+                                <Typography variant="body2">
+                                  Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}
+                                </Typography>
+                              </Box>
+                            )}
+                            {initialValues.updatedBy && initialValues.updatedBy.date && (
+                              <Box mt={1} color="text.secondary">
+                                <Typography variant="body2">
+                                  Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Fragment>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Box>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,7 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },

@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@mui/material';
 import PropTypes from 'prop-types';
@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard';
 import routes from './Helpers/Routes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     marginTop: 0
   },

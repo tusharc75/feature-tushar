@@ -1,10 +1,10 @@
 import React from 'react';
-import MuiDialogContent, { DialogContentProps } from '@mui/material/DialogContent';
+import { DialogContent as MuiDialogContent, DialogContentProps, Theme } from '@mui/material';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { isMobile, isTablet } from 'react-device-detect';
 import { withStyles, CSSProperties } from '@mui/styles';
 
-const DialogContent = withStyles((theme) => ({
+const DialogContent = withStyles((theme: Theme) => ({
   root: {
     margin: 0,
     padding: theme.spacing(1, 2)

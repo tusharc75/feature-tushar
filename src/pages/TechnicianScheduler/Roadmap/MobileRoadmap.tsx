@@ -1,4 +1,4 @@
-import { Avatar, Box, Collapse, IconButton, Typography } from '@mui/material';
+import { Avatar, Box, Collapse, IconButton, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -21,7 +21,7 @@ type TProps = {
   setSelected: (data) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     '&:hover > $content': {
       backgroundColor: theme.palette.action.hover

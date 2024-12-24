@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -18,7 +18,7 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-secondary, #fff)',
     padding: '10px 10px',

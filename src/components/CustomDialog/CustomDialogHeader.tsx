@@ -1,12 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, Typography } from '@mui/material';
+import { IconButton, Theme, Typography } from '@mui/material';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import { makeStyles } from '@mui/styles';
 import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     margin: 0,
     padding: theme.spacing(1.5, 1.5, 1.5, 2),

@@ -1,4 +1,4 @@
-import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@mui/material';
+import { Chip, ChipProps, CircularProgress, Grid, TextField, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
@@ -9,7 +9,7 @@ import { useData } from '../StateProvider/Provider';
 import ActivityModelHandler from './Activity/ActivityModelHandler';
 import { get_activity_resource, get_dynamic_resource } from './Activity/Helpers/utils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   chipStyle: {
     textAlign: 'center',
     height: 'unset !important',

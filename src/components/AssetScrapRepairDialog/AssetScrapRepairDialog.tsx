@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Box, TextField } from '@mui/material';
+import { Box, TextField, Theme } from '@mui/material';
 import { Button, CircularProgress, Dialog } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -9,7 +9,7 @@ import { CustomDialogTransition, serializedAsset } from '../../constants/helpers
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

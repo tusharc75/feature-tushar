@@ -1,13 +1,13 @@
 import React, { useState, Fragment } from 'react';
 import { makeStyles, useTheme } from '@mui/styles';
-import { Box, Typography, Grid, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar } from '@mui/material';
+import { Box, Typography, Grid, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar, Theme } from '@mui/material';
 import './style.scss';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import NavLinks from '../../components/NavLinks';
 import { Image } from '@mui/icons-material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   profile: {
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(5)
