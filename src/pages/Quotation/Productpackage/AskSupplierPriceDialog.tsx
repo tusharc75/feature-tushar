@@ -111,11 +111,12 @@ const AskSupplierPriceDialog = (props) => {
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={() => {
-          setAskSupplierPriceDialog(false);
-        }}
         open={askSupplierPriceDialog}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            setAskSupplierPriceDialog(false);
+          }
+        }}
         disableEnforceFocus={true}
       >
         <CustomDialogHeader

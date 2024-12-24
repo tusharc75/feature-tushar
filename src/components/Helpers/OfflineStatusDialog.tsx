@@ -36,7 +36,6 @@ export default function OfflineStatusDialog(props) {
 
   return (
     <Dialog
-      disableBackdropClick
       disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
       maxWidth="xs"

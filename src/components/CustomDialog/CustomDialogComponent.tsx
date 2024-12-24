@@ -14,10 +14,13 @@ function CustomDialogComponent({ title, open, onClose, children }) {
   const [themeColor] = useAppTheme();
   return (
     <Dialog
-      disableBackdropClick={true}
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
       maxWidth="md"
       open={open}
-      onClose={onClose}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="form-dialog-title"
       fullScreen={isMobile || isTablet}

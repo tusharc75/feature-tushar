@@ -306,13 +306,16 @@ export default function TinyMCE(props) {
             <>
               {isUploadImage ? (
                 <Dialog
-                  disableBackdropClick={true}
+                  onClose={(event, reason) => {
+                    if (reason !== 'backdropClick') {
+                      setIsUploadImage(false)
+                    }
+                  }}
                   open={true}
                   fullScreen={isMobile || isTablet}
                   TransitionComponent={CustomDialogTransition}
                   aria-labelledby="customized-dialog-title"
                   maxWidth="xs"
-                  onClose={() => setIsUploadImage(false)}
                 >
                   <CustomDialogHeader onClose={() => setIsUploadImage(false)} title="Upload Image"></CustomDialogHeader>
 

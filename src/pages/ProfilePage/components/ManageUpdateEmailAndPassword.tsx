@@ -128,9 +128,12 @@ export default function ManageUpdateEmailAndPassword({
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      onClose={onClose}
       open={open}
-      disableBackdropClick={true}
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose()
+        }
+      }}
     >
       <CustomDialogHeader
         title={isUpdateEmail ? 'Update Email' : 'Update Password'}
