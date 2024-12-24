@@ -2,7 +2,7 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { ArrowRightAlt } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
