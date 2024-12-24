@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -104,7 +104,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         autoHighlight
         value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
         getOptionLabel={(option) => option.optionLabel || ''}
-        getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+        isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
         onChange={(event, newValue) => {
           setSelectedUsers(newValue.map((user) => user.optionValue));
         }}

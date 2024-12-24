@@ -21,7 +21,7 @@ import {
   workOrder
 } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
@@ -192,7 +192,7 @@ const WorkOrderPlanning = () => {
         style={{ minWidth: '300px' }}
         value={selectedStatus}
         getOptionLabel={(option) => option || ''}
-        getOptionSelected={(option: any, val: any) => option === val}
+        isOptionEqualToValue={(option: any, val: any) => option === val}
         onChange={(_, newVal) => {
           setSelectedStatus(newVal ? newVal : 'Pending');
         }}

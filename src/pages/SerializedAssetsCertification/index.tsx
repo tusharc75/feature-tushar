@@ -3,7 +3,7 @@ import { Box, IconButton, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import HistoryIcon from '@mui/icons-material/History';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { camelCase } from 'lodash';
 import moment from 'moment';
@@ -241,7 +241,7 @@ const SerializedAssetsCertification = () => {
               }}
               fullWidth
               options={assetOptions}
-              getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+              isOptionEqualToValue={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
               getOptionLabel={(option) => option.optionLabel}
               size="small"
               renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}

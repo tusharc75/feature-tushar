@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -42,7 +42,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
           }))
         });
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -87,7 +87,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       .then((res) => {
         onSuccess();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   return (
@@ -164,7 +164,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                   disabled
                                   options={packageOptions}
                                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                                  getOptionSelected={(option: any, val) => option?.optionValue === val}
+                                  isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                                   value={
                                     packageOptions && packageOptions.filter((f) => f?.optionValue === data?.package).length
                                       ? packageOptions.filter((f) => f?.optionValue === data?.package)[0]
@@ -221,7 +221,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                   size="small"
                   type="submit"
                   onClick={submitForm}
-                  // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                // endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Save
                 </Button>

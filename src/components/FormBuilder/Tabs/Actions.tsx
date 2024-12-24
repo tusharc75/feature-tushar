@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { getLookupResource, getResourceField } from '../helper';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -76,7 +76,7 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
     try {
       const data: any = await getResourceField(resource, true);
       setFields(data);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const validate = () => {
@@ -223,7 +223,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               options={fields}
               disabled={resourceFieldsLoading}
               getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 fields && fields.filter((data) => data?.fieldName === action?.field).length
                   ? fields && fields.filter((data) => data?.fieldName === action?.field)[0]
@@ -266,7 +266,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="resource"
               options={resource}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 resource && resource?.filter((data) => data.optionValue === action?.resource)?.length
                   ? resource && resource?.filter((data) => data.optionValue === action?.resource)[0]
@@ -301,7 +301,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               options={resourceFields}
               disabled={resourceFieldsLoading}
               getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField).length
                   ? resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField)[0]
@@ -344,7 +344,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="action"
               options={ACTION}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 ACTION && ACTION?.filter((data) => data.optionValue === action?.action)?.length
                   ? ACTION && ACTION?.filter((data) => data.optionValue === action?.action)[0]

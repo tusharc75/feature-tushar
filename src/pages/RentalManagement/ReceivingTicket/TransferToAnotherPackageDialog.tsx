@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -141,7 +141,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
                 setSelectedPackage(val);
               }}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
               renderInput={(props) => (
                 <TextField {...props} placeholder={''} variant="outlined" name="packages" required={true} label={'Select Package'} />
               )}
@@ -175,7 +175,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
             const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;

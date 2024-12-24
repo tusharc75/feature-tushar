@@ -110,9 +110,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setUserList(
           data.length
             ? data.map((user: any) => ({
-                id: user._id,
-                name: `${user.firstName} ${user.lastName}`
-              }))
+              id: user._id,
+              name: `${user.firstName} ${user.lastName}`
+            }))
             : []
         );
       })
@@ -128,9 +128,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setRoleList(
           data.length
             ? data.map((role: any) => ({
-                id: role._id,
-                name: role.name
-              }))
+              id: role._id,
+              name: role.name
+            }))
             : []
         );
       });
@@ -408,7 +408,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     getOptionLabel={(option: any) =>
                                       option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
                                     }
-                                    getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                                    isOptionEqualToValue={(option: any, val) => option?.currencyCode === val}
                                     onChange={(e, val) => {
                                       setCurrency(val?.currencyCode ? val?.currencyCode : '');
                                       setCurrencySymbol(val?.symbolNative);

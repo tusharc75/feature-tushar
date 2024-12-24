@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Box, Checkbox, FormControl, IconButton, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -138,10 +138,10 @@ export const PreviewFields = ({
                 if (
                   val.find((e) => e.fieldName === 'Select All') &&
                   ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !==
-                    val
-                      ?.map((e) => e?.fieldName)
-                      .sort()
-                      .toString()
+                  val
+                    ?.map((e) => e?.fieldName)
+                    .sort()
+                    .toString()
                 ) {
                   setVisibleColumns(allColumn);
                 } else if (
@@ -164,7 +164,7 @@ export const PreviewFields = ({
               }}
               options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...allColumn]}
               getOptionLabel={(option) => option?.fieldLabel}
-              getOptionSelected={(option: any, value: any) => option.fieldName === value.fieldName}
+              isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
               disableCloseOnSelect
               renderOption={(option, { selected }) => (
                 <React.Fragment>
@@ -174,7 +174,7 @@ export const PreviewFields = ({
                     style={{ marginRight: 8 }}
                     checked={
                       ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
-                      ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
+                        ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
                         ? true
                         : selected
                     }
@@ -195,7 +195,7 @@ export const PreviewFields = ({
               <Autocomplete
                 options={visibleColumns?.filter((e) => e?.fieldName !== 'index')}
                 getOptionLabel={(option: any) => option.fieldLabel}
-                getOptionSelected={(option: any, value: any) => option.fieldName === value.fieldName}
+                isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
                 fullWidth
                 value={sortBy}
                 onChange={(event, newValue) => {

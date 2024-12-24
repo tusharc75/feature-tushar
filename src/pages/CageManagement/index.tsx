@@ -1,7 +1,7 @@
 import { Grid, IconButton, TextField } from '@mui/material';
 import CropFreeIcon from '@mui/icons-material/CropFree';
 import HistoryIcon from '@mui/icons-material/History';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -216,7 +216,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
         options={plantOptions}
         getOptionLabel={(option: any) => option.warehouseName}
         disableClearable
-        getOptionSelected={(option: any, val) => option.warehouseId === val}
+        isOptionEqualToValue={(option: any, val) => option.warehouseId === val}
         size={'small'}
         value={
           plantOptions.filter((data) => data.warehouseId === plantId).length ? plantOptions.filter((data) => data.warehouseId === plantId)[0] : ''
@@ -235,7 +235,7 @@ const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryLis
         className="md:max-w-[250px]"
         options={productCategoryList}
         getOptionLabel={(option: any) => (option ? option.name : '')}
-        getOptionSelected={(option: any, val) => option._id === val}
+        isOptionEqualToValue={(option: any, val) => option._id === val}
         value={
           productCategoryList.find((data) => data._id === productCategory) ? productCategoryList.find((data) => data._id === productCategory) : ''
         }

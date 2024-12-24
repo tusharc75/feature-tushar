@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Add, Cancel, Delete } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
