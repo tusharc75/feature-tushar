@@ -70,7 +70,7 @@ const AssetStats = () => {
           onChange={(_, val) => setSelectedAssets(val)}
           fullWidth
           size="small"
-          getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+          isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
           getOptionLabel={(option) => option.optionLabel}
           renderOption={(option) => <Typography noWrap>{option.optionLabel}</Typography>}
           onInputChange={(_, val) => setSearchVal(val)}

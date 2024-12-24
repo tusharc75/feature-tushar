@@ -1,7 +1,7 @@
 import { Box, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@mui/material';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {

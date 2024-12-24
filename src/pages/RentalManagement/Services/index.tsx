@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem, TextField } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { startCase } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -700,7 +700,7 @@ const Services = ({
               autoHighlight
               value={selectedServiceOption}
               getOptionLabel={(option: any) => option?.optionLabel || ''}
-              getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+              isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
               onChange={(_, val) => {
                 let value = val;
                 if (!val) {

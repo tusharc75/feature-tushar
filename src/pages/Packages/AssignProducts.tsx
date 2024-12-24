@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, Fragment } from 'react';
 import { Dialog, Button, Box, TextField, CircularProgress } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';

@@ -112,7 +112,7 @@ export default function ResourceTransferDialog(props) {
             autoHighlight
             value={toResource}
             getOptionLabel={(option) => option.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+            isOptionEqualToValue={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
             onChange={(_, val) => setToResource(val)}
             renderInput={(params) => <TextField {...params} label={`To ${resource}`} variant="outlined" />}
           />

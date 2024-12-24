@@ -9,7 +9,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertInventory, CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
@@ -256,7 +256,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                       disableClearable
                       options={storageLocationOptions}
                       getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
                           ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
@@ -297,7 +297,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                         onChange={(_, val) => {
                           setFieldValue('serialNumbers', val);
                         }}
-                        getOptionSelected={(item, current) => item === current}
+                        isOptionEqualToValue={(item, current) => item === current}
                         getOptionLabel={(option) => option}
                         renderInput={(props) => (
                           <TextField

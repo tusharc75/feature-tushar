@@ -1,5 +1,5 @@
 import { IconButton, InputAdornment, TextField, Typography } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { find, result } from 'lodash';
@@ -109,13 +109,13 @@ const FormTypes = (props) => {
       disabled={disabled}
       value={options.find((data) => data.optionValue === values[name]) ? options.find((data) => data.optionValue === values[name]) : ''}
       getOptionLabel={(option: any) => option?.optionLabel || ''}
-      getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+      isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
       onChange={
         onChange
           ? onChange
           : (e, val) => {
-              handleChange(name, val?.optionValue);
-            }
+            handleChange(name, val?.optionValue);
+          }
       }
       renderInput={(params) => (
         <TextField
@@ -145,25 +145,25 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                if (fieldData?.isConverter) {
-                  handleCurrencyChangeWithConverterChange(
-                    name,
-                    currency,
-                    unit,
-                    e.target.value === ''
-                      ? 0
-                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                        ? e.target.value.replace(/,/g, '')
-                        : parseFloat(e.target.value.replace(/,/g, ''))
-                  );
-                } else if (fieldData.displayCurrency.length > 1) {
-                  handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                } else {
-                  handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                }
+            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+              if (fieldData?.isConverter) {
+                handleCurrencyChangeWithConverterChange(
+                  name,
+                  currency,
+                  unit,
+                  e.target.value === ''
+                    ? 0
+                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                      ? e.target.value.replace(/,/g, '')
+                      : parseFloat(e.target.value.replace(/,/g, ''))
+                );
+              } else if (fieldData.displayCurrency.length > 1) {
+                handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              } else {
+                handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
               }
             }
+          }
       }
       autoComplete="off"
       onBlur={(e) => {
@@ -241,8 +241,8 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
-            }
+            handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+          }
       }
       InputProps={{
         inputProps: { min: 0 },
@@ -272,13 +272,13 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              handleChange(
-                name,
-                e.target.value === ''
-                  ? 0
-                  : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
-              );
-            }
+            handleChange(
+              name,
+              e.target.value === ''
+                ? 0
+                : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+            );
+          }
       }
     />
   ) : fieldData?.type === 'vlookupDropdown' ? (
@@ -313,12 +313,12 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (fieldData?.returnType === 'decimal') {
-                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              } else {
-                handleChange(name, e.target.value);
-              }
+            if (fieldData?.returnType === 'decimal') {
+              handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            } else {
+              handleChange(name, e.target.value);
             }
+          }
       }
       InputProps={{
         inputProps: { min: 0 },
@@ -337,7 +337,7 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
     let value: { name: string; value: any[] } | string = serializedData;
     try {
       value = JSON.parse(serializedData) as { name: string; value: any[] };
-    } catch (error) {}
+    } catch (error) { }
 
     if (typeof value === 'string' || !value) {
       // Allow pasting of normal text.
@@ -376,13 +376,13 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
         limitTags={1}
         value={value}
         getOptionLabel={(option: any) => option?.optionLabel || ''}
-        getOptionSelected={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
+        isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
         onChange={
           onChange
             ? onChange
             : (e, val) => {
-                handleChange(name, val ? val : []);
-              }
+              handleChange(name, val ? val : []);
+            }
         }
         renderInput={(params) => (
           <TextField

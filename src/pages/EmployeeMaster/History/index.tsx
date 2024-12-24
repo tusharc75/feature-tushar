@@ -10,7 +10,7 @@ import { camelCase } from 'lodash';
 import { dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 

@@ -1,6 +1,6 @@
 import { useState, Fragment, useContext } from 'react';
 import { Avatar, TextField, Box, Button } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -30,9 +30,9 @@ const NewChat = (props) => {
           chatTitle: data.group
             ? data.group
             : data.users
-                .filter((d) => d._id !== userId)
-                .map((_d) => `${_d.firstName} ${_d.lastName}`)
-                .join(', ')
+              .filter((d) => d._id !== userId)
+              .map((_d) => `${_d.firstName} ${_d.lastName}`)
+              .join(', ')
         };
         if (setChatOpen) {
           setChatOpen(true);

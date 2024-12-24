@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -126,7 +126,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                     ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) => values[name].includes(data.optionValue))
                     : []
                 }
-                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={(e, val: any) => {
                   setFieldValue(name, val ? val.map((val) => val?.optionValue) : []);
                   setSelectedOption(val ? val : []);
@@ -182,7 +182,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 fullWidth
                 loading={loading}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={uniqBy([...options, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === values[name]) || ''}
                 onChange={(e, val) => {
                   setFieldValue(name, val ? val?.optionValue : '');

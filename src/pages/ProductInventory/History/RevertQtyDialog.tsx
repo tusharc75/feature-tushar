@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import React from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -105,7 +105,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                     size="small"
                     value={values?.serialNumber ? serialNumber?.filter((data: any) => values?.serialNumber?.includes(data.optionValue)) : []}
                     getOptionLabel={(option) => option.optionLabel}
-                    getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                    isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                     onChange={(_, newVal: any) => {
                       const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                       const values = isAll ? [...serialNumber?.map((o) => o.optionValue)] : newVal?.map((val) => val.optionValue);

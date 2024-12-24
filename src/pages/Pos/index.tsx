@@ -2,7 +2,7 @@ import { Badge, Box, Button, Grid, IconButton, TextField } from '@mui/material';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import CropFreeIcon from '@mui/icons-material/CropFree';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -184,7 +184,7 @@ const Pos = () => {
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.warehouseName}
                 disableClearable
-                getOptionSelected={(option: any, val) => option.warehouseId === val}
+                isOptionEqualToValue={(option: any, val) => option.warehouseId === val}
                 value={
                   plantOptions.filter((data) => data.warehouseId === plantId).length
                     ? plantOptions.filter((data) => data.warehouseId === plantId)[0]
@@ -215,7 +215,7 @@ const Pos = () => {
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
+                isOptionEqualToValue={(option: any, val) => option._id === val}
                 value={
                   productCategoryList.find((data) => data._id === productCategory)
                     ? productCategoryList.find((data) => data._id === productCategory)

@@ -17,7 +17,7 @@ import {
   MenuItem
 } from '@mui/material';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { AiOutlineImport } from 'react-icons/ai';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -414,7 +414,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={productCategory}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
                       ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
@@ -432,7 +432,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={productTemplate}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
                       ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
@@ -454,7 +454,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   style={{ minWidth: '250px', flexGrow: 1 }}
                   options={priceTemplate}
                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   value={
                     priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
                       ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
@@ -642,15 +642,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  // error={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  // }
-                                  // helperText={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                  //   'Required field'
-                                  // }
+                                // error={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                // }
+                                // helperText={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                //   'Required field'
+                                // }
                                 />
                               )}
                             />

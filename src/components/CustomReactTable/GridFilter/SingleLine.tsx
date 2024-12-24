@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce, startCase } from 'lodash';
 import { useCallback, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -75,7 +75,7 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
         autoHighlight
         value={value}
         getOptionLabel={(option: any) => option || ''}
-        getOptionSelected={(option, val) => option === val}
+        isOptionEqualToValue={(option, val) => option === val}
         onChange={onChange}
         renderInput={(params) => (
           <TextField

@@ -42,7 +42,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
             options={entityOptions}
             disabled={!values['isFieldEntityWise']}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option?.optionValue === val?.optionValue}
+            isOptionEqualToValue={(option: any, val) => option?.optionValue === val?.optionValue}
             value={
               values['fieldEntity']?.length > 0
                 ? entityOptions.filter((option) => values['fieldEntity'].includes(option.optionValue))?.map((option) => option)

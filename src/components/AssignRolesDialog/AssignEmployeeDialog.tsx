@@ -1,5 +1,5 @@
 import { Box, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -212,7 +212,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
           className="max-w-[300px]"
           options={warehouseOptions}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]

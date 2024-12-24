@@ -19,7 +19,7 @@ import {
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -132,7 +132,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -259,32 +259,31 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedProduct === d.id) {
-                      setSelectedProduct(null);
-                    } else {
-                      setSelectedProduct(d.id);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -293,7 +292,7 @@ const AssignSerialNumbersDialog = ({
               fullWidth
               options={warehouseOption}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
                   ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]

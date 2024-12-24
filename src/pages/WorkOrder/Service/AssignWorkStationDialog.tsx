@@ -97,7 +97,7 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
               setSelectedWorkStations(val);
             }}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
             renderInput={(props) => (
               <TextField {...props} placeholder={''} variant="outlined" name="workStationList" label={'Select Work Stations'} />
             )}
