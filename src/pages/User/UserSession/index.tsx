@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { Line } from 'react-chartjs-2';
 import { dateFormatForInputControl } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -143,66 +143,64 @@ const UserSession = ({ id }) => {
       </Box>
       <Box padding="10px">
         <Grid item xs={12} sm={12} md={12}>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select
-                    labelId="duration"
-                    id="time-duration"
-                    value={timeFrame}
-                    onChange={(e) => setTimeFrame(e.target.value)}
-                    label="Select Duration"
-                  >
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  autoOk
-                  size="small"
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  maxDate={trackingTime.between.to}
-                  label="From"
-                  views={['year', 'month', 'date']}
-                  value={trackingTime.between.from}
-                  onChange={(date) => {
-                    setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  autoOk
-                  size="small"
-                  minDate={trackingTime.between.from}
-                  openTo="year"
-                  format={dateFormatForInputControl}
-                  label="To"
-                  views={['year', 'month', 'date']}
-                  value={trackingTime.between.to}
-                  onChange={(date) => {
-                    setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                  }}
-                />
-              </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}>
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel id="duration">Select Duration</InputLabel>
+                <Select
+                  labelId="duration"
+                  id="time-duration"
+                  value={timeFrame}
+                  onChange={(e) => setTimeFrame(e.target.value)}
+                  label="Select Duration"
+                >
+                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                  <MenuItem value={'custom'}>Custom</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-          </MuiPickersUtilsProvider>
+            <Grid item xs={6} sm={4}>
+              <DatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                autoOk
+                size="small"
+                openTo="year"
+                format={dateFormatForInputControl}
+                maxDate={trackingTime.between.to}
+                label="From"
+                views={['year', 'month', 'date']}
+                value={trackingTime.between.from}
+                onChange={(date) => {
+                  setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
+                }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={4}>
+              <DatePicker
+                disabled={timeFrame !== 'custom'}
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                autoOk
+                size="small"
+                minDate={trackingTime.between.from}
+                openTo="year"
+                format={dateFormatForInputControl}
+                label="To"
+                views={['year', 'month', 'date']}
+                value={trackingTime.between.to}
+                onChange={(date) => {
+                  setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
+                }}
+              />
+            </Grid>
+          </Grid>
         </Grid>
       </Box>
       <Typography className="subtitle1 m-2">

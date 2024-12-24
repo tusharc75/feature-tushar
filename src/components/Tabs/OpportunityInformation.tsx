@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Grid, Typography, TextField, Link } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import moment from 'moment';
-
-// import SelectSearch from "react-select-search";
+import DatePicker from '@mui/lab/DatePicker';
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
 
@@ -58,54 +54,52 @@ const OpportunityInformation = () => {
 
   return (
     <div>
-      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
-        {/* Left Side Box */}
-        <Grid container spacing={2}>
-          <Grid item sm={12} md={7}>
-            <BoxWithBorder>
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Opportunity Name</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" placeholder="_ _ _" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+      <Grid container spacing={2}>
+        <Grid item sm={12} md={7}>
+          <BoxWithBorder>
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Opportunity Name</Typography>
               </Grid>
-
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Target Close Date</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <KeyboardDatePicker
-                    clearable
-                    inputVariant="outlined"
-                    value={selectedDate}
-                    onChange={(date: any) => setSelectedDate(date)}
-                    minDate={new Date()}
-                    format="Mon DD, YYYY"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" placeholder="_ _ _" />
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Add Currency</Typography>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={6}
-                  lg={5}
-                  // className={classes.selectInput}
-                >
-                  {/* <SelectSearch
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Target Close Date</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <DatePicker
+                  clearable
+                  inputVariant="outlined"
+                  value={selectedDate}
+                  onChange={(date: any) => setSelectedDate(date)}
+                  minDate={new Date()}
+                  format="Mon DD, YYYY"
+                />
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
+
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Add Currency</Typography>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={6}
+                lg={5}
+              // className={classes.selectInput}
+              >
+                {/* <SelectSearch
                     onChange={handleCurrencyChange}
                     search
                     options={currencyOptions}
@@ -113,148 +107,147 @@ const OpportunityInformation = () => {
                     // name="language"
                     placeholder="Select Currency"
                   /> */}
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Purchase Timeframe</Typography>
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={6}
-                  lg={5}
-                  // className={classes.selectInput}
-                >
-                  {/* <SelectSearch
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Purchase Timeframe</Typography>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={6}
+                lg={5}
+              // className={classes.selectInput}
+              >
+                {/* <SelectSearch
                     search
                     options={salesPersonOptions}
                     placeholder="Select Purchase Timeframe"
                   /> */}
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Est. Revenue</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" placeholder="$" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Est. Revenue</Typography>
               </Grid>
-
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Probability(%)</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" placeholder="_ _ _%" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" placeholder="$" />
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Type</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  {/* <SelectSearch
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Probability(%)</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" placeholder="_ _ _%" />
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
+
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Type</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                {/* <SelectSearch
                     search
                     options={bussinessTypeOptions}
                     placeholder="Select Type"
                   /> */}
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Sales Person</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  {/* <SelectSearch
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Sales Person</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                {/* <SelectSearch
                     search
                     options={salesPersonOptions}
                     placeholder="Select Person"
                   /> */}
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}>
-                  <Link className={classes.inputLable}>Create a new sales person</Link>
-                </Grid>
               </Grid>
-
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Details</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}>
+                <Link className={classes.inputLable}>Create a new sales person</Link>
               </Grid>
-            </BoxWithBorder>
+            </Grid>
 
-            <div style={{ marginBottom: 20 }} />
-            {/* Bottom Box */}
-            <BoxWithBorder>
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Current Situation</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Details</Typography>
               </Grid>
-
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Customer Needs</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
               </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
+          </BoxWithBorder>
 
-              {/* New Input */}
-              <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
-                <Grid item xs={12} sm={6} md={6} lg={3}>
-                  <Typography className={classes.inputLable}>Proposed Solution</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6} lg={5}>
-                  <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+          <div style={{ marginBottom: 20 }} />
+          {/* Bottom Box */}
+          <BoxWithBorder>
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Current Situation</Typography>
               </Grid>
-            </BoxWithBorder>
-          </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
 
-          {/* Right Side Box */}
-          <Grid item sm={12} md={5} className={classes.aiSide}>
-            <BoxWithBorder>
-              <Typography variant="h6" style={{ marginBottom: 20 }}>
-                AI Assitant
-              </Typography>
-              <img src={SVG('AI Robot')} alt="AI Robot" />
-              <Typography style={{ marginTop: 50 }}>To enable AI assistant save this opportunity</Typography>
-            </BoxWithBorder>
-          </Grid>
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Customer Needs</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
+
+            {/* New Input */}
+            <Grid container spacing={2} alignItems="center" className={classes.inputMargin}>
+              <Grid item xs={12} sm={6} md={6} lg={3}>
+                <Typography className={classes.inputLable}>Proposed Solution</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={6} lg={5}>
+                <TextField className={classes.input} variant="outlined" multiline rows={4} placeholder="_ _ _" />
+              </Grid>
+              <Grid item xs={12} sm={12} md={12} lg={4}></Grid>
+            </Grid>
+          </BoxWithBorder>
         </Grid>
-      </MuiPickersUtilsProvider>
+
+        {/* Right Side Box */}
+        <Grid item sm={12} md={5} className={classes.aiSide}>
+          <BoxWithBorder>
+            <Typography variant="h6" style={{ marginBottom: 20 }}>
+              AI Assitant
+            </Typography>
+            <img src={SVG('AI Robot')} alt="AI Robot" />
+            <Typography style={{ marginTop: 50 }}>To enable AI assistant save this opportunity</Typography>
+          </BoxWithBorder>
+        </Grid>
+      </Grid>
     </div>
   );
 };

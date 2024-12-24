@@ -4,8 +4,6 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
@@ -175,122 +173,120 @@ const CustomReport = () => {
   };
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
-      <section className="main-container-v1">
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs
-            routes={[
-              { title: 'Reports', path: '/reports' },
-              { title: 'Custom Report', path: '' }
-            ]}
-          />
-        </div>
-        <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className={'align-items-center flex w-full justify-between gap-1'}></div>
-              <div className="flex flex-wrap justify-end gap-[8px]">
-                <div className="flex flex-wrap items-center gap-[8px]">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setShowManageDialog({ open: true, id: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs
+          routes={[
+            { title: 'Reports', path: '/reports' },
+            { title: 'Custom Report', path: '' }
+          ]}
+        />
+      </div>
+      <CustomContainer>
+        <div className="header-panel">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className={'align-items-center flex w-full justify-between gap-1'}></div>
+            <div className="flex flex-wrap justify-end gap-[8px]">
+              <div className="flex flex-wrap items-center gap-[8px]">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setShowManageDialog({ open: true, id: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
 
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                <>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={`new-dropdown-v1`}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                    disabled={selectedRecords?.length ? false : true}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                      onClick={() => {
+                        if (selectedRecords.length === 1) {
+                          setDeleteRecord(selectedRecords[0]);
+                        } else {
+                          setDeleteRecord(null);
+                        }
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                        onClick={() => {
-                          if (selectedRecords.length === 1) {
-                            setDeleteRecord(selectedRecords[0]);
-                          } else {
-                            setDeleteRecord(null);
-                          }
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                </div>
+                      {`Delete (${selectedRecords?.length})`}
+                    </MenuItem>
+                  </Menu>
+                </>
               </div>
             </div>
           </div>
-          {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              isClientSideGrid={true}
-              showOnlyShowFilteredRecordSwitch={false}
-              showFilters={false}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </CustomContainer>
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.customReportName || ''}` : `selected records`} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            okBtnLoading={isSubmitting}
-            onOk={handleDelete}
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            isClientSideGrid={true}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
-        {showManageDialog.open && (
-          <ManageCustomReport
-            id={showManageDialog.id}
-            handleClose={() => setShowManageDialog({ open: false, id: null })}
-            onSuccess={() => {
-              fetchData();
-              setShowManageDialog({ open: false, id: null });
-            }}
-          />
-        )}
-      </section>
-    </MuiPickersUtilsProvider>
+      </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.customReportName || ''}` : `selected records`} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageCustomReport
+          id={showManageDialog.id}
+          handleClose={() => setShowManageDialog({ open: false, id: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, id: null });
+          }}
+        />
+      )}
+    </section>
   );
 };
 
