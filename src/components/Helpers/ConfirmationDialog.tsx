@@ -47,8 +47,6 @@ export default function ConfirmationDialogRaw({
 
   return (
     <Dialog
-      disableBackdropClick
-      disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
       transitionDuration={walkmeInstance ? 0 : 250}
       maxWidth="xs"

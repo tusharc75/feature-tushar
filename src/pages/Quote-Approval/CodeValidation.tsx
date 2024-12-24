@@ -60,9 +60,12 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={close}
         open={open}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            close();
+          }
+        }}
       >
         <CustomDialogHeader
           title={title}
