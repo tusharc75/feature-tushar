@@ -148,14 +148,11 @@ const CardView = (props, ref) => {
   }, []);
 
   useEffect(() => {
-    if (filterQuery?.filterById?.length > 0 || filterQuery?.deepFilter?.length > 0) {
+    if (filterQuery?.length > 0) {
       let query = `&filterType=and`;
 
-      if (filterQuery?.filterById?.length > 0) {
-        query = `${query}&filterById=${JSON.stringify(filterQuery?.filterById)}`;
-      }
-      if (filterQuery?.deepFilter?.length > 0) {
-        query = `${query}&deepFilter=${JSON.stringify(filterQuery?.deepFilter)}`;
+      if (filterQuery?.length > 0) {
+        query = `${query}&filterById=${JSON.stringify(filterQuery)}`;
       }
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
