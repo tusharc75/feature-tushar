@@ -1,4 +1,4 @@
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { Box, Button, IconButton } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { MdAddShoppingCart } from 'react-icons/md';

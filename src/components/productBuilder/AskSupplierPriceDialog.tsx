@@ -9,7 +9,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomButton from '../Helpers/CustomButton';
 import TinyMce from '../TinyMCE';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { GoArrowDown } from 'react-icons/go';
 import { fileIcons } from '../Activity/Email/FileIcons';
 import { useContext, useEffect, useState } from 'react';

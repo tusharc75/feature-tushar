@@ -3,7 +3,7 @@ import { Box, Button, capitalize, Chip, Dialog, Divider, IconButton, List, ListI
 import { useHistory } from 'react-router-dom';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
+import ImageIcon from '@mui/icons-material/Image';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import BarcodeScannerComponent from 'react-qr-barcode-scanner';
 import { MdAddShoppingCart } from 'react-icons/md';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 
 export default function Scan({ onClose, plantId, setAssignCartProductQty }) {
   const toastConfig = useContext(CustomToastContext);

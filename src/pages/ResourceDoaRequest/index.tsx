@@ -12,7 +12,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DOA_STATUS, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { CancelOutlined, CheckCircleOutlined } from '@material-ui/icons';
+import { CancelOutlined, CheckCircleOutlined } from '@mui/icons-material';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';

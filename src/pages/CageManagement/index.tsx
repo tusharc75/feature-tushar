@@ -1,6 +1,6 @@
 import { Grid, IconButton, TextField } from '@mui/material';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import HistoryIcon from '@material-ui/icons/History';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import HistoryIcon from '@mui/icons-material/History';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

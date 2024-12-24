@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
-import { DragIndicator } from '@material-ui/icons';
+import { DragIndicator } from '@mui/icons-material';
 import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 

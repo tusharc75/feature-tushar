@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@mui/material';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Autocomplete } from '@mui/material';
 import { camelCase, has, isEmpty } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';

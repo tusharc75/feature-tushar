@@ -1,6 +1,6 @@
-import { Clear as ClearIcon } from '@material-ui/icons';
-import CallMadeIcon from '@material-ui/icons/CallMade';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+import { Clear as ClearIcon } from '@mui/icons-material';
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import { IconButton, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { kebabCase } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';

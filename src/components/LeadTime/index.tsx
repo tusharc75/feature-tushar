@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, Typography } from '@mui/material';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import ManageLeadTime from './ManageLeadTime';
 import axiosInstance from 'src/axios/axiosInstance';

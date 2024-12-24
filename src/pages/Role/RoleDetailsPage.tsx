@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@mui/material';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint } from '@mui/icons-material';
 import { Autocomplete, Skeleton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

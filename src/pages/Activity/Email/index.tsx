@@ -1,6 +1,6 @@
 import { Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { convertNodeToElement } from 'react-html-parser';

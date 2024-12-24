@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { startCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

@@ -1,4 +1,4 @@
-import { Check } from '@material-ui/icons';
+import { Check } from '@mui/icons-material';
 import { Grid, Paper, Step, StepConnector, StepLabel, Stepper, Typography } from '@mui/material';
 import { makeStyles, withStyles } from '@mui/styles';
 import clsx from 'clsx';

@@ -2,8 +2,8 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } f
 import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';

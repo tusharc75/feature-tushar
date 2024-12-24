@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@mui/material';
 import ListItem from '@mui/material/ListItem/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

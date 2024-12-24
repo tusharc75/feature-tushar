@@ -11,7 +11,7 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { kebabCase } from 'lodash';
 import moment from 'moment';
 import { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';

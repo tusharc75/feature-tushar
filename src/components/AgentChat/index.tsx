@@ -1,5 +1,5 @@
 import { Button, Grow } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Chatbox, { useChatboxReducer } from 'src/components/AiChatbox';

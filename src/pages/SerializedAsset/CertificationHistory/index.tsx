@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';

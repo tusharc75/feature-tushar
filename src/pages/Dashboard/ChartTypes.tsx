@@ -1,7 +1,7 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
 import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@mui/material';
-import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
+import { ImportExport, TableChart, Timeline, Maximize } from '@mui/icons-material';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@mui/material';
@@ -21,7 +21,7 @@ import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { FunnelChart } from 'react-funnel-pipeline';
 import 'react-funnel-pipeline/dist/index.css';

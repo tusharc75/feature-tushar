@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import { MoreHoriz, Settings } from '@material-ui/icons';
+import { MoreHoriz, Settings } from '@mui/icons-material';
 import { useState } from 'react';
 import { OPERATOR } from 'src/components/FormBuilder/helper';
 import ValidationDialog from 'src/components/FormBuilder/Properties/Validation/ValidationDialog';

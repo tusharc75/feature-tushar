@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Grid, IconButton, Typography } from '@mui/material';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { IoCalendarOutline } from 'react-icons/io5';

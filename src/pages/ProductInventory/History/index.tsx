@@ -26,7 +26,7 @@ import RevertQtyDialog from './RevertQtyDialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Autocomplete } from '@mui/material';
-import { Autorenew } from '@material-ui/icons';
+import { Autorenew } from '@mui/icons-material';
 import { FiExternalLink } from 'react-icons/fi';
 
 export const ReferenceRenderer = (row) => {

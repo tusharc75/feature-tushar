@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Popover } from '@mui/material';
 import IconWithPulse from 'src/components/IconWithPulse';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import { read, utils } from 'xlsx';
 import { makeStyles } from '@mui/styles';

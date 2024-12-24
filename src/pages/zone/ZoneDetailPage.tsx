@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';

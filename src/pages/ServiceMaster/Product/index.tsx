@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, useMediaQuery } from '@mui/material'
 import { serviceMaster, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { useData } from '../../../StateProvider/Provider';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
@@ -15,7 +15,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 

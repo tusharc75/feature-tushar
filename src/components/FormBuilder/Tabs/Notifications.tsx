@@ -9,7 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FieldArray, Form, Formik } from 'formik';
 import { Autocomplete } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isArray } from 'lodash';
 

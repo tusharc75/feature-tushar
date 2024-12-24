@@ -1,5 +1,5 @@
 import { Button, Menu, MenuItem } from '@mui/material';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState } from 'react';

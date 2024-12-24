@@ -1,11 +1,11 @@
 import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useEffect, useState } from 'react';
 
-import { MoreVert } from '@material-ui/icons';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { MoreVert } from '@mui/icons-material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { BiCustomize } from 'react-icons/bi';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';

@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem, TextField } from '@mui/material';
-import CachedIcon from '@material-ui/icons/Cached';
+import CachedIcon from '@mui/icons-material/Cached';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

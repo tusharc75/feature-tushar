@@ -3,8 +3,8 @@ import styles from './index.module.scss';
 
 import type { CardInterface } from './';
 import { Checkbox, IconButton, Grid } from '@mui/material';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useCollapse } from 'src/hooks';
 
 interface CardWithCheckboxProps extends CardInterface {

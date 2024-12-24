@@ -24,9 +24,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { MdAdd, MdOutlineHorizontalRule } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
 const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDeleteCart }) => {

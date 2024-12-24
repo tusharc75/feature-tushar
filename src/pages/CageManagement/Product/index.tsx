@@ -9,7 +9,7 @@ import { cageManagement, gridLoadingTimeout, isObjectEmpty } from 'src/constants
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
-import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';
+import AddToPhotosOutlinedIcon from '@mui/icons-material/AddToPhotosOutlined';
 
 const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, searchVal, productCategory, refreshData }) => {
   const toastConfig = useContext(CustomToastContext);

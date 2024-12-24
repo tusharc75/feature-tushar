@@ -1,12 +1,12 @@
 import DateUtils from '@date-io/date-fns';
-import { Image } from '@material-ui/icons';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import CreditCardIcon from '@material-ui/icons/CreditCard';
-import DeleteIcon from '@material-ui/icons/Delete';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import InfoIcon from '@material-ui/icons/Info';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
-import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import { Image } from '@mui/icons-material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import DeleteIcon from '@mui/icons-material/Delete';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import InfoIcon from '@mui/icons-material/Info';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {

@@ -9,15 +9,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
-import { Add } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { Add } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';

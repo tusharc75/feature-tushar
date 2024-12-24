@@ -10,7 +10,7 @@ import { MdAddShoppingCart } from 'react-icons/md';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import { Link } from 'react-router-dom';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 import routes from '../../../components/Helpers/Routes';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 

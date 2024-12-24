@@ -1,5 +1,5 @@
 import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 

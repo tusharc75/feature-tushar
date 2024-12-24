@@ -10,7 +10,7 @@ import moment from 'moment';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {

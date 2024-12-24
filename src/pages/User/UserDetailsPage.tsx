@@ -1,4 +1,4 @@
-import { ControlPoint, Edit } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import { Box, Dialog, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';

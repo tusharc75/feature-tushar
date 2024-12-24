@@ -14,7 +14,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Services from 'src/pages/Packages/Services';
 import Products from 'src/pages/Packages/Products';

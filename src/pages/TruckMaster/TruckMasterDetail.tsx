@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { Edit } from '@material-ui/icons';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Edit } from '@mui/icons-material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';

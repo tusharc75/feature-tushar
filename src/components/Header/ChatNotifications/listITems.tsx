@@ -1,5 +1,5 @@
 import { Avatar, Chip, ListItem, Typography } from '@mui/material';
-import { Check, Group } from '@material-ui/icons';
+import { Check, Group } from '@mui/icons-material';
 import moment from 'moment';
 import { ForwardedRef, forwardRef, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

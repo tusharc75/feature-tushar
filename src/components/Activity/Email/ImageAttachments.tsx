@@ -2,7 +2,7 @@ import emailStyles from '../../../pages/Activity/Email/email.module.scss';
 import Grid from '@mui/material/Grid';
 import { Paper } from '@mui/material';
 import { IconButton } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { GoArrowDown } from 'react-icons/go';
 
 export default function ImageAttachments(props) {

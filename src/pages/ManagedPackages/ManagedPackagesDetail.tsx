@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagedPackages from './ManageManagedPackages';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';

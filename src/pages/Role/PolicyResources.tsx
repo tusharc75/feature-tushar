@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import React from 'react';
 import routes from 'src/components/Helpers/Routes';

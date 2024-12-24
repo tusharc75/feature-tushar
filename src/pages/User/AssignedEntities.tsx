@@ -1,7 +1,7 @@
 import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { ControlPoint, Delete } from '@material-ui/icons';
+import { ControlPoint, Delete } from '@mui/icons-material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';

@@ -13,7 +13,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import React, { useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { TableData } from 'src/components/Shared/types';

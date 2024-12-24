@@ -1,6 +1,6 @@
 import React, { FC, memo, useRef, useState } from 'react';
 import { Collapse } from '@mui/material';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import Chart from '../Helper/Chart';
 import { VariableSizeList, areEqual } from 'react-window';
 

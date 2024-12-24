@@ -9,7 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ManageFleetReceiverDialog from './ReceiverDialog';
 import moment from 'moment';
 import { dateFormat } from 'src/constants/helpers';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
-import { Delete, DragIndicator, Edit } from '@material-ui/icons';
+import { Delete, DragIndicator, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfigureItemDialog from './ConfigureItemDialog';

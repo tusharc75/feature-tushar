@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, MenuItem, Button, CircularProgress } from '@mui/material';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const SendMailMenu = ({ exportData, isProcessing }) => {

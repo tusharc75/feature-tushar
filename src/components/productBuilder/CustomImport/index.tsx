@@ -31,7 +31,7 @@ import { read, utils, write, writeFile } from 'xlsx';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete } from '@mui/icons-material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
 import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';

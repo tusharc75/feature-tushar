@@ -12,9 +12,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ViewBillingDialog from './ViewBillingDialog';
 import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {

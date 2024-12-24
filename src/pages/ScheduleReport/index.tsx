@@ -1,6 +1,6 @@
 import MomentUtils from '@date-io/moment';
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

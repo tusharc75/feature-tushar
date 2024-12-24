@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, IconButton } from '@mui/material';
-import { AddOutlined } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { AddOutlined } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

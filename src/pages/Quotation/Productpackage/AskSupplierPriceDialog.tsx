@@ -3,7 +3,7 @@ import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mu
 import Dialog from '@mui/material/Dialog';
 import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvider';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { GoArrowDown } from 'react-icons/go';
 import { useContext, useEffect, useState } from 'react';
 import emailStyles from '../../Activity/Email/email.module.scss';

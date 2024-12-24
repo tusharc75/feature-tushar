@@ -1,5 +1,5 @@
 import { IconButton, IconButtonProps } from '@mui/material';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert } from '@mui/icons-material';
 import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';

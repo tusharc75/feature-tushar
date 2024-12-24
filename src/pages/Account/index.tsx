@@ -4,8 +4,8 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -41,7 +41,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const options = ['All', 'Approved', 'Disapproved'];
 

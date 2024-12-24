@@ -1,8 +1,8 @@
 import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
+import AddIcon from '@mui/icons-material/AddCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

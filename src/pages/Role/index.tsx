@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

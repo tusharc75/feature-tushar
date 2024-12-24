@@ -13,11 +13,11 @@ import TextField from '@mui/material/TextField';
 import { object, string } from 'yup';
 import { useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
-import BarChartIcon from '@material-ui/icons/BarChart';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import { ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const ProductBuilderSchema = object().shape({
   name: string().required('please enter name')

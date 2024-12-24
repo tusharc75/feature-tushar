@@ -10,7 +10,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Autorenew } from '@material-ui/icons';
+import { Autorenew } from '@mui/icons-material';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
 function ProcessLogs({ onClose, logsData, productName, product, referenceType }) {

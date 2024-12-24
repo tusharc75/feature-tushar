@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@mui/material';
-import { DragIndicator, InfoOutlined, MoreHoriz } from '@material-ui/icons';
+import { DragIndicator, InfoOutlined, MoreHoriz } from '@mui/icons-material';
 import React, { useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

@@ -8,7 +8,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { ListRelatedTo } from '../../components/Activity/Helpers/ListRelatedTo';
 import ActivityModelHandler from '../../components/Activity/ActivityModelHandler';
 import routes from '../../components/Helpers/Routes';
-import { DateRange } from '@material-ui/icons';
+import { DateRange } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 
 const Reminder = () => {

@@ -3,7 +3,7 @@ import { Theme, createStyles } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@mui/material/Button';
-import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@material-ui/icons';
+import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@mui/icons-material';
 import {
   convertMsToTime,
   getChipColor,
