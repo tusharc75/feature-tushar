@@ -106,7 +106,7 @@ const WorkOrderSupervisor = () => {
       fieldData: {
         _id: '630dc2429ec41869052395b1',
         fieldName: 'user',
-        fieldLabel: resources?.employeeMaster.titlePlural,
+        fieldLabel: resources?.employeeMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.employeeMaster,
         resource: sidebarResource.workOrderSupervisor,
@@ -128,7 +128,7 @@ const WorkOrderSupervisor = () => {
       fieldData: {
         _id: '630dc2429ec41869052395b2',
         fieldName: 'serviceMaster',
-        fieldLabel: resources?.serviceMaster.titlePlural,
+        fieldLabel: resources?.serviceMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.serviceMaster,
         resource: sidebarResource.workOrderSupervisor,
@@ -150,7 +150,7 @@ const WorkOrderSupervisor = () => {
       fieldData: {
         _id: '630dc2429ec41869052395b3',
         fieldName: 'workOrder',
-        fieldLabel: resources?.workOrder.titlePlural,
+        fieldLabel: resources?.workOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.workOrder,
         resource: sidebarResource.workOrderSupervisor,
@@ -172,7 +172,7 @@ const WorkOrderSupervisor = () => {
       fieldData: {
         _id: '630dc2429ec41869052395b4',
         fieldName: 'repairOrder',
-        fieldLabel: resources?.repairOrder.titlePlural,
+        fieldLabel: resources?.repairOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.repairOrder,
         resource: sidebarResource.workOrderSupervisor,
@@ -194,7 +194,7 @@ const WorkOrderSupervisor = () => {
       fieldData: {
         _id: '630dc2429ec41869052395b5',
         fieldName: 'productionOrder',
-        fieldLabel: resources?.productionOrder.titlePlural,
+        fieldLabel: resources?.productionOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.productionOrder,
         resource: sidebarResource.workOrderSupervisor,
@@ -429,12 +429,12 @@ const WorkOrderSupervisor = () => {
         },
         ...(['table-view', 'card-view']?.includes(viewType)
           ? [
-              {
-                disabled: selectedRecords?.length === 0,
-                label: 'Add Products/Consumables',
-                onClick: () => setConsumablesDialog(true)
-              }
-            ]
+            {
+              disabled: selectedRecords?.length === 0,
+              label: 'Add Products/Consumables',
+              onClick: () => setConsumablesDialog(true)
+            }
+          ]
           : [])
       ]
     };
@@ -565,7 +565,7 @@ const WorkOrderSupervisor = () => {
                   </>
                 ) : (
                   <div className="flex">
-                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
+                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
                       <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                         {resources?.workOrder?.titleSingular}
                       </ToggleButton>
@@ -728,15 +728,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               assignTechnicianDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                    uniqueId: r?.uniqueId,
-                    workOrderId: r?.workOrder
-                  }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
                 : [
-                    {
-                      uniqueId: selectedServiceData?.uniqueId,
-                      workOrderId: selectedServiceData?._id
-                    }
-                  ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
             }
             assignedUsers={
               assignTechnicianDialog.multiple
@@ -762,15 +762,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               workStationAssignDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                    uniqueId: r?.uniqueId,
-                    workOrderId: r?.workOrder
-                  }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrder
+                }))
                 : [
-                    {
-                      uniqueId: selectedServiceData?.uniqueId,
-                      workOrderId: selectedServiceData?._id
-                    }
-                  ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?._id
+                  }
+                ]
             }
             workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {
