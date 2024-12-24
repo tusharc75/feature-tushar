@@ -5,6 +5,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelatedTo = null, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
@@ -26,15 +27,15 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
   return (
     <Fragment>
       <HideWhenOffline>
-        <Button
+        <ThemeButton
+          borderColor="none"
           endIcon={<ArrowForwardIcon />}
           id="collaborator-button"
-          variant="contained"
           onClick={() => setActivityShow(!showActivity)}
-          style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}
+          color="primary"
         >
           Workspace
-        </Button>
+        </ThemeButton>
       </HideWhenOffline>
       {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
       <div className={`activity-new-v1 ${showActivity ? 'show-activity-v1' : 'hide-activity-v1'}`}>

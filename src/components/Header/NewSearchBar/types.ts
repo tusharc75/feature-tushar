@@ -1,3 +1,13 @@
+export type SearchBarProps = {
+  user: UserData;
+  selectedEntity: SelectedEntityData;
+};
+export type UseSearchState = {
+  items: Item[];
+};
+
+export type UseSearchActions = { type: 'setItems'; payload: Item[] };
+
 export type Section = {
   head: string;
   items: Item[];

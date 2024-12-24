@@ -1,7 +1,7 @@
 import { Clear as ClearIcon } from '@mui/icons-material';
 import CallMadeIcon from '@mui/icons-material/CallMade';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
-import { IconButton, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { IconButton, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { kebabCase } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -212,7 +212,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
               <List key={section.head} className={styles.resultUL} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
                 {section.items.map((item) => {
                   return (
-                    <ListItem
+                    <ListItemButton
                       key={item.resourceLabel}
                       button
                       onClick={() => {
@@ -226,7 +226,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       </ListItemIcon>
                       <ListItemText primary={<span style={{ fontWeight: 500, fontSize: '15px' }}>{item.resourceLabel}</span>} />
                       <UserFavoriteIcon item={item} />
-                    </ListItem>
+                    </ListItemButton>
                   );
                 })}
               </List>
