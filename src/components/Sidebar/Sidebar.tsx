@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import { Collapse, CssBaseline, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
@@ -147,7 +147,7 @@ function SideBar({ location }) {
             }, 500);
         }}
         className={cn(
-          'main-sidebar fixed left-0 top-0 z-[1200] h-full overflow-hidden bg-[--sidebar-bg] [&_.MuiListItem-root]:min-h-[56px] [&_.MuiListItem-root]:py-[12px] [&_.MuiListItem-root]:pl-[30px] [&_.MuiListItem-root]:pr-[16px]',
+          'main-sidebar fixed left-0 top-0 z-[1200] h-full overflow-hidden bg-[--sidebar-bg] [&_.MuiListItemButton-root]:min-h-[56px] [&_.MuiListItemButton-root]:py-[12px] [&_.MuiListItemButton-root]:pl-[30px] [&_.MuiListItemButton-root]:pr-[16px]',
           sidebarOpen ? 'w-[306px]' : 'max-[959px]:w-0 min-[960px]:w-[84px] [&_.MuiListItemText-root]:truncate'
         )}
         style={{ transition: 'width 195ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}
@@ -190,9 +190,8 @@ function SideBar({ location }) {
                 return (
                   <React.Fragment key={listItem.name}>
                     <HtmlTooltip title={!isSidebarOpen ? listItem.name : ''}>
-                      <ListItem
+                      <ListItemButton
                         className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
-                        button
                         key={listItem.name + '' + i}
                         onClick={() => {
                           if (isSidebarOpen) {
@@ -224,7 +223,7 @@ function SideBar({ location }) {
                             {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
                           </span>
                         )}
-                      </ListItem>
+                      </ListItemButton>
                     </HtmlTooltip>
                     {hasChild && (
                       <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
@@ -242,8 +241,7 @@ function SideBar({ location }) {
                               }}
                               to={item.link}
                             >
-                              <ListItem
-                                button
+                              <ListItemButton
                                 selected={pathnames?.includes(lowerCase(item.name))}
                                 className={`${styles.subListItems} `}
                                 id={`sidebar-item-${(item.resourceLabel || item.name).split(' ').join('-')}`}
@@ -260,7 +258,7 @@ function SideBar({ location }) {
                                   primary={item.resourceLabel || item.name}
                                   className={`line-clamp-1 !text-[var(--sidebar-text-color)] [&>span]:!font-normal`}
                                 />
-                              </ListItem>
+                              </ListItemButton>
                             </Link>
                           ))}
                         </List>
