@@ -14,7 +14,7 @@ import {
   Typography
 } from '@mui/material';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';

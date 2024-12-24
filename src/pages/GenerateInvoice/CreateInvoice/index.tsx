@@ -13,7 +13,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

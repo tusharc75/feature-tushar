@@ -6,7 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
 import { Button, Grid, TextField } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Formik } from 'formik';

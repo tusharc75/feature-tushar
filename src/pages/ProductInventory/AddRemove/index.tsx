@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Autocomplete } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

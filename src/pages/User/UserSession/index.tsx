@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Line } from 'react-chartjs-2';
 import { dateFormatForInputControl } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

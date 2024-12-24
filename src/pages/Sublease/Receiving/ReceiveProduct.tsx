@@ -9,7 +9,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 
 const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {

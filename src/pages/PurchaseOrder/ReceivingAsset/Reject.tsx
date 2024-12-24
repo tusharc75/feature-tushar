@@ -20,7 +20,7 @@ import {
 } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { startCase } from 'lodash';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
