@@ -76,7 +76,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setInitialValues({
         name: '',
@@ -269,7 +269,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       <Box mt={2}>
                         <Autocomplete
                           options={resourceOptions}
-                          getOptionLabel={(option) => option.optionLabel}
+                          getOptionLabel={(option) => option.optionLabel || ''}
                           value={resource}
                           fullWidth
                           onChange={(event, newValue) => {
@@ -283,7 +283,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           <Autocomplete
                             disabled={loadingResources}
                             options={resourceData}
-                            getOptionLabel={(option: any) => option.optionLabel}
+                            getOptionLabel={(option: any) => option.optionLabel || ''}
                             isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
                             fullWidth
                             value={selectedResourceData}

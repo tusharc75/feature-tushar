@@ -147,7 +147,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         fetchBoard();
       });
@@ -240,7 +240,7 @@ const Board = ({ type, filter }) => {
         <Autocomplete
           fullWidth
           options={resourceOptions}
-          getOptionLabel={(option) => option.optionLabel}
+          getOptionLabel={(option) => option.optionLabel || ''}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
@@ -253,7 +253,7 @@ const Board = ({ type, filter }) => {
             fullWidth
             disabled={loadingResources}
             options={resourceData}
-            getOptionLabel={(option: any) => option.optionLabel}
+            getOptionLabel={(option: any) => option.optionLabel || ''}
             isOptionEqualToValue={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
             value={selectedResourceData}
             onChange={(event, newValue) => {

@@ -26,8 +26,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     setFields(
       response?.data?.data
         ? response?.data?.data
-          ?.filter((d) => d?.fieldData?.primaryField)
-          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+            ?.filter((d) => d?.fieldData?.primaryField)
+            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
         : []
     );
   };
@@ -115,7 +115,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                     <Autocomplete
                       id="collaborateToolsField"
                       options={fields}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])?.length

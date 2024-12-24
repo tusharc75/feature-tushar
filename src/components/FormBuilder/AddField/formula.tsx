@@ -110,7 +110,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                     return _field.fieldLabel;
                   })
               }
-              getOptionLabel={(option) => option}
+              getOptionLabel={(option) => option || ''}
               value={values['inputFields'] ? convertValuetoLabel(values['inputFields']) : []}
               renderTags={(value: string[], getTagProps) =>
                 value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)

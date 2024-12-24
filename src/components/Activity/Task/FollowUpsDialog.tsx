@@ -181,7 +181,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       disableCloseOnSelect
                       options={fieldOptions}
                       limitTags={4}
-                      getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                      getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option?.fieldName === val?.fieldName}
                       value={values?.formRelatedTo?.fields}
                       onChange={(e, val) => {
@@ -212,7 +212,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
           </>
         )}
       </Formik>
-    </Dialog >
+    </Dialog>
   );
 };
 

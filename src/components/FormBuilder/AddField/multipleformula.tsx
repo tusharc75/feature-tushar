@@ -142,7 +142,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                     return _field.fieldLabel;
                   })
               }
-              getOptionLabel={(option) => option}
+              getOptionLabel={(option) => option || ''}
               value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
               renderTags={(value: string[], getTagProps) =>
                 value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)

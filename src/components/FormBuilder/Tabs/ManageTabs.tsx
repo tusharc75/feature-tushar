@@ -143,7 +143,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                   <Autocomplete
                     id="stepsStyle"
                     options={[STEPS_STYLE.list, STEPS_STYLE.step, STEPS_STYLE.sideBar]}
-                    getOptionLabel={(option: any) => (option ? option : '')}
+                    getOptionLabel={(option: any) => (option ? option || '' : '')}
                     isOptionEqualToValue={(option: any, val) => option === val}
                     value={values['stepsStyle']}
                     onChange={(e: any, value) => {

@@ -104,7 +104,7 @@ const ValidationDialog = ({ onClose, data, fields, fieldsToExclude, fieldValue, 
                       id="fields"
                       disabled={data ? true : false}
                       options={fieldOptions}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)?.length > 0
@@ -133,7 +133,7 @@ const ValidationDialog = ({ onClose, data, fields, fieldsToExclude, fieldValue, 
                     <Autocomplete
                       id="operator"
                       options={OPERATOR}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         OPERATOR?.filter((f) => f?.optionValue === values?.operator)?.length > 0

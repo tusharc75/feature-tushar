@@ -174,7 +174,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
               <Autocomplete
                 id="formField"
                 options={fields}
-                getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                 isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                 value={fields?.find((f) => f.fieldName === state[index]?.formField) || ''}
                 onChange={(e: any, value) => {
@@ -204,7 +204,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
               <Autocomplete
                 id="resourceField"
                 options={resourceFieldOptions}
-                getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                 isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                 value={resourceFieldOptions?.find((f) => f.fieldName === state[index]?.resourceField) || ''}
                 onChange={(e: any, value) => {

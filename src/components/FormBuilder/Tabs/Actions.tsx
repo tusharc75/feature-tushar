@@ -76,7 +76,7 @@ export default function Actions({ onClose, onSuccess, resource, resourceData }) 
     try {
       const data: any = await getResourceField(resource, true);
       setFields(data);
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const validate = () => {
@@ -222,7 +222,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="field"
               options={fields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
               isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 fields && fields.filter((data) => data?.fieldName === action?.field).length
@@ -265,7 +265,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
             <Autocomplete
               id="resource"
               options={resource}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
               isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 resource && resource?.filter((data) => data.optionValue === action?.resource)?.length
@@ -300,7 +300,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="resourceField"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
               isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField).length
@@ -343,7 +343,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
             <Autocomplete
               id="action"
               options={ACTION}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
               isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 ACTION && ACTION?.filter((data) => data.optionValue === action?.action)?.length
