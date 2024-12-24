@@ -74,7 +74,7 @@ const ManageScheduleRental = ({ schedularState }: SchedularComponentProps) => {
                   color="primary"
                   size="small"
                   onClick={() => {
-                    setActiveTab('technicians');
+                   schedularState?.tabs?.find((t)=>t.key==='technicians')?.show ? setActiveTab('technicians') : setActiveTab('services');
                   }}
                 >
                   Back

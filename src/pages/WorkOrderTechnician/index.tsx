@@ -15,7 +15,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
 import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -23,37 +22,10 @@ import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHead
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder, workOrderIconMap } from 'src/constants/helpers';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
-
-const FIELD_TO_FILTER = [
-  {
-    key: 'serviceMaster',
-    fieldName: 'service',
-    fieldLabel: sidebarResource.serviceMaster,
-    resource: sidebarResource.serviceMaster,
-    type: 'dropDown'
-  },
-  {
-    key: 'workOrder',
-    fieldName: '_id',
-    fieldLabel: sidebarResource?.workOrder,
-    resource: sidebarResource.workOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'repairOrder',
-    fieldName: 'repairOrder',
-    fieldLabel: sidebarResource?.repairOrder,
-    resource: sidebarResource?.repairOrder,
-    type: 'dropDown'
-  },
-  {
-    key: 'productionOrder',
-    fieldName: 'productionOrder',
-    fieldLabel: sidebarResource?.productionOrder,
-    resource: sidebarResource?.productionOrder,
-    type: 'dropDown'
-  }
-];
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { BiFilterAlt } from 'react-icons/bi';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import Filter from 'src/components/Filter';
 
 type ViewType = 'card-view' | 'table-view';
 type TableViewStatus =
@@ -81,35 +53,119 @@ const WorkOrderTechnician = () => {
   };
 
   const {
-    state: { permissions, resources }
+    state: {
+      permissions,
+      resources,
+      user: { user }
+    }
   }: any = useData();
 
   const ref: any = useRef();
 
+  const FIELD_TO_FILTER = [
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b2',
+        fieldName: 'service',
+        fieldLabel: resources?.serviceMaster?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.serviceMaster,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 1,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isRead : false,
+      isCreate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isCreate : false,
+      isUpdate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b3',
+        fieldName: '_id',
+        fieldLabel: resources?.workOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.workOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 2,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.workOrder ? permissions?.workOrder?.isRead : false,
+      isCreate: permissions && permissions?.workOrder ? permissions?.workOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.workOrder ? permissions?.workOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b4',
+        fieldName: 'repairOrder',
+        fieldLabel: resources?.repairOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.repairOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 3,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isRead : false,
+      isCreate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isUpdate : false
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b5',
+        fieldName: 'productionOrder',
+        fieldLabel: resources?.productionOrder?.titlePlural,
+        lookup: true,
+        lookupResource: sidebarResource.productionOrder,
+        resource: sidebarResource.workOrderTechnician,
+        type: 'dropDown',
+        order: 4,
+        required: false,
+        sectionName: 'Work Order Technician Filter',
+        isTooltip: false,
+        editAble: false,
+        brand: user?.brand,
+        roleType: 0,
+        sectionProperties: ''
+      },
+      isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
+      isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
+      isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
+    }
+  ];
+
   const [viewType, setViewType] = useState<ViewType>('table-view');
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
-  const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
     WORKORDER_SERVICE_STATUS.pending,
     WORKORDER_SERVICE_STATUS.inProgress,
     WORKORDER_SERVICE_STATUS.completed
   ]);
-  const [filterQuery, setFilterQuery] = useState({
-    filterById: [],
-    deepFilter: []
-  });
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [filterQuery, setFilterQuery] = useState([]);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const options: any = [];
-    FIELD_TO_FILTER?.forEach((item) => {
-      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push(item);
-      }
-    });
-    setFieldToFilterList(options);
-  }, []);
 
   const onClickRefreshIcon = () => {
     if (viewType === 'card-view') {
@@ -190,6 +246,32 @@ const WorkOrderTechnician = () => {
     ];
   }, [tableViewStatus]);
 
+  const getQueryString = (filterByIdsP = filterByIds) => {
+    if (filterByIdsP?.length > 0) {
+      const filterById = filterByIdsP
+        ?.filter((f) => f?.term?.length > 0)
+        ?.map((f) => {
+          const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+          return {
+            field: f?.field,
+            term: {
+              [term]: f?.term?.map?.((d: any) => d.optionValue)
+            }
+          };
+        });
+      if (filterById?.length > 0) {
+        return filterById;
+      }
+    }
+    return [];
+  };
+
+  const handleApplyFilter = (filterByIdsP = filterByIds) => {
+    setShowFilter(false);
+    const queryString = getQueryString(filterByIdsP);
+    setFilterQuery(queryString);
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -254,8 +336,29 @@ const WorkOrderTechnician = () => {
               newActionButtonProps={newActionButtonProps}
               actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
               leftSideContents={
-                <div className="flex-grow">
-                  <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                <div className="flex items-center gap-2">
+                  <ThemeButton
+                    tooltip="Apply Filters"
+                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                    iconForMobile={<BiFilterAlt />}
+                    onClick={() => {
+                      setShowFilter(true);
+                    }}
+                    variant="outlined"
+                  >
+                    Show Filters
+                  </ThemeButton>
+                  <DisplayFilterChip
+                    filterTerm={filterTerm}
+                    resourceColumns={FIELD_TO_FILTER}
+                    deepFilters={[]}
+                    filterByIds={filterByIds}
+                    fetchResourceData={(deepFilter, filterById) => {
+                      handleApplyFilter(filterById);
+                    }}
+                    setDeepFilters={null}
+                    setFilterByIds={setFilterByIds}
+                  />
                 </div>
               }
               hasXpadding={false}
@@ -283,8 +386,29 @@ const WorkOrderTechnician = () => {
                   newActionButtonProps={newActionButtonProps}
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
-                    <div className="flex-grow">
-                      <CustomFilter field={fieldToFilterList} position="right" setFilterQuery={setFilterQuery} />
+                    <div className="flex items-center gap-2">
+                      <ThemeButton
+                        tooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                        variant="outlined"
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
                     </div>
                   }
                   hasXpadding={false}
@@ -309,6 +433,26 @@ const WorkOrderTechnician = () => {
             setShowServiceCompleteConfirmBox(false);
           }}
           onOk={handleCompleteService}
+        />
+      )}
+      {showFilter && (
+        <Filter
+          onClose={() => {
+            setShowFilter(false);
+            tableDispatch({ type: 'onlyFilter', filters: {} });
+            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+          }}
+          loading={false}
+          filterTitle={resources?.workOrderTechnician?.titleSingular}
+          resource={sidebarResource.workOrderTechnician}
+          columns={FIELD_TO_FILTER}
+          onApplyFilter={handleApplyFilter}
+          deepFilters={[]}
+          setDeepFilters={null}
+          filterByIds={filterByIds}
+          setFilterByIds={setFilterByIds}
+          filterTerm={filterTerm}
+          setFilterTerm={setFilterTerm}
         />
       )}
     </Box>

@@ -29,7 +29,7 @@ const Scheduler = () => {
         className={`sidebar max-md:hide-scrollbar isolate px-3 py-4 [--gap:18px] max-md:order-2 max-md:overflow-auto max-md:border-t md:h-[--h] md:min-h-[--min-h] md:border-r`}
       >
         <ul className=" flex gap-[--gap] max-md:w-min max-md:flex-row md:flex-col">
-          {tabs.map((t, index) => {
+          {tabs.filter((f)=> f.show).map((t, index) => {
             const isActive = index <= activeTabIndex;
             return (
               <li

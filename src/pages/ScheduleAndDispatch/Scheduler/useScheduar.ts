@@ -54,7 +54,7 @@ const useScheduar = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { resources, user }
+    state: { resources, user, permissions }
   }: any = useData();
 
   const setSelectedAssets = useCallback((value: SchedularState['selectedAssets']) => setState({ type: 'setSelectedAssets', payload: value }), []);
@@ -165,10 +165,10 @@ const useScheduar = () => {
 
   useEffect(() => {
     const tabs: SchedularState['tabs'] = [
-      { key: 'assets', label: resources?.serializedAsset?.titlePlural },
-      { key: 'services', label: resources?.serviceMaster?.titlePlural },
-      { key: 'technicians', label: resources?.employeeMaster?.titlePlural },
-      { key: 'customerDetail', label: 'Customer Detail' }
+      { key: 'assets', label: resources?.serializedAsset?.titlePlural, show: true },
+      { key: 'services', label: resources?.serviceMaster?.titlePlural, show: true },
+      { key: 'technicians', label: resources?.employeeMaster?.titlePlural, show: permissions?.employeeMaster?.isRead },
+      { key: 'customerDetail', label: 'Customer Detail', show: true }
     ];
     setTabs(tabs);
   }, [resources?.employeeMaster?.titlePlural, resources?.serializedAsset?.titlePlural, resources?.serviceMaster?.titlePlural, setTabs]);

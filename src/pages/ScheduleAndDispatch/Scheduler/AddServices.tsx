@@ -31,7 +31,11 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
 
   const handleAdd = () => {
     setSelectedServices(selectedRecords);
-    setActiveTab('technicians');
+    if(schedularState?.tabs?.find((s)=> s.key==='technicians')?.show){
+      setActiveTab('technicians');
+    }else{
+      setActiveTab('customerDetail');
+    }
   };
 
   useEffect(() => {

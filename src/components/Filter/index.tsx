@@ -103,9 +103,9 @@ const Filter = ({
   const handleClearAllFilter = () => {
     const newDeepFilter = deepFilters.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
     const newFilterByIds = filterByIds.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
-    setDeepFilters(newDeepFilter);
-    setFilterByIds(newFilterByIds);
-    setFilterTerm({});
+    if (setDeepFilters) setDeepFilters(newDeepFilter);
+    if (setFilterByIds) setFilterByIds(newFilterByIds);
+    if (setFilterTerm) setFilterTerm({});
     // onApplyFilter(newDeepFilter, newFilterByIds);
   };
 

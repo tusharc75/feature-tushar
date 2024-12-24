@@ -107,7 +107,6 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
     <>
       <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
       {columns ? (
-        selectedServices?.length ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
@@ -117,7 +116,6 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
             refreshGrid={fetchData}
             resource={sidebarResource.employeeMaster}
           />
-        ) : null
       ) : (
         <Box p={2} className="h-[--loader-h]">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

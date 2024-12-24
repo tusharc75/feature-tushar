@@ -25,12 +25,12 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
     {
       key: 'fieldTicket',
       resource: sidebarResource.fieldTicket,
-      title: resources?.fieldTicket?.titlePlural
+      title: resources?.fieldTicket?.titleSingular
     },
     {
       key: 'rentalManagement',
       resource: sidebarResource.rentalManagement,
-      title: resources?.rentalManagement?.titlePlural
+      title: resources?.rentalManagement?.titleSingular
     }
   ];
 
@@ -47,7 +47,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
     const options: any = [];
     TECHNICIAN_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setServiceTypes(options);
