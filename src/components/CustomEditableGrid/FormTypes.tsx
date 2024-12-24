@@ -1,6 +1,6 @@
 import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
-import DateUtils from '@date-io/date-fns';
-import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
 import { Autocomplete } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -154,54 +154,50 @@ const FormTypes = (props) => {
       {...others}
     />
   ) : fieldData?.type === 'date' ? (
-    <MuiPickersUtilsProvider utils={DateUtils}>
-      <KeyboardDatePicker
-        style={{ paddingRight: 1 }}
-        disabled={fieldData?.isUneditable}
-        clearable
-        autoOk
-        required={fieldData?.required}
-        variant="inline"
-        inputVariant="outlined"
-        value={values[fieldData?.fieldName]}
-        name={`${fieldData?.fieldName}`}
-        label={fieldData?.label}
-        onChange={(date) => onChange(fieldData?.fieldName, date)}
-        format={dateFormatForInputControl}
-        InputLabelProps={{
-          shrink: true
-        }}
-        margin="dense"
-        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-        {...others}
-      />
-    </MuiPickersUtilsProvider>
+    <DatePicker
+      style={{ paddingRight: 1 }}
+      disabled={fieldData?.isUneditable}
+      clearable
+      autoOk
+      required={fieldData?.required}
+      variant="inline"
+      inputVariant="outlined"
+      value={values[fieldData?.fieldName]}
+      name={`${fieldData?.fieldName}`}
+      label={fieldData?.label}
+      onChange={(date) => onChange(fieldData?.fieldName, date)}
+      format={dateFormatForInputControl}
+      InputLabelProps={{
+        shrink: true
+      }}
+      margin="dense"
+      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+      {...others}
+    />
   ) : fieldData?.type === 'dateTime' ? (
-    <MuiPickersUtilsProvider utils={DateUtils}>
-      <KeyboardDateTimePicker
-        autoOk
-        clearable
-        style={{ paddingRight: 1 }}
-        required={fieldData?.required}
-        variant="inline"
-        inputVariant="outlined"
-        ampm={false}
-        value={values[fieldData?.fieldName]}
-        name={`${fieldData?.fieldName}`}
-        label={fieldData?.label}
-        onChange={(date) => onChange(fieldData?.fieldName, date)}
-        onError={console.error}
-        format={dateFormatForInputControl + ' HH:mm'}
-        InputLabelProps={{
-          shrink: true
-        }}
-        margin="dense"
-        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-        {...others}
-      />
-    </MuiPickersUtilsProvider>
+    <DateTimePicker
+      autoOk
+      clearable
+      style={{ paddingRight: 1 }}
+      required={fieldData?.required}
+      variant="inline"
+      inputVariant="outlined"
+      ampm={false}
+      value={values[fieldData?.fieldName]}
+      name={`${fieldData?.fieldName}`}
+      label={fieldData?.label}
+      onChange={(date) => onChange(fieldData?.fieldName, date)}
+      onError={console.error}
+      format={dateFormatForInputControl + ' HH:mm'}
+      InputLabelProps={{
+        shrink: true
+      }}
+      margin="dense"
+      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+      {...others}
+    />
   ) : null;
 };
 

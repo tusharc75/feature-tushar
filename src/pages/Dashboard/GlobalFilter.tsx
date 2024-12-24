@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
@@ -177,7 +177,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   </FormControl>
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <KeyboardDatePicker
+                  <DatePicker
                     disabled={timeFrame !== 'custom' || disabled}
                     inputVariant="outlined"
                     variant="inline"
@@ -196,7 +196,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   />
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <KeyboardDatePicker
+                  <DatePicker
                     disabled={timeFrame !== 'custom' || disabled}
                     inputVariant="outlined"
                     variant="inline"

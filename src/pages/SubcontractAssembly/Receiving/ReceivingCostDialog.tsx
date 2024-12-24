@@ -26,8 +26,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
+import DatePicker from '@mui/lab/DatePicker';
 import { Grid } from '@mui/material';
 
 export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData }) {
@@ -147,28 +146,26 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                 </Form>
                 <Grid spacing={3} container>
                   <Grid item xs={12} sm={6} md={6}>
-                    <MuiPickersUtilsProvider utils={DateUtils}>
-                      <KeyboardDatePicker
-                        label="Received Date"
-                        variant="inline"
-                        inputVariant="outlined"
-                        required
-                        autoOk
-                        size="small"
-                        margin="dense"
-                        name="receiveDate"
-                        placeholder="Receive Date"
-                        value={receiveDate}
-                        format={dateFormatForInputControl}
-                        onChange={(value) => {
-                          setReceiveDate(convertDateInDateTime(value));
-                        }}
-                        fullWidth
-                        {...(minReceiveDate ? { minDate: minReceiveDate } : {})}
-                        error={validateDate()?.receiveDate}
-                        helperText={validateDate()?.receiveDate ? validateDate()?.receiveDate : ''}
-                      />
-                    </MuiPickersUtilsProvider>
+                    <DatePicker
+                      label="Received Date"
+                      variant="inline"
+                      inputVariant="outlined"
+                      required
+                      autoOk
+                      size="small"
+                      margin="dense"
+                      name="receiveDate"
+                      placeholder="Receive Date"
+                      value={receiveDate}
+                      format={dateFormatForInputControl}
+                      onChange={(value) => {
+                        setReceiveDate(convertDateInDateTime(value));
+                      }}
+                      fullWidth
+                      {...(minReceiveDate ? { minDate: minReceiveDate } : {})}
+                      error={validateDate()?.receiveDate}
+                      helperText={validateDate()?.receiveDate ? validateDate()?.receiveDate : ''}
+                    />
                   </Grid>
                 </Grid>
               </CustomDialogContent>
@@ -220,7 +217,8 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-    </Dialog>
+      )
+      }
+    </Dialog >
   );
 }

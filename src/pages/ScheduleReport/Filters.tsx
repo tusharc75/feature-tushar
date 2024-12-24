@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { dateFormat } from 'src/constants/helpers';
 
 const Filters = ({
@@ -36,9 +36,9 @@ const Filters = ({
     });
     setIsStatusPeriod(
       resource?.includes('Serialized Asset') &&
-        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status') &&
-        formValues.status.length > 0
+      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+      formValues?.hasOwnProperty('status') &&
+      formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -48,60 +48,60 @@ const Filters = ({
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       default:
@@ -182,7 +182,7 @@ const Filters = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <KeyboardDatePicker
+                  <DatePicker
                     autoOk
                     disabled={statusTimeFrame !== 'custom'}
                     fullWidth
@@ -202,7 +202,7 @@ const Filters = ({
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <KeyboardDatePicker
+                  <DatePicker
                     autoOk
                     fullWidth
                     disabled={statusTimeFrame !== 'custom'}
@@ -276,7 +276,7 @@ const Filters = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <KeyboardDatePicker
+                <DatePicker
                   autoOk
                   fullWidth
                   disabled={statusTimeFrame !== 'custom'}
@@ -296,7 +296,7 @@ const Filters = ({
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <KeyboardDatePicker
+                <DatePicker
                   autoOk
                   fullWidth
                   size="small"
