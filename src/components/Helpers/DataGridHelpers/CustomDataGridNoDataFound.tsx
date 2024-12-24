@@ -1,34 +1,32 @@
-import { GridOverlay } from '@material-ui/data-grid';
-import { Theme, createStyles } from '@mui/material';
-import React from 'react';
+import { Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
+import { GridOverlay } from '@mui/x-data-grid';
+import React from 'react';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexDirection: 'column',
-      '& .ant-empty-img-1': {
-        fill: theme.palette.type === 'light' ? '#aeb8c2' : '#262626'
-      },
-      '& .ant-empty-img-2': {
-        fill: theme.palette.type === 'light' ? '#f5f5f7' : '#595959'
-      },
-      '& .ant-empty-img-3': {
-        fill: theme.palette.type === 'light' ? '#dce0e6' : '#434343'
-      },
-      '& .ant-empty-img-4': {
-        fill: theme.palette.type === 'light' ? '#fff' : '#1c1c1c'
-      },
-      '& .ant-empty-img-5': {
-        fillOpacity: theme.palette.type === 'light' ? '0.8' : '0.08',
-        fill: theme.palette.type === 'light' ? '#f5f5f5' : '#fff'
-      }
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    flexDirection: 'column',
+    '& .ant-empty-img-1': {
+      fill: theme.palette.mode === 'light' ? '#aeb8c2' : '#262626'
     },
-    label: {
-      marginTop: theme.spacing(1)
+    '& .ant-empty-img-2': {
+      fill: theme.palette.mode === 'light' ? '#f5f5f7' : '#595959'
+    },
+    '& .ant-empty-img-3': {
+      fill: theme.palette.mode === 'light' ? '#dce0e6' : '#434343'
+    },
+    '& .ant-empty-img-4': {
+      fill: theme.palette.mode === 'light' ? '#fff' : '#1c1c1c'
+    },
+    '& .ant-empty-img-5': {
+      fillOpacity: theme.palette.mode === 'light' ? '0.8' : '0.08',
+      fill: theme.palette.mode === 'light' ? '#f5f5f5' : '#fff'
     }
-  })
-);
+  },
+  label: {
+    marginTop: theme.spacing(1)
+  }
+}));
 
 export default function CustomDataGridNoDataFound() {
   const classes = useStyles();

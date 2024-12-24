@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataGrid } from '@material-ui/data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import { Box, Button, TextField, InputAdornment } from '@mui/material';
 import { Add, Search } from '@mui/icons-material';
 import CustomDataGridNoDataFound from '../Helpers/DataGridHelpers/CustomDataGridNoDataFound';
