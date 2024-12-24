@@ -12,7 +12,7 @@ import {
   TableRow,
   TextField
 } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
@@ -31,7 +31,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const localizer = momentLocalizer(moment);

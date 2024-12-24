@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';

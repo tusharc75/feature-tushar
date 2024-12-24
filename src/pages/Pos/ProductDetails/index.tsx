@@ -13,9 +13,9 @@ import styles from './product-detail-page.module.scss';
 import { MdAdd, MdAddShoppingCart, MdOutlineHorizontalRule } from 'react-icons/md';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import QuantityDialog from '../QuantityDialog';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import Parts from '../Parts';
 import { useData } from 'src/StateProvider/Provider';
 

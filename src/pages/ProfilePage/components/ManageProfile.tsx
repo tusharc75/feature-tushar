@@ -15,8 +15,8 @@ import {
   Typography
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Image } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Image } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';

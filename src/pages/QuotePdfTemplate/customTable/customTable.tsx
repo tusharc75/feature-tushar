@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { Autocomplete } from '@mui/material';
-import { Add, Cancel, Delete } from '@material-ui/icons';
+import { Add, Cancel, Delete } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
 import axiosInstance from 'src/axios/axiosInstance';

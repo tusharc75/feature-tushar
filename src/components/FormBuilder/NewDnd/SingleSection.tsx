@@ -1,7 +1,7 @@
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@mui/material';
-import { DragIndicator, Settings } from '@material-ui/icons';
+import { DragIndicator, Settings } from '@mui/icons-material';
 import update from 'immutability-helper';
 import React, { useMemo } from 'react';
 import Field from './Field';

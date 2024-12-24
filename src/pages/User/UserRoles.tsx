@@ -1,7 +1,7 @@
 import { makeStyles } from '@mui/styles';
 import { Typography, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 

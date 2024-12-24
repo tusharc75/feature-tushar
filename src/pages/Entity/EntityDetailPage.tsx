@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, IconButton, Typography } from '@mui/material';
-import { ControlPoint, Edit } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

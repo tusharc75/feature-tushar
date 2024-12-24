@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
 import { isEmpty } from 'lodash';

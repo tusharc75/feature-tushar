@@ -1,6 +1,6 @@
 import { Box, Chip, IconButton, MenuItem } from '@mui/material';
-import { Delete, Help, Warning } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Delete, Help, Warning } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

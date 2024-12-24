@@ -2,13 +2,13 @@ import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
 import { makeStyles } from '@mui/styles';
-import { ExpandMore } from '@material-ui/icons';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import Edit from '@material-ui/icons/Edit';
-import HelpIcon from '@material-ui/icons/HelpOutline';
-import InfoIcon from '@material-ui/icons/Info';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import { ExpandMore } from '@mui/icons-material';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Edit from '@mui/icons-material/Edit';
+import HelpIcon from '@mui/icons-material/HelpOutline';
+import InfoIcon from '@mui/icons-material/Info';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -78,7 +78,7 @@ import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/componen
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/ChangePreviousAssetDataDialog';
 import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCell';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
 const useStyles = makeStyles((theme) => ({

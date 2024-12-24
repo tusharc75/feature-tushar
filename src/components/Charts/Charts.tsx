@@ -1,5 +1,5 @@
 import { Bar, Doughnut, Pie, PolarArea, Line, Scatter } from 'react-chartjs-2';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Button } from '@mui/material';
 
 export default function ChartsRender({ chartType, kpi, title, edit, handleDrag, handleDrop, id, handleDelete }) {

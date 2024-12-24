@@ -1,6 +1,6 @@
 import { CircularProgress, Dialog, Icon, IconButton, MenuItem } from '@mui/material';
-import { GetApp } from '@material-ui/icons';
-import PreviewIcon from '@material-ui/icons/Visibility';
+import { GetApp } from '@mui/icons-material';
+import PreviewIcon from '@mui/icons-material/Visibility';
 import { createElement, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';

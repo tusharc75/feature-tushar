@@ -17,8 +17,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { TiArrowBack } from 'react-icons/ti';
 import { RiCheckboxCircleFill, RiShareForwardFill } from 'react-icons/ri';
 import MobileStepper from '@mui/material/MobileStepper';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 
 const useStyles = makeStyles((theme) => ({
   backButton: {

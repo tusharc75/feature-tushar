@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import SettingsIcon from '@material-ui/icons/Settings';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Autocomplete } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

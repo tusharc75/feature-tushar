@@ -1,5 +1,5 @@
 import { Divider, IconButton, List, ListItem, Menu } from '@mui/material';
-import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
+import { Delete, Edit, SwapHoriz } from '@mui/icons-material';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';

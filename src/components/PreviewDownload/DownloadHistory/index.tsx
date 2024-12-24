@@ -1,12 +1,12 @@
 import axiosInstance from 'src/axios/axiosInstance';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import DownloadIcon from '@material-ui/icons/GetApp';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { FILE_PROCESS_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
-import SyncIcon from '@material-ui/icons/Sync';
-import PreviewIcon from '@material-ui/icons/Visibility';
+import SyncIcon from '@mui/icons-material/Sync';
+import PreviewIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 var apiCallInterval: any = null;

@@ -23,7 +23,7 @@ import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
-import { Settings } from '@material-ui/icons';
+import { Settings } from '@mui/icons-material';
 import SettingDialog from './SettingDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 

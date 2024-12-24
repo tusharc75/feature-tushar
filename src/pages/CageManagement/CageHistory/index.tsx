@@ -7,7 +7,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 
 const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);

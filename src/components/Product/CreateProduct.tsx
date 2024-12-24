@@ -1,12 +1,12 @@
 import { Box, Button, Collapse, Grid, InputAdornment } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import InfoIcon from '@material-ui/icons/Info';
+import AddIcon from '@mui/icons-material/AddCircle';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import InfoIcon from '@mui/icons-material/Info';
 import { Form, Formik } from 'formik';
 import { isEqual, map, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';

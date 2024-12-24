@@ -1,5 +1,5 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
-import MyLocationIcon from '@material-ui/icons/MyLocation';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { useContext, useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
 import { Link, useHistory } from 'react-router-dom';

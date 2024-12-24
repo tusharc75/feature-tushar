@@ -1,10 +1,10 @@
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import HelpIcon from '@material-ui/icons/Help';
-import LayersIcon from '@material-ui/icons/Layers';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HelpIcon from '@mui/icons-material/Help';
+import LayersIcon from '@mui/icons-material/Layers';
 import { groupBy, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

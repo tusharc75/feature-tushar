@@ -4,7 +4,7 @@ import { Autocomplete } from '@mui/material';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 
 const NewChat = (props) => {
   const { setNewChat, setSelectedChat, users, userId, setChatOpen } = props;

@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from '@mui/material';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import moment from 'moment';

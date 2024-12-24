@@ -1,6 +1,6 @@
 import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
-import { Add, ExpandMore, LowPriority } from '@material-ui/icons';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

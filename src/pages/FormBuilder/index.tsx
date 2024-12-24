@@ -13,7 +13,7 @@ import { gridLoadingTimeout } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ArrangeView from './ArrangeView';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import SectionMaster from './sectionMaster';

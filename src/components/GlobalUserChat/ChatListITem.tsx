@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@mui/material';
-import { Group } from '@material-ui/icons';
+import { Group } from '@mui/icons-material';
 import moment from 'moment';
 
 import axiosInstance from '../../axios/axiosInstance';

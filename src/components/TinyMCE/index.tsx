@@ -17,7 +17,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 // import 'tinymce/icons/default';
 import './tinymce.scss';
 

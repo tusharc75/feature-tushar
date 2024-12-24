@@ -5,7 +5,7 @@ import Chatbox, { Topics, useChatboxReducer } from 'src/components/AiChatbox';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Chat } from '@material-ui/icons';
+import { Chat } from '@mui/icons-material';
 import { isArray } from 'lodash';
 import { FiSidebar } from 'react-icons/fi';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';

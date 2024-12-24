@@ -1,11 +1,11 @@
 import { Box, Button, Collapse, IconButton } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddAlertIcon from '@material-ui/icons/AddAlert';
-import BuildIcon from '@material-ui/icons/Build';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import PolicyIcon from '@material-ui/icons/Policy';
-import SettingIcon from '@material-ui/icons/Settings';
+import AddAlertIcon from '@mui/icons-material/AddAlert';
+import BuildIcon from '@mui/icons-material/Build';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import PolicyIcon from '@mui/icons-material/Policy';
+import SettingIcon from '@mui/icons-material/Settings';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ManageTabs from 'src/components/FormBuilder/Tabs/ManageTabs';
 import axios, { CancelTokenSource } from 'axios';
@@ -26,7 +26,7 @@ import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
-import { AddOutlined, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 
 const DynamicTabs = ({ workflowId = null, resource }) => {

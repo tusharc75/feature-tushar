@@ -1,10 +1,10 @@
 import { Box, Checkbox, Chip, FormControlLabel, IconButton, MenuItem, TextField } from '@mui/material';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import HistoryIcon from '@material-ui/icons/History';
-import InfoIcon from '@material-ui/icons/Info';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import SettingsIcon from '@material-ui/icons/Settings';
-import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import HistoryIcon from '@mui/icons-material/History';
+import InfoIcon from '@mui/icons-material/Info';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import SettingsIcon from '@mui/icons-material/Settings';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

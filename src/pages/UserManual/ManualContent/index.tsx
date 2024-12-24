@@ -1,5 +1,5 @@
 import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { kebabCase } from 'lodash';
 import { useState } from 'react';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';

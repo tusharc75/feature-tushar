@@ -1,6 +1,6 @@
 import { Box, Grid, IconButton, MenuItem, TextField } from '@mui/material';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Autocomplete } from '@mui/material';
 import { camelCase, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, IconButton } from '@mui/material';
-import AddIcon from '@material-ui/icons/AddCircle';
+import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import moment from 'moment';

@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from '../../axios/axiosInstance';

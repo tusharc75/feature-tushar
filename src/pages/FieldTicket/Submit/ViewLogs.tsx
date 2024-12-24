@@ -1,5 +1,5 @@
 import { Box, Dialog, IconButton } from '@mui/material';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

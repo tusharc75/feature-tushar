@@ -15,8 +15,8 @@ import {
   Menu,
   Button
 } from '@mui/material';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
@@ -27,7 +27,7 @@ import { AiOutlineMail } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { Image, MoreVert } from '@material-ui/icons';
+import { Image, MoreVert } from '@mui/icons-material';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 export default function ContactAccordionInDetailPage({ contacts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {

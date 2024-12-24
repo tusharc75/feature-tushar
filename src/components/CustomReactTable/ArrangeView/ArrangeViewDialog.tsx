@@ -17,7 +17,7 @@ import {
   TextField,
   useMediaQuery
 } from '@mui/material';
-import { DragHandle, Info } from '@material-ui/icons';
+import { DragHandle, Info } from '@mui/icons-material';
 import { Formik, FormikErrors } from 'formik';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';

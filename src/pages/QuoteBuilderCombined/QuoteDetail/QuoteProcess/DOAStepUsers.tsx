@@ -3,7 +3,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { FcApproval } from 'react-icons/fc';
-import { Block, KeyboardArrowUp, WatchLater } from '@material-ui/icons';
+import { Block, KeyboardArrowUp, WatchLater } from '@mui/icons-material';
 
 import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

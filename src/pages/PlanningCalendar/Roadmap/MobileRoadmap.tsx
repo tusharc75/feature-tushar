@@ -2,7 +2,7 @@ import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
 import type { Activity } from './types';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { Typography, Box, Avatar, IconButton, Collapse, Tooltip, Button } from '@mui/material';
-import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@material-ui/icons';
+import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@mui/icons-material';
 import moment from 'moment';
 import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
 

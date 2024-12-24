@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
-import { DragIndicator, Info } from '@material-ui/icons';
-import SwapVertIcon from '@material-ui/icons/SwapVert';
+import { DragIndicator, Info } from '@mui/icons-material';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 import update from 'immutability-helper';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

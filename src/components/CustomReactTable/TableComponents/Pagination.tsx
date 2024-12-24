@@ -1,5 +1,5 @@
 import { FormControl, MenuItem, Select, IconButton } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import React, { FC, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useDebounce } from 'src/hooks';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';

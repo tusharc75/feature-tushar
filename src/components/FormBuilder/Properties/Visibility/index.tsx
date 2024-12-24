@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import ConditionDialog from './ConditionDialog';
-import { MoreHoriz, Settings } from '@material-ui/icons';
+import { MoreHoriz, Settings } from '@mui/icons-material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';

@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@mui/material';
-import { Map } from '@material-ui/icons';
+import { Map } from '@mui/icons-material';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { memo, useEffect, useState } from 'react';

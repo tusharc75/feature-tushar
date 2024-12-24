@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';

@@ -10,10 +10,10 @@ import styles from './logs.module.scss';
 import moment from 'moment';
 import { TextField, Button, Grid } from '@mui/material';
 import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
-import PersonIcon from '@material-ui/icons/Person';
+import PersonIcon from '@mui/icons-material/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, userId }) => {

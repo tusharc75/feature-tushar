@@ -11,7 +11,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ManageQuotationDialog from '../ManageQuotationDialog';
 import { useData } from '../../../StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -19,7 +19,7 @@ import { cloneDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FiExternalLink } from 'react-icons/fi';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = '' }) {
   const renderedFrom = `${camelCase(sidebarResource?.quotation)}_versions`;

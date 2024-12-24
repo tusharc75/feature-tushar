@@ -4,7 +4,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { sidebarResource } from 'src/constants/helpers';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 

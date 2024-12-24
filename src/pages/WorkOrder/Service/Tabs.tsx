@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './Tabs.module.scss';
 // import { MdArrowBackIos, MdArrowForwardIos } from 'react-icons/md';
-import ArrowBackIosRoundedIcon from '@material-ui/icons/ArrowBackIosRounded';
-import ArrowForwardIosRoundedIcon from '@material-ui/icons/ArrowForwardIosRounded';
+import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 
 let childrenCount = 0;
 

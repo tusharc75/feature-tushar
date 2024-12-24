@@ -1,6 +1,6 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button, IconButton, Typography } from '@mui/material';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ActivityModelHandler from '../../ActivityModelHandler';

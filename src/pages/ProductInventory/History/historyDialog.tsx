@@ -1,5 +1,5 @@
 import { Box, Dialog } from '@mui/material';
-import { CalendarToday, List } from '@material-ui/icons';
+import { CalendarToday, List } from '@mui/icons-material';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState } from 'react';

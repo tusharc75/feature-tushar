@@ -1,6 +1,6 @@
 import { Box, Button, IconButton } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { MdDragIndicator } from 'react-icons/md';
@@ -14,7 +14,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 
 const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {

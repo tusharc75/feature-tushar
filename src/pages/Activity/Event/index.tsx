@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid } from '@mui/material';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
 import queryString from 'query-string';

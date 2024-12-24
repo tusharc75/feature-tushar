@@ -1,7 +1,7 @@
 import { Box, Chip, MenuItem, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';

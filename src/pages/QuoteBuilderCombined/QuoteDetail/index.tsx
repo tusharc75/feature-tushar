@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { ExpandMore } from '@mui/icons-material';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

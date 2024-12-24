@@ -21,17 +21,17 @@ import {
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
-import { Apps, FormatListNumbered } from '@material-ui/icons';
+import { Apps, FormatListNumbered } from '@mui/icons-material';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useHistory } from 'react-router-dom';
 

@@ -1,5 +1,5 @@
 import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper } from '@mui/material';
-import { Check } from '@material-ui/icons';
+import { Check } from '@mui/icons-material';
 import clsx from 'clsx';
 import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';

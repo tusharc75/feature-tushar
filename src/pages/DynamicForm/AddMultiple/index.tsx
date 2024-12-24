@@ -12,7 +12,7 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import MaUTable from '@mui/material/Table';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete } from '@mui/icons-material';
 
 function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);

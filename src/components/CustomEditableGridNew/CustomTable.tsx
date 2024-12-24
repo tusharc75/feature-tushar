@@ -1,8 +1,8 @@
 import { IconButton, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import MaUTable from '@mui/material/Table';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { defaultRangeExtractor, elementScroll, Range, useVirtualizer, VirtualizerOptions } from '@tanstack/react-virtual';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
