@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Avatar, Box, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
 import { Rating } from '@mui/material';
 import styles from './rating-and-review-chart.module.scss';
-import StarIcon from '@material-ui/icons/Star';
+import StarIcon from '@mui/icons-material/Star';
 
 const green = '#1fb31f';
 const yellow = '#1fb31f';

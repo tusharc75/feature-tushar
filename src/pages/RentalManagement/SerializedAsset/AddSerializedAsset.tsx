@@ -42,7 +42,7 @@ import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 
 const AddSerializedAsset = ({
   isAdding,

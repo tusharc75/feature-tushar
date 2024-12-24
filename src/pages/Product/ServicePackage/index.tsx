@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
 import { HiBadgeCheck } from 'react-icons/hi';

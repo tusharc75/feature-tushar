@@ -13,10 +13,10 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { camelCase, startCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
 import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
 

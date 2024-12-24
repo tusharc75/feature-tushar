@@ -20,7 +20,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import IconWithPulse from 'src/components/IconWithPulse';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 
 export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 

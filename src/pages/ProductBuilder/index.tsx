@@ -1,6 +1,6 @@
 import { Box, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

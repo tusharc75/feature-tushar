@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, ButtonProps, useMediaQuery } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export type DeleteButtonProps = {
   text: string | React.ReactNode;

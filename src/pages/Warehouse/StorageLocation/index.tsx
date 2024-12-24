@@ -1,5 +1,5 @@
 import { Button, Grid, IconButton } from '@mui/material';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -9,10 +9,10 @@ import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
 import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 

@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, MenuItem } from '@mui/material';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -33,7 +33,7 @@ import ManageRepairJob from './ManageRepairJob';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createRepairJobFlow } from './walkmeSteps';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 let repairJobTimeout;
 

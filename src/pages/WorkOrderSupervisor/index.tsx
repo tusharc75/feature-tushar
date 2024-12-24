@@ -1,8 +1,8 @@
 import DateFnsUtils from '@date-io/date-fns';
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { MoreVert } from '@material-ui/icons';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { MoreVert } from '@mui/icons-material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';

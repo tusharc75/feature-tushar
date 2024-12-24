@@ -1,4 +1,4 @@
-import { Assessment, Call, Email, Event } from '@material-ui/icons';
+import { Assessment, Call, Email, Event } from '@mui/icons-material';
 import { Paper, Tab, Tabs } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import React from 'react';

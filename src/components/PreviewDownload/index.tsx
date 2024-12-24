@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { isTablet } from 'react-device-detect';
 import { ThemeButton } from '../Helpers/Buttons';
 

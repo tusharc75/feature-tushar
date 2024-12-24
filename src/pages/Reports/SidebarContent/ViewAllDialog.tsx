@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, IconButton } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import React, { useCallback, useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { TbStar, TbStarFilled } from 'react-icons/tb';

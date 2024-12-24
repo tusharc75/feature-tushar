@@ -1,9 +1,9 @@
 import { Box, Dialog, IconButton } from '@mui/material';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Fragment, useContext, useEffect, useState } from 'react';
 
-import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from './../../StateProvider/Provider';
@@ -24,9 +24,9 @@ import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
 
-import CloseIcon from '@material-ui/icons/Close';
-import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
-import MailIcon from '@material-ui/icons/Mail';
+import CloseIcon from '@mui/icons-material/Close';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import MailIcon from '@mui/icons-material/Mail';
 import { isEmpty } from 'lodash';
 import { CollaborateIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from '../CustomTooltipTitle';

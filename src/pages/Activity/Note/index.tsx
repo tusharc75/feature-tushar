@@ -1,6 +1,6 @@
 import { Chip, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';

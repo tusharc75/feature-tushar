@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { WORKORDER_SERVICE_STEP_STATUS, convertMsToTime } from 'src/constants/helpers';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import styles from './index.module.scss';
 
 export const getFieldsWithOtherDetails = (steps: any) => {

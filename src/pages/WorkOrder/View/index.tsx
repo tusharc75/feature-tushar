@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';

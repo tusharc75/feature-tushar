@@ -1,7 +1,7 @@
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';

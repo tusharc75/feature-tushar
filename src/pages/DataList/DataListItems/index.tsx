@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageDataList from './ManageDataList';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const DataListItems = ({ dataListId }) => {

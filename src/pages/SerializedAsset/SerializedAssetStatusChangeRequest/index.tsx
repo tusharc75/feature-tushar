@@ -14,8 +14,8 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import CancelIcon from '@material-ui/icons/Cancel';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Autocomplete } from '@mui/material';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);

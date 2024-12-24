@@ -1,7 +1,7 @@
 import { IconButton, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,7 +16,7 @@ import { displayDateTime, fieldTicket, prepareDataForGrid, sidebarResource } fro
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';

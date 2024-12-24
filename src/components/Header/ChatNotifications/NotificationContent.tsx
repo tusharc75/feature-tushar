@@ -1,5 +1,5 @@
 import { Button, IconButton, List, Menu, MenuItem, Typography } from '@mui/material';
-import { AddCircle, ClearAll, DoneAllOutlined, Markunread, Settings } from '@material-ui/icons';
+import { AddCircle, ClearAll, DoneAllOutlined, Markunread, Settings } from '@mui/icons-material';
 import { useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { TabOptions, tabOptions } from '.';

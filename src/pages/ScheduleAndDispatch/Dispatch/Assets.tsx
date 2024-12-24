@@ -1,5 +1,5 @@
 import { Box, Button, IconButton } from '@mui/material';
-import { Help, LocalShipping } from '@material-ui/icons';
+import { Help, LocalShipping } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';

@@ -8,10 +8,10 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
-import { KeyboardArrowDown } from '@material-ui/icons';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import { KeyboardArrowDown } from '@mui/icons-material';
 import { flattenArray } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import MaterialDialog from './MaterialDialog';

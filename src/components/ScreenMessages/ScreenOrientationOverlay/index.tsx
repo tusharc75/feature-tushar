@@ -1,8 +1,8 @@
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from './ScreenOrientationOverlay.module.scss';
-import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
-import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
+import RotateRightOutlinedIcon from '@mui/icons-material/RotateRightOutlined';
+import RotateLeftOutlinedIcon from '@mui/icons-material/RotateLeftOutlined';
 import ReactDOM from 'react-dom';
 
 const useDeviceOrientation = (): { landscape: boolean; portrait: boolean } => {

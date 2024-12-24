@@ -3,7 +3,7 @@ import { ECOM_SECTIONS } from 'src/constants/helpers';
 
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { IconButton } from '@mui/material';
-import { DragIndicator } from '@material-ui/icons';
+import { DragIndicator } from '@mui/icons-material';
 
 const Sidebar = () => {
   return (

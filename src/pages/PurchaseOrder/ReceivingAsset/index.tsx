@@ -1,8 +1,8 @@
 import { Button, Grid, IconButton } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import { Cancel } from '@material-ui/icons';
-import HistoryIcon from '@material-ui/icons/History';
-import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import { Cancel } from '@mui/icons-material';
+import HistoryIcon from '@mui/icons-material/History';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

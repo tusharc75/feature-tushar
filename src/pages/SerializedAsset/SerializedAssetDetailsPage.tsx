@@ -1,8 +1,8 @@
 import { Box, Button, Grid } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import BuildIcon from '@material-ui/icons/Build';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import BuildIcon from '@mui/icons-material/Build';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Skeleton } from '@mui/material';
 import { round, startCase } from 'lodash';
 import moment from 'moment';
@@ -49,7 +49,7 @@ import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 import VolumeData from 'src/pages/IotChart/VolumeData';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {

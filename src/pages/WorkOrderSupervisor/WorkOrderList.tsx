@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import moment from 'moment';

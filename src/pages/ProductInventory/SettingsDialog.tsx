@@ -11,7 +11,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, dateFormat, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function SettingsDialog({ onClose, warehouse }) {

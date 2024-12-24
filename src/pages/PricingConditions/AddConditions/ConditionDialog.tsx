@@ -17,7 +17,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { result, find, startCase, isEqual, camelCase, values } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import MenuItem from '@mui/material/MenuItem';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import MultipleEntry from './MultipleEntry';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash';

@@ -1,8 +1,8 @@
 import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import { MoreVert } from '@material-ui/icons';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { MoreVert } from '@mui/icons-material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';

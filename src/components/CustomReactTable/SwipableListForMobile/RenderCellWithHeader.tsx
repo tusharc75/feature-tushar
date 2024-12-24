@@ -1,4 +1,4 @@
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
 import { TColType } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';

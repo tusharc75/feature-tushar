@@ -1,5 +1,5 @@
 import { Box, Button, Grid, IconButton, MenuItem } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

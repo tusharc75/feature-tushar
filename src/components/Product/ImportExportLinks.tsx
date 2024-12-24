@@ -1,4 +1,4 @@
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Box, Button, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { isEmpty } from 'lodash';

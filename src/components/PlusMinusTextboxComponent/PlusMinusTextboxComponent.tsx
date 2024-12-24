@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { IconButton, Grid, TextField } from '@mui/material';
 import NumberFormat from 'react-number-format';
-import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
-import RemoveCircleOutlineOutlinedIcon from '@material-ui/icons/RemoveCircleOutlineOutlined';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
 import { generateUniqueId } from '../../constants/helpers';
 
 interface NumberFormatCustomProps {

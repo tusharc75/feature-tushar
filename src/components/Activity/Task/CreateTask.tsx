@@ -14,7 +14,7 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import TableChartIcon from '@material-ui/icons/TableChart';
+import TableChartIcon from '@mui/icons-material/TableChart';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';

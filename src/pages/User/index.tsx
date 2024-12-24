@@ -1,5 +1,5 @@
 import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@mui/material';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';

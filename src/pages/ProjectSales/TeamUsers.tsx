@@ -1,6 +1,6 @@
 import { makeStyles } from '@mui/styles';
 import { Typography, Box, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Chip, Grid } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
 import BoxWithBorder from '../../components/BoxWithBorder';

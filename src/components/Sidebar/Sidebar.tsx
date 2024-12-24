@@ -1,4 +1,4 @@
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { Collapse, CssBaseline, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';

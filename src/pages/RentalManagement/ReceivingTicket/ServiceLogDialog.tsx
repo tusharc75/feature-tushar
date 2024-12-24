@@ -13,7 +13,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, Edit } from '@material-ui/icons';
+import { Delete, Edit } from '@mui/icons-material';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';

@@ -1,8 +1,8 @@
 import DateFnsUtils from '@date-io/date-fns';
 import { Box, IconButton, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import HistoryIcon from '@material-ui/icons/History';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import HistoryIcon from '@mui/icons-material/History';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { Autocomplete } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase } from 'lodash';

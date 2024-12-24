@@ -14,7 +14,7 @@ import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import HistoryIcon from '@material-ui/icons/History';
+import HistoryIcon from '@mui/icons-material/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
 const renderedFrom = 'workOrder_consumables_request';

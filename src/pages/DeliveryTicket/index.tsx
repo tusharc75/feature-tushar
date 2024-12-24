@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';

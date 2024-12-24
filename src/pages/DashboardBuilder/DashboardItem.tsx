@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, IconButton, ThemeOptions, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Delete, Edit } from '@material-ui/icons';
+import { Delete, Edit } from '@mui/icons-material';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
 import { colSpans } from 'src/constants/helpers';

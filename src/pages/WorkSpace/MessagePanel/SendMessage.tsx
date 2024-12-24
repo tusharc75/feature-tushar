@@ -1,5 +1,5 @@
 import { Button, IconButton } from '@mui/material';
-import { AttachFile, Close, Send } from '@material-ui/icons';
+import { AttachFile, Close, Send } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';

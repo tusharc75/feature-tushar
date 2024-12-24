@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { dateTimeFormat, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import { CustomImport } from './customImport';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

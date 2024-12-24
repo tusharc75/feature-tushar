@@ -1,4 +1,4 @@
-import { AccessTime } from '@material-ui/icons';
+import { AccessTime } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { WORKORDER_SERVICE_STEP_STATUS, convertMsToTime } from 'src/constants/helpers';
 

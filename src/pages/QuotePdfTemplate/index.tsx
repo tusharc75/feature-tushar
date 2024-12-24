@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';

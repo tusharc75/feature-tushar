@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@mui/material';
-import CachedIcon from '@material-ui/icons/Cached';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import CachedIcon from '@mui/icons-material/Cached';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';

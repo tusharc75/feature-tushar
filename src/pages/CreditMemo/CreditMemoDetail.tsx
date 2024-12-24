@@ -16,7 +16,7 @@ import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@mui/icons-material';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { Skeleton } from '@mui/material';

@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

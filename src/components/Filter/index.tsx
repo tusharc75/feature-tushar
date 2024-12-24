@@ -1,5 +1,5 @@
 import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';

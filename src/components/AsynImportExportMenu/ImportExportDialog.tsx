@@ -17,7 +17,7 @@ import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import NoDataCell from '../Helpers/NoDataCell';

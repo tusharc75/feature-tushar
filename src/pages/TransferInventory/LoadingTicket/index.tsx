@@ -24,7 +24,7 @@ import { MenuItem } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateLoadingStepCreateLoadingTicket, generateLoadingStepReceive } from 'src/pages/TransferInventory/walkmeSteps';
 

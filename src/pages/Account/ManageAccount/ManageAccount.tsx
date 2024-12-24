@@ -1,7 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
+import AddIcon from '@mui/icons-material/AddCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';

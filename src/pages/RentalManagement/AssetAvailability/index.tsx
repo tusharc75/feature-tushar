@@ -3,8 +3,8 @@ import { Box, Button, CircularProgress, Dialog, Typography } from '@mui/material
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
 import Skeleton from '@mui/material/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

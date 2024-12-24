@@ -1,5 +1,5 @@
 import { Grid, Box, Container, Button, ButtonGroup, TextField, IconButton } from '@mui/material';
-import { Add, Delete } from '@material-ui/icons';
+import { Add, Delete } from '@mui/icons-material';
 
 function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, label }) {
   return (

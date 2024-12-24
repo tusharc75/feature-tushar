@@ -9,7 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import { Button, Grid } from '@mui/material';
 import { dateTimeFormat } from 'src/constants/helpers';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Comments = ({ uniqueId }) => {

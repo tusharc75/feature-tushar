@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -26,7 +26,7 @@ import ManageCreditMemo from './ManageCreditMemo';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 
 const CreditMemo = () => {
   const {

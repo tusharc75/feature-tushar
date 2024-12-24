@@ -1,6 +1,6 @@
-import { Close } from '@material-ui/icons';
-import DonutLargeIcon from '@material-ui/icons/DonutLarge';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { Close } from '@mui/icons-material';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';

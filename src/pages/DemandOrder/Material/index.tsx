@@ -1,7 +1,7 @@
 import { Box, Grid, IconButton, MenuItem } from '@mui/material';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import Add from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';

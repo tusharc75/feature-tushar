@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { Star, StarOutline } from '@material-ui/icons';
+import { Star, StarOutline } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useFavorites } from 'src/hooks';
 import { Item } from 'src/pages/Home/types';

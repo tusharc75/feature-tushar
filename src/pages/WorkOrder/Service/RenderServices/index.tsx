@@ -1,5 +1,5 @@
 import { Chip, IconButton } from '@mui/material';
-import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
+import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
 import React, { useEffect, useState } from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

@@ -1,5 +1,5 @@
 import { Button, Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
-import { Add, ArrowDropDown, ArrowDropUp, Delete, MoreHoriz } from '@material-ui/icons';
+import { Add, ArrowDropDown, ArrowDropUp, Delete, MoreHoriz } from '@mui/icons-material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

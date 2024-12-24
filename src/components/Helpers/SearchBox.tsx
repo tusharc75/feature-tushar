@@ -1,4 +1,4 @@
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import React, { memo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';

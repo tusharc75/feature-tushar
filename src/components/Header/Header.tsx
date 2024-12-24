@@ -1,8 +1,8 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
-import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-ui/icons';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import SyncIcon from '@material-ui/icons/Sync';
+import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@mui/icons-material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import SyncIcon from '@mui/icons-material/Sync';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
