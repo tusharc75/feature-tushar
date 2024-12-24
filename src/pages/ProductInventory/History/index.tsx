@@ -25,7 +25,7 @@ import routes from '../../../components/Helpers/Routes';
 import RevertQtyDialog from './RevertQtyDialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Autorenew } from '@material-ui/icons';
 import { FiExternalLink } from 'react-icons/fi';
 

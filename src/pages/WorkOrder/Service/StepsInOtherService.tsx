@@ -1,5 +1,5 @@
 import { Add, DeleteOutline, DragIndicator, Edit, FileCopyOutlined, LowPriority } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Box, Dialog, IconButton, TextField, Theme, Typography, createStyles } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';

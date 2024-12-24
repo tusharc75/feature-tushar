@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';

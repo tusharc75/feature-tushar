@@ -5,7 +5,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import SettingsIcon from '@material-ui/icons/Settings';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';

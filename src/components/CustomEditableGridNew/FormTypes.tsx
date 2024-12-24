@@ -1,5 +1,5 @@
 import { IconButton, InputAdornment, TextField, Typography } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { find, result } from 'lodash';

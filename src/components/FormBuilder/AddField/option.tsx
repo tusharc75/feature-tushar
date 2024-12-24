@@ -17,7 +17,7 @@ import { DragIndicator } from '@material-ui/icons';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import SortIcon from '@material-ui/icons/Sort';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import update from 'immutability-helper';
 import { orderBy } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';

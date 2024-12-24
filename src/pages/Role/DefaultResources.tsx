@@ -1,5 +1,5 @@
 import { Box, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit }) => {
   return (

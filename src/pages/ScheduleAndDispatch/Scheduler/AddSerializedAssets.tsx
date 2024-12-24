@@ -1,6 +1,5 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import { Box, Button, IconButton, TableBody, TableCell, TableHead, TableRow, TextField, Autocomplete } from '@mui/material';
 import MaUTable from '@mui/material/Table';
-import { Autocomplete } from '@material-ui/lab';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -177,31 +176,25 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
             />
           )}
           <div className="flex items-center gap-3">
-          {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
-            <Button
-              disabled={false}
-              variant="contained"
-              size="small"
-              color="primary"
-              onClick={() => setOpenAssetQtyDialog(true)}
-            >
-              Auto Select Asset
-            </Button>
-          )}
-          {isVirtualizedTableView && (
-             <Button
-             disabled={false}
-             variant="contained"
-             size="small"
-             color="primary"
-             onClick={() => {
-              setIsVirtualizedTableView(false);
-              setSelectedAssets([]);
-             }}
-           >
-             Reset
-           </Button>
-          )}
+            {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
+              <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => setOpenAssetQtyDialog(true)}>
+                Auto Select Asset
+              </Button>
+            )}
+            {isVirtualizedTableView && (
+              <Button
+                disabled={false}
+                variant="contained"
+                size="small"
+                color="primary"
+                onClick={() => {
+                  setIsVirtualizedTableView(false);
+                  setSelectedAssets([]);
+                }}
+              >
+                Reset
+              </Button>
+            )}
           </div>
         </div>
       </div>

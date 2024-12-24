@@ -2,7 +2,7 @@ import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/mate
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 const FormTypes = (props) => {

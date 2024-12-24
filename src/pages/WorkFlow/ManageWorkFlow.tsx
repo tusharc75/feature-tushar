@@ -14,7 +14,7 @@ import { Box, CircularProgress, TextField } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { getLookupResource } from 'src/components/FormBuilder/helper';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { object, string } from 'yup';
 import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

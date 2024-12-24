@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typog
 import { ExpandMore } from '@material-ui/icons';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';

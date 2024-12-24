@@ -1,6 +1,6 @@
 import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { FaCircleChevronDown } from 'react-icons/fa6';

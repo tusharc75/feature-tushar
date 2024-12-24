@@ -2,7 +2,7 @@ import { Avatar, Box, Collapse, IconButton, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@material-ui/icons';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { TreeItem, TreeView } from '@material-ui/lab';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 import moment from 'moment';
 import React, { Fragment, useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

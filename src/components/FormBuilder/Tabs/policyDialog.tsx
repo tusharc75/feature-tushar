@@ -10,7 +10,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

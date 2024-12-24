@@ -2,7 +2,7 @@ import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, L
 import ListItem from '@mui/material/ListItem/ListItem';
 import { Edit } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { reverse as _reverse } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';

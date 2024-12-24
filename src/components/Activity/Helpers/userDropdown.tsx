@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { TextField, Chip } from '@mui/material';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { flatMap, map } from 'lodash';
 import axiosInstance from '../../../axios/axiosInstance';
 

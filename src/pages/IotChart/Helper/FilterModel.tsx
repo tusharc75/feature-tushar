@@ -1,6 +1,6 @@
 import DateFnsUtils from '@date-io/date-fns';
 import { Box, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
 import { useEffect, useState } from 'react';

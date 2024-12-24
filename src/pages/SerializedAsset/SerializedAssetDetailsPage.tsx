@@ -3,7 +3,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import BuildIcon from '@material-ui/icons/Build';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { round, startCase } from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';

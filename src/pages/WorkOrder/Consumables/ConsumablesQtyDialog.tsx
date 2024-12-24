@@ -1,4 +1,4 @@
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Box, Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';

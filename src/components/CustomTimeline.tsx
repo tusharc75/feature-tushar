@@ -1,4 +1,4 @@
-import { Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator } from '@material-ui/lab';
+import { Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator } from '@mui/material';
 import { RiSpaceShipLine } from 'react-icons/ri';
 import { displayDate } from '../constants/helpers';
 import { makeStyles } from '@mui/styles';

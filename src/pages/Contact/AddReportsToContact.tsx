@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, TextField, CircularProgress } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import { object } from 'yup';

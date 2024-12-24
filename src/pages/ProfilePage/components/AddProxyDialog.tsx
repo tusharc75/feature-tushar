@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormat } from '../../../constants/helpers';
 import MomentUtils from '@date-io/moment';

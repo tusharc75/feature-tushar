@@ -19,7 +19,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Edit, ExpandMore } from '@material-ui/icons';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 
 const creditMemoDetail = () => {
   const { id } = useParams();

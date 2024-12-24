@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Popover, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';

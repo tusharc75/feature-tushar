@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Box, IconButton, Paper, Typography } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import BoxWithBorder from '../../../components/BoxWithBorder';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Accordion from '@mui/material/Accordion';

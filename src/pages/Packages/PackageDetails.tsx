@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';

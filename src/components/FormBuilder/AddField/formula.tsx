@@ -9,7 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import { checkFormula } from '../../../constants/formulaUtility';
 import Chip from '@mui/material/Chip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import Grid from '@mui/material/Grid';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@mui/material';

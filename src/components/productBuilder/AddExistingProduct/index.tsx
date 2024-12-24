@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

@@ -12,7 +12,7 @@ import { serviceMaster } from 'src/constants/helpers';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import Checkbox from '@mui/material/Checkbox';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';

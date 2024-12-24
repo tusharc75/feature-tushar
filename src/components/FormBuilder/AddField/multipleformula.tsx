@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import Chip from '@mui/material/Chip';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Button, Typography } from '@mui/material';
 import { checkFormula } from '../../../constants/formulaUtility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
