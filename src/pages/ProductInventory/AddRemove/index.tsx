@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
-import { Autocomplete } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -390,7 +390,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         disableClearable
                         options={storageLocationOptions}
                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
                             ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
@@ -527,7 +527,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                               );
                             }
                           }}
-                          getOptionSelected={(item, current) => item === current}
+                          isOptionEqualToValue={(item, current) => item === current}
                           getOptionLabel={(option) => option}
                           renderInput={(props) => (
                             <TextField

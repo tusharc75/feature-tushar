@@ -5,7 +5,7 @@ import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import { makeStyles } from '@mui/styles';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/md';
@@ -233,10 +233,10 @@ const CurrencyConverter = () => {
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
-                  // renderOption={(option) => {
-                  //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                  //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                  // }}
+                // renderOption={(option) => {
+                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                // }}
                 />
               </Grid>
               <Grid xs={12} md={4} sm={4} container justify="flex-end">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Grid, Typography, TextField, Link, Theme } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
 

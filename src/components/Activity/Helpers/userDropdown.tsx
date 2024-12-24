@@ -34,7 +34,7 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
           setUsers(userData);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const setParticipants = (values, reason) => {
@@ -114,7 +114,7 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
         }}
         freeSolo
         limitTags={5}
-        getOptionSelected={(opt, val) => {
+        isOptionEqualToValue={(opt, val) => {
           return opt.userId === val.userId;
         }}
         filterSelectedOptions={false}
@@ -122,12 +122,12 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
         value={
           users && multiple === true
             ? users.filter((data) =>
-                flatMap(value, (nameObj) =>
-                  map(nameObj, (userId) => {
-                    return userId;
-                  })
-                ).includes(data.userId)
-              )
+              flatMap(value, (nameObj) =>
+                map(nameObj, (userId) => {
+                  return userId;
+                })
+              ).includes(data.userId)
+            )
             : users
               ? users.filter((data) => data.userId === value).length > 0
                 ? users.filter((data) => data.userId === value)[0]

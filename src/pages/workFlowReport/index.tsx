@@ -14,7 +14,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
 

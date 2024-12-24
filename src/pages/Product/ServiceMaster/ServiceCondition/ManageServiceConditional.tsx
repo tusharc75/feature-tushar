@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const OPERATOR = [
   {

@@ -9,8 +9,8 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
-import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import Autocomplete from '@mui/material/Autocomplete';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormat } from '../../../constants/helpers';
 
 const AddProxySchema = object().shape({
@@ -96,7 +96,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         onChange={(event, newValue: any) => {
                           setFieldValue('user', newValue._id);
                         }}
-                        getOptionSelected={(option: any, val) => option._id === val}
+                        isOptionEqualToValue={(option: any, val) => option._id === val}
                         renderInput={(params) => (
                           <TextField
                             {...params}

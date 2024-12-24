@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -75,7 +75,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                     size="small"
                     value={values?.serialNumber ? serialNumberOptions?.filter((data: any) => values?.serialNumber?.includes(data.optionValue)) : []}
                     getOptionLabel={(option) => option.optionLabel}
-                    getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                    isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                     onChange={(_, newVal: any) => {
                       const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                       const values = isAll ? [...serialNumberOptions?.map((o) => o.optionValue)] : newVal?.map((val) => val.optionValue);

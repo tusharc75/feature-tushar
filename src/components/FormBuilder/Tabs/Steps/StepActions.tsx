@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -175,7 +175,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
                 id="formField"
                 options={fields}
                 getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                getOptionSelected={(option: any, val) => option?.fieldName === val}
+                isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                 value={fields?.find((f) => f.fieldName === state[index]?.formField) || ''}
                 onChange={(e: any, value) => {
                   let data = [...state];
@@ -205,7 +205,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
                 id="resourceField"
                 options={resourceFieldOptions}
                 getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                getOptionSelected={(option: any, val) => option?.fieldName === val}
+                isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                 value={resourceFieldOptions?.find((f) => f.fieldName === state[index]?.resourceField) || ''}
                 onChange={(e: any, value) => {
                   let data = [...state];

@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';

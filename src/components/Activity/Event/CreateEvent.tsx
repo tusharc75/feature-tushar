@@ -1,8 +1,8 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { ArrowRightAlt } from '@mui/icons-material';
-import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import Autocomplete from '@mui/material/Autocomplete';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
@@ -284,7 +284,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             disabled={loadingResources}
                             options={resourceData}
                             getOptionLabel={(option: any) => option.optionLabel}
-                            getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+                            isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
                             fullWidth
                             value={selectedResourceData}
                             onChange={(event, newValue) => {

@@ -1,6 +1,6 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import Autocomplete from '@mui/material/Autocomplete';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -182,7 +182,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       options={fieldOptions}
                       limitTags={4}
                       getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                      getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
+                      isOptionEqualToValue={(option: any, val) => option?.fieldName === val?.fieldName}
                       value={values?.formRelatedTo?.fields}
                       onChange={(e, val) => {
                         setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });

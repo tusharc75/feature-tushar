@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -144,7 +144,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                     id="stepsStyle"
                     options={[STEPS_STYLE.list, STEPS_STYLE.step, STEPS_STYLE.sideBar]}
                     getOptionLabel={(option: any) => (option ? option : '')}
-                    getOptionSelected={(option: any, val) => option === val}
+                    isOptionEqualToValue={(option: any, val) => option === val}
                     value={values['stepsStyle']}
                     onChange={(e: any, value) => {
                       setFieldValue('stepsStyle', value);

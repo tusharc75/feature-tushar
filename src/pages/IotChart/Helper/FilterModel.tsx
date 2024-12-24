@@ -1,5 +1,5 @@
 import { Box, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
 import { useEffect, useState } from 'react';

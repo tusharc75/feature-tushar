@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormat } from 'src/constants/helpers';
 
 const Filters = ({

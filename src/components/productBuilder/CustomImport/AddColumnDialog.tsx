@@ -13,7 +13,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const FieldSchema = object().shape({
   type: string().required('please select field type'),
@@ -107,7 +107,7 @@ export const AddColumnDialog = (props) => {
                   options={section || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option ?? ''}
                   value={values?.sectionName}
                   onChange={(_, newVal) => {
@@ -130,7 +130,7 @@ export const AddColumnDialog = (props) => {
                   options={fieldLabelOptions || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option?.fieldLabel ?? ''}
                   value={
                     fieldLabelOptions?.filter((f) => f?.fieldLabel === values?.fieldLabel)?.length > 0

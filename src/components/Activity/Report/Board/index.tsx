@@ -1,5 +1,5 @@
 import { Box, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, groupBy } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -147,7 +147,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((err) => {
         fetchBoard();
       });
@@ -254,7 +254,7 @@ const Board = ({ type, filter }) => {
             disabled={loadingResources}
             options={resourceData}
             getOptionLabel={(option: any) => option.optionLabel}
-            getOptionSelected={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
+            isOptionEqualToValue={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);

@@ -22,7 +22,7 @@ import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE } from 'src/constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -261,7 +261,7 @@ export default function ManageAttachment({
                           renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
                           disabled={defaultAttachmentType === '' ? !canEdit : true}
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option: any, value: any) => option === value}
+                          isOptionEqualToValue={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
                             setFieldValue('attachmentType', val);
                           }}

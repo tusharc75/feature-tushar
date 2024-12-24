@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, IconButton, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -70,7 +70,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
       .then(({ data: { data } }) => {
         setExcelMappingData(data?.filter((d) => d?.access === 'everyone' || (d?.access === 'private' && d?.user === user?.user?._id)));
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const deleteExcelMappingView = () => {
@@ -130,7 +130,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       size="small"
                       options={excelMappingData}
                       getOptionLabel={(option) => option?.name || ''}
-                      getOptionSelected={(option: any, val) => option?._id === val}
+                      isOptionEqualToValue={(option: any, val) => option?._id === val}
                       value={selectedView}
                       onChange={(event: any, newValue: any) => {
                         setSelectedView(newValue ? newValue : null);
@@ -173,7 +173,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                   <Autocomplete
                                     options={sheetNames}
                                     disableClearable
-                                    getOptionSelected={(option: any, val) => option === val}
+                                    isOptionEqualToValue={(option: any, val) => option === val}
                                     value={data?.sheetName}
                                     onChange={(e, val) => {
                                       arrayHelpers.replace(index, {
@@ -235,7 +235,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                   <Autocomplete
                                     options={['1', '2']}
                                     disableClearable
-                                    getOptionSelected={(option: any, val) => option === val}
+                                    isOptionEqualToValue={(option: any, val) => option === val}
                                     value={data?.headerRow}
                                     onChange={(e, val) => {
                                       arrayHelpers.replace(index, {

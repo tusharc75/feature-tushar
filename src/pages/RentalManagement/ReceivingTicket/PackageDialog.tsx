@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -27,7 +27,7 @@ const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
             ?.map((m) => ({ optionLabel: m?.packageDetail?.packageName, optionValue: m?._id }))
         );
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   return (
@@ -55,7 +55,7 @@ const PackageDialog = ({ onClose, rentalManagementData, onSuccess }) => {
               setSelectedPackage(val);
             }}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
             renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="package" label="Select Package" />}
           />
         </Box>

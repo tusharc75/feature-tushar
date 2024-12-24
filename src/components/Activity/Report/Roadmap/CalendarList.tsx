@@ -70,7 +70,8 @@ export default function CalendarList(props) {
         return (
           <TreeItem
             key={index}
-            nodeId={data._id.toString()}
+            itemId={data._id.toString()}
+            id={data._id.toString()}
             label={label}
             children={children}
             classes={{

@@ -1,5 +1,5 @@
 import { Box, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit }) => {
   return (
@@ -10,7 +10,7 @@ const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit 
           disableCloseOnSelect={true}
           options={resourceList}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             resourceList && resourceList?.filter((data) => data.optionValue === resourceName)?.length
               ? resourceList && resourceList?.filter((data) => data.optionValue === resourceName)[0]

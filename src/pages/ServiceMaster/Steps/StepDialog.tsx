@@ -12,7 +12,7 @@ import { serviceMaster } from 'src/constants/helpers';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import Checkbox from '@mui/material/Checkbox';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import Grid from '@mui/material/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
@@ -355,7 +355,7 @@ export default function StepDialog({
                           getOptionLabel={(option: any) =>
                             option ? `${option?.currencyCode} - ${option?.currencyName} - (${option?.symbolNative})` : ''
                           }
-                          getOptionSelected={(option: any, val) => option.currencyCode === val}
+                          isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
                           onChange={(event, newValue) => {
                             setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
                           }}
@@ -379,9 +379,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -404,9 +403,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -444,7 +442,7 @@ export default function StepDialog({
                                 : []
                             }
                             getOptionLabel={(option) => option.optionLabel}
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(_, newVal: any) => {
                               const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                               const values = isAll
@@ -517,7 +515,7 @@ export default function StepDialog({
                                   size="small"
                                   value={values?.passAddon ? services?.filter((data: any) => values?.passAddon?.includes(data.optionValue)) : []}
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -566,7 +564,7 @@ export default function StepDialog({
                                   size="small"
                                   value={values?.failAddon ? services?.filter((data: any) => values?.failAddon?.includes(data.optionValue)) : []}
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -620,7 +618,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -679,7 +677,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -738,7 +736,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -797,7 +795,7 @@ export default function StepDialog({
                                       : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -891,7 +889,7 @@ export default function StepDialog({
                                     values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll
@@ -946,7 +944,7 @@ export default function StepDialog({
                                     values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any[]) => {
                                     const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
                                     const values = isAll ? allFollowingStepToJump?.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
@@ -1020,7 +1018,7 @@ export default function StepDialog({
                                     values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
                                   }
                                   getOptionLabel={(option) => option.optionLabel}
-                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToStepOnFail', newVal ? newVal?.optionValue : '');
                                   }}
@@ -1068,7 +1066,7 @@ export default function StepDialog({
                                   value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
                                   getOptionLabel={(option) => option?.optionLabel}
                                   renderOption={(option) => option?.optionLabel}
-                                  // getOptionSelected={(option: any, val: any) => option?.optionValue === val?.optionValue}
+                                  // isOptionEqualToValue={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
                                   }}

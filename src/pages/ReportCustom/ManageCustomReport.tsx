@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
 import { CustomDialogTransition, REPORT_LIST } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -371,7 +371,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option?.title || ''}
-                          getOptionSelected={(option, value) => option?.value === value?.value}
+                          isOptionEqualToValue={(option, value) => option?.value === value?.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
@@ -410,7 +410,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           multiple
                           size="small"
                           value={values.filters}
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           onChange={(_, newVal) => {
                             setFieldValue('filters', newVal);
@@ -447,7 +447,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           multiple
                           size="small"
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           value={values.column}
                           onChange={(_, newVal) => setFieldValue('column', newVal)}
