@@ -83,7 +83,8 @@ const TreeNode = ({ data, handleSelect }) => {
     <TreeItem
       style={{ width: '100%' }}
       key={data._id}
-      nodeId={data._id.toString()}
+      itemId={data._id.toString()}
+      id={data._id.toString()}
       label={label}
       children={types.map((t) => (
         <Box
