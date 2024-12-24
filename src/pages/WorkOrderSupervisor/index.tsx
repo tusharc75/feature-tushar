@@ -818,6 +818,7 @@ const WorkOrderSupervisor = () => {
         <Filter
           onClose={() => {
             setShowFilter(false);
+            dispatch({ type: 'setFilterQuery', filterQuery: '' });
           }}
           loading={false}
           filterTitle={resources?.workOrderSupervisor?.titleSingular}
