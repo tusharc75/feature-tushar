@@ -163,14 +163,9 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    if (filterQuery?.filterById?.length) {
-      filterQuery?.filterById?.forEach((e) => {
+    if (filterQuery?.length) {
+      filterQuery?.forEach((e) => {
         filterByIds.push(e);
-      });
-    }
-    if (filterQuery?.deepFilter?.length) {
-      filterQuery?.deepFilter?.forEach((e) => {
-        deepFilters.push(e);
       });
     }
     if (filterByIds?.length) {
