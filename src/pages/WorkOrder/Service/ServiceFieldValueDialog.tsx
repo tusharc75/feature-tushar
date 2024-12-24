@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -81,10 +81,7 @@ const ServiceFieldValueDialog = ({ workOrderId, fields = [], fieldsValue = {}, s
                       />
                     </Form>
                   ) : (
-                    <DetailsPage
-                      containerPadding={'0px'}
-                      data={fieldsValue}
-                      fields={fields.map((f) => ({ fieldData: f }))} />
+                    <DetailsPage containerPadding={'0px'} data={fieldsValue} fields={fields.map((f) => ({ fieldData: f }))} />
                   )}
                 </Box>
               </CustomDialogContent>

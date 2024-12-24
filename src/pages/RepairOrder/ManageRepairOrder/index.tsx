@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import moment from 'moment';
@@ -131,7 +131,7 @@ const ManageRepairOrder = ({
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
-          const disabledField = ['rentalJob', 'warehouse', 'customerAccount', 'type']
+          const disabledField = ['rentalJob', 'warehouse', 'customerAccount', 'type'];
           disabledField?.forEach((field: any) => {
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === field && initialData[field]) {
@@ -139,7 +139,7 @@ const ManageRepairOrder = ({
                 e.isUneditable = true;
               }
             });
-          })
+          });
         }
         if (referenceType === sidebarResource.workOrderPlanning) {
           if (referenceData) {
@@ -430,8 +430,8 @@ const ManageRepairOrder = ({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                         />

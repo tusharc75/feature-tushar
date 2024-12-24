@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
@@ -18,7 +18,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
-
   const renderedFrom = camelCase(sidebarResource.invoice);
 
   const toastConfig = useContext(CustomToastContext);
@@ -42,8 +41,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
       data = response?.data?.data;
       setRentalManagementData(data);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -208,12 +206,14 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
 
   return (
     <>
-      {rentalManagementData ?
+      {rentalManagementData ? (
         <>
           {allowCreateInvoice && permissions?.invoice?.isCreate && (
             <Box display="flex" justifyContent="flex-end">
               <Box display="flex" alignItems="center" pt={2} pr={2}>
-                <HtmlTooltip title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}>
+                <HtmlTooltip
+                  title={rentalManagementData?.allowToCreateBill ? '' : 'Invoice can be created only once item delivered or service started'}
+                >
                   <Button
                     variant="contained"
                     color="primary"
@@ -246,9 +246,12 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
               </Box>
             )}
           </Grid>
-        </> : <Box p={2} height={500}>
+        </>
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        </Box>
+      )}
       {createBillDialog.open && (
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}

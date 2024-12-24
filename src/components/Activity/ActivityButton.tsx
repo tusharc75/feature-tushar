@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Button, IconButton } from '@material-ui/core';
+import Grid from '@mui/material/Grid';
+import { Button, IconButton } from '@mui/material';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
@@ -59,14 +59,14 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                        type: extraRelatedTo?.resource,
-                        referenceId: extraRelatedTo?.referenceId,
-                        access: true
-                      }
+                          type: extraRelatedTo?.resource,
+                          referenceId: extraRelatedTo?.referenceId,
+                          access: true
+                        }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                 />
               )}

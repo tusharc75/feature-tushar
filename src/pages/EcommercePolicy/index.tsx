@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import EditIcon from '@material-ui/icons/Edit';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -31,7 +31,7 @@ const EcommercePolicy = () => {
       .then(({ data: { data } }) => {
         setDetails(data);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const getFields = () => {

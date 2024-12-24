@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { capitalize, sortBy, uniqBy } from 'lodash';

@@ -1,10 +1,10 @@
-import Avatar from '@material-ui/core/Avatar';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
 import React, { useEffect } from 'react';
@@ -127,7 +127,7 @@ export const Comment = ({ referenceId }) => {
       <Box pt={3}>
         <div className="flex flex-wrap items-start gap-2">
           <Avatar className={` ${avatarClass} `}>{currentUser && currentUser.firstName[0] + currentUser.lastName[0]} </Avatar>
-          <div className=" space-y-3 flex-grow">
+          <div className=" flex-grow space-y-3">
             <TextField
               id="outlined-multiline-static"
               label="Comment"

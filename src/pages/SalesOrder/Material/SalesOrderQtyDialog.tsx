@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -157,7 +157,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
     } else {
       return 'Bulk Edit';
     }
-  }
+  };
 
   const handleSubmit = async (values) => {
     if (isBulkedit) {
@@ -331,12 +331,20 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
-
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? priceMethodList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -348,13 +356,26 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
+                                              );
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === value &&
+                                                  d.unit === values['unit']
+                                              );
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                              );
                                             }
                                             let priceFieldName = 'price_' + salesOrderData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(

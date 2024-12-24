@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -19,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -55,7 +55,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {

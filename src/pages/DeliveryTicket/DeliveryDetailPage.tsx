@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import axiosInstance from '../../axios/axiosInstance';
 import { useMemo, useState, useContext, useEffect } from 'react';

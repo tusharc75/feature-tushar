@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -19,7 +19,7 @@ const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -28,25 +28,25 @@ const History = ({ id }) => {
   const [resourceList, setResourceList] = useState([]);
 
   const TECHNICIAN_RESOURCE = [
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    path: routes.fieldTicketDetail.path,
-    title: resources?.fieldTicket?.titlePlural
-  },
-  {
-    key: 'workOrder',
-    resource: sidebarResource.workOrder,
-    path: routes.workOrderDetail.path,
-    title: resources?.workOrder?.titlePlural
-  },
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    path: routes.rentalManagementDetail.path,
-    title: resources?.rentalManagement?.titlePlural
-  }
-];
+    {
+      key: 'fieldTicket',
+      resource: sidebarResource.fieldTicket,
+      path: routes.fieldTicketDetail.path,
+      title: resources?.fieldTicket?.titlePlural
+    },
+    {
+      key: 'workOrder',
+      resource: sidebarResource.workOrder,
+      path: routes.workOrderDetail.path,
+      title: resources?.workOrder?.titlePlural
+    },
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      path: routes.rentalManagementDetail.path,
+      title: resources?.rentalManagement?.titlePlural
+    }
+  ];
 
   const columns = [
     {

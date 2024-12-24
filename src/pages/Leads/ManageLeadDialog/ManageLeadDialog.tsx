@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { useHistory } from 'react-router-dom';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { getObjKeys, yupSchema, getObjKeysWithValues } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

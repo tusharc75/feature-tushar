@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, MenuItem } from '@mui/material';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

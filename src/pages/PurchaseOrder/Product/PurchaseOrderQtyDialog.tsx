@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog,  Box } from '@material-ui/core';
+import { Button, Dialog, Box } from '@mui/material';
 import { CHILD_RESOURCE, arrayToDropwdownOption } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -34,7 +34,6 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
       walkmeInstance.handleNext();
     }
   }, [initialData]);
-
 
   const fetchField = async () => {
     setInitialData({ fields: [], values: {} });
@@ -158,11 +157,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                       if (name === 'taxCode') {
                         const taxCode = initialData?.fields?.find((e) => e?.fieldName === 'taxCode')?.option.find((d) => d.optionValue === value);
                         setFieldValue('taxPercentage', taxCode?.taxRate || 0);
-                        const result = autoCalculateSpecificFields(
-                          { ['taxPercentage']: taxCode?.taxRate || 0 },
-                          values,
-                          initialData.fields
-                        );
+                        const result = autoCalculateSpecificFields({ ['taxPercentage']: taxCode?.taxRate || 0 }, values, initialData.fields);
                         if (Object.keys(result).length >= 1) {
                           for (var x in result) {
                             setFieldValue(x, result[x]);

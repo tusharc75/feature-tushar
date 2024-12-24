@@ -1,4 +1,4 @@
-import { Box, CssBaseline } from '@material-ui/core';
+import { Box, CssBaseline } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -12,7 +12,7 @@ const AzureSSOError = () => {
     const searchParams = new URLSearchParams(document.location.search);
     const errorMessage = searchParams.get('message');
     const email = searchParams.get('email');
-    if (email) setEmail(email)
+    if (email) setEmail(email);
     if (errorMessage) setError(errorMessage);
   }, []);
 
@@ -24,7 +24,9 @@ const AzureSSOError = () => {
           <div className={styles.contentContainer}>
             <p>{error}</p>
             {email && <p>Email returned from your IDP: {email}</p>}
-            <Link to="/login" className={`${'cursor-pointer'} ${'setLink'}`}>Login</Link>
+            <Link to="/login" className={`${'cursor-pointer'} ${'setLink'}`}>
+              Login
+            </Link>
           </div>
         </div>
       </div>

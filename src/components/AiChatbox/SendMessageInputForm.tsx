@@ -1,4 +1,4 @@
-import { IconButton, TextareaAutosize } from '@material-ui/core';
+import { IconButton, TextareaAutosize } from '@mui/material';
 import { FormEvent, KeyboardEvent, useState } from 'react';
 import { SendIcon } from 'src/assets/svg/svgIcons';
 import VoiceInput from 'src/components/AiChatbox/VoiceInput';

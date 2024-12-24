@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { Theme, createStyles } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@material-ui/icons';
 import {
   convertMsToTime,
@@ -17,7 +18,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';

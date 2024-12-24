@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, Chip, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -10,10 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import {
-  CustomDialogTransition,
-  sidebarResource
-} from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -22,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageUnit = ({ onClose, onSuccess, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -128,12 +125,7 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
       }}
     >
       {initialData?.fields?.length ? (
-        <Formik
-          initialValues={initialData.values}
-          enableReinitialize={true}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} enableReinitialize={true} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
@@ -141,8 +133,11 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}` : `Create ${resources?.units?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}`
+                    : `Create ${resources?.units?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -151,7 +146,7 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Box, Grid, Checkbox, Button, Dialog } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Box, Grid, Checkbox, Button, Dialog } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { DataGrid } from '@material-ui/data-grid';
 import Container from '../../components/CustomContainer';
@@ -195,13 +195,13 @@ export default function Doa() {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format(dateFormat),
-        status: user.blocked ? user.blocked : false
-      }))
+          id: user._id,
+          isChecked: false,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          createdAt: moment(user.createdAt).format(dateFormat),
+          status: user.blocked ? user.blocked : false
+        }))
       : [];
 
     setDataRows(rows);

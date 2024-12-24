@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import CloseIcon from '@material-ui/icons/Close';
-import { Chip } from '@material-ui/core';
+import { Chip } from '@mui/material';
 import _ from 'lodash';
 
 const DisplayChips = (props) => {

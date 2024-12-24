@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -29,7 +29,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
   const history = useHistory();
 
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });

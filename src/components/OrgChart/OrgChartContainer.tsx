@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { generateUniqueId } from '../../constants/helpers';
 import OrgChart from './OrgChart';

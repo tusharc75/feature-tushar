@@ -4486,7 +4486,14 @@ body .btn-outline-red-v1 {
     }
   }
 }
-
+.main-sidebar {
+  .MuiToolbar-root {
+    @media all and (max-width: 959px) {
+      width: 0px !important;
+      height: 0px !important;
+    }
+  }
+}
 .has-mobile-step {
   .detail-container-v1,
   .detail-container {

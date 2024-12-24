@@ -1,5 +1,5 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { TableHead, TableRow } from '@material-ui/core';
+import { TableHead, TableRow } from '@mui/material';
 import { Fragment, memo } from 'react';
 import { DraggableHeader } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 

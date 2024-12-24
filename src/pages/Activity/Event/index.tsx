@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@mui/material';
 import { Add } from '@material-ui/icons';
 import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';

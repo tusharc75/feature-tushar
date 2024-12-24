@@ -1,13 +1,12 @@
-import Box from '@material-ui/core/Box/Box';
-import { Button } from '@material-ui/core';
-import {  sidebarResource } from 'src/constants/helpers';
+import Box from '@mui/material/Box/Box';
+import { Button } from '@mui/material';
+import { sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import PreviewDownload from 'src/components/PreviewDownload';
 import routes from 'src/components/Helpers/Routes';
-
 
 const SendEmail = ({
   quotationData,
@@ -19,7 +18,6 @@ const SendEmail = ({
   hideSummary = false,
   hideVersions = false
 }) => {
-
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -76,7 +74,8 @@ const SendEmail = ({
                 `totalPrice_${quotationData?.currency?.toLowerCase()}`,
                 `tax_${quotationData?.currency?.toLowerCase()}`,
                 `finalPrice_${quotationData?.currency?.toLowerCase()}`
-              ]} />
+              ]}
+            />
           </Box>
         </Box>
       </Box>

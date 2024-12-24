@@ -1,4 +1,4 @@
-import { Box, FormGroup, Grid, IconButton, useMediaQuery } from '@material-ui/core';
+import { Box, FormGroup, Grid, IconButton, useMediaQuery } from '@mui/material';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -77,13 +77,13 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
       </Grid>
       <Box mt={2}>
         <div
-          className={`grid gap-y-4 sm:gap-x-3 md:gap-x-4 grid-cols-1 ${
+          className={`grid grid-cols-1 gap-y-4 sm:gap-x-3 md:gap-x-4 ${
             isExpanded ? '' : '[--left-col-size:62px]'
-          } sm:grid-cols-[var(--left-col-size,5fr)_9fr] md:grid-cols-[var(--left-col-size,4fr)_9fr] lg:grid-cols-[var(--left-col-size,320px)_1fr]  transition-all duration-300`}
+          } transition-all duration-300 sm:grid-cols-[var(--left-col-size,5fr)_9fr]  md:grid-cols-[var(--left-col-size,4fr)_9fr] lg:grid-cols-[var(--left-col-size,320px)_1fr]`}
         >
           <div className={`container-with-border ${isExpanded ? '' : 'overflow-hidden'} `}>
-            <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between gap-2 px-4 py-3 items-center">
-              <p className={` font-semibold text-[16px] ${isExpanded ? '' : ' sr-only'}`}>Data Points</p>
+            <div className="flex items-center justify-between gap-2 px-4 py-3 [border-bottom:1px_solid_var(--common-border-color)]">
+              <p className={` text-[16px] font-semibold ${isExpanded ? '' : ' sr-only'}`}>Data Points</p>
               {isMobile ? null : (
                 <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
                   {isExpanded ? <ChevronLeft /> : <ChevronRight />}
@@ -92,8 +92,8 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
             </div>
 
             <div
-              className={`sm:h-[calc(574px-48px)] h-[250px] px-2 ${
-                isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap ${frostedGlass}`
+              className={`h-[250px] px-2 sm:h-[calc(574px-48px)] ${
+                isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap [&_*]:!overflow-hidden ${frostedGlass}`
               } py-1`}
             >
               <FormGroup>
@@ -122,7 +122,7 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
               </FormGroup>
             </div>
           </div>
-          <div className="container-with-border sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
+          <div className="container-with-border h-[250px] overflow-auto px-4 py-1 sm:h-[calc(574px-48px)]">
             {Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length ? (
               <Chart
                 deviceTemplate={deviceTemplate}
@@ -136,8 +136,8 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
                 }
               />
             ) : (
-              <div className="text-center grid place-items-center text-xl font-semibold text-gray-400 dark:text-gray-300 min-h-[574px]">
-                <p className="border-dashed border-r-0 border-l-0 py-4 select-none">Select Some Datapoints</p>
+              <div className="grid min-h-[574px] place-items-center text-center text-xl font-semibold text-gray-400 dark:text-gray-300">
+                <p className="select-none border-l-0 border-r-0 border-dashed py-4">Select Some Datapoints</p>
               </div>
             )}
           </div>

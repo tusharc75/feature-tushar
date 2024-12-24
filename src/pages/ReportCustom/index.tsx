@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton } from '@mui/material';
 import { isMobile } from 'react-device-detect';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -8,21 +8,19 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { camelCase, startCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
 
-
 const CustomReport = () => {
-
   const renderedFrom = 'custom-report';
 
   const toastConfig = useContext(CustomToastContext);
@@ -102,7 +100,7 @@ const CustomReport = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" fontSize='small' />
+            <DeleteIcon color="error" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -237,7 +235,7 @@ const CustomReport = () => {
                           if (selectedRecords.length === 1) {
                             setDeleteRecord(selectedRecords[0]);
                           } else {
-                            setDeleteRecord(null)
+                            setDeleteRecord(null);
                           }
                           closeActions();
                           setShowDeleteConfirmBox(true);

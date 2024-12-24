@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@mui/material';
 import { CheckCircle, CloudUpload, Delete } from '@material-ui/icons';
 import DescriptionIcon from '@material-ui/icons/Description';
 import SyncIcon from '@material-ui/icons/Sync';

@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -91,11 +91,7 @@ const Dashboard = () => {
           } else {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
             setCharts(data[0]?.charts);
-            setKpis(
-              data[0]?.charts
-                ?.filter((chart) => chart?.hasFilters)
-                ?.map((chart) => camelCase(chart?.kpi?.name))
-            );
+            setKpis(data[0]?.charts?.filter((chart) => chart?.hasFilters)?.map((chart) => camelCase(chart?.kpi?.name)));
             setSelectedDashboardId(data[0]?._id);
           }
           setDashboardList(data);

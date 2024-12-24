@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Dialog, Box, IconButton } from '@material-ui/core';
+import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';

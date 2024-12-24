@@ -1,4 +1,4 @@
-import { Box, Button, Grid, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, useMediaQuery } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ import Product from './Product';
 import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Step from '../DynamicForm/Step'
+import Step from '../DynamicForm/Step';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -107,7 +107,12 @@ const ServiceMasterDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes?.serviceMaster, title: resources?.serviceMaster?.titlePlural }, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes?.serviceMaster, title: resources?.serviceMaster?.titlePlural },
+              { title: `${serviceMasterDetailData?.serviceName || ''}` }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -202,13 +202,13 @@ const PackageList = () => {
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
-              setShowDeleteConfirmBox(true);
-            }}
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
@@ -243,8 +243,9 @@ const PackageList = () => {
             },
             {
               title: 'Sub-Package Export',
-              api: `${packages.api}/unknown/package/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-                }`,
+              api: `${packages.api}/unknown/package/template?export=true${
+                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -289,7 +290,7 @@ const PackageList = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${deleteRecord?.packageName || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.packages?.titleSingular?.toLowerCase()} : ${deleteRecord?.packageName || ''}` : `selected ${resources?.packages?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

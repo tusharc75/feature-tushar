@@ -1,7 +1,7 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
 import { object, string } from 'yup';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';

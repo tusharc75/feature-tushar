@@ -1,4 +1,4 @@
-import { Button, Dialog, Typography, Box } from '@material-ui/core';
+import { Button, Dialog, Typography, Box } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

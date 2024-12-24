@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

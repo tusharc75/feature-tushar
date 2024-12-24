@@ -11,7 +11,7 @@ import {
   TableHead,
   TableRow,
   TextField
-} from '@material-ui/core';
+} from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';

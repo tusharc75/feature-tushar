@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, Box, Grid, CircularProgress, useTheme, useMediaQuery, InputAdornment } from '@material-ui/core';
+import { Dialog, Button, Box, Grid, CircularProgress, useTheme, useMediaQuery, InputAdornment } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
 import FormTypes from '../Helpers/FormTypes';

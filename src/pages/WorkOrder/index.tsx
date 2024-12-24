@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -32,8 +32,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import axios, { CancelTokenSource } from 'axios';
 
 const WorkOrder = () => {
-
-
   let renderedFrom = camelCase(sidebarResource?.workOrder);
 
   const toastConfig = useContext(CustomToastContext);
@@ -272,7 +270,7 @@ const WorkOrder = () => {
           if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
           } else {
-            setDeleteRecord(null)
+            setDeleteRecord(null);
           }
           setIsConformDialogVisible(true);
         }}
@@ -340,8 +338,12 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.workOrderNumber || ''}` : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.workOrderNumber || ''}`
+                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

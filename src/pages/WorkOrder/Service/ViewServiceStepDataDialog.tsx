@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Dialog, TextField, Typography, useMediaQuery } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

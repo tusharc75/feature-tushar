@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

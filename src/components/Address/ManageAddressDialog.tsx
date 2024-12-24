@@ -1,11 +1,11 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
@@ -13,7 +13,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
@@ -23,7 +23,6 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { mapDarkTheme, mapLightTheme } from 'src/constants/helpers';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
-
   const {
     state: { user }
   }: any = useData();
@@ -165,7 +164,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       fullAddress.longitude = addressDetail?.longitude;
     }
     fullAddress.streetAddress = results.formatted_address;
-    if (!fromMarkerChange || !(initialData?.fields?.some((f) => f.fieldName === 'searchAddress'))) {
+    if (!fromMarkerChange || !initialData?.fields?.some((f) => f.fieldName === 'searchAddress')) {
       fullAddress.fullAddress = val?.description ?? results.formatted_address;
     } else {
       fullAddress.fullAddress = addressDetail?.fullAddress ?? '';
@@ -184,8 +183,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
             if (initialData.fields?.find((e) => e?.fieldName === 'fullAddress')?.type !== 'singleLine') {
               setFieldValue(k, addressDetail[k]);
             }
-          }
-          else {
+          } else {
             setFieldValue(k, addressDetail[k]);
           }
         });
@@ -222,7 +220,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
     return () => latLngChangedManually && setLatLngChangedManually(false);
   }, [addressDetail?.latitude, addressDetail?.longitude]);
 
-
   const onCordChange = (latLng: google.maps.LatLng) => {
     if (!formikRef.current || !window.google) return;
 
@@ -231,8 +228,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       fullAddress.latitude = latLng?.lat()?.toString();
       fullAddress.longitude = latLng?.lng()?.toString();
       setAddressDetail(fullAddress);
-    }
-    else {
+    } else {
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ location: latLng }, (result, status) => {
         if (status === google.maps.GeocoderStatus.OK) {
@@ -285,81 +281,97 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                  {formsData && formsData.map((form, index1) => {
-                    return <div key={index1}>
-                      <div className={'detail-box-content'}>
-                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                      </div>
-                      <Box marginY={2}>
-                        <Grid spacing={3} container>
-                          {form.sectionFields.map((field, index2) => (
-                            <Grid key={index2} item xs={12} sm={6} md={6}>
-                              {
-                                ['fullAddress', 'searchAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
-                                  'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={null}
-                                    setFieldValue={setFieldValue}
-                                    fieldData={field}
-                                    onChange={
-                                      field.fieldName === 'fullAddress' && field.type === 'singleLine' ? null
-                                        : (field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress')
-                                          ? (_, val) => {
-                                            if (typeof val !== 'object') return;
-                                            getFullAddress(val);
-                                            if (!val?.place_id) {
-                                              setAddressDetail(null);
-                                            }
-                                          }
-                                          : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                            const { name, value } = e.target;
-                                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                                            setAddressDetail((prevState: any) => ({
-                                              ...prevState,
-                                              [name]: value
-                                            }));
-                                            setLatLngChangedManually(true);
-                                          }}
-                                  />
-                                  :
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={null}
-                                    setFieldValue={setFieldValue}
-                                    fieldData={field}
-                                    allFields={initialData.fields}
-                                  />
-                              }
+                  {formsData &&
+                    formsData.map((form, index1) => {
+                      return (
+                        <div key={index1}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field, index2) => (
+                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  {[
+                                    'fullAddress',
+                                    'searchAddress',
+                                    'streetAddress',
+                                    'city',
+                                    'state',
+                                    'zipCode',
+                                    'country',
+                                    'county',
+                                    'latitude',
+                                    'longitude',
+                                    'state/Province',
+                                    'zipCode/PostalCode'
+                                  ].includes(field.fieldName) ? (
+                                    <FormTypes
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={null}
+                                      setFieldValue={setFieldValue}
+                                      fieldData={field}
+                                      onChange={
+                                        field.fieldName === 'fullAddress' && field.type === 'singleLine'
+                                          ? null
+                                          : field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress'
+                                            ? (_, val) => {
+                                                if (typeof val !== 'object') return;
+                                                getFullAddress(val);
+                                                if (!val?.place_id) {
+                                                  setAddressDetail(null);
+                                                }
+                                              }
+                                            : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                const { name, value } = e.target;
+                                                if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                                setAddressDetail((prevState: any) => ({
+                                                  ...prevState,
+                                                  [name]: value
+                                                }));
+                                                setLatLngChangedManually(true);
+                                              }
+                                      }
+                                    />
+                                  ) : (
+                                    <FormTypes
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={null}
+                                      setFieldValue={setFieldValue}
+                                      fieldData={field}
+                                      allFields={initialData.fields}
+                                    />
+                                  )}
+                                </Grid>
+                              ))}
                             </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </div>
-                  })}
+                          </Box>
+                        </div>
+                      );
+                    })}
                 </Form>
                 <div>
                   <p>Drag or click to select new coordinates</p>
@@ -370,7 +382,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                       options={{
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
                         gestureHandling: 'cooperative',
-                        styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
+                        styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme
                       }}
                       mapContainerStyle={{
                         height: '100%',

@@ -1,5 +1,5 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Button, IconButton, Typography } from '@material-ui/core';
+import { Button, IconButton, Typography } from '@mui/material';
 import { Add } from '@material-ui/icons';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -38,9 +38,9 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
 
   return (
     <>
-      <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px] group`} key={column.status} ref={setNodeRef}>
+      <div className={`group rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`} key={column.status} ref={setNodeRef}>
         {!loading && (
-          <div className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+          <div className="sticky top-0 z-10 rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)] px-[13px] py-[14px]">
             <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
               {column.status}
               {' (' + column.items.length + ')'}
@@ -83,7 +83,7 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
           </SortableContext>
         </ul>
         {permissions && permissions[type?.toLowerCase()]?.isCreate && !loading ? (
-          <div className=" group-hover:opacity-100 opacity-0 sticky bottom-0">
+          <div className=" sticky bottom-0 opacity-0 group-hover:opacity-100">
             <ThemeButton
               iconForMobile={false}
               fullWidth

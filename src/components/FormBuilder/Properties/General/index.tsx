@@ -1,5 +1,5 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { Autocomplete } from '@material-ui/lab';
 import { Fragment, useEffect, useState } from 'react';

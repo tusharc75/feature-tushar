@@ -1,7 +1,7 @@
 import Editor from '@draft-js-plugins/editor';
 import createImagePlugin from '@draft-js-plugins/image';
-import { IconButton } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
+import { IconButton } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import FormatAlignCenterIcon from '@material-ui/icons/FormatAlignCenter';
 import FormatAlignLeftIcon from '@material-ui/icons/FormatAlignLeft';
 import FormatAlignRightIcon from '@material-ui/icons/FormatAlignRight';

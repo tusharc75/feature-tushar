@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';

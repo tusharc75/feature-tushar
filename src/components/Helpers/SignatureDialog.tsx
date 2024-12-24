@@ -1,5 +1,5 @@
 import { useRef, useState, useContext } from 'react';
-import { Button, Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@material-ui/core';
+import { Button, Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -7,7 +7,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import SignaturePad from 'react-signature-canvas';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 
 export default function SignatureDialog(props) {
   const { open, onClose, onSigned, forDelivery, steps, label, submitting } = props;

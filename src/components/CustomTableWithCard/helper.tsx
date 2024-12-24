@@ -1,4 +1,4 @@
-import { Typography, GridProps } from '@material-ui/core';
+import { Typography, GridProps } from '@mui/material';
 import moment from 'moment';
 import { CardInterface } from 'src/components/CustomTableWithCard';
 import { dateTimeFormat, dateFormat } from 'src/constants/helpers';

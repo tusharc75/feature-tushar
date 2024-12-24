@@ -1,6 +1,6 @@
-import { Box, Dialog, Grid, makeStyles } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import React, { useState } from 'react';
+import { Box, Dialog, Grid } from '@mui/material';
+import Button from '@mui/material/Button';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

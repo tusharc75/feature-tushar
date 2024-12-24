@@ -12,7 +12,7 @@ import {
   Select,
   TextField,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios, { CancelTokenSource } from 'axios';
@@ -85,7 +85,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: '',

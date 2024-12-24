@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, getObjKeys } from 'src/constants/helpers';
-import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,7 +11,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import MaUTable from '@material-ui/core/Table';
+import MaUTable from '@mui/material/Table';
 import { Add, Delete } from '@material-ui/icons';
 
 function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
@@ -206,15 +206,15 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
                 overflow: 'auto',
                 height: '100%'
               }}
-              className="border custom-react-table editable-table-v1"
+              className="custom-react-table editable-table-v1 border"
             >
-              <MaUTable size="small" className="tableWrap table sticky">
+              <MaUTable size="small" className="tableWrap sticky table">
                 <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                   <TableRow key={'thead'} className="tr">
                     {entries[0]?.map((field, index) => (
                       <TableCell key={`${index}-${field?.fieldName}-head`} className="th text-truncate table-header overflow-initial">
                         <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                          <div className="d-flex gap-2 align-items-center">
+                          <div className="d-flex align-items-center gap-2">
                             <span>{field?.fieldLabel}</span>
                           </div>
                         </div>

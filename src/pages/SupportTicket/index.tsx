@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -22,7 +22,6 @@ import ManageSupportTicket from './ManageSupportTicket';
 import axios, { CancelTokenSource } from 'axios';
 
 const SupportTicket = () => {
-
   const renderedFrom = camelCase(sidebarResource.supportTicket);
   const toastConfig = useContext(CustomToastContext);
 
@@ -33,7 +32,6 @@ const SupportTicket = () => {
   const {
     state: { user, selectedEntity, resources }
   }: any = useData();
-
 
   const types = [
     {
@@ -228,11 +226,11 @@ const SupportTicket = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -250,7 +248,7 @@ const SupportTicket = () => {
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
           module={resources?.supportTicket?.titlePlural}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -299,8 +297,12 @@ const SupportTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.supportTicketNumber || ''}` : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.supportTicketNumber || ''}`
+              : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

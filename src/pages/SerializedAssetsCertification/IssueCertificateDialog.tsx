@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import moment from 'moment';
@@ -28,7 +28,6 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -64,7 +63,9 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   const handleSubmit = (values) => {
     setLoading(true);
-    const attachments = isArray(values?.attachments) ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName })) : [];
+    const attachments = isArray(values?.attachments)
+      ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }))
+      : [];
     const body = { ...values, asset: assetId, attachments: attachments };
     axiosInstance()
       .post(`${serializedAssetsCertification.api}/issue-certificate`, body)
@@ -191,6 +192,5 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
     </Dialog>
   );
 };
-
 
 export default IssueCertificateDialog;

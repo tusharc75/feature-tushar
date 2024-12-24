@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import Grid from '@mui/material/Grid';
+import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -15,7 +16,7 @@ import { isEmpty, isEqual, startCase, toLower } from 'lodash';
 import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import { Autocomplete } from '@material-ui/lab';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -93,7 +94,6 @@ const CreateFormBuilder = () => {
   const [steppers, setSteppers] = useState([]);
   const [sectionNameList, setSectionNameList] = useState([]);
   const [settingDialog, setSettingDialog] = useState(false);
-
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -218,7 +218,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -427,13 +427,7 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField
-                        {...params}
-                        label="Section Name"
-                        variant="outlined"
-                        margin="dense"
-                        fullWidth />
-                      }
+                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" fullWidth />}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);
@@ -481,8 +475,8 @@ const CreateFormBuilder = () => {
                           onClick={() => {
                             setSettingDialog(true);
                           }}
-                          color='primary'
-                          size='small'
+                          color="primary"
+                          size="small"
                         >
                           <Settings fontSize="small" />
                         </IconButton>

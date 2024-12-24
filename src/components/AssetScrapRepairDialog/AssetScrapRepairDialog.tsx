@@ -1,12 +1,13 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles, Box, TextField } from '@material-ui/core';
-import { Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, TextField } from '@mui/material';
+import { Button, CircularProgress, Dialog } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, serializedAsset } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {

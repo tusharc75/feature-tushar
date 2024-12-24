@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -15,13 +15,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import {
-  CHILD_RESOURCE,
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  yupSchema
-} from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 
 const ManagePaidTimeOff = ({ payrollPolicyId, currency, id = null, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -132,15 +126,15 @@ const ManagePaidTimeOff = ({ payrollPolicyId, currency, id = null, onSuccess, on
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>

@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -137,7 +137,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     setMaterialFields(JSON.parse(JSON.stringify(data)));
 
     var costFields = await fetch_rental_cost_fields(rentalManagementData?.currency, false);
-    setCostFields(costFields)
+    setCostFields(costFields);
 
     let newColumns = generateColumns(
       renderedFrom,
@@ -496,8 +496,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-          parent.type === MATERIAL_TYPE.serializedAsset ||
-          parent.type === MATERIAL_TYPE.manualEntry
+        parent.type === MATERIAL_TYPE.serializedAsset ||
+        parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -887,8 +887,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleCreateBill = (invoiceData = null) => {
     setIsSubmitting(true);
-    const material = []
-    const additionalCost = []
+    const material = [];
+    const additionalCost = [];
     rowsApplied?.forEach((element: any) => {
       if (element.type === MATERIAL_TYPE.service && element?.parentId) {
         if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
@@ -901,33 +901,35 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           type: element.type,
           ...getObjKeysWithValues(element, costFields)
         });
-      }
-      else {
+      } else {
         const obj: any = {
           _id: element._id,
           type: element.type,
           parentId: element.parentId,
           materialId: element.materialId,
           ...getObjKeysWithValues(element, materialFields)
-        }
+        };
         if (element?.type === MATERIAL_TYPE.other) {
           obj.detail = element.detail;
         }
         material.push(obj);
       }
     });
-    axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
-      material: material,
-      additionalCost: additionalCost,
-      invoiceData: invoiceData
-    }).then(() => {
-      setIsSubmitting(false);
-      setOpenInvoiceDataDialog(false);
-      onSuccess();
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
+        material: material,
+        additionalCost: additionalCost,
+        invoiceData: invoiceData
+      })
+      .then(() => {
+        setIsSubmitting(false);
+        setOpenInvoiceDataDialog(false);
+        onSuccess();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -995,7 +997,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords?.length &&
-                                  ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                    ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"

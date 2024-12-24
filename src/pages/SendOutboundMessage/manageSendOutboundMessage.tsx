@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';

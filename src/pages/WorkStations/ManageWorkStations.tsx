@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -53,7 +53,7 @@ const ManageWorkStations = ({ onClose, onSuccess, isClone = false, id = null }) 
               const { workStationName, ...rest } = data;
               setCloneHeading(workStationName);
               tempData = rest;
-            } 
+            }
             setInitialData({
               fields: fields,
               values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)

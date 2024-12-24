@@ -5,19 +5,19 @@ import {
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
-import Step from '@material-ui/core/Step';
-import StepContent from '@material-ui/core/StepContent';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
+  Typography
+} from '@mui/material';
+import Step from '@mui/material/Step';
+import StepContent from '@mui/material/StepContent';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -25,7 +25,6 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
-import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   button: {

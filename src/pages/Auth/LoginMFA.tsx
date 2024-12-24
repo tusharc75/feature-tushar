@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -193,7 +193,8 @@ const LoginMFA = () => {
                   }}
                 >
                   <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to proceed.
+                    A verification code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Please enter the code below to
+                    proceed.
                   </p>
                   <div className="mb-6 md:px-5">
                     <OtpInput

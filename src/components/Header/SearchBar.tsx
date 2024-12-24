@@ -1,20 +1,18 @@
-import React, { useState, useRef, useEffect, useReducer, useCallback } from 'react';
-import { IconButton, ListItem, ListItemText, List, ListItemIcon } from '@material-ui/core';
 import { Clear as ClearIcon } from '@material-ui/icons';
-import { useData } from '../../StateProvider/Provider';
-import { SET_SEARCH } from '../../StateProvider/actionTypes';
-import routes from '../Helpers/Routes';
-import { kebabCase } from 'lodash';
-import { staticHiddenResource } from '../../constants/helpers';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
-import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
-import styles from './Header.module.scss';
 import CallMadeIcon from '@material-ui/icons/CallMade';
-import { useStore, SEARCH } from 'src/StateProvider/fastContext';
+import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+import { IconButton, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { kebabCase } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
+import { useClickdOutside, useKeyPress, usePathname } from 'src/hooks';
+import { staticHiddenResource } from '../../constants/helpers';
+import routes from '../Helpers/Routes';
+import styles from './Header.module.scss';
 
-import { filterReducerInitialState, filterReducer } from './helper';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
+import { filterReducer, filterReducerInitialState } from './helper';
 
 export const SearchBar = ({ user, selectedEntity, history }) => {
   // const {
@@ -28,10 +26,11 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
   const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
+  const trimmedSearch = useMemo(() => search.trim() !== '', [search]);
 
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
-  }, [search.trim() !== '', search]);
+  }, [trimmedSearch, search]);
 
   const handleFocusOnSlash = (e: KeyboardEvent) => {
     if (!inputRef.current) return;
@@ -179,6 +178,8 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
   const arrowUpPressed = useKeyPress({ targetKey: 'ArrowUp' });
   const arrowDownPressed = useKeyPress({ targetKey: 'ArrowDown' });
   const listContainerRef = React.useRef(null);
+
+  console.log({ arrowUpPressed, arrowDownPressed });
 
   useEffect(() => {
     if (arrowUpPressed) {

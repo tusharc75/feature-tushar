@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme } from '@material-ui/core';
+import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import axiosInstance from '../../axios/axiosInstance';
@@ -269,7 +269,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                 />
               </Box>
               <Box className="mb-3 flex justify-end">
-              <ImportExportRole
+                <ImportExportRole
                   resource={resource}
                   field={field}
                   childrenResource={childrenResource}
@@ -278,7 +278,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   setChildrenResource={setChildrenResource}
                   isExport={false}
                   isImport={true}
-                  />
+                />
               </Box>
               <Paper>
                 {loading ? (

@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, TextField } from '@mui/material';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -12,11 +12,10 @@ import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-
 const SettingDialog = ({ entities, resource, handleClose }) => {
   const [initialValues, setInitialValues] = useState({
     entityWiseResourceName: false,
-    entityResources: {},
+    entityResources: {}
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -32,25 +31,23 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
         values[d.entity] = {
           resourceLabel: d.resourceLabel,
           homePageLabel: d.homePageLabel
-        }
-      })
+        };
+      });
       setInitialValues({
         entityWiseResourceName: true,
         entityResources: values
       });
       setSelectedEntities(entities?.filter((e: any) => data?.find((d: any) => d?.entity === e?._id)) || []);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, [resource]);
 
   const handleSave = (values) => {
-
     const payload = [];
     if (values?.entityWiseResourceName) {
-
       selectedEntities?.forEach((entity) => {
         payload.push({
           entity: entity._id,
@@ -60,7 +57,8 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
       });
     }
 
-    axiosInstance().post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
+    axiosInstance()
+      .post(`/sa-formbuilder/entity-wise-resource-names/${resource}`, payload)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -88,7 +86,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
       });
     }
     return errors;
-  }
+  };
 
   return (
     <Dialog
@@ -104,12 +102,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
         }
       }}
     >
-      <Formik
-        enableReinitialize={true}
-        initialValues={initialValues}
-        onSubmit={handleSave}
-        validate={validation}
-      >
+      <Formik enableReinitialize={true} initialValues={initialValues} onSubmit={handleSave} validate={validation}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
@@ -147,7 +140,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                       <Autocomplete
                         id="entities"
                         multiple
-                        size='small'
+                        size="small"
                         disableCloseOnSelect
                         options={entities || []}
                         getOptionLabel={(option: any) => (option ? option?.entityName : '')}
@@ -156,12 +149,9 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                         onChange={(e, val) => {
                           setSelectedEntities(val);
                         }}
-                        renderInput={(params) => <TextField {...params}
-                          margin="dense"
-                          variant="outlined"
-                          label="Entities"
-                          fullWidth
-                          name="entities" />}
+                        renderInput={(params) => (
+                          <TextField {...params} margin="dense" variant="outlined" label="Entities" fullWidth name="entities" />
+                        )}
                       />
                       <FieldArray name="entityResources">
                         {() =>
@@ -173,7 +163,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     disabled
                                     variant="outlined"
                                     size="small"
-                                    value={entities.find((e) => e._id === entity._id)?.entityName || ""}
+                                    value={entities.find((e) => e._id === entity._id)?.entityName || ''}
                                     label="Entity"
                                     fullWidth
                                   />
@@ -184,7 +174,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     variant="outlined"
                                     size="small"
                                     required={true}
-                                    value={values['entityResources'][entity._id]?.resourceLabel || ""}
+                                    value={values['entityResources'][entity._id]?.resourceLabel || ''}
                                     label="Resource Label (Singular)"
                                     fullWidth
                                     onChange={(e) => {
@@ -195,7 +185,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                 <Grid item xs={4}>
                                   <Field
                                     as={TextField}
-                                    value={values['entityResources'][entity._id]?.homePageLabel || ""}
+                                    value={values['entityResources'][entity._id]?.homePageLabel || ''}
                                     variant="outlined"
                                     size="small"
                                     required={true}
@@ -232,7 +222,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                 type="submit"
                 color="primary"
                 variant="contained"
-                disabled={(values.entityWiseResourceName && !selectedEntities?.length || !isEmpty(errors))}
+                disabled={(values.entityWiseResourceName && !selectedEntities?.length) || !isEmpty(errors)}
                 onClick={submitForm}
               >
                 Save

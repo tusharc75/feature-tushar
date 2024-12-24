@@ -1,19 +1,19 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, productAuction,GenerateResourceLineNumber } from '../../constants/helpers';
+import { CustomDialogTransition, productAuction, GenerateResourceLineNumber } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -157,7 +157,11 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
             <Fragment>
               <CustomDialogHeader
                 title={
-                  productAuctionId ? (isClone ? 'Clone' : `Update ${productAuctionData?.productAuction}`) : 'Create ' + resources?.productAuction?.titleSingular
+                  productAuctionId
+                    ? isClone
+                      ? 'Clone'
+                      : `Update ${productAuctionData?.productAuction}`
+                    : 'Create ' + resources?.productAuction?.titleSingular
                 }
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
@@ -174,7 +178,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

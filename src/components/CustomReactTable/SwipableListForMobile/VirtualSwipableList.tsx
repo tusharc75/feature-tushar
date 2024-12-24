@@ -1,4 +1,4 @@
-import { Collapse, IconButton } from '@material-ui/core';
+import { Collapse, IconButton } from '@mui/material';
 import { flexRender } from '@tanstack/react-table';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { DEFAULT_DATA_ROWS_VISIBLE } from 'src/components/CustomReactTable/SwipableListForMobile';

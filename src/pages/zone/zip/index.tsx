@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import React from 'react';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';

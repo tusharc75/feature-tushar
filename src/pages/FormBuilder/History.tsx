@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import Dialog from '@material-ui/core/Dialog/Dialog';
+import Dialog from '@mui/material/Dialog/Dialog';
 import { CustomDialogTransition, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';

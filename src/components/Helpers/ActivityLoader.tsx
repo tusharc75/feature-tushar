@@ -1,5 +1,5 @@
-import { Box } from "@material-ui/core";
-import { CircularProgress } from "@material-ui/core"
+import { Box } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 
 const ActivityLoader = () => {
   return (

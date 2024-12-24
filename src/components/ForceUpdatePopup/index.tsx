@@ -1,4 +1,4 @@
-import { Dialog } from '@material-ui/core';
+import { Dialog } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { UpdateIllustration } from 'src/assets/svg/Illustrations';
 

@@ -1,5 +1,5 @@
-import { Box, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@material-ui/lab';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -128,7 +128,7 @@ const DetailsPageHeader = (props) => {
             })
           ) : null}
         </Box>
-        <div id="detailHeaderPageActions" className={'flex items-center justify-flex-end gap-2'}>
+        <div id="detailHeaderPageActions" className={'justify-flex-end flex items-center gap-2'}>
           {children}
         </div>
       </div>

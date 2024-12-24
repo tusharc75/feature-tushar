@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import WarningIcon from '@material-ui/icons/Warning';
 import { camelCase } from 'lodash';
@@ -110,12 +110,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );
@@ -279,11 +279,11 @@ const Units = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -360,8 +360,12 @@ const Units = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.units?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.unitNumber || ''}` : `selected ${resources?.units?.titlePlural?.toLowerCase()}`} ?`}  
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.units?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.unitNumber || ''}`
+                : `selected ${resources?.units?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

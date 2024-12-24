@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, GridSize } from '@material-ui/core';
+import { Box, Grid, GridSize } from '@mui/material';
 import { Skeleton } from '@material-ui/lab';
 import { useAppTheme } from 'src/constants/AppConfig';
 

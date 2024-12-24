@@ -1,6 +1,6 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import MomentUtils from '@date-io/moment';
-import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { ArrowRightAlt } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';

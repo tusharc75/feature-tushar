@@ -14,7 +14,7 @@ import {
   Typography,
   CircularProgress,
   Paper
-} from '@material-ui/core';
+} from '@mui/material';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';

@@ -1,51 +1,51 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Link, Box, Button, Divider } from "@material-ui/core";
-import PropTypes from "prop-types";
+import { makeStyles } from '@mui/styles';
+import { Grid, Link, Box, Button, Divider } from '@mui/material';
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%",
+    width: '100%'
   },
   linksContainer: {
-    display: "flex",
+    display: 'flex'
   },
   links: {
     color: theme.palette.primary.main, //  textDark
-    [theme.breakpoints.down("sm")]: {
-      display: "none",
-    },
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
+    }
   },
   linkDivider: {
     backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
+    margin: '0 1rem'
   },
   headButtons: {
-    display: "flex",
-    justifyContent: "flex-end",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-    },
+    display: 'flex',
+    justifyContent: 'flex-end',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column'
+    }
   },
   button: {
-    "&:hover": {
-      background: theme.palette.primary.main, //  darkBg
+    '&:hover': {
+      background: theme.palette.primary.main //  darkBg
     },
-    "&:first-child": {
+    '&:first-child': {
       marginRight: 15,
 
-      [theme.breakpoints.down("sm")]: {
-        marginRight: 0,
-      },
+      [theme.breakpoints.down('sm')]: {
+        marginRight: 0
+      }
     },
-    "&:last-child": {
-      [theme.breakpoints.down("sm")]: {
-        marginLeft: "0 !important",
-      },
+    '&:last-child': {
+      [theme.breakpoints.down('sm')]: {
+        marginLeft: '0 !important'
+      }
     },
-    [theme.breakpoints.down("sm")]: {
-      marginBottom: 15,
-    },
-  },
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: 15
+    }
+  }
 }));
 
 const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
@@ -53,13 +53,13 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
 
   const buttonActions = (action) => {
     switch (action) {
-      case "Save": {
-        alert("Save Button Clicked");
+      case 'Save': {
+        alert('Save Button Clicked');
         break;
       }
 
-      case "Delete": {
-        alert("Delete Button Clicked");
+      case 'Delete': {
+        alert('Delete Button Clicked');
         break;
       }
 
@@ -81,61 +81,25 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
           <Box component="div" className={classes.linksContainer}>
             {OpportunityDashboard && (
               <>
-                <Link
-                  href="#"
-                  onClick={(e) => e.preventDefault()}
-                  className={classes.links}
-                >
+                <Link href="#" onClick={(e) => e.preventDefault()} className={classes.links}>
                   Opportunities Dashboard
                 </Link>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
+                <Divider orientation="vertical" flexItem className={classes.linkDivider} />
               </>
             )}
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
+            <Link href="#" onClick={(e) => e.preventDefault()} className={classes.links}>
               Import from Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
+            <Divider orientation="vertical" flexItem className={classes.linkDivider} />
+            <Link href="#" onClick={(e) => e.preventDefault()} className={classes.links}>
               Export to Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
+            <Divider orientation="vertical" flexItem className={classes.linkDivider} />
+            <Link href="#" onClick={(e) => e.preventDefault()} className={classes.links}>
               Download Template
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
+            <Divider orientation="vertical" flexItem className={classes.linkDivider} />
+            <Link href="#" onClick={(e) => e.preventDefault()} className={classes.links}>
               Email a Link
             </Link>
           </Box>
@@ -153,7 +117,7 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
                   style={{
                     backgroundColor: btn.bg,
                     color: btn.color,
-                    marginLeft: i === 2 ? 15 : 0,
+                    marginLeft: i === 2 ? 15 : 0
                   }}
                   onClick={() => buttonActions(btn.title)}
                 >
@@ -169,7 +133,7 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
 
 OpportunityNavLinks.propTypes = {
   OpportunityDashboard: PropTypes.any,
-  ButtonProps: PropTypes.any,
+  ButtonProps: PropTypes.any
 };
 
 export default OpportunityNavLinks;

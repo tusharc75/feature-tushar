@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid, Typography } from '@material-ui/core';
+import { Box, Dialog, Grid, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -63,10 +63,7 @@ const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {
             }
           ></CustomDialogHeader>
           <Box pl={1} pr={1}>
-            <WorkOrderDetailContent
-              id={workOrderId}
-              tab={1}
-              resource={sidebarResource.workOrderSupervisor} />
+            <WorkOrderDetailContent id={workOrderId} tab={1} resource={sidebarResource.workOrderSupervisor} />
           </Box>
         </>
       ) : (

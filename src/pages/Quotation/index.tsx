@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import { Delete, Help, Warning } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -33,8 +33,6 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const Quotation = () => {
-
-
   const renderedFrom = camelCase(sidebarResource?.quotation);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -324,8 +322,7 @@ const Quotation = () => {
           onClick={() => {
             if (selectedRecords?.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-            }
-            else {
+            } else {
               setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
@@ -398,8 +395,12 @@ const Quotation = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.quotationNumber}` : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.quotationNumber}`
+                : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

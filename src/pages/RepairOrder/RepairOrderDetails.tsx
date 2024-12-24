@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import EditIcon from '@material-ui/icons/Edit';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';

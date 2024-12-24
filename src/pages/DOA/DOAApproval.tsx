@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@mui/material';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import { useContext, useEffect, useState } from 'react';
@@ -17,7 +17,14 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import ProductBuilder from '../../components/productBuilder';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  CustomDialogTransition,
+  defaultActivityShow,
+  formatAmountWithCurrency,
+  quoteBuilder,
+  sidebarResource
+} from '../../constants/helpers';
 import DOAReasonDialog from './DOAReasonDialog';
 
 const DOAApproval = () => {
@@ -136,7 +143,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -248,10 +255,7 @@ const DOAApproval = () => {
                 </HtmlTooltip>
               </>
             ) : null}
-            <ActivityButton
-              referenceId={QData?.quoteBuilderId}
-              resource={ACTIVITY_RESOURCE.quote}
-              resourceLabel={QData?.quoteName} />
+            <ActivityButton referenceId={QData?.quoteBuilderId} resource={ACTIVITY_RESOURCE.quote} resourceLabel={QData?.quoteName} />
           </Box>
         </Box>
       </Box>

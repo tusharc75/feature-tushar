@@ -1,6 +1,6 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';

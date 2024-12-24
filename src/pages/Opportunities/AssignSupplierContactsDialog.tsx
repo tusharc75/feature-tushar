@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  TextField,
-  Chip
-} from '@material-ui/core';
+import { Button, Checkbox, CircularProgress, Dialog, List, ListItem, ListItemIcon, ListItemText, Typography, TextField, Chip } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';

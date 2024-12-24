@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -17,11 +17,10 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null,  referenceData= null, isRedirectToDetailPage= true }) => {
-  
+const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -57,7 +56,7 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null, 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {
@@ -153,12 +152,13 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null, 
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update - ${initialData.values?.managedPackageName ? `${initialData.values?.managedPackageName}` : ''}`
-                  : `Create ${resources?.managedPackages?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update - ${initialData.values?.managedPackageName ? `${initialData.values?.managedPackageName}` : ''}`
+                    : `Create ${resources?.managedPackages?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -167,19 +167,19 @@ const ManageManagedPackages = ({ onClose, onSuccess, isClone = false, id= null, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <InputField
-                        errors={errors}
-                        values={values}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        touched={touched}
-                        fieldsData={initialData.fields}
-                        size="small"
-                        fullWidth
-                        resource={sidebarResource.managedPackages}
-                        referenceId={id || null}
-                      />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.managedPackages}
+                    referenceId={id || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

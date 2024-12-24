@@ -1,4 +1,4 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { camelCase, capitalize, isArray, isNumber, isString } from 'lodash';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -47,7 +47,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.oldValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
+                                  window.open(
+                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`
+                                  );
                               }}
                             >
                               {data?.oldValue?.label}
@@ -60,15 +62,19 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={oldValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${oldValue?.value}`);
+                                      window.open(
+                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${oldValue?.value}`
+                                      );
                                   }}
                                 >
                                   {oldValue?.label}
                                 </p>
                               );
                             })
+                          ) : isString(data?.oldValue) || isNumber(data?.oldValue) ? (
+                            data?.oldValue
                           ) : (
-                            isString(data?.oldValue) || isNumber(data?.oldValue) ? data?.oldValue : <NoDataCell />
+                            <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -86,7 +92,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.newValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
+                                  window.open(
+                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`
+                                  );
                               }}
                             >
                               {data?.newValue?.label}
@@ -99,10 +107,11 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={newValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`);
+                                      window.open(
+                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`
+                                      );
                                   }}
                                 >
-
                                   {newValue?.label}
                                 </p>
                               );
@@ -121,8 +130,10 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                 </Typography>
                               );
                             })
+                          ) : isString(data?.newValue) || isNumber(data?.oldValue) ? (
+                            data?.newValue
                           ) : (
-                            isString(data?.newValue) || isNumber(data?.oldValue) ? data?.newValue : <NoDataCell />
+                            <NoDataCell />
                           )
                         ) : (
                           <NoDataCell />
@@ -135,9 +146,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
             </TableBody>
           </Table>
         </TableContainer>
-      ) : (
-        null
-      )}
+      ) : null}
       {operations?.length ? (
         <TableContainer component={Paper}>
           <Table aria-label="customized table">
@@ -181,7 +190,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                               title={data?.oldValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
+                                                  window.open(
+                                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`
+                                                  );
                                               }}
                                             >
                                               {data?.oldValue?.label}
@@ -203,7 +214,9 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                               title={data?.newValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
+                                                  window.open(
+                                                    `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`
+                                                  );
                                               }}
                                             >
                                               {data?.newValue?.label}

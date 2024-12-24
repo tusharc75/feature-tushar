@@ -1,5 +1,5 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, Dialog, IconButton } from '@mui/material';
+import Button from '@mui/material/Button';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -36,7 +36,6 @@ import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_view`;
 
@@ -172,14 +171,15 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -211,14 +211,15 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+      _subRow.detail = `${
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : _subRow?.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''

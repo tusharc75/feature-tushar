@@ -1,4 +1,4 @@
-import { GridSize } from '@material-ui/core';
+import { GridSize } from '@mui/material';
 import { ASSET_STATUS } from 'src/constants/helpers';
 
 const RentalStatus = Object.keys(ASSET_STATUS).map((key) => ({

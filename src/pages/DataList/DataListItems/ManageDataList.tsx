@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null ,dataListId = null}) => {
+const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null, dataListId = null }) => {
   const {
     state: { user }
   }: any = useData();
@@ -44,11 +44,11 @@ const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null ,dataLis
             required: true,
             tooltipMessage: '',
             sectionName: 'Data list',
-            type: 'singleLine',
+            type: 'singleLine'
           },
           isCreate: true,
           isDelete: true,
-          isUpdate: true,
+          isUpdate: true
         },
         {
           fieldData: {
@@ -59,12 +59,12 @@ const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null ,dataLis
             order: 1,
             tooltipMessage: '',
             sectionName: 'Data list',
-            type: 'multiLine',
+            type: 'multiLine'
           },
           isCreate: true,
           isDelete: true,
-          isUpdate: true,
-        },
+          isUpdate: true
+        }
       ];
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);

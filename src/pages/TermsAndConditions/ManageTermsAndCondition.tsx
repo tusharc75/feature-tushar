@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -56,7 +56,7 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
             }
             setInitialData({
               fields: fields,
-              values:  isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {
@@ -141,12 +141,13 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
+                title={`${
+                  id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.name ? `(${initialData.values?.name})` : ''}`
                     : `Create ${resources?.termsAndConditions?.titleSingular}`
-                  }`}
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

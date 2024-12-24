@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton } from '@mui/material';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';

@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React, { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -212,7 +212,7 @@ const Products = ({
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (allowedToEdit) {
-      setWalkmeData([generateAddExistingProduct(false,resources?.transferInventory?.titleSingular)]);
+      setWalkmeData([generateAddExistingProduct(false, resources?.transferInventory?.titleSingular)]);
     } else {
       setWalkmeData([]);
     }

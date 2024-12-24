@@ -1,4 +1,4 @@
-import { IconButton, useMediaQuery } from '@material-ui/core';
+import { IconButton, useMediaQuery } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';

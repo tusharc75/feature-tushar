@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
+import { Menu, MenuItem, Button, useMediaQuery } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

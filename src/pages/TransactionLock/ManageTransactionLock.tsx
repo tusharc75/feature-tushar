@@ -1,10 +1,10 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
@@ -13,7 +13,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -25,7 +25,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -172,7 +172,11 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
             <Fragment>
               <CustomDialogHeader
                 title={
-                  id ? (isClone ? `Clone - ${cloneHeading}` : `Update ${transactionLockData?.lockNumber}`) : 'Create ' + resources?.transactionLock?.titleSingular
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${transactionLockData?.lockNumber}`
+                    : 'Create ' + resources?.transactionLock?.titleSingular
                 }
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
@@ -189,7 +193,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

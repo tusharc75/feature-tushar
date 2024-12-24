@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
@@ -155,7 +155,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
-
           onClick={() => {
             const ids = selectedRecords.map((d) => d._id);
             setShowDeleteConfirmBox(true);

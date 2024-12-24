@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer, useCallback } from 'react';
-import { IconButton, ListItem, ListItemText, List } from '@material-ui/core';
+import { IconButton, ListItem, ListItemText, List } from '@mui/material';
 import { Clear as ClearIcon } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';

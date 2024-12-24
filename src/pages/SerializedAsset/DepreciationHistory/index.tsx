@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

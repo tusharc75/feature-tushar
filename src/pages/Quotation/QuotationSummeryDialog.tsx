@@ -13,7 +13,7 @@ import {
   Grid,
   Chip,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -83,7 +83,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   const [redCard, setRedCard] = useState(false);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   useEffect(() => {
@@ -102,7 +102,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     additionalData = additionalCostResponce?.data?.data || [];
     inventory = data?.inventory ? data?.inventory : [];
     let rows = data.material.filter((e) => e.parentId === null);
-     rows = [...rows,...additionalData]
+    rows = [...rows, ...additionalData];
     const totalFinalPrice = rows
       .filter(
         (f) =>
@@ -114,7 +114,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     const totalSupplierPrice = rows
       .filter(
         (f) =>
-        !f?.parentId &&
+          !f?.parentId &&
           f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
       )

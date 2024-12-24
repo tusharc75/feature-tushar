@@ -10,7 +10,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';

@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Button, Dialog, Grid, TextField } from '@mui/material';
 import { Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -36,7 +36,7 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
     if (values?.qty == 0) {
       errors['qty'] = 'Please add quantity';
     }
-    return errors
+    return errors;
   };
 
   return (

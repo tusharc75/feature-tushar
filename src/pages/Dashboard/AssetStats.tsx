@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@material-ui/core';
+import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@mui/material';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
@@ -149,9 +149,11 @@ const AssetStats = () => {
                   <Box display="flex" alignItems="flex-end">
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
-                        {assetStats?.totalUtilization ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}` : 0}
+                        {assetStats?.totalUtilization
+                          ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}`
+                          : 0}
                       </Typography>
-                    </Box >
+                    </Box>
                     <Box ml={1}>
                       <Typography variant="body1">Hours</Typography>
                     </Box>
@@ -196,9 +198,11 @@ const AssetStats = () => {
                   <Box display="flex" alignItems="flex-end">
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
-                        {assetStats?.totalInUseTimeAfterLastRepair ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}` : 0}
+                        {assetStats?.totalInUseTimeAfterLastRepair
+                          ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`
+                          : 0}
                       </Typography>
-                    </Box >
+                    </Box>
                     <Box ml={1}>
                       <Typography variant="body1">Hours</Typography>
                     </Box>

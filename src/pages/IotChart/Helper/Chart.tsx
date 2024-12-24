@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isEmpty } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
@@ -63,24 +63,26 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
         autoSelected: 'zoom',
         tools: {
           download: downloadIconHTML,
-          customIcons: [{
-            icon: toggleIconSvg,
-            title: 'Toggle Chart Type',
-            class: 'custom-icon',
-            click: function (chart, options, e) {
-              const newType = chart.w.config.chart.type === 'line' ? 'bar' : 'line';
-              const newSharedTooltip = newType !== 'bar';
-              chart.updateOptions({
-                chart: {
-                  type: newType
-                },
-                tooltip: {
-                  shared: newSharedTooltip,
-                  intersect: !newSharedTooltip
-                }
-              });
+          customIcons: [
+            {
+              icon: toggleIconSvg,
+              title: 'Toggle Chart Type',
+              class: 'custom-icon',
+              click: function (chart, options, e) {
+                const newType = chart.w.config.chart.type === 'line' ? 'bar' : 'line';
+                const newSharedTooltip = newType !== 'bar';
+                chart.updateOptions({
+                  chart: {
+                    type: newType
+                  },
+                  tooltip: {
+                    shared: newSharedTooltip,
+                    intersect: !newSharedTooltip
+                  }
+                });
+              }
             }
-          }]
+          ]
         }
       }
     },
@@ -183,7 +185,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
     let param = {
       timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone,
       filterById: JSON.stringify(filterById),
-      deepFilter: JSON.stringify(deepFilter),
+      deepFilter: JSON.stringify(deepFilter)
     };
     axiosInstance()
       .get(api, { params: param })
@@ -365,7 +367,8 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
             options={options}
             series={chartData}
             type={dataPoints?.length === 1 ? dataPoints[0]?.chartType?.toLowerCase() || 'line' : 'line'}
-            height={500} />
+            height={500}
+          />
         </>
       ) : (
         <Box p={2} height={500}>

@@ -1,37 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  MenuItem,
-  Menu,
-  Button
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { MoreVert } from '@material-ui/icons';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
-import routes from './../../components/Helpers/Routes';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { AiOutlinePhone } from 'react-icons/ai';
+import { FaArrowAltCircleDown, FaIndustry } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { FaArrowAltCircleDown } from 'react-icons/fa';
+import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { useData } from '../../StateProvider/Provider';
 import { customerAccount, supplierAccount } from '../../constants/helpers';
+import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './../Account/ManageAccount/index';
-import { FaIndustry } from 'react-icons/fa';
-import { AiOutlinePhone } from 'react-icons/ai';
-import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { MoreVert } from '@material-ui/icons';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import DisplayData from 'src/components/CardDisplayData';
 
 export default function AccountAccordionDetail({ accounts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {
@@ -89,7 +69,8 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? resources?.customerAccount?.titlePlural : resources?.supplierAccount?.titlePlural} ({accounts?.length ?? 0})
+                    {type === 'customer' ? resources?.customerAccount?.titlePlural : resources?.supplierAccount?.titlePlural} ({accounts?.length ?? 0}
+                    )
                   </Typography>
                 </Box>
               </Box>

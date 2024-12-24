@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import queryString from 'query-string';
 import React, { useContext, useState } from 'react';

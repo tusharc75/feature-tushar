@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Icon, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Icon, Paper, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAppTheme } from 'src/constants/AppConfig';
 export interface IQuickLinks {

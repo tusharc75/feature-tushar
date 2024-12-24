@@ -1,25 +1,19 @@
 import { Fragment, useEffect, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import {
-  CustomDialogTransition,
-  getObjKeysWithValues,
-  sidebarResource,
-  yupSchema,
-} from '../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import { CustomDialogTransition, getObjKeysWithValues, sidebarResource, yupSchema } from '../../constants/helpers';
+import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 
 export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPolicy, fields, serializedAssetData, productInventoryId }) {
-
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -34,18 +28,17 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
     if (statusPolicy?.sumDecimalField || statusPolicy?.autoIncrementDecimalField) {
       fieldsDataForUpdate?.forEach((e) => {
         if (e?.type === 'decimal' && statusPolicy?.sumDecimalField) {
-          decimalField.push(e.fieldName)
+          decimalField.push(e.fieldName);
           initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
           initialValues[e.fieldName] = 0;
-        }
-        else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
+        } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
           e.isWarningTooltip = true;
-          e.warningTooltipMessage = `Auto Increment (Previous Value ${(initialValues[e.fieldName] || 0)})`
+          e.warningTooltipMessage = `Auto Increment (Previous Value ${initialValues[e.fieldName] || 0})`;
           initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
         }
-      })
+      });
     }
-    setDecimalFields(decimalField)
+    setDecimalFields(decimalField);
     setInitialData({
       fields: fieldsDataForUpdate,
       values: initialValues
@@ -54,19 +47,17 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    const data: any = {}
+    const data: any = {};
     statusPolicy?.fields?.forEach((fieldName) => {
       if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
-        data[fieldName] = parseFloat(values[fieldName] || 0) + parseFloat(values[`${fieldName}_orignal`] || 0)
+        data[fieldName] = parseFloat(values[fieldName] || 0) + parseFloat(values[`${fieldName}_orignal`] || 0);
+      } else {
+        data[fieldName] = values[fieldName];
       }
-      else {
-        data[fieldName] = values[fieldName]
-      }
-    })
+    });
     onSuccess(data);
     setSubmitting(false);
   };
-
 
   return (
     <Dialog
@@ -81,12 +72,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          enableReinitialize={true}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} enableReinitialize={true} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader

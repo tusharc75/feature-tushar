@@ -2,7 +2,7 @@ import { Error } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';
-import { Button, Collapse } from '@material-ui/core';
+import { Button, Collapse } from '@mui/material';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 interface ErrorMessages {

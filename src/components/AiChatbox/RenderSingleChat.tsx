@@ -1,4 +1,4 @@
-import { IconButton, Typography } from '@material-ui/core';
+import { IconButton, Typography } from '@mui/material';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';

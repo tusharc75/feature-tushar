@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { isEqual } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -18,10 +18,9 @@ import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
 
 const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -172,7 +171,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

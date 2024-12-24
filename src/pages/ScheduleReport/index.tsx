@@ -1,5 +1,5 @@
 import MomentUtils from '@date-io/moment';
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase, startCase } from 'lodash';
@@ -21,9 +21,7 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 
-
 const ScheduleReport = () => {
-
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
   const toastConfig = useContext(CustomToastContext);
@@ -137,7 +135,7 @@ const ScheduleReport = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -218,7 +216,7 @@ const ScheduleReport = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

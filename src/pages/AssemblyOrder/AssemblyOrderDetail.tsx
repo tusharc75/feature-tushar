@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';

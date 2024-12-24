@@ -1,10 +1,19 @@
 import React, { useContext, useEffect } from 'react';
-import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/core';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { Dialog, Box, Grid, Button, Typography, IconButton } from '@mui/material';
+import { Theme, createStyles } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, sidebarResource, CustomDialogTransition, gridSize } from 'src/constants/helpers';
+import {
+  workOrder,
+  WORKORDER_SERVICE_STEP_STATUS,
+  yupSchema,
+  convertMsToTime,
+  sidebarResource,
+  CustomDialogTransition,
+  gridSize
+} from 'src/constants/helpers';
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
@@ -127,15 +136,14 @@ const StepFieldsDialog = ({
 
   const [saveAndComplete, setSaveAndComplete] = React.useState({ saveAndComplete: false, saveAndNextAndComplete: false });
 
-
   const RenderStepData = () => {
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-            : stepData?.duration || 0
-        )
+            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+              : stepData?.duration || 0
+          )
         : 0
     );
 
@@ -166,7 +174,7 @@ const StepFieldsDialog = ({
         <h6 className={`${classes.sectionHead} `} onClick={() => setIsVisible((prev) => !prev)}>
           <span
             style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}
-            className="bg-[#DBDBDBE5] text-[#5B5B5B] dark:text-black dark:bg-white"
+            className="bg-[#DBDBDBE5] text-[#5B5B5B] dark:bg-white dark:text-black"
           >
             <MdKeyboardArrowDown />
           </span>
@@ -272,11 +280,10 @@ const StepFieldsDialog = ({
   const handleSubmitData = async (values) => {
     if (saveAndComplete.saveAndComplete || saveAndComplete.saveAndNextAndComplete) {
       handleSubmit(values, step, saveAndComplete.saveAndComplete, saveAndComplete.saveAndNextAndComplete);
-    }
-    else {
+    } else {
       handleSubmit(values, step);
     }
-  }
+  };
 
   return (
     <>
@@ -304,23 +311,14 @@ const StepFieldsDialog = ({
           }}
           showManimizeMaximize={true}
         />
-        <Formik
-          initialValues={fieldData?.values}
-          validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={handleSubmitData}
-          enableReinitialize
-        >
+        <Formik initialValues={fieldData?.values} validationSchema={yupSchema(fieldData?.fields)} onSubmit={handleSubmitData} enableReinitialize>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogContent>
                 <div className={`${styles.content} pt-2`}>
                   {fieldData?.fields?.length ? (
                     !isEditing ? (
-                      <DetailsPage
-                        containerPadding={'0px'}
-                        data={fieldData.orignalValues}
-                        fields={fieldData.fields.map((f) => ({ fieldData: f }))}
-                      />
+                      <DetailsPage containerPadding={'0px'} data={fieldData.orignalValues} fields={fieldData.fields.map((f) => ({ fieldData: f }))} />
                     ) : (
                       <Form autoComplete="off" autoCorrect="off" noValidate>
                         {fieldData?.formsData.length > 0 &&
@@ -344,12 +342,15 @@ const StepFieldsDialog = ({
                                 <Box marginY={2}>
                                   <Grid spacing={2} container>
                                     {form?.sectionFields?.map((field, index2) => (
-                                      <Grid key={index2} item
+                                      <Grid
+                                        key={index2}
+                                        item
                                         xs={12}
                                         sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                                         md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                                         lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}>
+                                        xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                      >
                                         <FormTypes
                                           {...field}
                                           row={field.type === 'radio'}
@@ -448,11 +449,7 @@ const StepFieldsDialog = ({
                     {!isEditing ? (
                       <>
                         <Box ml={1} />
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleClose}
-                          color="primary">
+                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                           Cancel
                         </Button>
                         <Box ml={1} />
@@ -465,11 +462,7 @@ const StepFieldsDialog = ({
                     ) : (
                       <>
                         <Box ml={1} />
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleClose}
-                          color="primary">
+                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                           Cancel
                         </Button>
                         <Box ml={1} />
@@ -479,14 +472,14 @@ const StepFieldsDialog = ({
                           variant="contained"
                           color="primary"
                           onClick={() => {
-                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false })
+                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
                             submitForm();
                           }}
                         >
                           {' '}
                           Save
                         </CustomButton>
-                        {!step?.isPassFail &&
+                        {!step?.isPassFail && (
                           <>
                             <Box ml={1} />
                             <CustomButton
@@ -495,14 +488,14 @@ const StepFieldsDialog = ({
                               variant="contained"
                               color="primary"
                               onClick={() => {
-                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false })
+                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
                                 submitForm();
                               }}
                             >
                               {' '}
                               Complete
                             </CustomButton>
-                            {nextStep &&
+                            {nextStep && (
                               <>
                                 <Box ml={1} />
                                 <CustomButton
@@ -511,16 +504,17 @@ const StepFieldsDialog = ({
                                   variant="contained"
                                   color="primary"
                                   onClick={() => {
-                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true })
+                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
                                     submitForm();
                                   }}
                                 >
                                   {' '}
                                   Complete & Next
                                 </CustomButton>
-                              </>}
+                              </>
+                            )}
                           </>
-                        }
+                        )}
                       </>
                     )}
                   </div>

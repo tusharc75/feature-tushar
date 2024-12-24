@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FaceLiveNess from 'src/components/FaceLiveness/AWS';
 import { CustomDialogTransition } from 'src/constants/helpers';

@@ -1,32 +1,31 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { makeStyles } from '@mui/styles';
 import {
-  Dialog,
   Box,
   Button,
+  CircularProgress,
+  Dialog,
   Link,
-  TextField,
-  Table,
-  TableHead,
   Paper,
-  TableContainer,
+  Table,
   TableBody,
   TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
-  Typography
-} from '@material-ui/core';
-import { read, utils, writeFile } from 'xlsx';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
+  TextField
+} from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import routes from 'src/components/Helpers/Routes';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { addAssetsInRental } from '../rentalOfflineHelper';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { read, utils, writeFile } from 'xlsx';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { addAssetsInRental } from '../rentalOfflineHelper';
 
 interface DialogProps {
   closeDialog: () => void;

@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';

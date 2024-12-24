@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Dialog, Button, CircularProgress } from '@material-ui/core';
+import { Box, Dialog, Button, CircularProgress } from '@mui/material';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';

@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import { makeStyles } from '@mui/styles';
+import Button from '@mui/material/Button';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
+import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@mui/material';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';

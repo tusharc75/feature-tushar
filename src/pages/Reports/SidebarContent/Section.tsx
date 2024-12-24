@@ -1,4 +1,4 @@
-import { Collapse, IconButton } from '@material-ui/core';
+import { Collapse, IconButton } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import { TbStar, TbStarFilled } from 'react-icons/tb';

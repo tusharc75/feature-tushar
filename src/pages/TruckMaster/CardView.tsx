@@ -1,17 +1,18 @@
-import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
-import { Fragment, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Map } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useData } from 'src/StateProvider/Provider';
-import { Map } from '@material-ui/icons';
-import MapView from './MapView';
-import routes from 'src/components/Helpers/Routes';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import Activity from '../../components/Activity';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
-import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Fragment, useState } from 'react';
 import { ImAttachment } from 'react-icons/im';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
+import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import Activity from '../../components/Activity';
+import MapView from './MapView';
 
 const useStyles = makeStyles((theme) => ({
   cardBox: {
@@ -158,7 +159,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowManageDialog({open: true, isClone: true, idToClone:truckMaster?._id })
+                          setShowManageDialog({ open: true, isClone: true, idToClone: truckMaster?._id });
                         }}
                       >
                         <FileCopyIcon />

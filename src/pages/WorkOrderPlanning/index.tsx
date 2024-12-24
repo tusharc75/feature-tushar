@@ -1,4 +1,4 @@
-import { Box, MenuItem, TextField } from '@material-ui/core';
+import { Box, MenuItem, TextField } from '@mui/material';
 import { camelCase, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

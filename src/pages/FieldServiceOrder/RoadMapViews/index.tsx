@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -37,7 +37,9 @@ function ServiceOrderViews({ serviceData }) {
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
 
-  const { state:{permissions} }:any =  useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -54,7 +56,7 @@ function ServiceOrderViews({ serviceData }) {
           }
         ])}`
       );
-       const invoices = permissions?.invoice?.isRead && await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`) ;
+      const invoices = permissions?.invoice?.isRead && (await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`));
 
       var xPosition = 0;
       var flowEdge: any[] = [];

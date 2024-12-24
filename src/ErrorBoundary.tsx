@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button } from '@material-ui/core';
+import { Typography, Button } from '@mui/material';
 import styles from './error.module.scss';
 import errorImage from './assets/line-item.png';
 import { VITE_APP_ENV } from 'src/config';

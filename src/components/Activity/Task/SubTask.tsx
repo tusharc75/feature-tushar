@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@material-ui/core';
+import Box from '@mui/material/Box';
+import { makeStyles } from '@mui/styles';
+import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@mui/material';
 import { DeleteOutline } from '@material-ui/icons';
 
 import axiosInstance from '../../../axios/axiosInstance';
@@ -97,9 +97,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
         {((childTasks && childTasks.length > 0) || openAddSub === true) && (
           <Box mb={1}>
             <div className="position-relative">
-              <h4 className="form-label-style">
-                Child Task
-              </h4>
+              <h4 className="form-label-style">Child Task</h4>
             </div>
           </Box>
         )}

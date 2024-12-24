@@ -1,5 +1,5 @@
-import { Box, Button } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import moment from 'moment';

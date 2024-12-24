@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { useEffect, useState } from 'react';
 import ManageLeadTime from './ManageLeadTime';

@@ -1,6 +1,6 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@material-ui/core';
+import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@mui/material';
 import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
@@ -263,7 +263,7 @@ const ChartTypes = ({
           sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
@@ -408,13 +408,13 @@ const ChartTypes = ({
                     }}
                     options={{
                       plugins: {
-                        ...((chart?.currency || chart?.percentage || chart?.chartType === 'Bar') &&
-                        {
+                        ...((chart?.currency || chart?.percentage || chart?.chartType === 'Bar') && {
                           tooltip: {
                             mode: 'index',
                             callbacks: {
                               label: function (context) {
-                                let label = (chart?.chartType === 'Bar' && chart?.stack) ? context.dataset.label : context.label || context.dataset.label || '';
+                                let label =
+                                  chart?.chartType === 'Bar' && chart?.stack ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
@@ -426,14 +426,17 @@ const ChartTypes = ({
                                     parseValue = context?.parsed?.x;
                                   }
                                   if (parseValue !== null) {
-                                    label += chart?.currency ? formatAmountWithCurrency((globalFilters.currency || currency), Number(parseValue) ? parseValue : '00').fullFormatAmountWithoutSpace : parseValue;
+                                    label += chart?.currency
+                                      ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
+                                          .fullFormatAmountWithoutSpace
+                                      : parseValue;
                                   }
                                 }
                                 return label;
                               }
                             }
                           }
-                        }),
+                        })
                       },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
@@ -449,11 +452,12 @@ const ChartTypes = ({
                           },
                           ticks: {
                             callback: function (value) {
-                              return chart?.currency ?
-                                formatAmountWithCurrency((globalFilters.currency || currency), Number(value) ? value : '00').fullFormatAmountWithoutSpace
+                              return chart?.currency
+                                ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
+                                    .fullFormatAmountWithoutSpace
                                 : value;
                             }
-                          },
+                          }
                         },
                         ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {
@@ -473,21 +477,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                            }
-                          },
-                          y: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
                             }
                           }
-                        }
-                      })
+                        })
                     }}
                   />
                 </>

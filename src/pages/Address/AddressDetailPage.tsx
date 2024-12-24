@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -109,7 +109,7 @@ const AddressDetailPage = () => {
       stylers: [{ color: '#17263c' }]
     },
     { featureType: 'transit', stylers: [{ visibility: 'on' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'on' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'on' }] }
   ];
 
   const mapLightTheme: GoogleMapProps['options']['styles'] = [
@@ -157,7 +157,8 @@ const AddressDetailPage = () => {
   };
 
   const handleDeleteAddress = () => {
-    axiosInstance().put(`/address/remove`, { ids: [id] })
+    axiosInstance()
+      .put(`/address/remove`, { ids: [id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -233,7 +234,7 @@ const AddressDetailPage = () => {
             ) : (
               <DetailsPage data={addressData} fields={addressFields} />
             )}
-            {(addressData?.latitude && addressData?.longitude) && (
+            {addressData?.latitude && addressData?.longitude && (
               <Box height={400} width={'100%'} borderRadius={4} overflow="hidden" marginTop={2}>
                 <GoogleMap
                   key={themeColor}
@@ -241,7 +242,7 @@ const AddressDetailPage = () => {
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     streetViewControl: true,
                     gestureHandling: 'cooperative',
-                    styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
+                    styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme
                   }}
                   mapContainerStyle={{
                     height: '100%',

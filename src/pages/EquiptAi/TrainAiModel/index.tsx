@@ -1,5 +1,5 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -167,11 +167,11 @@ const TrainAiModel = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -229,7 +229,7 @@ const TrainAiModel = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.trainAiModel?.titleSingular?.toLowerCase()} : ${deleteRecord?.topic}` : `selected ${resources?.trainAiModel?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.trainAiModel?.titleSingular?.toLowerCase()} : ${deleteRecord?.topic}` : `selected ${resources?.trainAiModel?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

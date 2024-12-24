@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, sidebarResource, yupSchema } from 'src/constants/helpers';
 import { FieldArray, Form, Formik, getIn } from 'formik';

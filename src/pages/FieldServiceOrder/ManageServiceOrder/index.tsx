@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomButton from '../../../components/Helpers/CustomButton';
@@ -19,7 +19,7 @@ import {
   SERVICE_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
@@ -28,15 +28,10 @@ import { isEqual } from 'lodash';
 import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageServiceOrderDialog = ({
-  isClone,
-  serviceOrderId,
-  onClose,
-  onSuccess,
-  open,
-}) => {
-
-  const { state: { user, resources } }: any = useData();
+const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open }) => {
+  const {
+    state: { user, resources }
+  }: any = useData();
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -231,12 +226,17 @@ const ManageServiceOrderDialog = ({
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
                         if (name === 'customerAccount') {
-                          const customerAccount = initialData?.fields?.find((e) => e?.fieldName === 'customerAccount')?.option.find((d) => d.optionValue === value);
-                          const collaborator = [...customerAccount.fieldServiceManager || [], ...customerAccount?.lead || []];
+                          const customerAccount = initialData?.fields
+                            ?.find((e) => e?.fieldName === 'customerAccount')
+                            ?.option.find((d) => d.optionValue === value);
+                          const collaborator = [...(customerAccount.fieldServiceManager || []), ...(customerAccount?.lead || [])];
                           if (collaborator?.length) {
-                            setFieldValue('collaborator', collaborator?.filter((e) => e !== values['owner']))
+                            setFieldValue(
+                              'collaborator',
+                              collaborator?.filter((e) => e !== values['owner'])
+                            );
                           } else {
-                            setFieldValue('collaborator', [])
+                            setFieldValue('collaborator', []);
                           }
                         }
                         if (name === 'wellNumber') {

@@ -1,4 +1,4 @@
-import { IconButton, InputAdornment, TextField, Typography } from '@material-ui/core';
+import { IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';

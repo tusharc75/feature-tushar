@@ -1,7 +1,7 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { MdViewWeek } from 'react-icons/md';
@@ -19,13 +19,7 @@ import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import {
-  WORKORDER_SERVICE_STATUS,
-  WORKORDER_TECHNICIAN_SERVICE_STATUS,
-  sidebarResource,
-  workOrder,
-  workOrderIconMap
-} from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder, workOrderIconMap } from 'src/constants/helpers';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -212,7 +206,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,

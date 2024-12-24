@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import { groupBy, map, uniq } from 'lodash';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -43,8 +43,18 @@ interface ReceivingGridProps {
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen, resources, setAllAssetsReceived } =
-    props;
+  const {
+    transferAssetId,
+    transferAssetData,
+    setNextStep,
+    updateTransferStatus,
+    isTransferEnded,
+    renderedFrom,
+    allowedToEdit,
+    stepFullScreen,
+    resources,
+    setAllAssetsReceived
+  } = props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });

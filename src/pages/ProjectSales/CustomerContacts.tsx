@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Grid, List, ListItemText, ListItem, ListItemAvatar, IconButton } from '@material-ui/core';
+import { Box, Card, CardContent, Grid, List, ListItemText, ListItem, ListItemAvatar, IconButton } from '@mui/material';
 
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { Link, useHistory } from 'react-router-dom';
@@ -13,7 +13,7 @@ function DisplayData({ key, label, value, icon }) {
   return (
     <div style={{ flexGrow: 1 }}>
       <List>
-        <ListItem key={key} className="px-0 pt-0 pb-0 contact-accodian">
+        <ListItem key={key} className="contact-accodian px-0 pb-0 pt-0">
           <ListItemAvatar className={styles.list_start_icon}>{icon}</ListItemAvatar>
           <ListItemText
             primary={
@@ -94,7 +94,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactRoute, handl
       <div>
         <Box margin={1} />
         <Box
-          className="btn-view gap-1 view_all_button"
+          className="btn-view view_all_button gap-1"
           p={1}
           display="flex"
           justifyContent="center"

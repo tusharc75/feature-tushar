@@ -1,4 +1,4 @@
-import { Popper } from '@material-ui/core';
+import { Popper } from '@mui/material';
 import { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 

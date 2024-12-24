@@ -1,4 +1,4 @@
-import { Avatar, IconButton } from '@material-ui/core';
+import { Avatar, IconButton } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import { Socket } from 'socket.io-client';

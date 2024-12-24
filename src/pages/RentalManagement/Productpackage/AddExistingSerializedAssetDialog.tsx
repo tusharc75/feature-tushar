@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -541,7 +541,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
             if (checkAssetPolicy(receivingStatus)) {
               const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
@@ -568,7 +568,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

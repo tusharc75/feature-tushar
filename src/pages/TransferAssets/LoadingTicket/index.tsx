@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import InfoIcon from '@material-ui/icons/Info';
 import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
@@ -529,8 +529,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-          selectedRecords.length &&
-          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+        selectedRecords.length &&
+        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -554,7 +554,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId))
+            selectedRecords.some(
+              (e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId)
+            )
           }
           onClick={() => {
             setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });

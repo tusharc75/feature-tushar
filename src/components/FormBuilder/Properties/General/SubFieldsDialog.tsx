@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Button } from '@material-ui/core';
+import { Dialog, Button } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -73,7 +73,7 @@ const SubFieldsDialog = ({ handleClose, fields = [], setFieldValue }) => {
       return false;
     }
     setFieldValue('subFields', data);
-    handleClose()
+    handleClose();
   };
 
   return (
