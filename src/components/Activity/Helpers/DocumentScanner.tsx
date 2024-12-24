@@ -11,7 +11,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CircularProgress } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import SwitchCameraIcon from '@material-ui/icons/SwitchCamera';
+import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {

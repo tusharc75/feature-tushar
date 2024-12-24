@@ -5,7 +5,7 @@ import './style.scss';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import NavLinks from '../../components/NavLinks';
-import { Image } from '@material-ui/icons';
+import { Image } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
   profile: {

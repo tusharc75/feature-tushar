@@ -23,7 +23,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import { Link } from 'react-router-dom';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AssignServiceDialog = ({

@@ -1,6 +1,6 @@
 import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, Link as MuiLink, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
+import { Image, InfoOutlined, MoreHoriz } from '@mui/icons-material';
 import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
@@ -32,7 +32,7 @@ import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import GoogleMaps from 'src/components/GoogleMap';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';

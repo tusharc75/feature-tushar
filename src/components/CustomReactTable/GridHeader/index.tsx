@@ -1,5 +1,5 @@
 import { Button, IconButton, useMediaQuery } from '@mui/material';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import React, { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

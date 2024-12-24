@@ -13,7 +13,7 @@ import {
   ListItemText,
   Typography
 } from '@mui/material';
-import { Check } from '@material-ui/icons';
+import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

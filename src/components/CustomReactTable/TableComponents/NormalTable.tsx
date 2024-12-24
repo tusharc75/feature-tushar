@@ -1,7 +1,7 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@mui/material';
 import MaUTable from '@mui/material/Table';
-import { Error } from '@material-ui/icons';
+import { Error } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
 import React, { ForwardedRef, forwardRef, memo } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';

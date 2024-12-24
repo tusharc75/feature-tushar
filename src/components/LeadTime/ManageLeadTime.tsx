@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
-import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';

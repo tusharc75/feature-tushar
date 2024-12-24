@@ -1,6 +1,6 @@
 import { Box, Chip, IconButton, MenuItem } from '@mui/material';
-import { Delete } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Delete } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';

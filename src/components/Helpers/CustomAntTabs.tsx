@@ -1,6 +1,6 @@
 import { Theme, createStyles } from '@mui/material/styles';
 import { Typography, Tabs, Tab } from '@mui/material';
-import { DeveloperBoard, Map } from '@material-ui/icons';
+import { DeveloperBoard, Map } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 
 const AntTabs = withStyles((theme) => ({

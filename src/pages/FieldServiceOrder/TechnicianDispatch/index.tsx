@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import SendIcon from '@material-ui/icons/Send';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SendIcon from '@mui/icons-material/Send';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

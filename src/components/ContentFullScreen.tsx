@@ -1,6 +1,6 @@
 import Dialog from '@mui/material/Dialog/Dialog';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 

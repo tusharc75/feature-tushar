@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { Typography, Box, Button, IconButton, Dialog } from '@mui/material';
-import { AddCircle, CameraAlt, Delete, Info, Publish } from '@material-ui/icons';
+import { AddCircle, CameraAlt, Delete, Info, Publish } from '@mui/icons-material';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

@@ -1,6 +1,6 @@
 import { IconButton } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useState } from 'react';
 import GoogleMaps from 'src/components/GoogleMap';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

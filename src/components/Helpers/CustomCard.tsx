@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { IconButton, Card, CardHeader, Avatar, Menu, MenuItem } from '@mui/material';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert } from '@mui/icons-material';
 
 const CustomCard = (props) => {
   const { heading, subHeading, data, edit, remove } = props;

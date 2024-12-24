@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import Box from '@mui/material/Box';
 import { makeStyles } from '@mui/styles';
 import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@mui/material';
-import { DeleteOutline } from '@material-ui/icons';
+import { DeleteOutline } from '@mui/icons-material';
 
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

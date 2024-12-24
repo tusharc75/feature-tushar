@@ -1,4 +1,4 @@
-import { Error } from '@material-ui/icons';
+import { Error } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';

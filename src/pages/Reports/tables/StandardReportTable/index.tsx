@@ -1,6 +1,6 @@
 import MomentUtils from '@date-io/moment';
 import { CircularProgress, Dialog, IconButton } from '@mui/material';
-import { History, Visibility } from '@material-ui/icons';
+import { History, Visibility } from '@mui/icons-material';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
 import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';

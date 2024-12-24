@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
-import PersonIcon from '@material-ui/icons/Person';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonIcon from '@mui/icons-material/Person';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

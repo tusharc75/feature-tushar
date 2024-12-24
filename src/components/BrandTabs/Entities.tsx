@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
 import { Box, Button, TextField, InputAdornment } from '@mui/material';
-import { Add, Search } from '@material-ui/icons';
+import { Add, Search } from '@mui/icons-material';
 import CustomDataGridNoDataFound from '../Helpers/DataGridHelpers/CustomDataGridNoDataFound';
 
 const Entities = ({ brand }) => {

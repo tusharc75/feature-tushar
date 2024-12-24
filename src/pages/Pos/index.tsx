@@ -1,7 +1,7 @@
 import { Badge, Box, Button, Grid, IconButton, TextField } from '@mui/material';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import CropFreeIcon from '@material-ui/icons/CropFree';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import CropFreeIcon from '@mui/icons-material/CropFree';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

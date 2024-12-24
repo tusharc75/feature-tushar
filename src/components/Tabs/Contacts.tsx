@@ -4,7 +4,7 @@ import { Grid, Typography, TextField, FormControl, Select, MenuItem, Box, IconBu
 
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
-import { Add, FilterList, SortByAlpha, Search } from '@material-ui/icons';
+import { Add, FilterList, SortByAlpha, Search } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
   customers: {

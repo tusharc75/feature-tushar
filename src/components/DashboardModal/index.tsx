@@ -2,7 +2,7 @@ import { Box, Dialog, DialogActions, IconButton, PaperProps, Typography } from '
 import type { DialogProps } from '@mui/material/Dialog';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogTitle from '@mui/material/DialogTitle';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import React, { FC, ReactElement, ReactNode, useState } from 'react';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { useAppTheme } from 'src/constants/AppConfig';

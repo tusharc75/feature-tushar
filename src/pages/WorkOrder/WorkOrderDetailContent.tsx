@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react';

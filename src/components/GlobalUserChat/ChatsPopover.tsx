@@ -1,6 +1,6 @@
 import { Avatar, Box, Divider, IconButton, List, TextField, Typography, useMediaQuery } from '@mui/material';
 import { Theme, createStyles, useTheme } from '@mui/material/styles';
-import { ArrowBack, Create, Group } from '@material-ui/icons';
+import { ArrowBack, Create, Group } from '@mui/icons-material';
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 

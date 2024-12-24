@@ -1,4 +1,4 @@
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '@mui/icons-material/Close';
 import { IconButton, Typography } from '@mui/material';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import { makeStyles } from '@mui/styles';

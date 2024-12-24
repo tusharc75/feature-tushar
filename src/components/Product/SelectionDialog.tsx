@@ -1,7 +1,7 @@
 import { Box, Button, Grid } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
-import AddIcon from '@material-ui/icons/AddCircle';
+import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

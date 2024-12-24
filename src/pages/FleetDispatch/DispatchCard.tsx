@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import WorkIcon from '@material-ui/icons/Work';
+import WorkIcon from '@mui/icons-material/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 import { cn } from 'src/constants/helpers';

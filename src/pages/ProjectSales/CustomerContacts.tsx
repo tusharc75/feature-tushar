@@ -1,11 +1,11 @@
 import { Box, Card, CardContent, Grid, List, ListItemText, ListItem, ListItemAvatar, IconButton } from '@mui/material';
 
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { Link, useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { BsPerson } from 'react-icons/bs';
 import { BiFace } from 'react-icons/bi';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import styles from './ProjectSales.module.scss';
 import React from 'react';
 

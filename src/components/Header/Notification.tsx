@@ -1,5 +1,5 @@
 import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover, Typography, useMediaQuery } from '@mui/material';
-import { ClearAll, DoneAllOutlined, Settings, Visibility } from '@material-ui/icons';
+import { ClearAll, DoneAllOutlined, Settings, Visibility } from '@mui/icons-material';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Accepted, Assigned, Changed, Created, Rejected } from 'src/assets/notificationIcons';
@@ -12,7 +12,7 @@ import { displayCardDate } from '../../constants/helpers';
 
 import styles from './Header.module.scss';
 
-import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import ChangesDialog from 'src/pages/ResourceLogs/ChangesDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 

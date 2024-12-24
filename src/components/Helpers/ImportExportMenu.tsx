@@ -3,7 +3,7 @@ import { Menu, MenuItem, Button, useMediaQuery } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
 import HtmlTooltip from '../CustomTooltipTitle';
 

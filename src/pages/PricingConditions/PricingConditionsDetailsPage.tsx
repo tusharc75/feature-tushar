@@ -28,7 +28,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import Autocomplete from '@mui/material/Autocomplete';
 import { result, find, startCase, isEqual, camelCase } from 'lodash';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import Badge from '@mui/material/Badge';
 import { makeStyles } from '@mui/styles';
 import { FaDiceOne } from 'react-icons/fa';

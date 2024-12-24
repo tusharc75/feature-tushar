@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
 import ListItem from '@mui/material/ListItem/ListItem';
-import { Edit } from '@material-ui/icons';
-import AddIcon from '@material-ui/icons/Add';
+import { Edit } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
 import { Skeleton } from '@mui/material';
 import { reverse as _reverse } from 'lodash';
 import queryString from 'query-string';

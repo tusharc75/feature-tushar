@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { AddOutlined, Delete, ExpandMore } from '@mui/icons-material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
-import { ExpandMore } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { capitalize, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

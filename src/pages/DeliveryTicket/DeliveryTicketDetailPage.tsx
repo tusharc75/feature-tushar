@@ -1,7 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@mui/material';
-import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import EditIcon from '@material-ui/icons/Edit';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import EditIcon from '@mui/icons-material/Edit';
+import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';

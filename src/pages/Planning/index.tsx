@@ -1,8 +1,8 @@
 import { Box, Button, Chip, IconButton, MenuItem } from '@mui/material';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';

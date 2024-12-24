@@ -1,8 +1,8 @@
 import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
-import { AddOutlined, Delete as DeleteIcon } from '@material-ui/icons';
-import GetAppIcon from '@material-ui/icons/GetApp';
+import { AddOutlined, Delete as DeleteIcon } from '@mui/icons-material';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { Autocomplete } from '@mui/material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -20,10 +20,10 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 
-import FolderIcon from '@material-ui/icons/Folder';
-import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import SendIcon from '@material-ui/icons/Send';
-import PreviewIcon from '@material-ui/icons/Visibility';
+import FolderIcon from '@mui/icons-material/Folder';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import SendIcon from '@mui/icons-material/Send';
+import PreviewIcon from '@mui/icons-material/Visibility';
 import axios, { CancelTokenSource } from 'axios';
 import _ from 'lodash';
 import mime from 'mime';

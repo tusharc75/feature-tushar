@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn } from 'src/constants/helpers';

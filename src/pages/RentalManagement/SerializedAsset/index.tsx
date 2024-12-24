@@ -1,11 +1,11 @@
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
-import { Delete, ExpandMore } from '@material-ui/icons';
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-import ReceiptIcon from '@material-ui/icons/Receipt';
-import RepeatIcon from '@material-ui/icons/Repeat';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Delete, ExpandMore } from '@mui/icons-material';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import RepeatIcon from '@mui/icons-material/Repeat';
+import WarningIcon from '@mui/icons-material/Warning';
 import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

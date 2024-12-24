@@ -1,6 +1,6 @@
-import AddIcon from '@material-ui/icons/Add';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import RemoveIcon from '@material-ui/icons/Remove';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { Box, Button, IconButton } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { MdAddShoppingCart } from 'react-icons/md';

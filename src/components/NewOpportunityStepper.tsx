@@ -2,8 +2,8 @@ import React from 'react';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 import { Stepper, Step, StepLabel, StepConnector, Button, Grid, Typography, Box, Paper } from '@mui/material';
-import { Edit } from '@material-ui/icons';
-import { Check } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 
 function getSteps() {

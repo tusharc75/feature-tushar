@@ -1,5 +1,5 @@
 import { Button, ButtonProps, Menu, useMediaQuery } from '@mui/material';
-import { Add, ExpandMore } from '@material-ui/icons';
+import { Add, ExpandMore } from '@mui/icons-material';
 import { ReactNode, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';

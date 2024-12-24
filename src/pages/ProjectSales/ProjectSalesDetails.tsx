@@ -1,10 +1,10 @@
 import { Box, Button, Grid, IconButton, Paper, Typography } from '@mui/material';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';

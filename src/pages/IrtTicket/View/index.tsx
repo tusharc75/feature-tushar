@@ -2,7 +2,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { useHistory } from 'react-router-dom';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';

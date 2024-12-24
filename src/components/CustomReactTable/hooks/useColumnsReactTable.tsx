@@ -1,6 +1,6 @@
 import { Avatar, Box } from '@mui/material';
-import { Image } from '@material-ui/icons';
-import InfoIcon from '@material-ui/icons/Info';
+import { Image } from '@mui/icons-material';
+import InfoIcon from '@mui/icons-material/Info';
 import { isArray, isObject } from 'lodash';
 import camelCase from 'lodash/camelCase';
 import moment from 'moment';

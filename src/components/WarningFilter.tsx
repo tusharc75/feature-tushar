@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel, FormGroup, Menu, MenuItem } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import { ReactNode, memo, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';

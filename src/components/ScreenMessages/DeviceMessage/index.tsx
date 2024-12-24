@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { ArrowBack } from '@material-ui/icons';
+import { ArrowBack } from '@mui/icons-material';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';

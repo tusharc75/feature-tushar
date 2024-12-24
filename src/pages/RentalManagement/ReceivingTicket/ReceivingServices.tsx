@@ -13,7 +13,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import moment from 'moment';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
@@ -22,7 +22,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagement)}_services`;

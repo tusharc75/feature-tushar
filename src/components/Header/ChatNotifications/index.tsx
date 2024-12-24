@@ -1,5 +1,5 @@
 import { Badge, Box, IconButton, MenuItem, Popover, useMediaQuery } from '@mui/material';
-import { ArrowBack, ChatBubbleOutlineOutlined } from '@material-ui/icons';
+import { ArrowBack, ChatBubbleOutlineOutlined } from '@mui/icons-material';
 import { useCallback, useContext, useState } from 'react';
 import { CustomChatNotificationCountContext } from '../../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';

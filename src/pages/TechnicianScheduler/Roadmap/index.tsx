@@ -1,5 +1,5 @@
 import { Box, IconButton, Typography } from '@mui/material';
-import { Close, Map } from '@material-ui/icons';
+import { Close, Map } from '@mui/icons-material';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

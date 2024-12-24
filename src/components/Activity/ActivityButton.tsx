@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import Grid from '@mui/material/Grid';
 import { Button, IconButton } from '@mui/material';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
 import { useData } from 'src/StateProvider/Provider';

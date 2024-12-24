@@ -1,8 +1,8 @@
 import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
-import { default as Add } from '@material-ui/icons/Add';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { default as Add } from '@mui/icons-material/Add';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

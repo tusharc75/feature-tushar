@@ -13,7 +13,7 @@ import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import IntegrationCardShell from 'src/pages/Integration/IntegrationCardShell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, CheckBox } from '@material-ui/icons';
+import { Delete, CheckBox } from '@mui/icons-material';
 import slackLogo from 'src/assets/slack-logo.png';
 
 const Integration = () => {

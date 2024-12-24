@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TreeItem, TreeView } from '@mui/x-tree-view';
 import { Virtualizer } from '@tanstack/react-virtual';
 import React from 'react';

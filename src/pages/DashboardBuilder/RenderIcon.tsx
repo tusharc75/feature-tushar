@@ -1,5 +1,5 @@
 import { SvgIconProps } from '@mui/material';
-import { DonutLarge, PieChart, BarChart, Map, Timeline, List } from '@material-ui/icons';
+import { DonutLarge, PieChart, BarChart, Map, Timeline, List } from '@mui/icons-material';
 
 interface Props extends SvgIconProps {
   type: string;

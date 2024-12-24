@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import { DragHandle, DragIndicator, ExpandMore } from '@material-ui/icons';
+import { DragHandle, DragIndicator, ExpandMore } from '@mui/icons-material';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

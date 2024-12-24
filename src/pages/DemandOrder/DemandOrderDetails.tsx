@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@mui/icons-material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@mui/material';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GiVintageRobot } from 'react-icons/gi';

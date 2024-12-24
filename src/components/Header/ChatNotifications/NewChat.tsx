@@ -1,7 +1,7 @@
 import { Button, Chip, CircularProgress, List, TextField } from '@mui/material';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { Search } from '@material-ui/icons';
+import { Search } from '@mui/icons-material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { SingleUser } from './listITems';

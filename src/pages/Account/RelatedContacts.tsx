@@ -7,7 +7,7 @@ import { BsPerson } from 'react-icons/bs';
 import { BiFace } from 'react-icons/bi';
 import ListItem from '@mui/material/ListItem/ListItem';
 import { ListItemText } from '@mui/material';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 function DisplayData({ key, label, value, icon, highlightsHead = false }) {
   return (

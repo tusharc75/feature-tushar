@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import ListItemText from '@mui/material/ListItemText';
 import { makeStyles } from '@mui/styles';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import { roleTypes, userType } from '../../constants/helpers';

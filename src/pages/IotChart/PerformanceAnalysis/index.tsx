@@ -8,7 +8,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import TreeViewNew from './TreeView';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }) => {
   const toastConfig = useContext(CustomToastContext);

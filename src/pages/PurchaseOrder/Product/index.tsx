@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import EditIcon from '@material-ui/icons/Edit';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase, isEmpty, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,7 +24,7 @@ import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import ServiceDialog from './ServiceDialog';
 import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';

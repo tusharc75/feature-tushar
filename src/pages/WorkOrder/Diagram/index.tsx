@@ -1,8 +1,8 @@
 import { Box, Button, Collapse, Dialog, IconButton, Typography } from '@mui/material';
-import { Add, Delete } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import { Add, Delete } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ShowPdf from './ShowPdf';

@@ -1,4 +1,4 @@
-import { Add, DeleteOutline, DragIndicator, Edit, FileCopyOutlined, LowPriority } from '@material-ui/icons';
+import { Add, DeleteOutline, DragIndicator, Edit, FileCopyOutlined, LowPriority } from '@mui/icons-material';
 import { Autocomplete } from '@mui/material';
 import { Box, Dialog, IconButton, TextField, Theme, Typography, createStyles } from '@mui/material';
 import { makeStyles } from '@mui/styles';

@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Grid, IconButton } from '@mui/material';
-import { Delete, DragIndicator, Edit } from '@material-ui/icons';
+import { Delete, DragIndicator, Edit } from '@mui/icons-material';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfigureItemDialog from './ConfigureItemDialog';

@@ -1,5 +1,5 @@
 import { Menu, MenuItem, Popover } from '@mui/material';
-import { Today } from '@material-ui/icons';
+import { Today } from '@mui/icons-material';
 import moment from 'moment';
 import React from 'react';
 import { DateRange } from 'react-day-picker';

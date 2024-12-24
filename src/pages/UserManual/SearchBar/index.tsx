@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useReducer, useCallback } from 'react';
 import { IconButton, ListItem, ListItemText, List } from '@mui/material';
-import { Clear as ClearIcon } from '@material-ui/icons';
+import { Clear as ClearIcon } from '@mui/icons-material';
 import { kebabCase } from 'lodash';
-import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import { useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from '../userManual.module.scss';
 import { filterReducer, filterReducerInitialState } from 'src/pages/UserManual/SearchBar/helper';

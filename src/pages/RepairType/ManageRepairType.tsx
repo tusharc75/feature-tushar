@@ -19,8 +19,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuccess }) => {

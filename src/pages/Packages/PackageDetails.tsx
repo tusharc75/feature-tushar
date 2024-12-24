@@ -3,7 +3,7 @@ import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Edit } from '@material-ui/icons';
+import { Edit } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';

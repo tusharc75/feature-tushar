@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
@@ -31,7 +31,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiveDialog from './ReceiveDialog';
 import { transferAssetMessage } from 'src/constants/messageHelpers';
 

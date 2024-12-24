@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import SendIcon from '@material-ui/icons/Send';
+import SendIcon from '@mui/icons-material/Send';
 import { CgSearchLoading } from 'react-icons/cg';
 import { makeStyles } from '@mui/styles';
 
