@@ -456,7 +456,7 @@ const ViewButtons = ({ view, setView, resetSelectedRecords }) => {
               tooltip: 'Card View'
             },
             {
-              value: 'list',
+              value: 'table',
               icon: <TfiLayoutListThumbAlt />,
               tooltip: 'List View'
             }
