@@ -16,7 +16,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { checkFormula } from 'src/constants/formulaUtility';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
@@ -237,13 +237,12 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
                     : `Create ${resources?.iotDataPoints?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

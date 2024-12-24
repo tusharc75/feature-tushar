@@ -1,5 +1,5 @@
 import { Box, Button, Container, FormControl, FormControlLabel, Grid, Paper, Radio, TextField, Typography } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import RadioGroup from '@mui/material/RadioGroup';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -196,7 +196,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                               setSelectedUsers(val);
                             }}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             renderInput={(props) => (
                               <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Users'} />
                             )}

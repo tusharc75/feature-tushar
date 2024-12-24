@@ -20,7 +20,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../components/Helpers/CustomButton';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { AiOutlineImport } from 'react-icons/ai';

@@ -7,7 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { Formik, Form } from 'formik';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -89,7 +89,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
                   onChange={(_, val) => {
                     setFieldValue('serialNumber', val);
                   }}
-                  getOptionSelected={(item, current) => item === current}
+                  isOptionEqualToValue={(item, current) => item === current}
                   getOptionLabel={(option) => option}
                   renderInput={(props) => (
                     <TextField

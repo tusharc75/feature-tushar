@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniqBy } from 'lodash';
@@ -141,7 +141,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         disabled={assetId ? true : false}
                         options={serializedAssetOptions}
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
-                        getOptionSelected={(option: any, val) => option?.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                         value={
                           serializedAssetOptions?.filter((data) => values['serializedAsset'] === data?.optionValue).length
                             ? serializedAssetOptions?.find((data) => values['serializedAsset'] === data?.optionValue)
@@ -202,7 +202,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
                         }
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
-                        getOptionSelected={(option: any, val) => option?.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                         value={
                           outBoundMessageOptions?.filter((data) => values['messageId'] === data?.optionValue).length
                             ? outBoundMessageOptions?.find((data) => values['messageId'] === data?.optionValue)

@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -78,7 +78,7 @@ const AssignUserDialog = ({ handleClose, onSuccess, id }) => {
               setSelectedUsers(val);
             }}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
             renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Approvers'} />}
           />
         </Box>

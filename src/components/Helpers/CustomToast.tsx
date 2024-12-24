@@ -1,49 +1,31 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
-import { makeStyles } from '@mui/styles';
-import { Theme } from '@mui/material';
-
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    width: '100%',
-    '& > * + *': {
-      marginTop: theme.spacing(2)
-    }
-  }
-}));
+import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 
 const CustomToast = (props) => {
-  const { open, close, message, type, hideDuration = 6000, anchorOrigin = null } = props;
-  const classes = useStyles();
+  const { open, close, message, type, hideDuration = 6000 } = props;
 
   return (
     <>
       {open && (
-        <div className={classes.root}>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Snackbar
             open={open}
             autoHideDuration={hideDuration}
             onClose={close}
-            anchorOrigin={
-              anchorOrigin
-                ? anchorOrigin
-                : {
-                    vertical: 'top',
-                    horizontal: 'center'
-                  }
-            }
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           >
-            <Alert onClose={close} severity={type}>
+            <Alert
+              onClose={close}
+              severity={type}
+              variant="filled"
+              sx={{ width: '100%' }}
+            >
               {message}
             </Alert>
           </Snackbar>
-        </div>
+        </Box>
       )}
     </>
   );
@@ -54,7 +36,6 @@ CustomToast.propTypes = {
   close: PropTypes.func.isRequired,
   message: PropTypes.any.isRequired,
   type: PropTypes.string.isRequired,
-  anchorOrigin: PropTypes.object
 };
 
 export default CustomToast;

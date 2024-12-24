@@ -7,7 +7,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -54,7 +54,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   return (
@@ -69,7 +69,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
                 style={{ width: '300px' }}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
                     ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]

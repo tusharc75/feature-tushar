@@ -21,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { sortBy } from 'lodash';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
 
 const AttachmentSchema = object().shape({
@@ -198,7 +198,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                           options={Object.values(ATTACHMENT_TYPE)}
                           renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option: any, value: any) => option === value}
+                          isOptionEqualToValue={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
                             setFieldValue('attachmentType', val);
                           }}

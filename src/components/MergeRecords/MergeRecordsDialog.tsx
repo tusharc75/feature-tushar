@@ -7,7 +7,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ImportExportMenu from '../Helpers/ImportExportMenu';
@@ -111,7 +111,7 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
                 onChange={(_, val) => {
                   setMergeValue(val);
                 }}
-                getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                isOptionEqualToValue={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
                 getOptionLabel={(option) => option.optionLabel}
                 renderInput={(props) => <TextField {...props} required variant="outlined" label={`${resource}`} />}
               />

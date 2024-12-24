@@ -107,7 +107,7 @@ const WorkOrderSupervisor = () => {
         fieldName: 'user',
         fieldLabel: resources?.employeeMaster?.titlePlural,
         lookup: true,
-        lookupResource: sidebarResource.employeeMaster,
+        lookupResource: sidebarResource.user,
         resource: sidebarResource.workOrderSupervisor,
         type: 'dropDown',
         order: 0,
@@ -126,7 +126,7 @@ const WorkOrderSupervisor = () => {
     {
       fieldData: {
         _id: '630dc2429ec41869052395b2',
-        fieldName: 'serviceMaster',
+        fieldName: 'service',
         fieldLabel: resources?.serviceMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.serviceMaster,
@@ -732,7 +732,7 @@ const WorkOrderSupervisor = () => {
               : [
                 {
                   uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?._id
+                  workOrderId: selectedServiceData?.workOrder
                 }
               ]
           }

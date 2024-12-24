@@ -16,7 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
@@ -668,7 +668,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             autoHighlight
             value={selectedServiceOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+            isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
             onChange={(_, val) => {
               let value = val;
               if (!val) {

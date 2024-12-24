@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -136,9 +136,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -187,12 +187,12 @@ const PackageInventory = () => {
           module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {}}
+          onExportToExcelSuccess={() => { }}
         />
       </div>
       <CustomContainer>
@@ -256,7 +256,7 @@ const LeftSideContents = ({ plantOptions, plantId, setPlantId, resources }) => {
         options={plantOptions}
         getOptionLabel={(option: any) => option.optionLabel || ''}
         disableClearable
-        getOptionSelected={(option: any, val) => option.optionValue === val}
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
         value={
           plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
         }

@@ -4,7 +4,7 @@ import { ASSET_NUMBER_TYPE, CustomDialogTransition, sublease } from '../../../co
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -245,7 +245,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                                         fullWidth
                                         options={existingAssets ? existingAssets?.filter((e) => e?.product === data?.product) : []}
                                         getOptionLabel={(option: any) => (option ? option?.assetNumber : '')}
-                                        getOptionSelected={(option: any, val) => option.assetNumber === val}
+                                        isOptionEqualToValue={(option: any, val) => option.assetNumber === val}
                                         value={
                                           existingAssets?.filter((e) => e?.assetNumber === data.assetNumber)?.length > 0
                                             ? existingAssets?.filter((e) => e?.assetNumber === data.assetNumber)[0]

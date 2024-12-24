@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -253,7 +253,7 @@ const AddExistingProduct = (props) => {
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
+                isOptionEqualToValue={(option: any, val) => option._id === val}
                 disabled={referenceData && referenceData?.productCategory ? true : false}
                 value={
                   productCategoryList.filter((data) => data._id === productCategory).length
@@ -272,7 +272,7 @@ const AddExistingProduct = (props) => {
                   style={{ width: '250px' }}
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                   disabled={referenceData && referenceData?.productTemplate ? true : false}
                   value={
                     productTemplateList.filter((data) => data.optionValue === productTemplate).length

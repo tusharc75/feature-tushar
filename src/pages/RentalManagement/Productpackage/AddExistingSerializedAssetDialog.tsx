@@ -23,7 +23,7 @@ import {
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
@@ -340,7 +340,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           fullWidth
           options={warehouseOption}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
@@ -568,7 +568,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

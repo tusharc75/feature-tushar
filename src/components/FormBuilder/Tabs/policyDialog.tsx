@@ -10,7 +10,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -264,8 +264,8 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
             fullWidth
             size="small"
             options={options}
-            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => {
+            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+            isOptionEqualToValue={(option: any, val) => {
               return option?.optionValue === val?.optionValue;
             }}
             value={options?.find((e) => e.optionValue === data?.data) || {}}
@@ -295,8 +295,8 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
       multiple={multiple}
       disableCloseOnSelect={multiple}
       options={options}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-      getOptionSelected={(option: any, val) => {
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+      isOptionEqualToValue={(option: any, val) => {
         return option?.optionValue === val?.optionValue;
       }}
       value={value}

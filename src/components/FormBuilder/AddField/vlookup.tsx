@@ -263,7 +263,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
               return _field.fieldLabel;
             })
         }
-        getOptionLabel={(option) => option}
+        getOptionLabel={(option) => option || ''}
         value={values['vlookupInputFields'] ? convertValueToLabel(values['vlookupInputFields']) : []}
         renderTags={(value: string[], getTagProps) =>
           value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)

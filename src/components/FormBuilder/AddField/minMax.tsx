@@ -75,8 +75,8 @@ export const MinMax = ({ values, setFieldValue, touched, errors }) => {
                   options={services}
                   fullWidth
                   value={values?.minValueServiceAdd ? services?.find((data: any) => values?.minValueServiceAdd === data.optionValue) : []}
-                  getOptionLabel={(option) => option.optionLabel}
-                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                  getOptionLabel={(option) => option.optionLabel || ''}
+                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                   onChange={(_, newVal: any) => {
                     setFieldValue('minValueServiceAdd', newVal?.optionValue);
                   }}
@@ -90,8 +90,8 @@ export const MinMax = ({ values, setFieldValue, touched, errors }) => {
                   options={services}
                   fullWidth
                   value={values?.maxValueServiceAdd ? services?.find((data: any) => values?.maxValueServiceAdd === data.optionValue) : []}
-                  getOptionLabel={(option) => option.optionLabel}
-                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                  getOptionLabel={(option) => option.optionLabel || ''}
+                  isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                   onChange={(_, newVal: any) => {
                     setFieldValue('maxValueServiceAdd', newVal?.optionValue);
                   }}

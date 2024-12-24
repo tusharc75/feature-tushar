@@ -1,7 +1,7 @@
 import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 
@@ -105,7 +105,7 @@ const FormTypes = (props) => {
           : ''
       }
       getOptionLabel={(option: any) => option?.optionLabel || ''}
-      getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+      isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
       onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
       renderInput={(params) => (
         <TextField

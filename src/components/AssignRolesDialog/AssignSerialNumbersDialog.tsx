@@ -19,7 +19,7 @@ import {
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -292,8 +292,8 @@ const AssignSerialNumbersDialog = ({
             <Autocomplete
               fullWidth
               options={warehouseOption}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
                   ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]

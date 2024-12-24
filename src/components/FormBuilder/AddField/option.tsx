@@ -280,7 +280,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                 id="tags-filled"
                 options={fields && fields.filter((_f) => _f._id !== _id && _f.type === 'dropDown')}
                 getOptionLabel={(option: any) => (option ? option.fieldLabel : '')}
-                getOptionSelected={(option: any, val) => option.fieldName === val}
+                isOptionEqualToValue={(option: any, val) => option.fieldName === val}
                 value={
                   fields && fields.filter((data) => data.fieldName === values['dropdowDependentOn']).length
                     ? fields && fields.filter((data) => data.fieldName === values['dropdowDependentOn'])[0]
@@ -375,7 +375,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             id="tags-filled"
             options={values['option'] && values['option']}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
             value={
               values['option'] && values['option'].filter((data) => data.optionValue === values['defaultDropdownOption']).length
                 ? values['option'] && values['option'].filter((data) => data.optionValue === values['defaultDropdownOption'])[0]
@@ -522,23 +522,23 @@ const Card = (props) => {
                 {values['dropdowDependentOn'] && fields.filter((_f) => _f.fieldName === values['dropdowDependentOn']).length
                   ? fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].lookup
                     ? lookupOption &&
-                      lookupOption.map((_option) => {
+                    lookupOption.map((_option) => {
+                      return (
+                        <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          {_option.optionLabel}
+                        </MenuItem>
+                      );
+                    })
+                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
+                    fields
+                      .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
+                      .option.map((_option) => {
                         return (
-                          <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                             {_option.optionLabel}
                           </MenuItem>
                         );
                       })
-                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
-                      fields
-                        .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
-                        .option.map((_option) => {
-                          return (
-                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
-                              {_option.optionLabel}
-                            </MenuItem>
-                          );
-                        })
                   : null}
               </Select>
               {/* <TextField

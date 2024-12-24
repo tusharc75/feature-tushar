@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import React from 'react';
 import { getResourceField } from '../helper';
 
@@ -32,8 +32,8 @@ function FieldDependent({ fields, values, fieldSet }) {
           <Autocomplete
             id="lookup-dependent-on"
             options={fields && fields.filter((_f) => _f._id !== values['_id'] && _f.type === 'dropDown' && _f?.lookup)}
-            getOptionLabel={(option: any) => (option ? option.fieldLabel : '')}
-            getOptionSelected={(option: any, val) => option.fieldName === val}
+            getOptionLabel={(option: any) => (option ? option.fieldLabel || '' : '')}
+            isOptionEqualToValue={(option: any, val) => option.fieldName === val}
             value={
               fields && fields.filter((data) => data.fieldName === values['lookupDependentOn']).length
                 ? fields && fields.filter((data) => data.fieldName === values['lookupDependentOn'])[0]
@@ -53,8 +53,8 @@ function FieldDependent({ fields, values, fieldSet }) {
               id="lookup-dependent-on-field"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === values['lookupDependentOnField']).length
                   ? resourceFields && resourceFields.filter((data) => data?.fieldName === values['lookupDependentOnField'])[0]

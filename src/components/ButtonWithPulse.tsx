@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { Button, ButtonProps } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface ButtonWithPulseProps extends ButtonProps {
   pulseEffect?: boolean;
@@ -14,9 +15,9 @@ const ButtonWithPulse: FC<ButtonWithPulseProps> = ({ children, disabled, pulseEf
           <span></span>
         </span>
       )}
-      <Button {...others} disabled={disabled}>
+      <ThemeButton {...others} disabled={disabled}>
         {children}
-      </Button>
+      </ThemeButton>
     </div>
   );
 };

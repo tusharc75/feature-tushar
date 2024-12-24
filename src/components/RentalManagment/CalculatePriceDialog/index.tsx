@@ -15,7 +15,7 @@ import {
   Typography,
   TextField
 } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { map, uniq } from 'lodash';
 import { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -116,7 +116,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
                             autoHighlight
                             value={value[obj.productData?.materialId]}
                             getOptionLabel={(option) => option.conditionName || ''}
-                            getOptionSelected={(option, val) => (option ? option.conditionId === val.conditionId : false)}
+                            isOptionEqualToValue={(option, val) => (option ? option.conditionId === val.conditionId : false)}
                             onChange={(_, val) => {
                               setValue((prevState) => ({
                                 ...prevState,

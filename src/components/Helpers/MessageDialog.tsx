@@ -26,7 +26,6 @@ export default function MessageDialog({ onClose, open, message, header = 'Messag
 
   return (
     <Dialog
-      disableBackdropClick
       TransitionComponent={CustomDialogTransition}
       disableEscapeKeyDown
       maxWidth="xs"

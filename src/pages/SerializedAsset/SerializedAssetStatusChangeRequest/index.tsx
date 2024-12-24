@@ -16,7 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
@@ -207,7 +207,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -220,7 +220,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -234,7 +234,7 @@ const SerializedAssetStatusChangeRequest = () => {
               className={`w-full lg:w-[230px]`}
               options={statusOptions}
               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 statusOptions?.filter((data) => data.optionValue === selectedStatus)?.length
                   ? statusOptions.filter((data) => data.optionValue === selectedStatus)[0]

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@mui/material';
+import { Box, Button, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
@@ -40,9 +41,12 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={close}
         open={open}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            close();
+          }
+        }}
       >
         <CustomDialogHeader
           title={title}
@@ -73,7 +77,7 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
-                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                    <Grid key={index2} size={{ xs: 12, sm: 6, md: 6 }} >
                                       <FormTypes
                                         // {...rest}
                                         values={values}

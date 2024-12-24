@@ -1,4 +1,4 @@
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
@@ -190,7 +190,7 @@ const ConsumablesQtyDialog = ({
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values }) => (
           <>
@@ -239,7 +239,7 @@ const ConsumablesQtyDialog = ({
                                           <Autocomplete
                                             options={storageLocationOptions}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                            getOptionSelected={(option: any, val) => option.optionValue === val}
+                                            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                             value={
                                               storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
                                                 ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
@@ -324,7 +324,7 @@ const ConsumablesQtyDialog = ({
                                               serialNumber: val
                                             });
                                           }}
-                                          getOptionSelected={(item, current) => item === current}
+                                          isOptionEqualToValue={(item, current) => item === current}
                                           getOptionLabel={(option) => option}
                                           renderInput={(props) => (
                                             <TextField
@@ -366,7 +366,7 @@ const ConsumablesQtyDialog = ({
                                       <Autocomplete
                                         options={storageLocationOptions}
                                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                         value={
                                           storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
                                             ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
@@ -457,7 +457,7 @@ const ConsumablesQtyDialog = ({
                                         serialNumber: val
                                       });
                                     }}
-                                    getOptionSelected={(item, current) => item === current}
+                                    isOptionEqualToValue={(item, current) => item === current}
                                     getOptionLabel={(option) => option}
                                     renderInput={(props) => (
                                       <TextField

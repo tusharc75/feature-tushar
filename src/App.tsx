@@ -443,8 +443,8 @@ function App() {
   };
 
   return (
-    <ColorModeProvider>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ColorModeProvider>
         <CssBaseline />
         <AnimatePresence initial={false} exitBeforeEnter>
           <ErrorBoundaryComponent>
@@ -1238,14 +1238,12 @@ function App() {
             <AgentChat />
           </ErrorBoundaryComponent>
         </AnimatePresence>
-        {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}
         {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
         {toast?.toastConfig?.open &&
           (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
             <CustomToaster
               type={toast.toastConfig.type}
               message={toast.toastConfig.message}
-              anchorOrigin={toast.toastConfig?.anchorOrigin || null}
               open={toast.toastConfig.open}
               close={() => {
                 toast.setToastConfig({ open: false });
@@ -1256,8 +1254,8 @@ function App() {
           ) : (
             ''
           ))}
-      </LocalizationProvider>
-    </ColorModeProvider>
+      </ColorModeProvider>
+    </LocalizationProvider>
   );
 }
 

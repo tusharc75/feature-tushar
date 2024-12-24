@@ -177,9 +177,12 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={onClose}
         open={open}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            onClose()
+          }
+        }}
       >
         <CustomDialogHeader
           title="Create Opportunity"
@@ -201,7 +204,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
             initialValues={opportunityData.initialValues}
             validationSchema={yupSchema(opportunityData.fields)}
             validateOnMount
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors }) => (
               <>
@@ -449,8 +452,8 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
                                           fieldData={field}

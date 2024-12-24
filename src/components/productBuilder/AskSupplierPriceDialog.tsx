@@ -15,7 +15,7 @@ import emailStyles from '../../pages/Activity/Email/email.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const AskSupplierPriceDialog = (props) => {
   const {
@@ -165,11 +165,12 @@ const AskSupplierPriceDialog = (props) => {
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        onClose={() => {
-          setAskSupplierPriceDialog(false);
-        }}
         open={askSupplierPriceDialog}
-        disableBackdropClick={true}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            setAskSupplierPriceDialog(false);
+          }
+        }}
         disableEnforceFocus={true}
       >
         <CustomDialogHeader

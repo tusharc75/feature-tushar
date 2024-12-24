@@ -39,7 +39,6 @@ export default function RecordDeletedDialog() {
 
   return (
     <Dialog
-      disableBackdropClick
       disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
       maxWidth="xs"
