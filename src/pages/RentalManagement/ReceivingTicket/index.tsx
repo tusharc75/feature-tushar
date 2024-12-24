@@ -2299,6 +2299,7 @@ const ReceivingTicket = ({
             )?.length === selectedRecords?.length && (
                 <>
                   <MenuItem
+                    disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.available)?.length ? true : false}
                     onClick={() => {
                       setAnchorEl(null);
                       setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
@@ -2309,6 +2310,7 @@ const ReceivingTicket = ({
                 </>
               )}
             <MenuItem
+              disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
               onClick={() => {
                 setAnchorEl(null);
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
@@ -2317,6 +2319,7 @@ const ReceivingTicket = ({
               {ASSET_STATUS.scrap}
             </MenuItem>
             <MenuItem
+              disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
               onClick={() => {
                 setAnchorEl(null);
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
@@ -2325,6 +2328,7 @@ const ReceivingTicket = ({
               {ASSET_STATUS.lost}
             </MenuItem>
             <MenuItem
+              disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.needRepair)?.length ? true : false}
               onClick={() => {
                 setAnchorEl(null);
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRepair, message: '' });
@@ -2333,6 +2337,7 @@ const ReceivingTicket = ({
               {ASSET_STATUS.needRepair}
             </MenuItem>
             <MenuItem
+              disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.needRecert)?.length ? true : false}
               onClick={() => {
                 setAnchorEl(null);
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRecert, message: '' });

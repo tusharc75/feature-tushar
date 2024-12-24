@@ -1,20 +1,20 @@
-import { Grow, Zoom } from '@material-ui/core';
+import { Grow } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, cloneDeep, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
-import axiosInstance from 'src/axios/axiosInstance';
+import { CompletedIcon, InProgressByOtherIcon, InProgressIcon, PendingIcon } from 'src/assets/newSvgs';
 import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import { GoogleMapProps } from '@react-google-maps/api';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -3820,8 +3820,17 @@ export function filterDataByDateIntersection<D>(
   });
 }
 export const workOrderColormap = {
-  [WORKORDER_SERVICE_STATUS.pending]: { color: 'text-[#CA8A04]', background: 'bg-[#F6F2E2]', indicator: 'bg-[#EEBA6C]' },
-  [WORKORDER_SERVICE_STATUS.inProgress]: { color: 'text-[#3772FF]', background: 'bg-[#3772FF33]', indicator: 'bg-[#0095FF]' },
-  [WORKORDER_SERVICE_STATUS.completed]: { color: 'text-[#0FBE00]', background: 'bg-[#0FBE0033]', indicator: 'bg-[#03781D]' },
-  [WORKORDER_SERVICE_STATUS.inProgressByOther]: { color: 'text-[#3772FF]', background: 'bg-[#3772FF33]', indicator: 'bg-[#0095FF]' }
+  [WORKORDER_SERVICE_STATUS.pending]: { color: 'text-[#B66A11]', background: 'bg-[#FFF1E0]', indicator: 'bg-[#B66A11]' },
+  [WORKORDER_SERVICE_STATUS.inProgress]: { color: 'text-[#0273FF]', background: 'bg-[#D6F1FF]', indicator: 'bg-[#0273FF]' },
+  [WORKORDER_SERVICE_STATUS.completed]: { color: 'text-[#0A983E]', background: 'bg-[#E2FDEC]', indicator: 'bg-[#0A983E]' },
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: { color: 'text-[#6D29F6]', background: 'bg-[#D6F1FF]', indicator: 'bg-[#6D29F6]' }
+};
+
+export const workOrderIconMap = {
+  [WORKORDER_SERVICE_STATUS.pending]: <PendingIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.pending].color}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgress]: <InProgressIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].color}`} />,
+  [WORKORDER_SERVICE_STATUS.completed]: <CompletedIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.completed].color}`} />,
+  [WORKORDER_SERVICE_STATUS.inProgressByOther]: (
+    <InProgressByOtherIcon className={`${workOrderColormap[WORKORDER_SERVICE_STATUS.inProgressByOther].color}`} />
+  )
 };

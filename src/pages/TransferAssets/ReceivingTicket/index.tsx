@@ -39,10 +39,11 @@ interface ReceivingGridProps {
   allowedToEdit: boolean;
   stepFullScreen: any;
   resources: any;
+  setAllAssetsReceived: any;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen, resources } =
+  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen, resources, setAllAssetsReceived } =
     props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -200,7 +201,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   useEffect(() => {
     if (transferAssetId) {
-      fetchAssetsData(true);
+      fetchAssetsData();
     }
   }, [transferAssetId]);
 
@@ -236,7 +237,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         });
     });
 
-  const fetchAssetsData = async (forceRefresh) => {
+  const fetchAssetsData = async (checkAutoComplete = false) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
@@ -270,8 +271,22 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           ...finalObject
         };
       });
+      if (assetData?.length && transferAssetData?.transferType.includes('External')) {
+        if (assetData?.every((e) => e['receivingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
+          setAllAssetsReceived(true);
+        } else {
+          setAllAssetsReceived(false);
+        }
+      }
       dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
       dispatch({ type: 'loading', loading: false });
+      if (checkAutoComplete && transferAssetData?.transferType === 'External') {
+        if (assetData?.length && assetData?.every((e) => e['receivingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
+          if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
+            updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+          }
+        }
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -285,24 +300,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       const loadingTicketsNotDelivered = selectedRecords.filter((asset: any) => asset?.loadingTicketStatus !== 'Delivered');
       setLoadingTicketsNotDelivered(loadingTicketsNotDelivered);
       setAssetWithNoTicket(inventoryWithNoTicket);
-    }
-
-    if (dataRows?.length > 0) {
-      const inventoryWithNoTicket = dataRows?.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
-      const inventoryDelivered = dataRows?.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
-      if (inventoryWithNoTicket.length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-      if (transferAssetData?.transferType.includes('External')) {
-        if (
-          transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed &&
-          inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length
-        ) {
-          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
-        }
-      }
     }
   }, [dataRows, selectedRecords]);
 
@@ -466,7 +463,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
+          message={`Are you sure you want to receive ${selectedRecords?.length == 1 ? 'asset' : 'assets'}?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

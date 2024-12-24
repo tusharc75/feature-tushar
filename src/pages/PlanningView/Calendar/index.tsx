@@ -405,6 +405,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
             if (d?.actualEndDate) {
               end = new Date(d?.actualEndDate);
+              end.setHours(23, 59, 59, 999);
               endDraggable = false;
             }
             if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {

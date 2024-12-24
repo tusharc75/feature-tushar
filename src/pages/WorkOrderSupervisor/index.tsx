@@ -25,6 +25,7 @@ import {
   sidebarResource,
   workOrder,
   workOrderColormap,
+  workOrderIconMap,
   workOrderSupervisor
 } from 'src/constants/helpers';
 import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
@@ -443,65 +444,44 @@ const WorkOrderSupervisor = () => {
   const statusMenuItems = useMemo(() => {
     return [
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.pending].indicator)} />
-            {WORKORDER_SERVICE_STATUS.pending}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.pending,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
-        value: WORKORDER_SERVICE_STATUS.pending
+        value: WORKORDER_SERVICE_STATUS.pending,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.pending]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.inProgress].indicator)} />
-            {WORKORDER_SERVICE_STATUS.inProgress}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.inProgress,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
-        value: WORKORDER_SERVICE_STATUS.inProgress
+        value: WORKORDER_SERVICE_STATUS.inProgress,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgress]
       },
       {
-        label: (
-          <span className="flex items-center gap-2">
-            <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[WORKORDER_SERVICE_STATUS.completed].indicator)} />
-            {WORKORDER_SERVICE_STATUS.completed}
-          </span>
-        ),
+        label: WORKORDER_SERVICE_STATUS.completed,
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
-        value: WORKORDER_SERVICE_STATUS.completed
+        value: WORKORDER_SERVICE_STATUS.completed,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
       }
-    ];
+    ] as ButtonMenuProps<string>['items'];
   }, [tableViewStatus]);
 
   const moreButtonMenuItems: ButtonMenuProps<string>['items'] = useMemo(() => {
-    const items: ButtonMenuProps<string>['items'] = [];
-    if (permissions?.repairOrder?.isCreate) {
-      items.push({
+    return [
+      {
+        visible: permissions?.repairOrder?.isCreate,
         label: `${resources?.repairOrder?.titlePlural}`,
-        onClick: () => {
-          window.open(`${routes?.repairOrder?.path}`);
-        }
-      });
-    }
-    if (permissions?.productionOrder?.isCreate) {
-      items.push({
+        onClick: () => window.open(`${routes?.repairOrder?.path}`)
+      },
+      {
+        visible: permissions?.productionOrder?.isCreate,
         label: `${resources?.productionOrder?.titlePlural}`,
-        onClick: () => {
-          window.open(`${routes?.productionOrder?.path}`);
-        }
-      });
-    }
-    if (permissions?.assemblyOrder?.isCreate) {
-      items.push({
+        onClick: () => window.open(`${routes?.productionOrder?.path}`)
+      },
+      {
+        visible: permissions?.assemblyOrder?.isCreate,
         label: `${resources?.assemblyOrder?.titlePlural}`,
-        onClick: () => {
-          window.open(`${routes?.assemblyOrder?.path}`);
-        }
-      });
-    }
-    return items;
+        onClick: () => window.open(`${routes?.assemblyOrder?.path}`)
+      }
+    ] as ButtonMenuProps<string>['items'];
   }, [
     permissions?.assemblyOrder?.isCreate,
     permissions?.productionOrder?.isCreate,
@@ -573,11 +553,11 @@ const WorkOrderSupervisor = () => {
                         showChevron={true}
                         items={statusMenuItems}
                         onItemClick={(e, item) => {
-                          setTableViewStatus(item.value);
+                          setTableViewStatus(item.value as TableViewStatus);
                         }}
                       >
                         <span className="flex items-center gap-2">
-                          <span className={cn('block h-2 w-2 rounded-full', workOrderColormap[tableViewStatus].indicator)} />
+                          {workOrderIconMap[tableViewStatus]}
                           Status: {tableViewStatus}
                         </span>
                       </ButtonMenu>
@@ -673,6 +653,7 @@ const WorkOrderSupervisor = () => {
           {viewType === 'card-view' && (
             <div className="pt-2">
               <CardColTimeline
+                getColColors={(colName) => workOrderColormap[colName]}
                 fetchSingleColumn={fetchSingleColumn}
                 state={state}
                 dispatch={dispatch}

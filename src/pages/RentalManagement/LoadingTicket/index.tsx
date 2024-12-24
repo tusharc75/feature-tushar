@@ -1420,6 +1420,7 @@ const LoadingTicket = ({
         }}
       >
         <MenuItem
+          disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
           onClick={() => {
             setAnchorEl(null);
             setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
@@ -1428,6 +1429,7 @@ const LoadingTicket = ({
           {ASSET_STATUS.scrap}
         </MenuItem>
         <MenuItem
+          disabled={selectedRecords?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
           onClick={() => {
             setAnchorEl(null);
             setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });

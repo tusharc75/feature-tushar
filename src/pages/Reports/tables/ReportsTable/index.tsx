@@ -246,6 +246,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           const tempFilter = deepFiltersP[i];
           if (filters[tempFilter.field]) {
             newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+            deepFiltersP = newDeepFilter;
           }
         }
         Object.keys(filters).forEach((field) => {

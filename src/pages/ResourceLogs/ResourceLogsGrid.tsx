@@ -185,9 +185,9 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                       oldValue = isArray(oldValue) ? oldValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
                       newValue = isArray(newValue) ? newValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
                     }
-                    if (oldValue && newValue) {
+                    if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
                       changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
-                    } else if (newValue) {
+                    } else if (newValue || newValue === 0) {
                       changeString.push(`${e.fieldLabel} changed to ${newValue}`);
                     }
                   } else if (e?.label) {
