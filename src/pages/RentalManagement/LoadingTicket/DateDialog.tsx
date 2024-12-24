@@ -7,7 +7,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatForInputControl } from 'src/constants/helpers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
   const [minDate, setMinDate] = useState(new Date());

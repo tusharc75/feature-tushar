@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';

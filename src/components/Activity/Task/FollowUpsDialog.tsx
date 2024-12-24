@@ -1,6 +1,6 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

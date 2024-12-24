@@ -1,6 +1,6 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';

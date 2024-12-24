@@ -10,7 +10,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import { Autocomplete } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormat } from '../../../constants/helpers';
 
 const AddProxySchema = object().shape({

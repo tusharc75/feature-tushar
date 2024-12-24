@@ -7,7 +7,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 import {

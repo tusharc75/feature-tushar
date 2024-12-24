@@ -26,7 +26,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Grid } from '@mui/material';
 
 export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData }) {
