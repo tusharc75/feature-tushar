@@ -443,12 +443,12 @@ function App() {
   };
 
   return (
-    <ColorModeProvider>
-      <CssBaseline />
-      <AnimatePresence initial={false} exitBeforeEnter>
-        <ErrorBoundaryComponent>
-          <Switch>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ColorModeProvider>
+        <CssBaseline />
+        <AnimatePresence initial={false} exitBeforeEnter>
+          <ErrorBoundaryComponent>
+            <Switch>
               <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
               <Route
                 // exact
@@ -1231,32 +1231,31 @@ function App() {
                 <DynamicFormDetail />
               </PrivateRoute>
               <Route path="*" component={NotFound} />
-            </LocalizationProvider>
-          </Switch>
-          <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
-          <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
-          <CustomIntro />
-          <AgentChat />
-        </ErrorBoundaryComponent>
-      </AnimatePresence>
-      {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}
-      {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
-      {toast?.toastConfig?.open &&
-        (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
-          <CustomToaster
-            type={toast.toastConfig.type}
-            message={toast.toastConfig.message}
-            open={toast.toastConfig.open}
-            close={() => {
-              toast.setToastConfig({ open: false });
-            }}
-          />
-        ) : toast.toastConfig.type === 'notFoundError' ? (
-          <RecordDeletedDialog />
-        ) : (
-          ''
-        ))}
-    </ColorModeProvider>
+            </Switch>
+            <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
+            <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
+            <CustomIntro />
+            <AgentChat />
+          </ErrorBoundaryComponent>
+        </AnimatePresence>
+        {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
+        {toast?.toastConfig?.open &&
+          (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
+            <CustomToaster
+              type={toast.toastConfig.type}
+              message={toast.toastConfig.message}
+              open={toast.toastConfig.open}
+              close={() => {
+                toast.setToastConfig({ open: false });
+              }}
+            />
+          ) : toast.toastConfig.type === 'notFoundError' ? (
+            <RecordDeletedDialog />
+          ) : (
+            ''
+          ))}
+      </ColorModeProvider>
+    </LocalizationProvider>
   );
 }
 
