@@ -34,6 +34,9 @@ import axios, { CancelTokenSource } from 'axios';
 import { Apps, FormatListNumbered } from '@mui/icons-material';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useHistory } from 'react-router-dom';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import { MdViewWeek } from 'react-icons/md';
+import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 
 type Views = 'card' | 'table';
 
@@ -94,7 +97,7 @@ const FieldServiceTechnician = () => {
   const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.fieldServiceTechnician);
-  const [view, setView] = useState<Views>('table');
+  const [view, setView] = useState('table');
   const [selectedData, setSelectedData] = useState(null);
   const [colData, setColData] = useState(null);
   const {
@@ -102,7 +105,11 @@ const FieldServiceTechnician = () => {
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
+  const { dispatch: tableDispatch } = useTableReducer();
+  const resetSelectedRecords = () => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+    tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
   const [columns, setColumns] = useState(null);
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
@@ -354,7 +361,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={isMobileView ? null : <ViewButtons handleViewChange={handleViewChange} view={view} />}
+          rightSideContents={isMobileView ? null : <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
@@ -436,23 +443,28 @@ const FieldServiceTechnician = () => {
 
 export default FieldServiceTechnician;
 
-const ViewButtons = ({ view, handleViewChange }) => {
+const ViewButtons = ({ view, setView, resetSelectedRecords }) => {
   return (
     <div className="flex flex-nowrap gap-2">
-      <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <IconButton size="small" onClick={() => handleViewChange('card')} disabled={view === 'card'}>
-            <Apps color="primary" className={`${view === 'card' ? ' opacity-45' : ''}`} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
-      <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
-        <span>
-          <IconButton size="small" onClick={() => handleViewChange('table')} disabled={view === 'table'}>
-            <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
+      <IconButtonTabs
+        onItemClick={resetSelectedRecords}
+        items={
+          [
+            {
+              value: 'card',
+              icon: <MdViewWeek />,
+              tooltip: 'Card View'
+            },
+            {
+              value: 'list',
+              icon: <TfiLayoutListThumbAlt />,
+              tooltip: 'List View'
+            }
+          ] as const
+        }
+        setValue={setView}
+        value={view}
+      />
     </div>
   );
 };
