@@ -1,6 +1,5 @@
-import DateFnsUtils from '@date-io/date-fns';
 import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
-import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -70,57 +69,55 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
           <Form>
             <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
             <CustomDialogContent>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <Box p={2}>
-                  <Grid container spacing={2}>
-                    {type !== 'stop' && (
-                      <Grid item xs={12} sm={12}>
-                        <KeyboardDateTimePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          margin="none"
-                          autoOk
-                          format={dateFormatForInputControl + ' HH:mm'}
-                          {...(minStartDate ? { minDate: minStartDate } : {})}
-                          label={`Start Date`}
-                          views={['year', 'month', 'date']}
-                          value={values.startDate}
-                          onChange={(date) => {
-                            setFieldValue('startDate', date);
-                          }}
-                          error={touched['startDate'] && Boolean(errors['startDate'])}
-                          helperText={touched['startDate'] && errors['startDate']}
-                        />
-                      </Grid>
-                    )}
-                    {(type === 'startStop' || type === 'stop') && (
-                      <Grid item xs={12} sm={12}>
-                        <KeyboardDateTimePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          margin="none"
-                          autoOk
-                          format={dateFormatForInputControl + ' HH:mm'}
-                          minDate={values.startDate}
-                          label={`'End' Date`}
-                          views={['year', 'month', 'date']}
-                          value={values.endDate}
-                          onChange={(date) => {
-                            setFieldValue('endDate', date);
-                          }}
-                          {...(maxEndDate ? { maxDate: maxEndDate } : {})}
-                          error={touched['endDate'] && Boolean(errors['endDate'])}
-                          helperText={touched['endDate'] && errors['endDate']}
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
-              </MuiPickersUtilsProvider>
+              <Box p={2}>
+                <Grid container spacing={2}>
+                  {type !== 'stop' && (
+                    <Grid item xs={12} sm={12}>
+                      <DateTimePicker
+                        inputVariant="outlined"
+                        variant="inline"
+                        fullWidth
+                        size="small"
+                        margin="none"
+                        autoOk
+                        format={dateFormatForInputControl + ' HH:mm'}
+                        {...(minStartDate ? { minDate: minStartDate } : {})}
+                        label={`Start Date`}
+                        views={['year', 'month', 'date']}
+                        value={values.startDate}
+                        onChange={(date) => {
+                          setFieldValue('startDate', date);
+                        }}
+                        error={touched['startDate'] && Boolean(errors['startDate'])}
+                        helperText={touched['startDate'] && errors['startDate']}
+                      />
+                    </Grid>
+                  )}
+                  {(type === 'startStop' || type === 'stop') && (
+                    <Grid item xs={12} sm={12}>
+                      <DateTimePicker
+                        inputVariant="outlined"
+                        variant="inline"
+                        fullWidth
+                        size="small"
+                        margin="none"
+                        autoOk
+                        format={dateFormatForInputControl + ' HH:mm'}
+                        minDate={values.startDate}
+                        label={`'End' Date`}
+                        views={['year', 'month', 'date']}
+                        value={values.endDate}
+                        onChange={(date) => {
+                          setFieldValue('endDate', date);
+                        }}
+                        {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                        error={touched['endDate'] && Boolean(errors['endDate'])}
+                        helperText={touched['endDate'] && errors['endDate']}
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
               <Button disabled={loading} size="small" variant="outlined" color="primary" onClick={onClose}>

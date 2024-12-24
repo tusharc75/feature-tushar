@@ -1,7 +1,6 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
+import DatePicker from '@mui/lab/DatePicker';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -108,92 +107,90 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
             />
             <CustomDialogContent>
               <Form>
-                <MuiPickersUtilsProvider utils={DateUtils}>
-                  <Grid container spacing={2}>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <TextField
-                        fullWidth
-                        label="Subject"
-                        variant="outlined"
-                        type="text"
-                        size="small"
-                        name="name"
-                        autoComplete="off"
-                        value={values?.name}
-                        required
-                        onChange={(e) => {
-                          setFieldValue('name', e?.target?.value);
-                        }}
-                        error={touched['name'] && Boolean(errors['name'])}
-                        helperText={touched['name'] && errors['name']}
-                      />
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <TextField
-                        fullWidth
-                        label="Description"
-                        variant="outlined"
-                        type="text"
-                        size="small"
-                        name="description"
-                        multiline
-                        rows={4}
-                        value={values?.description}
-                        onChange={(e) => {
-                          setFieldValue('description', e?.target?.value);
-                        }}
-                      />
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <UserDropdown
-                        name="assignee"
-                        label="Assignee"
-                        errors={errors}
-                        touched={touched}
-                        required={true}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        multiple={true}
-                        value={values['assignee']}
-                        email={[]}
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={12} md={6} lg={6}>
-                      <KeyboardDatePicker
-                        label="Due Date"
-                        name="dueDate"
-                        autoOk
-                        variant="inline"
-                        inputVariant="outlined"
-                        fullWidth
-                        margin="dense"
-                        minDate={values.startDate}
-                        value={values.dueDate}
-                        onChange={(value) => {
-                          setFieldValue('dueDate', value);
-                        }}
-                        format={dateFormatForInputControl}
-                      />
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <Autocomplete
-                        id="field"
-                        multiple
-                        disableCloseOnSelect
-                        options={fieldOptions}
-                        limitTags={4}
-                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                        getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
-                        value={values?.formRelatedTo?.fields}
-                        onChange={(e, val) => {
-                          setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
-                        }}
-                        renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
-                      />
-                    </Grid>
+                <Grid container spacing={2}>
+                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                    <TextField
+                      fullWidth
+                      label="Subject"
+                      variant="outlined"
+                      type="text"
+                      size="small"
+                      name="name"
+                      autoComplete="off"
+                      value={values?.name}
+                      required
+                      onChange={(e) => {
+                        setFieldValue('name', e?.target?.value);
+                      }}
+                      error={touched['name'] && Boolean(errors['name'])}
+                      helperText={touched['name'] && errors['name']}
+                    />
                   </Grid>
-                </MuiPickersUtilsProvider>
+                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                    <TextField
+                      fullWidth
+                      label="Description"
+                      variant="outlined"
+                      type="text"
+                      size="small"
+                      name="description"
+                      multiline
+                      rows={4}
+                      value={values?.description}
+                      onChange={(e) => {
+                        setFieldValue('description', e?.target?.value);
+                      }}
+                    />
+                  </Grid>
+                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                    <UserDropdown
+                      name="assignee"
+                      label="Assignee"
+                      errors={errors}
+                      touched={touched}
+                      required={true}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      multiple={true}
+                      value={values['assignee']}
+                      email={[]}
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={12} md={6} lg={6}>
+                    <DatePicker
+                      label="Due Date"
+                      name="dueDate"
+                      autoOk
+                      variant="inline"
+                      inputVariant="outlined"
+                      fullWidth
+                      margin="dense"
+                      minDate={values.startDate}
+                      value={values.dueDate}
+                      onChange={(value) => {
+                        setFieldValue('dueDate', value);
+                      }}
+                      format={dateFormatForInputControl}
+                    />
+                  </Grid>
+                  <Grid item md={12} lg={12} xs={12} sm={12}>
+                    <Autocomplete
+                      id="field"
+                      multiple
+                      disableCloseOnSelect
+                      options={fieldOptions}
+                      limitTags={4}
+                      getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                      getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
+                      value={values?.formRelatedTo?.fields}
+                      onChange={(e, val) => {
+                        setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
+                      }}
+                      renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
+                    />
+                  </Grid>
+                </Grid>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -215,7 +212,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
           </>
         )}
       </Formik>
-    </Dialog>
+    </Dialog >
   );
 };
 

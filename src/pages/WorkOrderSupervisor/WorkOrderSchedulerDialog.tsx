@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@mui/material';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -208,7 +208,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <KeyboardDatePicker
+                        <DatePicker
                           variant="inline"
                           fullWidth
                           size="small"

@@ -10,9 +10,8 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import { Autocomplete } from '@mui/material';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { dateFormat } from '../../../constants/helpers';
-import MomentUtils from '@date-io/moment';
 
 const AddProxySchema = object().shape({
   user: string().required('Please select user'),
@@ -86,90 +85,87 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
 
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <MuiPickersUtilsProvider utils={MomentUtils}>
-                    <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                      <Grid item md={12} sm={12} xs={12}>
-                        <Autocomplete
-                          id="combo-box-demo"
-                          size="small"
-                          value={userList.filter((data) => data._id === values.user).length ? userList.find((data) => data._id === values.user) : ''}
-                          options={userList}
-                          getOptionLabel={(option: any) => option.concatedName}
-                          onChange={(event, newValue: any) => {
-                            setFieldValue('user', newValue._id);
-                          }}
-                          getOptionSelected={(option: any, val) => option._id === val}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Select User"
-                              variant="outlined"
-                              name="nameField"
-                              error={touched['user'] && Boolean(errors['user'])}
-                              helperText={touched['user'] && errors['user']}
-                              required
-                            />
-                          )}
-                        />
-                      </Grid>
-
-                      <Grid item md={12} sm={12} xs={12}>
-                        <KeyboardDatePicker
-                          autoOk
-                          size="small"
-                          disablePast
-                          variant="inline"
-                          inputVariant="outlined"
-                          value={values.startDate}
-                          name="startDate"
-                          label="Start Date"
-                          required
-                          fullWidth
-                          placeholder={dateFormat}
-                          onChange={(date: any) => {
-                            setFieldValue('startDate', date);
-                          }}
-                          format={dateFormat}
-                          error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
-                          helperText={Boolean(touched['startDate']) && errors['startDate']}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                      </Grid>
-
-                      <Grid item md={12} sm={12} xs={12}>
-                        <KeyboardDatePicker
-                          autoOk
-                          size="small"
-                          disablePast
-                          variant="inline"
-                          inputVariant="outlined"
-                          minDate={values.startDate}
-                          value={values.endDate}
-                          name="endDate"
-                          label="End Date"
-                          required
-                          fullWidth
-                          placeholder={dateFormat}
-                          onChange={(date: any) => {
-                            setFieldValue('endDate', date);
-                          }}
-                          format={dateFormat}
-                          error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
-                          helperText={Boolean(touched['endDate']) && errors['endDate']}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                      </Grid>
+                  <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
+                    <Grid item md={12} sm={12} xs={12}>
+                      <Autocomplete
+                        id="combo-box-demo"
+                        size="small"
+                        value={userList.filter((data) => data._id === values.user).length ? userList.find((data) => data._id === values.user) : ''}
+                        options={userList}
+                        getOptionLabel={(option: any) => option.concatedName}
+                        onChange={(event, newValue: any) => {
+                          setFieldValue('user', newValue._id);
+                        }}
+                        getOptionSelected={(option: any, val) => option._id === val}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select User"
+                            variant="outlined"
+                            name="nameField"
+                            error={touched['user'] && Boolean(errors['user'])}
+                            helperText={touched['user'] && errors['user']}
+                            required
+                          />
+                        )}
+                      />
                     </Grid>
-                  </MuiPickersUtilsProvider>
+
+                    <Grid item md={12} sm={12} xs={12}>
+                      <DatePicker
+                        autoOk
+                        size="small"
+                        disablePast
+                        variant="inline"
+                        inputVariant="outlined"
+                        value={values.startDate}
+                        name="startDate"
+                        label="Start Date"
+                        required
+                        fullWidth
+                        placeholder={dateFormat}
+                        onChange={(date: any) => {
+                          setFieldValue('startDate', date);
+                        }}
+                        format={dateFormat}
+                        error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
+                        helperText={Boolean(touched['startDate']) && errors['startDate']}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                    </Grid>
+
+                    <Grid item md={12} sm={12} xs={12}>
+                      <DatePicker
+                        autoOk
+                        size="small"
+                        disablePast
+                        variant="inline"
+                        inputVariant="outlined"
+                        minDate={values.startDate}
+                        value={values.endDate}
+                        name="endDate"
+                        label="End Date"
+                        required
+                        fullWidth
+                        placeholder={dateFormat}
+                        onChange={(date: any) => {
+                          setFieldValue('endDate', date);
+                        }}
+                        format={dateFormat}
+                        error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
+                        helperText={Boolean(touched['endDate']) && errors['endDate']}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                    </Grid>
+                  </Grid>
                 </Form>
               </CustomDialogContent>
-
               <CustomDialogFooter>
                 <Button size="small" onClick={onClose} variant="contained">
                   Cancel

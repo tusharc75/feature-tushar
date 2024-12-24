@@ -13,8 +13,6 @@ import routes from 'src/components/Helpers/Routes';
 import { cn, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
 let cancelTokenSource = null;
@@ -394,7 +392,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   }, [page, sorting, search, limit, filters, pageSizes, showGrid]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
         {showGrid && (
           <>
@@ -418,7 +416,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
               api={getApi()}
-              afterImportCompleted={() => {}}
+              afterImportCompleted={() => { }}
               onlyExport={true}
             />
           </>
@@ -472,7 +470,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           onCloseWithErrors={navigateToMainPage}
         />
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

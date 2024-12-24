@@ -1,13 +1,11 @@
-import MomentUtils from '@date-io/moment';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { dateFormat, downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ActivityList from './ActivityList';
@@ -167,76 +165,74 @@ const RoadMap = () => {
     <Box>
       <div className="flex flex-wrap justify-between">
         <div className="grid w-full gap-4 md:max-w-[calc(100%-161px)] md:grid-cols-2 xl:grid-cols-4">
-          <MuiPickersUtilsProvider utils={MomentUtils}>
-            <Autocomplete
-              fullWidth
-              options={products}
-              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                products.filter((data) => data.optionValue === selectedProduct).length
-                  ? products.filter((data) => data.optionValue === selectedProduct)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setSelectedProduct(val && val.optionValue ? val.optionValue : '');
-              }}
-              renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
-            />
-            <Autocomplete
-              fullWidth
-              options={warehouse}
-              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                warehouse.filter((data) => data.optionValue === selectedWarehouse).length
-                  ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-              }}
-              renderInput={(params) => (
-                <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
-              )}
-            />
-            <KeyboardDatePicker
-              autoOk
-              fullWidth
-              size="small"
-              variant="inline"
-              inputVariant="outlined"
-              value={new Date(startDate)}
-              name="startDate"
-              label="Start Date"
-              onChange={(date: any) => {
-                setStartDate(moment(date).format('YYYY-MM-DD'));
-              }}
-              format={dateFormat}
-              InputLabelProps={{
-                shrink: true
-              }}
-              margin="dense"
-            />
-            <KeyboardDatePicker
-              autoOk
-              fullWidth
-              size="small"
-              variant="inline"
-              inputVariant="outlined"
-              value={new Date(endDate)}
-              name="endDate"
-              label="End Date"
-              onChange={(date: any) => {
-                setEndDate(moment(date).format('YYYY-MM-DD'));
-              }}
-              format={dateFormat}
-              InputLabelProps={{
-                shrink: true
-              }}
-              margin="dense"
-            />
-          </MuiPickersUtilsProvider>
+          <Autocomplete
+            fullWidth
+            options={products}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={
+              products.filter((data) => data.optionValue === selectedProduct).length
+                ? products.filter((data) => data.optionValue === selectedProduct)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedProduct(val && val.optionValue ? val.optionValue : '');
+            }}
+            renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
+          />
+          <Autocomplete
+            fullWidth
+            options={warehouse}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={
+              warehouse.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+            }}
+            renderInput={(params) => (
+              <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+            )}
+          />
+          <DatePicker
+            autoOk
+            fullWidth
+            size="small"
+            variant="inline"
+            inputVariant="outlined"
+            value={new Date(startDate)}
+            name="startDate"
+            label="Start Date"
+            onChange={(date: any) => {
+              setStartDate(moment(date).format('YYYY-MM-DD'));
+            }}
+            format={dateFormat}
+            InputLabelProps={{
+              shrink: true
+            }}
+            margin="dense"
+          />
+          <DatePicker
+            autoOk
+            fullWidth
+            size="small"
+            variant="inline"
+            inputVariant="outlined"
+            value={new Date(endDate)}
+            name="endDate"
+            label="End Date"
+            onChange={(date: any) => {
+              setEndDate(moment(date).format('YYYY-MM-DD'));
+            }}
+            format={dateFormat}
+            InputLabelProps={{
+              shrink: true
+            }}
+            margin="dense"
+          />
         </div>
         <Box display="flex">
           <Box pt={1}>
