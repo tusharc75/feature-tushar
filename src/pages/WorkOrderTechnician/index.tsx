@@ -22,10 +22,8 @@ import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHead
 import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_TECHNICIAN_SERVICE_STATUS,
-  cn,
   sidebarResource,
   workOrder,
-  workOrderColormap,
   workOrderIconMap
 } from 'src/constants/helpers';
 import CardView from './CardView';
@@ -75,7 +73,7 @@ const WorkOrderTechnician = () => {
       fieldData: {
         _id: '630dc2429ec41869032395b2',
         fieldName: 'service',
-        fieldLabel: resources?.serviceMaster.titlePlural,
+        fieldLabel: resources?.serviceMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.serviceMaster,
         resource: sidebarResource.workOrderTechnician,
@@ -97,7 +95,7 @@ const WorkOrderTechnician = () => {
       fieldData: {
         _id: '630dc2429ec41869032395b3',
         fieldName: '_id',
-        fieldLabel: resources?.workOrder.titlePlural,
+        fieldLabel: resources?.workOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.workOrder,
         resource: sidebarResource.workOrderTechnician,
@@ -119,7 +117,7 @@ const WorkOrderTechnician = () => {
       fieldData: {
         _id: '630dc2429ec41869032395b4',
         fieldName: 'repairOrder',
-        fieldLabel: resources?.repairOrder.titlePlural,
+        fieldLabel: resources?.repairOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.repairOrder,
         resource: sidebarResource.workOrderTechnician,
@@ -141,7 +139,7 @@ const WorkOrderTechnician = () => {
       fieldData: {
         _id: '630dc2429ec41869032395b5',
         fieldName: 'productionOrder',
-        fieldLabel: resources?.productionOrder.titlePlural,
+        fieldLabel: resources?.productionOrder?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.productionOrder,
         resource: sidebarResource.workOrderTechnician,
@@ -214,7 +212,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
