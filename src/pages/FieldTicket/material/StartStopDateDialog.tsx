@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -73,7 +73,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
                     <Grid item xs={12} sm={12}>
-                      <DateTimePicker
+                      <DatePicker
                         inputVariant="outlined"
                         variant="inline"
                         fullWidth
@@ -83,7 +83,6 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                         format={dateFormatForInputControl + ' HH:mm'}
                         {...(minStartDate ? { minDate: minStartDate } : {})}
                         label={`Start Date`}
-                        views={['year', 'month', 'date']}
                         value={values.startDate}
                         onChange={(date) => {
                           setFieldValue('startDate', date);
@@ -95,7 +94,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                   )}
                   {(type === 'startStop' || type === 'stop') && (
                     <Grid item xs={12} sm={12}>
-                      <DateTimePicker
+                      <DatePicker
                         inputVariant="outlined"
                         variant="inline"
                         fullWidth
@@ -105,7 +104,6 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                         format={dateFormatForInputControl + ' HH:mm'}
                         minDate={values.startDate}
                         label={`'End' Date`}
-                        views={['year', 'month', 'date']}
                         value={values.endDate}
                         onChange={(date) => {
                           setFieldValue('endDate', date);

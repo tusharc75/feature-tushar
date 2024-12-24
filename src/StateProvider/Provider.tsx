@@ -26,12 +26,12 @@ export const Provider = ({ children }) => {
           localStorage.setItem('dateFormat', 'DD/MM/YYYY');
           localStorage.setItem('dateTimeFormat', 'DD/MM/YYYY hh:mm A');
           localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
-          localStorage.setItem('dateFormatForInputControl', 'dd/MM/yyyy');
+          localStorage.setItem('dateFormatForInputControl', 'DD/MM/YYYY');
           if (data?.user?.timezone?.indexOf('America/') === 0) {
             localStorage.setItem('dateFormat', 'MM/DD/YYYY');
             localStorage.setItem('dateTimeFormat', 'MM/DD/YYYY hh:mm A');
             localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
-            localStorage.setItem('dateFormatForInputControl', 'MM/dd/yyyy');
+            localStorage.setItem('dateFormatForInputControl', 'MM/DD/YYYY');
           }
           dispatch({ type: SET_USER, payload: data });
 

@@ -1,9 +1,9 @@
 import { Box, TextField } from '@mui/material';
 import { Autocomplete } from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
 import { useEffect, useState } from 'react';
 import { isValid } from 'date-fns';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 
 export default function FilterModel({ dateFilters, setDateFilters }) {
   const [intervals, setIntervals] = useState(INTERVALS);
@@ -57,17 +57,12 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
   return (
     <Box display="flex" justifyContent="end">
       <div className="grid max-w-[850px] flex-grow grid-cols-1 justify-end gap-2 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr] ">
-        <DateTimePicker
-          inputVariant="outlined"
-          variant="inline"
+        <CustomDateTimePicker
           fullWidth
           size="small"
           margin="none"
-          autoOk
-          maxDate={dateFilter.to}
-          format={dateFormatForInputControl + ' HH:mm'}
+          maxDateTime={dateFilter.to}
           label="From"
-          views={['year', 'month', 'date', 'hours', 'minutes']}
           value={dateFilter.from}
           onChange={(date) => {
             setInputFromKeyBoard(false);
@@ -82,17 +77,12 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             }, 1000);
           }}
         />
-        <DateTimePicker
-          inputVariant="outlined"
-          variant="inline"
+        <CustomDateTimePicker
           fullWidth
           size="small"
           margin="none"
-          autoOk
-          minDate={dateFilter.from}
-          format={dateFormatForInputControl + ' HH:mm'}
+          minDateTime={dateFilter.from}
           label="To"
-          views={['year', 'month', 'date', 'hours', 'minutes']}
           value={dateFilter.to}
           onChange={(date) => {
             setInputFromKeyBoard(false);

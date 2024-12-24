@@ -2733,8 +2733,8 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={getLabel(label)}
-          {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
-          {...(fieldData?.restrictBackDate ? { minDate: new Date() } : {})}
+          {...(fieldData?.restrictFutureDate ? { maxDateTime: new Date() } : {})}
+          {...(fieldData?.restrictBackDate ? { minDateTime: new Date() } : {})}
           onChange={(date) => handleChange(name, date)}
           onError={console.error}
           error={touched[name] && Boolean(errors[name])}

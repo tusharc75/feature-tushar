@@ -1,9 +1,9 @@
-import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
 import { Autocomplete } from '@mui/material';
 import { useEffect, useState } from 'react';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 
 const FormTypes = (props) => {
   const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
@@ -176,28 +176,20 @@ const FormTypes = (props) => {
       {...others}
     />
   ) : fieldData?.type === 'dateTime' ? (
-    <DateTimePicker
-      autoOk
-      clearable
-      style={{ paddingRight: 1 }}
-      required={fieldData?.required}
-      variant="inline"
-      inputVariant="outlined"
-      ampm={false}
-      value={values[fieldData?.fieldName]}
-      name={`${fieldData?.fieldName}`}
-      label={fieldData?.label}
-      onChange={(date) => onChange(fieldData?.fieldName, date)}
-      onError={console.error}
-      format={dateFormatForInputControl + ' HH:mm'}
-      InputLabelProps={{
-        shrink: true
-      }}
-      margin="dense"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      {...others}
-    />
+    <Box className='pr-1'>
+      <CustomDateTimePicker
+        required={fieldData?.required}
+        value={values[fieldData?.fieldName]}
+        name={`${fieldData?.fieldName}`}
+        label={fieldData?.label}
+        onChange={(date) => onChange(fieldData?.fieldName, date)}
+        onError={console.error}
+        margin="dense"
+        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+        {...others}
+      />
+    </Box>
   ) : null;
 };
 

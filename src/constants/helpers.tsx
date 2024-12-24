@@ -1408,7 +1408,7 @@ export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/Y
 export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
 export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
-export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
+export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/DD/YYYY';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
