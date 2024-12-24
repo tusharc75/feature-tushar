@@ -36,7 +36,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [isAutoSelectAsset, setIsAutoSelectAsset] = useState(false);
   const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
   const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
 
@@ -63,7 +62,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       setSelectedAssets([]);
       dispatch({ type: 'selection', selectedRecords: [] });
       setIsVirtualizedTableView(false);
-      setIsAutoSelectAsset(false);
     }
   }, [selectedProduct, selectedWarehouse, loading]);
 
@@ -242,7 +240,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
           warehouse={selectedWarehouse}
           product={selectedProduct}
           handleClose={() => {
-            setIsAutoSelectAsset(false);
             setOpenAssetQtyDialog(false);
           }}
           handleSuccess={(data) => {
