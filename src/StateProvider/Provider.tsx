@@ -22,6 +22,17 @@ export const Provider = ({ children }) => {
         .then(({ data: response }) => {
           const { data } = response;
           localStorage.setItem('userData', JSON.stringify(data));
+          localStorage.setItem('brandTimeZone', (data?.user?.timezone || 'America/New_York'));
+          localStorage.setItem('dateFormat', 'DD/MM/YYYY');
+          localStorage.setItem('dateTimeFormat', 'DD/MM/YYYY hh:mm A');
+          localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
+          localStorage.setItem('dateFormatForInputControl', 'dd/MM/yyyy');
+          if (data?.user?.timezone?.indexOf('America/') === 0) {
+            localStorage.setItem('dateFormat', 'MM/DD/YYYY');
+            localStorage.setItem('dateTimeFormat', 'MM/DD/YYYY hh:mm A');
+            localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
+            localStorage.setItem('dateFormatForInputControl', 'MM/dd/yyyy');
+          }
           dispatch({ type: SET_USER, payload: data });
 
           // setUserFavorites
@@ -75,17 +86,6 @@ export const Provider = ({ children }) => {
         });
       }
       dispatch({ type: USER_LOADING, payload: false });
-    }
-
-    localStorage.setItem('dateFormat', 'DD/MM/YYYY');
-    localStorage.setItem('dateTimeFormat', 'DD/MM/YYYY hh:mm A');
-    localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
-    localStorage.setItem('dateFormatForInputControl', 'dd/MM/yyyy');
-    if (Intl.DateTimeFormat().resolvedOptions().timeZone?.indexOf('America/') === 0) {
-      localStorage.setItem('dateFormat', 'MM/DD/YYYY');
-      localStorage.setItem('dateTimeFormat', 'MM/DD/YYYY hh:mm A');
-      localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');
-      localStorage.setItem('dateFormatForInputControl', 'MM/dd/yyyy');
     }
   }, [token]);
 

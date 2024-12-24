@@ -8,7 +8,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 import {
   Avatar,
@@ -68,6 +67,7 @@ import Description from './FormTypes/Description';
 import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 
 type MultiFileType = {
   fileName: string;
@@ -2727,14 +2727,9 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <DateTimePicker
+        <CustomDateTimePicker
           {...rest}
-          autoOk
-          clearable
           required={required}
-          variant="inline"
-          inputVariant="outlined"
-          ampm={false}
           value={values[name]}
           name={name}
           label={getLabel(label)}
@@ -2742,12 +2737,8 @@ const FormTypes = (props) => {
           {...(fieldData?.restrictBackDate ? { minDate: new Date() } : {})}
           onChange={(date) => handleChange(name, date)}
           onError={console.error}
-          format={dateFormatForInputControl + ' HH:mm'}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true
-          }}
         />
       </InfoLabel>
     ) : type === 'year' ? (
