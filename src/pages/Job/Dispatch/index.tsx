@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -186,7 +186,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
 
   const handleViewPdf = (type, PDFType) => {
     setPdfLoading(type);
-    const Column = JSON.stringify(columns.map(col => ({ name: col.accessor })));
+    const Column = JSON.stringify(columns.map((col) => ({ name: col.accessor })));
     axiosInstance()
       .get(`/pdf/${jobData._id}?resource=Job&columns=${encodeURIComponent(Column)}`, { responseType: 'blob' })
       .then(({ data }) => {

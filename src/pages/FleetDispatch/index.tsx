@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { Map } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import update from 'immutability-helper';

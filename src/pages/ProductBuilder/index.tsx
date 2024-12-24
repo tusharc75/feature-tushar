@@ -1,5 +1,5 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import moment from 'moment';
@@ -198,12 +198,12 @@ const ProductBuilder = () => {
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
-              setShowDeleteConfirmBox(true);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords?.length})`}
@@ -246,8 +246,12 @@ const ProductBuilder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productBuilder?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.name || ''}` : `selected ${resources?.productBuilder?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.productBuilder?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.name || ''}`
+                : `selected ${resources?.productBuilder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

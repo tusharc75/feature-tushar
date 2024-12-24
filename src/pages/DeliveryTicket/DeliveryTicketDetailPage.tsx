@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import EditIcon from '@material-ui/icons/Edit';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';

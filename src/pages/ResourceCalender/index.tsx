@@ -1,4 +1,4 @@
-import { Grid, Typography, Box, Container } from '@material-ui/core';
+import { Grid, Typography, Box, Container } from '@mui/material';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -22,7 +22,7 @@ const ResourceCalendar = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+            <Grid item xs={12} className="d-flex align-items-center layout-for-tablet gap-1">
               <Grid style={{ display: 'flex', justifyContent: 'center' }}>
                 <MdDescription size={22} className="headerLogo" />
                 <span className="listingHeader">Resource Calendar</span>

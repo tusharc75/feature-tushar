@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import { ListingPageHeader } from '../PageHeaders';

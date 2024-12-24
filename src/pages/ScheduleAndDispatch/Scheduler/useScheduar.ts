@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import React, { useCallback, useContext, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { rentalManagement, sidebarResource } from 'src/constants/helpers';

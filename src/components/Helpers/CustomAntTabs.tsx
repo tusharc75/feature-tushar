@@ -1,6 +1,7 @@
-import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Typography, Tabs, Tab } from '@material-ui/core';
+import { Theme, createStyles } from '@mui/material/styles';
+import { Typography, Tabs, Tab } from '@mui/material';
 import { DeveloperBoard, Map } from '@material-ui/icons';
+import { withStyles } from '@mui/styles';
 
 const AntTabs = withStyles((theme) => ({
   root: {

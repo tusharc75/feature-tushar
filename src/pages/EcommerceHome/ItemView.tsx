@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
 import { Delete, DragIndicator, Edit } from '@material-ui/icons';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

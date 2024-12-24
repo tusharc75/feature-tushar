@@ -1,7 +1,7 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import type { DialogActionsProps } from '@material-ui/core/DialogActions';
+import MuiDialogActions from '@mui/material/DialogActions';
+import type { DialogActionsProps } from '@mui/material/DialogActions';
+import { withStyles } from '@mui/styles';
 
 interface CustomDialogFooterProps extends DialogActionsProps {}
 

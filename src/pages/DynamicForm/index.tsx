@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -284,7 +284,7 @@ const DynamicForm = () => {
           if (selectedRecords.length === 1) {
             setDeleteRecord(selectedRecords[0]);
           } else {
-            setDeleteRecord(null)
+            setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
         }}
@@ -356,8 +356,11 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}` :
-            `selected ${resourceLabel?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
+              : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import { Skeleton } from '@material-ui/lab';
 import { orderBy, startCase } from 'lodash';
 import moment from 'moment';

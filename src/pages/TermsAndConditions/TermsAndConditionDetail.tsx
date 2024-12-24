@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -27,7 +27,9 @@ const TermsAndConditionDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
+    { ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }
+  ]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
@@ -57,7 +59,9 @@ const TermsAndConditionDetail = () => {
       } = await axiosInstance().get(`${termsAndCondition.api}/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.termsAndConditions, data));
-      setAllowedToDelete(permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue));
+      setAllowedToDelete(
+        permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue)
+      );
 
       setTermsAndConditionData(data);
       setCustomizedRoutes([{ ...routes.termsAndConditions, title: resources?.termsAndConditions?.titlePlural }, { title: data?.name }]);

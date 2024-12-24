@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -24,16 +24,7 @@ interface EditDialogProps {
   loading: any;
 }
 
-const RepairOrderQtyDialog: FC<EditDialogProps> = ({
-  onClose,
-  handleSaveData,
-  repairOrderData,
-  rowData,
-  material,
-  isBulkedit,
-  loading
-}) => {
-
+const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, repairOrderData, rowData, material, isBulkedit, loading }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -136,7 +127,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
               <CustomDialogContent>
                 {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

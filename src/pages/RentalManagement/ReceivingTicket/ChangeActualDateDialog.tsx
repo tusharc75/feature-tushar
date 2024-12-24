@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -30,22 +30,25 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
         fetchAssetRentalDate(assets);
       }
     }
-  }, [])
+  }, []);
 
   const fetchAssetRentalDate = (assets) => {
     setLoadingData(true);
-    axiosInstance().put(`${routes?.serializedAsset?.path}/asset-last-history-date-before-adding`, { referenceId: rentalId, assets: assets }).then(({ data: { data } }) => {
-      if (data?.date) {
-        const date = new Date(data?.date);
-        date.setHours(0, 0, 0);
-        setMinStartDate(date);
-      }
-      setLoadingData(false);
-    }).catch((err) => {
-      setLoadingData(false);
-      toastConfig.setToastConfig(err);
-    })
-  }
+    axiosInstance()
+      .put(`${routes?.serializedAsset?.path}/asset-last-history-date-before-adding`, { referenceId: rentalId, assets: assets })
+      .then(({ data: { data } }) => {
+        if (data?.date) {
+          const date = new Date(data?.date);
+          date.setHours(0, 0, 0);
+          setMinStartDate(date);
+        }
+        setLoadingData(false);
+      })
+      .catch((err) => {
+        setLoadingData(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   function validate(values) {
     const errors = {};
@@ -76,33 +79,44 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
         }
       }}
       maxWidth="sm"
-      fullWidth>
+      fullWidth
+    >
       {!loadingData ? (
         <Formik
-          initialValues={data?.isAllowedStartDate && data?.isAllowedEndDate ? {
-            manualStartDate: new Date(data?.manualStartDate),
-            manualEndDate: new Date(data?.manualEndDate),
-          } :
-            data?.isAllowedStartDate ? { manualStartDate: new Date(data?.manualStartDate) } :
-              data?.isAllowedEndDate ? { manualEndDate: new Date(data?.manualEndDate) } : {}}
+          initialValues={
+            data?.isAllowedStartDate && data?.isAllowedEndDate
+              ? {
+                  manualStartDate: new Date(data?.manualStartDate),
+                  manualEndDate: new Date(data?.manualEndDate)
+                }
+              : data?.isAllowedStartDate
+                ? { manualStartDate: new Date(data?.manualStartDate) }
+                : data?.isAllowedEndDate
+                  ? { manualEndDate: new Date(data?.manualEndDate) }
+                  : {}
+          }
           validate={validate}
           onSubmit={(values) => {
             const newValues: any = {};
             if (data.isAllowedStartDate) {
-              newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString()
+              newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString();
             }
             if (data.isAllowedEndDate) {
-              newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString()
+              newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString();
             }
             handleSubmit(newValues);
-          }}>
+          }}
+        >
           {({ values, errors, touched, setFieldValue }) => (
-            <Form >
-              <CustomDialogHeader title={isBulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''} onClose={onClose} />
+            <Form>
+              <CustomDialogHeader
+                title={isBulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''}
+                onClose={onClose}
+              />
               <CustomDialogContent>
                 <Box p={2}>
                   <Grid container spacing={2}>
-                    {data?.isAllowedStartDate &&
+                    {data?.isAllowedStartDate && (
                       <Grid item xs={12} sm={12}>
                         <FormTypes
                           size="small"
@@ -119,8 +133,9 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                           {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
                           {...(minStartDate ? { minDate: minStartDate } : {})}
                         />
-                      </Grid>}
-                    {data?.isAllowedEndDate &&
+                      </Grid>
+                    )}
+                    {data?.isAllowedEndDate && (
                       <Grid item xs={12} sm={12}>
                         <FormTypes
                           size="small"
@@ -137,7 +152,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                           }}
                         />
                       </Grid>
-                    }
+                    )}
                   </Grid>
                 </Box>
               </CustomDialogContent>

@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Grid, TextField } from '@material-ui/core';
+import { Box, CircularProgress, Grid, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';

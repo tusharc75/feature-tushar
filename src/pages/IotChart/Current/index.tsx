@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { startCase } from 'lodash';
 import moment from 'moment';

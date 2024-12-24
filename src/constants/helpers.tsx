@@ -1,5 +1,5 @@
-import { Grow } from '@material-ui/core';
-import { TransitionProps } from '@material-ui/core/transitions';
+import { Grow } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
 import { camelCase, cloneDeep, isArray, isString, lowerFirst, orderBy, uniqBy } from 'lodash';

@@ -1,13 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, Grid, IconButton, Typography } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { withStyles } from '@material-ui/core/styles';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Checkbox, FormControlLabel, Grid, IconButton, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import { withStyles } from '@mui/styles';
 
 const Accordion = withStyles({
   root: {
@@ -58,75 +55,76 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 export default function CustomAccordian({ expandedAccordition, setExpandedAccordition, category, currentData, setSelected, selected }) {
-
-  return (<Accordion
-    expanded={expandedAccordition[category?._id]}
-    className={`omsAccordian w-full`}
-    onChange={() => {
-      setExpandedAccordition((prev) => (
-        {
+  return (
+    <Accordion
+      expanded={expandedAccordition[category?._id]}
+      className={`omsAccordian w-full`}
+      onChange={() => {
+        setExpandedAccordition((prev) => ({
           ...prev,
           [category?._id]: expandedAccordition[category?._id] ? false : true
-        }
-      ));
-    }}>
-    <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-      <Box display="flex">
-        <Box>
-          <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+        }));
+      }}
+    >
+      <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+        <Box display="flex">
+          <Box>
+            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+          </Box>
+          <Box padding="5px">
+            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+              {category?.iotDataPointsCategoryName}
+            </Typography>
+          </Box>
         </Box>
-        <Box padding="5px">
-          <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-            {category?.iotDataPointsCategoryName}
-          </Typography>
-        </Box>
-      </Box>
-    </AccordionSummary>
-    <AccordionDetails>
-      {expandedAccordition[category?._id] &&
-        <>
-          <Grid container spacing={1}>
-            {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.map((data) => {
-              return (
-                <Grid item xs={12} sm={12} lg={12} md={12}>
-                  <FormControlLabel
-                    key={data?.fieldName}
-                    title={data?.fieldLabel}
-                    control={
-                      <Checkbox
-                        onChange={(e) => {
-                          setSelected({
-                            dataPoints: { ...selected.dataPoints, [data?.fieldName]: e.target.checked }
-                          });
-                        }}
-                        checked={selected.dataPoints[data?.fieldName]}
-                        inputProps={{
-                          'aria-labelledby': `checkbox-list-label-select-all`
-                        }}
+      </AccordionSummary>
+      <AccordionDetails>
+        {expandedAccordition[category?._id] && (
+          <>
+            <Grid container spacing={1}>
+              {currentData
+                ?.filter((d) => d?.category?.optionValue === category?._id)
+                ?.map((data) => {
+                  return (
+                    <Grid item xs={12} sm={12} lg={12} md={12}>
+                      <FormControlLabel
+                        key={data?.fieldName}
+                        title={data?.fieldLabel}
+                        control={
+                          <Checkbox
+                            onChange={(e) => {
+                              setSelected({
+                                dataPoints: { ...selected.dataPoints, [data?.fieldName]: e.target.checked }
+                              });
+                            }}
+                            checked={selected.dataPoints[data?.fieldName]}
+                            inputProps={{
+                              'aria-labelledby': `checkbox-list-label-select-all`
+                            }}
+                          />
+                        }
+                        className="  max-w-full [&>span+span]:line-clamp-1 [&>span+span]:block [&>span+span]:max-w-full "
+                        label={<div className="mt-2 line-clamp-1 [overflow-wrap:anywhere]">{data?.fieldLabel}</div>}
                       />
-                    }
-                    className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
-                    label={<div className="line-clamp-1 [overflow-wrap:anywhere] mt-2">{data?.fieldLabel}</div>}
-                  />
-                </Grid>
-              );
-            })}
-          </Grid>
-          <div className='grid gap-2'>
-            {category?.child?.map((child: any) => (
-              <CustomAccordian
-                expandedAccordition={expandedAccordition}
-                setExpandedAccordition={setExpandedAccordition}
-                category={child}
-                currentData={currentData}
-                selected={selected}
-                setSelected={setSelected}
-              />
-            ))}
-          </div>
-        </>
-      }
-    </AccordionDetails>
-  </Accordion>
+                    </Grid>
+                  );
+                })}
+            </Grid>
+            <div className="grid gap-2">
+              {category?.child?.map((child: any) => (
+                <CustomAccordian
+                  expandedAccordition={expandedAccordition}
+                  setExpandedAccordition={setExpandedAccordition}
+                  category={child}
+                  currentData={currentData}
+                  selected={selected}
+                  setSelected={setSelected}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </AccordionDetails>
+    </Accordion>
   );
 }

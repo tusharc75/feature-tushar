@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -149,7 +149,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                   </Link>
                                 )
                               ) : (
-                                <span className="d-flex gap-2 align-items-center">
+                                <span className="d-flex align-items-center gap-2">
                                   <Typography>
                                     {obj.firstName} {obj.lastName}
                                   </Typography>{' '}

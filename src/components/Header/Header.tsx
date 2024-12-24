@@ -1,5 +1,5 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@material-ui/core';
+import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-ui/icons';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SyncIcon from '@material-ui/icons/Sync';
@@ -310,21 +310,21 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-              window.location.reload();
-            }}
-          >
-            <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+                window.location.reload();
+              }}
+            >
+              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -456,16 +456,13 @@ const Header = () => {
           {isSidebarOpen ? <GoChevronLeft /> : <GoChevronRight className=" align-middle" />}
         </IconButton>
       </span>
-      <AppBar
-        position="relative"
-        className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}
-      >
-        <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
+      <AppBar position="relative" className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`} style={{ zIndex: 1200 }}>
+        <Toolbar className={`bg-[--dark-primary,white] ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
-              } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
+              styles.flexAlignCenter
+            } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton

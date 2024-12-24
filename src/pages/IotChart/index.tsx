@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Typography } from '@material-ui/core';
+import { Box, Button, Chip, Typography } from '@mui/material';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { useContext, useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';

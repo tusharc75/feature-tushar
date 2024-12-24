@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

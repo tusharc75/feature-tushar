@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomButton from '../../../components/Helpers/CustomButton';
@@ -18,7 +18,7 @@ import {
   REPAIR_JOB_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';

@@ -1,6 +1,6 @@
-import Box from '@material-ui/core/Box';
-import Chip from '@material-ui/core/Chip';
-import IconButton from '@material-ui/core/IconButton';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
 import AddOutlined from '@material-ui/icons/AddOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useEffect, useState } from 'react';

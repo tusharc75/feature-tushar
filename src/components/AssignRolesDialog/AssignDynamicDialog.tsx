@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

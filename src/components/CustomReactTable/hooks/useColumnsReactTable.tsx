@@ -1,4 +1,4 @@
-import { Avatar, Box } from '@material-ui/core';
+import { Avatar, Box } from '@mui/material';
 import { Image } from '@material-ui/icons';
 import InfoIcon from '@material-ui/icons/Info';
 import { isArray, isObject } from 'lodash';

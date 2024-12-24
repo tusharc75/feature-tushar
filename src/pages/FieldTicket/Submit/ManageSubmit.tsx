@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -9,7 +9,16 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, FIELD_TICKET_LOG_TYPE, FIELD_TICKET_STATUS, fieldTicket, getObjKeys, getObjKeysWithValues, restoreObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  FIELD_TICKET_LOG_TYPE,
+  FIELD_TICKET_STATUS,
+  fieldTicket,
+  getObjKeys,
+  getObjKeysWithValues,
+  restoreObjKeysWithValues,
+  yupSchema
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
@@ -26,7 +35,11 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   useEffect(() => {
     fetchFields();
@@ -36,7 +49,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
     try {
       fields = fields?.filter((f) => f?.isRead);
       if (isOffline) {
-        fields = fields?.filter((f) => f?.type !== "multiFileUpload" && f?.type !== "fileUpload");
+        fields = fields?.filter((f) => f?.type !== 'multiFileUpload' && f?.type !== 'fileUpload');
       }
       let tempInitialData = getObjKeys('', fields);
       if (fields?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
@@ -48,14 +61,16 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         logData = data?.data;
       } else {
         const data = await findAll(objectStore.fieldTicketLogs);
-        logData = data?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
+        logData = data
+          ?.filter((d) => d?.fieldTicketId === fieldTicketData?._id)
+          ?.sort((a, b) => new Date(b.date ?? 0)?.getTime() - new Date(a.date ?? 0)?.getTime());
       }
       for (const d of logData) {
         if (d?.type === FIELD_TICKET_LOG_TYPE.readyToInvoice) {
           tempInitialData = { ...tempInitialData, ...d };
           break;
         }
-      };
+      }
       setInitialData({
         fields: fields,
         values: getObjKeysWithValues(tempInitialData, fields)
@@ -98,15 +113,17 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
       await insertUpdate(objectStore.fieldTicketLogs, data._id, data);
       onSuccess();
     } else {
-      await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setSubmitting(false);
-        onSuccess();
-      })
+      await axiosInstance()
+        .put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+          setSubmitting(false);
+          onSuccess();
+        })
         .catch((err) => {
           setSubmitting(false);
           toastConfig.setToastConfig(err);

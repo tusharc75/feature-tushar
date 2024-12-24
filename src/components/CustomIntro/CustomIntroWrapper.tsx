@@ -1,4 +1,4 @@
-import { IconButton, Popper } from '@material-ui/core';
+import { IconButton, Popper } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { ReactNode, useRef, useState } from 'react';
 import { FaCaretUp } from 'react-icons/fa';

@@ -1,4 +1,4 @@
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import { Error } from '@material-ui/icons';
 import React, { FC, useMemo } from 'react';
 import VirtualSwipableList from 'src/components/CustomReactTable/SwipableListForMobile/VirtualSwipableList';

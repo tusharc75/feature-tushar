@@ -1,4 +1,4 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { BsFillCheckCircleFill, BsFillClockFill, BsFillXCircleFill } from 'react-icons/bs';
 import routes from 'src/components/Helpers/Routes';
 import { DOA_STATUS } from 'src/constants/helpers';

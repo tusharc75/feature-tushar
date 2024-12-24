@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';

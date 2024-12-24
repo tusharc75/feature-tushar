@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
+import { Box } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
 import { Autocomplete } from '@material-ui/lab';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -77,21 +77,21 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
-  useEffect(()=>{
-   if(selectedRecords?.length){
-    const newlySelected = selectedRecords?.filter(data => !orderedSelectedRecords?.some(item => item._id === data._id)) || [];
-    const deselected = orderedSelectedRecords?.filter(item => !selectedRecords?.some(data => data._id === item._id));
+  useEffect(() => {
+    if (selectedRecords?.length) {
+      const newlySelected = selectedRecords?.filter((data) => !orderedSelectedRecords?.some((item) => item._id === data._id)) || [];
+      const deselected = orderedSelectedRecords?.filter((item) => !selectedRecords?.some((data) => data._id === item._id));
 
-    let updatedOrder = [];
-    if(orderedSelectedRecords?.length){
-      updatedOrder = [...orderedSelectedRecords?.filter(item => !deselected?.some(d => d._id === item._id))]
+      let updatedOrder = [];
+      if (orderedSelectedRecords?.length) {
+        updatedOrder = [...orderedSelectedRecords?.filter((item) => !deselected?.some((d) => d._id === item._id))];
+      }
+
+      updatedOrder = [...updatedOrder, ...newlySelected];
+
+      setOrderedSelectedRecords(updatedOrder);
     }
-  
-    updatedOrder = [...updatedOrder, ...newlySelected];
-
-    setOrderedSelectedRecords(updatedOrder);
-   }
-  },[selectedRecords])
+  }, [selectedRecords]);
 
   useEffect(() => {
     axiosInstance()

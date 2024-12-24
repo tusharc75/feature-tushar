@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -46,7 +46,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         }
       ]
     });
-  
+
     const managedPackageField = managedPackageFieldData?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
 
     let coloum: any = [

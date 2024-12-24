@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -10,7 +10,7 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

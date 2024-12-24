@@ -1,7 +1,7 @@
 import { useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

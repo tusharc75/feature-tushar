@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Box, Typography, Button } from '@material-ui/core';
+import { Box, Typography, Button } from '@mui/material';
 import styles from '../../profilePage.module.scss';
 import DefaultRecordDialog from './DefaultRecordDialog';
 
 const UiPreference = ({ userData, onSuccess }) => {
-
   const [byDefaultRecordDialog, setByDefaultRecordDialog] = useState(false);
 
   return (
@@ -19,29 +18,27 @@ const UiPreference = ({ userData, onSuccess }) => {
             color="primary"
             size="small"
             onClick={() => {
-              setByDefaultRecordDialog(true)
+              setByDefaultRecordDialog(true);
             }}
           >
             By Default Record
           </Button>
         </div>
       </Box>
-      {byDefaultRecordDialog &&
+      {byDefaultRecordDialog && (
         <DefaultRecordDialog
           userData={userData}
           handleClose={() => {
-            setByDefaultRecordDialog(false)
+            setByDefaultRecordDialog(false);
           }}
           onSuccess={() => {
-            setByDefaultRecordDialog(false)
-            onSuccess()
+            setByDefaultRecordDialog(false);
+            onSuccess();
           }}
         />
-      }
+      )}
     </>
   );
-}
+};
 
-
-export default UiPreference
-
+export default UiPreference;

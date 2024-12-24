@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -193,7 +193,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
       dispatch({ type: 'loading', loading: false });
       if (assets?.length > 0) {
         setNextStep(true);
-        setNextStepToolTip(null)
+        setNextStepToolTip(null);
       } else {
         setNextStep(false);
         setNextStepToolTip(transferAssetMessage.addSerializedAssets);

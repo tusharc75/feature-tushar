@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { camelCase, startCase, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

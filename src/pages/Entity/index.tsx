@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -261,7 +261,7 @@ const Entity: FC = () => {
           }}
         >
           {`Delete (${selectedRecords.length})`}
-          </MenuItem>
+        </MenuItem>
         <MenuItem
           disabled={!(permissions[entityResource]?.isUpdate && selectedRecords?.length)}
           onClick={() => {

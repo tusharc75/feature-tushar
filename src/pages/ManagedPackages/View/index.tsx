@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';

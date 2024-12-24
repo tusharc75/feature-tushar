@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Dialog, useMediaQuery } from '@mui/material';
 import { useContext, useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -62,13 +62,15 @@ function PreviewDownload({
     setLoadingType(subType);
     setBtnLoading(operation);
 
-    let showColumns = JSON.stringify(visibleColumns?.map((e) => {
-      return ({
-        name: e?.fieldName,
-        width: e?.width,
-        customLabel: e?.customLabel
+    let showColumns = JSON.stringify(
+      visibleColumns?.map((e) => {
+        return {
+          name: e?.fieldName,
+          width: e?.width,
+          customLabel: e?.customLabel
+        };
       })
-    }));
+    );
 
     let api = '';
     if (type === 'Excel') {

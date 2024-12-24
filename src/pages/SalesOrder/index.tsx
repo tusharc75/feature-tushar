@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -16,27 +16,19 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  getDefaultMyRecordType,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  salesOrder,
-  sidebarResource,
-} from '../../constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, salesOrder, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const SalesOrder = () => {
-
   const renderedFrom = camelCase(sidebarResource.salesOrder);
   const toastConfig = useContext(CustomToastContext);
 
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
 
   const types = [
     {
@@ -137,22 +129,25 @@ const SalesOrder = () => {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    setDeleteLoading(true)
-    axiosInstance().put(`${salesOrder.api}/remove`, { ids }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    setDeleteLoading(true);
+    axiosInstance()
+      .put(`${salesOrder.api}/remove`, { ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setDeleteLoading(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setDeleteLoading(false);
       });
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-      setDeleteLoading(false)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setDeleteLoading(false)
-    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -231,8 +226,7 @@ const SalesOrder = () => {
           onClick={() => {
             if (selectedRecords?.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-            }
-            else {
+            } else {
               setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
@@ -306,8 +300,12 @@ const SalesOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
-             ${deleteRecord?.salesOrderNo}` : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
+             ${deleteRecord?.salesOrderNo}`
+              : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

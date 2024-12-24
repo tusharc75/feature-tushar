@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@mui/material';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

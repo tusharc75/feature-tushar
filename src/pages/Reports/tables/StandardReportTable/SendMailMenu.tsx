@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Button, CircularProgress } from '@material-ui/core';
+import { Menu, MenuItem, Button, CircularProgress } from '@mui/material';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const SendMailMenu = ({ exportData, isProcessing }) => {
-
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -49,7 +48,6 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
           vertical: 'top',
           horizontal: 'right'
         }}
-        
       >
         <MenuItem
           onClick={() => {

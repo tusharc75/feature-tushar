@@ -1,4 +1,4 @@
-import { Button, Menu, MenuItem } from '@material-ui/core';
+import { Button, Menu, MenuItem } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -78,7 +78,7 @@ function QuoteHeader({
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className={'d-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
@@ -94,10 +94,10 @@ function QuoteHeader({
         </ToggleButtonGroup>
         {children}
       </div>
-      <div className="flex flex-wrap gap-[8px]  justify-end">
+      <div className="flex flex-wrap justify-end  gap-[8px]">
         <SearchBox onChange={onSearch} value={searchVal} />
 
-        <div className="flex gap-[8px] flex-wrap items-center">
+        <div className="flex flex-wrap items-center gap-[8px]">
           {QuotePermissions.isCreate && (
             <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
               Add

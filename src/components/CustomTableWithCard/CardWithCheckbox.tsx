@@ -2,7 +2,7 @@ import React, { FC, useEffect } from 'react';
 import styles from './index.module.scss';
 
 import type { CardInterface } from './';
-import { Checkbox, IconButton, Grid } from '@material-ui/core';
+import { Checkbox, IconButton, Grid } from '@mui/material';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useCollapse } from 'src/hooks';

@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -290,12 +290,12 @@ const Roles: FC = () => {
         <MenuItem
           disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null);
-              }
-              setIsConformDialogVisible(true);
+            } else {
+              setDeleteRecord(null);
+            }
+            setIsConformDialogVisible(true);
           }}
         >
           {`Delete (${selectedRecords.length})`}
@@ -311,8 +311,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-              permissions?.role?.isDelete &&
-              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }
@@ -325,8 +325,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-              permissions?.role?.isDelete &&
-              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }
@@ -338,7 +338,7 @@ const Roles: FC = () => {
         </MenuItem>
       </>
     );
-  };  
+  };
 
   return (
     <>

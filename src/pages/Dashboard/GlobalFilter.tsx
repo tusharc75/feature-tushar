@@ -1,5 +1,6 @@
 import React from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, makeStyles } from '@material-ui/core';
+import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
@@ -43,7 +44,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
   const [timeFrame, setTimeFrame] = React.useState<any>(null);
 
   React.useEffect(() => {
-    setTimeFrame(globalFilters.timeFrame)
+    setTimeFrame(globalFilters.timeFrame);
   }, [globalFilters.timeFrame]);
 
   React.useEffect(() => {
@@ -92,7 +93,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
           ...globalFilters,
           between: {
             from: new Date(moment().startOf('year').calendar()),
-            to: new Date(moment().endOf('year').calendar()),
+            to: new Date(moment().endOf('year').calendar())
           }
         });
         break;
@@ -107,7 +108,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
     localStorage.setItem('selectedDashboard', selectedDashboard);
     setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: selectedDashboard }));
     if (dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration) {
-      setTimeFrame(dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration)
+      setTimeFrame(dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration);
     }
   };
 
@@ -153,7 +154,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
               </Grid>
             </Grid>
           </Grid>
-          {globalFilters?.timeFrame && globalFilters?.between &&
+          {globalFilters?.timeFrame && globalFilters?.between && (
             <Grid item xs={12} sm={12} md={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
@@ -215,7 +216,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                 </Grid>
               </Grid>
             </Grid>
-          }
+          )}
         </Grid>
       </Box>
     </AppBar>

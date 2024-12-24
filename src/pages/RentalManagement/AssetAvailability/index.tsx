@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

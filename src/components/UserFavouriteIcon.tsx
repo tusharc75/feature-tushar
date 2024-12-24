@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Star, StarOutline } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useFavorites } from 'src/hooks';

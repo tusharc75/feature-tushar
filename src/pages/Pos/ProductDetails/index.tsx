@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import { Box, Button, Grid, makeStyles, Paper, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, Paper, IconButton } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
@@ -308,9 +309,9 @@ const ProductDetails = () => {
                     </Grid>
                     <Grid item xs={12} sm={6} md={6} lg={6}>
                       <Box border={1} borderColor="var(--common-border-color)" borderRadius={5} style={{ height: '100%' }}>
-                        <Grid className="px-2 py-2 first-content-Layout">
+                        <Grid className="first-content-Layout px-2 py-2">
                           <h4>{productData.productCategory?.optionLabel}</h4>
-                          <h2 className="pt-1 pb-1" style={{ color: 'white', fontSize: '1.5rem' }}>
+                          <h2 className="pb-1 pt-1" style={{ color: 'white', fontSize: '1.5rem' }}>
                             {productData.productName}
                           </h2>
                           {productData?.availableInventory ? <h4>{`Inventory : ${productData?.availableInventory}`}</h4> : <h4>{`No inventory`}</h4>}
@@ -388,7 +389,7 @@ const ProductDetails = () => {
                     </Grid>
                   </Grid>
                 ) : (
-                  <Grid container className="py-4 px-2">
+                  <Grid container className="px-2 py-4">
                     <Grid item xs={6} className="d-flex flex-column align-items-center">
                       <Box display="flex" justifyContent="center" alignItems="center">
                         <Skeleton width={200} height={200} />
@@ -418,7 +419,7 @@ const ProductDetails = () => {
                               <Skeleton width="100%" height={70} />
                             </Grid>
                           </Grid>
-                          <Box className="my-3 d-flex gap-4 align-items-baseline">
+                          <Box className="d-flex align-items-baseline my-3 gap-4">
                             {
                               <div className="d-flex align-items-center gap-2">
                                 <Skeleton width={100} height={50} />

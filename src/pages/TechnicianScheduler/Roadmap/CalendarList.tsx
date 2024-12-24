@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { getColorFromPriority, getPositionOfDate, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
@@ -45,7 +45,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             className={`${styles.singleService} singlePriority ${bgColor}`}
             style={{ minHeight: '50px', ...pos }}
             onClick={() => {
-              handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '')
+              handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '');
             }}
           >
             <HtmlTooltip

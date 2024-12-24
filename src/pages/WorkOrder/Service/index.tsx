@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import { Add, ExpandMore, LowPriority } from '@material-ui/icons';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import { isArray, reverse } from 'lodash';
@@ -726,8 +726,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -743,8 +743,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                      !completed
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                       ? false
                       : true
                   }
@@ -799,8 +799,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -814,8 +814,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }

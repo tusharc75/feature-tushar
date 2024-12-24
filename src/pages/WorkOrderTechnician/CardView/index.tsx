@@ -10,7 +10,7 @@ import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrde
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase } from 'lodash';
 import TechnicianDialog from '../TechnicianDialog';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 

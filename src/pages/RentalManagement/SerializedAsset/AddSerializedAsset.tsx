@@ -1,8 +1,8 @@
-import { Box, CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import { Box, CircularProgress } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog/Dialog';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, isString, map, uniq } from 'lodash';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';

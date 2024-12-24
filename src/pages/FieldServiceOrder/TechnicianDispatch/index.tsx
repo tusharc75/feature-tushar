@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SendIcon from '@material-ui/icons/Send';
 import moment from 'moment';

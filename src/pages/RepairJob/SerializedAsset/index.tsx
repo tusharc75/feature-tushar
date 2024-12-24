@@ -1,5 +1,5 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
@@ -216,7 +216,8 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : alloweOperation && allowedToEdit &&
+            ) : alloweOperation &&
+              allowedToEdit &&
               repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
               ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
               row?.original?.canRepair &&
@@ -627,8 +628,9 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-            } ? `}
+          message={`Are you sure you want to mark repair complete for ${
+            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

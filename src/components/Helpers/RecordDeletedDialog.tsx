@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
+import { makeStyles } from '@mui/styles';
+import DialogContent from '@mui/material/DialogContent';
+import Dialog from '@mui/material/Dialog';
 import { FaTimesCircle } from 'react-icons/fa';
-import { Button, DialogActions } from '@material-ui/core';
+import { Button, DialogActions } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';

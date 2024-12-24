@@ -1,4 +1,4 @@
-import { Box, Button, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, MenuItem } from '@mui/material';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -288,7 +288,7 @@ const Planning = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

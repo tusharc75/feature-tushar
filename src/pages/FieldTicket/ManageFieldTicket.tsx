@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog, TextField, Grid } from '@material-ui/core';
+import { Box, Button, Chip, CircularProgress, Dialog, TextField, Grid } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual, update } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -48,7 +48,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
-  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false)
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
@@ -96,8 +96,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }
       const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
 
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForCreate = data
+        .filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
 
       if (id) {
         let mainData;
@@ -116,8 +120,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
-        }
-        else {
+        } else {
           if (referenceData) {
             fields?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
@@ -173,14 +176,19 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       await insertUpdate(objectStore.fieldTicket, _id, data);
       const offlineData = await findOne(objectStore.offlineDataSync, _id);
       if (/^[0-9a-fA-F]{24}$/.test(_id)) {
-        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...(offlineData?.data), ...values, _id, offlineSyncStatus: 'update' } });
+        await insertUpdate(objectStore.offlineDataSync, _id, {
+          type: 'fieldTicket',
+          data: { ...offlineData?.data, ...values, _id, offlineSyncStatus: 'update' }
+        });
       } else {
-        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...(offlineData?.data), ...values, _id, offlineSyncStatus: 'new' } });
+        await insertUpdate(objectStore.offlineDataSync, _id, {
+          type: 'fieldTicket',
+          data: { ...offlineData?.data, ...values, _id, offlineSyncStatus: 'new' }
+        });
       }
       onSuccess();
       setSubmitting(false);
-    }
-    else if (id && !isClone) {
+    } else if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.fieldTicket?.path}`, values)
@@ -197,8 +205,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       axiosInstance()
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
@@ -241,13 +248,19 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   }
 
   const fetchFieldServiceOrderData = async (fieldServiceOrderId) => {
-
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
     const fieldServiceOrderFields = response?.data?.data;
 
-    const { data: { data } } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
+    const {
+      data: { data }
+    } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
 
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data, user.user?.brandCurrency);
+    const referenceData: any = cloneResourceData(
+      fieldServiceOrderFields?.map((e) => e?.fieldData),
+      initialData?.fields,
+      data,
+      user.user?.brandCurrency
+    );
 
     const tempInitialData = getObjKeys('', initialData?.fields);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(initialData?.fields);
@@ -293,12 +306,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                  : `Create ${resources?.fieldTicket?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                    : `Create ${resources?.fieldTicket?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -320,8 +334,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                             setFieldValue('numberOfWells', 0);
                           }
                         }
-                      }
-                      else if (name === 'fieldServiceOrder') {
+                      } else if (name === 'fieldServiceOrder') {
                         if (value) {
                           fetchFieldServiceOrderData(value);
                         }
@@ -397,9 +410,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   type="submit"
                   onClick={() => {
                     if (id && isClone) {
-                      setShowConfirmCloneDetailsDialog(true)
+                      setShowConfirmCloneDetailsDialog(true);
                     } else {
-                      submitForm()
+                      submitForm();
                     }
                   }}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
@@ -415,9 +428,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   onSave={() => {
                     setShowConfirmDialog(false);
                     if (id && isClone) {
-                      setShowConfirmCloneDetailsDialog(true)
+                      setShowConfirmCloneDetailsDialog(true);
                     } else {
-                      submitForm()
+                      submitForm();
                     }
                   }}
                   onClose={() => {
@@ -431,13 +444,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   open={true}
                   message="Please confirm this if you want to clone  details ?"
                   onOk={() => {
-                    setFieldValue('fieldTicketId', id)
-                    setShowConfirmCloneDetailsDialog(false)
-                    submitForm()
+                    setFieldValue('fieldTicketId', id);
+                    setShowConfirmCloneDetailsDialog(false);
+                    submitForm();
                   }}
                   onClose={() => {
-                    setShowConfirmCloneDetailsDialog(false)
-                    submitForm()
+                    setShowConfirmCloneDetailsDialog(false);
+                    submitForm();
                   }}
                 />
               )}

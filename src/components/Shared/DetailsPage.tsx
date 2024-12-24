@@ -1,4 +1,5 @@
-import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
+import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, Link as MuiLink, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';

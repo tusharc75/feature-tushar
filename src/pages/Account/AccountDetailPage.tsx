@@ -1,5 +1,5 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem/ListItem';
+import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
+import ListItem from '@mui/material/ListItem/ListItem';
 import { Edit } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
 import { Skeleton } from '@material-ui/lab';
@@ -444,20 +444,22 @@ export default function AccountDetailPage(props) {
   ].filter((d) => d.show);
 
   const handleDeleteAccout = () => {
-    axiosInstance().put(`/${accountApi}/remove`, { ids: [deleteRecord?._id] }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      if (deleteRecord?._id !== accountData?._id) {
-        fetchAccountData();
-      } else {
-        goBackToListing();
-      }
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-    })
+    axiosInstance()
+      .put(`/${accountApi}/remove`, { ids: [deleteRecord?._id] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (deleteRecord?._id !== accountData?._id) {
+          fetchAccountData();
+        } else {
+          goBackToListing();
+        }
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowDeleteConfirmBox(false);
@@ -655,9 +657,10 @@ export default function AccountDetailPage(props) {
               <DeleteButton
                 text="Delete"
                 onClick={() => {
-                  setDeleteRecord(accountData)
-                  setShowDeleteConfirmBox(true)
-                }} />
+                  setDeleteRecord(accountData);
+                  setShowDeleteConfirmBox(true);
+                }}
+              />
             )}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
@@ -875,7 +878,7 @@ export default function AccountDetailPage(props) {
                   canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
                   handleDelete={(data) => {
                     setDeleteRecord(data);
-                    setShowDeleteConfirmBox(true)
+                    setShowDeleteConfirmBox(true);
                   }}
                   accountResource={accountResource}
                 />
@@ -987,7 +990,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => { }}
+          handleAddressDataSource={() => {}}
         />
       ) : null}
 

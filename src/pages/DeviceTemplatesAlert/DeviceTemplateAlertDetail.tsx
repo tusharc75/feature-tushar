@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -27,7 +27,9 @@ const DeviceTemplateAlertDetail = () => {
   const {
     state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
+    { ...routes.deviceTemplateAlert, title: resources?.deviceTemplateAlert?.titlePlural }
+  ]);
 
   useEffect(() => {
     if (id) {
@@ -124,7 +126,7 @@ const DeviceTemplateAlertDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-        message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} : ${deviceTemplateAlertData?.alertNumber} ?`} 
+          message={`Are you sure you want to delete ${resources?.deviceTemplateAlert?.titleSingular?.toLowerCase()} : ${deviceTemplateAlertData?.alertNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

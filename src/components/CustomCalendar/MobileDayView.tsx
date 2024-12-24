@@ -1,4 +1,4 @@
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import moment from 'moment';
 import { CustomCalendarProps, ViewType } from 'src/components/CustomCalendar';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

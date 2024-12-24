@@ -3,7 +3,7 @@ import { QUOTATION_STATUS, sidebarResource } from 'src/constants/helpers';
 import { BsFillClockFill, BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
 import styles from './quoteStatus.module.scss';
 import routes from '../Helpers/Routes';
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import HtmlTooltip from '../CustomTooltipTitle';
 
 const getStatusWithIcon = (status: any) => {

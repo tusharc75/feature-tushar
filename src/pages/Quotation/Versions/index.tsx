@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -62,10 +62,11 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
                 <CustomRenderCell value={row?.original?.version} />
               </Link>
             )}
-            {row.original?.converted &&
-              <HtmlTooltip title='Converted'>
+            {row.original?.converted && (
+              <HtmlTooltip title="Converted">
                 <InfoIcon fontSize="small" color={'primary'} />
-              </HtmlTooltip>}
+              </HtmlTooltip>
+            )}
           </div>
         ) : (
           <NoDataCell />

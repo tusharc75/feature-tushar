@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Grid, Paper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Grid, Paper } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar';
 import { profileMenuItems } from '../../constants/helpers';
@@ -158,9 +158,12 @@ export default function ProfilePage(props) {
               ) : activeItem === profileMenuItems.notification ? (
                 <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
               ) : activeItem === profileMenuItems.uiPreference ? (
-                <UiPreference userData={userData} onSuccess={() => {
-                  fetchUserData(true)
-                }} />
+                <UiPreference
+                  userData={userData}
+                  onSuccess={() => {
+                    fetchUserData(true);
+                  }}
+                />
               ) : activeItem === profileMenuItems.setting ? (
                 <Paper className={classes.paper}>setting</Paper>
               ) : activeItem === profileMenuItems.users ? (

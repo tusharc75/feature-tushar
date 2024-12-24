@@ -12,7 +12,7 @@ import {
   TableRow,
   TextField,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

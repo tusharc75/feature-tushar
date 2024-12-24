@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -234,7 +234,7 @@ const ProductionOrder = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}
@@ -305,8 +305,12 @@ const ProductionOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.productionOrderNumber || ''}` : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productionOrderNumber || ''}`
+              : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

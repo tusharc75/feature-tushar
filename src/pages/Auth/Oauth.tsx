@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
+import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { Logo } from 'src/assets/authenticationAssets';
@@ -18,7 +18,6 @@ export const userManual = {
 };
 
 const Oauth = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +28,8 @@ const Oauth = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/auth', data)
+    axiosInstance()
+      .post('/user/auth', data)
       .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;

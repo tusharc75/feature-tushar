@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
@@ -162,7 +162,9 @@ const TruckMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.truckMaster, title: resources?.truckMaster?.titlePlural }, { title: truckMasterData?.truckName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.truckMaster, title: resources?.truckMaster?.titlePlural }, { title: truckMasterData?.truckName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -223,12 +225,8 @@ const TruckMasterDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            History
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>History</CustomTab>
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>

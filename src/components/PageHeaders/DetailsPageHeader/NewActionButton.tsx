@@ -1,4 +1,4 @@
-import { IconButton, IconButtonProps } from '@material-ui/core';
+import { IconButton, IconButtonProps } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

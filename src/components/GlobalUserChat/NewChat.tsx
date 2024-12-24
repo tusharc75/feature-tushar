@@ -1,5 +1,5 @@
 import { useState, Fragment, useContext } from 'react';
-import { Avatar, TextField, Box, Button } from '@material-ui/core';
+import { Avatar, TextField, Box, Button } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../axios/axiosInstance';

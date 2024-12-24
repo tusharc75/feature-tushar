@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import AppsIcon from '@material-ui/icons/Apps';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -223,11 +223,11 @@ const TrailerMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -312,8 +312,12 @@ const TrailerMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.trailerMaster?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.trailerName || ''}` : `selected ${resources?.trailerMaster?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.trailerMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.trailerName || ''}`
+              : `selected ${resources?.trailerMaster?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

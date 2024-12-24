@@ -14,7 +14,7 @@ import {
   MenuItem,
   Menu,
   Button
-} from '@material-ui/core';
+} from '@mui/material';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import routes from './../../components/Helpers/Routes';
@@ -86,7 +86,8 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? resources?.customerContact?.titlePlural : resources?.supplierContact?.titlePlural} ({contacts?.length ?? 0})
+                    {type === 'customer' ? resources?.customerContact?.titlePlural : resources?.supplierContact?.titlePlural} ({contacts?.length ?? 0}
+                    )
                   </Typography>
                 </Box>
               </Box>
@@ -165,19 +166,19 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                                         <React.Fragment>
                                           <Typography component="p" variant="body2" className="cardDetail">
                                             {obj?.title && (
-                                              <span className="d-flex gap-2 align-items-center">
+                                              <span className="d-flex align-items-center gap-2">
                                                 <FiStar size="15" />
                                                 {obj?.title}
                                               </span>
                                             )}
                                             {obj?.phone && (
-                                              <span className="d-flex gap-2 align-items-center">
+                                              <span className="d-flex align-items-center gap-2">
                                                 <BiPhone size="15" />
                                                 {obj?.phone} <CopyToClipboard textToCopy={obj?.phone} />
                                               </span>
                                             )}
                                             {obj?.email && (
-                                              <span className="d-flex gap-2 align-items-center">
+                                              <span className="d-flex align-items-center gap-2">
                                                 <AiOutlineMail size="15" />
                                                 {obj?.email} <CopyToClipboard textToCopy={obj?.email} />
                                               </span>

@@ -1,4 +1,4 @@
-import { Container, CssBaseline } from '@material-ui/core';
+import { Container, CssBaseline } from '@mui/material';
 import { cn } from 'src/constants/helpers';
 
 type CustomContainerProps = {
@@ -38,28 +38,3 @@ const CustomContainer = (props: CustomContainerProps) => {
 };
 
 export default CustomContainer;
-
-// import React from "react";
-// import { makeStyles } from "@material-ui/core/styles";
-// import { Paper } from "@material-ui/core";
-
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     padding: theme.spacing(2),
-//     marginTop: theme.spacing(2),
-//     minHeight: "calc(100vh - 65px)",
-//   },
-// }));
-
-// const CustomContainer = (props) => {
-//   const { children, style } = props;
-//   const classes = useStyles();
-
-//   return (
-//     <Paper elevation={0} className={classes.root} style={{ ...style }}>
-//       {children}
-//     </Paper>
-//   );
-// };
-
-// export default CustomContainer;

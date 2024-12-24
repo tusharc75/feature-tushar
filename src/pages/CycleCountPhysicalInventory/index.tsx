@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@mui/material';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { camelCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';

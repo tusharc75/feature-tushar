@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Fragment, useContext, useEffect, useState } from 'react';

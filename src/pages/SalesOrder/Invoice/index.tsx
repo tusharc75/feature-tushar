@@ -1,6 +1,6 @@
-import { IconButton } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { IconButton } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Grid, IconButton, Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, IconButton, Menu, MenuItem, Button, useMediaQuery } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
 import { serviceMaster, sidebarResource } from 'src/constants/helpers';

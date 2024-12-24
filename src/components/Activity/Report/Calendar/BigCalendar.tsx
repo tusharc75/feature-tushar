@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import Box from '@material-ui/core/Box';
-import { Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@mui/material/IconButton';
 import moment from 'moment';
-import { grey } from '@material-ui/core/colors';
+import { grey } from '@mui/material/colors';
 import { dateFormat } from '../../../../constants/helpers';
 let dayname = moment.weekdaysShort();
 

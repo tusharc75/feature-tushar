@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@material-ui/core';
+import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
 import { CustomDialogTransition, REPORT_LIST } from 'src/constants/helpers';

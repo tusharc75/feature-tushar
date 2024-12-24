@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';

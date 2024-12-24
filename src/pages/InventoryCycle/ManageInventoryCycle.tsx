@@ -1,10 +1,10 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
@@ -14,7 +14,7 @@ import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
@@ -143,10 +143,10 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
                   isClone
                     ? `Clone - ${cloneHeading}`
                     : inventoryCycleId
-                    ? !isUpdateDisabled
-                      ? 'Update ' + resources?.inventoryCycle?.titleSingular
-                      : values['name']
-                    : 'Create ' + resources?.inventoryCycle?.titleSingular
+                      ? !isUpdateDisabled
+                        ? 'Update ' + resources?.inventoryCycle?.titleSingular
+                        : values['name']
+                      : 'Create ' + resources?.inventoryCycle?.titleSingular
                 }
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();

@@ -1,5 +1,5 @@
-import { Button, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
+import { Button, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -211,12 +211,12 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-        resource: sidebarResource.sublease,
-        referenceId: subleaseData?._id,
-        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-      }
+          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+          resource: sidebarResource.sublease,
+          referenceId: subleaseData?._id,
+          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+        }
       : null;
 
   const rightSideContents = () => {

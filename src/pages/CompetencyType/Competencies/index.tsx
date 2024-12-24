@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
@@ -181,11 +181,11 @@ const Competencies = ({ competencyType }) => {
       <>
         <MenuItem
           onClick={() => {
-            if (selectedRecords.length === 1){ 
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -240,8 +240,12 @@ const Competencies = ({ competencyType }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.competencyName || ''}` : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.competencyName || ''}`
+              : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,4 +1,4 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { camelCase, kebabCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

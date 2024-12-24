@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -156,7 +156,9 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     )}
                   />
                   {values?.fieldName &&
-                    (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || ['checkBox', 'switch'].includes(selectedField?.type) ? (
+                    (selectedField?.type === 'dropDown' ||
+                    selectedField?.type === 'multiSelect' ||
+                    ['checkBox', 'switch'].includes(selectedField?.type) ? (
                       <Autocomplete
                         id="fieldValue"
                         options={options}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, CircularProgress, Dialog } from '@mui/material';
 import { DirectionsRenderer, GoogleMap, Marker, LoadScript, Polyline } from '@react-google-maps/api';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

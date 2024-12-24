@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography, useMediaQuery } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';

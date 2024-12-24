@@ -1,15 +1,16 @@
-import { useState, useEffect, useContext } from 'react';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, Divider } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios from 'axios';
-import { backendApi } from '../../config';
-import { Box, Button, Divider, makeStyles } from '@material-ui/core';
-import { downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { sortBy } from 'lodash';
-import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useContext, useEffect, useState } from 'react';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { backendApi } from '../../config';
+import { downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -150,9 +151,9 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             const currencyField: any =
               e?.type === 'currencyAmount'
                 ? {
-                  ...ele,
-                  fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
-                }
+                    ...ele,
+                    fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
+                  }
                 : {};
 
             rows.forEach((data) => {
@@ -378,7 +379,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

@@ -1,12 +1,12 @@
 import { useContext, useState } from 'react';
-import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
 import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -62,7 +62,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
   const toastConfig = useContext(CustomToastContext);
   const [rows, setRows] = useState(notificationPreferenceData);
   const [isUpdating, setUpdating] = useState(false);
-  const [isEdit,setIsEdit]=  useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [isAllPreference, setAllPreference] = useState({
     portal: notificationPreferenceData.every((d) => d.portal),
     email: notificationPreferenceData.every((d) => d.email)
@@ -152,33 +152,33 @@ export default function NotificationPreference({ notificationPreferenceData, use
           </Grid>
         </Box>
         <div className="header-panel">
-          <div className="flex flex-wrap gap-[8px] justify-end">
+          <div className="flex flex-wrap justify-end gap-[8px]">
             {isEdit && (
-            <Button
-              disabled={isUpdating}
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                updateNotificationPref();
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Update
-            </Button>
+              <Button
+                disabled={isUpdating}
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  updateNotificationPref();
+                }}
+              >
+                {isUpdating && <CircularProgress size={22} />}
+                Update
+              </Button>
             )}
             {!isEdit && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                setIsEdit(!isEdit)
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Edit
-            </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setIsEdit(!isEdit);
+                }}
+              >
+                {isUpdating && <CircularProgress size={22} />}
+                Edit
+              </Button>
             )}
           </div>
         </div>

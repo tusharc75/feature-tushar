@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@material-ui/core';
+import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@mui/material';
 import { Group } from '@material-ui/icons';
 import moment from 'moment';
 
@@ -33,15 +33,7 @@ const ChatList = (props) => {
               </p>
               <Box ml={1} />
               {chat?.users.length > 2 && (
-                <HtmlTooltip
-                  title={
-                    <Fragment>
-                      {chat?.users.map((u) => (
-                        <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>
-                      ))}
-                    </Fragment>
-                  }
-                >
+                <HtmlTooltip title={<Fragment>{chat?.users.map((u) => <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>)}</Fragment>}>
                   <Chip variant="outlined" color="secondary" label="Group" size="small" icon={<Group />} />
                 </HtmlTooltip>
               )}

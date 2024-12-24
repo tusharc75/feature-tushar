@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -145,7 +145,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -316,8 +316,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     } else {
       setSelectedData(null);
@@ -329,7 +329,9 @@ const FieldServiceTechnician = () => {
     (view: Views) => {
       setView(view);
       const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
-      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources }));
+      updatedColumns.push(
+        getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources })
+      );
       setColumns(updatedColumns);
     },
     [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
@@ -383,12 +385,12 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
+                    setNextStep={() => {}}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
+                    handleChangeStatus={() => {}}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => { }}
+                    fetchServiceOrderData={() => {}}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

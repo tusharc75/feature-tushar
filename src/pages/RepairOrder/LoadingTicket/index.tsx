@@ -1,6 +1,6 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
-import Grid from '@material-ui/core/Grid/Grid';
+import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { ExpandMore } from '@material-ui/icons';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

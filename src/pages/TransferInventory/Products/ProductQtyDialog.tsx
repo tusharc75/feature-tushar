@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@material-ui/core';
+import { Button, Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -21,7 +21,6 @@ interface EditDialogProps {
 }
 
 const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave }) => {
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -37,7 +36,6 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
       fields: newFields,
       values: getObjKeysWithValues(rowData, newFields)
     });
-
   };
 
   const handleSubmit = async (values) => {
@@ -91,7 +89,7 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

@@ -1,6 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Button, Grid } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
 import AddIcon from '@material-ui/icons/AddCircle';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -18,7 +18,6 @@ import CreateProductCategory from '../../pages/ProductCategory/CreateProductCate
 import HtmlTooltip from '../CustomTooltipTitle';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
-
 
 const SelectionDialog = (props) => {
   const {
@@ -144,13 +143,13 @@ const SelectionDialog = (props) => {
       axiosInstance()
         .get(
           `${api}/template?productCategory=` +
-          values.productCategory +
-          '&productTemplate=' +
-          values.productTemplate +
-          '&priceTemplate=' +
-          values.priceTemplate +
-          '&refrenceId=' +
-          refrenceId,
+            values.productCategory +
+            '&productTemplate=' +
+            values.productTemplate +
+            '&priceTemplate=' +
+            values.priceTemplate +
+            '&refrenceId=' +
+            refrenceId,
           { responseType: 'arraybuffer' }
         )
         .then((response) => {
@@ -197,14 +196,7 @@ const SelectionDialog = (props) => {
       open={true}
       fullWidth
     >
-      <Formik
-        innerRef={ref}
-        enableReinitialize={true}
-        initialValues={initialData}
-        validateOnMount
-        validate={validate}
-        onSubmit={handleSubmit}
-      >
+      <Formik innerRef={ref} enableReinitialize={true} initialValues={initialData} validateOnMount validate={validate} onSubmit={handleSubmit}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Fragment>
             <CustomDialogHeader title="Select Category & Template" onClose={handleClose}></CustomDialogHeader>

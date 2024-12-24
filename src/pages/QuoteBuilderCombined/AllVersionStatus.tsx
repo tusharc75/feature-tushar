@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomDialogTransition, formatAmountWithCurrency, gridLoadingTimeout } from '../../constants/helpers';

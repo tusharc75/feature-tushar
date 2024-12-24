@@ -1,6 +1,6 @@
-import { Box, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import TextField from '@material-ui/core/TextField';
+import { Box, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { Autocomplete } from '@material-ui/lab';
@@ -296,11 +296,11 @@ const Product = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -387,8 +387,9 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/service-master/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -403,8 +404,9 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/package/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -431,7 +433,7 @@ const Product = () => {
                 isProductType,
                 productTypeList,
                 productType,
-                setProductType,
+                setProductType
               }}
             />
           }
@@ -492,7 +494,7 @@ const Product = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} : ${deleteRecord?.productName || ''}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -518,7 +520,7 @@ const LeftSideContent = ({
   isProductType,
   productTypeList,
   productType,
-  setProductType,
+  setProductType
 }) => {
   return (
     <>

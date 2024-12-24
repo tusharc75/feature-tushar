@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -145,7 +145,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         element.isMulitFormula = false;
       });
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
-      
+
       setInitialData({
         fields: data,
         values: {
@@ -188,13 +188,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             const assetPricingMethod = {
               optionValue: 'Per Job',
               optionLabel: 'Per Job'
-            }
-            pricingMethodOptions.push(assetPricingMethod)
+            };
+            pricingMethodOptions.push(assetPricingMethod);
             element.option = [assetPricingMethod];
             element.value = 'Per Job';
           }
-        }
-        else {
+        } else {
           if (element.fieldName === 'unit') {
             element.option = unitOptions;
           }
@@ -251,8 +250,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
-      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
+    if (
+      (fieldTicketData?.taxCode ||
+        (fieldTicketData?.billingAddress &&
+          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
+      !isOffline
+    ) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -268,7 +271,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
       handleSaveData(rows);
     } else {
-      if(isEqual(ref?.current?.values, initialData.values)){
+      if (isEqual(ref?.current?.values, initialData.values)) {
         handleSaveData([rowData], saveAndNext, true);
         return;
       }
@@ -341,10 +344,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     if (referenceType === 'consumables') {
-      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty>0) {
+      if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty > 0) {
         errors['qty'] = 'Quantity can not be change in bulk edit once consumed';
-      }
-      else {
+      } else {
         if (values.qty < (rowData?.consumedQty || 0) + (rowData?.requestedQty || 0)) {
           errors['qty'] = 'Quantity can not be less than consumed quantity';
         }
@@ -668,38 +670,38 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                 >
                   {'Close'}
                 </Button>
-                {isBulkedit === false && showSaveAndNext && (
-                  isEqual(ref?.current?.values, initialData.values) ? (
+                {isBulkedit === false &&
+                  showSaveAndNext &&
+                  (isEqual(ref?.current?.values, initialData.values) ? (
                     <CustomButton
-                    loading={fetchingData}
-                    disabled={fetchingData}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {'Next'}
-                  </CustomButton>
+                      loading={fetchingData}
+                      disabled={fetchingData}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {'Next'}
+                    </CustomButton>
                   ) : (
                     <CustomButton
-                    loading={loading}
-                    disabled={loading || isEqual(ref?.current?.values, initialData.values)}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={() => {
-                      setSaveAndNext(true);
-                      submitForm();
-                    }}
-                  >
-                    {' '}
-                    Save & Next
-                  </CustomButton>
-                  )
-                )}
+                      loading={loading}
+                      disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {' '}
+                      Save & Next
+                    </CustomButton>
+                  ))}
                 <CustomButton
                   id="dialog-save-button"
                   loading={loading}
@@ -755,5 +757,3 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 };
 
 export default MaterialQtyDialog;
-
-

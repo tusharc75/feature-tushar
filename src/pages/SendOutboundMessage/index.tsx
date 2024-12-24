@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from '@material-ui/core';
+import { Box, Button, TextField } from '@mui/material';
 import { AddOutlined } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';

@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -151,9 +151,9 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
               </Box>
             ))
           ) : (
-        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-          Activation Conditions not added yet!
-        </Box>
+            <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+              Activation Conditions not added yet!
+            </Box>
           )
         ) : (
           <Box p={2} height={500}>

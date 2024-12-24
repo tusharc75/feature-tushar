@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
 import React from 'react';

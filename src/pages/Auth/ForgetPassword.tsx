@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Box, Button, CssBaseline, Link as MuiLink, CircularProgress, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CssBaseline, Link as MuiLink, CircularProgress, TextField, Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { object, string } from 'yup';
 import { Link } from 'react-router-dom';

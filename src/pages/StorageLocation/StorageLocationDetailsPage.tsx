@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -72,7 +72,12 @@ const StorageLocationDetailsPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.storageLocation, title: resources?.storageLocation?.titlePlural }, { title: storageLocationData?.storageLocationName }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { ...routes.storageLocation, title: resources?.storageLocation?.titlePlural },
+              { title: storageLocationData?.storageLocationName }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

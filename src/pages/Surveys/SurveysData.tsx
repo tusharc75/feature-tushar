@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

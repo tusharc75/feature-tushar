@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomButton from '../../../components/Helpers/CustomButton';
@@ -19,7 +19,7 @@ import {
   sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
@@ -28,7 +28,17 @@ import { isEqual } from 'lodash';
 import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null, referenceData = null, isRedirectTodetailPage = true }) => {
+const ManageQuotationDialog = ({
+  isClone,
+  quotationId,
+  quotationData = null,
+  onClose,
+  onSuccess,
+  open,
+  versionId = null,
+  referenceData = null,
+  isRedirectTodetailPage = true
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -51,7 +61,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     try {
       let fieldData;
       const response: any = await axiosInstance().get('/field?resource=Quotation');
-      fieldData = response?.data?.data?.filter((obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(obj?.fieldData?.fieldName));
+      fieldData = response?.data?.data?.filter(
+        (obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(obj?.fieldData?.fieldName)
+      );
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -77,8 +89,10 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 if (['warehouse', 'type']?.includes(e?.fieldName)) {
                   e.isUneditable = true;
                 }
-                if (['customerAccount']?.includes(e?.fieldName) &&
-                  [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(data?.status)) {
+                if (
+                  ['customerAccount']?.includes(e?.fieldName) &&
+                  [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(data?.status)
+                ) {
                   e.isUneditable = true;
                 }
               });

@@ -1,24 +1,7 @@
-import {
-  Box,
-  Dialog,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  IconButton,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { startCase } from 'lodash';
+import { Box, Dialog, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { FcFlowChart } from 'react-icons/fc';
@@ -27,7 +10,6 @@ import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

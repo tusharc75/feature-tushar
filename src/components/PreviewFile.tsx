@@ -1,4 +1,4 @@
-import { CircularProgress, Dialog, Icon, IconButton, MenuItem } from '@material-ui/core';
+import { CircularProgress, Dialog, Icon, IconButton, MenuItem } from '@mui/material';
 import { GetApp } from '@material-ui/icons';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import { createElement, useContext, useState } from 'react';

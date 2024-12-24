@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -7,7 +7,7 @@ import TinyMce from './../../components/TinyMCE';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { dateTimeFormat } from 'src/constants/helpers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -68,13 +68,13 @@ const Comments = ({ uniqueId }) => {
             {data.map((item: any) => (
               <div key={item._id} className="mb-4 border border-[var(--common-border-color)] p-2">
                 <div key={item._id} className="md:mb-[26px]">
-                  <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)] mb-4 ">
+                  <div className="mb-4 mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)] ">
                     <p>
                       <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.date).format(dateTimeFormat)}</span>
                     </p>
                   </div>
-                  <div className="flex flex-wrap md:gap-[32px] gap-4 items-start justify-between">
+                  <div className="flex flex-wrap items-start justify-between gap-4 md:gap-[32px]">
                     <div
                       className="max-image"
                       dangerouslySetInnerHTML={{

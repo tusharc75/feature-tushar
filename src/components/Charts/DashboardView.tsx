@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { Box, Button } from "@material-ui/core";
-import Masonry from "react-masonry-css";
+import { useEffect, useState } from 'react';
+import { Box, Button } from '@mui/material';
+import Masonry from 'react-masonry-css';
 
-import ChartsRender from "./Charts";
-import ChartDialog from "./AddNewChartDialog";
+import ChartsRender from './Charts';
+import ChartDialog from './AddNewChartDialog';
 
 export default function DashboardView({ edit, handleSave, Charts }) {
   const [dragId, setDragId] = useState();
@@ -24,7 +24,7 @@ export default function DashboardView({ edit, handleSave, Charts }) {
 
   const fetchKPIs = () => {
     //to fetch Available Kpis
-    setKpis(["Standard KPI"]);
+    setKpis(['Standard KPI']);
   };
 
   const handleDrag = (ev) => {
@@ -33,7 +33,7 @@ export default function DashboardView({ edit, handleSave, Charts }) {
 
   const handleAddComponent = (values) => {
     let order = 1;
-    let id = "";
+    let id = '';
     if (charts.length === 0) {
       id = values.chartType + order.toString();
     } else {
@@ -45,7 +45,7 @@ export default function DashboardView({ edit, handleSave, Charts }) {
       title: values.name,
       Kpi: values.kpi,
       order: order,
-      id: id,
+      id: id
     };
     var oldCharts = charts;
     oldCharts.push(newChart);
@@ -89,31 +89,16 @@ export default function DashboardView({ edit, handleSave, Charts }) {
     <Box p={1}>
       {edit && (
         <Box>
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
-            onClick={() => handleSave(charts)}
-          >
+          <Button variant="contained" size="small" color="primary" onClick={() => handleSave(charts)}>
             Save
           </Button>
-          <Button
-            className="ml-2"
-            variant="contained"
-            size="small"
-            color="primary"
-            onClick={() => setAddComponent(true)}
-          >
+          <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => setAddComponent(true)}>
             Add Component
           </Button>
         </Box>
       )}
       <Box mt={2}>
-        <Masonry
-          breakpointCols={3}
-          className="my-masonry-grid"
-          columnClassName="my-masonry-grid_column"
-        >
+        <Masonry breakpointCols={3} className="my-masonry-grid" columnClassName="my-masonry-grid_column">
           {charts.map((chart) => (
             <ChartsRender
               chartType={chart.chartType}
@@ -128,13 +113,7 @@ export default function DashboardView({ edit, handleSave, Charts }) {
           ))}
         </Masonry>
       </Box>
-      {addComponent && (
-        <ChartDialog
-          handleClose={() => setAddComponent(false)}
-          handleAddComponent={handleAddComponent}
-          KPIs={Kpis}
-        />
-      )}
+      {addComponent && <ChartDialog handleClose={() => setAddComponent(false)} handleAddComponent={handleAddComponent} KPIs={Kpis} />}
     </Box>
   );
 }

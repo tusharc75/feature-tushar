@@ -1,5 +1,5 @@
-import { Box, Chip, MenuItem } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Chip, MenuItem } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -250,8 +250,7 @@ const TransferAsset = () => {
         onClick={() => {
           if (selectedRecords?.length === 1) {
             setDeleteRecord(selectedRecords[0]);
-          }
-          else {
+          } else {
             setDeleteRecord(null);
           }
           setShowDeleteConfirmBox(true);
@@ -337,8 +336,12 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}` : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`} ?`}  
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}`
+              : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

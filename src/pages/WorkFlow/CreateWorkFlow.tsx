@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Box, Button, useMediaQuery } from '@material-ui/core';
+import Grid from '@mui/material/Grid';
+import { Box, Button, useMediaQuery } from '@mui/material';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { isTablet } from 'react-device-detect';
@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import ActivationCondition from './ActivationCondition';
 import Notifications from 'src/pages/WorkFlow/Notifications';
 import { RiCloseCircleFill } from 'react-icons/ri';
@@ -83,9 +83,9 @@ const CreateWorkFlow = () => {
                         fullWidth
                         margin="dense"
                         value={workFlowData.workflowName || ''}
-                      // onChange={(e) => {
-                      //   setWorkFlowName(e.target.value.trimStart());
-                      // }}
+                        // onChange={(e) => {
+                        //   setWorkFlowName(e.target.value.trimStart());
+                        // }}
                       />
                     </Grid>
                     <Grid item xs={6} md={4}>

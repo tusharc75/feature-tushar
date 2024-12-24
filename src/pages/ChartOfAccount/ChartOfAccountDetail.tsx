@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import Step from '../DynamicForm/Step';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';

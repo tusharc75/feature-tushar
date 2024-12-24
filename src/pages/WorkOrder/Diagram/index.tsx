@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Dialog, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Collapse, Dialog, IconButton, Typography } from '@mui/material';
 import { Add, Delete } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -108,8 +108,8 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
   const ShowOtherFiles = ({ data }) => {
     const FileIcon = getFileIcon(data.url);
     return (
-      <div className="flex justify-center items-center h-full inset-0">
-        <div className="flex flex-col gap-2 items-center">
+      <div className="inset-0 flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
           <FileIcon size={150} className="text-center" />
           <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
           <Button
@@ -132,8 +132,8 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
     <Box>
       <Box className="container-with-border" p={'20px'}>
         {!fromVersions && (
-          <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
-            <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
+          <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+            <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
             <ThemeButton
               onClick={() => {
                 setAttachemntDialog({ open: true, id: null, isClone: false });
@@ -146,17 +146,18 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           </Box>
         )}
         <Box pt={2} pb={2}>
-          <Box className="overflow-auto h-[calc(100vh-250px)]">
+          <Box className="h-[calc(100vh-250px)] overflow-auto">
             <div className="grid gap-3">
               {rowData &&
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -229,7 +230,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                                 onClick={() => {
                                   setSelectedAttachment({ ...f, attachmentId: file?._id });
                                 }}
-                                className="px-[18px] py-[8px] cursor-pointer"
+                                className="cursor-pointer px-[18px] py-[8px]"
                                 style={{
                                   border:
                                     selectedAttachment?.url === f?.url
@@ -240,7 +241,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                                 }}
                               >
                                 <HtmlTooltip title={f.name}>
-                                  <div className="flex gap-2 items-center">
+                                  <div className="flex items-center gap-2">
                                     <div className="w-[20px]">
                                       <Icon size={20} />
                                     </div>

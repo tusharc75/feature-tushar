@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';

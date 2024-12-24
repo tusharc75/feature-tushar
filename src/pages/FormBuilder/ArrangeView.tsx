@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { DragHandle, DragIndicator, ExpandMore } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';

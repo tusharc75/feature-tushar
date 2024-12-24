@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';

@@ -5,7 +5,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';

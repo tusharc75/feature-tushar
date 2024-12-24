@@ -1,5 +1,5 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, TableBody, TableCell, TableHead, TableRow, TextField } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
+import { Box, Button, Checkbox, FormControlLabel, IconButton, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { Autocomplete } from '@material-ui/lab';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import axios, { CancelTokenSource } from 'axios';

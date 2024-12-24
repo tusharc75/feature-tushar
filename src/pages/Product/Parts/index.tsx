@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

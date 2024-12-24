@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

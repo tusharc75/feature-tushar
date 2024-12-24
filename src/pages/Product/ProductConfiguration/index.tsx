@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { Delete, Edit } from '@material-ui/icons';
 import React from 'react';
 import { useData } from 'src/StateProvider/Provider';

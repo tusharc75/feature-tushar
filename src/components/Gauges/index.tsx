@@ -1,6 +1,7 @@
 import React from 'react';
 import GaugeChart from 'react-gauge-chart';
-import { Box, Typography, makeStyles } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   lebel: {

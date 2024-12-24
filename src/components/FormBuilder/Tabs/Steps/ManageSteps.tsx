@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual, startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,4 +1,4 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
+import { Button, Grid, IconButton } from '@mui/material';
 import EditIcon from '@material-ui/icons/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -9,7 +9,7 @@ import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

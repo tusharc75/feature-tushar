@@ -1,10 +1,10 @@
-import React from 'react';
-import { IconButton, Typography, makeStyles, Box } from '@material-ui/core';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '@material-ui/icons/Close';
-import PropTypes from 'prop-types';
-import { FiMinimize2, FiMaximize2 } from 'react-icons/fi';
+import { IconButton, Typography } from '@mui/material';
+import MuiDialogTitle from '@mui/material/DialogTitle';
+import { makeStyles } from '@mui/styles';
+import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,7 +45,7 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => { },
+  onMinimizeMaximize = () => {},
   style = {},
   additionalTitle = null
 }: CustomDialogHeaderProps) {

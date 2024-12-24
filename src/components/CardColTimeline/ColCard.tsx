@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';

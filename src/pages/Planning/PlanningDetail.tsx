@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -178,19 +178,9 @@ const PlanningDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange} textColor="primary">
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
-          {resourceData &&
-            resourceData?.tabs?.length &&
-            resourceData?.tabs?.map((tab, i) => (
-              <CustomTab value={i + 2}>
-                {tab?.tabName}
-              </CustomTab>
-            ))}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -234,7 +224,7 @@ const PlanningDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.planning?.titleSingular?.toLowerCase()} : ${planningData?.planningNumber || ''} ?`}            
+          message={`Are you sure you want to delete ${resources?.planning?.titleSingular?.toLowerCase()} : ${planningData?.planningNumber || ''} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

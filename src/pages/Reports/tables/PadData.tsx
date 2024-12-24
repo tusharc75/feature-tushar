@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog, Grid } from '@mui/material';
 import { isNumber } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

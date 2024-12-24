@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link, Checkbox } from '@material-ui/core';
+import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link, Checkbox } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ASSET_NUMBER_TYPE, CustomDialogTransition, sidebarResource } from '../../../constants/helpers';

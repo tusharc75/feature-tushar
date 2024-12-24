@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@mui/material';
 import { Map } from '@material-ui/icons';
 import moment from 'moment';
 import PropTypes from 'prop-types';

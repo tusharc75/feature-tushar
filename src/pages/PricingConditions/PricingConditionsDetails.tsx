@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -130,7 +130,7 @@ const PricingConditionsDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.pricingCondition?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}           
+          message={`Are you sure you want to delete ${resources?.pricingCondition?.titleSingular?.toLowerCase()} : ${headingLabel} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

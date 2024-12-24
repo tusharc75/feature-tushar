@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, Typography } from '@material-ui/core';
+import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import { CheckCircle, Delete } from '@material-ui/icons';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -728,12 +728,12 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
             if (autoCompleteData && autoCompleteData.length > 0) {
               autoCompleteData.forEach((d) => {
                 if (d?.canAutoCompleteWorkOrder && d?.workOrderId) {
-                  if(d?.type===MATERIAL_TYPE.package) isPackage = true;
+                  if (d?.type === MATERIAL_TYPE.package) isPackage = true;
                   if (!ids?.includes(d?.workOrderId)) ids.push(d?.workOrderId);
                 }
               });
             }
-            
+
             isPackage ? setOpenManagedPackageDialog({ open: true, ids: ids }) : handleAutoComplete(ids);
           }}
         />
@@ -742,15 +742,15 @@ const WorkOrder = ({ renderedFrom, assemblyOrderData, setNextStep, stepFullScree
       {openManagedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenManagedPackageDialog({open: false, ids: []});
+            setOpenManagedPackageDialog({ open: false, ids: [] });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
           workOrderIds={openManagedPackageDialog.ids}
           onSuccess={() => {
             setCompleteConfirmBox(false);
-            handleAutoComplete(openManagedPackageDialog.ids)
-            setOpenManagedPackageDialog({open: false, ids: []});
+            handleAutoComplete(openManagedPackageDialog.ids);
+            setOpenManagedPackageDialog({ open: false, ids: [] });
           }}
         />
       )}

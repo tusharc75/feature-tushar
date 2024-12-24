@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomButton from '../../../components/Helpers/CustomButton';
@@ -16,7 +16,7 @@ import {
   yupSchema
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
@@ -83,8 +83,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
               if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
                 tempInitialData[key] = [referenceData[key]];
-              }
-              else {
+              } else {
                 tempInitialData[key] = referenceData[key];
               }
               field.disableOnEdit = true;

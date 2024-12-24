@@ -1,8 +1,8 @@
-import { Typography } from '@material-ui/core';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { Typography } from '@mui/material';
+import ListSubheader from '@mui/material/ListSubheader';
+import TextField from '@mui/material/TextField';
+import { makeStyles, useTheme } from '@mui/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Autocomplete, { AutocompleteRenderGroupParams, AutocompleteRenderInputParams } from '@material-ui/lab/Autocomplete';
 import React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -30,7 +30,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
     if (sectionData && sectionData?._id) {
       values._id = sectionData?._id;
     }
-    values.oldSectionName = sectionData?.sectionName
+    values.oldSectionName = sectionData?.sectionName;
     axiosInstance()
       .put(`section-master`, values)
       .then(({ data }) => {

@@ -1,37 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Button
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { MoreVert } from '@material-ui/icons';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
-import { displayDate } from '../../services/util';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link, useHistory } from 'react-router-dom';
-import routes from '../Helpers/Routes';
-import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
-import { MoreVert } from '@material-ui/icons';
-import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
+import { displayDate } from '../../services/util';
+import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
+import routes from '../Helpers/Routes';
 
 export default function ProjectInAccordion({
   expanded = true,

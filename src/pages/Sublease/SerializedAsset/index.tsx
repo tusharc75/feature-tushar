@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, MenuItem } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';

@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
@@ -278,19 +278,22 @@ const TransferAssetDetailPage = () => {
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowReopenCloseConfirmation({ open: true, type: 'close' });
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
-            )}
+            {permissions?.transferAsset?.isUpdate &&
+              allowedToEdit &&
+              !isTransferEnded &&
+              (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => {
+                    setShowReopenCloseConfirmation({ open: true, type: 'close' });
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}

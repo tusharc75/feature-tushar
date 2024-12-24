@@ -1,6 +1,6 @@
-import { Box, Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
+import { Box, Typography } from '@mui/material';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

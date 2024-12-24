@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Button, Box, CircularProgress, Grid } from '@material-ui/core';
+import { Dialog, Button, Box, CircularProgress, Grid } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -154,7 +154,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         {!notEditable && (
           <Box display="flex" justifyContent="flex-end">
             <Box>
-              <label htmlFor="importField" className="cursor-pointer mr-3">
+              <label htmlFor="importField" className="mr-3 cursor-pointer">
                 Import Fields
                 <input
                   onClick={(e: any) => (e.target.value = null)}
@@ -169,7 +169,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
                   type="file"
                 />
               </label>
-              <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+              <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
                 Export Fields
               </label>
               <a id="downloadAnchorElem" style={{ display: 'none' }}></a>

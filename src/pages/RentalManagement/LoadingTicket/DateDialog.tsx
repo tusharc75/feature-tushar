@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, Grid, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -11,24 +11,24 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateUtils from '@date-io/date-fns';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
-
-  const [minDate, setMinDate] = useState(new Date())
+  const [minDate, setMinDate] = useState(new Date());
 
   useEffect(() => {
-    findValidationDate()
-  }, [assets])
+    findValidationDate();
+  }, [assets]);
 
   const findValidationDate = async () => {
-    const last = type === 'changeStatus' ? 1 : 2
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
+    const last = type === 'changeStatus' ? 1 : 2;
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last });
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
     }
     lastDate.setHours(0, 0, 0);
-    setMinDate(lastDate)
-  }
-
+    setMinDate(lastDate);
+  };
 
   function validate(values) {
     const errors = {};
@@ -48,15 +48,17 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
         }
       }}
       maxWidth="sm"
-      fullWidth>
+      fullWidth
+    >
       <Formik
         initialValues={{ date: new Date() }}
         validate={validate}
         onSubmit={(values) => {
           handleSubmit(moment(values.date).format('MM/DD/YYYY'), values?.status);
-        }}>
+        }}
+      >
         {({ values, errors, touched, setFieldValue }) => (
-          <Form >
+          <Form>
             <CustomDialogHeader title={title} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
@@ -82,22 +84,32 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                         setFieldValue('date', convertDateInDateTime(value));
                       }}
                     />
-                    {status === ASSET_STATUS.delivered &&
+                    {status === ASSET_STATUS.delivered && (
                       <Box pt={2}>
                         <Typography>Would you like to change status ?</Typography>
                         <Box pt={1}>
                           <FormControl component="fieldset">
-                            <RadioGroup row aria-label="status" name="status" value={values['status']} onChange={(e) => {
-                              setFieldValue('status', e.target.value);
-                            }}>
-                              <FormControlLabel value={ASSET_STATUS.standByNotChargeable} control={<Radio />} label={ASSET_STATUS.standByNotChargeable} />
+                            <RadioGroup
+                              row
+                              aria-label="status"
+                              name="status"
+                              value={values['status']}
+                              onChange={(e) => {
+                                setFieldValue('status', e.target.value);
+                              }}
+                            >
+                              <FormControlLabel
+                                value={ASSET_STATUS.standByNotChargeable}
+                                control={<Radio />}
+                                label={ASSET_STATUS.standByNotChargeable}
+                              />
                               <FormControlLabel value={ASSET_STATUS.standBy} control={<Radio />} label={ASSET_STATUS.standBy} />
                               <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
                             </RadioGroup>
                           </FormControl>
                         </Box>
                       </Box>
-                    }
+                    )}
                   </MuiPickersUtilsProvider>
                 </Grid>
               </Box>

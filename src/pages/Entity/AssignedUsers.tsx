@@ -1,9 +1,9 @@
-import { Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import { makeStyles } from '@mui/styles';
 import DeleteIcon from '@material-ui/icons/Delete';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
@@ -45,7 +45,7 @@ const AssignedUsers = (props) => {
                       </Typography>
                     }
                     secondary={
-                      <div className="flex items-center mr-1">
+                      <div className="mr-1 flex items-center">
                         <span className=" truncate">{obj.email}</span>
                         <CopyToClipboard textToCopy={obj.email} className="ml-1 cursor-pointer" />
                       </div>
