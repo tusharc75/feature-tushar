@@ -1,17 +1,18 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import axios, { CancelTokenSource } from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { ACCORDION_TYPE, CollapsibleWrapper } from 'src/pages/ScheduleAndDispatch/Scheduler/helper';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 
-const AddServices = ({ setSelectedServices, selectedAssets, isExpand, resources, handleOpen, submitLoad, selectedWarehouse }) => {
+const AddServices = ({ schedularState }: SchedularComponentProps) => {
+  const { selectedAssets, selectedWarehouse, loading, setSelectedServices, setActiveTab, getTabData, toastConfig } = schedularState;
+  const tabData = useMemo(() => getTabData('services'), [getTabData]);
+
   const renderedFrom = `${sidebarResource?.scheduleAndDispatch}_${sidebarResource.serviceMaster}`;
-  const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -30,15 +31,15 @@ const AddServices = ({ setSelectedServices, selectedAssets, isExpand, resources,
 
   const handleAdd = () => {
     setSelectedServices(selectedRecords);
-    handleOpen(ACCORDION_TYPE.technician);
+    setActiveTab('technicians');
   };
 
   useEffect(() => {
-    if (submitLoad  || selectedWarehouse) {
+    if (loading || selectedWarehouse) {
       setSelectedServices([]);
       dispatch({ type: 'selection', selectedRecords: [] });
     }
-  }, [submitLoad, selectedWarehouse]);
+  }, [loading, selectedWarehouse]);
 
   const fetchGridColumns = async () => {
     axiosInstance()
@@ -96,13 +97,8 @@ const AddServices = ({ setSelectedServices, selectedAssets, isExpand, resources,
   };
 
   return (
-    <CollapsibleWrapper
-      index={2}
-      title={resources?.serviceMaster?.titlePlural}
-      isExpand={isExpand}
-      accordionType={ACCORDION_TYPE.service}
-      handleOpen={handleOpen}
-    >
+    <>
+      <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
       {columns ? (
         selectedAssets?.length ? (
           <CustomReactTable
@@ -116,20 +112,20 @@ const AddServices = ({ setSelectedServices, selectedAssets, isExpand, resources,
           />
         ) : null
       ) : (
-        <Box p={2} height={500}>
+        <Box p={2} className="h-[--loader-h]">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
 
       <div className="flex justify-end gap-2">
-        <Button variant="outlined" color="secondary" size="small" onClick={() => handleOpen(ACCORDION_TYPE.asset)}>
+        <Button variant="outlined" color="secondary" size="small" onClick={() => setActiveTab('assets')}>
           Back
         </Button>
         <Button disabled={false} variant="contained" size="small" color="primary" onClick={() => handleAdd()}>
           Save & Next
         </Button>
       </div>
-    </CollapsibleWrapper>
+    </>
   );
 };
 
