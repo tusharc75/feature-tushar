@@ -126,7 +126,7 @@ const WorkOrderSupervisor = () => {
     {
       fieldData: {
         _id: '630dc2429ec41869052395b2',
-        fieldName: 'serviceMaster',
+        fieldName: 'service',
         fieldLabel: resources?.serviceMaster?.titlePlural,
         lookup: true,
         lookupResource: sidebarResource.serviceMaster,
