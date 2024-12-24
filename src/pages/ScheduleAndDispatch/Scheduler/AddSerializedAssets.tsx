@@ -36,7 +36,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [isAutoSelectAsset, setIsAutoSelectAsset] = useState(false);
   const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
   const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
 
@@ -63,7 +62,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       setSelectedAssets([]);
       dispatch({ type: 'selection', selectedRecords: [] });
       setIsVirtualizedTableView(false);
-      setIsAutoSelectAsset(false);
     }
   }, [selectedProduct, selectedWarehouse, loading]);
 
@@ -178,27 +176,33 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               )}
             />
           )}
-          {selectedProduct && selectedWarehouse && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  color="primary"
-                  checked={isAutoSelectAsset}
-                  name={`Auto Select Asset`}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setOpenAssetQtyDialog(true);
-                    } else {
-                      setIsVirtualizedTableView(false);
-                      setSelectedAssets([]);
-                    }
-                    setIsAutoSelectAsset(e.target.checked);
-                  }}
-                />
-              }
-              label={`Auto Select Asset`}
-            />
+          <div className="flex items-center gap-3">
+          {selectedProduct && selectedWarehouse && !isVirtualizedTableView && (
+            <Button
+              disabled={false}
+              variant="contained"
+              size="small"
+              color="primary"
+              onClick={() => setOpenAssetQtyDialog(true)}
+            >
+              Auto Select Asset
+            </Button>
           )}
+          {isVirtualizedTableView && (
+             <Button
+             disabled={false}
+             variant="contained"
+             size="small"
+             color="primary"
+             onClick={() => {
+              setIsVirtualizedTableView(false);
+              setSelectedAssets([]);
+             }}
+           >
+             Reset
+           </Button>
+          )}
+          </div>
         </div>
       </div>
       {isVirtualizedTableView ? (
@@ -236,7 +240,6 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
           warehouse={selectedWarehouse}
           product={selectedProduct}
           handleClose={() => {
-            setIsAutoSelectAsset(false);
             setOpenAssetQtyDialog(false);
           }}
           handleSuccess={(data) => {
@@ -283,7 +286,8 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
         display: 'block',
         overflow: 'auto',
         height: 'calc(100vh - 393px)',
-        marginTop: '10px'
+        marginTop: '10px',
+        marginBottom: '10px'
       }}
       ref={scrollContainerRef}
       className="custom-react-table editable-table-v1 w-full border"
@@ -299,7 +303,7 @@ const RenderVirtualizedAssetTable = ({ selectedAssets }) => {
         >
           <TableRow className="h-[40px] bg-gray-100">
             <TableCell key="no" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
-              S no.
+              Index
             </TableCell>
             <TableCell key="asset" className="flex items-center border-b border-gray-300 text-left font-bold" style={{ width: '50%' }}>
               Asset
