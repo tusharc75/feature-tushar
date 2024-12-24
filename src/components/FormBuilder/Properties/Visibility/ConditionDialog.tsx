@@ -233,7 +233,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                       id="fields"
                       disabled={data ? true : false}
                       options={fieldOptions}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)?.length > 0
@@ -276,13 +276,13 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             disableCloseOnSelect={true}
                             options={uniqBy([...options, ...defaultOptions], 'optionValue')}
                             getOptionLabel={(option: any) => {
-                              return option ? option?.optionLabel : '';
+                              return option ? option?.optionLabel || '' : '';
                             }}
                             value={
                               values?.value
                                 ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) =>
-                                  values?.value?.split(',')?.includes(data.optionValue)
-                                )
+                                    values?.value?.split(',')?.includes(data.optionValue)
+                                  )
                                 : []
                             }
                             isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
@@ -327,7 +327,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             id="value"
                             options={options}
                             disableCloseOnSelect={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
-                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel || '' : '')}
                             multiple={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
                             value={
                               values?.value && ['checkBox', 'switch', 'radio']?.includes(selectedField?.type)

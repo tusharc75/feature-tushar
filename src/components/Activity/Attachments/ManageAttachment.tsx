@@ -260,7 +260,7 @@ export default function ManageAttachment({
                           options={Object.values(ATTACHMENT_TYPE)}
                           renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
                           disabled={defaultAttachmentType === '' ? !canEdit : true}
-                          getOptionLabel={(option) => option}
+                          getOptionLabel={(option) => option || ''}
                           isOptionEqualToValue={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
                             setFieldValue('attachmentType', val);

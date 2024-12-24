@@ -11,7 +11,7 @@ const CheckboxDropdown = ({ value, setFieldValue, touched, errors }) => {
       <Autocomplete
         id="tags-filled"
         options={checkboxValuesOptions}
-        getOptionLabel={(option: any) => option.label}
+        getOptionLabel={(option: any) => option.label || ''}
         value={stateValue}
         multiple={false}
         onChange={(e, val) => {

@@ -97,32 +97,6 @@
   }
 }
 
-.MuiDialog-container {
-  .MuiDialogTitle-root {
-    background: #1c1c31;
-
-    [data-mode='dark'] & {
-      background: #1a1a26;
-    }
-
-    & h6 {
-      color: white;
-      font-weight: bold;
-    }
-
-    & .MuiIconButton-label {
-      color: white;
-      font-weight: bold;
-    }
-  }
-  .MuiDialogActions-root {
-    background: #ebebeb;
-    [data-mode='dark'] & {
-      background: #1a1a26;
-    }
-  }
-}
-
 .MuiIconButton-root {
   &.cursor-stop {
     color: gray !important;

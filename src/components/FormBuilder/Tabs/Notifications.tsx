@@ -72,7 +72,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel };
           })
       );
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSubmit = async (values) => {
@@ -188,7 +188,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                   <Autocomplete
                                     id="field"
                                     options={fields}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                                     isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       fields && fields.filter((f) => f?.fieldName === data?.field).length
@@ -230,7 +230,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                   <Autocomplete
                                     id="rule"
                                     options={RULE}
-                                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                                    getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                                     isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                     value={
                                       RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
@@ -272,13 +272,13 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                   <Autocomplete
                                     id="notificationUserField"
                                     options={notificationUserField}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                                     isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       notificationUserField &&
-                                        notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
+                                      notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
                                         ? notificationUserField &&
-                                        notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
+                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
                                         : ''
                                     }
                                     onChange={(e, val) => {

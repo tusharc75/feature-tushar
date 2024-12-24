@@ -195,7 +195,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
           fullWidth
           className="max-w-[300px]"
           options={competencyOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           onChange={(e, val) => {
             setSelectedCompetency(val);
           }}
@@ -211,7 +211,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
           fullWidth
           className="max-w-[300px]"
           options={warehouseOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length

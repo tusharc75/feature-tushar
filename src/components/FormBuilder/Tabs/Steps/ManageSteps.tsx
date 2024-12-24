@@ -193,7 +193,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                       multiple
                       disableCloseOnSelect
                       options={MATERIAL_TYPE}
-                      getOptionLabel={(option: any) => (option ? startCase(option) : '')}
+                      getOptionLabel={(option: any) => (option ? startCase(option) || '' : '')}
                       isOptionEqualToValue={(option: any, val) => option === val}
                       value={values['linkedMaterial']}
                       onChange={(e: any, value) => {
@@ -236,7 +236,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                       <Autocomplete
                         id="linkResourceName"
                         options={resourceOption}
-                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                         isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           resourceOption && resourceOption?.filter((data) => data.optionValue === values['linkResourceName'])?.length
@@ -267,7 +267,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                         id="linkResourceField"
                         options={resourceFieldOption?.filter((e) => e?.lookup)}
                         disabled={resourceFieldsLoading}
-                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                        getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                         isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                         value={
                           resourceFieldOption && resourceFieldOption.filter((data) => data?.fieldName === values['linkResourceField']).length

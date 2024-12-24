@@ -622,7 +622,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 value={values['additionalInfoSection']}
                 size="small"
                 options={section.map((s) => s.sectionName)}
-                getOptionLabel={(option) => option}
+                getOptionLabel={(option) => option || ''}
                 onChange={(event: any, newValue: string | null) => {
                   setFieldValue('additionalInfoSection', newValue);
                 }}

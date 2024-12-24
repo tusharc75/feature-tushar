@@ -34,7 +34,7 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
           setUsers(userData);
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   };
 
   const setParticipants = (values, reason) => {
@@ -103,11 +103,11 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
         options={users ? users : []}
         getOptionLabel={(option) => {
           if (typeof option === 'string') {
-            return option;
+            return option || '';
           }
 
           if (!Array.isArray(option)) {
-            return option.name;
+            return option.name || '';
           }
 
           return '';
@@ -122,12 +122,12 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
         value={
           users && multiple === true
             ? users.filter((data) =>
-              flatMap(value, (nameObj) =>
-                map(nameObj, (userId) => {
-                  return userId;
-                })
-              ).includes(data.userId)
-            )
+                flatMap(value, (nameObj) =>
+                  map(nameObj, (userId) => {
+                    return userId;
+                  })
+                ).includes(data.userId)
+              )
             : users
               ? users.filter((data) => data.userId === value).length > 0
                 ? users.filter((data) => data.userId === value)[0]

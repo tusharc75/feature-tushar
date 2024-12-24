@@ -48,6 +48,8 @@ const Activity = ({ type }) => {
     });
   };
 
+  console.log(tabs, viewType);
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">

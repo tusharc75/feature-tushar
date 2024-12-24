@@ -99,7 +99,7 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       disableCloseOnSelect={true}
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       getOptionLabel={(option: any) => {
-        return option ? option?.optionLabel : '';
+        return option ? option?.optionLabel || '' : '';
       }}
       value={
         cellValue
@@ -159,7 +159,7 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       fullWidth
       loading={loading}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
       isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
       value={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === cellValue) || ''}
       onChange={(e, val) => {

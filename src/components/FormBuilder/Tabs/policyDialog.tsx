@@ -264,7 +264,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
             fullWidth
             size="small"
             options={options}
-            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
             isOptionEqualToValue={(option: any, val) => {
               return option?.optionValue === val?.optionValue;
             }}
@@ -295,7 +295,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
       multiple={multiple}
       disableCloseOnSelect={multiple}
       options={options}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
       isOptionEqualToValue={(option: any, val) => {
         return option?.optionValue === val?.optionValue;
       }}

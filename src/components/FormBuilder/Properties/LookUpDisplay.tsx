@@ -32,7 +32,7 @@ function LookUpDisplay({ fields, values, fieldSet }) {
           <Autocomplete
             id="lookup-dependent-on"
             options={fields && fields.filter((_f) => _f._id !== values['_id'] && _f.type === 'dropDown' && _f?.lookup)}
-            getOptionLabel={(option: any) => (option ? option.fieldLabel : '')}
+            getOptionLabel={(option: any) => (option ? option.fieldLabel || '' : '')}
             isOptionEqualToValue={(option: any, val) => option.fieldName === val}
             value={
               fields && fields.filter((data) => data.fieldName === values['lookUpField']).length
@@ -51,7 +51,7 @@ function LookUpDisplay({ fields, values, fieldSet }) {
               id="lookup-dependent-on-field"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
               isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === values['lookUpFieldDisplay']).length

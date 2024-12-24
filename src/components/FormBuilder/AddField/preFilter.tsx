@@ -198,7 +198,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
         disableCloseOnSelect={true}
         id="preFilters"
         options={options}
-        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
         onChange={(e, val) => {
           setFieldValue('preFilters', val && val?.length > 0 ? val?.map((v) => v?.optionValue) : []);
         }}
@@ -229,7 +229,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
           disableCloseOnSelect={true}
           id="lookupPreFilterFields"
           options={prefilterFields ?? []}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           onChange={(e, val) => {
             const updatedValues = val?.map((v) => {
               return {
@@ -264,42 +264,42 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       <div className="mt-2 flex flex-col gap-2">
         {values['lookupPreFilterFields']?.length > 0 && !isEmpty(lookupOptionsMap)
           ? values['lookupPreFilterFields']?.map((field, index) => {
-            const preFilterField = prefilterFields?.find((e) => e.optionValue === field.fieldName);
-            return (
-              <Autocomplete
-                fullWidth
-                disableCloseOnSelect={true}
-                id={`lookupPreFilterFields_${index + 1}`}
-                options={lookupOptionsMap[field.fieldName] ?? []}
-                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                onChange={(e, val) => {
-                  const updatedValues = values['lookupPreFilterFields']?.map((ele) => {
-                    if (ele.fieldName === field.fieldName) {
-                      ele.value = val?.map((e) => e?.optionValue);
-                    }
-                    return ele;
-                  });
-                  setFieldValue('lookupPreFilterFields', updatedValues);
-                }}
-                multiple
-                size={'small'}
-                value={lookupOptionsMap[field.fieldName]?.filter((ele) => [...field?.value].includes(ele.optionValue)) ?? []}
-                filterSelectedOptions={true}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="dense"
-                    size={'small'}
-                    name={preFilterField.optionValue}
-                    label={preFilterField.optionLabel}
-                    placeholder={preFilterField.optionLabel}
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-            );
-          })
+              const preFilterField = prefilterFields?.find((e) => e.optionValue === field.fieldName);
+              return (
+                <Autocomplete
+                  fullWidth
+                  disableCloseOnSelect={true}
+                  id={`lookupPreFilterFields_${index + 1}`}
+                  options={lookupOptionsMap[field.fieldName] ?? []}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                  onChange={(e, val) => {
+                    const updatedValues = values['lookupPreFilterFields']?.map((ele) => {
+                      if (ele.fieldName === field.fieldName) {
+                        ele.value = val?.map((e) => e?.optionValue);
+                      }
+                      return ele;
+                    });
+                    setFieldValue('lookupPreFilterFields', updatedValues);
+                  }}
+                  multiple
+                  size={'small'}
+                  value={lookupOptionsMap[field.fieldName]?.filter((ele) => [...field?.value].includes(ele.optionValue)) ?? []}
+                  filterSelectedOptions={true}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      size={'small'}
+                      name={preFilterField.optionValue}
+                      label={preFilterField.optionLabel}
+                      placeholder={preFilterField.optionLabel}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              );
+            })
           : null}
       </div>
     </>
