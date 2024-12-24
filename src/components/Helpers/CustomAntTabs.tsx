@@ -3,7 +3,7 @@ import { Typography, Tabs, Tab } from '@mui/material';
 import { DeveloperBoard, Map } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
 
-const AntTabs = withStyles((theme) => ({
+const AntTabs = withStyles((theme: Theme) => ({
   root: {
     minHeight: '38px'
     // borderBottom: "1px solid #e8e8e8",

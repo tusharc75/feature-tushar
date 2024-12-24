@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Box, Grid, Checkbox, Button, Dialog } from '@mui/material';
+import { Box, Grid, Checkbox, Button, Dialog, Theme } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { DataGrid } from '@material-ui/data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import NewStepper from '../../components/Helpers/NewStepper';
@@ -23,7 +23,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import CustomDataGridToolbar from '../../components/Helpers/DataGridHelpers/CustomDataGridToolbar';
 import { CustomDialogTransition, dateFormat } from '../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   actionBtn: {
     background: theme.palette.primary.light, //  lightBg
     color: theme.palette.error.contrastText,

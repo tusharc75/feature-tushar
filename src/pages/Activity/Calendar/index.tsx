@@ -1,4 +1,4 @@
-import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
+import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
 import { lowerCase, startCase } from 'lodash';
@@ -22,7 +22,7 @@ import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-primary,#fff)'
   },

@@ -10,8 +10,9 @@ import moment from 'moment';
 import React, { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { PostComment } from '../../../axios/activity';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   marginLeft: {
     marginLeft: 10
   },

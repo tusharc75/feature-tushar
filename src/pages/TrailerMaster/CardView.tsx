@@ -1,6 +1,6 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -9,7 +9,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     border: '1px solid var(--common-border-color,#ebebeb)',

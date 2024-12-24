@@ -1,13 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Box, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import WorkIcon from '@mui/icons-material/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 import { cn } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fleetBox: {
     cursor: 'pointer',
     position: 'relative',

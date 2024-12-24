@@ -1,4 +1,4 @@
-import { Box, Dialog, DialogActions, IconButton, PaperProps, Typography } from '@mui/material';
+import { Box, Dialog, DialogActions, IconButton, PaperProps, Theme, Typography } from '@mui/material';
 import type { DialogProps } from '@mui/material/Dialog';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogTitle from '@mui/material/DialogTitle';
@@ -30,7 +30,7 @@ export interface ModalHead {
   fullScreenOption?: boolean;
 }
 
-const CustomDialogContent = withStyles((theme) => ({
+const CustomDialogContent = withStyles((theme: Theme) => ({
   root: {
     padding: theme.spacing(2)
   }

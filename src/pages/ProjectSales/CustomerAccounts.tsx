@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Grid, Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@mui/material';
+import { Grid, Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
@@ -23,7 +23,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 import routes from 'src/components/Helpers/Routes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     border: '1px solid var(--common-border-color)',
     borderRadius: '5px',

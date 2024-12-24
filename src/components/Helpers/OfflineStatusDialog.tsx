@@ -4,8 +4,9 @@ import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import { IoCloudOfflineOutline } from 'react-icons/io5';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

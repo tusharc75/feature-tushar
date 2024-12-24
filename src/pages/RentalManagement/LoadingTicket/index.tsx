@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, useMediaQuery } from '@mui/material';
+import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Theme, useMediaQuery } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { makeStyles } from '@mui/styles';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
@@ -67,7 +67,7 @@ const stepGlobalDataAdded = {
   deliverToCustomer: false
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

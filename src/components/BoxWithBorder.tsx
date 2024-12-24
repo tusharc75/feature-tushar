@@ -1,7 +1,7 @@
 import { makeStyles } from '@mui/styles';
-import { Box } from '@mui/material';
+import { Box, Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     border: '1px solid var(--dark-mode-border-color, #D4D6D7)',
     borderRadius: 4,

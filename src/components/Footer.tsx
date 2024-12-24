@@ -1,7 +1,7 @@
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   footerText: {
     textAlign: 'center',
     marginTop: theme.spacing(2)

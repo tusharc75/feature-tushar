@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField, Theme } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
@@ -13,7 +13,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { DOAType, DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     margin: 0,
     padding: theme.spacing(1.5, 1.5, 1.5, 2)

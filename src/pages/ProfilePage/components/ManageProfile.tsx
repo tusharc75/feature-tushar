@@ -12,6 +12,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Theme,
   Typography
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -40,7 +41,7 @@ import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import SetUpMfaDialog from './SetUpMfaDialog';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
     position: 'absolute',
     bottom: 0,

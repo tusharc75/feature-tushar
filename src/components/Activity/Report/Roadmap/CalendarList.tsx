@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { TreeItem, TreeView } from '@mui/x-tree-view';
 import moment from 'moment';
@@ -7,7 +7,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   label: {
     paddingLeft: 0
   },

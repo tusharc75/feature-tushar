@@ -1,5 +1,5 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Box, Button, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { Box, Button, IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SelectionDialog from './SelectionDialog';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     display: 'flex',

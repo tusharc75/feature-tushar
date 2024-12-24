@@ -1,4 +1,4 @@
-import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, Link as MuiLink, Typography } from '@mui/material';
+import { Avatar, Box, Dialog, GridSize, IconButton, ImageList, ImageListItem, Link as MuiLink, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Image, InfoOutlined, MoreHoriz } from '@mui/icons-material';
 import { camelCase, isArray, kebabCase } from 'lodash';
@@ -38,7 +38,7 @@ import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fieldText: {
     borderRadius: 4,
     cursor: 'normal',
