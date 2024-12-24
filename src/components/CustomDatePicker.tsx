@@ -37,7 +37,6 @@ const CustomDatePicker = (props) => {
       {...(openTo ? { openTo: openTo } : {})}
       disablePast={disablePast}
       required={required}
-      ampm={false}
       value={dayjs.tz(value) || null}
       name={name}
       label={label}
@@ -54,7 +53,6 @@ const CustomDatePicker = (props) => {
           ...(margin ? { margin: margin } : {}),
           ...(size ? { size: size } : {}),
           ...(placeholder ? { placeholder: placeholder } : {}),
-          ...(onInput ? { onInput: onInput } : {}),
           ...(!isEmpty(InputProps) ? InputProps : {})
         }
       }}

@@ -22,6 +22,7 @@ import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -300,7 +301,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <CustomDateTimePicker
+                          <CustomDatePicker
                             size="small"
                             disablePast={true}
                             value={values.startDate}
@@ -345,7 +346,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
 
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <CustomDateTimePicker
+                          <CustomDatePicker
                             size="small"
                             disablePast={true}
                             minDateTime={values.startDate}
