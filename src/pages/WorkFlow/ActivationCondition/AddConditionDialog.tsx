@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -126,12 +126,12 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     options={
                       fields?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))?.length > 0
                         ? fields
-                            ?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))
-                            ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
+                          ?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))
+                          ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
                         : []
                     }
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                     value={
                       fields
                         ?.filter((f) => f?.fieldName === values?.fieldName)
@@ -157,8 +157,8 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                   />
                   {values?.fieldName &&
                     (selectedField?.type === 'dropDown' ||
-                    selectedField?.type === 'multiSelect' ||
-                    ['checkBox', 'switch'].includes(selectedField?.type) ? (
+                      selectedField?.type === 'multiSelect' ||
+                      ['checkBox', 'switch'].includes(selectedField?.type) ? (
                       <Autocomplete
                         id="fieldValue"
                         options={options}

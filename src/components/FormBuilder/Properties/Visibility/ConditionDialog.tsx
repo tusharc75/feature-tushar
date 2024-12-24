@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -233,8 +233,8 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                       id="fields"
                       disabled={data ? true : false}
                       options={fieldOptions}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)?.length > 0
                           ? fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)[0]
@@ -276,7 +276,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             disableCloseOnSelect={true}
                             options={uniqBy([...options, ...defaultOptions], 'optionValue')}
                             getOptionLabel={(option: any) => {
-                              return option ? option?.optionLabel : '';
+                              return option ? option?.optionLabel || '' : '';
                             }}
                             value={
                               values?.value
@@ -285,7 +285,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                                   )
                                 : []
                             }
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(e, val: any) => {
                               setFieldValue('value', val ? val.map((val) => val?.optionValue)?.join(',') : '');
                               setInputValues('');
@@ -327,7 +327,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             id="value"
                             options={options}
                             disableCloseOnSelect={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
-                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel || '' : '')}
                             multiple={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
                             value={
                               values?.value && ['checkBox', 'switch', 'radio']?.includes(selectedField?.type)

@@ -83,7 +83,7 @@ function Roadmap({ type, filter }) {
     setSelected(nodeIds);
   };
 
-  console.log(treeList, activity);
+  console.log({ selected, expanded });
 
   return activity ? (
     <Box>

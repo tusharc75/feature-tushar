@@ -68,6 +68,7 @@ import Description from './FormTypes/Description';
 import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
+import dayjs from 'dayjs';
 
 type MultiFileType = {
   fileName: string;
@@ -1283,7 +1284,7 @@ const FormTypes = (props) => {
                 }
                 freeSolo={type === 'dropDown' && !lookup}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   option.filter((data) => data.optionValue === values[name]).length
                     ? option.filter((data) => data.optionValue === values[name])[0]
@@ -1462,7 +1463,7 @@ const FormTypes = (props) => {
                       fieldData?.decimalPlaces
                     )}
                     getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                     value={
                       optionConverter(
                         option,
@@ -1936,8 +1937,8 @@ const FormTypes = (props) => {
           }
           options={currencyData}
           getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-          getOptionSelected={(option: any, val) => option.currencyCode === val}
-          onChange={onChange ? onChange : (e, val) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
+          isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
+          onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -1949,7 +1950,7 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option) => {
+          renderOption={(option: any) => {
             const { currencyCode, currencyName, symbolNative } = option;
             return `${currencyCode} - ${currencyName} - (${symbolNative})`;
           }}
@@ -2006,7 +2007,7 @@ const FormTypes = (props) => {
               ]}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
               value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
-              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
               onChange={
                 onChange
                   ? (e, value: any, reason) => {
@@ -2021,7 +2022,7 @@ const FormTypes = (props) => {
                       onChange(e, value, reason);
                     }
                   }
-                  : (e, value: any, reason) => {
+                  : (e, value: any, reason: any) => {
                     if (setFieldValue) {
                       if (!lookup) {
                         if (reason === 'clear') {
@@ -2706,7 +2707,7 @@ const FormTypes = (props) => {
           required={required}
           variant="inline"
           inputVariant="outlined"
-          value={values[name] || null}
+          value={dayjs(values[name] || null)}
           name={name}
           label={getLabel(label)}
           {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
@@ -2735,7 +2736,7 @@ const FormTypes = (props) => {
           variant="inline"
           inputVariant="outlined"
           ampm={false}
-          value={values[name]}
+          value={dayjs(values[name] || null)}
           name={name}
           label={getLabel(label)}
           {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}

@@ -105,7 +105,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
         }
       }}
     >
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={() => {}}>
+      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={() => { }}>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
           <>
             <CustomDialogHeader
@@ -153,7 +153,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                         disableCloseOnSelect={true}
                         options={roleOptions ?? []}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           roleOptions && roleOptions?.filter((data) => values['ids'].includes(data.optionValue))?.length
                             ? roleOptions?.filter((data) => values['ids'].includes(data.optionValue))
@@ -187,7 +187,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                         options={userOptions ?? []}
                         disableCloseOnSelect={true}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           userOptions && userOptions?.filter((data) => values['ids'].includes(data.optionValue))?.length
                             ? userOptions?.filter((data) => values['ids'].includes(data.optionValue))

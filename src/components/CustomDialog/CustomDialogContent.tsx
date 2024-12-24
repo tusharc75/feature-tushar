@@ -3,6 +3,7 @@ import { DialogContent as MuiDialogContent, DialogContentProps, Theme } from '@m
 import { useAppTheme } from 'src/constants/AppConfig';
 import { isMobile, isTablet } from 'react-device-detect';
 import { withStyles, CSSProperties } from '@mui/styles';
+import { cn } from 'src/constants/helpers';
 
 const DialogContent = withStyles((theme: Theme) => ({
   root: {
@@ -40,23 +41,17 @@ type DialogContentPropsExtended = DialogContentProps & {
 
 function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...others }: DialogContentPropsExtended) {
   const vh = useViewportDynamicHeight();
-  const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
       <DialogContent
-        // className={`${
-        //   isFooterPresent
-        //     ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
-        //     : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
-        // } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''} truncate-autocomplete`}
-
-        className={`${
-          isFooterPresent ? ' max-[560px]:max-h-[calc(var(--vh)-99px)]' : ' max-[560px]:max-h-[calc(var(--vh)-45px)]'
-        } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''} truncate-autocomplete`}
+        className={cn(
+          'truncate-autocomplete overscroll-contain bg-[--dark-primary,white] px-6 py-5',
+          isFooterPresent ? ' max-[560px]:max-h-[calc(var(--vh)-99px)]' : ' max-[560px]:max-h-[calc(var(--vh)-45px)]',
+          isTablet || isMobile ? 'min-h-[250px]' : ''
+        )}
         style={
           {
             ...style,
-            background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
             '--vh': `${vh}px`
           } as CSSProperties
         }

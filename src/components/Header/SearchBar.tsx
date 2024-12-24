@@ -179,8 +179,6 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
   const arrowDownPressed = useKeyPress({ targetKey: 'ArrowDown' });
   const listContainerRef = React.useRef(null);
 
-  console.log({ arrowUpPressed, arrowDownPressed });
-
   useEffect(() => {
     if (arrowUpPressed) {
       filterDispatch({ type: 'arrowUp', element: listContainerRef.current });

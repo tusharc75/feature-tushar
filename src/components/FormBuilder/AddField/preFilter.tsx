@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useCallback, useEffect, useState } from 'react';
 import { getLookupOption } from '../helper';
 import { debounce, isEmpty, uniqBy } from 'lodash';
@@ -156,7 +156,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
           ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) => values['preFilters'].includes(data.optionValue))
           : []
       }
-      getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+      isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
       onChange={(e, val: any) => {
         setFieldValue('preFilters', val ? val.map((val) => val?.optionValue) : []);
         setInputValues('');
@@ -198,7 +198,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
         disableCloseOnSelect={true}
         id="preFilters"
         options={options}
-        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
         onChange={(e, val) => {
           setFieldValue('preFilters', val && val?.length > 0 ? val?.map((v) => v?.optionValue) : []);
         }}
@@ -229,7 +229,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
           disableCloseOnSelect={true}
           id="lookupPreFilterFields"
           options={prefilterFields ?? []}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           onChange={(e, val) => {
             const updatedValues = val?.map((v) => {
               return {
@@ -271,7 +271,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
                   disableCloseOnSelect={true}
                   id={`lookupPreFilterFields_${index + 1}`}
                   options={lookupOptionsMap[field.fieldName] ?? []}
-                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                   onChange={(e, val) => {
                     const updatedValues = values['lookupPreFilterFields']?.map((ele) => {
                       if (ele.fieldName === field.fieldName) {

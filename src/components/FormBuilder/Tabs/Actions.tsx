@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { getLookupResource, getResourceField } from '../helper';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -222,8 +222,8 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="field"
               options={fields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 fields && fields.filter((data) => data?.fieldName === action?.field).length
                   ? fields && fields.filter((data) => data?.fieldName === action?.field)[0]
@@ -265,8 +265,8 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
             <Autocomplete
               id="resource"
               options={resource}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 resource && resource?.filter((data) => data.optionValue === action?.resource)?.length
                   ? resource && resource?.filter((data) => data.optionValue === action?.resource)[0]
@@ -300,8 +300,8 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
               id="resourceField"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
               value={
                 resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField).length
                   ? resourceFields && resourceFields.filter((data) => data?.fieldName === action?.resourceField)[0]
@@ -343,8 +343,8 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
             <Autocomplete
               id="action"
               options={ACTION}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={
                 ACTION && ACTION?.filter((data) => data.optionValue === action?.action)?.length
                   ? ACTION && ACTION?.filter((data) => data.optionValue === action?.action)[0]

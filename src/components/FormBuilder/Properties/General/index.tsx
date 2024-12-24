@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Fragment, useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fieldLabelToFieldName } from '../../../../constants/helpers';
@@ -210,8 +210,8 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
               <Autocomplete
                 id="lookupResource"
                 options={lookupResource}
-                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={
                   lookupResource && lookupResource?.filter((data) => data.optionValue === values['lookupResource'])?.length
                     ? lookupResource && lookupResource?.filter((data) => data.optionValue === values['lookupResource'])[0]
@@ -273,8 +273,8 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
               <Autocomplete
                 id="dataListId"
                 options={dataList}
-                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option?.optionValue === val}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                 value={
                   dataList && dataList?.filter((data) => data.optionValue === values['dataListId'])?.length
                     ? dataList && dataList?.filter((data) => data.optionValue === values['dataListId'])[0]

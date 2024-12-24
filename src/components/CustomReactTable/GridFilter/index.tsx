@@ -220,7 +220,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                     setSelectedUserFilter(newValue || null);
                     setFormValues(newValue?.filterValue || {});
                   }}
-                  getOptionLabel={(option) => option.title}
+                  getOptionLabel={(option) => option.title || ''}
                   renderOption={(option) => (
                     <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
                       <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
@@ -434,36 +434,33 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           </Button>
         </CustomDialogFooter>
       </Dialog>
-      {
-        isFilterDeleteConfirm.open && (
-          <ConfirmationDialog
-            open={true}
-            message={`Are you sure you want to delete ?`}
-            onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
-            onOk={handleDeleteUserFilter}
-          />
-        )
-      }
-      {
-        isSaveFilter.open && (
-          <SaveFilterDialog
-            handleClose={() => {
-              setIsSaveFilter({ open: false, data: null });
-            }}
-            columns={coloums}
-            resource={resource}
-            handleSucess={() => {
-              setIsSaveFilter({ open: false, data: null });
-              setFormValues({});
-              fetchUserFilters();
-              setSelectedUserFilter(null);
-            }}
-            filterData={isSaveFilter.data}
-            filterValue={formValues}
-          />
-        )
-      }
-    </>);
+      {isFilterDeleteConfirm.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
+          onOk={handleDeleteUserFilter}
+        />
+      )}
+      {isSaveFilter.open && (
+        <SaveFilterDialog
+          handleClose={() => {
+            setIsSaveFilter({ open: false, data: null });
+          }}
+          columns={coloums}
+          resource={resource}
+          handleSucess={() => {
+            setIsSaveFilter({ open: false, data: null });
+            setFormValues({});
+            fetchUserFilters();
+            setSelectedUserFilter(null);
+          }}
+          filterData={isSaveFilter.data}
+          filterValue={formValues}
+        />
+      )}
+    </>
+  );
 }
 
 export default GridFilter;

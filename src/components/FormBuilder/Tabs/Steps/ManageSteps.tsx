@@ -11,7 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { object, string } from 'yup';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { getLookupResource, getResourceField } from '../../helper';
 import StepActions from './StepActions';
 import ConfigureField from 'src/components/FormBuilder/Tabs/Steps/ConfigureField';
@@ -193,8 +193,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                       multiple
                       disableCloseOnSelect
                       options={MATERIAL_TYPE}
-                      getOptionLabel={(option: any) => (option ? startCase(option) : '')}
-                      getOptionSelected={(option: any, val) => option === val}
+                      getOptionLabel={(option: any) => (option ? startCase(option) || '' : '')}
+                      isOptionEqualToValue={(option: any, val) => option === val}
                       value={values['linkedMaterial']}
                       onChange={(e: any, value) => {
                         setFieldValue('linkedMaterial', value);
@@ -236,8 +236,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                       <Autocomplete
                         id="linkResourceName"
                         options={resourceOption}
-                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                         value={
                           resourceOption && resourceOption?.filter((data) => data.optionValue === values['linkResourceName'])?.length
                             ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['linkResourceName'])[0]
@@ -267,8 +267,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                         id="linkResourceField"
                         options={resourceFieldOption?.filter((e) => e?.lookup)}
                         disabled={resourceFieldsLoading}
-                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                        getOptionSelected={(option: any, val) => option?.fieldName === val}
+                        getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                        isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                         value={
                           resourceFieldOption && resourceFieldOption.filter((data) => data?.fieldName === values['linkResourceField']).length
                             ? resourceFieldOption && resourceFieldOption.filter((data) => data?.fieldName === values['linkResourceField'])[0]

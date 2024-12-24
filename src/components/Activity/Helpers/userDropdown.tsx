@@ -103,18 +103,18 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
         options={users ? users : []}
         getOptionLabel={(option) => {
           if (typeof option === 'string') {
-            return option;
+            return option || '';
           }
 
           if (!Array.isArray(option)) {
-            return option.name;
+            return option.name || '';
           }
 
           return '';
         }}
         freeSolo
         limitTags={5}
-        getOptionSelected={(opt, val) => {
+        isOptionEqualToValue={(opt, val) => {
           return opt.userId === val.userId;
         }}
         filterSelectedOptions={false}

@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { TextField, Box } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';

@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -341,14 +341,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -744,12 +744,11 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -813,7 +812,7 @@ const LeftSideContent = ({
             className={`w-full lg:w-[230px]`}
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productCategoryList.filter((data) => data._id === productCategory).length
                 ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -833,7 +832,7 @@ const LeftSideContent = ({
             options={productFilterList}
             size="small"
             getOptionLabel={(option: any) => (option ? option.productName : '')}
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productFilterList.filter((data) => data._id === productFilter).length
                 ? productFilterList.filter((data) => data._id === productFilter)[0]
@@ -849,7 +848,7 @@ const LeftSideContent = ({
           className={`w-full lg:w-[230px]`}
           options={warehouseOptions}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
               ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]

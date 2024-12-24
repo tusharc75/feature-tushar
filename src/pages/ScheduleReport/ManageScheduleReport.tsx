@@ -495,7 +495,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option.title}
-                          getOptionSelected={(option, value) => option.value === value.value}
+                          isOptionEqualToValue={(option, value) => option.value === value.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
@@ -534,7 +534,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           multiple
                           size="small"
                           value={values.filters}
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           onChange={(_, newVal) => {
                             setFieldValue('filters', newVal);
@@ -580,7 +580,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           multiple
                           size="small"
-                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
                           getOptionLabel={(option) => option.fieldLabel}
                           value={values.column}
                           onChange={(_, newVal) => setFieldValue('column', newVal)}
@@ -619,7 +619,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option, value) => option === value}
+                          isOptionEqualToValue={(option, value) => option === value}
                           value={values.reportAction}
                           onChange={(_, newVal) => setFieldValue('reportAction', newVal)}
                           renderInput={(params) => (
@@ -641,7 +641,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
-                          getOptionSelected={(option, value) => option === value}
+                          isOptionEqualToValue={(option, value) => option === value}
                           value={values.fileType}
                           onChange={(_, newVal) => setFieldValue('fileType', newVal)}
                           renderInput={(params) => (
@@ -669,7 +669,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             multiple
                             size="small"
                             getOptionLabel={(option) => option.name}
-                            getOptionSelected={(option, value) => option.userId === value.userId}
+                            isOptionEqualToValue={(option, value) => option.userId === value.userId}
                             value={values.subscribeUsers}
                             onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
                             renderInput={(params) => (
@@ -693,7 +693,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             fullWidth
                             size="small"
                             getOptionLabel={(option) => option.optionLabel}
-                            getOptionSelected={(option, value) => option.optionValue == value}
+                            isOptionEqualToValue={(option, value) => option.optionValue == value}
                             value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
                             onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (
@@ -797,7 +797,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           options={getTimeOption()}
                           fullWidth
                           size="small"
-                          getOptionSelected={(option, val) => option === val}
+                          isOptionEqualToValue={(option, val) => option === val}
                           getOptionLabel={(option) => option ?? ''}
                           value={values.time}
                           onChange={(_, newVal) => {

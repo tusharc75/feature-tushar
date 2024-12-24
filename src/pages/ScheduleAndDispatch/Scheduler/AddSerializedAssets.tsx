@@ -139,7 +139,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               options={warehouseOptions}
               getOptionLabel={(option: any) => option.optionLabel}
               disableClearable
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={warehouseOptions?.find((data) => data.optionValue === selectedWarehouse) ?? ''}
               onChange={(e, val) => {
                 if (val !== null) {
@@ -165,7 +165,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
               className="md:max-w-[250px]"
               options={productOptions}
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
+              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
               value={productOptions?.find((data) => data.optionValue === selectedProduct) ?? ''}
               onChange={(e, val) => {
                 setSelectedProduct(val && val.optionValue ? val.optionValue : '');

@@ -14,7 +14,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -575,7 +575,7 @@ const LeftSideContents = ({
             disabled={loadingResources}
             options={resourceData}
             getOptionLabel={(option: any) => option.optionLabel || ''}
-            getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+            isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
             className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
             value={selectedResourceData}
             onChange={(event, newValue) => {

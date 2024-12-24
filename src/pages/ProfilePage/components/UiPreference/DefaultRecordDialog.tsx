@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../../axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { FieldArray, Form, Formik } from 'formik';

@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -167,7 +167,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                       onChange={(event: any, newValue: any) => {
                         setFieldValue('sortBy', newValue?.fieldName || '');
                       }}
-                      getOptionLabel={(option: any) => option.fieldLabel}
+                      getOptionLabel={(option: any) => option.fieldLabel || ''}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField
@@ -190,7 +190,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                       value={values['orderBy']}
                       id="order-by"
                       options={orderByOptions}
-                      getOptionLabel={(option: any) => startCase(option)}
+                      getOptionLabel={(option: any) => startCase(option) || ''}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField

@@ -22,7 +22,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
@@ -332,7 +332,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
             id={'select-product-dropdown'}
             value={selectedProductOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+            isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
             onChange={(_, val) => {
               let value = val;
               if (!val) {

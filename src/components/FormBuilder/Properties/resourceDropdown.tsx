@@ -32,7 +32,7 @@ export const ResourceDropdown = ({ type, lookupResource = '', value, options = [
         <Autocomplete
           id="tags-filled"
           options={lookupOption}
-          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionLabel={(option: any) => (option ? option.optionLabel || '' : '')}
           value={
             value && type === 'multiSelect'
               ? lookupOption?.filter((data) =>

@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { uniq, map } from 'lodash';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -425,7 +425,7 @@ const ProductTemplate = () => {
                           options={[{ _id: 'Select All', name: 'Select All' }, ...productCategory]}
                           multiple
                           getOptionLabel={(option: any) => (option ? option.name : '')}
-                          getOptionSelected={(option: any, val) => option._id === val}
+                          isOptionEqualToValue={(option: any, val) => option._id === val}
                           className="autocomplete-with-chip"
                           value={
                             productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id)).length
@@ -514,8 +514,8 @@ const ProductTemplate = () => {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -547,8 +547,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -582,8 +582,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (

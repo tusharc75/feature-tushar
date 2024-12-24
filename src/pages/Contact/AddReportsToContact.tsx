@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, TextField, CircularProgress } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Formik, Form } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import { object } from 'yup';
@@ -57,7 +57,7 @@ export default function AddReportsToContact({ open, isSubmitting, onClose, conta
                       options={contactsList.filter((o) => Boolean(!o.isExclude))}
                       autoHighlight
                       getOptionLabel={(option: any) => option.concatedName || ''}
-                      getOptionSelected={(option: any, val: any) => (option ? option._id === val._id : false)}
+                      isOptionEqualToValue={(option: any, val: any) => (option ? option._id === val._id : false)}
                       onChange={(_, val: any) => {
                         setFieldValue('addContact', val);
                       }}
@@ -83,7 +83,7 @@ export default function AddReportsToContact({ open, isSubmitting, onClose, conta
                       options={reportsToOption}
                       autoHighlight
                       getOptionLabel={(option: any) => option?.concatedName || ''}
-                      getOptionSelected={(option: any, val: any) => (option ? option?._id === val?._id : false)}
+                      isOptionEqualToValue={(option: any, val: any) => (option ? option?._id === val?._id : false)}
                       onChange={(_, val: any) => {
                         setFieldValue('reportsToContact', val);
                       }}

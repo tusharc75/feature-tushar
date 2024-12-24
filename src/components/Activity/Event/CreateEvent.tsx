@@ -1,7 +1,7 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { ArrowRightAlt } from '@mui/icons-material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import axios, { CancelTokenSource } from 'axios';
@@ -76,7 +76,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setInitialValues({
         name: '',
@@ -269,7 +269,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       <Box mt={2}>
                         <Autocomplete
                           options={resourceOptions}
-                          getOptionLabel={(option) => option.optionLabel}
+                          getOptionLabel={(option) => option.optionLabel || ''}
                           value={resource}
                           fullWidth
                           onChange={(event, newValue) => {
@@ -283,8 +283,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           <Autocomplete
                             disabled={loadingResources}
                             options={resourceData}
-                            getOptionLabel={(option: any) => option.optionLabel}
-                            getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+                            getOptionLabel={(option: any) => option.optionLabel || ''}
+                            isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
                             fullWidth
                             value={selectedResourceData}
                             onChange={(event, newValue) => {

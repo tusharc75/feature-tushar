@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -99,14 +99,14 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       disableCloseOnSelect={true}
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       getOptionLabel={(option: any) => {
-        return option ? option?.optionLabel : '';
+        return option ? option?.optionLabel || '' : '';
       }}
       value={
         cellValue
           ? uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')?.filter((data: any) => cellValue?.includes(data.optionValue))
           : []
       }
-      getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+      isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
       onChange={(e, val: any) => {
         setCellValue(val ? val.map((val) => val?.optionValue) : []);
         setInputValues('');
@@ -159,8 +159,8 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       options={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue')}
       fullWidth
       loading={loading}
-      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-      getOptionSelected={(option: any, val) => option?.optionValue === val}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+      isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
       value={uniqBy([...columnDef?.option, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === cellValue) || ''}
       onChange={(e, val) => {
         setCellValue(val?.optionValue || '');
