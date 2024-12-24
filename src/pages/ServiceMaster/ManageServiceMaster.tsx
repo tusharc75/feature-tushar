@@ -32,7 +32,7 @@ const ManageServiceMaster = ({
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const ref = useRef(null);
   const walkmeInstance = useGetWalkmeInstance();
@@ -181,7 +181,7 @@ const ManageServiceMaster = ({
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
               <CustomDialogHeader
-                title={serviceMasterId ? (isClone ? 'Clone' : `Update ${serviceMasterManage?.serviceName}`) : 'Create ' + routes.serviceMaster.title}
+                title={serviceMasterId ? (isClone ? 'Clone' : `Update ${serviceMasterManage?.serviceName}`) : 'Create ' + resources?.serviceMaster?.titleSingular}
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);

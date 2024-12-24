@@ -1,11 +1,11 @@
 import { Box, Button, Grid, useMediaQuery } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -120,29 +120,28 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.product?.isUpdate && !isMobile && (
-                  <Button
-                    variant={isMobile ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
+                {permissions?.serviceMaster?.isUpdate && !isMobile && (
+                  <ThemeButton
+                    variant={'outlined'}
                     onClick={() => {
                       setOpenConfigureFields(true);
                     }}
+                    tooltip={'Configure Fields'}
                   >
-                    Configure Fields
-                  </Button>
+                    {'Configure Fields'}
+                  </ThemeButton>
                 )}
-                {permissions?.product?.isUpdate && (
-                  <Button
-                    variant={isMobile ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
+                {permissions?.serviceMaster?.isUpdate && (
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
+                    variant={'outlined'}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
+                    tooltip={'Edit'}
                   >
-                    {isMobile ? <Edit /> : 'Edit'}
-                  </Button>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
