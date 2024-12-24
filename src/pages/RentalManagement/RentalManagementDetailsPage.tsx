@@ -499,16 +499,15 @@ const RentalManagementDetailsPage = () => {
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
-                        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
-                          <ThemeButton
-                            disabled={allowedToEdit ? false : true}
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            onClick={handleOpenUpdateDialog}
-                            id={'rental-management-edit-button'}
-                          >
-                            {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                          </ThemeButton>
-                        </HtmlTooltip>
+                        <ThemeButton
+                          disabled={allowedToEdit ? false : true}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          onClick={handleOpenUpdateDialog}
+                          tooltip={!allowedToEdit ? ownerAndColaborator : 'Edit'}
+                          id={'rental-management-edit-button'}
+                        >
+                          {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                        </ThemeButton>
                       </Fragment>
                     )}
                 </Fragment>
