@@ -9,7 +9,7 @@ import useScheduar from 'src/pages/ScheduleAndDispatch/Scheduler/useScheduar';
 
 const Scheduler = () => {
   const state = useScheduar();
-  const { activeTab, tabs, isMobile } = state;
+  const { activeTab, tabs, isMobile, activeTabIndex } = state;
   const tabsRef = useRef<Record<TabKey, HTMLLIElement>>({
     assets: null,
     services: null,
@@ -30,7 +30,7 @@ const Scheduler = () => {
       >
         <ul className=" flex gap-[--gap] max-md:w-min max-md:flex-row md:flex-col">
           {tabs.map((t, index) => {
-            const isActive = activeTab?.key === t.key;
+            const isActive = index <= activeTabIndex;
             return (
               <li
                 ref={(d) => (tabsRef.current[t.key] = d)}
