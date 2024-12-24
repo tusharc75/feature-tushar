@@ -1,6 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { DialogTitle, IconButton, Typography } from '@mui/material';
-
+import { DialogTitle, IconButton } from '@mui/material';
 import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
@@ -22,7 +21,7 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => {},
+  onMinimizeMaximize = () => { },
   style = {},
   additionalTitle = null
 }: CustomDialogHeaderProps) {

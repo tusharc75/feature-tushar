@@ -45,7 +45,7 @@ function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...
     <React.Fragment>
       <DialogContent
         className={cn(
-          'truncate-autocomplete overscroll-contain bg-[--dark-primary,white] px-6 py-5',
+          'truncate-autocomplete overscroll-contain bg-[--dark-primary,white] px-4 py-3',
           isFooterPresent ? ' max-[560px]:max-h-[calc(var(--vh)-99px)]' : ' max-[560px]:max-h-[calc(var(--vh)-45px)]',
           isTablet || isMobile ? 'min-h-[250px]' : ''
         )}
