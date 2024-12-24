@@ -1,9 +1,10 @@
-import { Box, Button, Dialog, TextField, makeStyles } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
 import { useState } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -1,7 +1,7 @@
-import { Box, CircularProgress } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import Grid from '@material-ui/core/Grid';
+import { Box, CircularProgress } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog/Dialog';
+import Grid from '@mui/material/Grid';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';

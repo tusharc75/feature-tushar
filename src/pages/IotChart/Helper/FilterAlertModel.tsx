@@ -1,5 +1,5 @@
-import { Box, Checkbox, FormControlLabel, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Checkbox, FormControlLabel, Grid, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 
 export default function FilterAlertModel({
   alertOptions,

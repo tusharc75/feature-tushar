@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Box, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
+import { Box, IconButton, ThemeOptions, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Delete, Edit } from '@material-ui/icons';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';

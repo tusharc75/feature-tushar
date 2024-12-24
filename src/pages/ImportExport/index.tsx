@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Grid, Button, CircularProgress, Typography, IconButton } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
+import { Box, Grid, Button, CircularProgress, Typography, IconButton } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -432,7 +432,7 @@ const ImportExport = () => {
           </Grid>
         </Grid>
         <Box>
-          {columns ?
+          {columns ? (
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
@@ -442,10 +442,12 @@ const ImportExport = () => {
               refreshGrid={fetchLogs}
               isClientSideGrid={true}
               hideSelection={true}
-            /> : <Box p={2} height={500}>
+            />
+          ) : (
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-          }
+          )}
           {customImportDialog && (
             <CustomImport
               open={customImportDialog}

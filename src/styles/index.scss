@@ -4486,7 +4486,14 @@ body .btn-outline-red-v1 {
     }
   }
 }
-
+.main-sidebar {
+  .MuiToolbar-root {
+    @media all and (max-width: 959px) {
+      width: 0px !important;
+      height: 0px !important;
+    }
+  }
+}
 .has-mobile-step {
   .detail-container-v1,
   .detail-container {
@@ -4696,13 +4703,14 @@ td.google-visualization-orgchart-node {
     padding: 6px 10px;
   }
 }
-
-.hide-scrollbar {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+@layer components {
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
 }
 .site-breadcrumb {
   li[aria-hidden='true'] {

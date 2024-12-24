@@ -1,5 +1,5 @@
-import { Box, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, groupBy } from 'lodash';
 import { useEffect, useState } from 'react';

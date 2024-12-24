@@ -14,8 +14,8 @@ import {
   Box,
   Typography,
   TextField
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+} from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -40,14 +40,16 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
   const fetchCalculatePrice = () => {
     const data: any = {};
     data.conditionType = [PRICING_SETUP_TYPE.rent];
-    data.material = material.filter((d) => (d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
-      materialId: ele?.materialId,
-      materialType: ele?.type,
-      qty: ele?.qty,
-      pricingMethod: ele?.pricingMethod?.split(',')[0],
-      unit: ele?.unit,
-      currency: referenceData?.currency
-    }));
+    data.material = material
+      .filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)
+      .map((ele) => ({
+        materialId: ele?.materialId,
+        materialType: ele?.type,
+        qty: ele?.qty,
+        pricingMethod: ele?.pricingMethod?.split(',')[0],
+        unit: ele?.unit,
+        currency: referenceData?.currency
+      }));
     data.supplier = [];
     data.customer = [referenceData?.customerAccount?.optionValue];
     data.warehouse = [referenceData?.warehouse?.optionValue];

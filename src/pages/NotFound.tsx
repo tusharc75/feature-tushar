@@ -1,20 +1,20 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { Box, Container, Typography, Button } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
+import { makeStyles } from '@mui/styles';
+import { Box, Container, Typography, Button } from '@mui/material';
+import { useHistory } from 'react-router-dom';
 
-import Footer from "../components/Footer";
+import Footer from '../components/Footer';
 
 const useStyles = makeStyles((theme) => ({
   heading: {
     color: theme.palette.primary.main,
-    fontWeight: "bold",
-    fontSize: "150px",
+    fontWeight: 'bold',
+    fontSize: '150px'
   },
   subtext: {
     color: theme.palette.primary.main,
-    fontWeight: "bold",
-    fontSize: "50px",
-  },
+    fontWeight: 'bold',
+    fontSize: '50px'
+  }
 }));
 
 const NotFound = () => {
@@ -22,13 +22,7 @@ const NotFound = () => {
   const classes = useStyles();
   return (
     <Container maxWidth="md">
-      <Box
-        marginY={5}
-        textAlign="center"
-        height="85vh"
-        display="flex"
-        flexDirection="column"
-      >
+      <Box marginY={5} textAlign="center" height="85vh" display="flex" flexDirection="column">
         <Box>
           <Typography className={classes.heading} component="h1" variant="h1">
             404
@@ -39,7 +33,7 @@ const NotFound = () => {
         </Box>
 
         <Box marginTop={5}>
-          <Button color="primary" onClick={() => history.push("/")}>
+          <Button color="primary" onClick={() => history.push('/')}>
             Go Back
           </Button>
           <Box component="span" marginX={2} />

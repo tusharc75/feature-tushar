@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';

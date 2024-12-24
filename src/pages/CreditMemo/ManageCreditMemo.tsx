@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -19,10 +19,9 @@ import { FaDiceOne } from 'react-icons/fa';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
-
   const history = useHistory();
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -72,12 +71,17 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
         }
         tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
 
-        let referenceData: any = {}
+        let referenceData: any = {};
         if (invoiceData) {
           const responseFieldResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource?.invoice}`);
           const invoiceField = responseFieldResponce?.data?.data;
-          referenceData = cloneResourceData(invoiceField.map((d: any) => d.fieldData), fieldsDataForCreate, invoiceData, user.user?.brandCurrency);
-          referenceData.invoice = invoiceData?._id
+          referenceData = cloneResourceData(
+            invoiceField.map((d: any) => d.fieldData),
+            fieldsDataForCreate,
+            invoiceData,
+            user.user?.brandCurrency
+          );
+          referenceData.invoice = invoiceData?._id;
           if (referenceData) {
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
@@ -167,12 +171,13 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${creditMemoId
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
-                  : `Create ${resources?.creditMemo?.titleSingular}`
-                  }`}
+                title={`${
+                  creditMemoId
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
+                    : `Create ${resources?.creditMemo?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

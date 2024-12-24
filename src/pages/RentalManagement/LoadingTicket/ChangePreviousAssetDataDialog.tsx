@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import { useEffect, useState } from 'react';

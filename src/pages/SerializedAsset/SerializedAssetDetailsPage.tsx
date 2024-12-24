@@ -1,9 +1,9 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import { Box, Button, Grid } from '@mui/material';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import BuildIcon from '@material-ui/icons/Build';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { round, startCase } from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
@@ -157,10 +157,7 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
-        setCustomizedRoutes([
-          { ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural },
-          { title: `${data?.assetNumber ?? ''}` }
-        ]);
+        setCustomizedRoutes([{ ...routes.serializedAsset, title: resources?.serializedAsset?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
         setCustomizedRoutes([{ ...routes.iotChart, title: resources?.iotChart?.titlePlural }, { title: `${data?.assetNumber ?? ''}` }]);
       }
@@ -284,7 +281,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

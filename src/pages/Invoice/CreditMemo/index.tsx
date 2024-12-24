@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { camelCase, set, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,9 +22,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-
 function CreditMemo({ invoiceData, allowedToEdit }) {
-
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -106,7 +104,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const fetchFields = async () => {
     try {
@@ -293,7 +291,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             Create
           </Button>
         )}
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
           {allowedToEdit && (
             <Button

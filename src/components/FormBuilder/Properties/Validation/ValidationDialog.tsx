@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

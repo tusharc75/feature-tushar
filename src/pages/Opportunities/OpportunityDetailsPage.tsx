@@ -1,6 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { cloneDeep } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -555,7 +555,9 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]} />
+            <CustomBreadCrumbs
+              routes={[{ ...routes.opportunity, title: resources?.opportunity?.titlePlural }, { title: opportunityData?.opportunityName }]}
+            />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
@@ -728,7 +730,7 @@ function OpportunityDetailsPage() {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}           
+            message={`Are you sure you want to delete ${resources?.opportunity?.titleSingular?.toLowerCase()} : ${opportunityData?.opportunityName || ''} ?`}
             onClose={() => setShowConfirmBox(false)}
             onOk={handleDeleteOpportunity}
           />

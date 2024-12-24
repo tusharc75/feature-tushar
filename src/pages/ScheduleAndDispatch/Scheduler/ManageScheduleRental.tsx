@@ -1,17 +1,18 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Form, Formik } from 'formik';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import InputField from 'src/components/Helpers/InputField';
 import { GenerateResourceLineNumber, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
-import { CollapsibleWrapper, ACCORDION_TYPE } from 'src/pages/ScheduleAndDispatch/Scheduler/helper';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 
-const ManageScheduleRental = ({ isExpand, handleSave, loading, handleOpen, user }) => {
+const ManageScheduleRental = ({ schedularState }: SchedularComponentProps) => {
+  const { loading, setActiveTab, handleSave, getTabData, toastConfig, user } = schedularState;
+  const tabData = useMemo(() => getTabData('customerDetail'), [getTabData]);
+
   const [initialData, setInitialData] = useState({ fields: [], values: null });
-  const toastConfig = useContext(CustomToastContext);
   useEffect(() => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.rentalManagement}`)
@@ -47,17 +48,12 @@ const ManageScheduleRental = ({ isExpand, handleSave, loading, handleOpen, user 
 
   return (
     <>
-      <CollapsibleWrapper
-        index={4}
-        title={'Customer Detail'}
-        isExpand={isExpand}
-        accordionType={ACCORDION_TYPE.customerDetail}
-        handleOpen={handleOpen}
-      >
-        {initialData?.fields?.length ? (
-          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData?.fields)} validateOnMount onSubmit={handleSubmit}>
-            {({ values, errors, touched, setFieldValue, submitForm }) => (
-              <Fragment>
+      <h6 className="mb-[18px] text-xl font-semibold leading-6">{tabData?.label}</h6>
+      {initialData?.fields?.length ? (
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData?.fields)} validateOnMount onSubmit={handleSubmit}>
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <>
+              <div className="min-h-[--loader-h]">
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
                     errors={errors}
@@ -69,41 +65,41 @@ const ManageScheduleRental = ({ isExpand, handleSave, loading, handleOpen, user 
                     fullWidth
                   />
                 </Form>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    disabled={false}
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      handleOpen('technician');
-                    }}
-                  >
-                    Back
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
-                    disabled={loading}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      submitForm();
-                    }}
-                  >
-                    Save
-                  </CustomButton>
-                </div>
-              </Fragment>
-            )}
-          </Formik>
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </CollapsibleWrapper>
+              </div>
+              <div className="flex  justify-end gap-2">
+                <Button
+                  disabled={false}
+                  type="button"
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                   schedularState?.tabs?.find((t)=>t.key==='technicians')?.show ? setActiveTab('technicians') : setActiveTab('services');
+                  }}
+                >
+                  Back
+                </Button>
+                <CustomButton
+                  loading={loading}
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    submitForm();
+                  }}
+                >
+                  Save
+                </CustomButton>
+              </div>
+            </>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} className="h-[--loader-h]">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';

@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link } from '@material-ui/core';
+import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link } from '@mui/material';
 import { ASSET_NUMBER_TYPE, CustomDialogTransition, sublease } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

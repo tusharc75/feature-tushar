@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -17,7 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 
 const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -139,7 +139,7 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                      : `Create ${resources?.surveys?.titleSingular}`
+                    : `Create ${resources?.surveys?.titleSingular}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

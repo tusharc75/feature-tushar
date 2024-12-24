@@ -1,4 +1,4 @@
-import { Box, Grid, Typography, Paper } from '@material-ui/core';
+import { Box, Grid, Typography, Paper } from '@mui/material';
 import styles from './dashboard.module.scss';
 
 const StaticCards = ({ chartData }: any) => {

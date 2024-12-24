@@ -3,7 +3,7 @@ import { getObjKeys, sidebarResource, getObjKeysWithValues, CustomDialogTransiti
 import { useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

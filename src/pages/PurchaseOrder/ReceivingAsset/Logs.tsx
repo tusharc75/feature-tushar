@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@mui/material';
 import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -118,19 +118,23 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
     <Dialog fullWidth fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`Logs - ${detail}`} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
-        {columns ? <CustomReactTable
-          height={'calc(100vh - 200px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-          refreshGrid={() => { }}
-          hideAction={true}
-          hideSelection={true}
-        /> : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={() => {}}
+            hideAction={true}
+            hideSelection={true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
     </Dialog>
   );

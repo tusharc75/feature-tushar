@@ -2,13 +2,13 @@ import { CSS } from '@dnd-kit/utilities';
 import { ECOM_SECTIONS } from 'src/constants/helpers';
 
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { DragIndicator } from '@material-ui/icons';
 
 const Sidebar = () => {
   return (
     <SortableContext items={ECOM_SECTIONS.map((d) => d._id)}>
-      <ul className=" list-none container-with-border p-4 space-y-2">
+      <ul className=" container-with-border list-none space-y-2 p-4">
         {ECOM_SECTIONS.map((item, index) => {
           return <SidebarItem item={item} key={item._id} index={index} />;
         })}
@@ -34,12 +34,12 @@ export const SidebarItem = ({ item, index }) => {
   };
   return (
     <li
-      className="list-none p-2 [border:1px_solid_var(--common-border-color)] bg-[var(--dark-secondary,white)] flex justify-between gap-2 items-center"
+      className="flex list-none items-center justify-between gap-2 bg-[var(--dark-secondary,white)] p-2 [border:1px_solid_var(--common-border-color)]"
       style={style}
       ref={setNodeRef}
     >
       {item.label}
-      <IconButton size="small" {...attributes} {...listeners} className=" !cursor-grab drag-handle">
+      <IconButton size="small" {...attributes} {...listeners} className=" drag-handle !cursor-grab">
         <DragIndicator />
       </IconButton>
     </li>

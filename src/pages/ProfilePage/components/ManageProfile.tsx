@@ -12,9 +12,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  makeStyles
-} from '@material-ui/core';
+  Typography
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Image } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { cloneDeep } from 'lodash';

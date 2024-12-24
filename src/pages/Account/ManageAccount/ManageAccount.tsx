@@ -1,5 +1,5 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid, IconButton } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import { Form, Formik } from 'formik';

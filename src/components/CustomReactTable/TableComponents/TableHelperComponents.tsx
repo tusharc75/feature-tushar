@@ -1,8 +1,8 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@mui/material';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';

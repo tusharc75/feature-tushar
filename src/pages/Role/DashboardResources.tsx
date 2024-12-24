@@ -1,5 +1,5 @@
-import { Box, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 
 const DashboardResources = ({ dashboardList, dashboardName, setDashboardName, isEdit }) => {
   return (

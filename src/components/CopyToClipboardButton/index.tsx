@@ -1,5 +1,5 @@
-import { IconButton, IconButtonProps, SvgIconTypeMap } from '@material-ui/core';
-import { OverridableComponent } from '@material-ui/core/OverridableComponent';
+import { IconButton, IconButtonProps, SvgIconTypeMap } from '@mui/material';
+import { OverridableComponent } from '@mui/material/OverridableComponent';
 import { DoneAllOutlined, FileCopyOutlined } from '@material-ui/icons';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

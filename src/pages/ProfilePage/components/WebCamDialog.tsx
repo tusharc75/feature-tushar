@@ -1,15 +1,15 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import Webcam from 'react-webcam';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 
 const WebCamDialog = ({ open, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);

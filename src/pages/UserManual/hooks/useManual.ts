@@ -1,4 +1,4 @@
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@mui/material';
 import { uniq } from 'lodash';
 import { useCallback, useContext, useEffect, useReducer } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -78,7 +78,7 @@ const useManual = () => {
       const parsedUrl = createURl(url);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
-  
+
       if (scrollKey) {
         setTimeout(() => {
           const element = document.querySelector(scrollKey);
@@ -89,7 +89,6 @@ const useManual = () => {
       }
     }
   }, []);
-  
 
   useEffect(() => {
     const handlePopstate = () => {

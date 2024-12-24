@@ -40,6 +40,17 @@ export const getLabel = (field: ColumnDefaultT, values: { field: string; term: s
         </HtmlTooltip>
       );
     }
+    if (typeof value === 'object' && !field?.multiple) {
+      if (Object.keys(value).length) {
+        return (
+          <HtmlTooltip title={startCase(value ? value['optionLabel'] : '')}>
+            <span>1</span>
+          </HtmlTooltip>
+        );
+      }
+      return '';
+    }
+
     if (typeof value === 'object' || Object.keys(value).length) {
       return Object.keys(value).length;
     }
@@ -75,6 +86,7 @@ type ColumnDefaultT = {
   resource: string;
   type: string;
   lookup?: boolean;
+  multiple?: boolean;
 };
 
 export const getErrors = (

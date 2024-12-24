@@ -1,4 +1,4 @@
-import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@material-ui/core';
+import { Dialog, FormControl, IconButton, MenuItem, Select, useMediaQuery } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { uniqBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
@@ -103,9 +103,9 @@ const Filter = ({
   const handleClearAllFilter = () => {
     const newDeepFilter = deepFilters.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
     const newFilterByIds = filterByIds.filter((f) => defaultColumnsMap[f.field.replace('from_', '').replace('to_', '')]);
-    setDeepFilters(newDeepFilter);
-    setFilterByIds(newFilterByIds);
-    setFilterTerm({});
+    if (setDeepFilters) setDeepFilters(newDeepFilter);
+    if (setFilterByIds) setFilterByIds(newFilterByIds);
+    if (setFilterTerm) setFilterTerm({});
     // onApplyFilter(newDeepFilter, newFilterByIds);
   };
 

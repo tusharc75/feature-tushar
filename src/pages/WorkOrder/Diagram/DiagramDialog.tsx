@@ -1,4 +1,4 @@
-import { Dialog, Grid } from '@material-ui/core';
+import { Dialog, Grid } from '@mui/material';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

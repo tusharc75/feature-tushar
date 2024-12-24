@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { HiOutlinePhotograph } from 'react-icons/hi';
@@ -74,7 +74,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   };
 
   const handleUploadFile = async (ev) => {
-
     setToastConfig({
       open: true,
       type: 'info',
@@ -94,7 +93,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           break;
         }
 
-        getFileUrl(file, "", {});
+        getFileUrl(file, '', {});
       }
       ev.target.value = '';
     }
@@ -338,9 +337,8 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             });
             editor.ui.registry.addButton('uploadDocument', {
               text: 'Upload Document',
-              onAction: (e) => handleUploadFileClick(e),
+              onAction: (e) => handleUploadFileClick(e)
             });
-
           },
 
           skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',

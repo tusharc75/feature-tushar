@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, sidebarResource } from '../../../constants/helpers';
 import ResourceLogsGrid from 'src/pages/ResourceLogs/ResourceLogsGrid';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

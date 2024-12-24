@@ -1,8 +1,8 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@mui/material';
+import ListItem from '@mui/material/ListItem/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineMail } from 'react-icons/ai';
@@ -183,7 +183,7 @@ const ContactDetailsPage = (props) => {
           { id: data?.accountName?.optionValue, type: accountResource }
         ]);
         setCustomizedRoutes([contactBreadcrumb, { title: [data.firstName, data.lastName].filter((d) => d).join(' ') }]);
-        setContactName([data.firstName, data.lastName].filter((d) => d).join(' '))
+        setContactName([data.firstName, data.lastName].filter((d) => d).join(' '));
         let orgChartData = [];
         let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {

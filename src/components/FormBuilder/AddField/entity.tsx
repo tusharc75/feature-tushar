@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Box from '@material-ui/core/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Checkbox, FormControlLabel } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 
 export const Entity = ({ values, setFieldValue, touched, errors }) => {

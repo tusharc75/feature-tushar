@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box } from '@material-ui/core';
+import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -182,7 +182,7 @@ export default function ManageUserDialog({
                     fullWidth
                     resource={sidebarResource.user}
                     referenceId={userId || null}
-                    collaborateTools = {true}
+                    collaborateTools={true}
                   />
                 </Form>
               </CustomDialogContent>

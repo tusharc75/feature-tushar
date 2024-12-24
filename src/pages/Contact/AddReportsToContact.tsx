@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Box, Button, TextField, CircularProgress } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, TextField, CircularProgress } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { Formik, Form } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import { object } from 'yup';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const ReportsToContact = object().shape({

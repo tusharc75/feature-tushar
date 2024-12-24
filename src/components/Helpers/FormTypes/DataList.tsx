@@ -1,5 +1,5 @@
-import { Box, CircularProgress, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, CircularProgress, Grid, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { debounce, uniqBy } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

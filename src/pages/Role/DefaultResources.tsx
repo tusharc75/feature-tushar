@@ -1,5 +1,5 @@
-import { Box, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 
 const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit }) => {
   return (
@@ -11,9 +11,10 @@ const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit 
           options={resourceList}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
           getOptionSelected={(option: any, val) => option.optionValue === val}
-          value={resourceList && resourceList?.filter((data) => data.optionValue === resourceName)?.length
-            ? resourceList && resourceList?.filter((data) => data.optionValue === resourceName)[0]
-            : ''
+          value={
+            resourceList && resourceList?.filter((data) => data.optionValue === resourceName)?.length
+              ? resourceList && resourceList?.filter((data) => data.optionValue === resourceName)[0]
+              : ''
           }
           onChange={(_event, newValue) => setResourceName(newValue && newValue?.optionValue ? newValue.optionValue : '')}
           renderInput={(params) => <TextField {...params} variant="outlined" label="Default Resource" placeholder="Resources" margin="dense" />}

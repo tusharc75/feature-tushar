@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import { AddCircleOutline, Autorenew, Visibility } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
 import { camelCase } from 'lodash';
@@ -35,7 +35,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: {resources }
+    state: { resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });

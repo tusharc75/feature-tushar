@@ -1,5 +1,5 @@
-import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
 import { lowerCase, startCase } from 'lodash';
 import queryString from 'query-string';
@@ -39,7 +39,8 @@ const BigCalendar = () => {
   const classes = useStyles();
   const {
     state: {
-      user: { user }, resources
+      user: { user },
+      resources
     }
   } = useData();
   const history = useHistory();
@@ -69,7 +70,7 @@ const BigCalendar = () => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setFilter([]);
     }
@@ -94,7 +95,7 @@ const BigCalendar = () => {
           }));
           setActivities({ activities: newData, loading: false });
         })
-        .catch(() => { });
+        .catch(() => {});
     },
     [type, filter]
   );

@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -57,7 +57,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
       ]
     });
     const managedPackageField = data?.find((d) => d.resource === sidebarResource.managedPackages)?.fieldNames || [];
-    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel)
+    setManagedPackagedLabel(managedPackageField[0]?.fieldLabel);
   };
 
   const validate = (values) => {

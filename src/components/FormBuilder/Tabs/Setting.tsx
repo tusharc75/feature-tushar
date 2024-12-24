@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,8 +26,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     setFields(
       response?.data?.data
         ? response?.data?.data
-          ?.filter((d) => d?.fieldData?.primaryField)
-          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+            ?.filter((d) => d?.fieldData?.primaryField)
+            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
         : []
     );
   };

@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import { Checkbox, FormControlLabel } from '@mui/material';
 import { uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -58,8 +58,10 @@ const DropDown = ({
   };
 
   useEffect(() => {
-    if (fieldData?.lookup && fieldData?.lookupResource) {
+    if (fieldData?.lookup && fieldData?.lookupResource && !fieldData?.customOptions?.length) {
       fetchOptions(page);
+    } else {
+      setOptions(fieldData?.customOptions);
     }
   }, [page, searchVal]);
 
@@ -122,20 +124,37 @@ const DropDown = ({
                       <Checkbox
                         name={o}
                         size="small"
-                        checked={(filterByIds?.find((d) => d?.field === fieldData?.fieldName)?.term || [])
-                          ?.map((t) => t?.optionValue)
-                          ?.includes(o?.optionValue)}
+                        checked={
+                          multiple
+                            ? (filterByIds?.find((d) => d?.field === fieldData?.fieldName)?.term || [])
+                                ?.map((t) => t?.optionValue)
+                                ?.includes(o?.optionValue)
+                            : filterByIds?.find((d) => d?.field === fieldData?.fieldName)?.term?.optionValue === o?.optionValue
+                        }
                         onChange={(e) => {
                           const filter = filterByIds?.find((d) => d?.field === fieldData?.fieldName);
-                          if (filter) {
-                            if (e?.target?.checked) {
-                              filter.term.push(o);
+                          if (multiple) {
+                            if (filter) {
+                              if (e?.target?.checked) {
+                                filter.term.push(o);
+                              } else {
+                                filter.term = filter.term?.filter((t) => t?.optionValue != o?.optionValue);
+                              }
+                              setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                             } else {
-                              filter.term = filter.term?.filter((t) => t?.optionValue != o?.optionValue);
+                              setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
                             }
-                            setFilterByIds([...deepFilters?.filter((d) => d?.field != fieldData?.fieldName), filter]);
                           } else {
-                            setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: [o] }]);
+                            if (filter) {
+                              if (e?.target?.checked) {
+                                filter.term = o;
+                              } else {
+                                filter.term = filter.term = {};
+                              }
+                              setFilterByIds([...filterByIds?.filter((d) => d?.field != fieldData?.fieldName), filter]);
+                            } else {
+                              setFilterByIds((pre) => [...pre, { field: fieldData?.fieldName, term: o }]);
+                            }
                           }
                         }}
                         className="!text-[--new-theme-color] dark:!text-gray-200"

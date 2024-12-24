@@ -1,5 +1,5 @@
 import MomentUtils from '@date-io/moment';
-import { CircularProgress, Dialog, IconButton } from '@material-ui/core';
+import { CircularProgress, Dialog, IconButton } from '@mui/material';
 import { History, Visibility } from '@material-ui/icons';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
@@ -263,6 +263,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         const tempFilter = deepFiltersP[i];
         if (filters[tempFilter.field]) {
           newDeepFilter = newDeepFilter.filter((d) => d.field !== tempFilter.field);
+          deepFiltersP = newDeepFilter;
         }
       }
 

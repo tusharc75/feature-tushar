@@ -1,6 +1,6 @@
-import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@mui/material';
 import { ControlPoint } from '@material-ui/icons';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';
@@ -361,27 +361,29 @@ const RoleDetailsPage = () => {
       return newData;
     });
 
-    axiosInstance().put(`/role`, {
-      _id: id,
-      ...values,
-      field: fields,
-      resource: resources,
-      type: roleData.type,
-      policy: policyFieldCheckBox,
-      dashBoards: dashBoardIds,
-      defaultResource: defaultResourceName,
-      superAdminAccess: superAdminAccess,
-      canAssignByAnyuser: canAssignByAnyuser
-    }).then(({ data }) => {
-      fetchRoleData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setUpdating(false);
-      setIsEdit(false);
-    })
+    axiosInstance()
+      .put(`/role`, {
+        _id: id,
+        ...values,
+        field: fields,
+        resource: resources,
+        type: roleData.type,
+        policy: policyFieldCheckBox,
+        dashBoards: dashBoardIds,
+        defaultResource: defaultResourceName,
+        superAdminAccess: superAdminAccess,
+        canAssignByAnyuser: canAssignByAnyuser
+      })
+      .then(({ data }) => {
+        fetchRoleData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setUpdating(false);
+        setIsEdit(false);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setUpdating(false);

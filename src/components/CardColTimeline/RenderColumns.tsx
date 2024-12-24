@@ -1,6 +1,6 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -114,7 +114,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
     if (!isItemLoaded(index)) {
       content = (
-        <div className="loader-skeleton overflow-hidden rounded-[8px] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)] ">
+        <div className="loader-skeleton overflow-hidden rounded-[8px] border shadow-[0px_4px_40px_rgba(0,0,0,0.08)]">
           <CommonSkeleton lenArray={Array.from(Array(2).keys())} lg={12} sm={12} xs={12} md={12} />
         </div>
       );
@@ -142,16 +142,16 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   return (
     <>
-      <div className="col group" key={refreshDataCount}>
+      <div className="col group -mx-[6px]" key={refreshDataCount}>
         {isInitialLoading ? (
           <div className="grid gap-2 overflow-hidden" style={{ maxHeight: containerHeight || 600 }}>
             {Array.from(Array(10).keys()).map((item) => (
               <div
                 key={item}
                 style={{ maxHeight: cardHeight, height: cardHeight }}
-                className="loader-skeleton overflow-hidden rounded-[8px] bg-[var(--dark-primary,_white)] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)]"
+                className="loader-skeleton mx-[6px] overflow-hidden rounded-[8px] border bg-[var(--dark-primary,_white)]"
               >
-                <div className="overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
+                <div className=" overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
                   <Skeleton variant="text" width="100px" height="16px" />
                   <Skeleton width="100%" height="50px" />
                   <Skeleton variant="text" width="100px" height="16px" />

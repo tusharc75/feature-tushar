@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import { ListingPageHeader } from '../PageHeaders';
@@ -19,7 +19,7 @@ import {
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

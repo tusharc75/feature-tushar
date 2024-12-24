@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -194,7 +194,7 @@ const ContactUs = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

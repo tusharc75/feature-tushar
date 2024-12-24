@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Box } from '@material-ui/core';
+import { Dialog, Button, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';

@@ -1,5 +1,5 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, IconButton } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -96,25 +96,25 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ? (
-                <a
-                  className="link text-truncate"
-                  href={`${routes?.storageLocationDetail?.path}/${row?.original['storageLocationId']}`}
-                  target="_blank"
-                >
-                  {row?.original['storageLocation']}
-                </a>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes?.storageLocationDetail?.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'processBy',
@@ -288,7 +288,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           <ProcessLogs
             onClose={() => {
               setOpenProcessLogs({ open: false, logs: [] });
-              fetchData()
+              fetchData();
             }}
             logsData={openProcessLogs.logs}
             productName={productName}

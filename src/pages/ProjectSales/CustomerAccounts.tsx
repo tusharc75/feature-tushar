@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Grid, Typography, makeStyles, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Grid, Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Skeleton } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
@@ -692,8 +693,8 @@ const CustomerAccounts = (props) => {
             accountDeleteRec
               ? 'Are you sure about removing this account from project?'
               : contactDeleteRec
-              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-              : null
+                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+                : null
           }
           onClose={() => {
             setShowConfirmBox(false);

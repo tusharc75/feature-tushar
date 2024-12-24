@@ -1,4 +1,5 @@
-import { Box, Grid, makeStyles, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -63,10 +64,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FleetReceiver = () => {
-    const {
+  const {
     state: { resources }
   }: any = useData();
-  
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 

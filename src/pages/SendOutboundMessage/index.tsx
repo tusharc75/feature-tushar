@@ -1,6 +1,6 @@
-import { Box, Button, TextField } from '@material-ui/core';
+import { Box, Button, TextField } from '@mui/material';
 import { AddOutlined } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

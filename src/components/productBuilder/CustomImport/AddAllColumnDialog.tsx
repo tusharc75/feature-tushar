@@ -1,7 +1,7 @@
 import { useState, Fragment, useRef } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import TextField from '@material-ui/core/TextField';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
 import { object, string } from 'yup';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
@@ -9,7 +9,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 export const AddAllColumnDialog = (props) => {
   const { fieldLabelOptions, handleClose, handleAddField, fields, section } = props;

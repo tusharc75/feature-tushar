@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import React from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -11,7 +11,6 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomDialogTransition, productInventory, sidebarResource } from 'src/constants/helpers';
 
 function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId, serialNumber = [] }) {
-
   const toastConfig = React.useContext(CustomToastContext);
   const [loading, setLoading] = React.useState(false);
 
@@ -20,7 +19,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
     if (values.revertQty <= 0) {
       errors['revertQty'] = 'Please enter valid revert qty';
     }
-    if (parseInt(values.revertQty) > (qty - revertedQty)) {
+    if (parseInt(values.revertQty) > qty - revertedQty) {
       errors['revertQty'] = 'Insufficient Quantity !';
     }
     if (serialNumber?.length && values.serialNumber?.length !== parseInt(values.revertQty)) {
@@ -31,12 +30,17 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
 
   const handleSubmit = (values) => {
     setLoading(true);
-    let data = { revertQty: parseInt(values.revertQty), comment: values.comment, ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {}) };
+    let data = {
+      revertQty: parseInt(values.revertQty),
+      comment: values.comment,
+      ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {})
+    };
     if ([sidebarResource.workOrder, sidebarResource.fieldTicket]?.includes(referenceType)) {
-      axiosInstance().put(`/material-handling/revert/${ledgerId}`, {
-        ...data,
-        referenceType: referenceType
-      })
+      axiosInstance()
+        .put(`/material-handling/revert/${ledgerId}`, {
+          ...data,
+          referenceType: referenceType
+        })
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();
@@ -45,9 +49,9 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
-      axiosInstance().put(`${productInventory.api}/${product}/ledger-revert/${ledgerId}`, data)
+    } else {
+      axiosInstance()
+        .put(`${productInventory.api}/${product}/ledger-revert/${ledgerId}`, data)
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();
@@ -65,9 +69,10 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
         onClose={onClose}
         title={productName !== '' ? `Revert - ${productName}` : 'Revert'}
         showManimizeMaximize={false}
-        showRequiredLabel={false} />
+        showRequiredLabel={false}
+      />
       <Formik
-        initialValues={{ revertQty: (qty - revertedQty), comment: 'Reverted', ...(serialNumber?.length ? { serialNumber: [] } : {}) }}
+        initialValues={{ revertQty: qty - revertedQty, comment: 'Reverted', ...(serialNumber?.length ? { serialNumber: [] } : {}) }}
         onSubmit={handleSubmit}
         validateOnMount
         validate={validate}
@@ -91,13 +96,10 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                   setFieldValue('revertQty', e.target.value?.replace(/\D/g, ''));
                 }}
               />
-              {serialNumber?.length ?
+              {serialNumber?.length ? (
                 <Box mt={2} mb={1}>
                   <Autocomplete
-                    options={[
-                      { optionValue: 'all', optionLabel: 'Select All' },
-                      ...serialNumber
-                    ]}
+                    options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...serialNumber]}
                     fullWidth
                     multiple
                     size="small"
@@ -110,11 +112,19 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                       setFieldValue('serialNumber', values);
                     }}
                     renderInput={(params) => (
-                      <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
+                      <TextField
+                        required={true}
+                        {...params}
+                        label="Select Serial Number"
+                        name="serialNumber"
+                        variant="outlined"
+                        error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
+                        helperText={touched['serialNumber'] && errors['serialNumber']}
+                      />
                     )}
                   />
                 </Box>
-                : null}
+              ) : null}
               <TextField
                 margin="dense"
                 type="text"
@@ -144,12 +154,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
               >
                 Cancel
               </Button>
-              <CustomButton
-                loading={loading}
-                variant="contained"
-                color="primary"
-                disabled={loading}
-                type="submit">
+              <CustomButton loading={loading} variant="contained" color="primary" disabled={loading} type="submit">
                 Revert
               </CustomButton>
             </CustomDialogFooter>

@@ -1,5 +1,5 @@
 import React, { FC, memo, useRef, useState } from 'react';
-import { Collapse } from '@material-ui/core';
+import { Collapse } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import Chart from '../Helper/Chart';
 import { VariableSizeList, areEqual } from 'react-window';
@@ -34,7 +34,7 @@ const RenderChildCollapsible = memo(
     const dataPoint = data[index];
     return (
       <div style={style}>
-        <div key={dataPoint?._id} className={`border rounded-[var(--roundnes,_5px)]`}>
+        <div key={dataPoint?._id} className={`rounded-[var(--roundnes,_5px)] border`}>
           <div className="" style={{ borderBottom: open === dataPoint._id ? '1px solid var(--common-border-color)' : 'none' }}>
             <button
               className={`no-shadow text-left ${buttonClass}`}
@@ -48,7 +48,7 @@ const RenderChildCollapsible = memo(
           </div>
           <Collapse in={dataPoint._id === open} unmountOnExit>
             <div className="">
-              <div className="container rounded-[0_!important] w-100 h-[591px] px-4 [overflow:hidden_!important] py-1">
+              <div className="w-100 container h-[591px] rounded-[0_!important] px-4 py-1 [overflow:hidden_!important]">
                 <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
               </div>
             </div>
@@ -97,7 +97,7 @@ const RenderParentCollapsible = ({
   };
 
   return (
-    <div key={category.name} className={`border rounded-[var(--roundnes,_5px)]`}>
+    <div key={category.name} className={`rounded-[var(--roundnes,_5px)] border`}>
       <div className="" style={{ borderBottom: open === category._id ? '1px solid var(--common-border-color)' : 'none' }}>
         <button className={`no-shadow text-left ${buttonClass}`} onClick={() => handleClick(category._id)}>
           {open === category._id ? <ExpandLess /> : <ExpandMore />}

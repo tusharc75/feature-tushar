@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -208,11 +208,11 @@ const DriverMaster = () => {
         <MenuItem
           disabled={!(permissions?.driverMaster?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -286,8 +286,12 @@ const DriverMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.driverMaster?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.driverName || ''}` : `selected ${resources?.driverMaster?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.driverMaster?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.driverName || ''}`
+              : `selected ${resources?.driverMaster?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

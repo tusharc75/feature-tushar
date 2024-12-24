@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { MoreHoriz, Settings } from '@material-ui/icons';
 import { useState } from 'react';
 import { OPERATOR } from 'src/components/FormBuilder/helper';

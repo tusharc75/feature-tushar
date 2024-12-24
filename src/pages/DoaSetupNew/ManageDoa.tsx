@@ -1,6 +1,6 @@
-import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField, makeStyles } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { Add, Delete } from '@material-ui/icons';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -11,6 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { DOAType, DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {

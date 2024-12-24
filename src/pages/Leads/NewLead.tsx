@@ -1,6 +1,6 @@
 import React, { useState, Fragment } from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Box, Typography, Grid, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar } from '@material-ui/core';
+import { makeStyles, useTheme } from '@mui/styles';
+import { Box, Typography, Grid, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar } from '@mui/material';
 import './style.scss';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';

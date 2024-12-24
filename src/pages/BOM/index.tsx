@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { product, prepareDataForGrid, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
@@ -8,7 +8,7 @@ import routes from '../../components/Helpers/Routes';
 import { AiOutlineApartment } from 'react-icons/ai';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Delete } from '@material-ui/icons';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
@@ -283,14 +283,16 @@ const BOMTable = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                   disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
-                   onClick={() =>{     
-                          if (selectedRecords.length === 1){ 
-                          setDeleteRecord(selectedRecords[0]);
-                          }else{
-                            setDeleteRecord(null)
-                          }
-                          setShowDeleteConfirmBox(true);}}>
+                    disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
+                    onClick={() => {
+                      if (selectedRecords.length === 1) {
+                        setDeleteRecord(selectedRecords[0]);
+                      } else {
+                        setDeleteRecord(null);
+                      }
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
                     {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
                 </Menu>
@@ -318,8 +320,12 @@ const BOMTable = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.product?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.productName || ''}` : resources?.product?.titlePlural?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.product?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.productName || ''}`
+              : resources?.product?.titlePlural?.toLowerCase()
+          } ?`}
           okBtnLoading={isDeleting}
           onClose={() => {
             setDeleteRecord(null);

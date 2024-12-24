@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { Info } from '@material-ui/icons';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
@@ -32,8 +32,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 
 type Props = {
-  filterResourceQuery: any;
-  globalFilters: DateRange;
+  filterQuery: any;
   status: string;
   renderedFrom: string;
   state: TInitialState;
@@ -52,7 +51,7 @@ export type WorkOrderListRef = {
 };
 
 const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
-  ({ filterResourceQuery, globalFilters, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, tableHead = null }, ref) => {
+  ({ filterQuery, status, renderedFrom, state, dispatch, consumablesDialog, setConsumablesDialog, tableHead = null }, ref) => {
     const toastConfig = useContext(CustomToastContext);
     const {
       state: { user, permissions, resources }
@@ -79,7 +78,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         fetchData(cancelToken);
       }
       return () => cancelToken.cancel();
-    }, [page, limit, sorting, status, filterResourceQuery, globalFilters, filters]);
+    }, [page, limit, sorting, status, filterQuery, filters]);
 
     const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
       let data;
@@ -277,17 +276,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
     };
 
     const getQueryString = () => {
-      let deepFilter = `?page=${page}&limit=${limit}&status=${status}`;
-
-      if (filterResourceQuery?.filterById?.length) {
-        filterResourceQuery?.filterById?.forEach((f) => {
-          deepFilter = `${deepFilter}&${f.field}=${f.term}`;
-        });
-      }
-
-      if (globalFilters) {
-        deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
-      }
+      let deepFilter = `?page=${page}&limit=${limit}&status=${status}${filterQuery}`;
 
       const { deepFilters } = gridFilterParser(filters);
 

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import TextField from '@material-ui/core/TextField';
-import { Dialog } from '@material-ui/core';
+import TextField from '@mui/material/TextField';
+import { Dialog } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -21,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { sortBy } from 'lodash';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
 
 const AttachmentSchema = object().shape({

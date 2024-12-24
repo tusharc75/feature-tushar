@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniqBy } from 'lodash';

@@ -8,7 +8,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 
 const customNodeStyles = {
   repairOrder: {

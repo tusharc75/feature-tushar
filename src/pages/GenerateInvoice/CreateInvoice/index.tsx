@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, sidebarResource } from 'src/constants/helpers';
@@ -415,12 +415,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const fetchPolicy = async () => {
     try {
-        const {
-          data: { data }
-        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
-        if (data) {
-          setInvoiceResourceData(data);
-        }
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+      if (data) {
+        setInvoiceResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -541,7 +541,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 color="primary"
                 type="button"
                 onClick={() => {
-                  if (resource===sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
+                  if (resource === sidebarResource.fieldTicket && invoiceResourceData?.policy?.fieldTicketInvoiceFields?.length > 0) {
                     setOpenInvoiceDataDialog(true);
                   } else {
                     handleCreateInvoice();

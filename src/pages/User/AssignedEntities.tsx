@@ -1,6 +1,6 @@
-import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { ControlPoint, Delete } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

@@ -1,6 +1,6 @@
-import { Box, Button, Collapse, Grid, InputAdornment } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Button, Collapse, Grid, InputAdornment } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
 import AddIcon from '@material-ui/icons/AddCircle';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -532,8 +532,9 @@ const CreateProduct = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`${productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
-                  }`}
+                title={`${
+                  productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -872,8 +873,8 @@ const CreateProduct = (props) => {
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                  }
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
                                                   : null
                                               }
                                             />

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -14,7 +14,9 @@ import { checkFormulaLoop } from 'src/constants/formulaUtility';
 const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '', fields = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [section, setSection] = useState([]);
@@ -145,7 +147,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
       <CustomDialogContent>
         <Box display="flex" justifyContent="flex-end">
           <Box>
-            <label htmlFor="importField" className="cursor-pointer mr-3">
+            <label htmlFor="importField" className="mr-3 cursor-pointer">
               Import Fields
               <input
                 onClick={(e: any) => (e.target.value = null)}
@@ -160,7 +162,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
                 type="file"
               />
             </label>
-            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+            <label className="mr-3 cursor-pointer" onClick={handleExportFields}>
               Export Fields
             </label>
             <a id="downloadAnchorElem" style={{ display: 'none' }}></a>

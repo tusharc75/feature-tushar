@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import PropTypes from 'prop-types';
@@ -12,7 +12,7 @@ import FormTypes from '../../Helpers/FormTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 
 import ImagePreview from '../Email/ImagePreview';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
@@ -22,7 +22,7 @@ import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE } from 'src/constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),

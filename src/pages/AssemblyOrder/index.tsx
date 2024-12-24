@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -287,8 +287,12 @@ const AssemblyOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?.assemblyOrderNumber}` : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?.assemblyOrderNumber}`
+              : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

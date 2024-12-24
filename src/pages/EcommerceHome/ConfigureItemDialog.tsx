@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -8,7 +8,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@mui/material';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 

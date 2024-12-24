@@ -1,6 +1,6 @@
 import MomentUtils from '@date-io/moment';
-import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvider';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -10,7 +10,7 @@ import emailStyles from '../../Activity/Email/email.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import ImageAttachments from 'src/components/Activity/Email/ImageAttachments';

@@ -1,9 +1,10 @@
-import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper, makeStyles, withStyles } from '@material-ui/core';
+import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper } from '@mui/material';
 import { Check } from '@material-ui/icons';
 import clsx from 'clsx';
 import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
+import { withStyles, makeStyles } from '@mui/styles';
 
 const QontoConnector = withStyles((theme) => ({
   alternativeLabel: {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
-import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
+import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

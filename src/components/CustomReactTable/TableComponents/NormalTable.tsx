@@ -1,6 +1,6 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
+import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { Error } from '@material-ui/icons';
 import { flexRender } from '@tanstack/react-table';
 import React, { ForwardedRef, forwardRef, memo } from 'react';

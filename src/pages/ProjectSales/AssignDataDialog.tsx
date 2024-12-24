@@ -11,7 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography
-} from '@material-ui/core';
+} from '@mui/material';
 import { camelCase, kebabCase, lowerCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 

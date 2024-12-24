@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase, sortBy } from 'lodash';
@@ -12,7 +12,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  INVOICE_STATUS,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCreditMemo from './ManageCreditMemo';
@@ -161,7 +168,8 @@ const CreditMemo = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.creditMemo?.isUpdate;
-          finalObject['canDelete'] = permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -203,7 +211,6 @@ const CreditMemo = () => {
       });
   };
 
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
   };
@@ -217,7 +224,7 @@ const CreditMemo = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}

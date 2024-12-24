@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, TextField, Typography } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';

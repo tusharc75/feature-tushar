@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase, orderBy } from 'lodash';
 import startCase from 'lodash/startCase';
 import { useEffect, useState } from 'react';

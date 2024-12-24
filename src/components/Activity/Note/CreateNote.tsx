@@ -1,10 +1,10 @@
 import MomentUtils from '@date-io/moment';
-import { CircularProgress, IconButton, Paper } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import { CircularProgress, IconButton, Paper } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -256,7 +256,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
 
   return !initialValues ? (
     <>
-      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
+      <CustomDialogHeader onClose={() => {}} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
       <CustomDialogContent>
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>

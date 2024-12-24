@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -7,7 +7,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ImportExportMenu from '../Helpers/ImportExportMenu';
@@ -93,7 +93,7 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
               <ImportExportMenu
                 permissions={{ isRead: false, isCreate: true }}
                 module="merge"
-                api={"/merge"}
+                api={'/merge'}
                 afterImportCompleted={() => {
                   onClose();
                   onSuccess();

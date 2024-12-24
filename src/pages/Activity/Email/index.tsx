@@ -1,5 +1,5 @@
-import { Box, Chip, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';

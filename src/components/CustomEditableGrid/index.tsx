@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
+import { Box, Button, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { isEmpty } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

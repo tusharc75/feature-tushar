@@ -1,4 +1,4 @@
-import { Box, MenuItem, TextField } from '@material-ui/core';
+import { Box, MenuItem, TextField } from '@mui/material';
 import { camelCase, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,7 +21,7 @@ import {
   workOrder
 } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';

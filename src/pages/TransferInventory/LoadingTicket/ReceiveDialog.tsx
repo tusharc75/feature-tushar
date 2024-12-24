@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
-import { Box } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import Button from '@mui/material/Button';
+import { Box } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import DateUtils from '@date-io/date-fns';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

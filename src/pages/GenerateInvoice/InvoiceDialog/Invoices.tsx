@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';

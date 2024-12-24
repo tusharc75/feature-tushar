@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
@@ -201,11 +201,11 @@ const SubcontractAssembly = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -298,8 +298,12 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.subcontractAssemblyNumber || ''}` : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.subcontractAssemblyNumber || ''}`
+                : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

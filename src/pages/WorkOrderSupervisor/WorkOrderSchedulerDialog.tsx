@@ -7,13 +7,13 @@ import {
   sidebarResource,
   workOrder
 } from '../../constants/helpers';
-import { Dialog, TextField, Box, Grid, Button } from '@material-ui/core';
+import { Dialog, TextField, Box, Grid, Button } from '@mui/material';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -23,7 +23,6 @@ import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
-
   const toastConfig = useContext(CustomToastContext);
   const [productOptions, setProductOptions] = useState([]);
   const [assetOptions, setAssetOptions] = useState([]);
@@ -52,13 +51,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       {
         field: 'status',
         term: {
-          $in: [
-            ASSET_STATUS.new,
-            ASSET_STATUS.available,
-            ASSET_STATUS.underReview,
-            ASSET_STATUS.needRepair,
-            ASSET_STATUS.needRecert
-          ]
+          $in: [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]
         }
       }
     ];
@@ -66,7 +59,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       .get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`)
       .then(({ data: { data: lookupSerializedAssets } }) => {
         let serializedAssets = lookupSerializedAssets['Serialized Asset'] || [];
-        const filteredAssets = serializedAssets?.filter(asset => asset?.product === selectedProduct);
+        const filteredAssets = serializedAssets?.filter((asset) => asset?.product === selectedProduct);
         setAssetOptions(filteredAssets || []);
         setLoading(false);
       })
@@ -76,14 +69,16 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   }, [selectedProduct]);
 
   useEffect(() => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
       .then(({ data: { data } }) => {
         setServicesOptions(data['Service Master'] || []);
       });
   }, []);
 
   const handleSubmit = (values) => {
-    axiosInstance().post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
+    axiosInstance()
+      .post(`${workOrder.api}/work-order-scheduler/scheduler`, values)
       .then(({ data }) => {
         onSuccess();
         toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
@@ -108,8 +103,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
       errors['date'] = 'Date cannot be in the past';
     }
     return errors;
-  };
-
+  }
 
   return (
     <Dialog
@@ -153,7 +147,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           value={productOptions.find((data) => data.optionValue === values.product) || null}
                           getOptionLabel={(option) => option?.optionLabel || ''}
                           onChange={(e, val) => {
-                            setFieldValue('product', val?.optionValue || '')
+                            setFieldValue('product', val?.optionValue || '');
                             setSelectedProduct(val?.optionValue);
                           }}
                           renderInput={(params) => (
@@ -193,11 +187,14 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           multiple
                           size="small"
                           options={servicesOptions}
-                          value={servicesOptions.filter((option) =>
-                            values.service.includes(option.optionValue)
-                          )}
+                          value={servicesOptions.filter((option) => values.service.includes(option.optionValue))}
                           getOptionLabel={(option) => option?.optionLabel || ''}
-                          onChange={(e, val) => setFieldValue('service', val.map((item) => item.optionValue))}
+                          onChange={(e, val) =>
+                            setFieldValue(
+                              'service',
+                              val.map((item) => item.optionValue)
+                            )
+                          }
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -233,18 +230,10 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                   </div>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => onClose()}
-                  >
+                  <Button size="small" color="primary" onClick={() => onClose()}>
                     Cancel
                   </Button>
-                  <CustomButton
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                  >
+                  <CustomButton variant="contained" color="primary" type="submit">
                     Save
                   </CustomButton>
                 </CustomDialogFooter>

@@ -1,4 +1,4 @@
-import { Chip, IconButton, useMediaQuery } from '@material-ui/core';
+import { Chip, IconButton, useMediaQuery } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import Chatbox, { Topics, useChatboxReducer } from 'src/components/AiChatbox';
@@ -74,8 +74,8 @@ const EquiptAi = () => {
         const selectedTopics =
           isArray(data?.topics) && data?.topics?.length
             ? data?.topics?.map((e) => {
-              return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
-            })
+                return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
+              })
             : [];
         setState({ type: 'setSelectedTopics', payload: selectedTopics });
         setState({ type: 'setMessageFromHistory', payload: data });

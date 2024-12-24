@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, CircularProgress, Dialog, Typography } from '@mui/material';
 import { GoogleMap, InfoWindow, Marker } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';

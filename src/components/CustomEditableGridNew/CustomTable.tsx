@@ -1,5 +1,5 @@
-import { IconButton, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
-import MaUTable from '@material-ui/core/Table';
+import { IconButton, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import MaUTable from '@mui/material/Table';
 import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -200,7 +200,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                         key={`${index}-${header?.Header}`}
                         {...header.getHeaderProps()}
                         className="th text-truncate table-header overflow-initial editable-table-cell relative"
-                      // ref={(ref) => setColumnRef(index, ref)}
+                        // ref={(ref) => setColumnRef(index, ref)}
                       >
                         <div className="d-flex align-items-center justify-content-space-between pos-rel">
                           <div className="d-flex align-items-center gap-2" {...header.getSortByToggleProps({ title: undefined })}>

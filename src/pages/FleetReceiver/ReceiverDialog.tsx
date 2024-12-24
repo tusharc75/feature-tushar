@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -12,7 +12,6 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -77,50 +76,22 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         <Box marginY={2}>
           <Grid spacing={2} container>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Job Number"
-                fullWidth
-                margin="dense"
-                value={data?.job?.jobNumber}
-              />
+              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" value={data?.job?.jobNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="PRS"
-                fullWidth
-                margin="dense"
-                value={data?.asset?.assetNumber}
-              />
+              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" value={data?.asset?.assetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Fleet Number"
-                fullWidth
-                margin="dense"
-                value={data?.fleet?.fleetNumber}
-              />
+              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" value={data?.fleet?.fleetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Location"
-                fullWidth
-                margin="dense"
-                value={data?.job?.shippingAddress?.optionLabel}
-              />
+              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" value={data?.job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
         </Box>
-        <div className={"detail-box-content"}>
-          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{'Receiver Information'}</h2>
+        <div className={'detail-box-content'}>
+          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{'Receiver Information'}</h2>
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>

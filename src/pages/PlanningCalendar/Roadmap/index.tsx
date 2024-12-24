@@ -1,6 +1,6 @@
 import MomentUtils from '@date-io/moment';
-import { Box, Button, TextField, Typography } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';

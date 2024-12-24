@@ -10,7 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow
-} from '@material-ui/core';
+} from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import moment from 'moment';
@@ -34,7 +34,7 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, setOpen }, ref) {
+function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, ref) {
   const {
     state: { resources }
   }: any = useData();
@@ -102,7 +102,7 @@ function WorkOrderCalendar({ getFilterQuery, filterResourceQuery, reference, set
 
   useEffect(() => {
     fetchData();
-  }, [filterResourceQuery, dateRange, reference]);
+  }, [filterQuery, dateRange, reference]);
 
   const childFunction = () => {
     fetchData();

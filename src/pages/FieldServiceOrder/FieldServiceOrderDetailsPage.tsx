@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';

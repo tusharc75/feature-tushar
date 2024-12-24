@@ -14,13 +14,13 @@ import {
   Typography,
   CircularProgress,
   Paper
-} from '@material-ui/core';
+} from '@mui/material';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../components/Helpers/CustomButton';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { AiOutlineImport } from 'react-icons/ai';

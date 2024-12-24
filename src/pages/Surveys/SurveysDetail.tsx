@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -63,7 +63,9 @@ const SurveysDetail = () => {
       } = await axiosInstance().get(`/surveys/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
-      setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete
+      );
       setSurveyData(data);
       setCustomizedRoutes([{ ...routes.surveys, title: resources?.surveys?.titlePlural }, { title: data?.surveyName }]);
       setLoading(false);
@@ -134,20 +136,14 @@ const SurveysDetail = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {allowedToDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-            )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange} textColor="primary">
-          <CustomTab value={0}>
-            Header
-          </CustomTab>
-          <CustomTab value={1}>
-            Details
-          </CustomTab>
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (

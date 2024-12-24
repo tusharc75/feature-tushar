@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string';
@@ -90,13 +90,13 @@ const FormBuilder = () => {
 
   useEffect(() => {
     fetchGetBrandResource();
-  }, [ search ]);
+  }, [search]);
 
   const closeHandler = () => {
     setArrangeViewOpen(false);
     fetchGetBrandResource();
   };
-  
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -171,11 +171,12 @@ const FormBuilder = () => {
         </div>
       </div>
       <CustomContainer>
-        <ListingPageHeader 
-          rightSideContents={<RightSideContents />} 
+        <ListingPageHeader
+          rightSideContents={<RightSideContents />}
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={false} isAddButtonVisible={false} 
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
         />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
         {openSectionMaster && <SectionMaster close={() => setOpenSectionMaster(false)} />}

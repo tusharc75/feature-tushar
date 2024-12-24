@@ -1,11 +1,11 @@
-import { Box, TextField } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
-import Chip from '@material-ui/core/Chip';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Chip from '@mui/material/Chip';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
+import { makeStyles } from '@mui/styles';
+import { Autocomplete } from '@mui/material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/md';
@@ -233,10 +233,10 @@ const CurrencyConverter = () => {
                   renderInput={(params) => (
                     <TextField {...params} margin="dense" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
-                // renderOption={(option) => {
-                //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
-                //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
-                // }}
+                  // renderOption={(option) => {
+                  //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
+                  //   return `${currencyCode} - ${currencyName} - (${symbolNative})`
+                  // }}
                 />
               </Grid>
               <Grid xs={12} md={4} sm={4} container justify="flex-end">

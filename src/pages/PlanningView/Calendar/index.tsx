@@ -11,9 +11,9 @@ import {
   TableHead,
   TableRow,
   TextField
-} from '@material-ui/core';
+} from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -405,6 +405,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
             if (d?.actualEndDate) {
               end = new Date(d?.actualEndDate);
+              end.setHours(23, 59, 59, 999);
               endDraggable = false;
             }
             if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {

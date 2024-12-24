@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, IconButton, InputAdornment } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, InputAdornment } from '@mui/material';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';

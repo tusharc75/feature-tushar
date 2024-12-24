@@ -1,8 +1,8 @@
-import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -338,11 +338,11 @@ const PurchaseOrder = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >

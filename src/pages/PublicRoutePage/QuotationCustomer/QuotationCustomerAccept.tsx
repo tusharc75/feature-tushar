@@ -1,5 +1,5 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Grid, Typography } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { orderBy, startCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';

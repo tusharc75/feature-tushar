@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
 import { DragIndicator, Info } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';

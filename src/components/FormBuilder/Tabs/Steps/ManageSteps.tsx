@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual, startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,7 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { object, string } from 'yup';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { getLookupResource, getResourceField } from '../../helper';
 import StepActions from './StepActions';
 import ConfigureField from 'src/components/FormBuilder/Tabs/Steps/ConfigureField';

@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Chip } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { TextField, Chip } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { flatMap, map } from 'lodash';
 import axiosInstance from '../../../axios/axiosInstance';
 
@@ -129,10 +129,10 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
                 ).includes(data.userId)
               )
             : users
-            ? users.filter((data) => data.userId === value).length > 0
-              ? users.filter((data) => data.userId === value)[0]
+              ? users.filter((data) => data.userId === value).length > 0
+                ? users.filter((data) => data.userId === value)[0]
+                : []
               : []
-            : []
         }
         renderTags={(value, getTagProps) =>
           value.map((option, index) => <Chip variant="outlined" label={option && option.name} {...getTagProps({ index })} />)

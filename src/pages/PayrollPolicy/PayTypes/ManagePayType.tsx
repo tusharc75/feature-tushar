@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,8 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicyId, isClone = false }) => {
- 
+const ManagePayType = ({ payTypeData, onClose, onSuccess, currency, payrollPolicyId, isClone = false }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -104,11 +103,7 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicy
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -125,7 +120,7 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicy
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

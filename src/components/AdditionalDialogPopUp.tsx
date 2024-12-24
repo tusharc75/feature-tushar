@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from '../constants/helpers';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
@@ -14,7 +14,7 @@ const arr = [...Array(9).keys()];
 
 const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [entityData,] = useState({
+  const [entityData] = useState({
     fields: fieldData.map((fields) => fields.fieldData),
     initialValues: getObjKeys(
       '',
@@ -37,17 +37,19 @@ const AdditionalDialogPopUp = ({ open, close, title, handleSave, fieldData }) =>
       <Dialog
         maxWidth="md"
         fullWidth
-        fullScreen={fullScreen || (isMobile || isTablet)}
+        fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={close}
         open={open}
         disableBackdropClick={true}
       >
-        <CustomDialogHeader title={title} onClose={close}
+        <CustomDialogHeader
+          title={title}
+          onClose={close}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />

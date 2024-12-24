@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, IconButton } from '@mui/material';
 import {
   CustomDialogTransition,
   IMPORT_EXPORT_STATUS,
@@ -33,7 +33,6 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -278,19 +277,23 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             Export to Excel
           </Button>
         )}
-        {columns ? <CustomReactTable
-          height={fullScreen ? 'calc(100vh - 285px)' : 'calc(100vh - 393px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          hideSelection={true}
-          showFilters={false}
-          showArrangeView={false}
-        /> : <Box p={2} height={300}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        {columns ? (
+          <CustomReactTable
+            height={fullScreen ? 'calc(100vh - 285px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            hideSelection={true}
+            showFilters={false}
+            showArrangeView={false}
+          />
+        ) : (
+          <Box p={2} height={300}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
       <CustomDialogFooter>
         <CustomButton

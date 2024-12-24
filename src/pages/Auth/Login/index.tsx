@@ -1,7 +1,7 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { Form, Formik } from 'formik';

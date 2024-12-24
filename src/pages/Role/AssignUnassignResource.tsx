@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, TextField, FormControlLabel, Box } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Button, Checkbox, CircularProgress, Dialog, TextField, FormControlLabel, Box } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import Loader from '../../components/Loader';

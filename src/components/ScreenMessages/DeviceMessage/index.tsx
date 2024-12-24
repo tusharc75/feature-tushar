@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { ArrowBack } from '@material-ui/icons';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';

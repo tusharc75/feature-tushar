@@ -1,17 +1,18 @@
+import { Add, DeleteOutline, DragIndicator, Edit, FileCopyOutlined, LowPriority } from '@material-ui/icons';
+import { Autocomplete } from '@mui/material';
+import { Box, Dialog, IconButton, TextField, Theme, Typography, createStyles } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, IconButton, TextField, Theme, Typography, createStyles, makeStyles } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
-import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator, LowPriority, Edit } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -174,10 +175,10 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
     >
       <CustomDialogHeader title={'Step Information'} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent isFooterPresent={false}>
-        <Box className="flex flex-wrap gap-2 justify-between items-center my-2">
+        <Box className="my-2 flex flex-wrap items-center justify-between gap-2">
           <Autocomplete
             id="service"
-            className="flex-grow min-w-[250px] min-[600px]:max-w-[300px]"
+            className="min-w-[250px] flex-grow min-[600px]:max-w-[300px]"
             options={serviceOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
             getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -198,7 +199,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
               />
             )}
           />
-          <Box className="flex flex-wrap gap-2 items-center ml-auto">
+          <Box className="ml-auto flex flex-wrap items-center gap-2">
             <ThemeButton
               iconForMobile={<LowPriority />}
               disabled={
@@ -244,22 +245,22 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
                   className={`${classes.accordionHeading}  ${classes.white} transition-all duration-500 `}
                 >
                   <Box sx={{ display: 'flex' }} gridGap={'8px'}>
-                    <span className="bg-[var(--primary)] dark:bg-[var(--dark-primary)] rounded-full text-white text-[13px] px-[12px] py-[1px]">
+                    <span className="rounded-full bg-[var(--primary)] px-[12px] py-[1px] text-[13px] text-white dark:bg-[var(--dark-primary)]">
                       {step?.order}
                     </span>
                     <Box
-                      className="mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]"
+                      className="mr-auto flex basis-[calc(100%-56px)] flex-wrap items-center justify-between gap-[8px] sm:basis-[calc(100%-155px)]"
                       gridGap={'8px'}
                     >
-                      <Box className="flex items-center gap-2 flex-grow text-[var(--primary-text)]">
-                        <div className="flex items-start gap-2 w-full">
+                      <Box className="flex flex-grow items-center gap-2 text-[var(--primary-text)]">
+                        <div className="flex w-full items-start gap-2">
                           <Typography className={`${classes.heading} flex-grow [word-break:break-all]`} style={{ fontWeight: '600' }}>
                             {step.stepName}
                           </Typography>
                         </div>
                       </Box>
                     </Box>
-                    <div className="flex md:gap-1 items-center">
+                    <div className="flex items-center md:gap-1">
                       <HtmlTooltip enterTouchDelay={0} title="Edit" placement="top" arrow>
                         <IconButton
                           size="small"

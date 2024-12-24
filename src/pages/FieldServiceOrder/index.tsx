@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -38,7 +38,6 @@ import { createFieldServiceOrderFlow } from './walkmeSteps';
 let serviceOrderTimeout;
 
 const ServiceOrder = () => {
-
   const { setWalkmeData } = useSetWalkmeData();
   const renderedFrom = camelCase(sidebarResource?.fieldServiceOrder);
 

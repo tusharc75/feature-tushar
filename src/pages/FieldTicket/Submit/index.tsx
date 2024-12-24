@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@mui/material';
 import HistoryIcon from '@material-ui/icons/History';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -65,8 +65,18 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const fetchFields = async () => {
     setColumns(null);
-    let fieldTicketMaterialFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false, isOffline);
-    const fieldTicketSubmitField = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true, isOffline);
+    let fieldTicketMaterialFields = await fetch_child_resource_fields_perm(
+      CHILD_RESOURCE.fieldTicketMateial,
+      fieldTicketData?.currency,
+      false,
+      isOffline
+    );
+    const fieldTicketSubmitField = await fetch_child_resource_fields_perm(
+      CHILD_RESOURCE.fieldTicketSubmit,
+      fieldTicketData?.currency,
+      true,
+      isOffline
+    );
     setFieldTicketSubmitFields(fieldTicketSubmitField);
     fieldTicketMaterialFields = fieldTicketMaterialFields?.filter((f) => f?.isRead);
 

@@ -1,6 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -106,10 +106,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            allowedToEdit &&
-            leadData[processFieldName] &&
-            currentStepToShow + 1 >= steps.length
+              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+              allowedToEdit &&
+              leadData[processFieldName] &&
+              currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -134,7 +134,10 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data));
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([{ ...routes.lead, title: resources?.lead?.titlePlural }, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }]);
+        setCustomizedRoutes([
+          { ...routes.lead, title: resources?.lead?.titlePlural },
+          { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') || data?.company }
+        ]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -475,7 +478,7 @@ const LeadDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName} ?`}            
+          message={`Are you sure you want to delete ${resources?.lead?.titleSingular?.toLowerCase()} : ${leadData?.concatedName} ?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDeleteLead}
           okBtnLoading={isDeleting}

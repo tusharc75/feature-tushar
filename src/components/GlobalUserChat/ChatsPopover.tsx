@@ -1,7 +1,8 @@
-import { Avatar, Box, Divider, IconButton, List, TextField, Typography, useMediaQuery } from '@material-ui/core';
-import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles';
+import { Avatar, Box, Divider, IconButton, List, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Theme, createStyles, useTheme } from '@mui/material/styles';
 import { ArrowBack, Create, Group } from '@material-ui/icons';
 import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { makeStyles } from '@mui/styles';
 
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { useData } from '../../StateProvider/Provider';
@@ -79,7 +80,7 @@ const ChatsPopover = (props) => {
     <div id={open ? 'chats-popover' : undefined} className={`chat-popover ${isSmallScreen ? 'small-screen' : ''}`}>
       {open && (
         <Box overflow="hidden">
-          <Box className="flex justify-between items-center h-[60px] p-[20px] bg-[var(--new-theme-color)] text-[white]">
+          <Box className="flex h-[60px] items-center justify-between bg-[var(--new-theme-color)] p-[20px] text-[white]">
             {selectedChat || newChat ? (
               <HtmlTooltip title="Go Back">
                 <IconButton
@@ -111,9 +112,9 @@ const ChatsPopover = (props) => {
 
             <Box display="flex" alignItems="center">
               {selectedChat ? (
-                <Avatar src={selectedChat.avatar} alt={selectedChat.chatTitle ? selectedChat.chatTitle : ''} className="mr-2 ml-[12px]" />
+                <Avatar src={selectedChat.avatar} alt={selectedChat.chatTitle ? selectedChat.chatTitle : ''} className="ml-[12px] mr-2" />
               ) : null}
-              <Typography variant="h6" className="text-truncate [font-size:16px_!important] font-bold">
+              <Typography variant="h6" className="text-truncate font-bold [font-size:16px_!important]">
                 {selectedChat ? selectedChat?.chatTitle : newChat ? 'New chat' : `Chats (${chatList?.length})`}
               </Typography>
               {selectedChat && selectedChat?.users?.length > 2 && (
@@ -121,13 +122,7 @@ const ChatsPopover = (props) => {
                   <HtmlTooltip
                     arrow
                     placement="top"
-                    title={
-                      <>
-                        {selectedChat?.users?.map((u) => (
-                          <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>
-                        ))}
-                      </>
-                    }
+                    title={<>{selectedChat?.users?.map((u) => <Typography>{`${u?.firstName} ${u?.lastName}`}</Typography>)}</>}
                   >
                     <Group fontSize="medium" className="text-[white]" />
                   </HtmlTooltip>
@@ -161,7 +156,7 @@ const ChatsPopover = (props) => {
                     label={'Search name or number'}
                   />
                 </div>
-                <h4 className="text-[var(--primary-text)] mb-3 font-semibold text-[14px] px-[17px]">Quick Contacts</h4>
+                <h4 className="mb-3 px-[17px] text-[14px] font-semibold text-[var(--primary-text)]">Quick Contacts</h4>
                 <List
                   disablePadding
                   dense

@@ -1,7 +1,7 @@
-import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
+import { Chip, Dialog, IconButton, MenuItem, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';

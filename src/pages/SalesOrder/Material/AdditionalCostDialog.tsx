@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Box } from '@material-ui/core';
+import { Button, Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -10,7 +10,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import {  isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 
@@ -24,7 +24,15 @@ interface AdditionalCostDialogProps {
   showSaveAndNext?: Boolean;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
+  onClose,
+  currency,
+  handleAddCost,
+  handleUpdateCost,
+  costData,
+  loadingEdit,
+  showSaveAndNext
+}) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -51,8 +59,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         values: getObjKeys('', poFields)
       });
     }
-  }
-
+  };
 
   const handleSubmit = (values) => {
     if (!costData) {

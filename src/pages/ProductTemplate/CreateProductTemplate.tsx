@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, makeStyles, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { FormBuilder } from '../../components/FormBuilder';
@@ -9,11 +10,11 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
-import TextField from '@material-ui/core/TextField';
+import { Autocomplete } from '@mui/material';
+import TextField from '@mui/material/TextField';
 import { uniq, map } from 'lodash';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
 import HistoryDialog from '../../components/Activity/History';
@@ -312,7 +313,7 @@ const ProductTemplate = () => {
       <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <CustomBreadCrumbs
               routes={[
                 { title: resources?.productTemplate?.titlePlural, path: routes.productTemplate.path },
@@ -382,7 +383,7 @@ const ProductTemplate = () => {
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
                   <Box py={1}>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-[3fr_108px_3fr_180px]  md:gap-4 mb-2">
+                    <div className="mb-2 grid md:grid-cols-2  md:gap-4 lg:grid-cols-[3fr_108px_3fr_180px]">
                       <TextField
                         disabled={!hasPermissionToUpdate}
                         variant="outlined"
@@ -432,8 +433,11 @@ const ProductTemplate = () => {
                               : []
                           }
                           onChange={(e, val) => {
-                            if (val?.find((v) => v._id === "Select All")) {
-                              setFieldValue('productCategory', productCategory?.map((d) => d._id));
+                            if (val?.find((v) => v._id === 'Select All')) {
+                              setFieldValue(
+                                'productCategory',
+                                productCategory?.map((d) => d._id)
+                              );
                             } else {
                               setFieldValue('productCategory', val && val?.map((d) => d._id));
                             }
@@ -454,7 +458,7 @@ const ProductTemplate = () => {
                         />
                       )}
 
-                      <div className="ml-auto flex mt-3 md:mt-0 items-center">
+                      <div className="ml-auto mt-3 flex items-center md:mt-0">
                         <HistoryButton onClick={() => setShowHistory(true)} />
                         <Box>
                           {((id === '0' && productTemplatePermissions.isCreate) || (id !== '0' && productTemplatePermissions.isUpdate)) && (
@@ -495,7 +499,7 @@ const ProductTemplate = () => {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_153px] items-center md:gap-4 mb-2">
+                    <div className="mb-2 grid items-center md:grid-cols-2 md:gap-4 lg:grid-cols-[1fr_1fr_1fr_153px]">
                       <Autocomplete
                         disabled={!hasPermissionToUpdate}
                         multiple
@@ -510,8 +514,8 @@ const ProductTemplate = () => {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                            )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -543,8 +547,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                            )
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -578,8 +582,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                            )
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (

@@ -1,18 +1,5 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  makeStyles
-} from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
+import { Box, Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,7 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 
 const ConsumablesQtyDialog = ({
   referenceId,

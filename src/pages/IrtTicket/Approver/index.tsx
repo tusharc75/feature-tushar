@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PersonIcon from '@material-ui/icons/Person';
 import moment from 'moment';
@@ -83,14 +83,14 @@ const Approver = ({ irtTicketData }) => {
                             ? 'hsl(194, 100%, 94%)'
                             : 'hsla(194, 100%, 64%, .5)'
                           : item.status === IRT_APPROVER_STATUS.approved
-                          ? theme === 'light'
-                            ? 'hsl(96, 100%, 94%)'
-                            : 'hsla(96, 100%, 64%, .5)'
-                          : item.status === IRT_APPROVER_STATUS.declined
-                          ? theme === 'light'
-                            ? 'hsl(0, 100%, 96%)'
-                            : 'hsla(0, 100%, 66%, .5)'
-                          : 'white',
+                            ? theme === 'light'
+                              ? 'hsl(96, 100%, 94%)'
+                              : 'hsla(96, 100%, 64%, .5)'
+                            : item.status === IRT_APPROVER_STATUS.declined
+                              ? theme === 'light'
+                                ? 'hsl(0, 100%, 96%)'
+                                : 'hsla(0, 100%, 66%, .5)'
+                              : 'white',
                       borderColor: selected?._id === item?._id ? 'var(--dark-active-border-color, #329592)' : 'var(--common-border-color)',
                       cursor: 'pointer',
                       transition: '.3s'

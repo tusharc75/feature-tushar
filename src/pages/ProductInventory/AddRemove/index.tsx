@@ -1,20 +1,8 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  Divider,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  Typography
-} from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

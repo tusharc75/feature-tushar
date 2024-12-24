@@ -1,5 +1,5 @@
-import { Box, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

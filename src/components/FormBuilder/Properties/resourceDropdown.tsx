@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Box from '@material-ui/core/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
+import Box from '@mui/material/Box';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import { map } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { getLookupOption } from '../helper';

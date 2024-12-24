@@ -1,8 +1,8 @@
-import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Menu, MenuItem, TextField, Typography } from '@mui/material';
 import { ExpandMore } from '@material-ui/icons';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
@@ -495,7 +495,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => { })
+      .then(() => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -683,8 +683,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }

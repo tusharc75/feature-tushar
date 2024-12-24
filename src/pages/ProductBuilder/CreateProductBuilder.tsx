@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Formik, Form } from 'formik';
@@ -16,7 +16,7 @@ import { BiArrowBack } from 'react-icons/bi';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 
 const ProductBuilderSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('name is required')
@@ -53,9 +53,9 @@ const CreateProductBuilder = () => {
       });
   };
 
-  const handleSave = () => { };
+  const handleSave = () => {};
 
-  const refreshProducts = (data) => { };
+  const refreshProducts = (data) => {};
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);

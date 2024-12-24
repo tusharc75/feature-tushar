@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Grid, IconButton, MenuItem } from '@mui/material';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { startCase } from 'lodash';

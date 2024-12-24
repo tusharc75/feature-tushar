@@ -1,10 +1,10 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';

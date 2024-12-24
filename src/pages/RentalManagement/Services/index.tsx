@@ -1,8 +1,8 @@
-import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { startCase } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -358,13 +358,16 @@ const Services = ({
           setNextStep(true);
           setNextStepToolTip(null);
         }
-      }
-      else {
-        if (data?.material?.filter((e) => e.parentId === null).filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
+      } else {
+        if (
+          data?.material
+            ?.filter((e) => e.parentId === null)
+            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))
+            ?.length
+        ) {
           setNextStep(true);
           setNextStepToolTip(null);
-        }
-        else {
+        } else {
           setNextStep(false);
           setNextStepToolTip(rentalManagementMessage.addServicePackage);
         }

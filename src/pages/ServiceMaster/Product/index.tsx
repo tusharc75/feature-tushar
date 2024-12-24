@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, Button, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, Button, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import { serviceMaster, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { useData } from '../../../StateProvider/Provider';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';

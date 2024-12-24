@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Grid, List, ListItemIcon, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, List, ListItemIcon, Typography } from '@mui/material';
 import accountClass from './account.module.scss';
 import { useHistory } from 'react-router-dom';
 import { BsPerson } from 'react-icons/bs';
 import { BiFace } from 'react-icons/bi';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import { ListItemText } from '@material-ui/core';
+import ListItem from '@mui/material/ListItem/ListItem';
+import { ListItemText } from '@mui/material';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
 function DisplayData({ key, label, value, icon, highlightsHead = false }) {

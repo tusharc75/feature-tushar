@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { HiArrowRight } from 'react-icons/hi';
 import { Link } from 'react-router-dom';

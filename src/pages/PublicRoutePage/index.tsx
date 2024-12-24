@@ -1,16 +1,17 @@
-import { useParams, useLocation } from 'react-router-dom';
+import { Box, Button, Grid, TextField } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios from 'axios';
-import { backendApi } from './../../config';
-import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog, TextField, AppBar, Toolbar } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { SVG } from '../../assets';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import QuoteSupplierPrice from './QuoteSupplierPrice';
+import { useContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import QuotationSupplierPrice from './QuotationSupplierPrice';
-import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
-import IrtTicket from './IrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { SVG } from '../../assets';
+import { backendApi } from './../../config';
+import IrtTicket from './IrtTicket';
+import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
+import QuotationSupplierPrice from './QuotationSupplierPrice';
+import QuoteSupplierPrice from './QuoteSupplierPrice';
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -122,7 +123,7 @@ const PublicRoutePage = () => {
   }, [resourceData?.referenceIdType]);
 
   return (
-    <div className="h-screen w-screen max-w-[100vw] overflow-hidden block m-0">
+    <div className="m-0 block h-screen w-screen max-w-[100vw] overflow-hidden">
       <div className={`${classes.header} flex items-center justify-between`}>
         <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
         <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>

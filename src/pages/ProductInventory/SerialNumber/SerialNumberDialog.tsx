@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, TextField } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Button, Grid, TextField } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 

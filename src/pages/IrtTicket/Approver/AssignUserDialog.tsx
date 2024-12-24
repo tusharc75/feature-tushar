@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -12,7 +12,6 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AssignUserDialog = ({ handleClose, onSuccess, id }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -33,7 +32,9 @@ const AssignUserDialog = ({ handleClose, onSuccess, id }) => {
   };
 
   const handleAssignUser = () => {
-    let values = selectedUsers?.map((i) => { return { user: i?.optionValue } });
+    let values = selectedUsers?.map((i) => {
+      return { user: i?.optionValue };
+    });
     let body = { approver: values };
     axiosInstance()
       .post(`${routes?.irtTicket?.path}/approver/${id}`, body)

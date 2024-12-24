@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

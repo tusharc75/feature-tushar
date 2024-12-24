@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { MdDelete } from 'react-icons/md';

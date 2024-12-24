@@ -1,4 +1,4 @@
-import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box } from '@material-ui/core';
+import { TableBody, Table, TableCell, TableContainer, TableHead, TableRow, Box } from '@mui/material';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { formatAmountWithCurrency } from '../../constants/helpers';
@@ -8,7 +8,7 @@ interface Props {
   chartData: any[];
   currency: string;
   type: string;
-  chart: any
+  chart: any;
 }
 
 const TableView = ({ id, chartData, chart, currency }: Props) => {
@@ -68,7 +68,8 @@ const TableView = ({ id, chartData, chart, currency }: Props) => {
                       ? data[key]?.toFixed(2)
                       : chart?.currency
                         ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount
-                        : chart?.percentage ? `${data[key]}%`
+                        : chart?.percentage
+                          ? `${data[key]}%`
                           : data[key]}
                 </TableCell>
               ))}

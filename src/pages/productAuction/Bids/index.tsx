@@ -4,7 +4,7 @@ import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 const renderedFrom = 'bids';
 

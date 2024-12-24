@@ -1,9 +1,9 @@
 import React, { ReactNode, useState, useCallback, FC, ChangeEvent } from 'react';
 import styles from './index.module.scss';
 import CardWithCheckBox from './CardWithCheckbox';
-import type { GridProps } from '@material-ui/core/Grid';
+import type { GridProps } from '@mui/material/Grid';
 import { createBodyColumns, ColumnInterface } from './helper';
-import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
+import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any[];

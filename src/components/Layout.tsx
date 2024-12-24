@@ -1,4 +1,4 @@
-import { Box, Toolbar, useMediaQuery, withWidth } from '@material-ui/core';
+import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -16,7 +16,7 @@ const Layout = ({ children, width }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
   const [sidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
   const [showChat, setShowChat] = useState({ show: true, oldScrollPosition: 0 });
-  const mobileWidths = ['xs', 'sm'];
+  const isMobileWidth = useMediaQuery('(max-width:959px)');
 
   const handleSidebarClose = () => {
     if (!isSidebarOutsideScreen) return;
@@ -40,7 +40,7 @@ const Layout = ({ children, width }) => {
       <div ref={contentRef}>
         <Toolbar />
         <Box display="flex">
-          {!mobileWidths.includes(width) && <Toolbar style={{ width: '66px' }} />}
+          {!isMobileWidth && <Toolbar style={{ width: '66px' }} />}
           <motion.div
             animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
@@ -67,4 +67,4 @@ const Layout = ({ children, width }) => {
   );
 };
 
-export default withWidth()(Layout);
+export default Layout;

@@ -1,6 +1,6 @@
-import { Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { TreeItem, TreeView } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 import moment from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

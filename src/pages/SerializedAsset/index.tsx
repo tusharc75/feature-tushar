@@ -1,12 +1,12 @@
-import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import IconButton from '@material-ui/core/IconButton';
+import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import queryString from 'query-string';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -87,7 +87,7 @@ const SerializedAsset = () => {
         filterVal['status'] = { filter: [assetStatus] };
       }
       if (product) {
-        const productFilter = JSON.parse(product)
+        const productFilter = JSON.parse(product);
         if (isArray(productFilter)) {
           filterVal['product'] = {
             operator: 'OR',
@@ -98,7 +98,7 @@ const SerializedAsset = () => {
         }
       }
       if (warehouse) {
-        const warehouseFilter = JSON.parse(warehouse)
+        const warehouseFilter = JSON.parse(warehouse);
         if (isArray(warehouseFilter)) {
           filterVal['warehouse'] = {
             operator: 'OR',
@@ -109,7 +109,7 @@ const SerializedAsset = () => {
         }
       }
       if (currentLocation) {
-        const currentLocationFilter = JSON.parse(currentLocation)
+        const currentLocationFilter = JSON.parse(currentLocation);
         if (isArray(currentLocationFilter)) {
           filterVal['currentLocation'] = {
             operator: 'OR',
@@ -341,14 +341,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -482,7 +482,7 @@ const SerializedAsset = () => {
             if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
             } else {
-              setDeleteRecord(null)
+              setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
           }}
@@ -632,7 +632,6 @@ const SerializedAsset = () => {
     );
   };
 
-
   const handleCertificationSupplier = async (data) => {
     const ids = selectedRecords?.map((item) => item?._id);
     const certificationSupplier = data?.map((item) => item?._id);
@@ -703,9 +702,7 @@ const SerializedAsset = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={
-            <ActionMenuItems />
-          }
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
           addButtonOnclick={() => {
             setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
@@ -747,8 +744,12 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
-            ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}` : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+            ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
+              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -841,9 +842,7 @@ const LeftSideContent = ({
             onChange={(e, val) => {
               setProductFilter(val && val._id ? val._id : '');
             }}
-            renderInput={(params) => (
-              <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
-            )}
+            renderInput={(params) => <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />}
           />
         )}
         <Autocomplete
@@ -860,15 +859,7 @@ const LeftSideContent = ({
             setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
           renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="none"
-              size="small"
-              name="plant"
-              label={resources?.warehouse?.titleSingular}
-              variant="outlined"
-              fullWidth
-            />
+            <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
           )}
         />
         {permissions?.sublease && (
@@ -905,4 +896,3 @@ const LeftSideContent = ({
     </>
   );
 };
-

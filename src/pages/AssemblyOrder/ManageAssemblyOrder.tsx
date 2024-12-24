@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -32,7 +32,7 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity,resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);

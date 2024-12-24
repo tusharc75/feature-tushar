@@ -16,7 +16,7 @@ import {
   Switch,
   TextField,
   useMediaQuery
-} from '@material-ui/core';
+} from '@mui/material';
 import { DragHandle, Info } from '@material-ui/icons';
 import { Formik, FormikErrors } from 'formik';
 import update from 'immutability-helper';

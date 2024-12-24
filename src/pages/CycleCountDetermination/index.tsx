@@ -1,5 +1,5 @@
-import { Box, Button, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';

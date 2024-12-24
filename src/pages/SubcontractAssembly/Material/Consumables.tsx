@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
+import Grid from '@mui/material/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   CHILD_RESOURCE,
@@ -13,7 +13,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem, TextField } from '@material-ui/core';
+import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -22,7 +22,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';

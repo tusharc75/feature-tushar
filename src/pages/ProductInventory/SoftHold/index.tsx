@@ -1,5 +1,5 @@
-import { Box, Grid } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
+import { Box, Grid } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { map, uniq } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';

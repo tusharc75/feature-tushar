@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Box, Button, Grid, CircularProgress } from '@material-ui/core';
+import { Dialog, Box, Button, Grid, CircularProgress } from '@mui/material';
 
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';

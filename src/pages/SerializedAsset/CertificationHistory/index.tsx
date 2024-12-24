@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Grid, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

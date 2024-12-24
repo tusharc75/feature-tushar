@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
-import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box, TextField } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box, TextField } from '@mui/material';
+import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';

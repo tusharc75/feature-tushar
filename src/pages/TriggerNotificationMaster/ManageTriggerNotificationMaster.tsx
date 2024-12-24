@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -19,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 
 const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -47,7 +47,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(data, fields, true, user) :getObjKeysWithValues(data, fields)
+              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fields)
             });
           })
           .catch((error) => {
@@ -141,7 +141,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

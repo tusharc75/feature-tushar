@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, Chip, IconButton, Tooltip, InputAdornment } from '@material-ui/core';
+import { Box, Button, Grid, Chip, IconButton, Tooltip, InputAdornment } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import {
@@ -17,20 +17,20 @@ import FormTypes from '../../components/Helpers/FormTypes';
 import CustomButton from '../../components/Helpers/CustomButton';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import TextField from '@material-ui/core/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
 import MultipleEntry from './AddConditions/MultipleEntry';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { result, find, startCase, isEqual, camelCase } from 'lodash';
 import { Delete } from '@material-ui/icons';
-import Badge from '@material-ui/core/Badge';
-import { makeStyles } from '@material-ui/core/styles';
+import Badge from '@mui/material/Badge';
+import { makeStyles } from '@mui/styles';
 import { FaDiceOne } from 'react-icons/fa';
 
 const useStyles = makeStyles(() => ({
@@ -594,7 +594,7 @@ function PricingConditionsDetailsPage() {
                                                   style={{ margin: 0 }}
                                                   value={
                                                     values[
-                                                    'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+                                                      'rent_' + _pricingMethod + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                                                     ]
                                                   }
                                                   onChange={(e) =>

@@ -1,5 +1,5 @@
-import { Box, IconButton, InputBase, Typography } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, IconButton, InputBase, Typography } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SendIcon } from 'src/assets/svg/svgIcons';

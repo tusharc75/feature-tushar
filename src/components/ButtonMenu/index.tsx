@@ -1,5 +1,5 @@
 import { MenuProps } from '@aws-amplify/ui-react';
-import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@material-ui/core';
+import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@mui/material';
 import React from 'react';
 import { BiChevronDown } from 'react-icons/bi';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -20,6 +20,7 @@ export type Items<D> = {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   value?: D;
+  visible?: boolean;
 } & Omit<MenuItemProps, 'children' | 'button'>;
 
 const ButtonMenu = <D,>({
@@ -75,7 +76,8 @@ const ButtonMenu = <D,>({
         {...menuProps}
       >
         {items.map((item, index) => {
-          const { onClick = () => {}, ...rest } = item;
+          const { onClick = () => {}, startIcon, endIcon, visible = true, ...rest } = item;
+          if (!visible) return null;
           return (
             <MenuItem
               key={index}
@@ -87,7 +89,11 @@ const ButtonMenu = <D,>({
               }}
               {...rest}
             >
-              {item.label}
+              <span className="flex items-center gap-2">
+                {startIcon}
+                {item.label}
+                {endIcon}
+              </span>
             </MenuItem>
           );
         })}

@@ -1,4 +1,4 @@
-import { Button, Grow } from '@material-ui/core';
+import { Button, Grow } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography } from '@mui/material';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Steps from 'src/components/Steps';

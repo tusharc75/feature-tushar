@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import { Card, IconButton, CardContent, Grid, Menu, MenuItem } from '@material-ui/core';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import { Card, IconButton, CardContent, Grid, Menu, MenuItem } from '@mui/material';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';

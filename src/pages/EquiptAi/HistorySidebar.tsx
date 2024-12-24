@@ -1,8 +1,8 @@
-import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Chat, Delete } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { groupBy } from 'lodash';
 import moment from 'moment';
 import { FiSidebar } from 'react-icons/fi';

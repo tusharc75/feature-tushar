@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, IconButton } from '@material-ui/core';
+import { Box, Button, Collapse, IconButton } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import BuildIcon from '@material-ui/icons/Build';
@@ -48,7 +48,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
     async (cancelTokenSource?: CancelTokenSource) => {
       setLoading(true);
       let api = `/sa-formbuilder/tabs/${resource}`;
-      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
+      if (workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`;
       axiosInstance()
         .get(api, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
@@ -73,7 +73,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const handleDelete = (tab) => {
     setDeleting(true);
     let api = `/sa-formbuilder/tabs/delete/${resourceData?._id}`;
-      if(workflowId) api = `${routes.workflow.path}/tabs/delete/${workflowId}`
+    if (workflowId) api = `${routes.workflow.path}/tabs/delete/${workflowId}`;
     axiosInstance()
       .put(api, { tabId: tab?._id })
       .then(() => {
@@ -90,7 +90,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
 
   const handleUpdateOrder = (tabs) => {
     let api = `/sa-formbuilder/tabs/order/${resourceData?._id}`;
-    if(workflowId) api = `${routes.workflow.path}/tabs/order/${workflowId}`;
+    if (workflowId) api = `${routes.workflow.path}/tabs/order/${workflowId}`;
     axiosInstance()
       .put(
         api,
@@ -157,39 +157,40 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
           )}
           {!workflowId && (
             <HtmlTooltip title={'Setting'}>
-            <IconButton
-              aria-label="Setting"
-              onClick={() => {
-                setOpenSetting(true);
-              }}
-            >
-              <SettingIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-         {!workflowId &&
-         ( <HtmlTooltip title={'Actions'}>
-            <IconButton
-              aria-label="Actions"
-              onClick={() => {
-                setOpenAction(true);
-              }}
-            >
-              <BuildIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>)}
-          {!workflowId &&
-          (<HtmlTooltip title={'Notifications'}>
-            <IconButton
-              aria-label="Notifications"
-              onClick={() => {
-                setOpenNotifications(true);
-              }}
-            >
-              <AddAlertIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+              <IconButton
+                aria-label="Setting"
+                onClick={() => {
+                  setOpenSetting(true);
+                }}
+              >
+                <SettingIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {!workflowId && (
+            <HtmlTooltip title={'Actions'}>
+              <IconButton
+                aria-label="Actions"
+                onClick={() => {
+                  setOpenAction(true);
+                }}
+              >
+                <BuildIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {!workflowId && (
+            <HtmlTooltip title={'Notifications'}>
+              <IconButton
+                aria-label="Notifications"
+                onClick={() => {
+                  setOpenNotifications(true);
+                }}
+              >
+                <AddAlertIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
         </Box>
       </Box>
 
@@ -218,7 +219,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             }}
             resource={resource}
             resourceId={resourceData?._id || null}
-            workflowId = {workflowId}
+            workflowId={workflowId}
           />
         )}
 
@@ -336,7 +337,9 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
   return (
     <>
       <li ref={setNodeRef} style={style} className={`list-none pb-2`}>
-        <div className={` rounded-[5px] [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`} >
+        <div
+          className={` rounded-[5px] [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
+        >
           <div className="flex items-center justify-between p-3 ">
             <div className="flex items-center gap-2">
               <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
@@ -374,7 +377,7 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
           </div>
           <Collapse in={isExpanded}>
             <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId}  />
+              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId} />
             </div>
           </Collapse>
         </div>

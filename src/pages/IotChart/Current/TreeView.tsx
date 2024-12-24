@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Box, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import HistoryIcon from '@material-ui/icons/History';
-import { withStyles } from '@material-ui/core/styles';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import { Box, Dialog, Grid, IconButton, Typography } from '@mui/material';
+import MuiAccordion from '@mui/material/Accordion';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import MuiAccordionSummary from '@mui/material/AccordionSummary';
+import { withStyles } from '@mui/styles';
 import moment from 'moment';
-import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 

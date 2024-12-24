@@ -1,4 +1,4 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Button, Dialog, TextField } from '@mui/material';
 import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

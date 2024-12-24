@@ -1,22 +1,22 @@
 import React, { useRef, useState, useEffect, Fragment, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import { object, string } from 'yup';
 import { useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
+import { ButtonGroup, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper } from '@mui/material';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const ProductBuilderSchema = object().shape({

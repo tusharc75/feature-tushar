@@ -1,17 +1,15 @@
-import React from "react";
-import { DataGrid } from "@material-ui/data-grid";
-import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
-import { Add, Search } from "@material-ui/icons";
-import CustomDataGridNoDataFound from "../Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import React from 'react';
+import { DataGrid } from '@material-ui/data-grid';
+import { Box, Button, TextField, InputAdornment } from '@mui/material';
+import { Add, Search } from '@material-ui/icons';
+import CustomDataGridNoDataFound from '../Helpers/DataGridHelpers/CustomDataGridNoDataFound';
 
 const Entities = ({ brand }) => {
-  const columns = [
-    { field: "entityName", headerName: "Entity Name", width: 150 },
-  ];
+  const columns = [{ field: 'entityName', headerName: 'Entity Name', width: 150 }];
 
   const dataRows = brand.entity.map((row) => ({
     id: row.id,
-    entityName: row.entityName,
+    entityName: row.entityName
   }));
 
   return (
@@ -22,7 +20,7 @@ const Entities = ({ brand }) => {
         </Button>
         <Box marginX={2} />
         <TextField
-          style={{ width: "150px" }}
+          style={{ width: '150px' }}
           variant="outlined"
           type="search"
           placeholder="Search"
@@ -32,14 +30,14 @@ const Entities = ({ brand }) => {
               <InputAdornment position="start">
                 <Search color="disabled" />
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Box>
       <div className="listing-grid">
         <DataGrid
           components={{
-            NoRowsOverlay: CustomDataGridNoDataFound,
+            NoRowsOverlay: CustomDataGridNoDataFound
           }}
           rows={dataRows}
           columns={columns}

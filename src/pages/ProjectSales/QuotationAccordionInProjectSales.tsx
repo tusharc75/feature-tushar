@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
@@ -138,7 +138,7 @@ export default function QuotationAccordionInProjectSales({
         </p>
       )
     ) : (
-      <span className="d-flex gap-2 align-items-center">
+      <span className="d-flex align-items-center gap-2">
         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
         <HtmlTooltip title={`${obj.quotationNumber} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
@@ -206,7 +206,7 @@ export default function QuotationAccordionInProjectSales({
                                     [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
                                       quotationNameWithRedirect(obj)
                                     ) : (
-                                      <span className="d-flex gap-2 align-items-center">
+                                      <span className="d-flex align-items-center gap-2">
                                         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
                                         <HtmlTooltip title={`${obj.quotationNumber} is a Private Quotation`}>
                                           <InfoOutlinedIcon fontSize="small" />

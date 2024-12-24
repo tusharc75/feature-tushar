@@ -1,16 +1,15 @@
-import { Box, CircularProgress, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, CircularProgress, Grid, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import React from 'react';
 import { getResourceField } from '../helper';
 
 function LookUpDisplay({ fields, values, fieldSet }) {
-
   const [resourceFields, setResourceFields] = React.useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
 
   React.useEffect(() => {
     if (values['lookUpField']) {
-      getFields()
+      getFields();
     }
   }, [values['lookUpField']]);
 
@@ -43,9 +42,7 @@ function LookUpDisplay({ fields, values, fieldSet }) {
             onChange={(e, val) => {
               fieldSet('lookUpField', val && val.fieldName ? val.fieldName : '');
             }}
-            renderInput={(params) => (
-              <TextField {...params} margin="dense" variant="outlined" label="Look Up Field" placeholder="Look Up Field" />
-            )}
+            renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Look Up Field" placeholder="Look Up Field" />}
           />
         </Grid>
         {values['lookUpField'] && (

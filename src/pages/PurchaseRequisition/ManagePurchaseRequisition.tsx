@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -20,7 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
-    state: { user,resources }
+    state: { user, resources }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -155,12 +155,13 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                  : `Create ${resources?.purchaseRequisition?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
+                    : `Create ${resources?.purchaseRequisition?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

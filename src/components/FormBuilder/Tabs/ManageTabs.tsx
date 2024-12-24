@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -43,7 +43,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
   const handleSubmit = (values) => {
     if (data && (resourceId || workflowId)) {
       let api = `/sa-formbuilder/tabs/${resourceId}`;
-      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
+      if (workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`;
       axiosInstance()
         .put(api, { ...values, tabId: data?._id })
         .then(({ data }) => {
@@ -61,7 +61,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
         });
     } else {
       let api = `/sa-formbuilder/tabs/${resource}`;
-      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
+      if (workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`;
       axiosInstance()
         .post(api, values)
         .then(({ data }) => {

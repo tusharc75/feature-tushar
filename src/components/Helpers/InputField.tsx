@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, InputAdornment } from '@material-ui/core';
+import { Box, Grid, IconButton, InputAdornment } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { FaDiceOne } from 'react-icons/fa';
 import { FaUserPlus } from 'react-icons/fa6';
@@ -106,23 +106,23 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                  if (val && val.currencyCode) {
-                                    setFieldValue(field.fieldName, val.currencyCode);
-                                    setCurrencySymbol(val.symbolNative);
-                                  } else {
-                                    setFieldValue(field.fieldName, '');
-                                    setCurrencySymbol(null);
+                                    if (val && val.currencyCode) {
+                                      setFieldValue(field.fieldName, val.currencyCode);
+                                      setCurrencySymbol(val.symbolNative);
+                                    } else {
+                                      setFieldValue(field.fieldName, '');
+                                      setCurrencySymbol(null);
+                                    }
                                   }
-                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                  if (onImageUploadCompletePercentage) {
-                                    onImageUploadCompletePercentage(completePercentage);
+                                    if (onImageUploadCompletePercentage) {
+                                      onImageUploadCompletePercentage(completePercentage);
+                                    }
                                   }
-                                }
                                 : null
                             }
                             fields={fieldsData}

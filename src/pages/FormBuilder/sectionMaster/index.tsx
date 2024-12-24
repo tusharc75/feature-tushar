@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton } from '@mui/material';
 import { AddOutlined } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import { useContext, useEffect, useState } from 'react';

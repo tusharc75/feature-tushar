@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
@@ -205,12 +205,8 @@ const DriverMasterDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0}>
-            Details
-          </CustomTab>
-          <CustomTab value={1}>
-            History
-          </CustomTab>
+          <CustomTab value={0}>Details</CustomTab>
+          <CustomTab value={1}>History</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -230,7 +226,7 @@ const DriverMasterDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} : ${driverMasterData?.driverName} ?`} 
+          message={`Are you sure you want to delete ${resources?.driverMaster?.titleSingular?.toLowerCase()} : ${driverMasterData?.driverName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

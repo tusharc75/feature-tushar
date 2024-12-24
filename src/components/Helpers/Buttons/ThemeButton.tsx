@@ -1,4 +1,4 @@
-import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@material-ui/core';
+import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@mui/material';
 import React, { ReactNode, useMemo } from 'react';
 import { FaMobileButton } from 'react-icons/fa6';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

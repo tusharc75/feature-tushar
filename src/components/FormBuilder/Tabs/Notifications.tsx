@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -7,7 +7,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FieldArray, Form, Formik } from 'formik';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';

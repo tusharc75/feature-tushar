@@ -1,12 +1,12 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import { Autocomplete } from '@material-ui/lab';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import { Autocomplete } from '@mui/material';
 import { Add, Cancel, Delete } from '@material-ui/icons';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 
 export default function customTable({ id, classes, entity, table, setTable }) {

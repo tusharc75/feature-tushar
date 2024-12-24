@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -139,7 +139,7 @@ const MarketSegmentDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.marketSegment?.titleSingular?.toLowerCase()} : ${fields?.name} ?`}            
+          message={`Are you sure you want to delete ${resources?.marketSegment?.titleSingular?.toLowerCase()} : ${fields?.name} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,5 +1,5 @@
-import { CircularProgress, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { CircularProgress, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { debounce } from 'lodash';
 import { useCallback, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +14,7 @@ interface Props {
   fieldLabel: string;
   fieldName: string;
   required: boolean;
-  onChange: (_:React.SyntheticEvent, value: any) => void;
+  onChange: (_: React.SyntheticEvent, value: any) => void;
 }
 
 const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel, onChange, fieldName, required = false }: Props) => {
@@ -27,7 +27,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
   const { setToastConfig } = useContext(CustomToastContext);
 
   const fetchOptions = useCallback(
-    debounce(async ( searchKey: string = '', page: number = 0) => {
+    debounce(async (searchKey: string = '', page: number = 0) => {
       try {
         if (searchKey !== '') {
           page = 0;

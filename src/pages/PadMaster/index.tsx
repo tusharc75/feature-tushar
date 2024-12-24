@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -202,11 +202,11 @@ const PadMaster = () => {
         <MenuItem
           disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -274,7 +274,7 @@ const PadMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.padMaster?.titleSingular?.toLowerCase()} : ${deleteRecord?.padName || ''}` : `selected ${resources?.padMaster?.titlePlural?.toLowerCase()}`} ?`}              
+          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.padMaster?.titleSingular?.toLowerCase()} : ${deleteRecord?.padName || ''}` : `selected ${resources?.padMaster?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

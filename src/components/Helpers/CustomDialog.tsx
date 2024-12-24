@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';

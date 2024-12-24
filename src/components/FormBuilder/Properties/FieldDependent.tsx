@@ -1,16 +1,15 @@
-import { Box, CircularProgress, Grid, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, CircularProgress, Grid, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import React from 'react';
 import { getResourceField } from '../helper';
 
 function FieldDependent({ fields, values, fieldSet }) {
-
   const [resourceFields, setResourceFields] = React.useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
 
   React.useEffect(() => {
     if (values['lookupDependentOn']) {
-      getFields()
+      getFields();
     }
   }, [values['lookupDependentOn']]);
 

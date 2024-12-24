@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Line } from 'react-chartjs-2';
 import { dateFormatForInputControl } from '../../../constants/helpers';
-  import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import DateFnsUtils from '@date-io/date-fns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const UserSession = ({id}) => {
+const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const [timeFrame, setTimeFrame] = useState<any>('1-year');
   const [trackingTime, setTrackingTime] = useState({
@@ -76,7 +76,7 @@ const UserSession = ({id}) => {
       day = ('0' + date.getDate()).slice(-2);
     return [month, day, date.getFullYear()].join('-');
   };
-  
+
   const userTimeTracker = async () => {
     setUserTrackingDataLoading(true);
     const parsedFromTime = convertDate(trackingTime.between.from);

@@ -1,5 +1,5 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, TextField } from '@mui/material';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -136,9 +136,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -187,12 +187,12 @@ const PackageInventory = () => {
           module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => { }}
+          onExportToExcelSuccess={() => {}}
         />
       </div>
       <CustomContainer>

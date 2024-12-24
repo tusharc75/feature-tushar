@@ -1,23 +1,23 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import TextField from '@material-ui/core/TextField';
-import { makeStyles } from '@material-ui/core/styles';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import { makeStyles } from '@mui/styles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
 import { object, string, boolean } from 'yup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -587,8 +587,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -620,10 +620,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -657,10 +657,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (

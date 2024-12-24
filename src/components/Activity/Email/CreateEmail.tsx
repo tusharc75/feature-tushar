@@ -1,15 +1,15 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import DateUtils from '@date-io/date-fns';
-import { CircularProgress, FormControlLabel, Switch } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Chip from '@material-ui/core/Chip';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { CircularProgress, FormControlLabel, Switch } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
+import Autocomplete from '@mui/material/Autocomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
@@ -93,7 +93,7 @@ export const CreateEmail = ({
   showManimizeMaximize,
   referenceType = '',
   isAttachmentLoading = false,
-  content = null,
+  content = null
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const {
@@ -280,7 +280,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSendEmail = async (values) => {
@@ -314,7 +314,7 @@ export const CreateEmail = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: "Email Sent Successfully"
+          message: 'Email Sent Successfully'
         });
         setSending(false);
         if (fetchData) fetchData();

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import routes from 'src/components/Helpers/Routes';
 
 const NotifSendType = [

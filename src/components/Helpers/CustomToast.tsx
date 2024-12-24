@@ -1,8 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Snackbar from "@material-ui/core/Snackbar";
-import MuiAlert from "@material-ui/lab/Alert";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import { makeStyles } from '@mui/styles';
 
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -10,34 +10,42 @@ function Alert(props) {
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%",
-    "& > * + *": {
-      marginTop: theme.spacing(2),
-    },
-  },
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2)
+    }
+  }
 }));
 
 const CustomToast = (props) => {
   const { open, close, message, type, hideDuration = 6000, anchorOrigin = null } = props;
   const classes = useStyles();
 
-  return <>
-    {
-      open && <div className={classes.root}>
-        <Snackbar open={open} autoHideDuration={hideDuration} onClose={close}
-          anchorOrigin={anchorOrigin ? anchorOrigin :
-            {
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-        >
-          <Alert onClose={close} severity={type}>
-            {message}
-          </Alert>
-        </Snackbar>
-      </div>
-    }
-  </>
+  return (
+    <>
+      {open && (
+        <div className={classes.root}>
+          <Snackbar
+            open={open}
+            autoHideDuration={hideDuration}
+            onClose={close}
+            anchorOrigin={
+              anchorOrigin
+                ? anchorOrigin
+                : {
+                    vertical: 'top',
+                    horizontal: 'center'
+                  }
+            }
+          >
+            <Alert onClose={close} severity={type}>
+              {message}
+            </Alert>
+          </Snackbar>
+        </div>
+      )}
+    </>
+  );
 };
 
 CustomToast.propTypes = {

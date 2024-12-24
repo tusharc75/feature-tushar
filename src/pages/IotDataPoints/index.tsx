@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -201,11 +201,11 @@ const IotDataPoints = () => {
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
           onClick={() => {
-            if (selectedRecords.length === 1){
+            if (selectedRecords.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-              }else{
-                setDeleteRecord(null)
-              }
+            } else {
+              setDeleteRecord(null);
+            }
             setShowDeleteConfirmBox(true);
           }}
         >
@@ -274,7 +274,7 @@ const IotDataPoints = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldLabel}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}              
+            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.iotDataPoints?.titleSingular?.toLowerCase()} : ${deleteRecord?.fieldLabel}` : `selected ${resources?.iotDataPoints?.titlePlural?.toLowerCase()}`} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

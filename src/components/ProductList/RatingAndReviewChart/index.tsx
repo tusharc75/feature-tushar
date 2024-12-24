@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Avatar, Box, CircularProgress, CircularProgressProps, Typography } from '@material-ui/core';
-import { Rating } from '@material-ui/lab';
+import { Avatar, Box, CircularProgress, CircularProgressProps, Typography } from '@mui/material';
+import { Rating } from '@mui/material';
 import styles from './rating-and-review-chart.module.scss';
 import StarIcon from '@material-ui/icons/Star';
 

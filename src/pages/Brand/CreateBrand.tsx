@@ -1,77 +1,65 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Container,
-  CssBaseline,
-  Grid,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Paper,
-  Box,
-  TextField,
-} from "@material-ui/core";
+import React from 'react';
+import { makeStyles } from '@mui/styles';
+import { Container, CssBaseline, Grid, Typography, Stepper, Step, StepLabel, Button, Paper, Box, TextField } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    width: "100%",
-    [theme.breakpoints.down("sm")]: {
-      textAlign: "center",
-    },
+    width: '100%',
+    [theme.breakpoints.down('sm')]: {
+      textAlign: 'center'
+    }
   },
   container: {
     margin: theme.spacing(2, 0),
     padding: theme.spacing(5, 10),
-    [theme.breakpoints.down("md")]: {
-      padding: theme.spacing(5, 5),
-    },
+    [theme.breakpoints.down('md')]: {
+      padding: theme.spacing(5, 5)
+    }
   },
   backButton: {
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
   instructions: {
     marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   formContainer: {
     padding: theme.spacing(10, 15),
-    [theme.breakpoints.down("md")]: {
-      padding: theme.spacing(10, 10),
+    [theme.breakpoints.down('md')]: {
+      padding: theme.spacing(10, 10)
     },
-    [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(10, 5),
-    },
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(10, 5)
+    }
   },
   inputContainer: {
-    width: "100%",
-    marginBottom: theme.spacing(4),
+    width: '100%',
+    marginBottom: theme.spacing(4)
   },
   input: {
-    width: "100%",
+    width: '100%'
   },
   buttonsContainer: {
-    display: "flex",
-    justifyContent: "flex-end",
-  },
+    display: 'flex',
+    justifyContent: 'flex-end'
+  }
 }));
 
 function getSteps() {
-  return ["User Details", "Entity Details", "Brand Details"];
+  return ['User Details', 'Entity Details', 'Brand Details'];
 }
 
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return "Select campaign settings...";
+      return 'Select campaign settings...';
     case 1:
-      return "What is an ad group anyways?";
+      return 'What is an ad group anyways?';
     case 2:
-      return "This is the bit I really care about!";
+      return 'This is the bit I really care about!';
     default:
-      return "Unknown stepIndex";
+      return 'Unknown stepIndex';
   }
 }
 
@@ -99,9 +87,7 @@ const CreateBrand = () => {
           <Grid container justify="space-between">
             <Grid item xs={12} sm={12} md={6}>
               <Typography variant="h6">Create New Brand</Typography>
-              <Typography variant="body2">
-                Follow all the steps to create a brand
-              </Typography>
+              <Typography variant="body2">Follow all the steps to create a brand</Typography>
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
               <Stepper activeStep={activeStep} alternativeLabel>
@@ -155,10 +141,7 @@ const CreateBrand = () => {
                     <TextField label="Name" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
-                    <TextField
-                      label="Tax Jurisdiction"
-                      className={classes.input}
-                    />
+                    <TextField label="Tax Jurisdiction" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
                     <TextField label="City" className={classes.input} />
@@ -199,19 +182,13 @@ const CreateBrand = () => {
                     <TextField label="State" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
-                    <TextField
-                      label="Communication Language"
-                      className={classes.input}
-                    />
+                    <TextField label="Communication Language" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
                     <TextField label="Mobile No." className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
-                    <TextField
-                      label="Communication Method"
-                      className={classes.input}
-                    />
+                    <TextField label="Communication Method" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
                     <TextField label="Requests" className={classes.input} />
@@ -222,10 +199,7 @@ const CreateBrand = () => {
                     <TextField label="Company Code" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
-                    <TextField
-                      label="Portal Language"
-                      className={classes.input}
-                    />
+                    <TextField label="Portal Language" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
                     <TextField label="City" className={classes.input} />
@@ -243,10 +217,7 @@ const CreateBrand = () => {
                     <TextField label="Comments" className={classes.input} />
                   </Box>
                   <Box className={classes.inputContainer}>
-                    <TextField
-                      label="Short Description"
-                      className={classes.input}
-                    />
+                    <TextField label="Short Description" className={classes.input} />
                   </Box>
                 </Grid>
               </Grid>
@@ -256,21 +227,11 @@ const CreateBrand = () => {
             <div>
               <div>
                 <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    size="small" 
-                    className={classes.backButton}
-                  >
+                  <Button disabled={activeStep === 0} onClick={handleBack} size="small" className={classes.backButton}>
                     Back
                   </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small" 
-                    onClick={handleNext}
-                  >
-                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  <Button variant="contained" color="primary" size="small" onClick={handleNext}>
+                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                   </Button>
                 </div>
               </div>

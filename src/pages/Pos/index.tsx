@@ -1,8 +1,8 @@
-import { Badge, Box, Button, Grid, IconButton, TextField } from '@material-ui/core';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
+import { Badge, Box, Button, Grid, IconButton, TextField } from '@mui/material';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

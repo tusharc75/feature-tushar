@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, FormEvent, useContext, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, Dialog, Grid, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -26,7 +26,15 @@ interface AdditionalCostDialogProps {
   showSaveAndNext?: Boolean;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
+  onClose,
+  currency,
+  handleAddCost,
+  handleUpdateCost,
+  costData,
+  loadingEdit,
+  showSaveAndNext
+}) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -76,7 +84,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
     return errors;
   }
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -91,7 +98,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
+          validationSchema={yupSchema(initialData.fields?.filter((f) => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}

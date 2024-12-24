@@ -1,15 +1,16 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import { FormBuilder } from '../../components/FormBuilder';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
-import TextField from '@material-ui/core/TextField';
+import TextField from '@mui/material/TextField';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { uniq, map, isEqual } from 'lodash';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
@@ -507,8 +508,8 @@ const PriceTemplate = () => {
                               setFieldValue('entity', val && val?.map((d) => d._id));
                               val && val.length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                  )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                             }}
                             renderInput={(params) => (
@@ -543,10 +544,10 @@ const PriceTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -584,10 +585,10 @@ const PriceTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    ownerCollaboratorDataConst.filter((data) =>
+                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                    )
                                   )
-                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (

@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import { useState } from 'react';

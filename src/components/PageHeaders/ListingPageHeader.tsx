@@ -1,6 +1,6 @@
-import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@material-ui/core';
+import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { FaCircleChevronDown } from 'react-icons/fa6';
@@ -17,7 +17,7 @@ type ButtonPropsWithExtraData = {
   loading?: boolean;
   iconsEnabled?: boolean;
   text?: string;
-  textAddShow?: boolean
+  textAddShow?: boolean;
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -188,8 +188,9 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (

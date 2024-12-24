@@ -1,10 +1,10 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
@@ -15,11 +15,11 @@ import {
   bulkAssetCreation,
   setFieldsInAscendingOrder,
   GenerateResourceLineNumber,
-  sidebarResource,
+  sidebarResource
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
@@ -59,7 +59,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 rest['status'] = 'New';
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: {...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setCloneHeading(baNumber);
                 setLoading(false);
@@ -205,7 +205,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                     fullWidth
                     resource={sidebarResource.quotation}
                     referenceId={bulkAssetCreationId || null}
-                    collaborateTools = {true}
+                    collaborateTools={true}
                   />
                 </Form>
               </CustomDialogContent>

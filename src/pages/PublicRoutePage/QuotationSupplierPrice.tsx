@@ -1,16 +1,17 @@
-import { useState, useEffect, useContext } from 'react';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, Divider } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import axios from 'axios';
-import { backendApi } from '../../config';
-import { Box, Button, Divider, makeStyles } from '@material-ui/core';
-import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { startCase } from 'lodash';
-import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useContext, useEffect, useState } from 'react';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { backendApi } from '../../config';
+import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -1,14 +1,12 @@
-import React from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import clsx from 'clsx';
-import { Stepper, Step, StepLabel, StepConnector, Grid, Typography, Paper, Chip, Box } from '@material-ui/core';
 import { Check } from '@material-ui/icons';
-import { getUniqueCurrencies } from '../../constants/helpers';
-import { FcCancel } from 'react-icons/fc';
+import { Grid, Paper, Step, StepConnector, StepLabel, Stepper, Typography } from '@mui/material';
+import { makeStyles, withStyles } from '@mui/styles';
+import clsx from 'clsx';
 import { FaHourglassHalf } from 'react-icons/fa';
+import { FcCancel } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
+import { getUniqueCurrencies } from '../../constants/helpers';
 
-import HtmlTooltip from '../../components/CustomTooltipTitle';
 import routes from './Routes';
 
 const useStyles = makeStyles((theme) => ({

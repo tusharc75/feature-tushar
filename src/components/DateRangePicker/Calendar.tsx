@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 import * as React from 'react';
 import { DayPicker } from 'react-day-picker';

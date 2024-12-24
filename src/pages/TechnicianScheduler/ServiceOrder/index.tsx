@@ -1,4 +1,4 @@
-import { Box, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@mui/material';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,7 +9,7 @@ import routes from 'src/components/Helpers/Routes';
 import { dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -18,21 +18,21 @@ const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
-    state: { permissions,resources }
+    state: { permissions, resources }
   }: any = useData();
 
   const TECHNICIAN_RESOURCE = [
-  {
-    key: 'fieldTicket',
-    resource: sidebarResource.fieldTicket,
-    title: resources?.fieldTicket?.titlePlural
-  },
-  {
-    key: 'rentalManagement',
-    resource: sidebarResource.rentalManagement,
-    title: resources?.rentalManagement?.titlePlural
-  },
-];
+    {
+      key: 'fieldTicket',
+      resource: sidebarResource.fieldTicket,
+      title: resources?.fieldTicket?.titleSingular
+    },
+    {
+      key: 'rentalManagement',
+      resource: sidebarResource.rentalManagement,
+      title: resources?.rentalManagement?.titleSingular
+    }
+  ];
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -47,7 +47,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
     const options: any = [];
     TECHNICIAN_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setServiceTypes(options);
@@ -112,50 +112,53 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       ...(selectedType === 'fieldTicket'
-        ? [{
-          accessor: 'fieldTicketNumber',
-          Header: 'Field Ticket',
-          width: 200,
-          Cell: ({ row }) =>
-            row.original['fieldTicketNumber'] ? (
-              <div className="flex items-center gap-1">
-                <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }]
-        : selectedType === 'rentalManagement'
-          ? [{
-            accessor: 'rentalJobName',
-            Header: 'Rental Job',
-            width: 200,
-            Cell: ({ row }) =>
-              row.original['rentalJobName'] ? (
-                <div className="flex items-center gap-1">
-                  <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
+        ? [
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              width: 200,
+              Cell: ({ row }) =>
+                row.original['fieldTicketNumber'] ? (
+                  <div className="flex items-center gap-1">
+                    <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
           ]
+        : selectedType === 'rentalManagement'
+          ? [
+              {
+                accessor: 'rentalJobName',
+                Header: 'Rental Job',
+                width: 200,
+                Cell: ({ row }) =>
+                  row.original['rentalJobName'] ? (
+                    <div className="flex items-center gap-1">
+                      <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  ) : (
+                    <NoDataCell />
+                  )
+              }
+            ]
           : []),
       {
         accessor: 'serviceName',

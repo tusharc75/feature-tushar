@@ -4,7 +4,7 @@ import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 import { AiOutlineEye } from 'react-icons/ai';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { formatAmountWithCurrency, sidebarResource, quotation, CHILD_RESOURCE } from '../../constants/helpers';
@@ -100,14 +100,15 @@ const DoaQuotationApproval = () => {
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = true;
@@ -121,14 +122,15 @@ const DoaQuotationApproval = () => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = true;
@@ -246,8 +248,8 @@ const DoaQuotationApproval = () => {
               View
             </Button>
             {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) &&
-              DOAData?.status !== 'Accepted' &&
-              DOAData?.status !== 'Rejected' ? (
+            DOAData?.status !== 'Accepted' &&
+            DOAData?.status !== 'Rejected' ? (
               <>
                 <Button
                   onClick={() => {

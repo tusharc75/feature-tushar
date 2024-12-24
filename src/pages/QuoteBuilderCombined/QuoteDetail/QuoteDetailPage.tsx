@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useMemo, useState, useContext, useEffect } from 'react';
@@ -6,12 +6,7 @@ import { formatAmountWithCurrency } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-
-export default function QuoteDetailPage({
-  quoteData,
-  selectedEntity,
-  ifQuoteApprovedAapproved
-}) {
+export default function QuoteDetailPage({ quoteData, selectedEntity, ifQuoteApprovedAapproved }) {
   const [loadingFields, setLoadingFields] = useState(false);
   const [quoteFields, setQuoteFields] = useState([]);
   const toastConfig = useContext(CustomToastContext);
@@ -58,9 +53,11 @@ export default function QuoteDetailPage({
               data={getCopyOfQuoteData}
               fields={!ifQuoteApprovedAapproved ? quoteFields.filter((_f) => _f.fieldData.sectionName !== 'Post-Quote Information') : quoteFields}
             />
-          ) : <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>}
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </>
       )}
     </div>

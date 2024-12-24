@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { useMemo } from 'react';
 import { getPathTitleFromPath } from 'src/components/AiChatbox/utils';
 

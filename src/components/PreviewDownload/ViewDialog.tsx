@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import CustomButton from '../Helpers/CustomButton';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';

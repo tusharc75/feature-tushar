@@ -1,8 +1,8 @@
-import Box from '@material-ui/core/Box/Box';
+import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@material-ui/core/Grid/Grid';
-import { Button, CircularProgress, Dialog } from '@material-ui/core';
+import Grid from '@mui/material/Grid/Grid';
+import { Button, CircularProgress, Dialog } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, gridLoadingTimeout, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
@@ -241,7 +241,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           rentalManagementData={selectedRecords[0]}
           onSuccess={(_selectedPackage) => {
             setSelectedPackage(_selectedPackage);
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingAvailableStatus ? ASSET_STATUS.available : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
               setOpenAssetDataDialog({
@@ -263,7 +263,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: null, data: null })}
           onSuccess={(_assetData) => {
             if (openAssetDataDialog.type === 'underReview') {

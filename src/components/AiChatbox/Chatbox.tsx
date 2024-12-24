@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Close } from '@material-ui/icons';
 import { Dispatch, useCallback, useContext, useEffect, useRef } from 'react';
 import { BsStars } from 'react-icons/bs';

@@ -1,7 +1,7 @@
-import { Grid, IconButton, TextField } from '@material-ui/core';
+import { Grid, IconButton, TextField } from '@mui/material';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import HistoryIcon from '@material-ui/icons/History';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';

@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
-import Skeleton from '@material-ui/lab/Skeleton';
+import Skeleton from '@mui/material/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';

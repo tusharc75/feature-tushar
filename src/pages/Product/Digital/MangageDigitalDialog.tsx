@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CustomDialogTransition, getObjKeysWithValues, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';

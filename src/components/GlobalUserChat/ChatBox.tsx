@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, Typography } from '@material-ui/core';
+import { Box, CircularProgress, IconButton, Typography } from '@mui/material';
 import { Done, DoneAll } from '@material-ui/icons';
 import moment from 'moment';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -92,21 +92,21 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
     if (messageData.seen.length === 1) {
       return (
         <span className="read-receipt received">
-          <Done className="[font-size:14px_!important] text-gray-500" />
+          <Done className="text-gray-500 [font-size:14px_!important]" />
         </span>
       );
     }
     if (messageData.seen.length === selectedChat.users.length) {
       return (
         <span className="read-receipt seen">
-          <DoneAll className="[font-size:14px_!important] text-[#49B11D]" />
+          <DoneAll className="text-[#49B11D] [font-size:14px_!important]" />
         </span>
       );
     }
     if (messageData.seen.length < selectedChat.users.length) {
       return (
         <span className="read-receipt sent">
-          <DoneAll className="[font-size:14px_!important] text-gray-500" />
+          <DoneAll className="text-gray-500 [font-size:14px_!important]" />
         </span>
       );
     }
@@ -138,14 +138,14 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
       ) : (
         <Box
           height={isSmallScreen ? 'calc(100vh - 171px)' : '449px'}
-          className="chatbox-container bg-[var(--dark-secondary,white)] gap-y-[9px] py-[20px] px-[17px]"
+          className="chatbox-container gap-y-[9px] bg-[var(--dark-secondary,white)] px-[17px] py-[20px]"
         >
           {messages &&
             messages.map((data, i) => {
               const userFromChat = user(data);
               const isMyMessage = data.userid === currentUser;
               return (
-                <div key={i} className={`single-message max-w-[calc(100%-min(30%,30px))] group w-fit ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}>
+                <div key={i} className={`single-message group w-fit max-w-[calc(100%-min(30%,30px))] ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}>
                   <div
                     title={moment(data.date).format('DD, MMM YYYY')}
                     className={`message-outlet p-[10px] ${
@@ -159,7 +159,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
                     }}
                   >
                     {selectedChat && chatUsers?.length > 2 ? (
-                      <p className="font-semibold text-[13px] mb-[2px]">
+                      <p className="mb-[2px] text-[13px] font-semibold">
                         {!userFromChat ? 'Equipt User' : userFromChat?._id !== currentUser && `${userFromChat?.firstName} ${userFromChat?.lastName}`}
                       </p>
                     ) : null}
@@ -168,9 +168,9 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
                       <p className="msg-text">{data.message}</p>
                     </div>
                   </div>
-                  <div className={`flex items-center gap-1 ${isMyMessage ? 'text-right justify-end' : ''}`}>
+                  <div className={`flex items-center gap-1 ${isMyMessage ? 'justify-end text-right' : ''}`}>
                     <RenderReadReceipt messageData={data} />
-                    <p className={`text-[12px] ${isMyMessage ? '' : 'opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                    <p className={`text-[12px] ${isMyMessage ? '' : 'opacity-0 transition-opacity duration-300 group-hover:opacity-100'}`}>
                       {formatTime(data.date)}
                     </p>
                   </div>
@@ -183,13 +183,13 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
       {!loadingChat && (
         <form
           onSubmit={sendMessage}
-          className={`h-[60px] grid grid-cols-[1fr_32px] gap-[10px] items-center px-[15px] py-[10px] shadow-[0px_-4px_40px_0px_rgba(0,_0,_0,_0.06)] dark:[border-top:1px_solid_var(--common-border-color)] dark:bg-[rgba(14,14,35,0.5)]`}
+          className={`grid h-[60px] grid-cols-[1fr_32px] items-center gap-[10px] px-[15px] py-[10px] shadow-[0px_-4px_40px_0px_rgba(0,_0,_0,_0.06)] dark:bg-[rgba(14,14,35,0.5)] dark:[border-top:1px_solid_var(--common-border-color)]`}
         >
           <input
             disabled={selectedChat.chatTitle === 'Equipt User'}
             placeholder="Start Typing..."
             value={messageValue}
-            className="p-[12px_22px] rounded-[26px] bg-[transparent] [border:1px_solid_var(--common-border-color)] text-[var(--primary-text)] text-[13px] [outline-color:transparent] focus-within:[outline:2px_solid_var(--common-border-color)]"
+            className="rounded-[26px] bg-[transparent] p-[12px_22px] text-[13px] text-[var(--primary-text)] [border:1px_solid_var(--common-border-color)] [outline-color:transparent] focus-within:[outline:2px_solid_var(--common-border-color)]"
             onChange={(e) => setMessageValue(e.target.value)}
             ref={inputRef}
           />

@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase, sortBy } from 'lodash';
@@ -34,8 +34,6 @@ import axios, { CancelTokenSource } from 'axios';
 let invoiceTimeout;
 
 const Invoice = () => {
-
-
   const renderedFrom = camelCase(sidebarResource.invoice);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -273,8 +271,7 @@ const Invoice = () => {
           onClick={() => {
             if (selectedRecords?.length === 1) {
               setDeleteRecord(selectedRecords[0]);
-            }
-            else {
+            } else {
               setDeleteRecord(null);
             }
             setShowDeleteConfirmBox(true);
@@ -406,8 +403,12 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.invoiceNumber}` : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`} ?`}
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+              ${deleteRecord?.invoiceNumber}`
+                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
