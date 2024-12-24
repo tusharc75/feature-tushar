@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
 import { camelCase, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';

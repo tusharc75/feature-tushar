@@ -22,7 +22,7 @@ import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE } from 'src/constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),

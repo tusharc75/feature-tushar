@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';

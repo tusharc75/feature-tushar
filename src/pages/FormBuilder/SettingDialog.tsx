@@ -8,7 +8,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from '../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 

@@ -26,7 +26,7 @@ import MultipleEntry from './AddConditions/MultipleEntry';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { result, find, startCase, isEqual, camelCase } from 'lodash';
 import { Delete } from '@material-ui/icons';
 import Badge from '@mui/material/Badge';

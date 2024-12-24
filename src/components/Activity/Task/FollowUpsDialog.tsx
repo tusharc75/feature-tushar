@@ -1,5 +1,5 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import { Form, Formik } from 'formik';

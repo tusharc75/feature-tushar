@@ -1,7 +1,7 @@
 import { Box, Grid, IconButton, MenuItem, TextField } from '@mui/material';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

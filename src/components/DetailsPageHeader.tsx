@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

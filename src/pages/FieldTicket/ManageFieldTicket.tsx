@@ -24,7 +24,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
 import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';

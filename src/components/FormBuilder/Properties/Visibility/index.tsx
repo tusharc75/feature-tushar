@@ -4,7 +4,7 @@ import ConditionDialog from './ConditionDialog';
 import { MoreHoriz, Settings } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Entity } from 'src/components/FormBuilder/AddField/entity';
 import { makeStyles } from '@mui/styles';
 

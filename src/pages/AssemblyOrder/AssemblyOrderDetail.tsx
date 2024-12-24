@@ -21,7 +21,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Edit } from '@material-ui/icons';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

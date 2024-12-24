@@ -3,7 +3,7 @@ import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField';
 import { makeStyles, useTheme } from '@mui/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import Autocomplete, { AutocompleteRenderGroupParams, AutocompleteRenderInputParams } from '@material-ui/lab/Autocomplete';
+import Autocomplete, { AutocompleteRenderGroupParams, AutocompleteRenderInputParams } from '@mui/material/Autocomplete';
 import React from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { AllSidebarIconList, DynamicIcon } from 'src/assets/IconGenerator';

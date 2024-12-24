@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { map } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

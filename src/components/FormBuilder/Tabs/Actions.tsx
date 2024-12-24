@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { getLookupResource, getResourceField } from '../helper';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

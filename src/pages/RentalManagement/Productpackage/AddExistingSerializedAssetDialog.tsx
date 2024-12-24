@@ -23,7 +23,7 @@ import {
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';

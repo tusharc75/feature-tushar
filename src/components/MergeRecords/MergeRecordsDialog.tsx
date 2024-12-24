@@ -7,7 +7,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ImportExportMenu from '../Helpers/ImportExportMenu';

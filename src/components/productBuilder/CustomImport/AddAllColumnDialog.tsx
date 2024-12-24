@@ -9,7 +9,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 export const AddAllColumnDialog = (props) => {
   const { fieldLabelOptions, handleClose, handleAddField, fields, section } = props;

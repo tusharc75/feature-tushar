@@ -1,6 +1,6 @@
 import { useState, Fragment, useContext } from 'react';
 import { Avatar, TextField, Box, Button } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

@@ -8,7 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { Box, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TextField, TableRow } from '@mui/material';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Formik, Form, FieldArray } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';

@@ -4,7 +4,7 @@ import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, I
 import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { TbPinnedOff } from 'react-icons/tb';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';

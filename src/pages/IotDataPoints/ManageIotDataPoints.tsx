@@ -16,7 +16,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { checkFormula } from 'src/constants/formulaUtility';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {

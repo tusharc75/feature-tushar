@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Box, Checkbox, FormControl, IconButton, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';

@@ -16,7 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';

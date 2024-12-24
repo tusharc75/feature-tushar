@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

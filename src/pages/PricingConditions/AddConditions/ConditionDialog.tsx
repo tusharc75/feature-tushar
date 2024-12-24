@@ -12,7 +12,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, MATERIAL_TYPE, PRICING_TYPE, getUniqueCurrencies } from './../../../constants/helpers';
 import { pricingCondition } from '../../../constants/helpers';
 import { Box, Grid, TextField, InputAdornment, Chip, Badge, Select, FormControl, InputLabel, IconButton } from '@mui/material';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { result, find, startCase, isEqual, camelCase, values } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';

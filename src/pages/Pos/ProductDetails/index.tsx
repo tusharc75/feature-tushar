@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import axiosInstance from 'src/axios/axiosInstance';
-import Skeleton from '@material-ui/lab/Skeleton';
+import Skeleton from '@mui/material/Skeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Carousel from 'react-material-ui-carousel';
 import { BsImage } from 'react-icons/bs';

@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';

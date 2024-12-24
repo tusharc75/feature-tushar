@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Add, Delete } from '@material-ui/icons';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

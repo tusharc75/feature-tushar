@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import queryString from 'query-string';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { camelCase, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';

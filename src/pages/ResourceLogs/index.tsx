@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';

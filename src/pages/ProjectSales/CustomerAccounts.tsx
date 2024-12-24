@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { Grid, Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';

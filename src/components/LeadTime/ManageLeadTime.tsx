@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, Grid, IconButton, TextField, Typography } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

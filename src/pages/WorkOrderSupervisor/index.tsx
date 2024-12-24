@@ -3,7 +3,7 @@ import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert } from '@material-ui/icons';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -429,12 +429,12 @@ const WorkOrderSupervisor = () => {
         },
         ...(['table-view', 'card-view']?.includes(viewType)
           ? [
-            {
-              disabled: selectedRecords?.length === 0,
-              label: 'Add Products/Consumables',
-              onClick: () => setConsumablesDialog(true)
-            }
-          ]
+              {
+                disabled: selectedRecords?.length === 0,
+                label: 'Add Products/Consumables',
+                onClick: () => setConsumablesDialog(true)
+              }
+            ]
           : [])
       ]
     };
@@ -565,7 +565,7 @@ const WorkOrderSupervisor = () => {
                   </>
                 ) : (
                   <div className="flex">
-                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => { }}>
+                    <ToggleButtonGroup size="small" exclusive value={resourceType} onChange={(e, newVal) => {}}>
                       <ToggleButton value={'workOrder'} onClick={() => setResourceType('workOrder')}>
                         {resources?.workOrder?.titleSingular}
                       </ToggleButton>
@@ -728,15 +728,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               assignTechnicianDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
                 : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
             }
             assignedUsers={
               assignTechnicianDialog.multiple
@@ -762,15 +762,15 @@ const WorkOrderSupervisor = () => {
             workOrderData={
               workStationAssignDialog.multiple
                 ? selectedRecords?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrder
-                }))
+                    uniqueId: r?.uniqueId,
+                    workOrderId: r?.workOrder
+                  }))
                 : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?._id
-                  }
-                ]
+                    {
+                      uniqueId: selectedServiceData?.uniqueId,
+                      workOrderId: selectedServiceData?._id
+                    }
+                  ]
             }
             workStations={workStationAssignDialog.multiple ? selectedRecords[0]?.assignedWorkStations : selectedServiceData?.assignedWorkStations}
             handleClose={() => {

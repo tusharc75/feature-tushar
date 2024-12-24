@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { getLookupOption } from '../helper';
 import { debounce, isEmpty, uniqBy } from 'lodash';

@@ -17,7 +17,7 @@ import emailStyles from '../../pages/Activity/Email/email.module.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 
 const AskSupplierPriceDialog = (props) => {
   const {

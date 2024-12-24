@@ -3,7 +3,7 @@ import { Box, IconButton, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import HistoryIcon from '@material-ui/icons/History';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { camelCase } from 'lodash';
 import moment from 'moment';

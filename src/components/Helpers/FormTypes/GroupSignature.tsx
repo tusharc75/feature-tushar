@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Typography, TextField, Box } from '@mui/material';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
 import { isObject } from 'lodash';

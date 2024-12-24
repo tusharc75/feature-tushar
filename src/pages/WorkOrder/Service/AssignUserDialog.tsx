@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isArray } from 'lodash';
 

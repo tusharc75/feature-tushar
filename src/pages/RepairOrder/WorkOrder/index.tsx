@@ -2,7 +2,7 @@ import { Box, Grid, IconButton, MenuItem, TextField } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import EditIcon from '@material-ui/icons/Edit';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete } from '@mui/material';
 import { capitalize, map, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
