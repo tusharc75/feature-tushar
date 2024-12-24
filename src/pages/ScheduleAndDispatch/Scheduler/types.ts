@@ -10,6 +10,7 @@ export type SchedularState = {
   selectedProduct: string | null;
   loading: boolean;
   activeTab: Tab | null;
+  activeTabIndex: number;
   tabs: Tab[];
 };
 export type UseScheduarActions =
@@ -21,8 +22,9 @@ export type UseScheduarActions =
   | { type: 'setLoading'; payload: boolean }
   | { type: 'setWarehouseOptions'; payload: WarehouseOption[] }
   | { type: 'setSelectedProduct'; payload: string }
-  | { type: 'setActiveTab'; payload: Tab }
-  | { type: 'setTabs'; payload: Tab[] };
+  | { type: 'setActiveTab'; payload: Tab | null }
+  | { type: 'setTabs'; payload: Tab[] }
+  | { type: 'setActiveTabIndex'; payload: number };
 
 export type UseScheduar = ReturnType<typeof useScheduar>;
 export type SchedularComponentProps = {

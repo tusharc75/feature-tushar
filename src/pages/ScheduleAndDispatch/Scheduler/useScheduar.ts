@@ -16,7 +16,8 @@ const initialState: SchedularState = {
   selectedProduct: null,
   loading: false,
   activeTab: null,
-  tabs: []
+  tabs: [],
+  activeTabIndex: -1
 };
 
 const reducer = (state: SchedularState, action: UseScheduarActions) => {
@@ -41,6 +42,8 @@ const reducer = (state: SchedularState, action: UseScheduarActions) => {
       return { ...state, activeTab: action.payload };
     case 'setTabs':
       return { ...state, tabs: action.payload };
+    case 'setActiveTabIndex':
+      return { ...state, activeTabIndex: action.payload };
     default:
       return state;
   }
@@ -75,7 +78,18 @@ const useScheduar = () => {
   const setSelectedProduct = useCallback((value: SchedularState['selectedProduct']) => setState({ type: 'setSelectedProduct', payload: value }), []);
   const setLoading = useCallback((value: SchedularState['loading']) => setState({ type: 'setLoading', payload: value }), []);
   const setTabs = useCallback((value: SchedularState['tabs']) => setState({ type: 'setTabs', payload: value }), []);
-  const getTabData = useCallback((key: TabKey) => state.tabs.find((tab) => tab.key === key), [state.tabs]);
+  const getTabData = useCallback(
+    (key: TabKey) => {
+      const index = state.tabs.findIndex((tab) => tab.key === key);
+      if (index !== -1) {
+        setState({ type: 'setActiveTabIndex', payload: index });
+        return state.tabs[index];
+      }
+      setState({ type: 'setActiveTabIndex', payload: index });
+      return null;
+    },
+    [state.tabs]
+  );
   const setActiveTab = useCallback(
     (key: TabKey) => {
       setState({ type: 'setActiveTab', payload: getTabData(key) });
