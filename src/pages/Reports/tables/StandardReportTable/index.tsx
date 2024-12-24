@@ -1,7 +1,5 @@
-import MomentUtils from '@date-io/moment';
 import { CircularProgress, Dialog, IconButton } from '@mui/material';
 import { History, Visibility } from '@mui/icons-material';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
 import { camelCase, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -589,7 +587,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [columns?.length, selectedReport.resource, footerData]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       {showGrid && (
         <div className={cn('inline-flex justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <>
@@ -616,7 +614,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   permissions={permissions?.report}
                   module={selectedReport.resource}
                   api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -766,7 +764,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           />
         </Dialog>
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

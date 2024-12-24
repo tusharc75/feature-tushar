@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Grid, Paper } from '@mui/material';
+import { Box, Grid, Paper, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar';
@@ -13,7 +13,7 @@ import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   paper: {
     padding: theme.spacing(1),
     textAlign: 'center',

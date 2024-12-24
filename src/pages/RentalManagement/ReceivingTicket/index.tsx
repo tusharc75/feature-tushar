@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@mui/material';
+import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
 import { makeStyles } from '@mui/styles';
@@ -81,7 +81,7 @@ import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCe
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

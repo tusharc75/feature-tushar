@@ -5,8 +5,9 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { FaCheckCircle } from 'react-icons/fa';
 import { isMobile } from 'react-device-detect';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     // width: "98%",
     // padding: "10px",

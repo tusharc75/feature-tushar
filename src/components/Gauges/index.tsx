@@ -1,9 +1,9 @@
 import React from 'react';
 import GaugeChart from 'react-gauge-chart';
-import { Box, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   lebel: {
     textAlign: 'center',
     fontWeight: 700,

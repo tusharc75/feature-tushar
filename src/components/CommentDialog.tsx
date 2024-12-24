@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Button, Dialog, TextField, Theme } from '@mui/material';
 import CustomDialogHeader from './CustomDialog/CustomDialogHeader';
 import CustomDialogContent from './CustomDialog/CustomDialogContent';
 import CustomDialogFooter from './CustomDialog/CustomDialogFooter';
@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

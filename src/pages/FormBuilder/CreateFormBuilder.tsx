@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@mui/material/Grid';
-import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery } from '@mui/material';
+import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -27,7 +27,7 @@ import { Settings } from '@mui/icons-material';
 import SettingDialog from './SettingDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     flexGrow: 1,

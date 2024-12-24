@@ -1,4 +1,3 @@
-import MomentUtils from '@date-io/moment';
 import { CircularProgress, IconButton, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -7,7 +6,6 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -256,7 +254,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
 
   return !initialValues ? (
     <>
-      <CustomDialogHeader onClose={() => {}} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
+      <CustomDialogHeader onClose={() => { }} title={`${noteId ? 'Edit' : 'New'} Note`}></CustomDialogHeader>
       <CustomDialogContent>
         <CommonSkeleton lenArray={[...Array(4).keys()]} />
       </CustomDialogContent>
@@ -285,85 +283,83 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
           ></CustomDialogHeader>
           <CustomDialogContent>
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <MuiPickersUtilsProvider utils={MomentUtils}>
-                <Box padding={1}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Note Title"
-                        required={true}
-                        name="name"
-                        fullWidth
-                        margin="dense"
-                        value={values['name']}
-                        error={touched['name'] && Boolean(errors['name'])}
-                        helperText={touched['name'] && errors['name']}
-                        onChange={(e) => {
-                          setFieldValue('name', e.target.value.trimStart());
+              <Box padding={1}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Note Title"
+                      required={true}
+                      name="name"
+                      fullWidth
+                      margin="dense"
+                      value={values['name']}
+                      error={touched['name'] && Boolean(errors['name'])}
+                      helperText={touched['name'] && errors['name']}
+                      onChange={(e) => {
+                        setFieldValue('name', e.target.value.trimStart());
+                      }}
+                    />
+                    {renderFileThumbnails}
+                    <ImageAttachments
+                      imageAttachments={fileImageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      onDelete={handleDeleteFileImageAttachment}
+                      emailId={noteId}
+                      isRenderedFrom={true}
+                    />
+                    <ImageAttachments
+                      imageAttachments={imageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      onDelete={handleDeleteImageAttachment}
+                      emailId={noteId}
+                      isRenderedFrom={true}
+                    />
+                    <Box>
+                      <TinyMce
+                        onChange={(value) => {
+                          setFieldValue('description', value);
                         }}
-                      />
-                      {renderFileThumbnails}
-                      <ImageAttachments
-                        imageAttachments={fileImageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
+                        initialValue={initialValues?.description}
+                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                          setUploadingImageOrFileProgress(completePercentage);
                         }}
-                        onDelete={handleDeleteFileImageAttachment}
-                        emailId={noteId}
-                        isRenderedFrom={true}
+                        // doNotShowUploadFile={true : false}
+                        onUploadFile={onUploadFile}
+                        onUploadImage={handleUploadImage}
+                        usePublicUrlforFileUpload={true}
                       />
-                      <ImageAttachments
-                        imageAttachments={imageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
-                        }}
-                        onDelete={handleDeleteImageAttachment}
-                        emailId={noteId}
-                        isRenderedFrom={true}
-                      />
-                      <Box>
-                        <TinyMce
-                          onChange={(value) => {
-                            setFieldValue('description', value);
-                          }}
-                          initialValue={initialValues?.description}
-                          imageOrFileUploadCompletePercentage={(completePercentage) => {
-                            setUploadingImageOrFileProgress(completePercentage);
-                          }}
-                          // doNotShowUploadFile={true : false}
-                          onUploadFile={onUploadFile}
-                          onUploadImage={handleUploadImage}
-                          usePublicUrlforFileUpload={true}
-                        />
-                      </Box>
+                    </Box>
 
-                      {noteId && (
-                        <Fragment>
-                          {initialValues.relatedTo && initialValues.relatedTo.length ? (
-                            <Box mt={2}>
-                              <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                            </Box>
-                          ) : null}
-                          {initialValues.createdBy && initialValues.createdBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
-                            </Box>
-                          )}
-                          {initialValues.updatedBy && initialValues.updatedBy.date && (
-                            <Box mt={1} color="text.secondary">
-                              <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
-                            </Box>
-                          )}
-                        </Fragment>
-                      )}
-                    </Grid>
+                    {noteId && (
+                      <Fragment>
+                        {initialValues.relatedTo && initialValues.relatedTo.length ? (
+                          <Box mt={2}>
+                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                          </Box>
+                        ) : null}
+                        {initialValues.createdBy && initialValues.createdBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
+                          </Box>
+                        )}
+                        {initialValues.updatedBy && initialValues.updatedBy.date && (
+                          <Box mt={1} color="text.secondary">
+                            <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
+                          </Box>
+                        )}
+                      </Fragment>
+                    )}
                   </Grid>
-                </Box>
-              </MuiPickersUtilsProvider>
+                </Grid>
+              </Box>
             </Form>
           </CustomDialogContent>
           <CustomDialogFooter>

@@ -28,8 +28,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DatePicker from '@mui/lab/DatePicker';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -496,8 +495,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-        parent.type === MATERIAL_TYPE.serializedAsset ||
-        parent.type === MATERIAL_TYPE.manualEntry
+          parent.type === MATERIAL_TYPE.serializedAsset ||
+          parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -938,83 +937,81 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <MuiPickersUtilsProvider utils={MomentUtils}>
-              <Grid container className={styles.rental_header_layout}>
-                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                      <div>
-                        <FormGroup>
-                          <FormControlLabel
-                            control={<Checkbox checked={proRata} />}
-                            key="proRata"
-                            placeholder="Pro Rata"
-                            label="Pro Rata"
-                            style={{ whiteSpace: 'nowrap' }}
-                            onChange={() => {
-                              setProRata(!proRata);
+            <Grid container className={styles.rental_header_layout}>
+              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+              <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                  <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                    <div>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox checked={proRata} />}
+                          key="proRata"
+                          placeholder="Pro Rata"
+                          label="Pro Rata"
+                          style={{ whiteSpace: 'nowrap' }}
+                          onChange={() => {
+                            setProRata(!proRata);
+                          }}
+                        />
+                      </FormGroup>
+                    </div>
+                    <DatePicker
+                      autoOk
+                      fullWidth
+                      size="small"
+                      variant="inline"
+                      inputVariant="outlined"
+                      // minDate={endDate || new Date()}
+                      value={endDate}
+                      name="endDate"
+                      label="Invoice Closing Date"
+                      onChange={(date: any) => {
+                        setEndDate(date ? date : null);
+                      }}
+                      format={dateFormat}
+                      InputLabelProps={{
+                        shrink: true
+                      }}
+                      margin="dense"
+                    />
+                    <Box style={{ display: 'flex', gap: '5px' }}>
+                      <HtmlTooltip
+                        title={
+                          selectedRecords?.length === 0
+                            ? 'Please select items to apply'
+                            : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry)
+                              ? ''
+                              : !moment(endDate)?.isValid()
+                                ? 'Please select valid date'
+                                : ''
+                        }
+                      >
+                        <span>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={
+                              isApplingDate ||
+                              !Boolean(
+                                selectedRecords?.length &&
+                                ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              )
+                            }
+                            size="small"
+                            onClick={() => {
+                              handleApplyDate();
                             }}
-                          />
-                        </FormGroup>
-                      </div>
-                      <KeyboardDatePicker
-                        autoOk
-                        fullWidth
-                        size="small"
-                        variant="inline"
-                        inputVariant="outlined"
-                        // minDate={endDate || new Date()}
-                        value={endDate}
-                        name="endDate"
-                        label="Invoice Closing Date"
-                        onChange={(date: any) => {
-                          setEndDate(date ? date : null);
-                        }}
-                        format={dateFormat}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
-                        margin="dense"
-                      />
-                      <Box style={{ display: 'flex', gap: '5px' }}>
-                        <HtmlTooltip
-                          title={
-                            selectedRecords?.length === 0
-                              ? 'Please select items to apply'
-                              : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry)
-                                ? ''
-                                : !moment(endDate)?.isValid()
-                                  ? 'Please select valid date'
-                                  : ''
-                          }
-                        >
-                          <span>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              disabled={
-                                isApplingDate ||
-                                !Boolean(
-                                  selectedRecords?.length &&
-                                    ((endDate && moment(endDate)?.isValid()) || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                                )
-                              }
-                              size="small"
-                              onClick={() => {
-                                handleApplyDate();
-                              }}
-                            >
-                              Apply
-                            </Button>
-                          </span>
-                        </HtmlTooltip>
-                      </Box>
-                    </Grid>
-                  </Box>
-                </Grid>
+                          >
+                            Apply
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
+                    </Box>
+                  </Grid>
+                </Box>
               </Grid>
-            </MuiPickersUtilsProvider>
+            </Grid>
           </Fragment>
           {columns ? (
             <Box zIndex={5} p={1}>

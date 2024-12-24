@@ -1,7 +1,5 @@
-import MomentUtils from '@date-io/moment';
 import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvider';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { GoArrowDown } from 'react-icons/go';
@@ -134,125 +132,123 @@ const AskSupplierPriceDialog = (props) => {
         />
 
         <CustomDialogContent>
-          <MuiPickersUtilsProvider utils={MomentUtils}>
-            <Box padding={1}>
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  {from != 'SupplierAskPrice' && (
-                    <Autocomplete
-                      multiple
-                      options={[{ _id: 'All', concatedName: 'All' }, ...supplierContactData]}
-                      getOptionLabel={(option: any) =>
-                        option
-                          ? option?.accountName
-                            ? `${option?.concatedName} - ${option?.accountName?.optionLabel}`
-                            : `${option?.concatedName}`
-                          : ''
-                      }
-                      value={
-                        supplierContactData.filter((data) => contactId?.some((d) => d === data._id)).length
-                          ? supplierContactData.filter((data) => contactId?.some((d) => d === data._id))
-                          : []
-                      }
-                      onChange={(e, val: any) => {
-                        val?.some((d) => d?._id === 'All')
-                          ? setContactId(supplierContactData?.map((d) => d._id))
-                          : setContactId(val && val?.map((d) => d._id));
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} margin="dense" name="contact" label="Supplier Contact" variant="outlined" required fullWidth />
-                      )}
-                    />
-                  )}
-                </Grid>
-                <Grid item xs={12}>
-                  <Box>
-                    {otherAttachments && otherAttachments.length > 0 && (
-                      <AttachmentThumbnail attachments={otherAttachments} canEdit={true} handleDeleteAttachment={handleDeleteAttachment} />
+          <Box padding={1}>
+            <Grid container spacing={1}>
+              <Grid item xs={12}>
+                {from != 'SupplierAskPrice' && (
+                  <Autocomplete
+                    multiple
+                    options={[{ _id: 'All', concatedName: 'All' }, ...supplierContactData]}
+                    getOptionLabel={(option: any) =>
+                      option
+                        ? option?.accountName
+                          ? `${option?.concatedName} - ${option?.accountName?.optionLabel}`
+                          : `${option?.concatedName}`
+                        : ''
+                    }
+                    value={
+                      supplierContactData.filter((data) => contactId?.some((d) => d === data._id)).length
+                        ? supplierContactData.filter((data) => contactId?.some((d) => d === data._id))
+                        : []
+                    }
+                    onChange={(e, val: any) => {
+                      val?.some((d) => d?._id === 'All')
+                        ? setContactId(supplierContactData?.map((d) => d._id))
+                        : setContactId(val && val?.map((d) => d._id));
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" name="contact" label="Supplier Contact" variant="outlined" required fullWidth />
                     )}
-                    {otherAttachments && otherAttachments.length > 0 && (
-                      <ImageAttachments
-                        imageAttachments={fileImageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
-                        }}
-                        isCreateOnly={true}
-                        onDelete={handleDeleteFileImageAttachment}
-                        emailId={null}
-                      />
-                    )}
-                    {otherAttachments && otherAttachments.length > 0 && (
-                      <ImageAttachments
-                        imageAttachments={imageAttachments}
-                        onImageClick={(attachment) => {
-                          setImageSource(attachment);
-                          setOpen(true);
-                        }}
-                        isCreateOnly={true}
-                        onDelete={handleDeleteImageAttachment}
-                        emailId={null}
-                      />
-                    )}
-                    <TinyMce
-                      onChange={(value) => {
-                        setContantValue(value);
-                      }}
-                      initialValue={''}
-                      imageOrFileUploadCompletePercentage={(completePercentage) => {
-                        setUploadingImageOrFileProgress(completePercentage);
-                      }}
-                      doNotShowUploadFile={false}
-                      onUploadFile={onUploadFile}
-                      onUploadImage={handleUploadImage}
-                      usePublicUrlforFileUpload={true}
-                      isSendToCustomer={false}
-                    />
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12}>
-                  {from != 'SupplierAskPrice' && (
-                    <Autocomplete
-                      multiple
-                      options={[
-                        { fieldName: 'All', fieldLabel: 'All' },
-                        ...fields.filter(
-                          (d) =>
-                            d.sectionName === 'Supplier Information' &&
-                            d.type === 'currencyAmount' &&
-                            (d.formula === undefined || d.formula === null || d.formula === '')
-                        )
-                      ]}
-                      getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                      value={
-                        fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
-                          ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
-                          : []
-                      }
-                      onChange={(e, val: any) => {
-                        val?.some((d) => d?.fieldName === 'All')
-                          ? setSelectedFields(
-                              fields
-                                ?.filter(
-                                  (d) =>
-                                    d.sectionName === 'Supplier Information' &&
-                                    d.type === 'currencyAmount' &&
-                                    (d.formula === undefined || d.formula === null || d.formula === '')
-                                )
-                                .map((d) => d?.fieldName)
-                            )
-                          : setSelectedFields(val && val?.map((d) => d?.fieldName));
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} margin="dense" name="field" label="Required Field" variant="outlined" required fullWidth />
-                      )}
-                    />
-                  )}
-                </Grid>
+                  />
+                )}
               </Grid>
-            </Box>
-          </MuiPickersUtilsProvider>
+              <Grid item xs={12}>
+                <Box>
+                  {otherAttachments && otherAttachments.length > 0 && (
+                    <AttachmentThumbnail attachments={otherAttachments} canEdit={true} handleDeleteAttachment={handleDeleteAttachment} />
+                  )}
+                  {otherAttachments && otherAttachments.length > 0 && (
+                    <ImageAttachments
+                      imageAttachments={fileImageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      isCreateOnly={true}
+                      onDelete={handleDeleteFileImageAttachment}
+                      emailId={null}
+                    />
+                  )}
+                  {otherAttachments && otherAttachments.length > 0 && (
+                    <ImageAttachments
+                      imageAttachments={imageAttachments}
+                      onImageClick={(attachment) => {
+                        setImageSource(attachment);
+                        setOpen(true);
+                      }}
+                      isCreateOnly={true}
+                      onDelete={handleDeleteImageAttachment}
+                      emailId={null}
+                    />
+                  )}
+                  <TinyMce
+                    onChange={(value) => {
+                      setContantValue(value);
+                    }}
+                    initialValue={''}
+                    imageOrFileUploadCompletePercentage={(completePercentage) => {
+                      setUploadingImageOrFileProgress(completePercentage);
+                    }}
+                    doNotShowUploadFile={false}
+                    onUploadFile={onUploadFile}
+                    onUploadImage={handleUploadImage}
+                    usePublicUrlforFileUpload={true}
+                    isSendToCustomer={false}
+                  />
+                </Box>
+              </Grid>
+
+              <Grid item xs={12}>
+                {from != 'SupplierAskPrice' && (
+                  <Autocomplete
+                    multiple
+                    options={[
+                      { fieldName: 'All', fieldLabel: 'All' },
+                      ...fields.filter(
+                        (d) =>
+                          d.sectionName === 'Supplier Information' &&
+                          d.type === 'currencyAmount' &&
+                          (d.formula === undefined || d.formula === null || d.formula === '')
+                      )
+                    ]}
+                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                    value={
+                      fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
+                        ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
+                        : []
+                    }
+                    onChange={(e, val: any) => {
+                      val?.some((d) => d?.fieldName === 'All')
+                        ? setSelectedFields(
+                          fields
+                            ?.filter(
+                              (d) =>
+                                d.sectionName === 'Supplier Information' &&
+                                d.type === 'currencyAmount' &&
+                                (d.formula === undefined || d.formula === null || d.formula === '')
+                            )
+                            .map((d) => d?.fieldName)
+                        )
+                        : setSelectedFields(val && val?.map((d) => d?.fieldName));
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" name="field" label="Required Field" variant="outlined" required fullWidth />
+                    )}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </Box>
         </CustomDialogContent>
 
         <CustomDialogFooter>

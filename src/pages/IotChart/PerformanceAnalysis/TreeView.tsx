@@ -1,6 +1,6 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Checkbox, FormControlLabel, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid, IconButton, Theme, Typography } from '@mui/material';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
@@ -45,7 +45,7 @@ const AccordionSummary = withStyles({
   expanded: {}
 })(MuiAccordionSummary);
 
-const AccordionDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme: Theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),

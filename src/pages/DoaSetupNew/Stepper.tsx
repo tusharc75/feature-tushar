@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper } from '@mui/material';
+import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper, Theme } from '@mui/material';
 import { Check } from '@mui/icons-material';
 import clsx from 'clsx';
 import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { withStyles, makeStyles } from '@mui/styles';
 
-const QontoConnector = withStyles((theme) => ({
+const QontoConnector = withStyles((theme: Theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-90% - 16px)',
@@ -20,7 +20,7 @@ const QontoConnector = withStyles((theme) => ({
   }
 }))(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme) => ({
+const useQontoStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#09445A',
     display: 'flex',

@@ -13,8 +13,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
+import DatePicker from '@mui/lab/DatePicker';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -114,27 +113,27 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-            {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
-              disabled: true,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                  {permissions?.fieldTicket?.isRead && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  )}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
+            disabled: true,
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                {permissions?.fieldTicket?.isRead && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                )}
+              </div>
+            )
+          }
+        ]
         : []),
       {
         accessor: 'detail',
@@ -433,54 +432,52 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         <CustomDialogContent>
           <Fragment>
             {progressiveBilling && (
-              <MuiPickersUtilsProvider utils={MomentUtils}>
-                <Grid container className={styles.rental_header_layout}>
-                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                  <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                    <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                      <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                        <KeyboardDatePicker
-                          autoOk
-                          fullWidth
-                          size="small"
-                          variant="inline"
-                          inputVariant="outlined"
-                          value={endDate}
-                          name="endDate"
-                          label="End Date"
-                          onChange={(date: any) => {
-                            setEndDate(date ? date : null);
-                          }}
-                          format={dateFormat}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                        <Box>
-                          <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
-                            <span>
-                              <CustomButton
-                                id="dialog-apply-button"
-                                loading={isDateApplying}
-                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
-                                variant="contained"
-                                color="primary"
-                                type="button"
-                                onClick={() => {
-                                  handleApplyDate();
-                                }}
-                              >
-                                Apply
-                              </CustomButton>
-                            </span>
-                          </HtmlTooltip>
-                        </Box>
-                      </Grid>
-                    </Box>
-                  </Grid>
+              <Grid container className={styles.rental_header_layout}>
+                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                      <DatePicker
+                        autoOk
+                        fullWidth
+                        size="small"
+                        variant="inline"
+                        inputVariant="outlined"
+                        value={endDate}
+                        name="endDate"
+                        label="End Date"
+                        onChange={(date: any) => {
+                          setEndDate(date ? date : null);
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                      <Box>
+                        <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
+                          <span>
+                            <CustomButton
+                              id="dialog-apply-button"
+                              loading={isDateApplying}
+                              disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
+                              variant="contained"
+                              color="primary"
+                              type="button"
+                              onClick={() => {
+                                handleApplyDate();
+                              }}
+                            >
+                              Apply
+                            </CustomButton>
+                          </span>
+                        </HtmlTooltip>
+                      </Box>
+                    </Grid>
+                  </Box>
                 </Grid>
-              </MuiPickersUtilsProvider>
+              </Grid>
             )}
             {columns ? (
               <Box zIndex={5} width={'100%'} p={1}>

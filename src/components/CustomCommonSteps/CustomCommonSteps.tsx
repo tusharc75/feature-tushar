@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import clsx from 'clsx';
 import { GiBackwardTime } from 'react-icons/gi';
 import IconButton from '@mui/material/IconButton';
-import { StepIconProps, Grid } from '@mui/material';
+import { StepIconProps, Grid, Theme } from '@mui/material';
 import { IoIosArrowDropleftCircle } from 'react-icons/io';
 import { GoPencil } from 'react-icons/go';
 import { BsCheckCircle } from 'react-icons/bs';
@@ -20,7 +20,7 @@ import MobileStepper from '@mui/material/MobileStepper';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   backButton: {
     marginRight: theme.spacing(1)
   },
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const useColorlibStepIconStyles = makeStyles((theme) => ({
+const useColorlibStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#d1c4c4',
     width: 30,

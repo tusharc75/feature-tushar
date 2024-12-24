@@ -1,4 +1,4 @@
-import { Box, Button, Divider } from '@mui/material';
+import { Box, Button, Divider, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { startCase } from 'lodash';
@@ -13,7 +13,7 @@ import { backendApi } from '../../config';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     padding: '10px',
     width: '100%',
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },

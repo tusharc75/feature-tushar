@@ -1,5 +1,5 @@
 import { Check } from '@mui/icons-material';
-import { Grid, Paper, Step, StepConnector, StepLabel, Stepper, Typography } from '@mui/material';
+import { Grid, Paper, Step, StepConnector, StepLabel, Stepper, Theme, Typography } from '@mui/material';
 import { makeStyles, withStyles } from '@mui/styles';
 import clsx from 'clsx';
 import { FaHourglassHalf } from 'react-icons/fa';
@@ -9,7 +9,7 @@ import { getUniqueCurrencies } from '../../constants/helpers';
 
 import routes from './Routes';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const QontoConnector = withStyles((theme) => ({
+const QontoConnector = withStyles((theme: Theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-90% - 16px)',
@@ -43,7 +43,7 @@ const QontoConnector = withStyles((theme) => ({
   }
 }))(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme) => ({
+const useQontoStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#09445A',
     display: 'flex',
@@ -74,7 +74,7 @@ const useQontoStepIconStyles = makeStyles((theme) => ({
   }
 }));
 
-const useQontoStepIconStylesForQuote = makeStyles((theme) => ({
+const useQontoStepIconStylesForQuote = makeStyles((theme: Theme) => ({
   root: {
     color: 'white',
     display: 'flex',

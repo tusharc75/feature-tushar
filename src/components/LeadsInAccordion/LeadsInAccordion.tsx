@@ -1,6 +1,6 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Card, CardContent, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
+import { Box, Card, CardContent, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Theme, Typography } from '@mui/material';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
@@ -47,7 +47,7 @@ const AccordionSummary = withStyles({
   expanded: {}
 })(MuiAccordionSummary);
 
-const AccordionDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme: Theme) => ({
   root: {
     padding: theme.spacing(1),
     display: 'block'

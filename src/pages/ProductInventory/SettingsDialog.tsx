@@ -1,11 +1,10 @@
 import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { Form, Formik } from 'formik';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, dateFormat, productInventory } from 'src/constants/helpers';
@@ -91,29 +90,27 @@ function SettingsDialog({ onClose, warehouse }) {
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={6}>
                       <Fragment>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                          <KeyboardDatePicker
-                            autoOk
-                            variant="inline"
-                            inputVariant="outlined"
-                            label="Lock Date"
-                            fullWidth
-                            format={dateFormat}
-                            value={values['lockDate']}
-                            placeholder="Lock Date"
-                            margin="dense"
-                            required
-                            maxDate={new Date()}
-                            onChange={(value) => {
-                              setFieldValue('lockDate', value);
-                            }}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            error={errors['lockDate'] ? true : false}
-                            helperText={errors['lockDate']}
-                          />
-                        </MuiPickersUtilsProvider>
+                        <DatePicker
+                          autoOk
+                          variant="inline"
+                          inputVariant="outlined"
+                          label="Lock Date"
+                          fullWidth
+                          format={dateFormat}
+                          value={values['lockDate']}
+                          placeholder="Lock Date"
+                          margin="dense"
+                          required
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('lockDate', value);
+                          }}
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          error={errors['lockDate'] ? true : false}
+                          helperText={errors['lockDate']}
+                        />
                       </Fragment>
                     </Grid>
                     <Grid item xs={12} sm={12} md={6}>

@@ -1,5 +1,3 @@
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
 import { camelCase, kebabCase, startCase } from 'lodash';
 import React from 'react';
@@ -155,13 +153,12 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    const api = `/report${
-      camelCase(resource) === 'quotes'
-        ? '/quote-builder'
-        : routes[camelCase(resource)]
-          ? routes[camelCase(resource)]?.path
-          : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
-    }${queryString}`;
+    const api = `/report${camelCase(resource) === 'quotes'
+      ? '/quote-builder'
+      : routes[camelCase(resource)]
+        ? routes[camelCase(resource)]?.path
+        : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+      }${queryString}`;
 
     axiosInstance()
       .get(api, { cancelToken: cancelTokenSource?.token })
@@ -210,12 +207,11 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `/report/${
-          camelCase(resource) === 'quotes'
-            ? 'quote-builder'
-            : routes[camelCase(resource)]
-              ? routes[camelCase(resource)]?.path
-              : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+        `/report/${camelCase(resource) === 'quotes'
+          ? 'quote-builder'
+          : routes[camelCase(resource)]
+            ? routes[camelCase(resource)]?.path
+            : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
         }/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
@@ -285,7 +281,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
   }, [selectedData, selectedResources]);
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       {showGrid && (
         <div className={cn('inline-flex items-center justify-between gap-2', !isSidebarOpen ? 'w-[calc(100%-40px)]' : 'w-full')}>
           <h6 className="text-[14px] font-semibold leading-[24px]">{selectedReport.title}</h6>
@@ -300,7 +296,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
               }
               module={''}
               api={resource === 'In Used Serialized Asset' ? `/report/${kebabCase(resource)}` : getApi()}
-              afterImportCompleted={() => {}}
+              afterImportCompleted={() => { }}
               onlyExport={true}
             />
           ) : (
@@ -337,7 +333,7 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       )}
-    </MuiPickersUtilsProvider>
+    </>
   );
 };
 

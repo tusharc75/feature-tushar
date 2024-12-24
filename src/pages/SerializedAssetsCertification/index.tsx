@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import HistoryIcon from '@mui/icons-material/History';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { Autocomplete } from '@mui/material';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -246,90 +246,88 @@ const SerializedAssetsCertification = () => {
               size="small"
               renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}
             />
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                maxDate={issueDuration.to}
-                label="From (Issue Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={issueDuration.from}
-                onChange={(date) => {
-                  setIssueDuration({ to: issueDuration.to, from: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                label="To (Issue Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={issueDuration.to}
-                onChange={(date) => {
-                  setIssueDuration({ from: issueDuration.from, to: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                maxDate={expireDuration.to}
-                label="From (Expiry Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={expireDuration.from}
-                onChange={(date) => {
-                  setExpireDuration({ to: expireDuration.to, from: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                format={dateFormatForInputControl}
-                label="To (Expiry Date)"
-                autoOk
-                InputLabelProps={{
-                  shrink: true
-                }}
-                views={['year', 'month', 'date']}
-                value={expireDuration.to}
-                onChange={(date) => {
-                  setExpireDuration({ from: expireDuration.from, to: date });
-                }}
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-              />
-            </MuiPickersUtilsProvider>
+            <DatePicker
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              format={dateFormatForInputControl}
+              maxDate={issueDuration.to}
+              label="From (Issue Date)"
+              autoOk
+              InputLabelProps={{
+                shrink: true
+              }}
+              views={['year', 'month', 'date']}
+              value={issueDuration.from}
+              onChange={(date) => {
+                setIssueDuration({ to: issueDuration.to, from: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <DatePicker
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              format={dateFormatForInputControl}
+              label="To (Issue Date)"
+              autoOk
+              InputLabelProps={{
+                shrink: true
+              }}
+              views={['year', 'month', 'date']}
+              value={issueDuration.to}
+              onChange={(date) => {
+                setIssueDuration({ from: issueDuration.from, to: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <DatePicker
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              format={dateFormatForInputControl}
+              maxDate={expireDuration.to}
+              label="From (Expiry Date)"
+              autoOk
+              InputLabelProps={{
+                shrink: true
+              }}
+              views={['year', 'month', 'date']}
+              value={expireDuration.from}
+              onChange={(date) => {
+                setExpireDuration({ to: expireDuration.to, from: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
+            <DatePicker
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              format={dateFormatForInputControl}
+              label="To (Expiry Date)"
+              autoOk
+              InputLabelProps={{
+                shrink: true
+              }}
+              views={['year', 'month', 'date']}
+              value={expireDuration.to}
+              onChange={(date) => {
+                setExpireDuration({ from: expireDuration.from, to: date });
+              }}
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+            />
             <SearchBox onChange={handleSearch} width={'150px'} value={search} />
           </div>
         </div>

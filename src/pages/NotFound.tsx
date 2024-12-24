@@ -1,10 +1,10 @@
 import { makeStyles } from '@mui/styles';
-import { Box, Container, Typography, Button } from '@mui/material';
+import { Box, Container, Typography, Button, Theme } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 
 import Footer from '../components/Footer';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   heading: {
     color: theme.palette.primary.main,
     fontWeight: 'bold',

@@ -2,16 +2,14 @@ import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import DateUtils from '@date-io/date-fns';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';
-import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -66,47 +64,45 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
       <Formik initialValues={{ receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
-            <MuiPickersUtilsProvider utils={DateUtils}>
-              <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
-              <CustomDialogContent>
-                <Box p={1}>
-                  <KeyboardDatePicker
-                    {...(lockDate ? { minDate: lockDate } : {})}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    autoOk
-                    required
-                    variant="inline"
-                    inputVariant="outlined"
-                    value={values.receiveDate}
-                    name="receiveDate"
-                    placeholder={'Receive Date'}
-                    label="Receive Date"
-                    format={dateFormatForInputControl}
-                    maxDate={new Date()}
-                    onChange={(value) => {
-                      var newDate = convertDateInDateTime(value);
-                      setFieldValue('receiveDate', newDate);
-                    }}
-                    error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
-                    helperText={touched['receiveDate'] && errors['receiveDate']}
-                  />
-                </Box>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  {'Deliver'}
-                </CustomButton>
-              </CustomDialogFooter>
-            </MuiPickersUtilsProvider>
+            <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
+            <CustomDialogContent>
+              <Box p={1}>
+                <DatePicker
+                  {...(lockDate ? { minDate: lockDate } : {})}
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  autoOk
+                  required
+                  variant="inline"
+                  inputVariant="outlined"
+                  value={values.receiveDate}
+                  name="receiveDate"
+                  placeholder={'Receive Date'}
+                  label="Receive Date"
+                  format={dateFormatForInputControl}
+                  maxDate={new Date()}
+                  onChange={(value) => {
+                    var newDate = convertDateInDateTime(value);
+                    setFieldValue('receiveDate', newDate);
+                  }}
+                  error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
+                  helperText={touched['receiveDate'] && errors['receiveDate']}
+                />
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button color="primary" size="small" onClick={handleClose}>
+                Cancel
+              </Button>
+              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                {'Deliver'}
+              </CustomButton>
+            </CustomDialogFooter>
           </Form>
         )}
       </Formik>
-    </Dialog>
+    </Dialog >
   );
 };
 

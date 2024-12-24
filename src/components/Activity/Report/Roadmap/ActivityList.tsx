@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Typography, Box, Button, Dialog, useMediaQuery } from '@mui/material';
+import { Typography, Box, Button, Dialog, useMediaQuery, Theme } from '@mui/material';
 import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -12,7 +12,7 @@ import { CreateCase } from '../../Case/CreateCase';
 import { useData } from '../../../../StateProvider/Provider';
 import { CustomDialogTransition } from '../../../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     '&:hover > $content': {
       backgroundColor: theme.palette.action.hover

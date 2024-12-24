@@ -1,7 +1,6 @@
-import MomentUtils from '@date-io/moment';
 import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -194,7 +193,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   return (
-    <MuiPickersUtilsProvider utils={MomentUtils}>
+    <>
       <Dialog
         maxWidth={'md'}
         open={true}
@@ -284,7 +283,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                             </FormControl>
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <KeyboardDatePicker
+                            <DatePicker
                               autoOk
                               disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
                               fullWidth
@@ -305,7 +304,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                             />
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <KeyboardDatePicker
+                            <DatePicker
                               autoOk
                               fullWidth
                               disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
@@ -435,33 +434,36 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           </Button>
         </CustomDialogFooter>
       </Dialog>
-      {isFilterDeleteConfirm.open && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete ?`}
-          onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
-          onOk={handleDeleteUserFilter}
-        />
-      )}
-      {isSaveFilter.open && (
-        <SaveFilterDialog
-          handleClose={() => {
-            setIsSaveFilter({ open: false, data: null });
-          }}
-          columns={coloums}
-          resource={resource}
-          handleSucess={() => {
-            setIsSaveFilter({ open: false, data: null });
-            setFormValues({});
-            fetchUserFilters();
-            setSelectedUserFilter(null);
-          }}
-          filterData={isSaveFilter.data}
-          filterValue={formValues}
-        />
-      )}
-    </MuiPickersUtilsProvider>
-  );
+      {
+        isFilterDeleteConfirm.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to delete ?`}
+            onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
+            onOk={handleDeleteUserFilter}
+          />
+        )
+      }
+      {
+        isSaveFilter.open && (
+          <SaveFilterDialog
+            handleClose={() => {
+              setIsSaveFilter({ open: false, data: null });
+            }}
+            columns={coloums}
+            resource={resource}
+            handleSucess={() => {
+              setIsSaveFilter({ open: false, data: null });
+              setFormValues({});
+              fetchUserFilters();
+              setSelectedUserFilter(null);
+            }}
+            filterData={isSaveFilter.data}
+            filterValue={formValues}
+          />
+        )
+      }
+    </>);
 }
 
 export default GridFilter;

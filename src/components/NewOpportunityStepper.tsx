@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
-import { Stepper, Step, StepLabel, StepConnector, Button, Grid, Typography, Box, Paper } from '@mui/material';
+import { Stepper, Step, StepLabel, StepConnector, Button, Grid, Typography, Box, Paper, Theme } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { Check } from '@mui/icons-material';
 import { withStyles } from '@mui/styles';
@@ -23,7 +23,7 @@ function getStepContent(stepIndex) {
   }
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     padding: theme.spacing(2),
     marginTop: theme.spacing(2)
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const QontoConnector = withStyles((theme) => ({
+const QontoConnector = withStyles((theme: Theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-50% - 16px)',
@@ -66,7 +66,7 @@ const QontoConnector = withStyles((theme) => ({
   }
 }))(StepConnector);
 
-const useQontoStepIconStyles = makeStyles((theme) => ({
+const useQontoStepIconStyles = makeStyles((theme: Theme) => ({
   root: {
     color: '#eaeaf0',
     display: 'flex',

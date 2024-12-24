@@ -2,6 +2,7 @@ import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import { withStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
 
 const Accordion = withStyles({
   root: {
@@ -42,7 +43,7 @@ const AccordionSummary = withStyles({
   expanded: {}
 })(MuiAccordionSummary);
 
-const AccordionDetails = withStyles((theme) => ({
+const AccordionDetails = withStyles((theme: Theme) => ({
   root: {
     display: 'block',
     padding: theme.spacing(2),

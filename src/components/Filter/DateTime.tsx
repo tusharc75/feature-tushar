@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -111,7 +111,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           </FormControl>
         </div>
         <div className="mt-5">
-          <KeyboardDatePicker
+          <DatePicker
             autoOk
             disabled={timeFrame !== 'custom'}
             fullWidth
@@ -135,13 +135,13 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             InputLabelProps={{
               shrink: true
             }}
-            // required={reportConfig?.defaultColumn ? field?.required : false}
-            // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-            // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+          // required={reportConfig?.defaultColumn ? field?.required : false}
+          // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+          // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         <div className="mt-5">
-          <KeyboardDatePicker
+          <DatePicker
             autoOk
             disabled={timeFrame !== 'custom'}
             fullWidth
@@ -165,9 +165,9 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             InputLabelProps={{
               shrink: true
             }}
-            // required={reportConfig?.defaultColumn ? field?.required : false}
-            // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-            // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+          // required={reportConfig?.defaultColumn ? field?.required : false}
+          // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+          // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         {isDatePresent && (
