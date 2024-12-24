@@ -63,7 +63,7 @@ const Activity = ({ type }) => {
               isAddButtonVisible={false}
             />
             {viewType === 0 && <Board type={type} filter={filter} />}
-            {/* {viewType === 1 && <Roadmap type={type} filter={filter} />} */}
+            {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>
         )}
       </CustomContainer>

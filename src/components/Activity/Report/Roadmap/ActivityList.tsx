@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Typography, Box, Button, Dialog, useMediaQuery, Theme } from '@mui/material';
-import { TreeView } from '@mui/x-tree-view/TreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { TreeView, TreeItem } from '@mui/x-tree-view';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
@@ -74,7 +73,8 @@ export default function ActivityList(props) {
       return (
         <TreeItem
           key={index}
-          nodeId={data._id.toString()}
+          itemId={data._id.toString()}
+          id={data._id.toString()}
           label={label}
           children={children}
           classes={{
@@ -88,14 +88,7 @@ export default function ActivityList(props) {
   let TreeNodes = getTreeNodes(activity);
   return (
     <>
-      <TreeView
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpandIcon={<ChevronRightIcon />}
-        expanded={expanded}
-        selected={selected}
-        onNodeToggle={handleToggle}
-        onNodeSelect={handleSelect}
-      >
+      <TreeView expanded={expanded} selected={selected} onNodeToggle={handleToggle} onNodeSelect={handleSelect}>
         {TreeNodes.map((node) => {
           return node;
         })}
