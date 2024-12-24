@@ -83,6 +83,8 @@ function Roadmap({ type, filter }) {
     setSelected(nodeIds);
   };
 
+  console.log(treeList, activity);
+
   return activity ? (
     <Box>
       <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>

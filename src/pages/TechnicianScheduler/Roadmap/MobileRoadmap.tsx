@@ -133,7 +133,8 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
       return (
         <TreeItem
           key={index}
-          nodeId={data._id.toString()}
+          itemId={data._id.toString()}
+          id={data._id.toString()}
           label={label}
           children={children}
           style={{ borderBottom: '1px solid var(--common-border-color)' }}

@@ -102,7 +102,8 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
     <TreeItem
       key={index}
       data-id={obj?._id}
-      nodeId={obj._id.toString()}
+      itemId={obj._id.toString()}
+      id={obj._id.toString()}
       label={label}
       children={children}
       classes={{
