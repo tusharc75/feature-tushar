@@ -28,7 +28,6 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -38,6 +37,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -956,22 +956,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                         />
                       </FormGroup>
                     </div>
-                    <DatePicker
-                      autoOk
+                    <CustomDatePicker
                       fullWidth
                       size="small"
-                      variant="inline"
-                      inputVariant="outlined"
-                      // minDate={endDate || new Date()}
                       value={endDate}
                       name="endDate"
                       label="Invoice Closing Date"
                       onChange={(date: any) => {
                         setEndDate(date ? date : null);
-                      }}
-                      format={dateFormat}
-                      InputLabelProps={{
-                        shrink: true
                       }}
                       margin="dense"
                     />

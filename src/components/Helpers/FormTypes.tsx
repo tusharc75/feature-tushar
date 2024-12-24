@@ -7,7 +7,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import {
   Avatar,
@@ -68,7 +67,7 @@ import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
-import dayjs from 'dayjs';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 type MultiFileType = {
   fileName: string;
@@ -2699,15 +2698,11 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <DatePicker
+        <CustomDatePicker
           {...rest}
           disabled={fieldData?.isUneditable || rest?.disabled}
-          clearable
-          autoOk
           required={required}
-          variant="inline"
-          inputVariant="outlined"
-          value={dayjs(values[name] || null)}
+          value={values[name]}
           name={name}
           label={getLabel(label)}
           {...(fieldData?.restrictFutureDate ? { maxDate: new Date() } : {})}
@@ -2715,10 +2710,6 @@ const FormTypes = (props) => {
           onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
           error={customError[name] || (touched[name] && Boolean(errors[name]))}
           helperText={customError[name] || (touched[name] && errors[name])}
-          format={dateFormatForInputControl}
-          InputLabelProps={{
-            shrink: true
-          }}
         />
       </InfoLabel>
     ) : type === 'dateTime' ? (
@@ -2752,13 +2743,9 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <DatePicker
+        <CustomDatePicker
           {...rest}
-          autoOk
-          clearable
           required={required}
-          variant="inline"
-          inputVariant="outlined"
           value={values[name] || new Date()}
           name={name}
           label={getLabel(label)}
@@ -2766,9 +2753,6 @@ const FormTypes = (props) => {
           onChange={(date) => handleChange(name, date)}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true
-          }}
         />
       </InfoLabel>
     ) : type === 'colorPicker' ? (

@@ -1,6 +1,5 @@
 import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -23,6 +22,7 @@ import { createFilterModel, fetchFieldOptions } from '../utils';
 import SaveFilterDialog from './SaveFilterDialog';
 import NumberInput from 'src/components/CustomReactTable/GridFilter/NumberInput';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -283,13 +283,10 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                             </FormControl>
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <DatePicker
-                              autoOk
+                            <CustomDatePicker
                               disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
                               fullWidth
                               size="small"
-                              variant="inline"
-                              inputVariant="outlined"
                               name={`from_${field.fieldName}`}
                               label={`From ${field.fieldLabel}`}
                               value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
@@ -297,30 +294,19 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                                 setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                                 handleSelectFilter(`from_${field.fieldName}`, date);
                               }}
-                              format={dateFormat}
-                              InputLabelProps={{
-                                shrink: true
-                              }}
                             />
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <DatePicker
-                              autoOk
+                            <CustomDatePicker
                               fullWidth
                               disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
                               size="small"
-                              variant="inline"
-                              inputVariant="outlined"
                               name={`to_${field.fieldName}`}
                               label={`To ${field.fieldLabel}`}
                               value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
                                 handleSelectFilter(`to_${field.fieldName}`, date);
-                              }}
-                              format={dateFormat}
-                              InputLabelProps={{
-                                shrink: true
                               }}
                               minDate={
                                 betweenDate && betweenDate[`from_${field.fieldName}`]

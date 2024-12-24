@@ -1,10 +1,10 @@
 import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -177,15 +177,11 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   </FormControl>
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <DatePicker
+                  <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
-                    inputVariant="outlined"
-                    variant="inline"
                     fullWidth
                     size="small"
                     openTo="year"
-                    autoOk
-                    format={dateFormatForInputControl}
                     maxDate={globalFilters.between.to}
                     label="From"
                     views={['year', 'month', 'date']}
@@ -196,16 +192,12 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   />
                 </Grid>
                 <Grid item xs={6} sm={4}>
-                  <DatePicker
+                  <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
-                    inputVariant="outlined"
-                    variant="inline"
                     fullWidth
                     size="small"
                     minDate={globalFilters.between.from}
                     openTo="year"
-                    autoOk
-                    format={dateFormatForInputControl}
                     label="To"
                     views={['year', 'month', 'date']}
                     value={globalFilters.between.to}

@@ -1,5 +1,4 @@
 import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -7,6 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, dateFormatForInputControl, displayDate, normalizeDate } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {
   const [initialValues, setInitialValues] = useState({ startDate: new Date(), endDate: new Date() });
@@ -73,14 +73,10 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
                     <Grid item xs={12} sm={12}>
-                      <DatePicker
-                        inputVariant="outlined"
-                        variant="inline"
+                      <CustomDatePicker
                         fullWidth
                         size="small"
                         margin="none"
-                        autoOk
-                        format={dateFormatForInputControl + ' HH:mm'}
                         {...(minStartDate ? { minDate: minStartDate } : {})}
                         label={`Start Date`}
                         value={values.startDate}
@@ -94,14 +90,10 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                   )}
                   {(type === 'startStop' || type === 'stop') && (
                     <Grid item xs={12} sm={12}>
-                      <DatePicker
-                        inputVariant="outlined"
-                        variant="inline"
+                      <CustomDatePicker
                         fullWidth
                         size="small"
                         margin="none"
-                        autoOk
-                        format={dateFormatForInputControl + ' HH:mm'}
                         minDate={values.startDate}
                         label={`'End' Date`}
                         value={values.endDate}

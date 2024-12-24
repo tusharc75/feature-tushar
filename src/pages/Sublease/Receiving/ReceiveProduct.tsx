@@ -9,8 +9,8 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -192,18 +192,14 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                       />
                       {subleaseData?.type === SUBLEASE_TYPE.vendor && (
                         <div className="datepicker mt-[14px]">
-                          <DatePicker
+                          <CustomDatePicker
                             label="Received Date"
-                            variant="inline"
-                            inputVariant="outlined"
                             required
-                            autoOk
                             size="small"
                             margin="dense"
                             name="receiveDate"
                             placeholder="Receive Date"
                             value={values.receiveDate}
-                            format={dateFormatForInputControl}
                             maxDate={new Date()}
                             onChange={(value) => {
                               setFieldValue('receiveDate', convertDateInDateTime(value));

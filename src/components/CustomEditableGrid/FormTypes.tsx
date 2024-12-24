@@ -1,9 +1,9 @@
 import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { arrayToDropwdownOption, dateFormatForInputControl, getUniqueCurrencies } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const FormTypes = (props) => {
   const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
@@ -154,27 +154,20 @@ const FormTypes = (props) => {
       {...others}
     />
   ) : fieldData?.type === 'date' ? (
-    <DatePicker
-      style={{ paddingRight: 1 }}
-      disabled={fieldData?.isUneditable}
-      clearable
-      autoOk
-      required={fieldData?.required}
-      variant="inline"
-      inputVariant="outlined"
-      value={values[fieldData?.fieldName]}
-      name={`${fieldData?.fieldName}`}
-      label={fieldData?.label}
-      onChange={(date) => onChange(fieldData?.fieldName, date)}
-      format={dateFormatForInputControl}
-      InputLabelProps={{
-        shrink: true
-      }}
-      margin="dense"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      {...others}
-    />
+    <Box className='pr-1'>
+      <CustomDatePicker
+        disabled={fieldData?.isUneditable}
+        required={fieldData?.required}
+        value={values[fieldData?.fieldName]}
+        name={`${fieldData?.fieldName}`}
+        label={fieldData?.label}
+        onChange={(date) => onChange(fieldData?.fieldName, date)}
+        margin="dense"
+        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+        {...others}
+      />
+    </Box>
   ) : fieldData?.type === 'dateTime' ? (
     <Box className='pr-1'>
       <CustomDateTimePicker

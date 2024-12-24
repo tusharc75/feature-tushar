@@ -6,12 +6,12 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
 import { Button, Grid, TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Formik } from 'formik';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { dateFormat } from '../../../constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -124,24 +124,17 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                   />
                 </Grid>
                 <Grid xs={12} md={12} sm={12} item>
-                  <DatePicker
-                    autoOk
+                  <CustomDatePicker
                     fullWidth
                     size="small"
-                    variant="inline"
-                    inputVariant="outlined"
                     value={values['invoiceDate']}
                     name="invoiceDate"
                     label="Invoice Date"
                     onChange={(date: any) => {
                       setFieldValue('invoiceDate', date ? date : null);
                     }}
-                    format={dateFormat}
                     error={Boolean(touched['invoiceDate']) && Boolean(errors['invoiceDate'])}
                     helperText={Boolean(touched['invoiceDate']) && errors['invoiceDate']}
-                    InputLabelProps={{
-                      shrink: true
-                    }}
                     margin="dense"
                   />
                 </Grid>

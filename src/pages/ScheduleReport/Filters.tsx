@@ -2,8 +2,8 @@ import React, { Fragment } from 'react';
 import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormat } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const Filters = ({
   selectedResources,
@@ -182,42 +182,28 @@ const Filters = ({
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <DatePicker
-                    autoOk
+                  <CustomDatePicker
                     disabled={statusTimeFrame !== 'custom'}
                     fullWidth
                     size="small"
-                    variant="inline"
-                    inputVariant="outlined"
                     name={`from_${field.fieldName}`}
                     label={`From ${field.fieldLabel}`}
                     value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                     onChange={(date: any) => {
                       setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                     }}
-                    format={dateFormat}
-                    InputLabelProps={{
-                      shrink: true
-                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <DatePicker
-                    autoOk
+                  <CustomDatePicker
                     fullWidth
                     disabled={statusTimeFrame !== 'custom'}
                     size="small"
-                    variant="inline"
-                    inputVariant="outlined"
                     name={`to_${field.fieldName}`}
                     label={`To ${field.fieldLabel}`}
                     value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                     onChange={(date: any) => {
                       setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                    }}
-                    format={dateFormat}
-                    InputLabelProps={{
-                      shrink: true
                     }}
                     minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
                   />
@@ -276,28 +262,20 @@ const Filters = ({
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker
-                  autoOk
+                <CustomDatePicker
                   fullWidth
                   disabled={statusTimeFrame !== 'custom'}
                   size="small"
-                  variant="inline"
-                  inputVariant="outlined"
                   name={`from_statusPeriod`}
                   label={`From Status Period`}
                   value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
                   onChange={(date: any) => {
                     setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
                   }}
-                  format={dateFormat}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <DatePicker
-                  autoOk
+                <CustomDatePicker
                   fullWidth
                   size="small"
                   variant="inline"
@@ -308,10 +286,6 @@ const Filters = ({
                   value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
                   onChange={(date: any) => {
                     setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
-                  }}
-                  format={dateFormat}
-                  InputLabelProps={{
-                    shrink: true
                   }}
                 />
               </Grid>

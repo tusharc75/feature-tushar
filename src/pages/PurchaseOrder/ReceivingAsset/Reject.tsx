@@ -20,8 +20,8 @@ import {
 } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { startCase } from 'lodash';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -414,11 +414,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                       )}
                     />
                     <div className="datepicker mt-[14px]">
-                      <DatePicker
+                      <CustomDatePicker
                         label="Reject Date"
-                        variant="inline"
-                        inputVariant="outlined"
-                        autoOk
                         size="small"
                         margin="dense"
                         name="rejectDate"

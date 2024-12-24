@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
@@ -67,20 +67,16 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
             <CustomDialogHeader title={`Deliver ${resources?.subcontractAssembly?.titleSingular}`} showRequiredLabel={true} onClose={handleClose} />
             <CustomDialogContent>
               <Box p={1}>
-                <DatePicker
+                <CustomDatePicker
                   {...(lockDate ? { minDate: lockDate } : {})}
                   fullWidth
                   size="small"
                   margin="dense"
-                  autoOk
                   required
-                  variant="inline"
-                  inputVariant="outlined"
                   value={values.receiveDate}
                   name="receiveDate"
                   placeholder={'Receive Date'}
                   label="Receive Date"
-                  format={dateFormatForInputControl}
                   maxDate={new Date()}
                   onChange={(value) => {
                     var newDate = convertDateInDateTime(value);
