@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Popover, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
@@ -140,7 +140,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           id="controllable-states-demo"
           options={kpiFilters}
           renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select a Filter Set" variant="outlined" />}
-          getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
+          isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
         />
         <div className="mt-2 [border-top:1px_dashed_var(--common-border-color)]" />
         <div className=" my-5 space-y-3">
@@ -170,7 +170,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   autoHighlight
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
                   getOptionLabel={(option: any) => option?.optionLabel}
-                  getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
+                  isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
                   onChange={(_, val) => {
                     handleChange(filter?.key, val);
                     setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: val }));

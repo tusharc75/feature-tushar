@@ -8,7 +8,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from '../../constants/helpers';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -144,7 +144,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                         disableCloseOnSelect
                         options={entities || []}
                         getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                        getOptionSelected={(option: any, val) => option?._id === val?._id}
+                        isOptionEqualToValue={(option: any, val) => option?._id === val?._id}
                         value={selectedEntities}
                         onChange={(e, val) => {
                           setSelectedEntities(val);

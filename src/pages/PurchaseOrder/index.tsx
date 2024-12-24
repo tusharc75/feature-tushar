@@ -2,7 +2,7 @@ import { Box, Chip, MenuItem, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -295,11 +295,11 @@ const PurchaseOrder = () => {
           className="md:max-w-[250px]"
           options={warehouseOptions}
           getOptionLabel={(option: any) => option.optionLabel}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             warehouseOptions.filter((data) => data.optionValue === warehouse).length
               ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
-              : ''
+              : null
           }
           onChange={(e, val) => {
             dispatch({ type: 'selection', selectedRecords: [] });

@@ -8,7 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,8 +26,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     setFields(
       response?.data?.data
         ? response?.data?.data
-            ?.filter((d) => d?.fieldData?.primaryField)
-            ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+          ?.filter((d) => d?.fieldData?.primaryField)
+          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
         : []
     );
   };
@@ -116,7 +116,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                       id="collaborateToolsField"
                       options={fields}
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])?.length
                           ? fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])[0]

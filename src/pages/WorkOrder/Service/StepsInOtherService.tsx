@@ -1,5 +1,5 @@
 import { Add, DeleteOutline, DragIndicator, Edit, FileCopyOutlined, LowPriority } from '@mui/icons-material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Dialog, IconButton, TextField, Theme, Typography, createStyles } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
@@ -181,7 +181,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
             className="min-w-[250px] flex-grow min-[600px]:max-w-[300px]"
             options={serviceOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
             value={selectedService}
             onChange={(e: any, value) => {
               setSelectedService(value);
@@ -204,12 +204,12 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
               iconForMobile={<LowPriority />}
               disabled={
                 allowedToEdit &&
-                selectedService &&
-                steps?.length > 0 &&
-                resource === sidebarResource.workOrder &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+                  selectedService &&
+                  steps?.length > 0 &&
+                  resource === sidebarResource.workOrder &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                   ? false
                   : true
               }

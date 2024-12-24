@@ -7,7 +7,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FieldArray, Form, Formik } from 'formik';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -72,7 +72,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel };
           })
       );
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSubmit = async (values) => {
@@ -189,7 +189,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     id="field"
                                     options={fields}
                                     getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
+                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       fields && fields.filter((f) => f?.fieldName === data?.field).length
                                         ? fields && fields.filter((f) => f?.fieldName === data?.field)[0]
@@ -231,7 +231,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     id="rule"
                                     options={RULE}
                                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                     value={
                                       RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
                                         ? RULE && RULE?.filter((d) => d?.optionValue === data?.rule)[0]
@@ -273,12 +273,12 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     id="notificationUserField"
                                     options={notificationUserField}
                                     getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
+                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                     value={
                                       notificationUserField &&
-                                      notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
+                                        notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
                                         ? notificationUserField &&
-                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
+                                        notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
                                         : ''
                                     }
                                     onChange={(e, val) => {

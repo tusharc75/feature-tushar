@@ -205,8 +205,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 imageOrFileUploadCompletePercentage={
                                   ['imageUpload', 'fileUpload'].some((s) => s === imageField.type)
                                     ? (completePercentage) => {
-                                        setUploadingImageOrFileProgress(completePercentage);
-                                      }
+                                      setUploadingImageOrFileProgress(completePercentage);
+                                    }
                                     : null
                                 }
                                 row={true}
@@ -254,7 +254,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                               handleHomeEndKeys
                               forcePopupIcon={true}
                               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                              getOptionSelected={(option: any, val) => option.optionValue === val}
+                              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                               value={
                                 kpiValue?.filter((v) => v.optionValue === values['kpi']).length
                                   ? kpiValue.filter((data) => data.optionValue === values['kpi'])[0]

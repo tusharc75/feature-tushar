@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { debounce } from 'lodash';
 import { useCallback, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -75,7 +75,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         autoHighlight
         value={value ? value : multiple ? [] : ''}
         getOptionLabel={(option: any) => option?.optionLabel}
-        getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
+        isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
         onChange={onChange}
         renderInput={(params) => (
           <TextField

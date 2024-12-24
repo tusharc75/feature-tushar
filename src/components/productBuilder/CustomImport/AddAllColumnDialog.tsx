@@ -9,7 +9,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 
 export const AddAllColumnDialog = (props) => {
   const { fieldLabelOptions, handleClose, handleAddField, fields, section } = props;
@@ -102,7 +102,7 @@ export const AddAllColumnDialog = (props) => {
                   options={section || []}
                   fullWidth
                   size="small"
-                  getOptionSelected={(option, val) => option === val}
+                  isOptionEqualToValue={(option, val) => option === val}
                   getOptionLabel={(option) => option ?? ''}
                   value={values?.sectionName}
                   onChange={(_, newVal) => {

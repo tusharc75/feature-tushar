@@ -1,5 +1,5 @@
 import { TextField } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -104,7 +104,7 @@ const ResourceLogs = () => {
                   options={option}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedOption}
                   onChange={(event, newValue) => {
                     setSelectedOption(newValue);
@@ -116,7 +116,7 @@ const ResourceLogs = () => {
                   options={actionOptions}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedAction}
                   onChange={(event, newValue) => {
                     setSelectedAction(newValue);
@@ -128,7 +128,7 @@ const ResourceLogs = () => {
                   options={userOptions}
                   fullWidth
                   getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  isOptionEqualToValue={(option: any, value: any) => option.optionValue === value.optionValue}
                   value={selectedUser}
                   onChange={(event, newValue) => {
                     setSelectedUser(newValue);

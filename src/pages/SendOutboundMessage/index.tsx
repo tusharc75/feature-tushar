@@ -1,6 +1,6 @@
 import { Box, Button, TextField } from '@mui/material';
 import { AddOutlined } from '@mui/icons-material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -182,7 +182,7 @@ const SendOutboundMessage = () => {
                 options={serializedAssetOptions}
                 style={{ minWidth: '350px' }}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                 value={selectedSerializedAsset}
                 onChange={(e, val) => {
                   setSelectedSerializedAsset(val);

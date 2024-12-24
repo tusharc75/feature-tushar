@@ -14,7 +14,7 @@ import { Box, CircularProgress, TextField } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { getLookupResource } from 'src/components/FormBuilder/helper';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { object, string } from 'yup';
 import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -110,7 +110,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
       }}
     >
       {resourceOption && resourceOption?.length > 0 ? (
-        <Formik initialValues={initialValues} validationSchema={workFlowSchema} onSubmit={handleSubmit} validate={() => {}}>
+        <Formik initialValues={initialValues} validationSchema={workFlowSchema} onSubmit={handleSubmit} validate={() => { }}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <>
               <CustomDialogHeader
@@ -149,7 +149,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                       options={resourceOption}
                       disabled={data}
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                       value={
                         resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])?.length
                           ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])[0]

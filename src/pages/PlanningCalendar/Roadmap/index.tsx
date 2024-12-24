@@ -1,5 +1,5 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
@@ -169,7 +169,7 @@ const RoadMap = () => {
             fullWidth
             options={products}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
             value={
               products.filter((data) => data.optionValue === selectedProduct).length
                 ? products.filter((data) => data.optionValue === selectedProduct)[0]
@@ -184,7 +184,7 @@ const RoadMap = () => {
             fullWidth
             options={warehouse}
             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
             value={
               warehouse.filter((data) => data.optionValue === selectedWarehouse).length
                 ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0]

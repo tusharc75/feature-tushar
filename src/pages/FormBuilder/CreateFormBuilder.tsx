@@ -17,7 +17,7 @@ import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
 import TextField from '@mui/material/TextField';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
@@ -218,7 +218,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({

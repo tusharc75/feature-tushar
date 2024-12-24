@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { RiBillLine } from 'react-icons/ri';
@@ -387,9 +387,8 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -404,9 +403,8 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -531,7 +529,7 @@ const LeftSideContent = ({
             options={productCategoryList}
             getOptionLabel={(option: any) => (option ? option.name : '')}
             size="small"
-            getOptionSelected={(option: any, val) => option._id === val}
+            isOptionEqualToValue={(option: any, val) => option._id === val}
             value={
               productCategoryList.filter((data) => data._id === productCategory).length
                 ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -551,7 +549,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTemplateList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTemplateList.filter((data) => data.optionValue === productTemplate).length
               ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
@@ -570,7 +568,7 @@ const LeftSideContent = ({
           className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
           options={productTypeList}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
           value={
             productTypeList.filter((data) => data.optionValue === productType).length
               ? productTypeList.filter((data) => data.optionValue === productType)[0]

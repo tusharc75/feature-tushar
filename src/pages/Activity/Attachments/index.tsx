@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import { AddOutlined, Delete as DeleteIcon } from '@mui/icons-material';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import { Autocomplete } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -648,7 +648,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -903,7 +903,7 @@ const LeftSideContents = ({
           options={resourceData || []}
           className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           getOptionLabel={(option: any) => option.optionLabel || ''}
-          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+          isOptionEqualToValue={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
           onChange={(event, newValue) => {
             setSelectedResourceData(newValue);
