@@ -6,10 +6,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Dialog from '@mui/material/Dialog';
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

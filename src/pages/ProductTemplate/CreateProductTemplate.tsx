@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, useMediaQuery } from '@mui/material';
+import { Box, Button, Menu, MenuItem, IconButton, CircularProgress, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -27,7 +27,7 @@ import { isTablet } from 'react-device-detect';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   tinyMCEContainer: {
     width: '100%'
   },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHistory } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -11,7 +11,7 @@ import { grey } from '@mui/material/colors';
 import { dateFormat } from '../../../../constants/helpers';
 let dayname = moment.weekdaysShort();
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   fontBold: {
     fontWeight: 500,
     color: theme.palette.primary.main

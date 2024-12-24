@@ -1,12 +1,12 @@
 import React from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box } from '@mui/material';
+import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
     padding: 0,
     height: '70px',

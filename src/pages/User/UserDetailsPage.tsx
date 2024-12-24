@@ -1,5 +1,5 @@
 import { ControlPoint, Edit } from '@mui/icons-material';
-import { Skeleton } from '@mui/material';
+import { Skeleton, Theme } from '@mui/material';
 import { Box, Dialog, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import queryString from 'query-string';
@@ -54,7 +54,7 @@ import UserSession from './UserSession';
 
 import { isMobile, isTablet } from 'react-device-detect';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   dataValue: {
     fontWeight: 500,
     color: theme.palette.primary.main

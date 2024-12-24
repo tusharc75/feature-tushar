@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Grid, Typography, TextField, Link } from '@mui/material';
+import { Grid, Typography, TextField, Link, Theme } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   inputLable: {
     color: theme.palette.primary.light //  textLight
   },

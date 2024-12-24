@@ -1,10 +1,10 @@
 import { makeStyles } from '@mui/styles';
-import { Grid, Typography, IconButton } from '@mui/material';
+import { Grid, Typography, IconButton, Theme } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import BoxWithBorder from '../../components/BoxWithBorder';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     // flexGrow: 1,
   },

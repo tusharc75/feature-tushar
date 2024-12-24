@@ -3,12 +3,12 @@ import { makeStyles } from '@mui/styles';
 import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import { FaTimesCircle } from 'react-icons/fa';
-import { Button, DialogActions } from '@mui/material';
+import { Button, DialogActions, Theme } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

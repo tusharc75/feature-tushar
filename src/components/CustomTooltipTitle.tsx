@@ -1,8 +1,8 @@
-import { Tooltip, TooltipProps } from '@mui/material';
+import { Theme, Tooltip, TooltipProps } from '@mui/material';
 import { cn } from 'src/constants/helpers';
 import { withStyles } from '@mui/styles';
 
-const TooltipWithStyle = withStyles((theme) => ({
+const TooltipWithStyle = withStyles((theme: Theme) => ({
   tooltip: {
     backgroundColor: '#121212',
     color: '#ffffff',

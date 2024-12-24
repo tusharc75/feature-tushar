@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Grid, Typography, TextField, FormControl, Select, MenuItem, Box, IconButton, InputAdornment } from '@mui/material';
+import { Grid, Typography, TextField, FormControl, Select, MenuItem, Box, IconButton, InputAdornment, Theme } from '@mui/material';
 
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
 import { Add, FilterList, SortByAlpha, Search } from '@mui/icons-material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   customers: {
     textAlign: 'center'
   },

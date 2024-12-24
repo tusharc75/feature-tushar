@@ -1,4 +1,4 @@
-import { CircularProgress, Typography } from '@mui/material';
+import { CircularProgress, Theme, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -9,7 +9,7 @@ import React from 'react';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,

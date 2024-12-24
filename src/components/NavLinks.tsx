@@ -1,8 +1,8 @@
 import { makeStyles } from '@mui/styles';
-import { Grid, Link, Box, Button, Divider } from '@mui/material';
+import { Grid, Link, Box, Button, Divider, Theme } from '@mui/material';
 import PropTypes from 'prop-types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     width: '100%'
   },
