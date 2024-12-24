@@ -33,6 +33,7 @@ import styles from './Header.module.scss';
 import Notification from './Notification';
 import { SearchBar } from './SearchBar';
 import { deleteDatabase } from 'src/constants/indexdbhelper';
+import NewSearchbar from 'src/components/Header/NewSearchBar';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -475,7 +476,7 @@ const Header = () => {
                 {sidebarOpenedByButton && isSidebarOpen ? <Close /> : <HiOutlineMenuAlt1 />}
               </IconButton>
             </div>
-            {/* Searchbar */}
+            {/* <NewSearchbar /> */}
             {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
           </Box>
 

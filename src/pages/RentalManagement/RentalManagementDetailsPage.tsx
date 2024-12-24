@@ -54,6 +54,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -420,8 +421,7 @@ const RentalManagementDetailsPage = () => {
               <>
                 <Fragment>
                   {permissions?.iotChart?.isRead && (
-                    <Button
-                      className="btn-outline-v1"
+                    <ThemeButton
                       id={'rental-management-view-iot-chart-button'}
                       variant="outlined"
                       color="primary"
@@ -431,27 +431,26 @@ const RentalManagementDetailsPage = () => {
                       }}
                     >
                       {`View ${resources?.iotChart?.titlePlural}`}
-                    </Button>
+                    </ThemeButton>
                   )}
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  <ThemeButton
                     className={`btn-outline-v1 ${(isMobile || isTablet) && 'no-hover'}`}
                     id={'rental-management-download-button'}
                     type="button"
                     size="small"
-                    // disabled={isDownloading ? true : false}
+                    disabled={isDownloading ? true : false}
+                    iconForMobile={<IoMdDownload />}
                     startIcon={isMobile ? '' : <IoMdDownload />}
                     onClick={(e) => {
                       handleDownload();
                     }}
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
-                  </Button>
+                  </ThemeButton>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
                     versionNotClonned &&
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
-                      <Button
-                        className="btn-outline-v1"
+                      <ThemeButton
                         id={'rental-management-create-new-version-button'}
                         variant="contained"
                         size="small"
@@ -461,7 +460,7 @@ const RentalManagementDetailsPage = () => {
                         }}
                       >
                         Create New Version
-                      </Button>
+                      </ThemeButton>
                     )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
@@ -472,7 +471,6 @@ const RentalManagementDetailsPage = () => {
                         <ButtonWithPulse
                           id={'rental-management-close-button'}
                           variant={'outlined'}
-                          color="default"
                           size="small"
                           onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
                           className={'btn-outline-v1'}
@@ -502,17 +500,14 @@ const RentalManagementDetailsPage = () => {
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
-                          <span>
-                            <Button
-                              disabled={allowedToEdit ? false : true}
-                              variant={isMobile && !isTablet ? 'text' : 'contained'}
-                              className={'btn-outline-v1'}
-                              onClick={handleOpenUpdateDialog}
-                              id={'rental-management-edit-button'}
-                            >
-                              {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                            </Button>
-                          </span>
+                          <ThemeButton
+                            disabled={allowedToEdit ? false : true}
+                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                            onClick={handleOpenUpdateDialog}
+                            id={'rental-management-edit-button'}
+                          >
+                            {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                          </ThemeButton>
                         </HtmlTooltip>
                       </Fragment>
                     )}
