@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Typography, Box, Button, Dialog, useMediaQuery, Theme } from '@mui/material';
-import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
+import { TreeView } from '@mui/x-tree-view/TreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
@@ -50,45 +51,44 @@ export default function ActivityList(props) {
     setCreate(false);
   };
 
-  // const getTreeNodes = (treeList) => {
-  //   return treeList.map((data, index) => {
-  //     let children = [];
-  //     if (data.child && data.child.length > 0) {
-  //       children = getTreeNodes(data.child);
-  //       children.push(<div></div>);
-  //     }
+  const getTreeNodes = (treeList) => {
+    return treeList.map((data, index) => {
+      let children = [];
+      if (data.child && data.child.length > 0) {
+        children = getTreeNodes(data.child);
+        children.push(<div></div>);
+      }
 
-  //     let label = (
-  //       <Box width={'100%'} height={30} className="d-flex align-items-center">
-  //         <Box width={'100%'} style={{ position: 'absolute' }}>
-  //           <Box onClick={() => setActivityData({ id: data._id, type })}>
-  //             <Typography variant="body2" className="text-truncate">
-  //               {data.name}
-  //             </Typography>
-  //           </Box>
-  //         </Box>
-  //       </Box>
-  //     );
+      let label = (
+        <Box width={'100%'} height={30} className="d-flex align-items-center">
+          <Box width={'100%'} style={{ position: 'absolute' }}>
+            <Box onClick={() => setActivityData({ id: data._id, type })}>
+              <Typography variant="body2" className="text-truncate">
+                {data.name}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      );
 
-  //     return (
-  //       <TreeItem
-  //         key={index}
-  //         id={data._id.toString()}
-  //         itemId={data._id.toString()}
-  //         label={label}
-  //         children={children}
-  //         classes={{
-  //           root: classes.root
-  //         }}
-  //       />
-  //     );
-  //   });
-  // };
+      return (
+        <TreeItem
+          key={index}
+          nodeId={data._id.toString()}
+          label={label}
+          children={children}
+          classes={{
+            root: classes.root
+          }}
+        />
+      );
+    });
+  };
 
-  // let TreeNodes = getTreeNodes(activity);
+  let TreeNodes = getTreeNodes(activity);
   return (
     <>
-      {/* <SimpleTreeView
+      <TreeView
         defaultCollapseIcon={<ExpandMoreIcon />}
         defaultExpandIcon={<ChevronRightIcon />}
         expanded={expanded}
@@ -96,39 +96,10 @@ export default function ActivityList(props) {
         onNodeToggle={handleToggle}
         onNodeSelect={handleSelect}
       >
-        {activity.map((data, index) => {
-          let children = [];
-          if (data.child && data.child.length > 0) {
-            children = getTreeNodes(data.child);
-            children.push(<div></div>);
-          }
-
-          let label = (
-            <Box width={'100%'} height={30} className="d-flex align-items-center">
-              <Box width={'100%'} style={{ position: 'absolute' }}>
-                <Box onClick={() => setActivityData({ id: data._id, type })}>
-                  <Typography variant="body2" className="text-truncate">
-                    {data.name}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          );
-
-          return (
-            <TreeItem
-              key={index}
-              id={data._id.toString()}
-              itemId={data._id.toString()}
-              label={label}
-              children={children}
-              classes={{
-                root: classes.root
-              }}
-            />
-          );
+        {TreeNodes.map((node) => {
+          return node;
         })}
-      </SimpleTreeView> */}
+      </TreeView>
       <div className="py-2">
         <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={isMobileDevices ? null : <AddIcon />}>
           Create {type}
