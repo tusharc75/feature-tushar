@@ -11,6 +11,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Theme,
   Typography
 } from '@mui/material';
 import { Check } from '@mui/icons-material';
@@ -28,7 +29,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   button: {
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1)

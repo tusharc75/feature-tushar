@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress } from '@mui/material';
+import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +12,7 @@ import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   tableCell: {
     fontSize: 'medium'
   },

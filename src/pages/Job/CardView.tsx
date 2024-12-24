@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -11,7 +11,7 @@ import routes from 'src/components/Helpers/Routes';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',

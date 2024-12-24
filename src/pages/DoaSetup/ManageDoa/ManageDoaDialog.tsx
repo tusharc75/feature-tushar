@@ -10,7 +10,8 @@ import {
   IconButton,
   InputAdornment,
   Switch,
-  TextField
+  TextField,
+  Theme
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Add, Delete } from '@mui/icons-material';
@@ -47,7 +48,7 @@ const DOAType = [
   }
 ];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     margin: 0,
     padding: theme.spacing(1.5, 1.5, 1.5, 2)

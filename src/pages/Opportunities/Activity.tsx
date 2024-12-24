@@ -1,9 +1,9 @@
 import { Assessment, Call, Email, Event } from '@mui/icons-material';
-import { Paper, Tab, Tabs } from '@mui/material';
+import { Paper, Tab, Tabs, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import React from 'react';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     maxWidth: 445,
@@ -12,21 +12,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-// withStyles((theme) => ({
-//   root: {
-//     textTransform: "none",
-//     minWidth: 72,
-//     fontWeight: theme.typography.fontWeightMedium,
-//     marginRight: theme.spacing(4),
-//     "&$selected": {
-//       color: theme.palette.primary.main,
-//     },
-//     "&:focus": {
-//       color: theme.palette.primary.main,
-//     },
-//   },
-//   selected: {},
-// }))
 const StyledTab = (props) => <Tab disableRipple {...props} />;
 
 const Activity = () => {

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Chip, Box, Typography } from '@mui/material';
+import { Chip, Box, Typography, Theme } from '@mui/material';
 import { purple } from '@mui/material/colors';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 import { kebabCase, startCase } from 'lodash';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   boldFont: {
     fontWeight: 500
   },

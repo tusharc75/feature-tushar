@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Typography, Box, Select, MenuItem } from '@mui/material';
+import { Grid, Typography, Box, Select, MenuItem, Theme } from '@mui/material';
 import Container from './CustomContainer';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     minHeight: '100%!important',
     marginTop: 5

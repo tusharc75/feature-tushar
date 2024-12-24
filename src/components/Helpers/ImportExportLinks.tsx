@@ -1,4 +1,4 @@
-import { IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { IconButton, Menu, MenuItem, Theme, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useContext, useMemo, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
@@ -8,7 +8,7 @@ import { downloadExcel } from '../../constants/helpers';
 
 import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     display: 'flex',
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
+    "['@media (max-width: 960px)']": {
       display: 'none'
     }
   },

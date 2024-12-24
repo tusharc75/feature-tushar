@@ -1,7 +1,7 @@
 import { Map } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Fragment, useState } from 'react';
 import { ImAttachment } from 'react-icons/im';
@@ -14,7 +14,7 @@ import { useData } from 'src/StateProvider/Provider';
 import Activity from '../../components/Activity';
 import MapView from './MapView';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   cardBox: {
     borderRadius: '12px',
     border: '1px solid var(--common-border-color,#ebebeb)',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Grid, Typography, TextField, Link } from '@mui/material';
+import { Grid, Typography, TextField, Link, Theme } from '@mui/material';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
@@ -9,7 +9,7 @@ import moment from 'moment';
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   inputLable: {
     color: theme.palette.primary.light //  textLight
   },

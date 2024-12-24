@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar } from '@mui/material';
+import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar, Theme } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { MdDelete } from 'react-icons/md';
 import { BsDot } from 'react-icons/bs';
 import { SubCaseColors } from '../Helpers/utils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   marginLeft: {
     marginLeft: 10
   },

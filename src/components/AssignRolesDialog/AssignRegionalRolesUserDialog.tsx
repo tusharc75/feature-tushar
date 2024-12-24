@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Theme,
   Typography
 } from '@mui/material';
 import Step from '@mui/material/Step';
@@ -26,7 +27,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   button: {
     marginTop: theme.spacing(1),
     marginRight: theme.spacing(1)

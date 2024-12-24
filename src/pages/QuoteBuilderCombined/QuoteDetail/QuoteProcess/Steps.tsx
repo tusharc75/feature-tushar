@@ -3,7 +3,7 @@ import { makeStyles } from '@mui/styles';
 import Button from '@mui/material/Button';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress } from '@mui/material';
+import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress, Theme } from '@mui/material';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
@@ -16,7 +16,7 @@ import DoaStepUsers from './DOAStepUsers';
 import Steps1 from 'src/components/Steps';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   rejected: {
     background: '#fedddd',
     color: 'var(--error) !important'

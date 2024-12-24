@@ -1,8 +1,8 @@
 import React from 'react';
 import { makeStyles } from '@mui/styles';
-import { Container, CssBaseline, Grid, Typography, Stepper, Step, StepLabel, Button, Paper, Box, TextField } from '@mui/material';
+import { Container, CssBaseline, Grid, Typography, Stepper, Step, StepLabel, Button, Paper, Box, TextField, Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
     width: '100%',

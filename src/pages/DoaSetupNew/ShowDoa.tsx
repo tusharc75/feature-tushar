@@ -3,8 +3,9 @@ import { BsFillCheckCircleFill, BsFillClockFill, BsFillXCircleFill } from 'react
 import routes from 'src/components/Helpers/Routes';
 import { DOA_STATUS } from 'src/constants/helpers';
 import { Link } from 'react-router-dom';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   mainContainer: {
     display: 'flex',
     alignItems: 'center',

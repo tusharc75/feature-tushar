@@ -1,11 +1,11 @@
 import { Image, Map } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Avatar, Box, IconButton, Typography } from '@mui/material';
+import { Avatar, Box, IconButton, Theme, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { TreeItem, TreeView } from '@mui/x-tree-view';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     '&:hover > $content': {
       backgroundColor: theme.palette.action.hover

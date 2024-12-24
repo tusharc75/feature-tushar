@@ -1,7 +1,7 @@
 import React, { useRef, Fragment, useState, useContext, useEffect } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import axiosInstance from '../../axios/axiosInstance';
-import { IconButton, Box, Button, Typography } from '@mui/material';
+import { IconButton, Box, Button, Typography, Theme } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -25,7 +25,7 @@ import { startCase } from 'lodash';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useAppTheme } from 'src/constants/AppConfig';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1
   },
