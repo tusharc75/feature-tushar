@@ -1,4 +1,5 @@
-import { Grid, IconButton, TextField } from '@mui/material';
+import { IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CropFreeIcon from '@mui/icons-material/CropFree';
 import HistoryIcon from '@mui/icons-material/History';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -140,10 +141,9 @@ const CageManagement = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{ xs:10, sm:11, md:4}}>
           <CustomBreadCrumbs routes={[{ ...routes.cageManagement, title: resources?.cageManagement?.titlePlural }]} />
         </Grid>
-        <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>
       <CustomContainer>
         <ListingPageHeader

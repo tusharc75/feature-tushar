@@ -1,4 +1,5 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import ChartTypes from './ChartTypes';
@@ -174,7 +175,7 @@ const Dashboard = () => {
                     />
                   ))}
                   {globalFilters.dashboardType?.includes('Asset') && (
-                    <Grid item xs={12}>
+                    <Grid size={{xs:12}}>
                       <AssetStats />
                     </Grid>
                   )}

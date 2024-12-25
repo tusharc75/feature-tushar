@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@mui/styles';
-import { Container, CssBaseline, Grid, Typography, Stepper, Step, StepLabel, Button, Paper, Box, TextField, Theme } from '@mui/material';
-
+import { Container, CssBaseline, Typography, Stepper, Step, StepLabel, Button, Paper, Box, TextField, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
@@ -84,12 +84,12 @@ const CreateBrand = () => {
       <CssBaseline />
       <Container fixed>
         <Paper className={classes.container}>
-          <Grid container justify="space-between">
-            <Grid item xs={12} sm={12} md={6}>
+          <Grid container justifyContent="space-between">
+            <Grid size={{ xs:12, sm:12, md:6}}>
               <Typography variant="h6">Create New Brand</Typography>
               <Typography variant="body2">Follow all the steps to create a brand</Typography>
             </Grid>
-            <Grid item xs={12} sm={12} md={6}>
+            <Grid size={{ xs:12, sm:12, md:6}}>
               <Stepper activeStep={activeStep} alternativeLabel>
                 {steps.map((label) => (
                   <Step key={label}>
@@ -106,8 +106,8 @@ const CreateBrand = () => {
             <Box className={classes.formContainer}>
               <h2>User Details</h2>
 
-              <Grid container spacing={10} justify="space-between">
-                <Grid item xs={12} sm={12} md={6}>
+              <Grid container spacing={10} justifyContent="space-between">
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="First Name" className={classes.input} />
                   </Box>
@@ -118,7 +118,7 @@ const CreateBrand = () => {
                     <TextField label="Mobile No." className={classes.input} />
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={12} md={6}>
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="Last Name" className={classes.input} />
                   </Box>
@@ -135,8 +135,8 @@ const CreateBrand = () => {
             <Box className={classes.formContainer}>
               <h2>Entity Details</h2>
 
-              <Grid container spacing={10} justify="space-between">
-                <Grid item xs={12} sm={12} md={6}>
+              <Grid container spacing={10} justifyContent="space-between">
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="Name" className={classes.input} />
                   </Box>
@@ -150,7 +150,7 @@ const CreateBrand = () => {
                     <TextField label="Country" className={classes.input} />
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={12} md={6}>
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="Brand" className={classes.input} />
                   </Box>
@@ -167,8 +167,8 @@ const CreateBrand = () => {
             <Box className={classes.formContainer}>
               <h2>Brand Details</h2>
 
-              <Grid container spacing={10} justify="space-between">
-                <Grid item xs={12} sm={12} md={6}>
+              <Grid container spacing={10} justifyContent="space-between">
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="Company Name" className={classes.input} />
                   </Box>
@@ -194,7 +194,7 @@ const CreateBrand = () => {
                     <TextField label="Requests" className={classes.input} />
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={12} md={6}>
+                <Grid size={{ xs:12, sm:12, md:6}}>
                   <Box className={classes.inputContainer}>
                     <TextField label="Company Code" className={classes.input} />
                   </Box>

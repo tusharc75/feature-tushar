@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { startCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -174,7 +175,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center" gridGap={'8px'}>
+        <Box display="flex" alignItems="center" gap='8px'>
           <PreviewDownload
             fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
             resource={sidebarResource.assemblyOrder}
@@ -188,7 +189,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         </Box>
       </Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{ xs:12, sm:12, md:12}}>
           {columns ? (
             <>
               <Box zIndex={5} width={'100%'}>

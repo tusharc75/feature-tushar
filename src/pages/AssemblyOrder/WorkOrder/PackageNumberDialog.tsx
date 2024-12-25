@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -126,7 +127,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                         {values?.managedPackages?.map((data, index) => (
                           <Box mb={2} border={1} p={1} borderColor="var(--common-border-color)">
                             <Grid container spacing={2}>
-                              <Grid item md={6} lg={6} sm={6} xs={12}>
+                              <Grid size={{ xs:12, sm:6, md:6, lg:6}}>
                                 <TextField
                                   fullWidth
                                   label={managedPackagedLabel || 'Managed Package Name'}
@@ -158,7 +159,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                   }
                                 />
                               </Grid>
-                              <Grid item md={6} lg={6} sm={6} xs={12}>
+                              <Grid size={{ xs:12, sm:6, md:6, lg:6}}>
                                 <Autocomplete
                                   id="package"
                                   disabled

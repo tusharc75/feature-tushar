@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
-import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box, TextField } from '@mui/material';
+import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -104,7 +105,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
+                <Grid key={i} size={{xs:12, sm:6, md:6}}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}
@@ -125,7 +126,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{xs:12, sm:6, md:6}}>
                     <Autocomplete
                       options={optionsArray['Inventory Cycle']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -147,7 +148,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{xs:12, sm:6, md:6}}>
                     <Autocomplete
                       options={optionsArray['User']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -169,7 +170,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{xs:12, sm:6, md:6}}>
                     <Autocomplete
                       options={optionsArray['Product Category']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -191,7 +192,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{xs:12, sm:6, md:6}}>
                     <Autocomplete
                       options={optionsArray['Warehouse']}
                       getOptionLabel={(option) => option.optionLabel}
