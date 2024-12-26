@@ -50,12 +50,14 @@ const useSearch = () => {
       u['resourceLabelLowerCase'] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
     });
-    const list = allData?.filter((u) => {
-      if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
-        return false;
-      }
-      return u.isRead && u.sectionName;
-    });
+    const list = allData
+      ?.filter((u) => {
+        if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
+          return false;
+        }
+        return u.isRead && u.sectionName;
+      })
+      .sort((a, b) => a.sectionName.localeCompare(b.sectionName));
     setItems(list);
   }, [selectedEntity, setItems, user.entity, pathName]);
 

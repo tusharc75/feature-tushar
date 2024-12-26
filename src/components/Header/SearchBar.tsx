@@ -214,7 +214,6 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                   return (
                     <ListItemButton
                       key={item.resourceLabel}
-                      button
                       onClick={() => {
                         history.push(handleRoutes(item));
                         clearSearch();
