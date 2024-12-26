@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -12,7 +12,7 @@ import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDia
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -190,14 +190,9 @@ const EmployeeMasterDetail = () => {
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpenUpdateDialog}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>

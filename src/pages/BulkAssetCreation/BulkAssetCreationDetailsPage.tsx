@@ -178,8 +178,8 @@ const BulkAssetCreationDetailsPage = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !['Completed']?.includes(bulkAssetCreationData?.status) && (
-                <ThemeButton variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
                 </ThemeButton>
               )}
               <ActivityButton

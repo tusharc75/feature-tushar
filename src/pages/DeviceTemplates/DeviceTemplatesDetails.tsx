@@ -1,15 +1,14 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -100,16 +99,15 @@ export default function DeviceTemplatesDetails() {
             {deviceTemplatesData ? (
               <>
                 {permissions?.deviceTemplates?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
+                    tooltip={'Edit'}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.warehouse?.isDelete && (
                   <span title={id ? "Primarily selected warehouse can't be deleted" : 'Permanently delete this warehouse'}>

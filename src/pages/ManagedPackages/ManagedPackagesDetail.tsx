@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -13,8 +13,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagedPackages from './ManageManagedPackages';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@mui/icons-material';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Assign from './Assign';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagedPackagesView from './View';
@@ -111,9 +111,9 @@ const ManagedPackagedDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.managedPackages?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.managedPackages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
