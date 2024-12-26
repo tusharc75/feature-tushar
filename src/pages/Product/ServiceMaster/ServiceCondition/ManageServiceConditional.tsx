@@ -380,7 +380,6 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                               error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
                                               helperText={touched?.condition && errors[`condition.${i}.value`]}
                                               margin="dense"
-                                              size="small"
                                             />
                                           ) : (
                                             <TextField

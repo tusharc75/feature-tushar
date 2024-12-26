@@ -51,9 +51,9 @@ function PlusMinusTextboxComponent({ inputTextLabel, value, minValue = 1, isRequ
           label={inputTextLabel}
           ref={inputNumberRef}
           value={inputValue}
-          slots={{ input: CustomFormat }}
           slotProps={{
             input: {
+              inputComponent: CustomFormat as any,
               inputProps: {
                 allowNegative: false,
                 min: minValue,
