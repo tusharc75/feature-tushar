@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -19,8 +20,8 @@ import {
 } from 'src/constants/helpers';
 import Steps, { getIndex } from 'src/components/Steps';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@mui/icons-material';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { Skeleton } from '@mui/material';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -182,14 +183,9 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderData ? (
               <>
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={() => setOpenUpdateDialog(true)}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
@@ -217,7 +213,7 @@ const AssemblyOrderDetail = () => {
               <DetailsPage data={assemblyOrderData} fields={allFields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>

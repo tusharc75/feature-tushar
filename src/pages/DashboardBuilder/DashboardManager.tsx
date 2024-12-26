@@ -1,5 +1,6 @@
 import { DndContext, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
 import update from 'immutability-helper';
@@ -306,10 +307,10 @@ const DashboardBuilder = () => {
           </Box>
           <Box p={1}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{xs:12, sm:4}}>
                 <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
               </Grid>
-              <Grid item xs={12} sm={8}>
+              <Grid size={{xs:12, sm:8}}>
                 <Box className={'container-with-border'} p={2}>
                   {formData.length === 0 && (
                     <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
