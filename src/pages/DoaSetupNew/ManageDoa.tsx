@@ -110,9 +110,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setUserList(
           data.length
             ? data.map((user: any) => ({
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`
-            }))
+                id: user._id,
+                name: `${user.firstName} ${user.lastName}`
+              }))
             : []
         );
       })
@@ -128,9 +128,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setRoleList(
           data.length
             ? data.map((role: any) => ({
-              id: role._id,
-              name: role.name
-            }))
+                id: role._id,
+                name: role.name
+              }))
             : []
         );
       });
@@ -218,8 +218,10 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
             <Grid item xs={3} md={4} lg={4}>
               <TextField
                 fullWidth
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                  }
                 }}
                 variant="outlined"
                 type="text"
@@ -376,8 +378,10 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                               <Grid container spacing={2}>
                                 <Grid item md={6} lg={6} sm={6} xs={6}>
                                   <TextField
-                                    InputProps={{
-                                      startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                    slotProps={{
+                                      input: {
+                                        startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                      }
                                     }}
                                     variant="outlined"
                                     type="text"

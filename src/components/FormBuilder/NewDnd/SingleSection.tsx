@@ -126,6 +126,7 @@ const SingleSection = ({
                 id="standard-basic"
                 variant="outlined"
                 margin="dense"
+                size="small"
                 value={section.sectionName}
                 onChange={(event) => onChangeSectionName(section.sectionId, event.target.value)}
               />

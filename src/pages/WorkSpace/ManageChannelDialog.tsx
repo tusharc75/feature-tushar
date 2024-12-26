@@ -138,6 +138,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         name="title"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values['title']}
                         error={touched['title'] && Boolean(errors['title'])}
                         helperText={touched['title'] && errors['title']}
@@ -154,6 +155,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         name="description"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values['description']}
                         error={touched['description'] && Boolean(errors['description'])}
                         helperText={touched['description'] && errors['description']}

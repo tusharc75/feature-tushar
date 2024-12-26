@@ -341,6 +341,7 @@ export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
     <div className="mr-2">
       <FormControl fullWidth size="small" variant="outlined" margin="dense">
         <Select
+          size="small"
           labelId={'filter-term'}
           id={'filter-term'}
           value={filterTerm[fieldName] || '$in'}

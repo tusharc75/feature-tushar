@@ -162,6 +162,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Workflow Resource"
                           placeholder="Workflow Resource"

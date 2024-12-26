@@ -62,6 +62,7 @@ export const ResourceDropdown = ({ type, lookupResource = '', value, options = [
             <TextField
               {...params}
               margin="dense"
+              size='small'
               variant="outlined"
               label="Default Value"
               placeholder="Default Value"

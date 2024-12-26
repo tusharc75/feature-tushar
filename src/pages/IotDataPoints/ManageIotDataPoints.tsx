@@ -322,6 +322,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         <TextField
                           inputRef={inputRef}
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Formula"
                           name="formula"
@@ -358,6 +359,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                             value={values['returnType']}
                             onChange={(e) => setFieldValue('returnType', e.target.value)}
                             label="Return Type"
+                            size="small"
                             name="returnType"
                           >
                             <MenuItem value="decimal">Decimal</MenuItem>

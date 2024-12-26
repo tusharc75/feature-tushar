@@ -129,6 +129,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                         <TextField
                           {...params}
                           margin="dense"
+                          size='small'
                           variant="outlined"
                           label="Workspace Tools Field"
                           placeholder="Workspace Tools Field"

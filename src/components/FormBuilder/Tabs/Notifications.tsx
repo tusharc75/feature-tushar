@@ -205,6 +205,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size='small'
                                         variant="outlined"
                                         label="Field"
                                         placeholder="Field"
@@ -247,6 +248,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size='small'
                                         variant="outlined"
                                         label="Rule"
                                         placeholder="Rule"
@@ -291,6 +293,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       <TextField
                                         {...params}
                                         margin="dense"
+                                        size='small'
                                         variant="outlined"
                                         label="Notification User Field"
                                         placeholder="Notification User Field"

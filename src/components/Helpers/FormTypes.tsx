@@ -985,15 +985,17 @@ const FormTypes = (props) => {
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-          InputProps={{
-            inputComponent: CustomFormat as any,
-            inputProps: {
+          slotProps={{
+            input: {
+              inputComponent: CustomFormat as any,
+              inputProps: {
               allowNegative: false,
               onValueChange: (values) => {
                 handleChange(name, values.value);
               },
               selectedCurrencyCode: selectedCurrencyCode
             }
+            },
           }}
         />
       </InfoLabel>
@@ -1015,27 +1017,27 @@ const FormTypes = (props) => {
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-          InputProps={{
-            inputComponent: CustomFormat as any,
-            inputProps: {
+          slotProps={{
+            input: {
+              inputComponent: CustomFormat as any,
               allowNegative: false,
               onValueChange: (values) => {
                 handleChange(name, values.value);
               },
-              selectedCurrencyCode: selectedCurrencyCode
+              selectedCurrencyCode: selectedCurrencyCode,
+              startAdornment: startAdornment ? (
+                startAdornment
+              ) : (
+                <InputAdornment position="start">
+                  {result(
+                    find(getUniqueCurrencies(), function (obj) {
+                      return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
+                    }),
+                    'symbolNative'
+                  )}
+                </InputAdornment>
+              )
             },
-            startAdornment: startAdornment ? (
-              startAdornment
-            ) : (
-              <InputAdornment position="start">
-                {result(
-                  find(getUniqueCurrencies(), function (obj) {
-                    return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
-                  }),
-                  'symbolNative'
-                )}
-              </InputAdornment>
-            )
           }}
         />
       </InfoLabel>
@@ -1057,10 +1059,12 @@ const FormTypes = (props) => {
           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          InputProps={{
-            endAdornment: '%',
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              endAdornment: '%',
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            },
           }}
           ref={inputNumberRef}
           onChange={
@@ -1185,6 +1189,7 @@ const FormTypes = (props) => {
               {...params}
               variant="outlined"
               margin="dense"
+              size="small"
               label={getLabel(label)}
               name={name}
               error={touched[name] && Boolean(errors[name])}
@@ -1512,9 +1517,11 @@ const FormTypes = (props) => {
                         ? onChange
                         : (e) => handleConverterChange(name, _unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
                     }
-                    InputProps={{
-                      inputProps: { min: 0 },
-                      readOnly: fieldData && fieldData?.isUneditable ? true : false
+                    slotProps={{
+                      input: {
+                        inputProps: { min: 0 },
+                        readOnly: fieldData && fieldData?.isUneditable ? true : false
+                      },
                     }}
                   />
                 )}
@@ -1589,8 +1596,8 @@ const FormTypes = (props) => {
                         value={
                           values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                             ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString(undefined, {
-                              maximumFractionDigits: fieldData?.decimalPlaces
-                            })
+                                maximumFractionDigits: fieldData?.decimalPlaces
+                              })
                             : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         error={
@@ -1620,19 +1627,21 @@ const FormTypes = (props) => {
                               }
                             }
                         }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              {result(
-                                find(getUniqueCurrencies(), function (obj) {
-                                  return obj.currencyCode === _currency;
-                                }),
-                                'symbolNative'
-                              )}
-                            </InputAdornment>
-                          ),
-                          inputProps: { min: 0, max: 9999999999 },
-                          readOnly: fieldData && fieldData?.isUneditable ? true : false
+                        slotProps={{
+                          input: {
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                {result(
+                                  find(getUniqueCurrencies(), function (obj) {
+                                    return obj.currencyCode === _currency;
+                                  }),
+                                  'symbolNative'
+                                )}
+                              </InputAdornment>
+                            ),
+                            inputProps: { min: 0, max: 9999999999 },
+                            readOnly: fieldData && fieldData?.isUneditable ? true : false
+                          },
                         }}
                       />
                     </InfoLabel>
@@ -1654,12 +1663,12 @@ const FormTypes = (props) => {
                       {(fieldData?.leval === 'product-custom' ||
                         fieldData?.leval === 'product-builder-custom' ||
                         fieldData?.leval === 'price-builder-custom') && (
-                          <HtmlTooltip title="Remove">
-                            <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                              <HighlightOffIcon color="error" />
-                            </IconButton>
-                          </HtmlTooltip>
-                        )}
+                        <HtmlTooltip title="Remove">
+                          <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                            <HighlightOffIcon color="error" />
+                          </IconButton>
+                        </HtmlTooltip>
+                      )}
                       {fieldData?.displayUnits?.length !== fieldData?.units?.length && (
                         <HtmlTooltip title="Add Converter" className="formActionButton">
                           <IconButton
@@ -1746,14 +1755,14 @@ const FormTypes = (props) => {
                         onChange
                           ? onChange
                           : (e) => {
-                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                              if (fieldData?.displayCurrency?.length > 1) {
-                                handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                              } else {
-                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                                if (fieldData?.displayCurrency?.length > 1) {
+                                  handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                } else {
+                                  handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                }
                               }
                             }
-                          }
                       }
                       onBlur={(e) => {
                         if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
@@ -1771,19 +1780,21 @@ const FormTypes = (props) => {
                           }
                         }
                       }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {result(
-                              find(getUniqueCurrencies(), function (obj) {
-                                return obj.currencyCode === _currency;
-                              }),
-                              'symbolNative'
-                            )}
-                          </InputAdornment>
-                        ),
-                        inputProps: { min: 0 },
-                        readOnly: fieldData && fieldData?.isUneditable ? true : false
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              {result(
+                                find(getUniqueCurrencies(), function (obj) {
+                                  return obj.currencyCode === _currency;
+                                }),
+                                'symbolNative'
+                              )}
+                            </InputAdornment>
+                          ),
+                          inputProps: { min: 0 },
+                          readOnly: fieldData && fieldData?.isUneditable ? true : false
+                        },
                       }}
                     />
                   </InfoLabel>
@@ -1864,9 +1875,11 @@ const FormTypes = (props) => {
                 handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
               }
           }
-          InputProps={{
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            },
           }}
         />
         {rest?.isMinMaxValue && (
@@ -1912,9 +1925,11 @@ const FormTypes = (props) => {
                 }
               }
           }
-          InputProps={{
-            inputProps: { min: 0 },
-            readOnly: fieldData && fieldData?.isUneditable ? true : false
+          slotProps={{
+            input: {
+              inputProps: { min: 0 },
+              readOnly: fieldData && fieldData?.isUneditable ? true : false
+            },
           }}
         />
       </InfoLabel>
@@ -1953,28 +1968,28 @@ const FormTypes = (props) => {
             const { currencyCode, currencyName, symbolNative } = option;
             return `${currencyCode} - ${currencyName} - (${symbolNative})`;
           }}
-        // renderOption={(option) => {
-        //   const { currencyCode, name, countryCode, symbolNative } = option;
-        //   return (
-        //     <Grid container alignItems="center">
-        //       <Grid item>
-        //         <Avatar
-        //           variant="rounded"
-        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-        //         />
-        //       </Grid>
-        //       <Grid item xs>
-        //         <Typography>
-        //           {currencyCode} ({symbolNative})
-        //         </Typography>
-        //         <Typography variant="body2" color="textSecondary">
-        //           {name}
-        //         </Typography>
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }}
+          // renderOption={(option) => {
+          //   const { currencyCode, name, countryCode, symbolNative } = option;
+          //   return (
+          //     <Grid container alignItems="center">
+          //       <Grid item>
+          //         <Avatar
+          //           variant="rounded"
+          //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+          //           style={{ marginRight: 20, width: "40px", height: "30px" }}
+          //         />
+          //       </Grid>
+          //       <Grid item xs>
+          //         <Typography>
+          //           {currencyCode} ({symbolNative})
+          //         </Typography>
+          //         <Typography variant="body2" color="textSecondary">
+          //           {name}
+          //         </Typography>
+          //       </Grid>
+          //     </Grid>
+          //   );
+          // }}
         />
       </InfoLabel>
     ) : type === 'multiSelect' ? (
@@ -2236,9 +2251,9 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+                  setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                  setValue(newValue);
+                }
           }
           onInputChange={(event, newInputValue) => {
             handleChange(name, newInputValue);
@@ -2458,18 +2473,18 @@ const FormTypes = (props) => {
             <ImageList style={{ transform: 'translateZ(0)', width: '100%' }}>
               {values[name]
                 ? values[name].map((item, i) => (
-                  <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
-                    <img src={item} alt={`demo ${i + 1}`} />
-                    <ImageListItemBar
-                      title={''}
-                      actionIcon={
-                        <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      }
-                    />
-                  </ImageListItem>
-                ))
+                    <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
+                      <img src={item} alt={`demo ${i + 1}`} />
+                      <ImageListItemBar
+                        title={''}
+                        actionIcon={
+                          <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                            <DeleteIcon color="error" />
+                          </IconButton>
+                        }
+                      />
+                    </ImageListItem>
+                  ))
                 : null}
             </ImageList>
           </Box>

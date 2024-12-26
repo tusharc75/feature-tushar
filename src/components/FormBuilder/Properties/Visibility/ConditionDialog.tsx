@@ -249,6 +249,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Fields"
                           placeholder="Select Field"
@@ -296,20 +297,23 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                                 {...params}
                                 variant="outlined"
                                 margin="dense"
+                                size="small"
                                 label="Value"
                                 name="value"
                                 error={touched['value'] && Boolean(errors['value'])}
                                 helperText={touched['value'] && errors['value']}
                                 required
                                 style={{ whiteSpace: 'nowrap' }}
-                                InputProps={{
-                                  ...params.InputProps,
-                                  endAdornment: (
-                                    <>
-                                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                      {params.InputProps.endAdornment}
-                                    </>
-                                  )
+                                slotProps={{
+                                  input: {
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                      <>
+                                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                        {params.InputProps.endAdornment}
+                                      </>
+                                    )
+                                  }
                                 }}
                               />
                             )}
@@ -349,6 +353,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 variant="outlined"
                                 label="Value"
                                 name="value"
@@ -370,6 +375,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                           name={'value'}
                           required
                           margin="dense"
+                          size="small"
                           value={values?.value}
                           onChange={(val) => {
                             if (val?.length < 5) {
@@ -390,6 +396,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                           rows={4}
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values?.value}
                           onChange={(e) => {
                             setFieldValue('value', e.target.value.trimStart());

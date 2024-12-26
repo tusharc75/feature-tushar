@@ -536,6 +536,7 @@ const AddSerializedAsset = ({
                       <TextField
                         {...params}
                         margin="dense"
+                        size="small"
                         name="plant"
                         placeholder={resources?.warehouse?.titleSingular}
                         label={resources?.warehouse?.titleSingular}

@@ -115,14 +115,16 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       renderInput={(params) => (
         <TextField
           {...params}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            )
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
           }}
           autoFocus
           onBlur={onBlur}
@@ -173,14 +175,16 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       renderInput={(params) => (
         <TextField
           {...params}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={15} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            )
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={15} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
           }}
           autoFocus
           onBlur={onBlur}

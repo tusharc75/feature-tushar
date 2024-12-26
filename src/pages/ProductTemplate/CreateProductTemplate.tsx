@@ -393,6 +393,7 @@ const ProductTemplate = () => {
                         name="name"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values['name']}
                         error={touched['name'] && Boolean(errors['name'])}
                         helperText={touched['name'] && errors['name']}
@@ -446,6 +447,7 @@ const ProductTemplate = () => {
                             <TextField
                               {...params}
                               margin="dense"
+                              size="small"
                               name="productCategory"
                               label="Product Category"
                               variant="outlined"
@@ -522,6 +524,7 @@ const ProductTemplate = () => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="entity"
                             label="Entity"
                             variant="outlined"
@@ -555,6 +558,7 @@ const ProductTemplate = () => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="owner"
                             label="Owner"
                             variant="outlined"
@@ -590,6 +594,7 @@ const ProductTemplate = () => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="collaborator"
                             label="Collaborator"
                             variant="outlined"

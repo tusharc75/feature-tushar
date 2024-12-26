@@ -161,6 +161,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
             onChange={(e) => setCaseName(e.target.value)}
             error={isError && caseName.length < 3}
             helperText={isError && caseName.length < 3 && 'Case name must be at least 3 letters'}
+            size="small"
           />
 
           <Box mt={1}>

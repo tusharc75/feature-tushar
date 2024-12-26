@@ -200,6 +200,7 @@ const Pos = () => {
                     <TextField
                       {...params}
                       margin="dense"
+                      size="small"
                       name="plant"
                       placeholder={resources?.warehouse?.titleSingular}
                       variant="standard"
@@ -207,7 +208,7 @@ const Pos = () => {
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" name="plant" size="small" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                   )
                 }
               />
@@ -229,6 +230,7 @@ const Pos = () => {
                     <TextField
                       {...params}
                       margin="dense"
+                      size="small"
                       name="productCategory"
                       placeholder="Product Category"
                       variant="standard"
@@ -236,7 +238,7 @@ const Pos = () => {
                       className={isMobile ? 'serchBox' : ''}
                     />
                   ) : (
-                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
                   )
                 }
               />

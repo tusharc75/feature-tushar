@@ -268,7 +268,7 @@ export const AddField = (props) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                 {['formAddInlineEdit', 'builder']?.includes(refrence) && (
-                  <FormControl fullWidth margin="dense" variant="outlined" error={touched['sectionName'] && Boolean(errors['sectionName'])}>
+                  <FormControl fullWidth margin="dense" variant="outlined" size="small" error={touched['sectionName'] && Boolean(errors['sectionName'])}>
                     <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"
@@ -277,13 +277,14 @@ export const AddField = (props) => {
                       onChange={(e) => setFieldValue('sectionName', e.target.value)}
                       label="Section Name"
                       name="sectionName"
+                      size="small"
                     >
                       {section && section.map((_section) => <MenuItem value={_section}>{_section}</MenuItem>)}
                     </Select>
                     <FormHelperText>{errors['sectionName']}</FormHelperText>
                   </FormControl>
                 )}
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -292,6 +293,7 @@ export const AddField = (props) => {
                     onChange={(e) => setFieldValue('type', e.target.value)}
                     label="Type"
                     name="type"
+                    size="small"
                     error={touched['type'] && Boolean(errors['type'])}
                   >
                     <MenuItem value={'singleLine'}>Single Line</MenuItem>
@@ -313,6 +315,7 @@ export const AddField = (props) => {
                   name="fieldLabel"
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['fieldLabel']}
                   error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
                   helperText={touched['fieldLabel'] && errors['fieldLabel']}
@@ -323,7 +326,7 @@ export const AddField = (props) => {
                   <Grid spacing={3} container>
                     {values['type'] === 'formula' && (
                       <Grid item xs={12} sm={6} md={6}>
-                        <FormControl fullWidth margin="dense" variant="outlined">
+                        <FormControl fullWidth margin="dense" variant="outlined" size="small">
                           <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                           <Select
                             labelId="demo-simple-select-outlined-label"
@@ -332,6 +335,7 @@ export const AddField = (props) => {
                             onChange={(e) => setFieldValue('returnType', e.target.value)}
                             label="Return Type"
                             name="returnType"
+                            size="small"
                           >
                             <MenuItem value="decimal">Decimal</MenuItem>
                             <MenuItem value="string">String</MenuItem>
@@ -342,7 +346,7 @@ export const AddField = (props) => {
                     )}
                     {(values['type'] === 'decimal' || values['type'] === 'converter' || values['returnType'] === 'decimal') && (
                       <Grid item xs={12} sm={6} md={6}>
-                        <FormControl fullWidth margin="dense" variant="outlined">
+                        <FormControl fullWidth margin="dense" size="small" variant="outlined">
                           <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
                           <Select
                             labelId="demo-simple-select-outlined-label"
@@ -351,6 +355,7 @@ export const AddField = (props) => {
                             onChange={(e) => setFieldValue('decimalPlaces', e.target.value)}
                             label="Number of decimal places"
                             name="decimalPlaces"
+                            size="small"
                           >
                             <MenuItem value={0}>0</MenuItem>
                             <MenuItem value={1}>1</MenuItem>
@@ -465,6 +470,7 @@ export const AddField = (props) => {
                       name="tooltipMessage"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={values['tooltipMessage']}
                       error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
                       helperText={touched['tooltipMessage'] && errors['tooltipMessage']}

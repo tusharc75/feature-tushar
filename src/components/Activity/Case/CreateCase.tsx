@@ -187,6 +187,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           name="name"
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values['name']}
                           error={touched['name'] && Boolean(errors['name'])}
                           helperText={touched['name'] && errors['name']}
@@ -198,6 +199,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           <TextField
                             fullWidth
                             margin="dense"
+                            size="small"
                             type="text"
                             multiline
                             rows={3}
@@ -255,6 +257,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               labelId="demo-simple-select-outlined-label"
                               id="demo-simple-select-outlined"
                               margin="dense"
+                              size="small"
                               label="Status"
                               value={values['status']}
                               name="status"
@@ -305,6 +308,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             name="startDate"
                             fullWidth
                             margin="dense"
+                            size="small"
                             value={values.startDate}
                             onChange={(value) => {
                               setFieldValue('startDate', value);
@@ -320,6 +324,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             value={values.dueDate}
                             fullWidth
                             margin="dense"
+                            size="small"
                             minDate={values.startDate}
                             maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                             onChange={(value) => {

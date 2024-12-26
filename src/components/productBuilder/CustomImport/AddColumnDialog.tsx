@@ -121,6 +121,7 @@ export const AddColumnDialog = (props) => {
                       helperText={touched['sectionName'] && errors['sectionName']}
                       label="Section Name"
                       margin="dense"
+                      size="small"
                       name="sectionName"
                       variant="outlined"
                     />
@@ -152,12 +153,13 @@ export const AddColumnDialog = (props) => {
                       helperText={touched['fieldLabel'] && errors['fieldLabel']}
                       label="Field Label"
                       margin="dense"
+                      size="small"
                       name="fieldLabel"
                       variant="outlined"
                     />
                   )}
                 />
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -167,6 +169,7 @@ export const AddColumnDialog = (props) => {
                     label="Type"
                     name="type"
                     margin="dense"
+                    size="small"
                     error={touched['type'] && Boolean(errors['type'])}
                     disabled={true}
                   >

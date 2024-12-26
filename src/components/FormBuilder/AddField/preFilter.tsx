@@ -167,18 +167,20 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
         <TextField
           {...params}
           margin="dense"
-          size={'small'}
+          size="small"
           variant="outlined"
           label="Pre Filters"
           name="preFilters"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                {params.InputProps.endAdornment}
-              </>
-            )
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }
           }}
         />
       )}
@@ -214,7 +216,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
           <TextField
             {...params}
             margin="dense"
-            size={'small'}
+            size="small"
             name="preFilters"
             label="Pre Filters"
             placeholder="Pre Filters"
@@ -251,7 +253,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
             <TextField
               {...params}
               margin="dense"
-              size={'small'}
+              size="small"
               name="lookupPreFilterFields"
               label="Lookup Pre Filter Fields"
               placeholder="Lookup Pre Filter Fields"
@@ -289,7 +291,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
                     <TextField
                       {...params}
                       margin="dense"
-                      size={'small'}
+                      size="small"
                       name={preFilterField.optionValue}
                       label={preFilterField.optionLabel}
                       placeholder={preFilterField.optionLabel}

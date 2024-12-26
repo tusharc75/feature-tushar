@@ -43,7 +43,7 @@ function FieldDependent({ fields, values, fieldSet }) {
               fieldSet('lookupDependentOn', val && val.fieldName ? val.fieldName : '');
             }}
             renderInput={(params) => (
-              <TextField {...params} margin="dense" variant="outlined" label="Lookup Dependent On" placeholder="Lookup Dependent On" />
+              <TextField {...params} margin="dense" variant="outlined" label="Lookup Dependent On" placeholder="Lookup Dependent On" size="small" />
             )}
           />
         </Grid>
@@ -67,17 +67,20 @@ function FieldDependent({ fields, values, fieldSet }) {
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Lookup Dependent On Field"
                   placeholder="Lookup Dependent On Field"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <React.Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </React.Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <React.Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </React.Fragment>
+                      )
+                    }
                   }}
                 />
               )}

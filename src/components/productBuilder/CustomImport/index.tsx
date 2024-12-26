@@ -424,7 +424,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Product Category" placeholder="Product Category" />
                   )}
                 />
                 <Autocomplete
@@ -446,7 +446,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     }
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Product Template" placeholder="Product Template" />
                   )}
                 />
                 <Autocomplete
@@ -464,7 +464,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Price Template" placeholder="Price Template" />
                   )}
                 />
                 <input

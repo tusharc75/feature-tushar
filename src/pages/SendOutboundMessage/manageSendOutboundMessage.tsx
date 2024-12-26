@@ -154,6 +154,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="serializedAsset"
                             label={resources?.serializedAsset?.titleSingular}
                             variant="outlined"
@@ -185,6 +186,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="messageType"
                             label="Type"
                             required={true}
@@ -218,6 +220,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="messageId"
                             label="Description"
                             variant="outlined"
@@ -233,6 +236,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                       <Grid item md={12} lg={12} sm={12}>
                         <TextField
                           margin="dense"
+                          size="small"
                           name="messageValue"
                           label="Value"
                           variant="outlined"

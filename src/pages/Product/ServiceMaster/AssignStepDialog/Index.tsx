@@ -77,7 +77,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                     }}
                     options={steps}
                     getOptionLabel={(option) => option.stepName}
-                    renderInput={(params) => <TextField {...params} label="Step Name" margin="dense" variant="outlined" />}
+                    renderInput={(params) => <TextField {...params} label="Step Name" margin="dense" size="small" variant="outlined" />}
                   />
                 </Box>
                 <Box mt={2}>
@@ -88,6 +88,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                           <Box>
                             <TextField
                               margin="dense"
+                              size="small"
                               type="number"
                               required
                               fullWidth

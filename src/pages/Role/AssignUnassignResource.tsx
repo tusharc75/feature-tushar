@@ -129,7 +129,7 @@ const AssignUnassignResourceDialog = ({
               // style={{ width: '400px' }}
               multiple={true}
               options={resource?.map((_resource) => _resource.name)}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
               getOptionLabel={(option) => option}
               onChange={(e, val) => {
                 setSelectedResource(val);

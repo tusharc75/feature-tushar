@@ -225,6 +225,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], def
             <TextField
               {...params}
               margin="dense"
+              size="small"
               name="plant"
               placeholder={resources?.warehouse?.titleSingular}
               label={resources?.warehouse?.titleSingular}

@@ -164,6 +164,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['oldPassword'] ? 'string' : 'password'}
                               label="Old Password"
                               name="oldPassword"
@@ -183,6 +184,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['newPassword'] ? 'string' : 'password'}
                               label="New Password"
                               name="newPassword"
@@ -201,6 +203,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['confirmPassword'] ? 'string' : 'password'}
                               label="Confirm Password"
                               name="confirmPassword"
@@ -225,6 +228,7 @@ export default function ManageUpdateEmailAndPassword({
                             style={{ width: '400px' }}
                             fullWidth
                             margin="dense"
+                            size="small"
                             type="email"
                             label="Email"
                             name="email"

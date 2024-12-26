@@ -34,6 +34,7 @@ const FormTypes = (props) => {
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       margin="dense"
+      size="small"
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
       {...others}
     />
@@ -49,6 +50,7 @@ const FormTypes = (props) => {
       rows={3}
       value={values[fieldData?.fieldName]}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
@@ -63,12 +65,15 @@ const FormTypes = (props) => {
       required={fieldData?.required}
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
-      InputProps={{
-        endAdornment: '% ',
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData?.isUneditable ? true : false
+      slotProps={{
+        input: {
+          endAdornment: '% ',
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData?.isUneditable ? true : false
+        },
       }}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
@@ -83,12 +88,15 @@ const FormTypes = (props) => {
       required={fieldData?.required}
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
-        )
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
+          )
+        },
       }}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
@@ -114,6 +122,7 @@ const FormTypes = (props) => {
           error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
           helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
           margin="dense"
+          size="small"
           label={fieldData?.label}
           variant="outlined"
           {...others}
@@ -130,12 +139,15 @@ const FormTypes = (props) => {
       name={`${fieldData?.fieldName}`}
       value={values[fieldData?.fieldName]}
       margin="dense"
+      size="small"
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
-      InputProps={{
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData?.isUneditable ? true : false
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData?.isUneditable ? true : false
+        },
       }}
       {...others}
     />

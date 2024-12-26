@@ -158,7 +158,7 @@ const AskSupplierPriceDialog = (props) => {
                         : setContactId(val && val?.map((d) => d._id));
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} margin="dense" name="contact" label="Supplier Contact" variant="outlined" required fullWidth />
+                      <TextField {...params} margin="dense" size="small" name="contact" label="Supplier Contact" variant="outlined" required fullWidth />
                     )}
                   />
                 )}
@@ -243,7 +243,7 @@ const AskSupplierPriceDialog = (props) => {
                         : setSelectedFields(val && val?.map((d) => d?.fieldName));
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} margin="dense" name="field" label="Required Field" variant="outlined" required fullWidth />
+                      <TextField {...params} margin="dense" size="small" name="field" label="Required Field" variant="outlined" required fullWidth />
                     )}
                   />
                 )}

@@ -247,6 +247,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       name="name"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={values['name']}
                       error={touched['name'] && Boolean(errors['name'])}
                       helperText={touched['name'] && errors['name']}
@@ -392,6 +393,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     <TextField
                       fullWidth
                       margin="dense"
+                      size="small"
                       type="text"
                       label="Location"
                       value={values['location']}
@@ -403,6 +405,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       fullWidth
                       margin="dense"
                       type="text"
+                      size="small"
                       multiline
                       rows={3}
                       label="Description"

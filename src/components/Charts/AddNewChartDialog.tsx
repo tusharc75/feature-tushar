@@ -98,6 +98,7 @@ const ChartDialog = (props) => {
                     name="name"
                     fullWidth
                     margin="dense"
+                    size="small"
                     value={values['name']}
                     error={touched['name'] && Boolean(errors['name'])}
                     helperText={touched['name'] && errors['name']}

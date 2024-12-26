@@ -80,16 +80,16 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         <Box marginY={2}>
           <Grid spacing={2} container>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" value={job?.jobNumber} />
+              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={job?.jobNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" value={job?.asset?.assetNumber} />
+              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={job?.asset?.assetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" value={fleet?.fleetNumber} />
+              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={fleet?.fleetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" value={job?.shippingAddress?.optionLabel} />
+              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
         </Box>
@@ -156,6 +156,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 fullWidth
                 rows={3}
                 margin="dense"
+                size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
               />

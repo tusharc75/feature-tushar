@@ -274,6 +274,7 @@ const DashboardBuilder = () => {
                               value={values.defaultDuration}
                               onChange={(e) => setFieldValue('defaultDuration', e.target.value)}
                               label="Select Duration"
+                              size="small"
                             >
                               <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                               <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

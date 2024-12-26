@@ -37,6 +37,7 @@ export const Currency = ({ values, setFieldValue, refrence, touched, errors }) =
           <TextField
             {...params}
             margin="dense"
+            size="small"
             variant="outlined"
             name="displayCurrency"
             label="Currency"

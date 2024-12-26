@@ -69,6 +69,7 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
                   <Grid xs={12} md={12} sm={12} item>
                     <TextField
                       margin="dense"
+                      size="small"
                       type="number"
                       label="Quantity"
                       name="quantity"

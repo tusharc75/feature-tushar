@@ -265,6 +265,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                             <FormControl fullWidth size="small" variant="outlined">
                               <InputLabel id={field.fieldName}>Select Duration</InputLabel>
                               <Select
+                                size="small"
                                 labelId={field.fieldName}
                                 id={`time-${field.fieldName}`}
                                 defaultValue={'custom'}

@@ -63,6 +63,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToPickup, product, cartQty
                   {product?.availableInventory ? (
                     <TextField
                       margin="dense"
+                      size="small"
                       type="number"
                       label="Qty"
                       name="qty"

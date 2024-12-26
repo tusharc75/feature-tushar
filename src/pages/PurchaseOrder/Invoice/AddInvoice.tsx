@@ -109,6 +109,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                 <Grid xs={12} md={12} sm={12} item>
                   <TextField
                     margin="dense"
+                    size="small"
                     type="text"
                     label="Invoice Number"
                     name="invoiceNumber"

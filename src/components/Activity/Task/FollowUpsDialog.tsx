@@ -183,7 +183,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       onChange={(e, val) => {
                         setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
                       }}
-                      renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
+                      renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" size="small" />}
                     />
                   </Grid>
                 </Grid>

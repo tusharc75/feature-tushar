@@ -33,6 +33,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         name={'qty_' + i}
                         variant="outlined"
                         margin="dense"
+                        size="small"
                         fullWidth
                         type="number"
                         value={data[fieldNames[0]]}
@@ -48,6 +49,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         name={'rate_' + index}
                         variant="outlined"
                         margin="dense"
+                        size="small"
                         fullWidth
                         type="number"
                         value={data[fieldNames[1]]}

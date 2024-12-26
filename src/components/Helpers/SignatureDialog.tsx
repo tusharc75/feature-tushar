@@ -118,6 +118,7 @@ export default function SignatureDialog(props) {
               label="Name"
               fullWidth
               margin="dense"
+              size="small"
               value={activeStep === 0 ? name1 : name2}
               onChange={(e) => {
                 activeStep === 0 ? setName1(e.target.value) : setName2(e.target.value);

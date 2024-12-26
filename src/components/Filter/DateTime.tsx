@@ -94,6 +94,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           <FormControl fullWidth size="small" variant="outlined">
             <InputLabel id={fieldData?.fieldName}>Select Duration</InputLabel>
             <Select
+              size="small"
               labelId={fieldData?.fieldName}
               id={`time-${fieldData?.fieldName}`}
               value={timeFrame}

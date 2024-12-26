@@ -133,6 +133,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                     name="tabName"
                     fullWidth
                     margin="dense"
+                    size='small'
                     value={values['tabName']}
                     error={touched['tabName'] && Boolean(errors['tabName'])}
                     helperText={touched['tabName'] && errors['tabName']}
@@ -153,6 +154,7 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
                       <TextField
                         {...params}
                         margin="dense"
+                        size='small'
                         variant="outlined"
                         label="Steps Style"
                         placeholder="Steps Style"

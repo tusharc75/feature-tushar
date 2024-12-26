@@ -96,6 +96,7 @@ function SettingsDialog({ onClose, warehouse }) {
                           value={values['lockDate']}
                           placeholder="Lock Date"
                           margin="dense"
+                          size="small"
                           required
                           maxDate={new Date()}
                           onChange={(value) => {
