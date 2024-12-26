@@ -101,7 +101,7 @@ function PreviewDownloadMultiple({ referenceIds }) {
   return (
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
-        <Box display="flex" flexWrap={'wrap'} gridGap={8}>
+        <div className="flex flex-wrap gap-2">
           {
             <ThemeButton
               size="small"
@@ -127,7 +127,7 @@ function PreviewDownloadMultiple({ referenceIds }) {
           >
             {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </ThemeButton>
-        </Box>
+        </div>
       </Box>
       {showColumnsDialog.open && (
         <PreviewDialog
