@@ -242,17 +242,12 @@ const TransferInventoryDetailPage = () => {
             {allowedToEdit &&
               ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
               transferInventoryData?.canComplete && (
-                <Fragment>
-                  <ButtonWithPulse
-                    variant={'outlined'}
-                    size="small"
-                    id={`transfer-inventory-complete-button`}
-                    onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
-                    className={'btn-outline-v1'}
-                  >
-                    Complete
-                  </ButtonWithPulse>
-                </Fragment>
+                <ButtonWithPulse
+                  id={`transfer-inventory-complete-button`}
+                  onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
+                >
+                  Complete
+                </ButtonWithPulse>
               )}
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
               <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>

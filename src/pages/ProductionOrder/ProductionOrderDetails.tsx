@@ -212,13 +212,9 @@ const ProductionOrderDetails = () => {
                   productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
                   productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] && (
                     <ButtonWithPulse
-                      variant="outlined"
-                      size="small"
                       onClick={() => {
                         updateOrderStatus(PRODUCTION_ORDER_STATUS.completed);
                       }}
-                      aria-controls="action-menu"
-                      className="btn-outline-v1"
                     >
                       Close
                     </ButtonWithPulse>

@@ -1,11 +1,10 @@
-import { Box, Button, Grid, IconButton } from '@mui/material';
+import { Box, Grid, IconButton } from '@mui/material';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FaSignature } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -503,22 +502,20 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
+                    onClick={handleOpenUpdateDialog}
+                    tooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
-
               {deliveryTicketData?.signatures?.length > 0 ? (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  iconForMobile={<FaSignature size={20} />}
                   onClick={() => setOpenSigns(true)}
-                  style={isMobile && !isTablet ? { color: 'var(--info-darken)' } : {}}
-                >
-                  {isMobile && !isTablet ? <FaSignature size={20} /> : 'View Signatures'}
-                </Button>
+                  tooltip={'View Signatures'}>
+                  {'View Signatures'}
+                </ThemeButton>
               ) : null}
               <PreviewDownload
                 resource={sidebarResource.deliveryTicket}

@@ -198,12 +198,9 @@ const FieldTicketDetail = () => {
           <Box className="control-buttons-v1">
             {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && !isOffline && (
               <ButtonWithPulse
-                variant={'outlined'}
-                size="small"
                 onClick={() => {
                   setShowClosedConfirmBox(true);
                 }}
-                className={'btn-outline-v1'}
               >
                 Close
               </ButtonWithPulse>
