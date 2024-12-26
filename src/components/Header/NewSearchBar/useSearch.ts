@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { SearchBarProps, UseSearchActions, UseSearchState } from 'src/components/Header/NewSearchBar/types';
 import { staticHiddenResource } from 'src/constants/helpers';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import { useData } from 'src/StateProvider/Provider';
 
 const initialState: UseSearchState = {
@@ -21,6 +22,14 @@ const useSearch = () => {
   const history = useHistory();
   const location = useLocation();
   const pathName = location.pathname;
+  const [globalSearch, setStore] = useStore((store) => store[SEARCH]);
+
+  const setGlobalSearch = useCallback(
+    (value: string) => {
+      setStore({ [SEARCH]: value });
+    },
+    [setStore]
+  );
 
   const {
     state: { user, selectedEntity }
@@ -65,7 +74,7 @@ const useSearch = () => {
     getItems();
   }, [getItems]);
 
-  return { ...state, history, setState };
+  return { ...state, history, globalSearch, setGlobalSearch, setState };
 };
 
 export default useSearch;

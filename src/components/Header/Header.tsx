@@ -476,8 +476,12 @@ const Header = () => {
                 {sidebarOpenedByButton && isSidebarOpen ? <Close /> : <HiOutlineMenuAlt1 />}
               </IconButton>
             </div>
-            {/* <NewSearchbar /> */}
-            {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
+            {!is768 && (
+              <div className="flex-grow md:ml-[31px]">
+                <NewSearchbar />
+              </div>
+            )}
+            {/* {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />} */}
           </Box>
 
           {/* Brand Logo */}
@@ -626,7 +630,11 @@ const Header = () => {
               <MoreIcon />
             </IconButton>
           )}
-          {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
+          {is768 && (
+            <div className="w-full">
+              <NewSearchbar />
+            </div>
+          )}
         </Toolbar>
       </AppBar>
       <DashboardModal
