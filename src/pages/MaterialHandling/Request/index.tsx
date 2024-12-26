@@ -281,7 +281,6 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
           <Menu
             anchorEl={anchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -293,7 +292,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -307,7 +306,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }

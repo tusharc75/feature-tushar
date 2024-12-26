@@ -180,7 +180,6 @@ const DemandOrderDetails = () => {
                 <Menu
                   anchorEl={convertAnchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'

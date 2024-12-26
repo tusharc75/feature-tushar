@@ -195,7 +195,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
         keepMounted={false}
-        getContentAnchorEl={null}
         transitionDuration={walkmeInstance ? 0 : 250}
         anchorOrigin={{
           vertical: 'bottom',

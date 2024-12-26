@@ -116,7 +116,6 @@ const DetailsPageHeader = ({
           <Menu
             anchorEl={addAnchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -183,7 +182,6 @@ const DetailsPageHeader = ({
             <Menu
               anchorEl={actionAnchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right'

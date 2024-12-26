@@ -386,7 +386,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
                 keepMounted
                 open={open}
                 onClose={handleClose}
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'right'

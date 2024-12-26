@@ -133,7 +133,6 @@ const AsynImportExportMenu = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'

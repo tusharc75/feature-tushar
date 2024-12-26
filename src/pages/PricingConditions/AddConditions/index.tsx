@@ -58,24 +58,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.competencyDetail.competencyName
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productDescription
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceDescription
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageDescription
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productDescription
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceDescription
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageDescription
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -200,14 +198,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${
-                    row?.original?.materialType === 'Product'
-                      ? routes.productDetail.path
-                      : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : row?.original?.materialType === 'Package'
-                          ? routes.packagesDetail.path
-                          : routes?.competenciesDetail.path
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -336,7 +333,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           <Menu
             anchorEl={addAnchorEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'
@@ -473,7 +469,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             <Menu
               anchorEl={anchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left'
@@ -592,9 +587,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

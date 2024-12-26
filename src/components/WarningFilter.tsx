@@ -49,7 +49,6 @@ const WarningFilter = ({ warnings, checkedFilter, setCheckedFilter }: WarningFil
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'

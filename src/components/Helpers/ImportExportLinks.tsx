@@ -37,7 +37,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -242,7 +242,6 @@ export default function ImportExportLinks({
         keepMounted
         open={true}
         onClose={handleCloseMenu}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -342,7 +341,6 @@ export default function ImportExportLinks({
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
-          getContentAnchorEl={null}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right'

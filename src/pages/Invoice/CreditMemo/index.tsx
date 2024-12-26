@@ -314,7 +314,6 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           keepMounted
           open={Boolean(anchorActionEl)}
           onClose={handleClose}
-          getContentAnchorEl={null}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right'
