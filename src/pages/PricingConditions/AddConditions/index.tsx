@@ -454,7 +454,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               <span>
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
                   size="small"
                   className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   onClick={openActions}

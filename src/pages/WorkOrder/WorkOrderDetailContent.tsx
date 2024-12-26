@@ -928,7 +928,6 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
       {menuItems.length > 0 && (
         <Button
           variant={'outlined'}
-          color="default"
           size="small"
           className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
           onClick={openActions}

@@ -200,47 +200,43 @@ const CustomReport = () => {
                 >
                   Add
                 </Button>
-
-                <>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length ? false : true}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                <Button
+                  variant={'outlined'}
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      if (selectedRecords.length === 1) {
+                        setDeleteRecord(selectedRecords[0]);
+                      } else {
+                        setDeleteRecord(null);
+                      }
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
-                    <MenuItem
-                      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                      onClick={() => {
-                        if (selectedRecords.length === 1) {
-                          setDeleteRecord(selectedRecords[0]);
-                        } else {
-                          setDeleteRecord(null);
-                        }
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      {`Delete (${selectedRecords?.length})`}
-                    </MenuItem>
-                  </Menu>
-                </>
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
           </div>

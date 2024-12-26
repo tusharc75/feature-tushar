@@ -245,7 +245,6 @@ const ListingPageHeader = ({
                         <span>
                           <Button
                             variant={'outlined'}
-                            color="default"
                             size="small"
                             id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
                             className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}

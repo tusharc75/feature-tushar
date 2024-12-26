@@ -199,7 +199,6 @@ const FieldTicketDetail = () => {
             {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && !isOffline && (
               <ButtonWithPulse
                 variant={'outlined'}
-                color="default"
                 size="small"
                 onClick={() => {
                   setShowClosedConfirmBox(true);
@@ -225,9 +224,9 @@ const FieldTicketDetail = () => {
               </Button>
             )}
             {allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status) && (
-                                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                                {'Edit'}
-                              </ThemeButton>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton

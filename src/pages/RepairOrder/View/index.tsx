@@ -254,7 +254,6 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         <Box>
           <Button
             variant={'outlined'}
-            color="default"
             size="small"
             onClick={() => {
               setColorInfo(!colorInfo);

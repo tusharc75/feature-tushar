@@ -92,7 +92,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -204,7 +204,6 @@ const SubleaseDetailsPage = () => {
               ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
                 <ButtonWithPulse
                   variant={'outlined'}
-                  color="default"
                   size="small"
                   onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
                   className={'btn-outline-v1'}

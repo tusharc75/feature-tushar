@@ -222,7 +222,6 @@ const QuoteApproval = () => {
                         <Button
                           variant="outlined"
                           startIcon={<GoThumbsdown />}
-                          color="default"
                           onClick={() => {
                             setQuoteStatusChangeData('Rejected');
                             setShowQuoteStatusChangeDialog(true);

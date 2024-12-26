@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';import queryString from 'query-string';
+import EditIcon from '@mui/icons-material/Edit'; import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -146,7 +146,7 @@ const SupportTicketDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {supportTicketData?.status === SUPPORT_TICKET_STATUS.completed && (
-              <Button disabled={loading} variant={'outlined'} color="default" size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
+              <Button disabled={loading} variant={'outlined'} size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
                 {'Re-Open'}
               </Button>
             )}

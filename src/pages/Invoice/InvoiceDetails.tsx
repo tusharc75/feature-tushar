@@ -267,10 +267,9 @@ const InvoiceDetails = () => {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
                   </Button>
                 )}
-                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && invoiceData?.status !== INVOICE_STATUS.closed && (
                   <Button
                     variant={'outlined'}
-                    color="default"
                     size="small"
                     onClick={openActions}
                     className="btn-outline-v1"
@@ -281,14 +280,6 @@ const InvoiceDetails = () => {
                     {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                   </Button>
                 )}
-                {permissions?.invoice?.isUpdate &&
-                  allowedToEdit &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
-                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                      {'Edit'}
-                    </ThemeButton>
-                  )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -318,21 +309,6 @@ const InvoiceDetails = () => {
                       );
                     })}
                 </Menu>
-                {/* {permissions?.invoice?.isUpdate &&
-                  allowedToEdit &&
-                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
-                    <ButtonWithPulse
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={() => {
-                        setShowClosedConfirmBox(true);
-                      }}
-                      className={'btn-outline-v1'}
-                    >
-                      Close
-                    </ButtonWithPulse>
-                  )} */}
                 {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
                   <Button
                     variant="outlined"
@@ -346,6 +322,14 @@ const InvoiceDetails = () => {
                     Re-Open
                   </Button>
                 )}
+                {permissions?.invoice?.isUpdate &&
+                  allowedToEdit &&
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
+                  )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />

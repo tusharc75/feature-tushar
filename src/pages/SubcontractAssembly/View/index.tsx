@@ -247,7 +247,6 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
         <Box>
           <Button
             variant={'outlined'}
-            color="default"
             size="small"
             onClick={() => {
               setColorInfo(!colorInfo);

@@ -25,7 +25,7 @@ const UpcomingActivity = (props) => {
       .then(({ data: { data } }) => {
         setActivity(data);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   return (
@@ -45,7 +45,6 @@ const UpcomingActivity = (props) => {
                     </Grid>
                     <Grid item xs={6} container justify="flex-end">
                       <Chip label={_activity.type} size="small" color="primary" />
-                      {/* {_activity.status && <Chip label={_activity.status} size="small" color="default" />} */}
                     </Grid>
                   </Grid>
                 </Box>

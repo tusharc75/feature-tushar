@@ -142,10 +142,8 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                         color: 'white'
                       }}
                     />
-
                     <IconButton
                       size="small"
-                      color="default"
                       onClick={(e) => {
                         setShowConfirmBox(true);
                         setDeleteTaskId(element._id);

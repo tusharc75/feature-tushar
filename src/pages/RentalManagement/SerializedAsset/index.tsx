@@ -417,10 +417,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === MATERIAL_TYPE.service
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === MATERIAL_TYPE.service
@@ -1019,7 +1019,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           <Button
             onClick={openLinkActions}
             variant="outlined"
-            color="default"
             size="small"
             aria-controls="action-menu"
             className="normal-case"

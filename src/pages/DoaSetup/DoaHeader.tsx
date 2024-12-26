@@ -31,7 +31,6 @@ function DoaHeader(props) {
               <Button
                 disabled={canDelete}
                 variant="outlined"
-                color="default"
                 size="small"
                 onClick={openActions}
                 className={`${styles.action_submit_btn} new-dropdown-v1`}

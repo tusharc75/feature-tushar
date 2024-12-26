@@ -342,7 +342,6 @@ const RepairOrderDetails = () => {
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
                   <ButtonWithPulse
                     variant={'outlined'}
-                    color="default"
                     size="small"
                     onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
                     className={'btn-outline-v1'}
@@ -427,13 +426,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -471,8 +470,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }

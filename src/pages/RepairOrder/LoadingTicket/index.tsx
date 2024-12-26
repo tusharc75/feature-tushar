@@ -303,7 +303,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
             <Fragment>
               <Button
                 variant="outlined"
-                color="default"
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"

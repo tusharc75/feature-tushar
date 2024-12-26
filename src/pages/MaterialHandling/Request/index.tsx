@@ -269,7 +269,6 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
           <Button
             variant={'outlined'}
             className="new-dropdown-v1"
-            color="default"
             size="small"
             aria-controls="action-menu"
             onClick={openActions}

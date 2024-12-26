@@ -145,8 +145,8 @@ const ProductionOrderDetails = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(
           permissions?.productionOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setProductionOrderData({ ...data });
       })
@@ -213,7 +213,6 @@ const ProductionOrderDetails = () => {
                   productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] && (
                     <ButtonWithPulse
                       variant="outlined"
-                      color="default"
                       size="small"
                       onClick={() => {
                         updateOrderStatus(PRODUCTION_ORDER_STATUS.completed);
@@ -274,21 +273,21 @@ const ProductionOrderDetails = () => {
               handleNext={
                 productionOrderProcessStepsNames[currentStep] === 'Add'
                   ? () => {
-                      setNextStep(false);
-                      axiosInstance()
-                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                        .then(({ data: { data } }) => {
-                          if (data) {
-                            setCurrentStep((prevStep) => {
-                              const newStep = prevStep + 1;
-                              return newStep;
-                            });
-                          }
-                        })
-                        .catch((err) => {
-                          toastConfig.setToastConfig(err);
-                        });
-                    }
+                    setNextStep(false);
+                    axiosInstance()
+                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                      .then(({ data: { data } }) => {
+                        if (data) {
+                          setCurrentStep((prevStep) => {
+                            const newStep = prevStep + 1;
+                            return newStep;
+                          });
+                        }
+                      })
+                      .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                      });
+                  }
                   : null
               }
               updateStatus={(step: number) => {

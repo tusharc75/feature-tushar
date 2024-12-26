@@ -108,7 +108,6 @@ function QuoteHeader({
               <Button
                 disabled={canDelete}
                 variant={'outlined'}
-                color="default"
                 size="small"
                 onClick={openActions}
                 className={` new-dropdown-v1`}
