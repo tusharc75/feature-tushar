@@ -1423,7 +1423,6 @@ export const displayDate = (date, format = null) => {
 };
 
 export const displayDateTime = (date, format = null) => {
-  console.log(dateTimeFormat)
   format = format ? format : dateTimeFormat;
   return date ? dayjs.utc(date).tz().format(format) : date;
 };

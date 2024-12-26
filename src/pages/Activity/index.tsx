@@ -34,7 +34,7 @@ const Activity = ({ type }) => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setFilter([]);
     }
@@ -48,7 +48,6 @@ const Activity = ({ type }) => {
     });
   };
 
-  console.log(tabs, viewType);
 
   return (
     <section className="main-container-v1">

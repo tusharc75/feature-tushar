@@ -283,12 +283,9 @@ const TransferAssetDetailPage = () => {
               !isTransferEnded &&
               (transferAssetData?.transferType.includes('External') ? isAllAssetsReceived : isAllAssetsDelivered) && (
                 <ButtonWithPulse
-                  variant={'outlined'}
-                  size="small"
                   onClick={() => {
                     setShowReopenCloseConfirmation({ open: true, type: 'close' });
                   }}
-                  className={'btn-outline-v1'}
                 >
                   Close
                 </ButtonWithPulse>

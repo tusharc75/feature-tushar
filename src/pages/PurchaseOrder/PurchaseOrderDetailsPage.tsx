@@ -207,8 +207,6 @@ const PurchaseOrderDetailsPage = () => {
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
                   <ButtonWithPulse
-                    variant={'outlined'}
-                    className={'btn-outline-v1'}
                     onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
                   >
                     Close
