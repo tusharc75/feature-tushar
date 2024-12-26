@@ -16,7 +16,6 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,13 +27,14 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { dateFormatForInputControl } from '../../../constants/helpers';
+import { displayDateTime } from '../../../constants/helpers';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import statusList from '../Helpers/statusList';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { SubCase } from './SubCase';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -140,8 +140,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
 
   function validate(values) {
     const errors = {};
-    if (moment(values.startDate) > moment(values.dueDate)) {
-      errors['dueDate'] = 'Due date must greater then start date';
+    if (dayjs(values.startDate).isAfter(dayjs(values.dueDate))) {
+      errors['dueDate'] = 'Due date must be greater than the start date';
     }
     return errors;
   }
@@ -332,14 +332,14 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             {initialValues.createdBy && initialValues.createdBy.date && (
                               <Box mt={1} color="text.secondary">
                                 <Typography variant="body2">
-                                  Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}
+                                  Created {displayDateTime(initialValues.createdBy.date, 'MMM DD YYYY hh:mm A')}
                                 </Typography>
                               </Box>
                             )}
                             {initialValues.updatedBy && initialValues.updatedBy.date && (
                               <Box mt={1} color="text.secondary">
                                 <Typography variant="body2">
-                                  Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}
+                                  Updated {displayDateTime(initialValues?.updatedBy?.date, 'MMM DD YYYY hh:mm A')}
                                 </Typography>
                               </Box>
                             )}

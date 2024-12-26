@@ -3,10 +3,9 @@ import { makeStyles } from '@mui/styles';
 import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { TreeItem, TreeView } from '@mui/x-tree-view';
-import moment from 'moment';
 import React, { Fragment, useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { displayDateTime } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
@@ -214,7 +213,7 @@ const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
           <div key={service._id}>
             <span className="mb-[7px] flex items-center gap-2 text-[12px]">
               <DateRange className="max-h-[16px] max-w-[16px]" />
-              <span className="text-[#6B6B6B] dark:text-gray-200">{moment(service.startDate).format(dateTimeFormat)}</span>
+              <span className="text-[#6B6B6B] dark:text-gray-200">{displayDateTime(service.startDate)}</span>
             </span>
             <HtmlTooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
               <div className={`flex min-h-[20px] flex-wrap rounded-md px-3 py-2 ${bgColor}`}>

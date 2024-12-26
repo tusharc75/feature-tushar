@@ -10,7 +10,6 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
-import { dateFormat } from '../../../constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddProxySchema = object().shape({
@@ -120,7 +119,6 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         label="Start Date"
                         required
                         fullWidth
-                        placeholder={dateFormat}
                         onChange={(date: any) => {
                           setFieldValue('startDate', date);
                         }}
@@ -132,7 +130,6 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
 
                     <Grid item md={12} sm={12} xs={12}>
                       <CustomDatePicker
-                        autoOk
                         size="small"
                         disablePast
                         minDate={values.startDate}
@@ -141,16 +138,11 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         label="End Date"
                         required
                         fullWidth
-                        placeholder={dateFormat}
                         onChange={(date: any) => {
                           setFieldValue('endDate', date);
                         }}
-                        format={dateFormat}
                         error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
                         helperText={Boolean(touched['endDate']) && errors['endDate']}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
                         margin="dense"
                       />
                     </Grid>

@@ -15,7 +15,7 @@ import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import routes from '../Helpers/Routes';
 import AssignQuoteDialog from './AssignQuoteDialog';

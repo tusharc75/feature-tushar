@@ -2,12 +2,11 @@ import { Box, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { sortBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 
 const displayColumns = ['qty', 'productName', 'productDescription', 'unit', 'responseDate', 'status'];
@@ -71,12 +70,12 @@ const ProductGridSupplierAskPrice = (props) => {
           <Grid item xs={12} sm={3} md={3} container justify="flex-start">
             {productData?.requestDate && (
               <Grid item xs={12} sm={12} md={12}>
-                <Typography variant="subtitle2">{`Request Date : ${moment(productData?.requestDate)?.format(dateTimeFormat)}`}</Typography>
+                <Typography variant="subtitle2">{`Request Date : ${displayDateTime(productData?.requestDate)}`}</Typography>
               </Grid>
             )}
             {productData?.responseDate && (
               <Grid item xs={12} sm={12} md={12}>
-                <Typography variant="subtitle2">{`Response Date : ${moment(productData?.responseDate)?.format(dateTimeFormat)}`}</Typography>
+                <Typography variant="subtitle2">{`Response Date : ${displayDateTime(productData?.responseDate)}`}</Typography>
               </Grid>
             )}
           </Grid>

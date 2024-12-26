@@ -10,7 +10,6 @@ import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
@@ -45,8 +44,8 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS,
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
-  dateFormat,
   deliveryTicket,
+  displayDate,
   findSimilarRecords,
   gridLoadingTimeout,
   serializedAsset as productInventoryHelperObject,
@@ -1399,8 +1398,8 @@ const ReceivingTicket = ({
         Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
+              {displayDate(row?.original?.manualStartDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1411,8 +1410,8 @@ const ReceivingTicket = ({
         Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
+              {displayDate(row?.original?.manualEndDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1424,8 +1423,8 @@ const ReceivingTicket = ({
         show: false,
         Cell: ({ row }) =>
           row?.original?.startDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-              {moment(row?.original?.startDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
+              {displayDate(row?.original?.startDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -1437,8 +1436,8 @@ const ReceivingTicket = ({
         show: false,
         Cell: ({ row }) =>
           row?.original?.endDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-              {moment(row?.original?.endDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
+              {displayDate(row?.original?.endDate)}
             </h5>
           ) : (
             <NoDataCell />

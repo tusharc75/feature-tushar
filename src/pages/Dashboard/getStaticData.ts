@@ -1,5 +1,4 @@
-import moment from 'moment';
-import { getExchangeRates, formatAmountWithCurrency } from 'src/constants/helpers';
+import { getExchangeRates, formatAmountWithCurrency, displayDateTime } from 'src/constants/helpers';
 import { ChartDataType } from './ChartTypes';
 
 async function getStaticData(chart: ChartDataType, data: any, currencyTo: string, currencyFrom: string) {
@@ -25,11 +24,11 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
   for (let d of data) {
     if (currencyTo && currencyFrom && currencyTo !== currencyFrom) {
       const salesData: any = await Promise.all([
-        getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedValue || 0, currencyFrom, currencyTo),
-        getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalBookedCost || 0, currencyFrom, currencyTo),
-        getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedValue || 0, currencyFrom, currencyTo),
-        getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.totalOfferedCost || 0, currencyFrom, currencyTo),
-        getExchangeRates(moment(d.date).format('YYYY-MM-DD'), d.budget || 0, currencyFrom, currencyTo)
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedValue || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalBookedCost || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedValue || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.totalOfferedCost || 0, currencyFrom, currencyTo),
+        getExchangeRates(displayDateTime(d.date, 'YYYY-MM-DD').format(), d.budget || 0, currencyFrom, currencyTo)
       ]);
       const bookedValue: any = salesData[0]?.rates[currencyTo];
       const bookedCost: any = salesData[1]?.rates[currencyTo];
@@ -52,7 +51,7 @@ async function getStaticData(chart: ChartDataType, data: any, currencyTo: string
 
     bookedVolumeData.push(d.totalBookedVolume || 0);
     offeredVolumeData.push(d.totalOfferedVolume || 0);
-    labels.push(moment(d.date).format('MMM/YY'));
+    labels.push(displayDateTime(d.date, 'MMM/YY'));
   }
 
   if (labels.length === 0) return null;

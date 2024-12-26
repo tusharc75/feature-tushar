@@ -7,8 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@mui/material';
 import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import moment from 'moment';
-import { dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, sidebarResource } from 'src/constants/helpers';
 
 const renderedFrom = `${camelCase(sidebarResource.driverMaster)}_History`;
 
@@ -62,8 +61,8 @@ const History = ({ id, status }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.date ? (
-            <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
-              {moment(row?.original?.date)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.date)}>
+              {displayDateTime(row?.original?.date)}
             </h5>
           ) : (
             <NoDataCell />

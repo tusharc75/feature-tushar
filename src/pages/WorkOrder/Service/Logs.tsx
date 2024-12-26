@@ -10,10 +10,10 @@ import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
-import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
+import dayjs from 'dayjs';
 
 const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
   const {
@@ -206,7 +206,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
                 return (
                   <div key={key} className={styles.singleGroup}>
                     <Box key={key}>
-                      <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
+                      <p className={styles.date}>{displayDateTime(key, 'MMM Do YYYY')}</p>
                     </Box>
                     <div className={styles.logContainer}>
                       {rows[key]?.map((row: any) => {
@@ -219,8 +219,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
                             <div className={styles.textContainer}>
                               <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
                               <p className={styles.logDetails}>
-                                {moment(row?.date).format('LT')}
-                                <span> {moment(row?.date).fromNow()}</span>
+                                {displayDateTime(row?.date, 'LT')}
+                                <span> {dayjs.utc(row?.date).tz().fromNow()}</span>
                                 <span className={styles.timePassedBadge}>
                                   <UserIcon style={{ marginRight: '5px' }} />
                                   {row?.user?.optionLabel}

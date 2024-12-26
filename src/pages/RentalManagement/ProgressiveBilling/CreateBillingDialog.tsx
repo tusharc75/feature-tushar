@@ -11,7 +11,6 @@ import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import {
   CustomDialogTransition,
-  dateFormat,
   deliveryTicket,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
@@ -20,7 +19,8 @@ import {
   MATERIAL_TYPE,
   ASSET_STATUS,
   sidebarResource,
-  getObjKeysWithValues
+  getObjKeysWithValues,
+  displayDate
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -689,7 +689,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               ?.data?.map((d) => ({
                 ...d,
                 type: MATERIAL_TYPE.other,
-                detail: moment(d?.date)?.format(dateFormat),
+                detail: displayDate(d?.date),
                 actualJobDuration: d?.DailyEvapBBLs,
                 parentId: element?._id
               }))

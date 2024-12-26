@@ -2,7 +2,6 @@ import { Box, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
@@ -17,7 +16,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -59,10 +58,10 @@ const ProductBuilder = () => {
       sortable: false,
       Cell: ({ row }) =>
         row.original?.createdByDate ? (
-          <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+          <h5 className="createBy" title={`${row.original?.createdByDate} • ${displayDate(row.original?.createdByDate)}`}>
             {row.original?.createdByDate}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+            <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
           </h5>
         ) : (
           <NoDataCell />
