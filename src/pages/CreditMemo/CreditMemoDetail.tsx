@@ -1,4 +1,4 @@
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -16,7 +16,6 @@ import ManageCreditMemo from './ManageCreditMemo';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
-import { isMobile, isTablet } from 'react-device-detect';
 import EditIcon from '@mui/icons-material/Edit';
 import { ExpandMore } from '@mui/icons-material';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -189,17 +188,15 @@ const creditMemoDetail = () => {
             {creditMemoData ? (
               <>
                 {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
-                  <Button
+                  <ThemeButton
+                    iconForMobile={<RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} />}
                     variant={'outlined'}
-                    size="small"
                     onClick={openActions}
-                    className="btn-outline-v1"
                     disabled={updateLoading}
-                    aria-controls="action-menu"
                     endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
-                  </Button>
+                    tooltip={'Change Status'}>
+                    Change Status
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={anchorEl}

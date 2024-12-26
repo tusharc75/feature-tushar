@@ -482,8 +482,6 @@ export default function DeliveryTicketDetail(props) {
                   <ThemeButton
                     iconForMobile={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? <TbTruckDelivery /> : <RiFolderReceivedLine />}
                     mobileTooltip={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
-                    className="btn-outline-v1"
-                    size="small"
                     onClick={() => {
                       if (user?.user?.brandPolicy?.assetDeliveredStatus && deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading) {
                         setOpenDateDialog({
@@ -498,12 +496,10 @@ export default function DeliveryTicketDetail(props) {
                         handelProcessTickets();
                       }
                     }}
-                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
                   >
                     {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
                   </ThemeButton>
                 )}
-
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
