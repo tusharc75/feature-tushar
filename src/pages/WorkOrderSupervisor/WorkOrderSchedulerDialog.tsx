@@ -14,13 +14,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
@@ -208,18 +208,14 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <DatePicker
-                          variant="inline"
+                        <CustomDatePicker
                           fullWidth
                           size="small"
                           margin="dense"
-                          autoOk
                           required
-                          inputVariant="outlined"
                           value={values.customDate}
                           name="Date"
                           label="Date"
-                          format={dateFormatForInputControl}
                           minDate={new Date()}
                           error={touched['customDate'] && Boolean(errors['customDate'])}
                           helperText={touched['customDate'] && errors['customDate']}

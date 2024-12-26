@@ -21,9 +21,9 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { read, utils, writeFile } from 'xlsx';
 import moment from 'moment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual, startCase } from 'lodash';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -515,10 +515,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                         )}
                       />
                       <div className="datepicker mt-[14px]">
-                        <DatePicker
+                        <CustomDatePicker
                           label="Received Date"
-                          variant="inline"
-                          inputVariant="outlined"
                           required
                           autoOk
                           size="small"
@@ -526,7 +524,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                           name="receiveDate"
                           placeholder="Receive Date"
                           value={values.receiveDate}
-                          format={dateFormatForInputControl}
                           minDate={
                             lockDate
                               ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0

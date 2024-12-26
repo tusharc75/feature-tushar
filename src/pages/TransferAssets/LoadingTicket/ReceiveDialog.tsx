@@ -5,7 +5,6 @@ import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   convertDateInDateTime,
   dateFormatForInputControl,
@@ -20,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -140,20 +140,16 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
             />
             <CustomDialogContent>
               <Box p={1}>
-                <DatePicker
+                <CustomDatePicker
                   {...(minDate ? { minDate } : {})}
                   fullWidth
                   size="small"
                   margin="dense"
-                  autoOk
                   required
-                  variant="inline"
-                  inputVariant="outlined"
                   value={values.receiveDate}
                   name="receiveDate"
                   placeholder={'Receive Date'}
                   label="Receive Date"
-                  format={dateFormatForInputControl}
                   onChange={(value) => {
                     var newDate = convertDateInDateTime(value);
                     setFieldValue('receiveDate', newDate);

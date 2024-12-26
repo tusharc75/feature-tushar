@@ -1,6 +1,5 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
@@ -14,6 +13,7 @@ import CalendarList from './CalendarList';
 import MobileRoadmap from './MobileRoadmap';
 import { Activity } from './types';
 import { useData } from 'src/StateProvider/Provider';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const stateDateFormat = 'YYYY-MM-DD';
 
@@ -197,39 +197,25 @@ const RoadMap = () => {
               <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
             )}
           />
-          <DatePicker
-            autoOk
+          <CustomDatePicker
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             value={new Date(startDate)}
             name="startDate"
             label="Start Date"
             onChange={(date: any) => {
               setStartDate(moment(date).format('YYYY-MM-DD'));
             }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
-            }}
             margin="dense"
           />
-          <DatePicker
-            autoOk
+          <CustomDatePicker
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             value={new Date(endDate)}
             name="endDate"
             label="End Date"
             onChange={(date: any) => {
               setEndDate(moment(date).format('YYYY-MM-DD'));
-            }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
             }}
             margin="dense"
           />

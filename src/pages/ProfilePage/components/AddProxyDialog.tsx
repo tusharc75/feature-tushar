@@ -10,8 +10,8 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { object, string } from 'yup';
 import { Formik, Form } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormat } from '../../../constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddProxySchema = object().shape({
   user: string().required('Please select user'),
@@ -112,12 +112,9 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                     </Grid>
 
                     <Grid item md={12} sm={12} xs={12}>
-                      <DatePicker
-                        autoOk
+                      <CustomDatePicker
                         size="small"
                         disablePast
-                        variant="inline"
-                        inputVariant="outlined"
                         value={values.startDate}
                         name="startDate"
                         label="Start Date"
@@ -127,23 +124,17 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                         onChange={(date: any) => {
                           setFieldValue('startDate', date);
                         }}
-                        format={dateFormat}
                         error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
                         helperText={Boolean(touched['startDate']) && errors['startDate']}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
                         margin="dense"
                       />
                     </Grid>
 
                     <Grid item md={12} sm={12} xs={12}>
-                      <DatePicker
+                      <CustomDatePicker
                         autoOk
                         size="small"
                         disablePast
-                        variant="inline"
-                        inputVariant="outlined"
                         minDate={values.startDate}
                         value={values.endDate}
                         name="endDate"

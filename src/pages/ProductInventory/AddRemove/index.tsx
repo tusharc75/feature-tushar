@@ -1,6 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -23,6 +22,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -417,20 +417,16 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     </Box>
                   )}
                   <Box m={1}>
-                    <DatePicker
+                    <CustomDatePicker
                       {...(lockDate ? { minDate: lockDate } : {})}
                       fullWidth
                       size="small"
                       margin="dense"
-                      autoOk
                       required
-                      variant="inline"
-                      inputVariant="outlined"
                       value={values.customDate}
                       name="customDate"
                       placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
                       label="Custom Date"
-                      format={dateFormatForInputControl}
                       maxDate={new Date()}
                       error={touched['customDate'] && Boolean(errors['customDate'])}
                       helperText={touched['customDate'] && errors['customDate']}

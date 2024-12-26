@@ -1,6 +1,5 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -13,6 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -158,12 +158,9 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                     />
                   </Grid>
                   <Grid item xs={6} sm={12} md={6} lg={6}>
-                    <DatePicker
+                    <CustomDatePicker
                       label="Due Date"
                       name="dueDate"
-                      autoOk
-                      variant="inline"
-                      inputVariant="outlined"
                       fullWidth
                       margin="dense"
                       minDate={values.startDate}
@@ -171,7 +168,6 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       onChange={(value) => {
                         setFieldValue('dueDate', value);
                       }}
-                      format={dateFormatForInputControl}
                     />
                   </Grid>
                   <Grid item md={12} lg={12} xs={12} sm={12}>

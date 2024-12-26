@@ -27,6 +27,7 @@ import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import { version } from '../package.json';
 import { VITE_APP_ENV } from 'src/config';
+import TimezoneLocalizationProvider from 'src/StateProvider/TimeLocalizationProvider';
 
 // @ts-ignore
 if (VITE_APP_ENV !== 'local' && navigator.onLine) {
@@ -55,7 +56,9 @@ ReactDOM.render(
                   <GlobalChatProvider>
                     <CustomOfflineProvider>
                       <NewAddressOptionListProvider>
-                        <App />
+                        <TimezoneLocalizationProvider>
+                          <App />
+                        </TimezoneLocalizationProvider>
                       </NewAddressOptionListProvider>
                     </CustomOfflineProvider>
                   </GlobalChatProvider>

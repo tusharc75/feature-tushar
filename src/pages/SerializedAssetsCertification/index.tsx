@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid';
 import HistoryIcon from '@mui/icons-material/History';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -29,6 +28,7 @@ import {
 import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const renderedFrom = camelCase(CHILD_RESOURCE?.serializedAssetsCertification);
 
@@ -246,19 +246,11 @@ const SerializedAssetsCertification = () => {
               size="small"
               renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}
             />
-            <DatePicker
-              inputVariant="outlined"
-              variant="inline"
+            <CustomDatePicker
               fullWidth
               size="small"
-              format={dateFormatForInputControl}
               maxDate={issueDuration.to}
               label="From (Issue Date)"
-              autoOk
-              InputLabelProps={{
-                shrink: true
-              }}
-              views={['year', 'month', 'date']}
               value={issueDuration.from}
               onChange={(date) => {
                 setIssueDuration({ to: issueDuration.to, from: date });
@@ -267,18 +259,12 @@ const SerializedAssetsCertification = () => {
                 style: { minHeight: '38px' }
               }}
             />
-            <DatePicker
+            <CustomDatePicker
               inputVariant="outlined"
               variant="inline"
               fullWidth
               size="small"
-              format={dateFormatForInputControl}
               label="To (Issue Date)"
-              autoOk
-              InputLabelProps={{
-                shrink: true
-              }}
-              views={['year', 'month', 'date']}
               value={issueDuration.to}
               onChange={(date) => {
                 setIssueDuration({ from: issueDuration.from, to: date });
@@ -287,19 +273,11 @@ const SerializedAssetsCertification = () => {
                 style: { minHeight: '38px' }
               }}
             />
-            <DatePicker
-              inputVariant="outlined"
-              variant="inline"
+            <CustomDatePicker
               fullWidth
               size="small"
-              format={dateFormatForInputControl}
               maxDate={expireDuration.to}
               label="From (Expiry Date)"
-              autoOk
-              InputLabelProps={{
-                shrink: true
-              }}
-              views={['year', 'month', 'date']}
               value={expireDuration.from}
               onChange={(date) => {
                 setExpireDuration({ to: expireDuration.to, from: date });
@@ -308,18 +286,10 @@ const SerializedAssetsCertification = () => {
                 style: { minHeight: '38px' }
               }}
             />
-            <DatePicker
-              inputVariant="outlined"
-              variant="inline"
+            <CustomDatePicker
               fullWidth
               size="small"
-              format={dateFormatForInputControl}
               label="To (Expiry Date)"
-              autoOk
-              InputLabelProps={{
-                shrink: true
-              }}
-              views={['year', 'month', 'date']}
               value={expireDuration.to}
               onChange={(date) => {
                 setExpireDuration({ from: expireDuration.from, to: date });

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Grid, Typography, TextField, Link, Theme } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import BoxWithBorder from '../BoxWithBorder';
 import { SVG } from '../../assets';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const useStyles = makeStyles((theme: Theme) => ({
   inputLable: {
@@ -74,13 +74,10 @@ const OpportunityInformation = () => {
                 <Typography className={classes.inputLable}>Target Close Date</Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={6} lg={5}>
-                <DatePicker
-                  clearable
-                  inputVariant="outlined"
+                <CustomDatePicker
                   value={selectedDate}
                   onChange={(date: any) => setSelectedDate(date)}
                   minDate={new Date()}
-                  format="Mon DD, YYYY"
                 />
               </Grid>
               <Grid item xs={12} sm={12} md={12} lg={4}></Grid>

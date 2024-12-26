@@ -2,8 +2,6 @@ import { useAccount, useMsal } from '@azure/msal-react';
 import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@mui/material';
 import { ArrowRightAlt } from '@mui/icons-material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
@@ -23,6 +21,8 @@ import Loader from '../../Loader';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -301,12 +301,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <DatePicker
-                            autoOk
+                          <CustomDatePicker
                             size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
+                            disablePast={true}
                             value={values.startDate}
                             name="startDate"
                             label="Start Date"
@@ -314,28 +311,20 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               setFieldValue('startDate', date ? date : null);
                               setFieldValue('startTime', date ? getTime(date._d) : null);
                             }}
-                            format={dateFormat}
                             error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
                             helperText={Boolean(touched['startDate']) && errors['startDate']}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
                             margin="dense"
                           />
                         </Grid>
 
                         <Grid item xs={5}>
-                          <DateTimePicker
-                            ampm={false}
+                          <CustomDateTimePicker
                             size="small"
-                            variant="inline"
-                            inputVariant="outlined"
                             label="Start Time"
                             name="startTime"
                             placeholder="08:00"
-                            mask="__:__"
+                            inputFormat="HH:mm"
                             value={values.startTime}
-                            invalidDateMessage="Invalid time format"
                             onChange={(date: any) => {
                               setFieldValue('startTime', date || null);
                               if (date && new Date(date._d).getHours() < 23) {
@@ -344,9 +333,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             }}
                             error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
                             helperText={Boolean(touched['startTime']) && errors['startTime']}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
                             margin="dense"
                           />
                         </Grid>
@@ -360,13 +346,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
 
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <DatePicker
-                            autoOk
+                          <CustomDatePicker
                             size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
-                            minDate={values.startDate}
+                            disablePast={true}
+                            minDateTime={values.startDate}
                             value={values.endDate}
                             name="endDate"
                             label="End Date"
@@ -374,25 +357,18 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               setFieldValue('endDate', date);
                               setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
                             }}
-                            format={dateFormat}
                             error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
                             helperText={Boolean(touched['endDate']) && errors['endDate']}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
                             margin="dense"
                           />
                         </Grid>
                         <Grid item xs={5}>
-                          <DateTimePicker
-                            ampm={false}
+                          <CustomDateTimePicker
                             size="small"
-                            variant="inline"
-                            inputVariant="outlined"
                             label="End Time"
                             name="endTime"
                             placeholder="08:00"
-                            mask="__:__"
+                            inputFormat="HH:mm"
                             value={values.endTime}
                             onChange={(date: any) => {
                               const nDate = new Date(values.startTime).toISOString().split('T')[0];
@@ -408,9 +384,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                             }}
                             error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
                             helperText={Boolean(touched['endTime']) && errors['endTime']}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
                             margin="dense"
                           />
                         </Grid>

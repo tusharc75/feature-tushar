@@ -13,7 +13,6 @@ import {
   Typography
 } from '@mui/material';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -35,6 +34,7 @@ import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import statusList from '../Helpers/statusList';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { SubCase } from './SubCase';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -300,17 +300,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           />
                         </Box>
                         <Box pt={1}>
-                          <DatePicker
+                          <CustomDatePicker
                             label="Start Date"
                             name="startDate"
-                            autoOk
-                            variant="inline"
-                            inputVariant="outlined"
                             fullWidth
                             margin="dense"
                             value={values.startDate}
-                            format={dateFormatForInputControl}
-                            //minDate={new Date()}
                             onChange={(value) => {
                               setFieldValue('startDate', value);
                               setFieldValue('dueDate', value);
@@ -319,16 +314,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           />
                         </Box>
                         <Box pt={1}>
-                          <DatePicker
+                          <CustomDatePicker
                             label="Due Date"
                             name="dueDate"
-                            autoOk
-                            variant="inline"
                             value={values.dueDate}
-                            inputVariant="outlined"
                             fullWidth
                             margin="dense"
-                            format={dateFormatForInputControl}
                             minDate={values.startDate}
                             maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                             onChange={(value) => {
