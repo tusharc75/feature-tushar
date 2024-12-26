@@ -1,8 +1,8 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@mui/icons-material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SyncIcon from '@mui/icons-material/Sync';
+import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { isEmpty } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -13,8 +13,10 @@ import io, { Socket } from 'socket.io-client';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
+import NewSearchbar from 'src/components/Header/SearchBar';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
+import { deleteDatabase } from 'src/constants/indexdbhelper';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import { userManual } from 'src/pages/Home';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
@@ -31,9 +33,6 @@ import UserProfile from './../UserProfile';
 import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
-import { SearchBar } from './SearchBar';
-import { deleteDatabase } from 'src/constants/indexdbhelper';
-import NewSearchbar from 'src/components/Header/NewSearchBar';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
