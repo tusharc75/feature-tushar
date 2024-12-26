@@ -112,7 +112,7 @@
     }
   }
   .MuiOutlinedInput-notchedOutline {
-    border-color: #e7e7e7 !important;
+    border-color: var(--common-border-color) !important;
   }
   .MuiInputLabel-outlined.MuiInputLabel-shrink {
     font-size: 0.8rem !important;
