@@ -1,11 +1,10 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -93,18 +92,15 @@ const WellMasterDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.wellMaster?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className={`btn-outline-v1`}
-                size="small"
+              <ThemeButton
+                iconForMobile={<EditIcon />}
                 onClick={() => {
-                  if (permissions?.wellMaster?.isUpdate) {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
-                  }
+                  setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
                 }}
+                tooltip={'Edit'}
               >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} resourceLabel={wellMasterData?.wellName} />
