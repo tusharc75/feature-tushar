@@ -16,7 +16,6 @@ import {
   CHILD_RESOURCE,
   convertDateInDateTime,
   CustomDialogTransition,
-  dateFormatForInputControl,
   displayDate,
   getObjKeys,
   yupSchema

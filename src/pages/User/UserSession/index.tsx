@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Line } from 'react-chartjs-2';
-import { dateFormatForInputControl } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import DateFnsUtils from '@date-io/date-fns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -168,7 +167,6 @@ const UserSession = ({ id }) => {
                 fullWidth
                 size="small"
                 openTo="year"
-                format={dateFormatForInputControl}
                 maxDate={trackingTime.between.to}
                 label="From"
                 views={['year', 'month', 'date']}

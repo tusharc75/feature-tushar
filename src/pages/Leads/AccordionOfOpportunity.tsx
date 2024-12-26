@@ -12,7 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {

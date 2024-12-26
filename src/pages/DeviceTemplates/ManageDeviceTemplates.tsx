@@ -12,11 +12,8 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  fieldServiceOrder,
-  setFieldsInAscendingOrder,
   yupSchema,
   sidebarResource,
-  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -26,7 +23,6 @@ import routes from '../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess, open }) => {

@@ -1,6 +1,5 @@
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat } from 'src/constants/helpers';
+import { displayDate } from 'src/constants/helpers';
 import routes from '../../Helpers/Routes';
 
 export const headerName = {
@@ -35,10 +34,10 @@ export const getStaticFields = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.createdBy ? (
-          <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate?.slice(0, 10))}`}>
             {row?.original?.createdBy}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}</span>
+            <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate?.slice(0, 10))}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -57,9 +56,9 @@ export const getStaticFields = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate?.slice(0, 10))}`}>
             {row?.original?.updatedBy}&nbsp;
-            <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
+            <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate?.slice(0, 10))}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -85,11 +84,11 @@ export const getCompletedByField = () => {
         row?.original?.completedBy ? (
           <h5
             className="createBy"
-            title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}
+            title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate?.slice(0, 10))}`}
           >
             {row?.original?.completedBy}
             <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
+            <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate?.slice(0, 10))}</span>
           </h5>
         ) : (
           <NoDataCell />

@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
-import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const useStyles = makeStyles((theme: Theme) => ({

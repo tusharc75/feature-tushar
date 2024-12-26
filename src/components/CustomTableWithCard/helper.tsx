@@ -1,7 +1,6 @@
 import { Typography, GridProps } from '@mui/material';
-import moment from 'moment';
 import { CardInterface } from 'src/components/CustomTableWithCard';
-import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
+import { displayDateTime, displayDate } from 'src/constants/helpers';
 
 const getUpdatedObject = (oldData, newData) => {
   const data = new Set([...Object.keys(oldData), ...Object.keys(newData)]);
@@ -93,7 +92,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
             return (
               <>
                 <Typography>{headerName}</Typography>
-                <Typography>{row[`${field}`] ? moment(row?.[`${field}`]).format(dateTimeFormat) : '---'}</Typography>
+                <Typography>{row[`${field}`] ? displayDateTime(row?.[`${field}`]) : '---'}</Typography>
               </>
             );
           },
@@ -106,7 +105,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
             return (
               <>
                 <Typography>{headerName}</Typography>
-                <Typography>{row[`${field}`] ? moment(row?.[`${field}`]).format(dateFormat) : '---'}</Typography>
+                <Typography>{row[`${field}`] ? displayDate(row?.[`${field}`]) : '---'}</Typography>
               </>
             );
           },
@@ -121,7 +120,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
                 <Typography>{headerName}</Typography>
                 <Typography>{row[`${field}`] ? row?.[`${field}`] : '---'}</Typography>
                 <Typography>
-                  {row[`${dateAccessor ?? 'createdByDate'}`] ? moment(row?.[`${dateAccessor ?? 'createdByDate'}`]).format(dateTimeFormat) : '---'}
+                  {row[`${dateAccessor ?? 'createdByDate'}`] ? displayDateTime(row?.[`${dateAccessor ?? 'createdByDate'}`]) : '---'}
                 </Typography>
               </>
             );
@@ -137,7 +136,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
                 <Typography>{headerName}</Typography>
                 <Typography>{row[`${field}`] ? row?.[`${field}`] : '---'}</Typography>
                 <Typography>
-                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? moment(row?.[`${dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat) : '---'}
+                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? displayDateTime(row?.[`${dateAccessor ?? 'updatedByDate'}`]) : '---'}
                 </Typography>
               </>
             );
@@ -165,7 +164,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
                   )}
                 </Typography>
                 <Typography>
-                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? moment(row?.[`${dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat) : '---'}
+                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? displayDateTime(row?.[`${dateAccessor ?? 'updatedByDate'}`]) : '---'}
                 </Typography>
               </>
             );

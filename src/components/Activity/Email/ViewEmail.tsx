@@ -10,7 +10,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineSend } from 'react-icons/ai';
@@ -26,7 +25,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import TinyMce from '../../../components/TinyMCE';
-import { dateTimeFormat, imageUploadMaxSize } from '../../../constants/helpers';
+import { displayDateTime, imageUploadMaxSize } from '../../../constants/helpers';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import ImageAttachments from './ImageAttachments';
@@ -443,7 +442,7 @@ export const ViewEmail = ({
                                   <Box className={classes.mailtextHead}>
                                     <Typography className={classes.mailFrom}>{values.mailbox}</Typography>
                                     <Typography className={classes.mailTimeStamp}>
-                                      {moment(values?.createdBy.date).format(dateTimeFormat)}
+                                      {displayDateTime(values?.createdBy.date)}
                                     </Typography>
                                   </Box>
                                   <div
@@ -489,7 +488,7 @@ export const ViewEmail = ({
                                       <Box className={classes.mailtextHead}>
                                         <Typography className={classes.mailFrom}>{incomingMail.from}</Typography>
                                         <Typography className={classes.mailTimeStamp}>
-                                          {moment(incomingMail.date).format(dateTimeFormat)}
+                                          {displayDateTime(incomingMail.date)}
                                         </Typography>
                                       </Box>
                                       <div

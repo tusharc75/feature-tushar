@@ -1,14 +1,13 @@
-import PropTypes from 'prop-types';
-import Button from '@mui/material/Button';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { Theme, Typography } from '@mui/material';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
 import { makeStyles } from '@mui/styles';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -19,18 +18,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   paper: {
     width: '80%',
     maxHeight: 435
-  },
-  closeButton: {
-    position: 'absolute',
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500]
   }
 }));
 
-export default function ConfirmationCancelDialog(props) {
+type ConfirmDialogProps = {
+  onClose: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  open: boolean;
+  onSave?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+};
+
+export default function ConfirmationCancelDialog({ onClose, onSave, open }: ConfirmDialogProps) {
   const classes = useStyles();
-  const { onClose, onSave, open, close } = props;
 
   return (
     <Dialog
@@ -49,10 +47,10 @@ export default function ConfirmationCancelDialog(props) {
         }
       }}
     >
-      <DialogTitle id="confirmation-dialog-title" className="text-white">
+      <DialogTitle id="confirmation-dialog-title" className="flex items-center justify-between bg-[#1c1c31] py-3 text-white dark:bg-[#1a1a26]">
         Confirm
         {onClose ? (
-          <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={onClose}>
+          <IconButton title="Close Confirm Dialog" aria-label="close" className={'text-white [transform:translateX(8px)]'} onClick={onClose}>
             <CloseIcon />
           </IconButton>
         ) : null}
@@ -60,7 +58,7 @@ export default function ConfirmationCancelDialog(props) {
       <DialogContent dividers>
         <Typography>Do you want to save changes or leave?</Typography>
       </DialogContent>
-      <DialogActions>
+      <DialogActions className="bg-[#ebebeb] dark:bg-[#1a1a26]">
         <Button title="Leave Form" id="confirm-dialog-cancel-button" size="small" autoFocus onClick={onClose} color="primary">
           Leave
         </Button>
@@ -71,10 +69,3 @@ export default function ConfirmationCancelDialog(props) {
     </Dialog>
   );
 }
-
-ConfirmationCancelDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  onSave: PropTypes.func,
-  close: PropTypes.func
-};

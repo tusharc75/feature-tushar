@@ -6,11 +6,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { makeStyles } from '@mui/styles';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
 import React, { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { PostComment } from '../../../axios/activity';
 import { Theme } from '@mui/material';
+import { displayDateTime } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
   marginLeft: {
@@ -117,7 +116,7 @@ export const Comment = ({ referenceId }) => {
                   {element.firstName + ' ' + element.lastName}
                   <Typography variant="caption" className={classes.marginLeft}>
                     {' '}
-                    {moment(element.createdAt).format('MMM DD YYYY hh:mm A')}
+                    {displayDateTime(element.createdAt, 'MMM DD YYYY hh:mm A')}
                   </Typography>
                 </Typography>
                 <Typography variant="body2">{element.content}</Typography>

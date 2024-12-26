@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormatForInputControl, displayDate, normalizeDate } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDate = null, maxEndDate = null }) {

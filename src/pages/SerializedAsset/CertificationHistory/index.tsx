@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, dateFormat, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, displayDate, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
@@ -14,7 +14,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
-import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
@@ -110,10 +109,10 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           disableSortBy: false,
           Cell: ({ row }) =>
             row.original?.createdBy ? (
-              <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+              <h5 className="createBy" title={`${row.original?.createdBy} • ${displayDate(row.original?.createdByDate)}`}>
                 {row.original?.createdBy}
                 <span className="hidden">&nbsp;-&nbsp;</span>
-                <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+                <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
               </h5>
             ) : (
               <NoDataCell />

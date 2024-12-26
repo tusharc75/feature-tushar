@@ -7,7 +7,6 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import {
   convertDateInDateTime,
-  dateFormatForInputControl,
   deliveryTicket,
   DELIVERY_TICKET_STATUS,
   productInventory,

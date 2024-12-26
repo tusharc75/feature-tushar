@@ -22,7 +22,6 @@ export const Provider = ({ children }) => {
         .then(({ data: response }) => {
           const { data } = response;
           localStorage.setItem('userData', JSON.stringify(data));
-          localStorage.setItem('brandTimeZone', (data?.user?.timezone || 'America/New_York'));
           localStorage.setItem('dateFormat', 'DD/MM/YYYY');
           localStorage.setItem('dateTimeFormat', 'DD/MM/YYYY hh:mm A');
           localStorage.setItem('cardDateFormat', 'MMM DD, YYYY');

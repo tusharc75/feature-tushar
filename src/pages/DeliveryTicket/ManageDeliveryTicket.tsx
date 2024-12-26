@@ -2,7 +2,6 @@ import { Box, Button, Dialog, Grid, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/AddCircle';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -42,6 +41,7 @@ import {
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import dayjs from 'dayjs';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -554,14 +554,15 @@ const ManageDeliveryTicket = ({
   function validate(values) {
     const errors = {};
     if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate') && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
-      let pickUpDate = moment(values?.pickUpDate);
-      let deliveryDate = moment(values?.deliveryDate);
+
+      let pickUpDate = dayjs(values?.pickUpDate);
+      let deliveryDate = dayjs(values?.deliveryDate);
       if (deliveryDate.diff(pickUpDate, 'days') < 0) {
         errors['pickUpDate'] = 'Please enter valid pick-Up date';
       }
     }
     if (initialData?.fields?.find((e) => e?.fieldName === 'createDate') && assets?.length) {
-      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+      if (!dayjs(values['createDate']).isSameOrAfter(dayjs(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
     }
@@ -764,7 +765,7 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        minDate={moment(values['pickUpDate'])}
+                                        minDate={new Date(values['pickUpDate'])}
                                       />
                                     ) : field.fieldName === 'owner' ? (
                                       <FormTypes

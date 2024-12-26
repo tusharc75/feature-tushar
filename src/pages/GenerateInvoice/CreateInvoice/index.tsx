@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';

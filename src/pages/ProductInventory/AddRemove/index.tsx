@@ -14,7 +14,6 @@ import {
   convertDateInDateTime,
   currencyCodeToSymbol,
   CustomDialogTransition,
-  dateFormatForInputControl,
   productInventory,
   sidebarResource
 } from '../../../constants/helpers';

@@ -1,12 +1,13 @@
 import { Box, CircularProgress, IconButton, Typography } from '@mui/material';
 import { Done, DoneAll } from '@mui/icons-material';
-import moment from 'moment';
 import { useContext, useEffect, useRef, useState } from 'react';
 
 import { SendIcon } from 'src/assets/svg/svgIcons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import axiosInstance from '../../axios/axiosInstance';
+import dayjs from 'dayjs';
+import { displayDateTime } from 'src/constants/helpers';
 
 const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -77,7 +78,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
     }
   };
 
-  const formatTime = (time: string) => moment(time).format('HH:MM');
+  const formatTime = (time: string) => dayjs.utc(time).tz().format('HH:MM');
 
   const user = (data: any) => chatUsers.find((_d) => _d?._id === data.userid);
 
@@ -147,7 +148,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
               return (
                 <div key={i} className={`single-message group w-fit max-w-[calc(100%-min(30%,30px))] ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}>
                   <div
-                    title={moment(data.date).format('DD, MMM YYYY')}
+                    title={displayDateTime(data.date, 'DD, MMM YYYY')}
                     className={`message-outlet p-[10px] ${
                       isMyMessage
                         ? 'my-message rounded-[10.142px_10.142px_0px_10.142px] bg-[var(--dark-primary,#E8FCFB)] text-right'

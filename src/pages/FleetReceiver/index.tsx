@@ -7,8 +7,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ManageFleetReceiverDialog from './ReceiverDialog';
-import moment from 'moment';
-import { dateFormat } from 'src/constants/helpers';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useData } from 'src/StateProvider/Provider';
 
