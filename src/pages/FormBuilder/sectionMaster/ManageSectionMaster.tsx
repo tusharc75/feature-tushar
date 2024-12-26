@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -89,7 +90,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <TextField
                         margin="dense"
                         size="small"
@@ -106,7 +107,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         helperText={touched['sectionName'] && errors['sectionName']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <TextField
                         margin="dense"
                         size="small"
@@ -122,7 +123,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         value={values['description']}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{xs:12}}>
                       <IconAutoComplete
                         onChange={(e, val) => {
                           setFieldValue('iconName', val);

@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -166,7 +167,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
           <Box mx={1} />
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

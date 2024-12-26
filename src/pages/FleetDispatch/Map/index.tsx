@@ -6,7 +6,6 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 const containerStyle = {
   minHeight: '500px',

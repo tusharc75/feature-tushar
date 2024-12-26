@@ -6,13 +6,13 @@ import {
   Dialog,
   DialogContent,
   FormControlLabel,
-  Grid,
   IconButton,
   InputAdornment,
   Switch,
   TextField,
   Theme
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -326,7 +326,7 @@ const DoaDialog = ({
                         <Box padding={2} className={`${classes.contentBox} max-[768px]:!mb-4`}>
                           <Box padding={1}>
                             <Grid container spacing={2}>
-                              <Grid item xs={6} md={3} sm={6}>
+                              <Grid size={{xs:6, md:3, sm:6}} >
                                 <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
                                   {DOAType.map((k, index) => {
                                     return (
@@ -337,7 +337,7 @@ const DoaDialog = ({
                                   })}
                                 </ToggleButtonGroup>
                               </Grid>
-                              <Grid item xs={6} md={3} sm={6}>
+                              <Grid size={{xs:6, md:3, sm:6}}>
                                 <ToggleButtonGroup size="small" value={selectedDoaApprove} exclusive onChange={handleDOAAproveTypeFilter}>
                                   {DoaApproveType.map((k, index) => {
                                     return (
@@ -348,7 +348,7 @@ const DoaDialog = ({
                                   })}
                                 </ToggleButtonGroup>
                               </Grid>
-                              <Grid item xs={12} md={3} sm={6}>
+                              <Grid size={{xs:12, md:3, sm:6}}>
                                 {selectedType === 2 && (
                                   <>
                                     <TextField
@@ -377,7 +377,7 @@ const DoaDialog = ({
                                   </>
                                 )}
                               </Grid>
-                              <Grid item xs={12} md={3} sm={6}>
+                              <Grid size={{xs:12, md:3, sm:6}}>
                                 {selectedType === 2 && (
                                   <div>
                                     <Autocomplete
@@ -414,22 +414,21 @@ const DoaDialog = ({
                         </Box>
                         <DialogContent className={classes.contentBox}>
                           <Form>
-                            <Grid item md={12}>
+                            <Grid size={{md:12}} >
                               {values.users && values.users.length > 0 && (
                                 <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
-                                  <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                                    <Grid item xs={1}>
+                                  <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
+                                    <Grid size={{xs:1}}>
                                       Index
                                     </Grid>
-                                    <Grid item xs={11} sm={5} md={5}>
+                                    <Grid size={{xs:11, sm:5, md:5}}>
                                       {doaApprove == 0 ? 'User' : 'Role'}
                                     </Grid>
                                     {selectedType === 2 && (
-                                      <Grid item md={4}>
+                                      <Grid size={{md:4}}>
                                         Amount
                                       </Grid>
                                     )}
-                                    <Grid item md={2}></Grid>
                                   </Grid>
                                 </Box>
                               )}
@@ -440,11 +439,11 @@ const DoaDialog = ({
                                     <div className="grid gap-5">
                                       {values.users && values.users.length > 0 ? (
                                         values.users.map((userVal, index) => (
-                                          <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
-                                            <Grid item xs={1} md={1}>
+                                          <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center" key={index}>
+                                            <Grid size={{xs:1, md:1}}>
                                               <span className="px-2">{index + 1}.</span>
                                             </Grid>
-                                            <Grid item xs={11} sm={5} md={5}>
+                                            <Grid size={{xs:11, sm:5, md:5}}>
                                               <Autocomplete
                                                 id="combo-box-demo"
                                                 limitTags={2}
@@ -494,9 +493,8 @@ const DoaDialog = ({
                                                 )}
                                               />
                                             </Grid>
-                                            <Grid item xs={1} sm={1} md={1} className="min-[600px]:hidden"></Grid>
                                             {selectedType === 2 && (
-                                              <Grid item xs={6} sm={3} md={3}>
+                                              <Grid size={{xs:6, sm:3, md:3}}>
                                                 <TextField
                                                   fullWidth
                                                   slotProps={{
@@ -531,7 +529,7 @@ const DoaDialog = ({
                                                 )}
                                               </Grid>
                                             )}
-                                            <Grid item sm={3} md={3} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
+                                            <Grid size={{sm:3, md:3}} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
                                               <ButtonGroup size="medium" aria-label="small outlined button group">
                                                 <IconButton
                                                   size="small"
@@ -575,7 +573,7 @@ const DoaDialog = ({
                                           </Grid>
                                         ))
                                       ) : (
-                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                        <Grid size={{md:12}} className="d-flex  align-items-center justify-content-center">
                                           <Button
                                             variant="contained"
                                             color="primary"

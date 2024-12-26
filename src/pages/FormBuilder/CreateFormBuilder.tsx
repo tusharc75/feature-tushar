@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHistory, useParams } from 'react-router-dom';
@@ -388,7 +388,7 @@ const CreateFormBuilder = () => {
             <Fragment>
               <Box mb={2}>
                 <Grid container spacing={1}>
-                  <Grid item xs={3}>
+                  <Grid size={{xs:3}}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -404,7 +404,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{xs:3}}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -419,7 +419,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{xs:3}}>
                     <Autocomplete
                       id="section-name"
                       freeSolo
@@ -433,7 +433,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={3} container justifyContent="flex-end">
+                  <Grid size={{xs:3}} container justifyContent="flex-end">
                     <Box>
                       {permissions?.formBuilder?.isUpdate && (
                         <Button
