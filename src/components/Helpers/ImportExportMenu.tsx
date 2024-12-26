@@ -17,7 +17,7 @@ const ImportExportMenu = ({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -197,7 +197,6 @@ const ImportExportMenu = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'

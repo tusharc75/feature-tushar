@@ -85,7 +85,9 @@ const WorkOrderSupervisor = () => {
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
-  const [viewType, setViewType] = useState<ViewType>('card-view');
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
+  });
   const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
@@ -261,12 +263,14 @@ const WorkOrderSupervisor = () => {
       visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
       limit: LIMIT
     });
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
+
 
     return () =>
       dispatch({
         type: 'reset'
       });
-  }, []);
+  }, [viewType]);
 
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);

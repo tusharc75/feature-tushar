@@ -292,7 +292,6 @@ const InvoiceDetails = () => {
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'

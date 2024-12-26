@@ -524,7 +524,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   <Menu
                     anchorEl={addAnchorEl}
                     keepMounted
-                    getContentAnchorEl={null}
                     anchorOrigin={{
                       vertical: 'bottom',
                       horizontal: 'left'

@@ -27,9 +27,9 @@ const ButtonMenu = <D,>({
   items,
   iconForMobile = false,
   children,
-  onClick = () => {},
+  onClick = () => { },
   menuProps,
-  onItemClick = () => {},
+  onItemClick = () => { },
   slot = undefined,
   showChevron = false,
   horizontal = 'left',
@@ -60,7 +60,6 @@ const ButtonMenu = <D,>({
     <>
       <Slot {...(slotProps as any)}>{children}</Slot>
       <Menu
-        getContentAnchorEl={null}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -76,7 +75,7 @@ const ButtonMenu = <D,>({
         {...menuProps}
       >
         {items.map((item, index) => {
-          const { onClick = () => {}, startIcon, endIcon, visible = true, ...rest } = item;
+          const { onClick = () => { }, startIcon, endIcon, visible = true, ...rest } = item;
           if (!visible) return null;
           return (
             <MenuItem

@@ -495,7 +495,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -629,7 +629,6 @@ export default function QuoteDetail() {
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -683,8 +682,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }

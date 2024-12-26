@@ -43,7 +43,6 @@ function DoaHeader(props) {
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

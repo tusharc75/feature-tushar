@@ -48,14 +48,14 @@ export default function ImportExportLinks({
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
   small = false,
   isCustomImport = false,
-  onSuccessCustomImport = () => {},
+  onSuccessCustomImport = () => { },
   currency = 'USD'
 }) {
   const classes = useStyles();
@@ -255,7 +255,6 @@ export default function ImportExportLinks({
         keepMounted
         open={true}
         onClose={handleCloseMenu}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -443,7 +442,6 @@ export default function ImportExportLinks({
             <>
               <Menu
                 id="import-export-extra-links"
-                getContentAnchorEl={null}
                 anchorEl={anchorExtraEl}
                 keepMounted
                 open={Boolean(anchorExtraEl)}
@@ -533,7 +531,6 @@ export default function ImportExportLinks({
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
