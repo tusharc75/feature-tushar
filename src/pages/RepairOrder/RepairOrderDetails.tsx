@@ -15,7 +15,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -377,13 +377,9 @@ const RepairOrderDetails = () => {
                       quotationVersionData?.status
                     ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      onClick={() => setOpenUpdateDialog(true)}
-                      className={'btn-outline-v1'}
-                    >
-                      {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>

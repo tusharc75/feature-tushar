@@ -1,17 +1,14 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
-import { Skeleton } from '@mui/material';
-import queryString from 'query-string';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSyncAlt } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import { SVG } from '../../assets';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -359,14 +356,9 @@ const LeadDetailsPage = () => {
               </>
             )}
             {leadsPermissions.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpneUpdateDialog}
-                className={'btn-outline-v1'}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton

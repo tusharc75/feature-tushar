@@ -508,15 +508,9 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
-                  >
-                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
 
               {deliveryTicketData?.signatures?.length > 0 ? (

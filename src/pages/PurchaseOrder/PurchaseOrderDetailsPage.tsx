@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -36,6 +36,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const PurchaseOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -224,14 +225,14 @@ const PurchaseOrderDetailsPage = () => {
                 }
               >
                 <span>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
                     onClick={handleOpenUpdateDialog}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
+                    tooltip={'Edit'}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                    {'Edit'}
+                  </ThemeButton>
                 </span>
               </HtmlTooltip>
             ) : (
@@ -243,14 +244,9 @@ const PurchaseOrderDetailsPage = () => {
                 }
               >
                 <span>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
-                    disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Re-Open'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)} tooltip={'Re-Open'}>
+                    {'Re-Open'}
+                  </ThemeButton>
                 </span>
               </HtmlTooltip>
             )}
