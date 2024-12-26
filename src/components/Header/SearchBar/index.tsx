@@ -22,7 +22,7 @@ const SearchBar = () => {
           size="small"
           renderInput={(params) => (
             <TextField
-              className="[&_.MuiAutocomplete-endAdornment>button:last-child]:hidden"
+              className=" [&_.MuiAutocomplete-endAdornment>button:last-child]:hidden"
               {...params}
               placeholder="Type / to search"
               margin="none"
@@ -35,7 +35,16 @@ const SearchBar = () => {
                   </IconButton>
                 ) : null
               }}
-              sx={{ '.MuiInputBase-root': { height: 44, padding: '10px 20px', paddingRight: '8px !important' }, paddingRight: '42px' }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  height: 44,
+                  padding: '10px 20px',
+                  paddingRight: '8px !important',
+                  background: 'transparent !important',
+                  border: '1px solid var(--common-border-color)'
+                },
+                paddingRight: '42px'
+              }}
             />
           )}
           inputValue={inputValue}
@@ -72,7 +81,16 @@ const SearchBar = () => {
               </IconButton>
             ) : null
           }}
-          sx={{ '.MuiInputBase-root': { height: 44, padding: '0' }, pr: '42px' }}
+          sx={{
+            '& .MuiInputBase-root': {
+              height: 44,
+              padding: '0',
+              paddingRight: '8px !important',
+              background: 'transparent !important',
+              border: '1px solid var(--common-border-color)'
+            },
+            pr: '42px'
+          }}
         />
       )}
       <IconButton

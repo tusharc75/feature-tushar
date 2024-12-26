@@ -104,7 +104,7 @@ export const ListboxComponent = React.forwardRef<HTMLDivElement, React.HTMLAttri
   const gridRef = useResetCache(itemCount);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="[&>div]:!bg-[var(--dark-primary,white)]">
       <OuterElementContext.Provider value={other}>
         <VariableSizeList
           itemData={itemData}
@@ -129,7 +129,8 @@ export const StyledPopper = styled(Popper)({
     boxSizing: 'border-box',
     '& ul': {
       padding: 0,
-      margin: 0
+      margin: 0,
+      background: 'var(--dark-primary,white)'
     }
   }
 });
