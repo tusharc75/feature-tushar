@@ -68,18 +68,21 @@ const AssingProductsDialog = (props) => {
             renderInput={(params) => (
               <TextField
                 {...params}
-                InputProps={{
-                  ...params.InputProps,
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
                   endAdornment: (
                     <Fragment>
                       {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
                       {params.InputProps.endAdornment}
                     </Fragment>
                   )
+                  }
                 }}
                 variant="outlined"
                 required
                 label="Select Product"
+                size="small"
               />
             )}
           />

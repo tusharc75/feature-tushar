@@ -306,7 +306,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             id="generate-invoice"
             style={{ width: '300px' }}
             options={resourceList?.map((item) => item)}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
             getOptionLabel={(option) => option?.title}
             onChange={(e, val) => {
               dispatch({ type: 'selection', selectedRecords: [] });

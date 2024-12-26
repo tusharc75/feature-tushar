@@ -236,6 +236,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                     )}
                     <TextField
                       margin="dense"
+                      size="small"
                       type="number"
                       label="Qty"
                       name="qty"
@@ -270,6 +271,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           name="storageLocation"
                           label="Storage Location"
                           variant="outlined"

@@ -128,7 +128,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                         </Box>
                         {status === IRT_APPROVER_STATUS.declined && (
                           <Box mt={2}>
-                            <FormControl variant="outlined" fullWidth margin="dense">
+                            <FormControl variant="outlined" fullWidth margin="dense" size="small">
                               <Autocomplete
                                 id="tags-filled"
                                 options={resaonList}
@@ -141,6 +141,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                                   <TextField
                                     {...params}
                                     margin="dense"
+                                    size="small"
                                     variant="outlined"
                                     label="Decline Reason"
                                     placeholder="Decline Reason"
@@ -160,6 +161,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                             fullWidth
                             rows={2}
                             margin="dense"
+                            size="small"
                             value={comment}
                             onChange={(e: any) => setComment(e.target.value)}
                           />

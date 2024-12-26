@@ -116,6 +116,7 @@ export const AddAllColumnDialog = (props) => {
                       helperText={touched['sectionName'] && errors['sectionName']}
                       label="Section Name"
                       margin="dense"
+                      size="small"
                       name="sectionName"
                       variant="outlined"
                     />
@@ -139,6 +140,7 @@ export const AddAllColumnDialog = (props) => {
                       helperText={touched['columns'] && errors['columns']}
                       label="Columns"
                       margin="dense"
+                      size="small"
                       name="columns"
                       variant="outlined"
                     />

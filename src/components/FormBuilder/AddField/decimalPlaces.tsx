@@ -6,7 +6,7 @@ import Select from '@mui/material/Select';
 
 export const DecimalPlaces = ({ values, setFieldValue }) => {
   return (
-    <FormControl fullWidth margin="dense" variant="outlined">
+    <FormControl fullWidth margin="dense" variant="outlined" size="small">
       <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
       <Select
         labelId="demo-simple-select-outlined-label"
@@ -15,6 +15,7 @@ export const DecimalPlaces = ({ values, setFieldValue }) => {
         onChange={(e) => setFieldValue('decimalPlaces', e.target.value)}
         label="Number of decimal places"
         name="decimalPlaces"
+        size="small"
       >
         <MenuItem value={0}>0</MenuItem>
         <MenuItem value={1}>1</MenuItem>

@@ -132,6 +132,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                 <TextField
                   fullWidth
                   margin="dense"
+                  size="small"
                   type="text"
                   required
                   label="Title"

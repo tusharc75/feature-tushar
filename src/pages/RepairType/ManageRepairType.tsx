@@ -255,6 +255,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                                   id="standard-basic"
                                   variant="outlined"
                                   margin="dense"
+                                  size="small"
                                   fullWidth
                                   style={{ margin: 0 }}
                                   value={steps?.name}

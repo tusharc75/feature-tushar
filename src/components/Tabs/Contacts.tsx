@@ -41,7 +41,7 @@ const Contacts = () => {
               <Grid container justify="space-between">
                 <Grid item>
                   <FormControl className={classes.formControl}>
-                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange}>
+                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange} size="small">
                       <MenuItem value="All">All Contacts</MenuItem>
                     </Select>
                   </FormControl>
@@ -61,12 +61,15 @@ const Contacts = () => {
                     type="search"
                     placeholder="Search Contacts"
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Search color="disabled" />
-                        </InputAdornment>
-                      )
+                    size="small"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Search color="disabled" />
+                          </InputAdornment>
+                        )
+                      }
                     }}
                   />
                 </Grid>
@@ -88,7 +91,7 @@ const Contacts = () => {
               <Grid container justify="space-between">
                 <Grid item>
                   <FormControl className={classes.formControl}>
-                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange}>
+                    <Select labelId="select-label" id="select" value={contacts} onChange={handleChange} size="small">
                       <MenuItem value="All">All Contacts</MenuItem>
                     </Select>
                   </FormControl>
@@ -108,12 +111,15 @@ const Contacts = () => {
                     type="search"
                     placeholder="Search Contacts"
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Search color="disabled" />
-                        </InputAdornment>
-                      )
+                    size="small"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Search color="disabled" />
+                          </InputAdornment>
+                        )
+                      }
                     }}
                   />
                 </Grid>

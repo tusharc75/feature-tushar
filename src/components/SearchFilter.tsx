@@ -178,14 +178,16 @@ export const SearchFilter = ({
             size="small"
             variant="outlined"
             placeholder="Search or Filter"
-            InputProps={{
-              ...params.InputProps,
+            slotProps={{
+              input: {
+                ...params.InputProps,
               endAdornment: (
                 <React.Fragment>
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}
                   {params.InputProps.endAdornment}
                 </React.Fragment>
               )
+              },
             }}
           />
         )}

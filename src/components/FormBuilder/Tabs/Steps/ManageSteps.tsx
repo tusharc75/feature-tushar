@@ -164,6 +164,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                     name="stepName"
                     fullWidth
                     margin="dense"
+                    size='small'
                     value={values['stepName']}
                     error={touched['stepName'] && Boolean(errors['stepName'])}
                     helperText={touched['stepName'] && errors['stepName']}
@@ -203,6 +204,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                         <TextField
                           {...params}
                           margin="dense"
+                          size='small'
                           variant="outlined"
                           label="Linked Material"
                           placeholder="Linked Material"
@@ -251,6 +253,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size='small'
                             variant="outlined"
                             label="Resource"
                             placeholder="Resource"
@@ -281,18 +284,21 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size='small'
                             variant="outlined"
                             label="Resource Field"
                             placeholder="Resource Field"
                             required
-                            InputProps={{
-                              ...params.InputProps,
-                              endAdornment: (
-                                <React.Fragment>
-                                  {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                                  {params.InputProps.endAdornment}
-                                </React.Fragment>
-                              )
+                            slotProps={{
+                              input: {
+                                ...params.InputProps,
+                                endAdornment: (
+                                  <React.Fragment>
+                                    {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </React.Fragment>
+                                )
+                              },
                             }}
                             error={touched['linkResourceField'] && Boolean(errors['linkResourceField'])}
                             helperText={touched['linkResourceField'] && errors['linkResourceField']}

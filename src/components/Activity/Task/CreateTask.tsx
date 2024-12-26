@@ -207,6 +207,7 @@ export const CreateTask = ({
                           name="name"
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values['name']}
                           error={touched['name'] && Boolean(errors['name'])}
                           helperText={touched['name'] && errors['name']}
@@ -219,6 +220,7 @@ export const CreateTask = ({
                             fullWidth
                             margin="dense"
                             type="text"
+                            size="small"
                             multiline
                             rows={3}
                             label="Description"
@@ -280,6 +282,7 @@ export const CreateTask = ({
                                   labelId="demo-simple-select-outlined-label"
                                   id="demo-simple-select-outlined"
                                   margin="dense"
+                                  size="small"
                                   label="Status"
                                   name="status"
                                   value={values['status']}
@@ -336,6 +339,7 @@ export const CreateTask = ({
                                     name="startDate"
                                     fullWidth
                                     margin="dense"
+                                    size="small"
                                     value={values.startDate}
                                     onChange={(value) => {
                                       setFieldValue('dueDate', value);
@@ -350,6 +354,7 @@ export const CreateTask = ({
                                     name="dueDate"
                                     fullWidth
                                     margin="dense"
+                                    size="small"
                                     minDate={values.startDate}
                                     maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                     value={values.dueDate}

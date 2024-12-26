@@ -17,7 +17,7 @@ const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit 
               : ''
           }
           onChange={(_event, newValue) => setResourceName(newValue && newValue?.optionValue ? newValue.optionValue : '')}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Default Resource" placeholder="Resources" margin="dense" />}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Default Resource" placeholder="Resources" margin="dense" size="small"/>}
           disabled={!isEdit}
         />
       </Box>

@@ -567,7 +567,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             </Grid>
@@ -586,7 +586,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                     setSelectedStorageLocation(val?.optionValue);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
                   )}
                 />
               )}

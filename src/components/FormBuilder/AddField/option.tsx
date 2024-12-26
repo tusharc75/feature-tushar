@@ -291,7 +291,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
                   GetLookupOption(val && val.fieldName ? val.fieldName : '');
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" variant="outlined" label="Dropdow Dependent On" placeholder="Dropdow Dependent On" />
+                  <TextField {...params} margin="dense" size="small" variant="outlined" label="Dropdow Dependent On" placeholder="Dropdow Dependent On" />
                 )}
               />
             </Grid>
@@ -384,14 +384,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             onChange={(e, val) => {
               setFieldValue('defaultDropdownOption', val && val.optionValue ? val.optionValue : '');
             }}
-            renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Default Option" placeholder="Default Option" />}
+            renderInput={(params) => <TextField {...params} margin="dense" size="small" variant="outlined" label="Default Option" placeholder="Default Option" />}
           />
         </Box>
       )}
       {values['isConverter'] ||
         (values['type'] === 'converter' && (
           <Grid item xs={12} sm={4} md={4}>
-            <FormControl fullWidth margin="dense" variant="outlined">
+            <FormControl fullWidth margin="dense" variant="outlined" size="small">
               <InputLabel id="dropdownOnConverter">Dropdown applied on converter</InputLabel>
               <Select
                 labelId="dropdownOnConverter"
@@ -503,6 +503,7 @@ const Card = (props) => {
               id="standard-basic"
               variant="outlined"
               margin="dense"
+              size="small"
               fullWidth
               style={{ margin: 0 }}
               value={data.optionLabel}

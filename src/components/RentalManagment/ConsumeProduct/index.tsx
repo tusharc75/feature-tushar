@@ -42,6 +42,7 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
                   name="qty"
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['qty']}
                   error={touched['qty'] && Boolean(errors['qty'])}
                   helperText={touched['qty'] && errors['qty']}

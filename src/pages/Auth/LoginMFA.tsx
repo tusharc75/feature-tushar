@@ -174,6 +174,7 @@ const LoginMFA = () => {
                   id="demo-simple-select"
                   value={selectedMethod}
                   onChange={(e) => setSelectedMethod(e.target.value)}
+                  size="small"
                 >
                   <MenuItem value={MFA_METHOD.emailOtp}>Email Code</MenuItem>
                   {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}

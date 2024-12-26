@@ -102,6 +102,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
                 <TextField
                   fullWidth
                   margin="dense"
+                  size="small"
                   type="text"
                   required
                   label="Name"

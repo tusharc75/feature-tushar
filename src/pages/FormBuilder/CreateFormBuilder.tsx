@@ -397,6 +397,7 @@ const CreateFormBuilder = () => {
                       name="name"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={resourceLabel}
                       onChange={(e) => {
                         setResourceLabel(e.target.value.trimStart());
@@ -411,6 +412,7 @@ const CreateFormBuilder = () => {
                       name="homePageLabel"
                       fullWidth
                       margin="dense"
+                      size="small"
                       value={homePageLabel}
                       onChange={(e) => {
                         setHomePageLabel(e.target.value.trimStart());
@@ -424,7 +426,7 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" fullWidth />}
+                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" size="small" fullWidth />}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);

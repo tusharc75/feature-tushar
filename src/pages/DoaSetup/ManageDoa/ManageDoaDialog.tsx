@@ -352,9 +352,11 @@ const DoaDialog = ({
                                 {selectedType === 2 && (
                                   <>
                                     <TextField
-                                      InputProps={{
+                                     slotProps={{
+                                      input: {
                                         startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                      }}
+                                      },
+                                    }}
                                       variant="outlined"
                                       type="text"
                                       size="small"
@@ -497,10 +499,12 @@ const DoaDialog = ({
                                               <Grid item xs={6} sm={3} md={3}>
                                                 <TextField
                                                   fullWidth
-                                                  InputProps={{
-                                                    startAdornment: (
-                                                      <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                                    )
+                                                  slotProps={{
+                                                    input: {
+                                                      startAdornment: (
+                                                        <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                                      )
+                                                    },
                                                   }}
                                                   // startAdornment={
                                                   //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''

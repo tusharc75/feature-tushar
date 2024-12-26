@@ -283,7 +283,7 @@ const AddExistingProduct = (props) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
                   )}
                 />
               )}

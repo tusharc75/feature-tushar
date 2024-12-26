@@ -80,14 +80,17 @@ const AssetStats = () => {
               {...params}
               variant="outlined"
               label="Search Assets"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
+              size="small"
+              slotProps={{
+                input: {
+                  ...params.InputProps,
+                  endAdornment: (
+                    <React.Fragment>
+                      {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </React.Fragment>
+                  )
+                }
               }}
             />
           )}
@@ -101,7 +104,7 @@ const AssetStats = () => {
       <Grid container spacing={2} alignItems={'stretch'}>
         {loadingStats &&
           ['1', '2', '3', '4'].map((d) => (
-            <Grid key={d} size={{xs:12, sm:4, md:3}} >
+            <Grid key={d} size={{ xs: 12, sm: 4, md: 3 }}>
               <Card>
                 <CardContent>
                   <Skeleton variant="text" height={30} width={200} animation="wave" />
@@ -113,7 +116,7 @@ const AssetStats = () => {
 
         {assetStats && selectedAssets.length > 0 && !loadingStats && (
           <>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -127,7 +130,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -141,7 +144,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -162,7 +165,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -176,7 +179,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -190,7 +193,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{xs:12, sm:4, md:4}}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>

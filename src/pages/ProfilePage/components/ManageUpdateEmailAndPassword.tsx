@@ -131,7 +131,7 @@ export default function ManageUpdateEmailAndPassword({
       open={open}
       onClose={(event, reason) => {
         if (reason !== 'backdropClick') {
-          onClose()
+          onClose();
         }
       }}
     >
@@ -164,6 +164,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['oldPassword'] ? 'string' : 'password'}
                               label="Old Password"
                               name="oldPassword"
@@ -171,8 +172,10 @@ export default function ManageUpdateEmailAndPassword({
                               required={true}
                               value={values['oldPassword']}
                               onChange={(e) => setFieldValue('oldPassword', e.target.value)}
-                              InputProps={{
-                                endAdornment: <PasswordEndAdornment fieldName="oldPassword" />
+                              slotProps={{
+                                input: {
+                                  endAdornment: <PasswordEndAdornment fieldName="oldPassword" />
+                                }
                               }}
                               error={Boolean(errors['oldPassword'])}
                               helperText={errors['oldPassword']}
@@ -183,6 +186,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['newPassword'] ? 'string' : 'password'}
                               label="New Password"
                               name="newPassword"
@@ -190,8 +194,10 @@ export default function ManageUpdateEmailAndPassword({
                               required={true}
                               value={values['newPassword']}
                               onChange={(e) => setFieldValue('newPassword', e.target.value)}
-                              InputProps={{
-                                endAdornment: <PasswordEndAdornment fieldName="newPassword" />
+                              slotProps={{
+                                input: {
+                                  endAdornment: <PasswordEndAdornment fieldName="newPassword" />
+                                }
                               }}
                               error={Boolean(errors['newPassword'])}
                               helperText={errors['newPassword']}
@@ -201,6 +207,7 @@ export default function ManageUpdateEmailAndPassword({
                             <TextField
                               fullWidth
                               margin="dense"
+                              size="small"
                               type={visibity['confirmPassword'] ? 'string' : 'password'}
                               label="Confirm Password"
                               name="confirmPassword"
@@ -210,8 +217,10 @@ export default function ManageUpdateEmailAndPassword({
                               onChange={(e) => {
                                 setFieldValue('confirmPassword', e.target.value);
                               }}
-                              InputProps={{
-                                endAdornment: <PasswordEndAdornment fieldName="confirmPassword" />
+                              slotProps={{
+                                input: {
+                                  endAdornment: <PasswordEndAdornment fieldName="confirmPassword" />
+                                }
                               }}
                               error={Boolean(errors['confirmPassword'])}
                               helperText={errors['confirmPassword']}
@@ -225,6 +234,7 @@ export default function ManageUpdateEmailAndPassword({
                             style={{ width: '400px' }}
                             fullWidth
                             margin="dense"
+                            size="small"
                             type="email"
                             label="Email"
                             name="email"

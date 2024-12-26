@@ -81,7 +81,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
                 )}
               />
             )}

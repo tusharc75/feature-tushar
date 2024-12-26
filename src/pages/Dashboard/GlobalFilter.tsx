@@ -122,7 +122,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard">
+                    <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard" size="small">
                       {dashboardList.map((d: { name: string; id: string }) => (
                         <MenuItem key={d.id} value={d.name}>
                           {d.name}
@@ -166,6 +166,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                       value={timeFrame}
                       onChange={(e) => setTimeFrame(e.target.value)}
                       label="Select Duration"
+                      size="small"
                     >
                       <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                       <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

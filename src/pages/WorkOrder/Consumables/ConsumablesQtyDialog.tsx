@@ -256,6 +256,7 @@ const ConsumablesQtyDialog = ({
                                                 {...params}
                                                 style={{ minWidth: '200px' }}
                                                 margin="dense"
+                                                size="small"
                                                 name="storageLocation"
                                                 label="Storage Location"
                                                 placeholder="Storage Location"

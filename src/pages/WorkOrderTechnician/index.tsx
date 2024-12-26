@@ -153,7 +153,9 @@ const WorkOrderTechnician = () => {
     }
   ];
 
-  const [viewType, setViewType] = useState<ViewType>('table-view');
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'table-view';
+  });
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
     WORKORDER_SERVICE_STATUS.pending,
@@ -206,7 +208,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -271,6 +273,11 @@ const WorkOrderTechnician = () => {
     const queryString = getQueryString(filterByIdsP);
     setFilterQuery(queryString);
   };
+
+
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
+  }, [viewType])
 
   return (
     <Box className="main-container-v1">

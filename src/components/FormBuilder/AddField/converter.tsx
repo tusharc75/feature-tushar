@@ -151,6 +151,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
           <TextField
             {...params}
             margin="dense"
+            size="small"
             name="units"
             variant="outlined"
             label="Units"
@@ -182,6 +183,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                           name={_unit}
                           variant="outlined"
                           margin="dense"
+                          size="small"
                           fullWidth
                           autoFocus
                           style={{ margin: 0 }}
@@ -213,6 +215,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                             name={_unit + '_' + index}
                             variant="outlined"
                             margin="dense"
+                            size="small"
                             fullWidth
                             style={{ margin: 0 }}
                             value={values['unitoption'] && values['unitoption'][i] && values['unitoption'][i][_unit]}
@@ -230,7 +233,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
         <Box mt={1}>
           <Grid spacing={3} container>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense" error={touched['displayUnits'] && Boolean(errors['displayUnits'])}>
+              <FormControl variant="outlined" fullWidth size="small" margin="dense" error={touched['displayUnits'] && Boolean(errors['displayUnits'])}>
                 <InputLabel htmlFor="displayUnits">Display Units</InputLabel>
                 <Select
                   inputProps={{
@@ -239,6 +242,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                   }}
                   margin="dense"
                   label="Display Units"
+                  size="small"
                   multiple
                   name="displayUnits"
                   value={values['displayUnits'] ? values['displayUnits'] : []}
@@ -285,13 +289,14 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
-              <FormControl variant="outlined" fullWidth margin="dense" error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}>
+              <FormControl variant="outlined" fullWidth margin="dense" size="small" error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}>
                 <InputLabel htmlFor="formulaUnits">Formula Units</InputLabel>
                 <Select
                   inputProps={{
                     name: 'formulaUnits',
                     id: 'formulaUnits'
                   }}
+                  size="small"
                   error={touched['formulaUnits'] && Boolean(errors['formulaUnits'])}
                   margin="dense"
                   label="Formula Units"
@@ -342,11 +347,12 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
             </Grid>
             {values['isFormula'] && (
               <Grid item xs={12} sm={4} md={4}>
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                   <InputLabel id="formulaOnConverter">Formula applied on converter</InputLabel>
                   <Select
                     labelId="formulaOnConverter"
                     id="formulaOnConverter"
+                    size="small"
                     value={values['formulaOnConverter']}
                     onChange={(e) => setFieldValue('formulaOnConverter', e.target.value)}
                     label="Formula applied on converter"

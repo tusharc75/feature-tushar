@@ -92,6 +92,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                     <Grid item xs={12} sm={12}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Section Name"
                         name="sectionName"
@@ -108,6 +109,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                     <Grid item xs={12} sm={12}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Description"
                         name="description"

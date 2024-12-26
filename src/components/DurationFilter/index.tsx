@@ -54,7 +54,7 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
       <Grid item xs={12} sm={12} md={4}>
         <FormControl style={{ minWidth: '200px' }} fullWidth size="small" variant="outlined">
           <InputLabel id="duration">Select Duration</InputLabel>
-          <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+          <Select size="small" labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
             {showAll && <MenuItem value={'all'}>All</MenuItem>}
             <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
             <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

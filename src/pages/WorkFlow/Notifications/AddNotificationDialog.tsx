@@ -167,6 +167,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Roles"
                             placeholder="Roles"
@@ -201,6 +202,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Users"
                             placeholder="Users"

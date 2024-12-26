@@ -82,6 +82,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
             <CustomDialogContent>
               <TextField
                 margin="dense"
+                size="small"
                 type="number"
                 label="Revert Qty"
                 name="revertQty"
@@ -127,6 +128,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
               ) : null}
               <TextField
                 margin="dense"
+                size="small"
                 type="text"
                 label="Comment"
                 name="comment"

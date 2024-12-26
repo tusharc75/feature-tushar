@@ -76,6 +76,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                               {...params}
                               required={true}
                               margin="dense"
+                              size="small"
                               name="resourceName"
                               label="Resource Name"
                               variant="outlined"
@@ -117,6 +118,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                                     {...params}
                                     required={true}
                                     margin="dense"
+                                    size="small"
                                     variant="outlined"
                                     name="fieldName"
                                     label="Field Name"

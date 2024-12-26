@@ -211,6 +211,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                       <div className="name-container mb-2 sm:mb-3 md:mb-4">
                         <TextField
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Rule Name"
                           name="ruleName"

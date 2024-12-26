@@ -196,7 +196,7 @@ const WorkOrderPlanning = () => {
         onChange={(_, newVal) => {
           setSelectedStatus(newVal ? newVal : 'Pending');
         }}
-        renderInput={(params) => <TextField {...params} margin="dense" label="Status" name="status" variant="outlined" />}
+        renderInput={(params) => <TextField {...params} margin="dense" size="small" label="Status" name="status" variant="outlined" />}
       />
     );
   };

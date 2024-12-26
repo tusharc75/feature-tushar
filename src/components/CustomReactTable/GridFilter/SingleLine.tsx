@@ -85,14 +85,16 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
             required={required}
             error={touched && Boolean(errors[fieldName])}
             helperText={touched && errors[fieldName]}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }
             }}
             margin="none"
             size={'small'}

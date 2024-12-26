@@ -34,6 +34,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
                   multiline
                   rows={4}
                   margin="dense"
+                  size="small"
                   value={values['reason']}
                   error={touched['reason'] && Boolean(errors['reason'])}
                   helperText={touched['reason'] && errors['reason']}

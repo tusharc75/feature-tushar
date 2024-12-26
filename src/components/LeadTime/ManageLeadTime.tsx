@@ -193,6 +193,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
                                       id="Days-Field"
                                       variant="outlined"
                                       margin="dense"
+                                      size="small"
                                       name="days"
                                       label="Days"
                                       type="number"

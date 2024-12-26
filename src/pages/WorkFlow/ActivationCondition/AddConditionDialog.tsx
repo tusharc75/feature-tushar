@@ -145,6 +145,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                       <TextField
                         {...params}
                         margin="dense"
+                        size="small"
                         variant="outlined"
                         label="Field Name"
                         placeholder="Select Field"
@@ -185,6 +186,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             variant="outlined"
                             label="Field Value"
                             name="fieldValue"
@@ -203,6 +205,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                         rows={4}
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={values?.value}
                         onChange={(e) => {
                           setFieldValue('fieldValue', e.target.value.trimStart());

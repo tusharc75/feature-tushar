@@ -120,6 +120,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Input Parameters"
                   placeholder="Input Parameters"
@@ -144,6 +145,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               variant="outlined"
               label="Formula"
               margin="dense"
+              size="small"
               fullWidth
               multiline
               rows={stepFullScreen ? 30 : 4}
@@ -173,7 +175,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               </Grid>
               <Grid item xs={6}>
                 {values['type'] === 'currencyAmount' && (
-                  <FormControl fullWidth margin="dense" variant="outlined">
+                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                     <InputLabel id="demo-simple-select-outlined-label">Formula applied on Currency</InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"

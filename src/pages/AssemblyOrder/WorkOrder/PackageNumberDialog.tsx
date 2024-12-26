@@ -181,6 +181,7 @@ const ManagedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderId
                                     <TextField
                                       {...params}
                                       margin="dense"
+                                      size="small"
                                       variant="outlined"
                                       label="Package"
                                       placeholder="Package"

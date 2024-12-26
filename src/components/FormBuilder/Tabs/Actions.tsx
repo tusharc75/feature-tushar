@@ -238,19 +238,22 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Field"
                   placeholder="Field"
                   name="field"
                   required
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }
                   }}
                   error={Boolean(error?.find((e) => e?.index === index && e?.actionType === actionType && e?.name === 'field')?.error)}
                   helperText={
@@ -281,6 +284,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Resource"
                   placeholder="Resource"
@@ -316,19 +320,22 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Resource Field"
                   placeholder="Resource Field"
                   name="resourceField"
                   required
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }
                   }}
                   error={Boolean(error?.find((e) => e?.index === index && e?.actionType === actionType && e?.name === 'resourceField')?.error)}
                   helperText={
@@ -359,6 +366,7 @@ const Card = ({ resource, action, state, setState, index, addRemove, actionType,
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Action"
                   placeholder="Action"

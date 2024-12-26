@@ -51,6 +51,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
               {status === MATERIAL_REQUEST_STATUS.processed && data && (
                 <TextField
                   margin="dense"
+                  size="small"
                   type="number"
                   label="Qty"
                   name="qty"
@@ -97,6 +98,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
               ) : null}
               <TextField
                 margin="dense"
+                size="small"
                 type="text"
                 label="Comment"
                 name="comment"

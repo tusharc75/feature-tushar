@@ -42,7 +42,9 @@ function LookUpDisplay({ fields, values, fieldSet }) {
             onChange={(e, val) => {
               fieldSet('lookUpField', val && val.fieldName ? val.fieldName : '');
             }}
-            renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Look Up Field" placeholder="Look Up Field" />}
+            renderInput={(params) => (
+              <TextField {...params} margin="dense" size="small" variant="outlined" label="Look Up Field" placeholder="Look Up Field" />
+            )}
           />
         </Grid>
         {values['lookUpField'] && (
@@ -65,17 +67,20 @@ function LookUpDisplay({ fields, values, fieldSet }) {
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Look Up Field Display"
                   placeholder="Look Up Field Display"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <React.Fragment>
-                        {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </React.Fragment>
-                    )
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <React.Fragment>
+                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </React.Fragment>
+                      )
+                    }
                   }}
                 />
               )}
