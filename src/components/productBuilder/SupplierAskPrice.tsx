@@ -12,6 +12,7 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   CustomDialogTransition,
   dateTimeFormat,
+  displayDateTime,
   getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -19,10 +20,7 @@ import {
   sidebarResource
 } from '../../constants/helpers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-
 import { DeleteButton } from 'src/components/Helpers/Buttons';
-
-import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 
 const renderedFrom = 'quoteSupplierPrice';
@@ -106,8 +104,8 @@ const SupplierAskPrice = (props) => {
               disabled: false,
               Cell: ({ row }) =>
                 row?.original?.responseDate ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.responseDate)?.format(dateTimeFormat)}`}>
-                    {moment(row?.original?.responseDate)?.format(dateTimeFormat)}
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.responseDate)}`}>
+                    {displayDateTime(row?.original?.responseDate)}
                   </h5>
                 ) : (
                   <NoDataCell />

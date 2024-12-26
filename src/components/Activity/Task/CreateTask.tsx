@@ -17,7 +17,6 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -29,7 +28,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { dateFormat, dateFormatForInputControl } from '../../../constants/helpers';
+import { dateFormatForInputControl, displayDate } from '../../../constants/helpers';
 import Loader from '../../Loader';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
@@ -37,6 +36,7 @@ import statusList from '../Helpers/statusList';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { SubTask } from './SubTask';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -152,8 +152,8 @@ export const CreateTask = ({
 
   function validate(values) {
     const errors = {};
-    const dueDate = moment(values.dueDate, dateFormatForInputControl).startOf('day');
-    const startDate = moment(values.startDate, dateFormatForInputControl).startOf('day');
+    const dueDate = dayjs(values.dueDate, dateFormatForInputControl).startOf('day');
+    const startDate = dayjs(values.startDate, dateFormatForInputControl).startOf('day');
     if (dueDate.isBefore(startDate) && !startDate.isSame(dueDate)) {
       errors['dueDate'] = 'Due date must greater then start date';
     }
@@ -365,12 +365,12 @@ export const CreateTask = ({
                                   {Boolean(errors['dueDate']) && <span className="text-[12px] text-red-500">{errors['dueDate']}</span>}
                                   {initialValues.createdBy && initialValues.createdBy.date && (
                                     <Box mt={1} color="text.secondary">
-                                      <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
+                                      <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
                                     </Box>
                                   )}
                                   {initialValues.updatedBy && initialValues.updatedBy.date && (
                                     <Box mt={1} color="text.secondary">
-                                      <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format(dateFormat)}</Typography>
+                                      <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
                                     </Box>
                                   )}
                                 </Grid>

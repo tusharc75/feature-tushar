@@ -12,10 +12,9 @@ import {
   convertMsToTime,
   sidebarResource,
   CustomDialogTransition,
-  gridSize
+  gridSize,
+  displayDateTime
 } from 'src/constants/helpers';
-import { dateTimeFormat } from 'src/constants/helpers';
-import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -213,14 +212,14 @@ const StepFieldsDialog = ({
             {stepData?.startDate ? (
               <div>
                 <p className={classes.sectionColTItle}>Start Date:</p>
-                <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
+                <p className={classes.sectionColDetail}>{displayDateTime(stepData.startDate)}</p>
               </div>
             ) : null}
 
             {stepData?.endDate ? (
               <div>
                 <p className={classes.sectionColTItle}>End Date:</p>
-                <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
+                <p className={classes.sectionColDetail}>{displayDateTime(stepData.endDate)}</p>
               </div>
             ) : null}
           </div>

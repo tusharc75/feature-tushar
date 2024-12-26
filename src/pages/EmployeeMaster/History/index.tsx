@@ -7,8 +7,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
-import moment from 'moment';
+import { displayDateTime, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import Autocomplete from '@mui/material/Autocomplete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -127,8 +126,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.startDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
+              {displayDateTime(row?.original?.startDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -147,8 +146,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.endDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
+              {displayDateTime(row?.original?.endDate)}
             </h5>
           ) : (
             <NoDataCell />

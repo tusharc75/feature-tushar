@@ -28,10 +28,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
 import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import moment from 'moment';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import dayjs from 'dayjs';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -232,13 +232,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    let actualStartDate = moment(values?.actualStartDate);
-    let actualEndDate = moment(values?.actualEndDate);
+    let actualStartDate = dayjs(values?.actualStartDate);
+    let actualEndDate = dayjs(values?.actualEndDate);
     if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
       if (actualEndDate.diff(actualStartDate, 'days') <= 0) {
         errors['actualEndDate'] = 'Please enter valid actual end date';

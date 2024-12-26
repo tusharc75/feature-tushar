@@ -35,7 +35,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(sidebarResource.transferAsset);
@@ -295,9 +295,9 @@ const TransferAssetDetailPage = () => {
                 </ButtonWithPulse>
               )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton

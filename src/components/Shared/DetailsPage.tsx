@@ -11,7 +11,6 @@ import {
   colSpans,
   columnSize,
   CustomDialogTransition,
-  dateFormat,
   displayDate,
   displayDateTime,
   formatAmountWithCurrency,
@@ -26,7 +25,6 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
 import { FaUserPlus } from 'react-icons/fa6';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
@@ -788,8 +786,8 @@ const RenderFollowUP = ({
           </div>
           {d.description && <p className="py-2 text-gray-600 dark:text-gray-400">{d.description}</p>}
           <span className="block text-[12px] font-bold text-gray-500 dark:text-gray-600">
-            Start date: {moment(d.startDate).format(dateFormat)}
-            {d.dueDate && <>, Due date: {moment(d.dueDate).format(dateFormat)}</>}
+            Start date: {displayDate(d.startDate)}
+            {d.dueDate && <>, Due date: {displayDate(d.dueDate)}</>}
           </span>
         </div>
       ))}

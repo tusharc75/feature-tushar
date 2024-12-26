@@ -3,7 +3,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -15,7 +14,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageRules from './ManageRules';
 
@@ -68,10 +67,10 @@ export default function Rules({ deviceTemplate }) {
         filter: false,
         Cell: ({ row }) =>
           row.original?.createdBy ? (
-            <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+            <h5 className="createBy" title={`${row.original?.createdBy} • ${displayDate(row.original?.createdByDate)}`}>
               {row.original?.createdBy}
               <span className="hidden">&nbsp;-&nbsp;</span>
-              <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+              <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
             </h5>
           ) : (
             <NoDataCell />
@@ -87,10 +86,10 @@ export default function Rules({ deviceTemplate }) {
             <h5
               className="updateBy"
               style={{ minWidth: 'min-content' }}
-              title={`${row.original?.updatedBy} • ${moment(row.original?.updatedByDate).format(dateFormat)}`}
+              title={`${row.original?.updatedBy} • ${displayDate(row.original?.updatedByDate)}`}
             >
               <span>{row.original?.updatedBy}</span>
-              <span className="updatedAtTime badge-date">{moment(row.original?.updatedByDate)?.format(dateFormat)}</span>
+              <span className="updatedAtTime badge-date">{displayDate(row.original?.updatedByDate)}</span>
             </h5>
           ) : (
             <NoDataCell />

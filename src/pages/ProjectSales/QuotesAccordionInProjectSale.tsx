@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import styles from './ProjectSales.module.scss';
 
 export default function QuotesAccordionInProjectSale({

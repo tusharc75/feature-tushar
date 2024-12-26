@@ -4,11 +4,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@mui/material/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { displayDate, gridLoadingTimeout } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -130,10 +128,10 @@ const SerialNumber = ({ product, warehouse }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.createdBy ? (
-            <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate).format(dateFormat)}`}>
+            <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
               {row?.original?.createdBy}
               <span className="hidden">&nbsp;-&nbsp;</span>
-              <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate)?.format(dateFormat)}</span>
+              <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
             </h5>
           ) : (
             <NoDataCell />

@@ -1,16 +1,15 @@
-import { Box, Button, Grid, IconButton, Paper, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
 import { ControlPoint } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -304,14 +303,9 @@ const ProjectSalesDetails = () => {
             ) : (
               <>
                 {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 ) : null}
                 {permissions?.projectSales?.isDelete && isManager ? (
                   <DeleteButton

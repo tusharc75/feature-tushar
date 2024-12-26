@@ -6,7 +6,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, dateFormat, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import InfoIcon from '@mui/icons-material/Info';

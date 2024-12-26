@@ -1,12 +1,11 @@
 import { Avatar, Box, Button, Dialog, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
-import moment from 'moment';
 import { Fragment, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
+import { CustomDialogTransition, dateTimeFormat, displayDateTime } from '../../../constants/helpers';
 import { Image } from '@mui/icons-material';
 
 const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) => {
@@ -68,7 +67,7 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                         secondary={
                           <Fragment>
                             <Typography variant="subtitle2">Qty - {product?.qty}</Typography>
-                            <Typography variant="subtitle2">{`Pick Up Date - ${moment(product?.pickUpDate).format(dateTimeFormat)}`}</Typography>
+                            <Typography variant="subtitle2">{`Pick Up Date - ${displayDateTime(product?.pickUpDate)}`}</Typography>
                           </Fragment>
                         }
                       />
@@ -119,8 +118,8 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                         secondary={
                           <Fragment>
                             <Typography variant="subtitle2">Qty - {product?.qty}</Typography>
-                            <Typography variant="subtitle2">{`Pick Up Date - ${moment(product?.pickUpDate).format(dateTimeFormat)}`}</Typography>
-                            <Typography variant="subtitle2">{`Drop Date - ${moment(product?.dropDate).format(dateTimeFormat)}`}</Typography>
+                            <Typography variant="subtitle2">{`Pick Up Date - ${displayDateTime(product?.pickUpDate)}`}</Typography>
+                            <Typography variant="subtitle2">{`Drop Date - ${displayDateTime(product?.dropDate)}`}</Typography>
                           </Fragment>
                         }
                       />

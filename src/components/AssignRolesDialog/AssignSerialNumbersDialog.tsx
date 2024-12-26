@@ -8,11 +8,9 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
-import routes from '../Helpers/Routes';
-import moment from 'moment';
 import {
   CustomDialogTransition,
-  dateFormat,
+  displayDate,
   gridLoadingTimeout,
   prepareDataForGrid,
   productInventory,
@@ -100,9 +98,9 @@ const AssignSerialNumbersDialog = ({
       Cell: ({ row }) => (
         <>
           {row?.original?.createdBy ? (
-            <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate).format(dateFormat)}`}>
+            <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
               {row?.original?.createdBy}
-              <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate)?.format(dateFormat)}</span>
+              <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
             </h5>
           ) : (
             <NoDataCell />

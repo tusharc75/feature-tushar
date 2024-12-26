@@ -2,7 +2,6 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { dateFormat } from 'src/constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {

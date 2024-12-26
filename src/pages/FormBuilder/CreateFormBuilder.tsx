@@ -26,6 +26,8 @@ import DynamicTabs from 'src/components/FormBuilder/Tabs';
 import { Settings } from '@mui/icons-material';
 import SettingDialog from './SettingDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -218,7 +220,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -329,14 +331,9 @@ const CreateFormBuilder = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                className={'btn-outline-v1'}
-                onClick={handleOpenHistoryDialog}
-              >
-                History
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenHistoryDialog} tooltip={'History'}>
+                {'History'}
+              </ThemeButton>
               <div className={classes.linksContainer} style={{ display: 'none' }}>
                 <label htmlFor="importField" className="mr-3 cursor-pointer">
                   Import Fields

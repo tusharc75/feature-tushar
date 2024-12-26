@@ -1,12 +1,13 @@
 import { Box, Button, Dialog, Grid, IconButton, Typography } from '@mui/material';
-import { ControlPoint, Edit } from '@mui/icons-material';
+import { ControlPoint } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
@@ -308,14 +309,9 @@ const EntityDetailsPage = () => {
             {entityData ? (
               <>
                 {permissions?.entity?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.entity?.isDelete && (
                   <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />

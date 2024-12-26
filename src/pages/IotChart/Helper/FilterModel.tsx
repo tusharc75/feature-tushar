@@ -1,6 +1,6 @@
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
+import { INTERVALS } from '../../../constants/helpers';
 import { useEffect, useState } from 'react';
 import { isValid } from 'date-fns';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';

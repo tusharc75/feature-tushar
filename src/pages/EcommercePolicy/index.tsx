@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -9,6 +8,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import DetailsDialog from './DetailsDialog';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const EcommercePolicy = () => {
   const [details, setDetails] = useState({});
@@ -50,16 +50,15 @@ const EcommercePolicy = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.eCommercePolicy, title: resources?.eCommercePolicy?.titlePlural }]} />
-        <Button
-          variant={isMobile && !isTablet ? 'text' : 'contained'}
-          size="small"
-          className={'btn-outline-v1'}
+        <ThemeButton
+          iconForMobile={<EditIcon />}
           onClick={() => {
             setOpen(true);
           }}
+          tooltip={'Edit'}
         >
-          {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-        </Button>
+          {'Edit'}
+        </ThemeButton>
       </Box>
       <Box className={`detail-container-v1`}>
         {fields ? <DetailsPage data={details} fields={fields} /> : <CommonSkeleton lenArray={[...Array(7).keys()]} />}

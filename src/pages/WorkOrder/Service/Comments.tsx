@@ -7,9 +7,8 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
-import moment from 'moment';
 import { TextField, Button, Grid } from '@mui/material';
-import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat, displayDateTime } from 'src/constants/helpers';
 import PersonIcon from '@mui/icons-material/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -162,12 +161,12 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                   <div className="mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)]">
                     <p>
                       Created by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.date)}</span>
                     </p>
                     {item.updatedBy && item.updatedAt ? (
                       <p>
                         Edited by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                        <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.updatedAt).format(dateTimeFormat)}</span>
+                        <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.updatedAt)}</span>
                       </p>
                     ) : null}
                     <div></div>

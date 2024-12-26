@@ -3,7 +3,6 @@ import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -35,6 +34,7 @@ import {
   DELIVERY_TICKET_TYPE,
   dateTimeFormat,
   deliveryTicket,
+  displayDateTime,
   getObjKeysWithValues,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -204,12 +204,12 @@ export default function DeliveryTicketDetail(props) {
         setDeliveryTicketData(data);
         const startDeliverySignatures = data?.signatures?.filter((f) => f.status === 'Start Delivery' && f.date);
         if (startDeliverySignatures && startDeliverySignatures.length > 0) {
-          setStartDeliveryDate(moment(startDeliverySignatures[startDeliverySignatures.length - 1].date).format(dateTimeFormat));
+          setStartDeliveryDate(displayDateTime(startDeliverySignatures[startDeliverySignatures.length - 1].date));
         }
         setSignOffDate(data?.actualDeliveryDate);
         const signOffSignatures = data?.signatures?.filter((f) => f.status === 'Sign-Off' && f.date);
         if (signOffSignatures && signOffSignatures.length > 0) {
-          setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
+          setSignOffDate(displayDateTime(signOffSignatures[signOffSignatures.length - 1].date));
         }
         setCanEdit([...(data?.collaborator ?? []), data?.owner ?? {}, data?.processor ?? {}].some((obj) => obj.optionValue === user.user._id));
         setSignatures(data?.signatures || []);
@@ -508,15 +508,9 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
-                  >
-                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
 
               {deliveryTicketData?.signatures?.length > 0 ? (

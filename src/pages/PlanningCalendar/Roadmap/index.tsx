@@ -5,7 +5,7 @@ import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, downloadExcel } from 'src/constants/helpers';
+import { downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ActivityList from './ActivityList';
 import Calendar from './Calendar';

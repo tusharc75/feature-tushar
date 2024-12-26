@@ -1,7 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { Skeleton } from '@mui/material';
 import { orderBy, startCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -11,7 +10,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
+import { displayDate, formatAmountWithCurrency, getUniqueCurrencies, MATERIAL_TYPE, quotation } from '../../../constants/helpers';
 import QCcomment from './QCcomment';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import axios from 'axios';
@@ -115,7 +114,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           Header: element.fieldLabel,
           disableFilters: true,
           Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+            row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName].slice(0, 10))}</p> : <NoDataCell />
         });
       } else if (element.fieldName === 'supplierAccount') {
         coloum.push({

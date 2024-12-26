@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
-import { dateFormatForInputControl } from '../../constants/helpers';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -114,13 +113,13 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
   };
 
   return (
-    <AppBar className={classes.appBar} position="sticky" elevation={0} style={{ zIndex: 1 }}>
+    <AppBar className={classes.appBar} position="sticky" elevation={0} sx={{ zIndex: 1, '--AppBar-background': 'var(--dark-primary, white)' }}>
       <Box pt={1}>
         <Grid container spacing={2}>
-          <Grid size={{xs:12, sm:6}} >
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Grid container spacing={2}>
               {dashboardList.length !== 0 && (
-                <Grid size={{xs:12, sm:6}}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="dashboard-type">Dashboard</InputLabel>
                     <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard} label="Dashboard" size="small">
@@ -133,7 +132,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   </FormControl>
                 </Grid>
               )}
-              <Grid size={{xs:12, sm:6}}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTypes
                   disabled={disabled}
                   fullWidth
@@ -156,9 +155,9 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
             </Grid>
           </Grid>
           {globalFilters?.timeFrame && globalFilters?.between && (
-            <Grid size={{xs:12, sm:12, md:6}} >
+            <Grid size={{ xs: 12, sm: 12, md: 6 }}>
               <Grid container spacing={2}>
-                <Grid size={{xs:12, sm:4}} >
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                     <InputLabel id="duration">Select Duration</InputLabel>
                     <Select
@@ -178,7 +177,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={{xs:6, sm:4}} >
+                <Grid size={{ xs: 6, sm: 4 }}>
                   <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
                     fullWidth
@@ -193,7 +192,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     }}
                   />
                 </Grid>
-                <Grid size={{xs:6, sm:4}}>
+                <Grid size={{ xs: 6, sm: 4 }}>
                   <CustomDatePicker
                     disabled={timeFrame !== 'custom' || disabled}
                     fullWidth

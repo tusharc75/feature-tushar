@@ -45,7 +45,6 @@ import { handleAutoCalculation, optionConverter } from '../../constants/formulaU
 import {
   checkValue,
   CustomDialogTransition,
-  dateFormatForInputControl,
   documentUploadMaxSize,
   documentUploadSupportExtensions,
   formatAmountWithCurrency,
@@ -1964,9 +1963,13 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option: any) => {
+          renderOption={(props, option: any) => {
             const { currencyCode, currencyName, symbolNative } = option;
-            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+            return (
+              <li {...props}>
+                {`${currencyCode} - ${currencyName} - (${symbolNative})`}
+              </li>
+            );
           }}
           // renderOption={(option) => {
           //   const { currencyCode, name, countryCode, symbolNative } = option;

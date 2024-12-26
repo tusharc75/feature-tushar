@@ -1,14 +1,12 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { cloneDeep } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { SVG } from '../../assets';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -564,16 +562,15 @@ function OpportunityDetailsPage() {
               {opportunityData ? (
                 <>
                   {allowedToEdit ? (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
+                    <ThemeButton
+                      iconForMobile={<EditIcon />}
                       onClick={() => {
                         setOpenUpdateDialog(true);
                       }}
-                      className={'btn-outline-v1'}
+                      tooltip={'Edit'}
                     >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                      {'Edit'}
+                    </ThemeButton>
                   ) : null}
 
                   {allowedToDelete ? (

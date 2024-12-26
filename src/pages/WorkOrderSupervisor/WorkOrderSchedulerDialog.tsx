@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import {
   ASSET_STATUS,
   CustomDialogTransition,
-  dateFormatForInputControl,
   serializedAsset,
   sidebarResource,
   workOrder
