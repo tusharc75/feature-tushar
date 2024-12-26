@@ -48,6 +48,7 @@ import {
   generateStepSendToSupplier,
   nextButtonStep
 } from 'src/pages/Sublease/walkmeSteps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SubleaseDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -214,9 +215,9 @@ const SubleaseDetailsPage = () => {
               )}
             {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
               <>
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
-                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               </>
             )}
             <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />

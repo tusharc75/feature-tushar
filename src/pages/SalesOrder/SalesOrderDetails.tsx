@@ -1,7 +1,6 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
-import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -215,14 +214,9 @@ const SalesOrderDetails = () => {
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                  <Button
-                    className={'btn-outline-v1'}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
 
                 {permissions?.salesOrder?.isDelete && salesOrderData?.canDelete && (

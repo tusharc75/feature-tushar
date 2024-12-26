@@ -1,11 +1,10 @@
 import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -91,16 +90,15 @@ const ProductAuctionDetailsPage = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.product?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
+                <ThemeButton
+                  iconForMobile={<EditIcon />}
                   onClick={() => {
                     setOpenUpdateDialog(true);
                   }}
-                  className={`btn-outline-v1`}
+                  tooltip={'Edit'}
                 >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>

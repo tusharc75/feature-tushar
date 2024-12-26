@@ -35,7 +35,7 @@ import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.repairJob);
@@ -220,9 +220,9 @@ const RepairJobDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />

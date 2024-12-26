@@ -1,16 +1,16 @@
 import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
-import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@mui/icons-material';
+import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -247,14 +247,9 @@ const ProductDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.product?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className={'btn-outline-v1'}
-                size="small"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions?.product?.isDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
