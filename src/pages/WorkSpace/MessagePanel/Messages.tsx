@@ -2,7 +2,6 @@ import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@mui/materi
 import { MoreVert, Delete, GetApp } from '@mui/icons-material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { BsEmojiGrin, BsReply } from 'react-icons/bs';
 import { Socket } from 'socket.io-client';
@@ -13,7 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
+import { cn, dateFormat, displayDate, displayDateTime, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
@@ -29,7 +28,7 @@ type MessagesProps = {
 };
 
 export const groupByDate = (messages: Message[]) => {
-  return groupBy(messages, (message) => moment(message.date).format(dateFormat));
+  return groupBy(messages, (message) => displayDate(message.date));
 };
 
 const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
@@ -244,7 +243,7 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
+  messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
   channelData
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();

@@ -45,7 +45,6 @@ import { handleAutoCalculation, optionConverter } from '../../constants/formulaU
 import {
   checkValue,
   CustomDialogTransition,
-  dateFormatForInputControl,
   documentUploadMaxSize,
   documentUploadSupportExtensions,
   formatAmountWithCurrency,

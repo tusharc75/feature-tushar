@@ -7,11 +7,10 @@ import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
-import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -35,7 +34,7 @@ const TriggerNotificationHistory = () => {
       disableSortBy: true,
       disabled: true,
       Cell: ({ row }) =>
-        row?.original?.createdBy?.date ? <div>{moment(row?.original?.createdBy?.date).format(dateTimeFormat)}</div> : <NoDataCell />
+        row?.original?.createdBy?.date ? <div>{displayDateTime(row?.original?.createdBy?.date)}</div> : <NoDataCell />
     },
     {
       accessor: 'reference',

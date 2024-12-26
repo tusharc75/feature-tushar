@@ -12,7 +12,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import RichTextEditor from 'react-rte';
@@ -27,7 +26,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import TinyMce from '../../../components/TinyMCE';
-import { dateTimeFormat, imageUploadMaxSize, sidebarResource, validations } from '../../../constants/helpers';
+import { displayDateTime, imageUploadMaxSize, sidebarResource, validations } from '../../../constants/helpers';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import ImageAttachments from './ImageAttachments';
@@ -488,7 +487,7 @@ export const CreateEmail = ({
                           </Box>
                         ) : null}
                         <Box mt={1} color="text.secondary">
-                          <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
+                          <Typography variant="body2">Sended {displayDateTime(initialValues.createdBy.date)}</Typography>
                         </Box>
                       </Fragment>
                     ) : (

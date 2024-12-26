@@ -6,7 +6,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { UserDropdown } from 'src/components/Activity/Helpers/userDropdown';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';

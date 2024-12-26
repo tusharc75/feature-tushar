@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { groupBy, map, uniq } from 'lodash';
-import moment from 'moment';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,8 +20,8 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   TRANSFER_ASSET_STATUS,
-  dateTimeFormat,
   deliveryTicket,
+  displayDateTime,
   prepareDataForGrid,
   serializedAsset,
   sidebarResource
@@ -126,8 +125,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       disableSortBy: true,
       Cell: ({ row }) =>
         row.original?.createDate ? (
-          <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.createDate)?.format(dateTimeFormat)}
+          <div className="createBy" title={`${displayDateTime(row.original?.createDate)}`}>
+            {displayDateTime(row.original?.createDate)}
           </div>
         ) : (
           <NoDataCell />
@@ -141,8 +140,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       disableSortBy: true,
       Cell: ({ row }) =>
         row.original?.actualDeliveryDate ? (
-          <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
+          <div className="createBy" title={`${displayDateTime(row.original?.actualDeliveryDate)}`}>
+            {displayDateTime(row.original?.actualDeliveryDate)}
           </div>
         ) : (
           <NoDataCell />

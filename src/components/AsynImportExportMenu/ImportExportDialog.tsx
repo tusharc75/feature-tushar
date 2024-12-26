@@ -4,7 +4,7 @@ import {
   CustomDialogTransition,
   IMPORT_EXPORT_STATUS,
   IMPORT_EXPORT_TYPE,
-  dateTimeFormat,
+  displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid
 } from 'src/constants/helpers';
@@ -15,7 +15,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { GetApp } from '@mui/icons-material';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -87,7 +86,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
         accessor: 'date',
         Header: 'Date & Time',
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {

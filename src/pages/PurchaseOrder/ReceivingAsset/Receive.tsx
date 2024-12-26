@@ -11,7 +11,6 @@ import {
   MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
-  dateFormatForInputControl,
   productInventory,
   purchaseOrder,
   sidebarResource

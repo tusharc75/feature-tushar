@@ -1,6 +1,5 @@
 import { Box, IconButton } from '@mui/material';
 import { camelCase, isArray, upperFirst } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -8,9 +7,10 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, dateTimeFormat, gridLoadingTimeout, UnCamelCase } from 'src/constants/helpers';
+import { displayDate, displayDateTime, gridLoadingTimeout, UnCamelCase } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
+import dayjs from 'dayjs';
 
 const renderedFrom = 'resourceLogs';
 
@@ -89,7 +89,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
         width: 120,
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => <div className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
+        Cell: ({ row }) => <div className="text-truncate">{displayDateTime(row?.original?.date)}</div>
       },
       {
         accessor: 'changeString',
@@ -172,11 +172,11 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     var oldValue = e?.oldValue;
                     var newValue = e?.newValue;
                     if (e?.type === 'date') {
-                      if (oldValue && moment(oldValue)?.isValid) {
-                        oldValue = moment(oldValue).format(dateFormat);
+                      if (oldValue && dayjs(oldValue)?.isValid) {
+                        oldValue = displayDate(oldValue);
                       }
-                      if (newValue && moment(newValue)?.isValid) {
-                        newValue = moment(newValue).format(dateFormat);
+                      if (newValue && dayjs(newValue)?.isValid) {
+                        newValue = displayDate(newValue);
                       }
                     } else if (e?.type === 'dropDown' && e?.lookup) {
                       oldValue = oldValue?.label;

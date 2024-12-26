@@ -15,6 +15,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
+import dayjs from 'dayjs';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1416,13 +1417,15 @@ export const yyyyMMDD = (dateToBeFormatted) => {
   return dateToBeFormatted ? moment(dateToBeFormatted).format(cardDateFormat) : dateToBeFormatted;
 };
 
-export const displayDate = (date) => {
-  return date ? moment(date).format(dateFormat) : date;
+export const displayDate = (date, format= null) => {
+  format = format ? format : dateFormat;
+  return date ? dayjs.utc(date).tz().format(format) : date;
 };
 
-export const displayDateTime = (date) => {
-  return date ? moment(date).format(dateTimeFormat) : date;
-};
+export const displayDateTime = (date, format= null) => {
+  format = format ? format : dateTimeFormat;
+  return date ? dayjs.utc(date).tz().format(format) : date;
+}
 
 export const displayCardDate = (date) => {
   return date ? moment(date).format(cardDateFormat) : date;

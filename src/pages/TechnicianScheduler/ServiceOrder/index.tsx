@@ -1,12 +1,11 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { displayDate, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -220,7 +219,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateStartDate'] ? (
-            <p className="text-truncate">{moment(row.original.estimateStartDate).format(dateFormat)}</p>
+            <p className="text-truncate">{displayDate(row.original.estimateStartDate)}</p>
           ) : (
             <NoDataCell />
           )
@@ -231,7 +230,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateEndDate'] ? (
-            <p className="text-truncate">{moment(row.original.estimateEndDate).format(dateFormat)}</p>
+            <p className="text-truncate">{displayDate(row.original.estimateEndDate)}</p>
           ) : (
             <NoDataCell />
           )

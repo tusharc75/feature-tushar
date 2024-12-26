@@ -16,12 +16,11 @@ import { useCallback } from 'react';
 import { getSearchQuery } from '../../services/util';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import moment from 'moment';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import CustomDataGridNoDataFound from '../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import CustomDataGridToolbar from '../../components/Helpers/DataGridHelpers/CustomDataGridToolbar';
-import { CustomDialogTransition, dateFormat } from '../../constants/helpers';
+import { CustomDialogTransition, displayDate } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
   actionBtn: {
@@ -199,7 +198,7 @@ export default function Doa() {
           isChecked: false,
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
-          createdAt: moment(user.createdAt).format(dateFormat),
+          createdAt: displayDate(user.createdAt),
           status: user.blocked ? user.blocked : false
         }))
       : [];

@@ -10,7 +10,7 @@ import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CreateProjectSales from '../../pages/ProjectSales/CreateProjectSales';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
 import routes from '../Helpers/Routes';
 

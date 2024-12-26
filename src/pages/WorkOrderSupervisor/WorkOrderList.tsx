@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import { Info } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
-import moment from 'moment';
 import React, { Dispatch, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { FiExternalLink } from 'react-icons/fi';

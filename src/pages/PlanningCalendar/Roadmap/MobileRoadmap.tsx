@@ -4,7 +4,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { Typography, Box, Avatar, IconButton, Collapse, Tooltip, Button } from '@mui/material';
 import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@mui/icons-material';
 import moment from 'moment';
-import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
+import { displayDate } from 'src/constants/helpers';
 
 interface MobileRoadmapProps {
   activity: Activity[];
@@ -136,7 +136,7 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
                     return (
                       <div className="rounded-md border border-[var(--common-border-color)] bg-[white] p-2 dark:bg-[var(--dark-secondary)]">
                         <div className="mb-1 flex flex-wrap justify-between gap-2 text-[12px] text-gray-500 dark:text-gray-300">
-                          {moment(item.startDate).format(dateFormat)} - {moment(item.endDate).format(dateFormat)}
+                          {displayDate(item.startDate)} - {displayDate(item.endDate)}
                         </div>
                         <p>
                           <b className="font-semibold">QTY :</b> {item.qty}

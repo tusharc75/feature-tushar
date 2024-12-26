@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Dialog, Button, Box, Grid, Typography } from '@mui/material';
 import { startCase } from 'lodash';
-import moment from 'moment';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormat, dateTimeFormat } from '../../constants/helpers';
+import { CustomDialogTransition, displayDateTime } from '../../constants/helpers';
 
 const ViewSignsDialog = ({ close, signatures }) => {
   const [signs, setSigns] = useState([]);
@@ -39,7 +38,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
               <Box textAlign="center">
                 <Typography variant="body1">
                   "{sign.status === 'Start Delivery' ? 'Sign-off - Dispatched' : 'Sign-off - Delivered'}"&nbsp;
-                  {sign?.signs && sign.signs.length > 1 && sign.signs[1].date ? moment(sign.signs[1].date).format(dateTimeFormat) : ''}
+                  {sign?.signs && sign.signs.length > 1 && sign.signs[1].date ? displayDateTime(sign.signs[1].date) : ''}
                 </Typography>
               </Box>
               <Box mt={4}>

@@ -13,7 +13,6 @@ import {
   MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
-  dateFormatForInputControl,
   productInventory,
   purchaseOrder,
   sidebarResource
@@ -421,7 +420,6 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                         name="rejectDate"
                         placeholder="Reject Date"
                         value={values.rejectDate}
-                        format={dateFormatForInputControl}
                         minDate={
                           lockDate
                             ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0

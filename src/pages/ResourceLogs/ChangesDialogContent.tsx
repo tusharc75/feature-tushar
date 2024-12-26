@@ -1,9 +1,8 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { camelCase, capitalize, isArray, isNumber, isString } from 'lodash';
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, UnCamelCase } from 'src/constants/helpers';
+import { displayDate, UnCamelCase } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
 const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
@@ -38,7 +37,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                       <TableCell data-th="Old Value">
                         {data?.oldValue || data?.oldValue === 0 ? (
                           data?.type === 'date' ? (
-                            moment(data?.oldValue).format(dateFormat)
+                            displayDate(data?.oldValue)
                           ) : data?.type === 'gpsLocation' ? (
                             data?.oldValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
@@ -83,7 +82,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                       <TableCell data-th="New Value">
                         {data?.newValue || data?.newValue === 0 ? (
                           data?.type === 'date' ? (
-                            moment(data?.newValue).format(dateFormat)
+                            displayDate(data?.newValue)
                           ) : data?.type === 'gpsLocation' ? (
                             data?.newValue?.locationName || <NoDataCell />
                           ) : data?.type === 'dropDown' && data?.lookup ? (
@@ -183,7 +182,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                       <TableCell>
                                         {data?.oldValue || data?.oldValue === 0 ? (
                                           data?.type === 'date' ? (
-                                            moment(data?.oldValue).format(dateFormat)
+                                            displayDate(data?.oldValue)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
                                             <p
                                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
@@ -207,7 +206,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                       <TableCell>
                                         {data?.newValue || data?.newValue === 0 ? (
                                           data?.type === 'date' ? (
-                                            moment(data?.newValue).format(dateFormat)
+                                            displayDate(data?.newValue)
                                           ) : data?.type === 'dropDown' && data?.lookup ? (
                                             <p
                                               className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}

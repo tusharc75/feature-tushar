@@ -1,12 +1,11 @@
 import { Form, Formik } from 'formik';
-
-import moment from 'moment';
 import { Dispatch, Fragment, useEffect, useMemo, useState } from 'react';
 import { TChatboxActions, TInitialChatboxState } from 'src/components/AiChatbox/chatboxReducer';
 import { Field } from 'src/components/AiChatbox/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { cn, dateFormat, yupSchema } from 'src/constants/helpers';
+import { cn, yupSchema } from 'src/constants/helpers';
+import { displayDate } from 'src/constants/helpers';
 
 function validate(values: any) {
   const errors = {};
@@ -50,7 +49,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
 
     for (const key of Object.keys(formattedData)) {
       if (fieldTypes[key] === 'date' && formattedData[key]) {
-        formattedData[key] = moment(formattedData[key]).format(dateFormat);
+        formattedData[key] = displayDate(formattedData[key]);
       }
     }
     handleSubmit(formattedData);

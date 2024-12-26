@@ -14,10 +14,10 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 // import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import moment from 'moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -162,8 +162,8 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }

@@ -19,7 +19,7 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import routes from './../../components/Helpers/Routes';
 import NewOpportunityProjectSales from './NewOpportunityProjectSales';
 import styles from './ProjectSales.module.scss';

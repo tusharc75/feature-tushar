@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SendIcon from '@mui/icons-material/Send';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -13,7 +12,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { dateTimeFormat, fieldServiceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, displayDateTime, fieldServiceOrder } from '../../../constants/helpers';
 import DispatchMaterial from './DispatchMaterial';
 import { FiExternalLink } from 'react-icons/fi';
 
@@ -96,7 +95,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         Header: 'Estimate Start Date',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['estimateStartDate'] ? <p>{moment(row.original['estimateStartDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original['estimateStartDate'] ? <p>{displayDateTime(row.original['estimateStartDate'])}</p> : <NoDataCell />;
         }
       },
       {
@@ -104,7 +103,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         Header: 'Estimate End Date',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['estimateEndDate'] ? <p>{moment(row.original['estimateEndDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original['estimateEndDate'] ? <p>{displayDateTime(row.original['estimateEndDate'])}</p> : <NoDataCell />;
         }
       }
     ];

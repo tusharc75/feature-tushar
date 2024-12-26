@@ -1,13 +1,12 @@
 import { Box, Button, IconButton } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, displayDateTime } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -47,7 +46,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original['requestDate'])}</p>
           ) : (
             <NoDataCell />
           );
@@ -136,7 +135,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         width: 200,
         Cell: ({ row }) => {
           return row?.original['processDate'] ? (
-            <p className="text-truncate">{moment(row?.original['processDate']).format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original['processDate'])}</p>
           ) : (
             <NoDataCell />
           );

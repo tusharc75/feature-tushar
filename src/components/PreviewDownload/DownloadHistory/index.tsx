@@ -3,8 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { FILE_PROCESS_STATUS, dateTimeFormat } from 'src/constants/helpers';
-import moment from 'moment';
+import { FILE_PROCESS_STATUS, dateTimeFormat, displayDateTime } from 'src/constants/helpers';
 import SyncIcon from '@mui/icons-material/Sync';
 import PreviewIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -104,7 +103,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
               <TableBody>
                 {historyData?.map((row) => (
                   <TableRow key={row._id}>
-                    <TableCell>{moment(row?.createdBy?.date).format(dateTimeFormat)}</TableCell>
+                    <TableCell>{displayDateTime(row?.createdBy?.date)}</TableCell>
                     <TableCell>
                       <Typography variant="inherit">{row?.pdfType}</Typography>
                     </TableCell>
