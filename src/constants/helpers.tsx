@@ -3840,8 +3840,8 @@ export const workOrderColormap = {
   },
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: {
     color: 'dark:text-white text-[#6D29F6]',
-    background: 'dark:bg-[#0c68e9] bg-[#D6F1FF]',
-    indicator: 'bg-[#6D29F6] dark:bg-[#0c68e9]'
+    background: 'dark:bg-[#6055df] bg-[#D6F1FF]',
+    indicator: 'bg-[#6D29F6] dark:bg-[#6055df]'
   }
 };
 
