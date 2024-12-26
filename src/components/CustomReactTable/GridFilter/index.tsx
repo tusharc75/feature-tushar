@@ -222,23 +222,26 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                     setFormValues(newValue?.filterValue || {});
                   }}
                   getOptionLabel={(option) => option.title || ''}
-                  renderOption={(option) => (
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                      <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
-                      <Box>
-                        <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
-                          <IconButton size="small" style={{ marginRight: '20px' }}>
-                            <AiFillEdit />
-                          </IconButton>
-                        </HtmlTooltip>
-                        <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                          <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                            <RiDeleteBin6Fill />
-                          </IconButton>
-                        </HtmlTooltip>
+                  renderOption={(props, option, state, ownerState) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                        <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                        <Box className='flex gap-2'>
+                          <HtmlTooltip title={'Edit'}>
+                            <IconButton size="small" >
+                              <AiFillEdit />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title={'Delete'}>
+                            <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                              <RiDeleteBin6Fill />
+                            </IconButton>
+                          </HtmlTooltip>
+                        </Box>
                       </Box>
-                    </Box>
-                  )}
+                    );
+                  }}
                   id="controllable-states-demo"
                   options={userFilters}
                   renderInput={(params) => <TextField {...params} fullWidth label="Select a Filter Set" variant="outlined" />}
