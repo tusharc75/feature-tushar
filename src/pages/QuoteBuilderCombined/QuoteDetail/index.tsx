@@ -617,7 +617,6 @@ export default function QuoteDetail() {
                 </HtmlTooltip>
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
                   size="small"
                   className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
                   endIcon={isMobile && !isTablet ? null : <ExpandMore />}

@@ -905,7 +905,6 @@ const RentalManagementViews = (props) => {
         <Box>
           <Button
             variant={'outlined'}
-            color="default"
             size="small"
             onClick={() => {
               setColorInfo(!colorInfo);

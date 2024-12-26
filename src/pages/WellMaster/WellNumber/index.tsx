@@ -207,7 +207,6 @@ const WellNumber = ({ wellName }) => {
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
                 <Button
                   variant="outlined"
-                  color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"

@@ -427,7 +427,6 @@ const SerializedAssetDetailsPage = () => {
                       ) && (
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          color="default"
                           className="btn-outline-v1"
                           size="small"
                           onClick={() => setShowRepairJobDialog(true)}
@@ -439,7 +438,6 @@ const SerializedAssetDetailsPage = () => {
                       <HtmlTooltip title={'If you update data from this button it will add log in history'}>
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          color="default"
                           className="btn-outline-v1"
                           size="small"
                           onClick={() =>
@@ -454,7 +452,6 @@ const SerializedAssetDetailsPage = () => {
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
                           variant="outlined"
-                          color="default"
                           size="small"
                           onClick={() => {
                             setStatus(ASSET_STATUS.available);
@@ -467,7 +464,6 @@ const SerializedAssetDetailsPage = () => {
                       ) : (
                         <Button
                           variant={'outlined'}
-                          color="default"
                           size="small"
                           onClick={openActions}
                           className="btn-outline-v1"

@@ -174,8 +174,8 @@ const TransferInventoryDetailPage = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setAllowedToDelete(
           permissions?.transferInventory?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
-            data?.canEdit
+          checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+          data?.canEdit
         );
         setTransferInventoryData(data);
       })
@@ -245,7 +245,6 @@ const TransferInventoryDetailPage = () => {
                 <Fragment>
                   <ButtonWithPulse
                     variant={'outlined'}
-                    color="default"
                     size="small"
                     id={`transfer-inventory-complete-button`}
                     onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}

@@ -162,7 +162,6 @@ const DetailsPageHeader = ({
               <span>
                 <Button
                   variant={'outlined'}
-                  color="default"
                   id={'details-page-action-button'}
                   size="small"
                   onClick={ActionClick}

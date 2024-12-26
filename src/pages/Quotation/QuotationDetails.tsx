@@ -465,7 +465,6 @@ const QuotationDetails = () => {
                   <Button
                     className="btn-outline-v1"
                     variant="outlined"
-                    color="default"
                     size="small"
                     onClick={openActionsAction}
                     aria-controls="action"

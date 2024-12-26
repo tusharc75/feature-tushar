@@ -260,7 +260,6 @@ const BOMTable = () => {
                 </Button>
                 <Button
                   variant={'outlined'}
-                  color="default"
                   size="small"
                   onClick={openActions}
                   className={`new-dropdown-v1`}
@@ -321,9 +320,9 @@ const BOMTable = () => {
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.product?.titleSingular?.toLowerCase()} :
+            ? `${resources?.product?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.productName || ''}`
-              : resources?.product?.titlePlural?.toLowerCase()
+            : resources?.product?.titlePlural?.toLowerCase()
             } ?`}
           okBtnLoading={isDeleting}
           onClose={() => {

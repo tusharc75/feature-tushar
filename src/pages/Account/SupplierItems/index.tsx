@@ -219,7 +219,6 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
             </Button>
             <Button
               variant="outlined"
-              color="default"
               size="small"
               onClick={openActions}
               aria-controls="action-menu"

@@ -133,14 +133,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
@@ -244,7 +244,6 @@ const ServiceOrderDetailsPage = () => {
               {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
                 <ButtonWithPulse
                   variant={'outlined'}
-                  color="default"
                   size="small"
                   onClick={() => {
                     setShowClosedConfirmBox(true);

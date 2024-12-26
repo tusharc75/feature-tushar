@@ -469,7 +469,6 @@ export default function TinyMCE(props) {
                       <>
                         <Button
                           variant="outlined"
-                          color="default"
                           size="small"
                           onClick={openActions}
                           className={classes.varibalesButton}

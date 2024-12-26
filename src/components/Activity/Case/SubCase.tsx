@@ -69,7 +69,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
 
     axiosInstance()
       .delete(`/case/${id}`)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -134,17 +134,6 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
                   </IconButton>
                 </Grid>
               </Grid>
-              {/* <Grid container justify="flex-end">
-               
-                <Box mr={1} />
-                <IconButton
-                  size="small"
-                  color="default"
-                  onClick={(e) => deleteCase(e, element._id)}
-                >
-                  <DeleteOutline color="error" />
-                </IconButton>
-              </Grid> */}
             </Grid>
           </Box>
         ))}

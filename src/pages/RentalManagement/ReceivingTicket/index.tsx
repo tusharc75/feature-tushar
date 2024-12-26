@@ -2092,7 +2092,6 @@ const ReceivingTicket = ({
           <Button
             onClick={openLinkActions}
             variant="outlined"
-            color="default"
             size="small"
             aria-controls="action-menu"
             className="normal-case"

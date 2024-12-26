@@ -187,7 +187,6 @@ const SalesOrderDetails = () => {
                   [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
                     <ButtonWithPulse
                       variant={'outlined'}
-                      color="default"
                       size="small"
                       onClick={() => {
                         setShowClosedConfirmBox(true);
