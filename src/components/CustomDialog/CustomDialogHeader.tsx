@@ -21,7 +21,7 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => { },
+  onMinimizeMaximize = () => {},
   style = {},
   additionalTitle = null
 }: CustomDialogHeaderProps) {
@@ -44,9 +44,9 @@ function CustomDialogHeader({
 
   return (
     <React.Fragment>
-      <DialogTitle component={'div'} className={`flex justify-between bg-[#1c1c31] py-3 text-white dark:bg-[#1a1a26]`}>
+      <DialogTitle component={'div'} className={`flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]`}>
         <h2
-          className={` title-layout text-truncate text-xl font-semibold leading-[1.5]`}
+          className={` title-layout text-truncate text-xl font-semibold leading-[1.6]`}
           style={{ ...style, maxWidth: `calc(100% - ${maxWidth}px)` }}
         >
           {title}
