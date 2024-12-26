@@ -86,7 +86,7 @@ const WorkOrderSupervisor = () => {
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [viewType, setViewType] = useState<ViewType>(() => {
-    return (localStorage.getItem(`${sidebarResource?.workOrderSupervisor}_view`) as ViewType) || 'card-view';
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
   const [consumablesDialog, setConsumablesDialog] = useState(false);
 
@@ -263,7 +263,7 @@ const WorkOrderSupervisor = () => {
       visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
       limit: LIMIT
     });
-    localStorage.setItem(`${sidebarResource?.workOrderSupervisor}_view`, viewType);
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
 
 
     return () =>
