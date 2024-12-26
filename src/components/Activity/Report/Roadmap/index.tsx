@@ -44,7 +44,7 @@ function Roadmap({ type, filter }) {
         setTreeList(data.treeList);
         if (shouldScroll) executeScroll();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   let height = window.innerHeight - 250;
@@ -83,7 +83,6 @@ function Roadmap({ type, filter }) {
     setSelected(nodeIds);
   };
 
-  console.log({ selected, expanded });
 
   return activity ? (
     <Box>

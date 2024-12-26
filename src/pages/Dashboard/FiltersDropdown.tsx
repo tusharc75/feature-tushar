@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Popover, TextField } from '@mui/material';
+import { Box, IconButton, Popover, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { isEmpty } from 'lodash';
 import React, { useContext, useState } from 'react';
@@ -8,9 +8,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
-import routes from 'src/components/Helpers/Routes';
 import SaveFilterDialog from './SaveFilterDialog';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number }[];
@@ -206,17 +206,15 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           ))}
         </div>
         <div className="mt-4 pt-2 text-right [border-top:1px_solid_var(--common-border-color)]">
-          <Button
+          <ThemeButton
+            borderColor="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedKpiFilter });
             }}
             disabled={isEmpty(inputValues) && !selectedKpiFilter ? true : false}
-            size="small"
-            color="primary"
-            className="yellow-button"
           >
             {selectedKpiFilter ? 'Update Filter' : 'Save Filter'}
-          </Button>
+          </ThemeButton>
         </div>
       </Box>
       {isSaveFilter.open && (

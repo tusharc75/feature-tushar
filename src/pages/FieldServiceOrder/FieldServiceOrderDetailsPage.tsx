@@ -244,12 +244,9 @@ const ServiceOrderDetailsPage = () => {
             <Box className="control-buttons-v1">
               {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
                 <ButtonWithPulse
-                  variant={'outlined'}
-                  size="small"
                   onClick={() => {
                     setShowClosedConfirmBox(true);
                   }}
-                  className={'btn-outline-v1'}
                 >
                   Close
                 </ButtonWithPulse>

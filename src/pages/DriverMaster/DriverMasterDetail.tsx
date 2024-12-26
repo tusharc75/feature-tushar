@@ -1,4 +1,4 @@
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -146,59 +146,52 @@ const DriverMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.driverMaster?.isUpdate && (
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  aria-controls="simple-menu"
-                  aria-haspopup="true"
-                  size="small"
-                  onClick={handleClick}
-                  endIcon={<ArrowDropDownIcon />}
-                  className="btn-outline-v1"
-                >
-                  {'Change Status'}
-                </Button>
-              )}
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
+            {permissions?.driverMaster?.isUpdate && (
+              <ThemeButton
+                onClick={handleClick}
+                endIcon={<ArrowDropDownIcon />}
+                iconForMobile={false}
               >
-                {driverMasterData &&
-                  statusOptions?.map((o, index) => {
-                    return (
-                      <MenuItem
-                        disabled={o?.optionLabel === driverMasterData?.status ? true : false}
-                        onClick={() => {
-                          handleClose();
-                          handleChangeStatus(o?.optionLabel);
-                        }}
-                        value={o}
-                      >
-                        {o?.optionLabel}
-                      </MenuItem>
-                    );
-                  })}
-              </Menu>
-              {permissions?.driverMaster?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
-              )}
-              {permissions?.driverMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </>
+                {'Change Status'}
+              </ThemeButton>
+            )}
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
+              {driverMasterData &&
+                statusOptions?.map((o, index) => {
+                  return (
+                    <MenuItem
+                      disabled={o?.optionLabel === driverMasterData?.status ? true : false}
+                      onClick={() => {
+                        handleClose();
+                        handleChangeStatus(o?.optionLabel);
+                      }}
+                      value={o}
+                    >
+                      {o?.optionLabel}
+                    </MenuItem>
+                  );
+                })}
+            </Menu>
+            {permissions?.driverMaster?.isUpdate && (
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.driverMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>

@@ -40,10 +40,7 @@ const SearchBar = () => {
                   height: 44,
                   padding: '10px 20px',
                   paddingRight: '8px !important',
-                  background: 'transparent !important',
-                  '[data-mode=dark] &': {
-                    border: '1px solid var(--common-border-color)'
-                  }
+                  background: 'transparent !important'
                 },
                 paddingRight: '42px'
               }}
@@ -92,10 +89,7 @@ const SearchBar = () => {
               height: 44,
               padding: '0',
               paddingRight: '8px !important',
-              background: 'transparent !important',
-              '[data-mode=dark] &': {
-                border: '1px solid var(--common-border-color)'
-              }
+              background: 'transparent !important'
             },
             pr: '42px'
           }}

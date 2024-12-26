@@ -23,6 +23,7 @@ import SaveFilterDialog from './SaveFilterDialog';
 import NumberInput from 'src/components/CustomReactTable/GridFilter/NumberInput';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -221,23 +222,26 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                     setFormValues(newValue?.filterValue || {});
                   }}
                   getOptionLabel={(option) => option.title || ''}
-                  renderOption={(option) => (
-                    <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                      <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
-                      <Box>
-                        <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
-                          <IconButton size="small" style={{ marginRight: '20px' }}>
-                            <AiFillEdit />
-                          </IconButton>
-                        </HtmlTooltip>
-                        <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                          <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                            <RiDeleteBin6Fill />
-                          </IconButton>
-                        </HtmlTooltip>
+                  renderOption={(props, option, state, ownerState) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                        <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                        <Box className='flex gap-2'>
+                          <HtmlTooltip title={'Edit'}>
+                            <IconButton size="small" >
+                              <AiFillEdit />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title={'Delete'}>
+                            <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                              <RiDeleteBin6Fill />
+                            </IconButton>
+                          </HtmlTooltip>
+                        </Box>
                       </Box>
-                    </Box>
-                  )}
+                    );
+                  }}
                   id="controllable-states-demo"
                   options={userFilters}
                   renderInput={(params) => <TextField {...params} fullWidth label="Select a Filter Set" variant="outlined" />}
@@ -397,18 +401,17 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
+          <ThemeButton
+            borderColor="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
             disabled={isEmpty(formValues) ? true : false}
             size="small"
             color="primary"
-            // variant="outlined"
-            className="yellow-button"
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
-          </Button>
+          </ThemeButton>
           <Button
             disabled={!validate(formValues) ? true : false}
             onClick={handleApplyFilter}

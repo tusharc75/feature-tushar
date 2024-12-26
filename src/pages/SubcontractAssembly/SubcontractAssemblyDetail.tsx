@@ -201,12 +201,9 @@ const SubcontractAssemblyDetail = () => {
                   subcontractAssemblyData?.material?.length > 0 &&
                   subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
-                      variant={'outlined'}
-                      size="small"
                       onClick={() => {
                         setShowClosedConfirmBox(true);
                       }}
-                      className={'btn-outline-v1'}
                     >
                       Close
                     </ButtonWithPulse>

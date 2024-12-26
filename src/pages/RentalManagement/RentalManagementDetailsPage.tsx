@@ -467,10 +467,7 @@ const RentalManagementDetailsPage = () => {
                       <Fragment>
                         <ButtonWithPulse
                           id={'rental-management-close-button'}
-                          variant={'outlined'}
-                          size="small"
                           onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
-                          className={'btn-outline-v1'}
                         >
                           Close
                         </ButtonWithPulse>
