@@ -111,7 +111,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, []);
 
   useEffect(() => {
-    fetchGridColumns();
+    if(selectedResource){
+      fetchGridColumns();
+    }
   }, [selectedResource]);
 
   useEffect(() => {
@@ -412,7 +414,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       </Grid>
       <div className="main-container">
         <ListingPageHeader
-          leftSideContents={<LeftSideContents />}
+          leftSideContents={LeftSideContents()}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={selectedResource.resource === sidebarResource.fieldTicket}
