@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@mui/material/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -16,7 +16,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
   const renderedFrom = `${camelCase(sidebarResource?.productInventory)}_history`;
@@ -48,7 +47,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -213,7 +212,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disableSortBy: true,
         Cell: ({ row }) => {
           return row.original?.transactionDate ? (
-            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p>
           ) : (
             <NoDataCell />
           );

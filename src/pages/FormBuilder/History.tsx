@@ -1,11 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import Dialog from '@mui/material/Dialog/Dialog';
-import { CustomDialogTransition, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Box, IconButton } from '@mui/material';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -13,7 +12,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { isMobile } from 'react-device-detect';
 import LogDialog from './LogDialog';
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const renderedFrom = camelCase(sidebarResource.formBuilder);
@@ -94,7 +92,7 @@ const HistoryLogs = ({ onClose, resource }) => {
       .get(`/history/resource-log?resource=${resource}`)
       .then(({ data: { data } }) => {
         data?.forEach((element) => {
-          element.date = moment(element?.date)?.format(dateTimeFormat);
+          element.date = displayDateTime(element?.date);
           element.changes = element?.log?.map((e) => e?.detail)?.toString();
         });
         dispatch({

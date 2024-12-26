@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@mui/material';
 import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat, displayDateTime, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, sidebarResource } from 'src/constants/helpers';
 
 const renderedFrom = `${camelCase(sidebarResource.trailerMaster)}_History`;
 

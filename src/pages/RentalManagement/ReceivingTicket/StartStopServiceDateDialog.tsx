@@ -6,7 +6,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
   const [initialValues, setInitialValues] = useState(null);
@@ -28,8 +28,8 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const onSubmit = (values) => {
     handleSubmit({
       ...values,
-      startDate: moment(values.startDate).format('MM/DD/YYYY'),
-      ...(values.endDate && { endDate: moment(values.endDate).format('MM/DD/YYYY') })
+      startDate: dayjs(values.startDate).format('MM/DD/YYYY'),
+      ...(values.endDate && { endDate: dayjs(values.endDate).format('MM/DD/YYYY') })
     });
   };
 

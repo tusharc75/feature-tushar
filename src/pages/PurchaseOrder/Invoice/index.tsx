@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
+import { purchaseOrder, gridLoadingTimeout, displayDateTime } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,7 +10,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
@@ -57,8 +56,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.invoiceDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.invoiceDate)}>
+              {displayDateTime(row?.original?.invoiceDate)}
             </h5>
           ) : (
             <NoDataCell />

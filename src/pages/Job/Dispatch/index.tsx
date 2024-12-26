@@ -3,15 +3,14 @@ import { Box, Button, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { dateTimeFormat } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { FiExternalLink } from 'react-icons/fi';
+import { displayDateTime } from 'src/constants/helpers';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -75,7 +74,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         accessor: 'dispatchDate',
         Header: 'Dispatched Date',
         width: 200,
-        Cell: ({ row }) => (row.original.dispatchDate ? <p>{moment(row.original.dispatchDate).format(dateTimeFormat)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original.dispatchDate ? <p>{displayDateTime(row.original.dispatchDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'dispatchComment',
@@ -93,7 +92,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         accessor: 'receivedDate',
         Header: 'Received Date',
         width: 200,
-        Cell: ({ row }) => (row.original.receivedDate ? <p>{moment(row.original.receivedDate).format(dateTimeFormat)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original.receivedDate ? <p>{displayDateTime(row.original.receivedDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'receiverComment',

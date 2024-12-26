@@ -8,7 +8,7 @@ const CustomDateTimePicker = (props) => {
     value,
     name,
     label,
-    handleChange,
+    onChange,
     required,
     fieldData,
     maxDateTime,
@@ -37,7 +37,7 @@ const CustomDateTimePicker = (props) => {
       label={label}
       {...(maxDateTime ? { maxDateTime: dayjs.tz(new Date(maxDateTime)) } : {})}
       {...(minDateTime ? { minDateTime: dayjs.tz(new Date(minDateTime)) } : {})}
-      onChange={(date) => handleChange(date)}
+      onChange={(date) => onChange(date)}
       onError={onError ? onError : console.error}
       slotProps={{
         textField: {

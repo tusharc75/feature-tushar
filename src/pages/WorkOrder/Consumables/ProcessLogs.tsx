@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, displayDateTime } from 'src/constants/helpers';
+import { CustomDialogTransition, PRODUCT_SERIAL_NUMBER_STATUS, displayDateTime } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';

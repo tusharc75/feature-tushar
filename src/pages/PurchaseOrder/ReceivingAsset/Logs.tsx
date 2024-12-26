@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Dialog } from '@mui/material';
-import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -32,7 +32,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         disableSortBy: true,
         disabled: true,
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {
@@ -94,7 +94,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         disableSortBy: true,
         Cell: ({ row }) => {
           return row.original?.transactionDate ? (
-            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
+            <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p>
           ) : (
             <NoDataCell />
           );

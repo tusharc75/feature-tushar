@@ -11,7 +11,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   CustomDialogTransition,
-  dateTimeFormat,
   displayDateTime,
   getLocalStorageArrayData,
   gridLoadingTimeout,

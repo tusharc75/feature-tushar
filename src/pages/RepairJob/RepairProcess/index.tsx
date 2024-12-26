@@ -1,5 +1,4 @@
 import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval, FcCancel } from 'react-icons/fc';
@@ -11,7 +10,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import { CustomDialogTransition, REPAIR_PROCESS_STATUS, dateTimeFormat, repairJob } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime, REPAIR_PROCESS_STATUS, repairJob } from '../../../constants/helpers';
 
 const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, repairJobData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -178,8 +177,8 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                         )}
                       </Grid>
                       <Grid item xs={3} sm={3} md={3} lg={3}>
-                        {step.startDate && <Typography variant="body2">Start Date - {moment(step.startDate).format(dateTimeFormat)}</Typography>}
-                        {step.endDate && <Typography variant="body2">End Date - {moment(step.endDate).format(dateTimeFormat)}</Typography>}
+                        {step.startDate && <Typography variant="body2">Start Date - {displayDateTime(step.startDate)}</Typography>}
+                        {step.endDate && <Typography variant="body2">End Date - {displayDateTime(step.endDate)}</Typography>}
                       </Grid>
                     </Grid>
                   </Box>

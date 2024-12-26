@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { CustomDialogTransition, dateTimeFormat, displayDateTime } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime } from '../../../constants/helpers';
 import { Image } from '@mui/icons-material';
 
 const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) => {
