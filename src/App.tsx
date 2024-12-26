@@ -1,6 +1,6 @@
 import { CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -289,6 +289,7 @@ function App() {
   }, []);
 
   const toast = useContext(CustomToastContext);
+
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
@@ -348,7 +349,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1246,7 +1247,7 @@ function App() {
               message={toast.toastConfig.message}
               open={toast.toastConfig.open}
               close={() => {
-                toast.setToastConfig({ open: false });
+                toast.setToastConfig((prev) => ({ message: '', type: null, open: false }));
               }}
             />
           ) : toast.toastConfig.type === 'notFoundError' ? (

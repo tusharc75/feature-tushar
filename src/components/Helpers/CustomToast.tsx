@@ -1,27 +1,24 @@
-import PropTypes from 'prop-types';
-import Snackbar from '@mui/material/Snackbar';
+import Alert, { AlertProps } from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 
-const CustomToast = (props) => {
-  const { open, close, message, type, hideDuration = 6000 } = props;
+export type CustomToastProps = {
+  open: boolean;
+  message: string;
+  type: AlertProps['severity'] | 'notFoundError';
+};
+type ExtraAttributes = {
+  hideDuration?: number;
+  close: () => void;
+};
 
+const CustomToast = ({ open, close, message, type, hideDuration = 6000 }: CustomToastProps & ExtraAttributes) => {
   return (
     <>
       {open && (
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Snackbar
-            open={open}
-            autoHideDuration={hideDuration}
-            onClose={close}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert
-              onClose={close}
-              severity={type}
-              variant="filled"
-              sx={{ width: '100%' }}
-            >
+          <Snackbar open={open} autoHideDuration={hideDuration} onClose={close} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Alert onClose={close} severity={type as AlertProps['severity']} variant="filled" sx={{ width: '100%', color: 'white' }}>
               {message}
             </Alert>
           </Snackbar>
@@ -29,13 +26,6 @@ const CustomToast = (props) => {
       )}
     </>
   );
-};
-
-CustomToast.propTypes = {
-  open: PropTypes.bool.isRequired,
-  close: PropTypes.func.isRequired,
-  message: PropTypes.any.isRequired,
-  type: PropTypes.string.isRequired,
 };
 
 export default CustomToast;

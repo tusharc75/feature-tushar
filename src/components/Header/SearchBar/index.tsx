@@ -41,7 +41,9 @@ const SearchBar = () => {
                   padding: '10px 20px',
                   paddingRight: '8px !important',
                   background: 'transparent !important',
-                  border: '1px solid var(--common-border-color)'
+                  '[data-mode=dark] &': {
+                    border: '1px solid var(--common-border-color)'
+                  }
                 },
                 paddingRight: '42px'
               }}
@@ -87,7 +89,9 @@ const SearchBar = () => {
               padding: '0',
               paddingRight: '8px !important',
               background: 'transparent !important',
-              border: '1px solid var(--common-border-color)'
+              '[data-mode=dark] &': {
+                border: '1px solid var(--common-border-color)'
+              }
             },
             pr: '42px'
           }}
