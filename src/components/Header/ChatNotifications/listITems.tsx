@@ -1,13 +1,13 @@
 import { Avatar, Chip, ListItem, Typography } from '@mui/material';
 import { Check, Group } from '@mui/icons-material';
-import moment from 'moment';
 import { ForwardedRef, forwardRef, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayCardDate } from 'src/constants/helpers';
 import { getUserAvatar } from './utils';
+import dayjs from 'dayjs';
 
 export const HistoryItem = ({ data, userId, handleClick }) => {
-  const formatTime = (time: string) => moment(time).format('HH:MM');
+  const formatTime = (time: string) => dayjs.utc(time).tz().format('HH:MM');
 
   const isUnseen = useMemo(() => data?.unseen > 0, [data]);
 

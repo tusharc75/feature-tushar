@@ -20,7 +20,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuotationDialog from '../../pages/Quotation/ManageQuotationDialog';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import styles from './ProjectSales.module.scss';
 
 export default function QuotationAccordionInProjectSales({

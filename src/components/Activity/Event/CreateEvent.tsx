@@ -5,7 +5,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { object, string } from 'yup';
@@ -15,7 +14,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { dateFormat, sidebarResource } from '../../../constants/helpers';
+import { displayDateTime, sidebarResource } from '../../../constants/helpers';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import Loader from '../../Loader';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
@@ -23,6 +22,7 @@ import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -209,7 +209,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
       errors['endDate'] = 'End date should be greater then start date';
       return errors;
     }
-    if (moment(startDate)?.format('MM-DD-YYYY') === moment(endDate)?.format('MM-DD-YYYY')) {
+    if (dayjs(startDate)?.format('MM-DD-YYYY') === dayjs(endDate)?.format('MM-DD-YYYY')) {
       if (new Date(values?.startTime)?.getTime() > new Date(values?.endTime).getTime()) {
         errors['endTime'] = 'End time should be greater then start time';
       }
@@ -415,12 +415,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       <Fragment>
                         {initialValues.createdBy && initialValues.createdBy.date && (
                           <Box mt={1} color="text.secondary">
-                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
+                            <Typography variant="body2">Created {displayDateTime(initialValues.createdBy.date, 'MMM DD YYYY hh:mm A')}</Typography>
                           </Box>
                         )}
                         {initialValues.updatedBy && initialValues.updatedBy.date && (
                           <Box mt={1} color="text.secondary">
-                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
+                            <Typography variant="body2">Updated {displayDateTime(initialValues.updatedBy.date, 'MMM DD YYYY hh:mm A')}</Typography>
                           </Box>
                         )}
                       </Fragment>

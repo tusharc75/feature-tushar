@@ -18,7 +18,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import routes from '../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
-  dateFormatForInputControl,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,

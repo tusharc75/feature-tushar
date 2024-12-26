@@ -2,8 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
-import moment from 'moment';
+import { CustomDialogTransition, displayDate, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -77,8 +76,8 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
           <>
             {row?.original?.startDate ? (
               <>
-                <h5 className="text-truncate" title={`${moment(row?.original?.startDate)?.format(dateFormat)}`}>
-                  {moment(row?.original?.startDate)?.format(dateFormat)}
+                <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
+                  {displayDate(row?.original?.startDate)}
                 </h5>
               </>
             ) : (
@@ -99,8 +98,8 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
           <>
             {row?.original?.endDate ? (
               <>
-                <h5 className="text-truncate" title={`${moment(row?.original?.endDate)?.format(dateFormat)}`}>
-                  {moment(row?.original?.endDate)?.format(dateFormat)}
+                <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
+                  {displayDate(row?.original?.endDate)}
                 </h5>
               </>
             ) : (

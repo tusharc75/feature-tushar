@@ -5,7 +5,7 @@ import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
+import { convertDateInDateTime, CustomDialogTransition, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';

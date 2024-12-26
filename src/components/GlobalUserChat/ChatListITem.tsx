@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
 import { ListItem, ListItemText, ListItemAvatar, Avatar, Box, Chip, Typography } from '@mui/material';
 import { Group } from '@mui/icons-material';
-import moment from 'moment';
 
 import axiosInstance from '../../axios/axiosInstance';
 import HtmlTooltip from '../CustomTooltipTitle';
+import dayjs from 'dayjs';
 
 const ChatList = (props) => {
   const { chat, setSelectedChat, userId } = props;
@@ -17,7 +17,7 @@ const ChatList = (props) => {
     }
   };
 
-  const formatTime = (time) => moment(time).fromNow(true);
+  const formatTime = (time) => dayjs.utc(time).tz().fromNow(true);
 
   return (
     <Fragment>

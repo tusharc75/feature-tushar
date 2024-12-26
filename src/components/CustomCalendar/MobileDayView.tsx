@@ -1,9 +1,8 @@
 import Dialog from '@mui/material/Dialog';
-import moment from 'moment';
 import { CustomCalendarProps, ViewType } from 'src/components/CustomCalendar';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, displayDate } from 'src/constants/helpers';
 
 type MobileDayViewProps = {
   onClose: () => void;
@@ -26,7 +25,7 @@ const MobileDayView = ({ onClose, date, calnedarProps, Component }: MobileDayVie
       }}
       fullWidth
     >
-      <CustomDialogHeader showRequiredLabel={false} title={moment(date).format(dateFormat)} onClose={onClose} />
+      <CustomDialogHeader showRequiredLabel={false} title={displayDate(date)} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <Component
           {...calnedarProps}

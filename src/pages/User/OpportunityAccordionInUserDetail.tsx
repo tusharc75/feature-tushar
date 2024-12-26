@@ -14,7 +14,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { formatAmountWithCurrency } from '../../constants/helpers';
-import { displayDate } from '../../services/util';
+import { displayDate } from 'src/constants/helpers';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog';
 

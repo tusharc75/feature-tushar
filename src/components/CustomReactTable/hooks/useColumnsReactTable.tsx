@@ -3,7 +3,6 @@ import { Image } from '@mui/icons-material';
 import InfoIcon from '@mui/icons-material/Info';
 import { isArray, isObject } from 'lodash';
 import camelCase from 'lodash/camelCase';
-import moment from 'moment';
 import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
@@ -20,8 +19,8 @@ import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import {
-  dateFormat,
-  dateTimeFormat,
+  displayDate,
+  displayDateTime,
   formatAmountWithCurrency,
   formatTotalforTableFooter,
   getUniqueCurrencies,
@@ -319,8 +318,8 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
-                    {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  <h5 className="createBy" title={`${displayDate(row?.original?.[field?.fieldName])}`}>
+                    {displayDate(row?.original?.[field?.fieldName])}
                   </h5>
                 ) : (
                   <NoDataCell />
@@ -335,8 +334,8 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
-                    {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.[field?.fieldName])}`}>
+                    {displayDateTime(row?.original?.[field?.fieldName])}
                   </h5>
                 ) : (
                   <NoDataCell />

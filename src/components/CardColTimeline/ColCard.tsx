@@ -1,11 +1,10 @@
 import { Box, Typography } from '@mui/material';
-import moment from 'moment';
 import React, { useRef } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { FaCheckCircle } from 'react-icons/fa';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STEP_STATUS, displayDate } from 'src/constants/helpers';
 import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
@@ -144,7 +143,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                {data[item.accessor] ? moment(data[item.accessor]).format(dateFormat) : '--'}
+                {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
           }
@@ -153,7 +152,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, cardOnSelect, rowDef, 
             return (
               <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
-                {data[item.accessor] ? moment(data[item.accessor]).format(dateTimeFormat) : '--'}
+                {data[item.accessor] ? displayDate(data[item.accessor]) : '--'}
               </Typography>
             );
           }

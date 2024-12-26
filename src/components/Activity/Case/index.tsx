@@ -7,13 +7,12 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
-import { CustomDialogTransition, dateFormat } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
 import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
@@ -116,7 +115,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     >
                       {_case.name}
                     </Typography>
-                    <span className="activity-date">Due Date : {moment(_case.dueDate).format(dateFormat)}</span>
+                    <span className="activity-date">Due Date : {displayDate(_case.dueDate)}</span>
                   </Grid>
                   {permissions['case']?.isUpdate || permissions['case']?.isDelete ? (
                     <Grid item xs={2} container justify="flex-end">

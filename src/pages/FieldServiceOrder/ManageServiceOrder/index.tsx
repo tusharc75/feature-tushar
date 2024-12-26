@@ -25,8 +25,8 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import InputField from 'src/components/Helpers/InputField';
+import dayjs from 'dayjs';
 
 const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open }) => {
   const {
@@ -166,8 +166,8 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = moment(values?.estimateStartDate);
-    let estimateEndDate = moment(values?.estimateEndDate);
+    let estimateStartDate = dayjs(values?.estimateStartDate);
+    let estimateEndDate = dayjs(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid end date';
     }

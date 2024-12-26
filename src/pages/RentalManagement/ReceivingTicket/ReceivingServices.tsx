@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_TYPE, dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { displayDate, MATERIAL_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -14,7 +14,6 @@ import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import moment from 'moment';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -117,8 +116,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
+              {displayDate(row?.original?.manualStartDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -129,39 +128,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
-              {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
+              {displayDate(row?.original?.manualEndDate)}
             </h5>
           ) : (
             <NoDataCell />
           )
       },
-      // {
-      //   accessor: 'startDate',
-      //   Header: 'System Start Date',
-      //   show: false,
-      //   Cell: ({ row }) =>
-      //     row?.original?.startDate ? (
-      //       <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-      //         {moment(row?.original?.startDate)?.format(dateFormat)}
-      //       </h5>
-      //     ) : (
-      //       <NoDataCell />
-      //     )
-      // },
-      // {
-      //   accessor: 'endDate',
-      //   Header: 'System End Date',
-      //   show: false,
-      //   Cell: ({ row }) =>
-      //     row?.original?.endDate ? (
-      //       <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-      //         {moment(row?.original?.endDate)?.format(dateFormat)}
-      //       </h5>
-      //     ) : (
-      //       <NoDataCell />
-      //     )
-      // },
       {
         accessor: 'action',
         Header: 'Actions',
@@ -233,8 +206,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    data['startDate'] = moment(values.startDate).format('MM/DD/YYYY');
-    data['endDate'] = moment(values.endDate).format('MM/DD/YYYY');
+    data['startDate'] = displayDate(values.startDate, 'MM/DD/YYYY');
+    data['endDate'] = displayDate(values.endDate, 'MM/DD/YYYY');
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
