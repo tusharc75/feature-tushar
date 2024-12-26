@@ -67,6 +67,7 @@ import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import CurrencyAutocomplete from './CurrencyAutocomplete';
 
 type MultiFileType = {
   fileName: string;
@@ -364,7 +365,6 @@ const FormTypes = (props) => {
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
   const [value, setValue] = React.useState(null);
-  const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
   const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
@@ -400,13 +400,6 @@ const FormTypes = (props) => {
       }, 200),
     []
   );
-
-  React.useEffect(() => {
-    const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
-    );
-    setCurrencyData(sortedArr);
-  }, []);
 
   React.useEffect(() => {
     let active = true;
@@ -1939,60 +1932,16 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Autocomplete
+         <CurrencyAutocomplete
           {...rest}
-          limitTags={2}
-          fullWidth
-          value={
-            currencyData.filter((data) => data.currencyCode === values[name]).length
-              ? currencyData.filter((data) => data.currencyCode === values[name])[0]
-              : ''
-          }
-          options={currencyData}
-          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-          isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
+          required = {true}
+          value={values[name]} 
+          label={getLabel(label)} 
+          name={name} 
+          fullWidth={true} 
           onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              name={name}
-              label={getLabel(label)}
-              error={touched[name] && Boolean(errors[name])}
-              helperText={touched[name] && errors[name]}
-              required={required}
-            />
-          )}
-          renderOption={(props, option: any) => {
-            const { currencyCode, currencyName, symbolNative } = option;
-            return (
-              <li {...props}>
-                {`${currencyCode} - ${currencyName} - (${symbolNative})`}
-              </li>
-            );
-          }}
-          // renderOption={(option) => {
-          //   const { currencyCode, name, countryCode, symbolNative } = option;
-          //   return (
-          //     <Grid container alignItems="center">
-          //       <Grid item>
-          //         <Avatar
-          //           variant="rounded"
-          //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-          //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-          //         />
-          //       </Grid>
-          //       <Grid item xs>
-          //         <Typography>
-          //           {currencyCode} ({symbolNative})
-          //         </Typography>
-          //         <Typography variant="body2" color="textSecondary">
-          //           {name}
-          //         </Typography>
-          //       </Grid>
-          //     </Grid>
-          //   );
-          // }}
+          helperText={touched[name] && errors[name]}
+          error={touched[name] && Boolean(errors[name])} 
         />
       </InfoLabel>
     ) : type === 'multiSelect' ? (
