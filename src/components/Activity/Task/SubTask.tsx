@@ -171,6 +171,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               name="name"
               fullWidth
               margin="dense"
+              size="small"
               onChange={(e) => setTaskName(e.target.value)}
               error={isError && taskName.length < 3}
               helperText={isError && taskName.length < 3 && 'Task name must be at least 3 letters'}

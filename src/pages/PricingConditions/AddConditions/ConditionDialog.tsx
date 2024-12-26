@@ -339,6 +339,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="conditionType"
                                 variant="outlined"
                                 label="Pricing Type"
@@ -368,6 +369,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 <TextField
                                   {...params}
                                   margin="dense"
+                                  size="small"
                                   name="unit"
                                   variant="outlined"
                                   label="Unit"
@@ -402,6 +404,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       name="mrp"
                                       variant="outlined"
                                       margin="dense"
+                                      size="small"
                                       fullWidth
                                       disabled={!allowedToEdit}
                                       label={'Rate ' + _unit + ' ' + _currency}
@@ -414,18 +417,20 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                           parseFloat(e.target.value)
                                         );
                                       }}
-                                      InputProps={{
-                                        startAdornment: (
-                                          <InputAdornment position="start">
-                                            {result(
-                                              find(getUniqueCurrencies(), function (obj) {
-                                                return obj.currencyCode === _currency;
-                                              }),
-                                              'symbolNative'
-                                            )}
-                                          </InputAdornment>
-                                        ),
-                                        inputProps: { min: 0, max: 9999999999 }
+                                      slotProps={{
+                                        input: {
+                                          startAdornment: (
+                                            <InputAdornment position="start">
+                                              {result(
+                                                find(getUniqueCurrencies(), function (obj) {
+                                                  return obj.currencyCode === _currency;
+                                                }),
+                                                'symbolNative'
+                                              )}
+                                            </InputAdornment>
+                                          ),
+                                          inputProps: { min: 0, max: 9999999999 }
+                                        }
                                       }}
                                       error={
                                         touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] &&
@@ -471,6 +476,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 <TextField
                                   {...params}
                                   margin="dense"
+                                  size="small"
                                   variant="outlined"
                                   name="pricingMethod"
                                   label="Pricing Method"
@@ -514,6 +520,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 disabled={!allowedToEdit}
                                                 variant="outlined"
                                                 margin="dense"
+                                                size="small"
                                                 fullWidth
                                                 type="number"
                                                 onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
@@ -539,18 +546,20 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                     parseFloat(e.target.value)
                                                   );
                                                 }}
-                                                InputProps={{
-                                                  startAdornment: (
-                                                    <InputAdornment position="start">
-                                                      {result(
-                                                        find(getUniqueCurrencies(), function (obj) {
-                                                          return obj.currencyCode === _currency;
-                                                        }),
-                                                        'symbolNative'
-                                                      )}
-                                                    </InputAdornment>
-                                                  ),
-                                                  inputProps: { min: 0, max: 9999999999 }
+                                                slotProps={{
+                                                  input: {
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">
+                                                        {result(
+                                                          find(getUniqueCurrencies(), function (obj) {
+                                                            return obj.currencyCode === _currency;
+                                                          }),
+                                                          'symbolNative'
+                                                        )}
+                                                      </InputAdornment>
+                                                    ),
+                                                    inputProps: { min: 0, max: 9999999999 }
+                                                  }
                                                 }}
                                                 error={
                                                   touched[
@@ -599,6 +608,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                               name={'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()}
                                               variant="outlined"
                                               margin="dense"
+                                              size="small"
                                               fullWidth
                                               disabled={!allowedToEdit}
                                               type="number"
@@ -611,18 +621,20 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                   parseFloat(e.target.value)
                                                 );
                                               }}
-                                              InputProps={{
-                                                startAdornment: (
-                                                  <InputAdornment position="start">
-                                                    {result(
-                                                      find(getUniqueCurrencies(), function (obj) {
-                                                        return obj.currencyCode === _currency;
-                                                      }),
-                                                      'symbolNative'
-                                                    )}
-                                                  </InputAdornment>
-                                                ),
-                                                inputProps: { min: 0, max: 9999999999 }
+                                              slotProps={{
+                                                input: {
+                                                  startAdornment: (
+                                                    <InputAdornment position="start">
+                                                      {result(
+                                                        find(getUniqueCurrencies(), function (obj) {
+                                                          return obj.currencyCode === _currency;
+                                                        }),
+                                                        'symbolNative'
+                                                      )}
+                                                    </InputAdornment>
+                                                  ),
+                                                  inputProps: { min: 0, max: 9999999999 }
+                                                }
                                               }}
                                               error={
                                                 touched['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] &&
@@ -678,7 +690,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
                               <Grid item xs={12} sm={2} md={2}>
-                                <FormControl fullWidth margin="dense" variant="outlined">
+                                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                   <Select
                                     labelId="demo-simple-select-outlined-label"
@@ -689,6 +701,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                     }}
                                     label="Type"
                                     name={'type_' + index}
+                                    size="small"
                                   >
                                     <MenuItem value="Flat">Flat</MenuItem>
                                     <MenuItem value="Percentage">Percentage</MenuItem>
@@ -705,6 +718,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       name="amount"
                                       variant="outlined"
                                       margin="dense"
+                                      size="small"
                                       fullWidth
                                       label={'Discount ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                       type="number"
@@ -719,6 +733,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       name="minTransAmount"
                                       variant="outlined"
                                       margin="dense"
+                                      size="small"
                                       fullWidth
                                       label="Minimum Trans. Amount"
                                       type="number"
@@ -733,6 +748,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       name="maxDiscount"
                                       variant="outlined"
                                       margin="dense"
+                                      size="small"
                                       fullWidth
                                       label="Maximum Discount"
                                       type="number"
@@ -820,6 +836,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   name="label"
                                   variant="outlined"
                                   margin="dense"
+                                  size="small"
                                   fullWidth
                                   label={'Charge Name'}
                                   type="text"
@@ -828,7 +845,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 />
                               </Grid>
                               <Grid item xs={12} sm={2} md={2}>
-                                <FormControl fullWidth margin="dense" variant="outlined">
+                                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                   <Select
                                     labelId="demo-simple-select-outlined-label"
@@ -839,6 +856,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                     }}
                                     label="Type"
                                     name={'type_' + index}
+                                    size="small"
                                   >
                                     <MenuItem value="Flat">Flat</MenuItem>
                                     <MenuItem value="Percentage">Percentage</MenuItem>
@@ -851,6 +869,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   name="amount"
                                   variant="outlined"
                                   margin="dense"
+                                  size="small"
                                   fullWidth
                                   label={'Charge ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                   type="number"
@@ -915,6 +934,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   name="taxCode"
                                   variant="outlined"
                                   margin="dense"
+                                  size="small"
                                   fullWidth
                                   label={'Tax Code'}
                                   type="text"
@@ -923,7 +943,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 />
                               </Grid>
                               <Grid item xs={12} sm={2} md={2}>
-                                <FormControl fullWidth margin="dense" variant="outlined">
+                                <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                   <Select
                                     labelId="demo-simple-select-outlined-label"
@@ -946,6 +966,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   name="amount"
                                   variant="outlined"
                                   margin="dense"
+                                  size="small"
                                   fullWidth
                                   label={'Tax ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                   type="number"

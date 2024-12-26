@@ -422,6 +422,7 @@ function PricingConditionsDetailsPage() {
                                         <TextField
                                           {...params}
                                           margin="dense"
+                                          size="small"
                                           name="units"
                                           variant="outlined"
                                           label="Units"
@@ -452,6 +453,7 @@ function PricingConditionsDetailsPage() {
                                         <TextField
                                           {...params}
                                           margin="dense"
+                                          size="small"
                                           variant="outlined"
                                           name="currency"
                                           label="Currency"
@@ -489,6 +491,7 @@ function PricingConditionsDetailsPage() {
                                         name="mrp"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label={'Rate ' + _unit + ' ' + _currency}
                                         type="number"
@@ -499,18 +502,20 @@ function PricingConditionsDetailsPage() {
                                             parseFloat(e.target.value)
                                           )
                                         }
-                                        InputProps={{
-                                          startAdornment: (
-                                            <InputAdornment position="start">
-                                              {result(
-                                                find(getUniqueCurrencies(), function (obj) {
-                                                  return obj.currencyCode === _currency;
-                                                }),
-                                                'symbolNative'
-                                              )}
-                                            </InputAdornment>
-                                          ),
-                                          inputProps: { min: 0, max: 9999999999 }
+                                        slotProps={{
+                                          input: {
+                                            startAdornment: (
+                                              <InputAdornment position="start">
+                                                {result(
+                                                  find(getUniqueCurrencies(), function (obj) {
+                                                    return obj.currencyCode === _currency;
+                                                  }),
+                                                  'symbolNative'
+                                                )}
+                                              </InputAdornment>
+                                            ),
+                                            inputProps: { min: 0, max: 9999999999 }
+                                          }
                                         }}
                                       />
                                     </Grid>
@@ -549,6 +554,7 @@ function PricingConditionsDetailsPage() {
                                   <TextField
                                     {...params}
                                     margin="dense"
+                                    size="small"
                                     variant="outlined"
                                     name="pricingMethod"
                                     label="Pricing Method"
@@ -589,6 +595,7 @@ function PricingConditionsDetailsPage() {
                                                   }
                                                   variant="outlined"
                                                   margin="dense"
+                                                  size="small"
                                                   fullWidth
                                                   type="number"
                                                   style={{ margin: 0 }}
@@ -649,7 +656,7 @@ function PricingConditionsDetailsPage() {
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
                                 <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
@@ -660,6 +667,7 @@ function PricingConditionsDetailsPage() {
                                       }}
                                       label="Type"
                                       name={'type_' + index}
+                                      size="small"
                                     >
                                       <MenuItem value="Flat">Flat</MenuItem>
                                       <MenuItem value="Percentage">Percentage</MenuItem>
@@ -676,6 +684,7 @@ function PricingConditionsDetailsPage() {
                                         name="amount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label={'Discount ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                         type="number"
@@ -689,6 +698,7 @@ function PricingConditionsDetailsPage() {
                                         name="minTransAmount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label="Minimum Trans. Amount"
                                         type="number"
@@ -702,6 +712,7 @@ function PricingConditionsDetailsPage() {
                                         name="maxDiscount"
                                         variant="outlined"
                                         margin="dense"
+                                        size="small"
                                         fullWidth
                                         label="Maximum Discount"
                                         type="number"
@@ -788,6 +799,7 @@ function PricingConditionsDetailsPage() {
                                     name="label"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Charge Name'}
                                     type="text"
@@ -796,11 +808,12 @@ function PricingConditionsDetailsPage() {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
                                       id="demo-simple-select-outlined"
+                                      size="small"
                                       value={val.type}
                                       onChange={(e) => {
                                         handleChangeChargeValue(index, 'type', e.target.value);
@@ -819,6 +832,7 @@ function PricingConditionsDetailsPage() {
                                     name="amount"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Charge ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                     type="number"
@@ -882,6 +896,7 @@ function PricingConditionsDetailsPage() {
                                     name="taxCode"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Tax Code'}
                                     type="text"
@@ -890,7 +905,7 @@ function PricingConditionsDetailsPage() {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={2} md={2}>
-                                  <FormControl fullWidth margin="dense" variant="outlined">
+                                  <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                     <Select
                                       labelId="demo-simple-select-outlined-label"
@@ -901,6 +916,7 @@ function PricingConditionsDetailsPage() {
                                       }}
                                       label="Type"
                                       name={'type_' + index}
+                                      size="small"
                                     >
                                       <MenuItem value="Flat">Flat</MenuItem>
                                       <MenuItem value="Percentage">Percentage</MenuItem>
@@ -913,6 +929,7 @@ function PricingConditionsDetailsPage() {
                                     name="amount"
                                     variant="outlined"
                                     margin="dense"
+                                    size="small"
                                     fullWidth
                                     label={'Tax ' + (val.type === 'Flat' ? ' Amount' : ' Percentage')}
                                     type="number"

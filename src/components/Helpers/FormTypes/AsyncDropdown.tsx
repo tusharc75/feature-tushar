@@ -85,17 +85,19 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
             required={required}
             error={touched && Boolean(errors[fieldName])}
             helperText={touched && errors[fieldName]}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              )
+            size="small"
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              },
             }}
             margin="none"
-            size={'small'}
             variant="outlined"
           />
         )}

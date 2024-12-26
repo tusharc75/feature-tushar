@@ -353,7 +353,7 @@ const ImportExport = () => {
             id="export-resources"
             style={{ width: '300px' }}
             options={Object.keys(sidebarResource)?.map((key) => sidebarResource[key])}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" size="small" required={true} />}
             getOptionLabel={(option) => option}
             onChange={(e, val) => {
               setSelectResource(val);

@@ -309,6 +309,7 @@ export default function StepDialog({
                       <Grid xs={12} md={6} sm={6} item>
                         <TextField
                           margin="dense"
+                          size="small"
                           type="text"
                           label="Step Name"
                           name="stepName"
@@ -327,6 +328,7 @@ export default function StepDialog({
                       <Grid xs={12} md={6} sm={6} item>
                         <TextField
                           margin="dense"
+                          size="small"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="Lead Time"
@@ -377,13 +379,16 @@ export default function StepDialog({
                       </Grid>
                       <Grid xs={12} md={4} sm={4} item>
                         <TextField
-                          InputProps={{
+                         slotProps={{
+                          input: {
                             startAdornment: (
                               <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
                                 }`}</InputAdornment>
                             )
-                          }}
+                          },
+                        }}
                           margin="dense"
+                          size="small"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           label="Cost Price"
@@ -401,12 +406,14 @@ export default function StepDialog({
                       </Grid>
                       <Grid xs={12} md={4} sm={4} item>
                         <TextField
-                          InputProps={{
+                         slotProps={{
+                          input: {
                             startAdornment: (
                               <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
                                 }`}</InputAdornment>
                             )
-                          }}
+                          },
+                        }}
                           margin="dense"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}

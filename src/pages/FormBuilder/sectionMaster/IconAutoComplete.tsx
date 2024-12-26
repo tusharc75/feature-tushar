@@ -138,7 +138,11 @@ export default function IconAutoComplete({ ...rest }) {
             variant="outlined"
             label="Select Icon"
             fullWidth
-            InputProps={{ ...params.InputProps, startAdornment: Icon }}
+            slotProps={{
+              input: {
+                ...params.InputProps, startAdornment: Icon
+              },
+            }}
           />
         );
       }}

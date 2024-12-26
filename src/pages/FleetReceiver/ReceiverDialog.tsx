@@ -76,16 +76,16 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
         <Box marginY={2}>
           <Grid spacing={2} container>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" value={data?.job?.jobNumber} />
+              <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={data?.job?.jobNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" value={data?.asset?.assetNumber} />
+              <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" value={data?.fleet?.fleetNumber} />
+              <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" value={data?.job?.shippingAddress?.optionLabel} />
+              <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={data?.job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
         </Box>
@@ -152,6 +152,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 fullWidth
                 rows={3}
                 margin="dense"
+                size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
               />

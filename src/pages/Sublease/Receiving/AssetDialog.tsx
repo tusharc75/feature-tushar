@@ -261,6 +261,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
                                           <TextField
                                             {...params}
                                             margin="dense"
+                                            size="small"
                                             name={`assetNumber_${index}`}
                                             label=""
                                             variant="outlined"

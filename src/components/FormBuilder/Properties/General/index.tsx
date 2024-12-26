@@ -64,6 +64,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             name="fieldLabel"
             fullWidth
             margin="dense"
+            size="small"
             disabled={!values['editAble']}
             value={values['fieldLabel']}
             error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
@@ -122,6 +123,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             name="fieldName"
             fullWidth
             margin="dense"
+            size="small"
             disabled={true}
             value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
           />
@@ -149,7 +151,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         <Grid spacing={3} container>
           {values['type'] === 'formula' && (
             <Grid item xs={12} sm={6} md={6}>
-              <FormControl fullWidth margin="dense" variant="outlined">
+              <FormControl fullWidth margin="dense" size="small" variant="outlined">
                 <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
@@ -160,6 +162,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   }}
                   label="Return Type"
                   name="returnType"
+                  size="small"
                 >
                   <MenuItem value="decimal">Decimal</MenuItem>
                   <MenuItem value="string">String</MenuItem>
@@ -225,6 +228,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     variant="outlined"
                     label="Lookup Resource"
                     placeholder="Lookup Resource"
@@ -288,6 +292,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     variant="outlined"
                     label="Data List"
                     placeholder="Data List"

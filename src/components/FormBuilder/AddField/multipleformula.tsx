@@ -152,6 +152,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Formula Fields"
                   placeholder="Formula Fields"
@@ -183,6 +184,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                 <TextField
                   {...params}
                   margin="dense"
+                  size="small"
                   variant="outlined"
                   label="Input Parameters"
                   placeholder="Input Parameters"
@@ -217,6 +219,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
                               id={'formulaoption_' + _field}
                               variant="outlined"
                               margin="dense"
+                              size="small"
                               fullWidth
                               multiline
                               rows={stepFullScreen ? 20 : 2}

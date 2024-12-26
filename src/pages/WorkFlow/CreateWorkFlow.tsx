@@ -82,6 +82,7 @@ const CreateWorkFlow = () => {
                         name="workflowName"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={workFlowData.workflowName || ''}
                         // onChange={(e) => {
                         //   setWorkFlowName(e.target.value.trimStart());
@@ -97,6 +98,7 @@ const CreateWorkFlow = () => {
                         name="workflowResource"
                         fullWidth
                         margin="dense"
+                        size="small"
                         value={workFlowData?.workflowResource?.optionLabel || ''}
                       />
                     </Grid>

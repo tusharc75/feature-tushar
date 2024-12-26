@@ -51,22 +51,24 @@ function PlusMinusTextboxComponent({ inputTextLabel, value, minValue = 1, isRequ
           label={inputTextLabel}
           ref={inputNumberRef}
           value={inputValue}
-          InputProps={{
-            inputComponent: CustomFormat as any,
-            inputProps: {
-              allowNegative: false,
-              min: minValue,
-              onValueChange: (values) => {
-                if ((isRequired === true && values.value === '') || parseInt(values.value) < minValue) {
-                  setInputValue(minValue?.toString());
-                } else {
-                  if (allowDecimal) {
-                    onChange(values.value);
-                    setInputValue(values.value?.toString());
+          slotProps={{
+            input: {
+              inputComponent: CustomFormat as any,
+              inputProps: {
+                allowNegative: false,
+                min: minValue,
+                onValueChange: (values) => {
+                  if ((isRequired === true && values.value === '') || parseInt(values.value) < minValue) {
+                    setInputValue(minValue?.toString());
                   } else {
-                    const value = values.value.replace(/[^0-9]/g, '');
-                    onChange(value);
-                    setInputValue(value?.toString());
+                    if (allowDecimal) {
+                      onChange(values.value);
+                      setInputValue(values.value?.toString());
+                    } else {
+                      const value = values.value.replace(/[^0-9]/g, '');
+                      onChange(value);
+                      setInputValue(value?.toString());
+                    }
                   }
                 }
               }

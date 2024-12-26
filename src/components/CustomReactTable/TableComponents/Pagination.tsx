@@ -129,7 +129,7 @@ const Pagination: FC<PaginationProps> = ({
         <div className="rows-per-page sm:justify-[unset] flex items-center justify-center gap-2 min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important] max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important]">
           <span className="max-[768px]:sr-only">Rows Per Page:</span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
-            <Select labelId="label" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
+            <Select labelId="label" size="small" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
               {rowsPerPageOptions.map((option) => (
                 <MenuItem value={option} key={option}>
                   {option}

@@ -63,6 +63,7 @@ function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSucc
             <CustomDialogContent>
               <TextField
                 margin="dense"
+                size="small"
                 type="number"
                 label="Qty"
                 name="qty"

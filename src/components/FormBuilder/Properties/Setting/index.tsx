@@ -105,6 +105,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     rows={4}
                     fullWidth
                     margin="dense"
+                    size="small"
                     value={values['defaultValue']}
                     error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
                     helperText={touched['defaultValue'] && errors['defaultValue']}
@@ -145,6 +146,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 name="tooltipMessage"
                 fullWidth
                 margin="dense"
+                size="small"
                 value={values['tooltipMessage']}
                 error={touched['isTooltip'] && Boolean(errors['tooltipMessage'])}
                 helperText={touched['isTooltip'] && errors['tooltipMessage']}
@@ -183,6 +185,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 name="warningTooltipMessage"
                 fullWidth
                 margin="dense"
+                size="small"
                 value={values['warningTooltipMessage']}
                 error={touched['warningTooltipMessage'] && Boolean(errors['warningTooltipMessage'])}
                 helperText={touched['warningTooltipMessage'] && errors['warningTooltipMessage']}
@@ -402,6 +405,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   rows={4}
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['systemGeneratedPrefix']}
                   error={touched['systemGeneratedPrefix'] && Boolean(errors['systemGeneratedPrefix'])}
                   helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
@@ -428,6 +432,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   rows={4}
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['systemGeneratedPrefixDigit']}
                   error={touched['systemGeneratedPrefixDigit'] && Boolean(errors['systemGeneratedPrefixDigit'])}
                   helperText={touched['systemGeneratedPrefixDigit'] && errors['systemGeneratedPrefixDigit']}
@@ -454,6 +459,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   rows={4}
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['systemGeneratedStartNumber']}
                   error={touched['systemGeneratedStartNumber'] && Boolean(errors['systemGeneratedStartNumber'])}
                   helperText={touched['systemGeneratedStartNumber'] && errors['systemGeneratedStartNumber']}

@@ -160,7 +160,7 @@ const NewLead = () => {
               {/* Lead Source */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Lead Source</Typography>
-                <FormControl className={classes.input} variant="outlined">
+                <FormControl className={classes.input} variant="outlined" size="small">
                   <InputLabel id="select-outlined-label">Select Source</InputLabel>
                   <Select
                     labelId="select-outlined-label"
@@ -168,6 +168,7 @@ const NewLead = () => {
                     value={qualifyinTimeline}
                     onChange={handleChange}
                     label="Select Source"
+                    size="small"
                   >
                     <MenuItem value="">
                       <em>None</em>
@@ -182,7 +183,7 @@ const NewLead = () => {
               {/* Select Industry */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Industry</Typography>
-                <FormControl className={classes.input} variant="outlined">
+                <FormControl className={classes.input} variant="outlined" size="small">
                   <InputLabel id="select-outlined-label">Select Industry</InputLabel>
                   <Select
                     labelId="select-outlined-label"
@@ -190,6 +191,7 @@ const NewLead = () => {
                     value={qualifyinTimeline}
                     onChange={handleChange}
                     label="Select Source"
+                    size="small"
                   >
                     <MenuItem value="">
                       <em>None</em>
@@ -263,7 +265,7 @@ const NewLead = () => {
               {/* Lead Status */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Lead Status</Typography>
-                <FormControl className={classes.input} variant="outlined">
+                <FormControl className={classes.input} variant="outlined" size="small">
                   <InputLabel id="demo-simple-select-outlined-label">Select Status</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -271,6 +273,7 @@ const NewLead = () => {
                     value={qualifyinTimeline}
                     onChange={handleChange}
                     label="Age"
+                    size="small"
                   >
                     <MenuItem value="">
                       <em>None</em>
@@ -293,7 +296,7 @@ const NewLead = () => {
               {/* Rating */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Rating</Typography>
-                <FormControl className={classes.input} variant="outlined">
+                <FormControl className={classes.input} variant="outlined" size="small">
                   <InputLabel id="demo-simple-select-outlined-label">Select Rating</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
@@ -301,6 +304,7 @@ const NewLead = () => {
                     value={qualifyinTimeline}
                     onChange={handleChange}
                     label="Age"
+                    size="small"
                   >
                     <MenuItem value="">
                       <em>None</em>

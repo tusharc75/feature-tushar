@@ -97,6 +97,7 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                 <TextField
                   fullWidth
                   margin="dense"
+                  size="small"
                   type="text"
                   required
                   label="Title"

@@ -410,6 +410,7 @@ const PriceTemplate = () => {
                           name="name"
                           fullWidth
                           margin="dense"
+                          size="small"
                           value={values['name']}
                           error={touched['name'] && Boolean(errors['name'])}
                           helperText={touched['name'] && errors['name']}
@@ -438,6 +439,7 @@ const PriceTemplate = () => {
                             <TextField
                               {...params}
                               margin="dense"
+                              size="small"
                               name="productTemplate"
                               label="Product Template"
                               variant="outlined"
@@ -516,6 +518,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="entity"
                                 label="Entity"
                                 variant="outlined"
@@ -554,6 +557,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="owner"
                                 label="Owner"
                                 variant="outlined"
@@ -595,6 +599,7 @@ const PriceTemplate = () => {
                               <TextField
                                 {...params}
                                 margin="dense"
+                                size="small"
                                 name="collaborator"
                                 label="Collaborator"
                                 variant="outlined"

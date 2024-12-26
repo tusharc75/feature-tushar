@@ -145,6 +145,7 @@ export const UserDropdown = ({ email, name, label, value, multiple, touched, err
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
             margin="dense"
+            size="small"
             required={required}
           />
         )}

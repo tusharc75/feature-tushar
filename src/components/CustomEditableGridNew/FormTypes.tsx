@@ -73,6 +73,7 @@ const FormTypes = (props) => {
     <TextField
       {...rest}
       margin="dense"
+      size="small"
       disabled={disabled}
       variant="outlined"
       type={'text'}
@@ -97,6 +98,7 @@ const FormTypes = (props) => {
       rows={1}
       value={values[name]}
       margin="dense"
+      size="small"
       error={Boolean(errors[`${values._id}_${name}`])}
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
@@ -124,6 +126,7 @@ const FormTypes = (props) => {
           error={Boolean(errors[`${values._id}_${name}`])}
           helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
           margin="dense"
+          size="small"
           variant="outlined"
         />
       )}
@@ -135,6 +138,7 @@ const FormTypes = (props) => {
       {...rest}
       variant="outlined"
       margin="dense"
+      size="small"
       name={name}
       required={required}
       disabled={disabled}
@@ -186,19 +190,21 @@ const FormTypes = (props) => {
           }
         }
       }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            {result(
-              find(getUniqueCurrencies(), function (obj) {
-                return obj.currencyCode === currency;
-              }),
-              'symbolNative'
-            )}
-          </InputAdornment>
-        ),
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              {result(
+                find(getUniqueCurrencies(), function (obj) {
+                  return obj.currencyCode === currency;
+                }),
+                'symbolNative'
+              )}
+            </InputAdornment>
+          ),
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'converter' ? (
@@ -207,6 +213,7 @@ const FormTypes = (props) => {
       variant="outlined"
       type="number"
       margin="dense"
+      size="small"
       name={name}
       required={required}
       autoComplete="off"
@@ -219,9 +226,11 @@ const FormTypes = (props) => {
           ? onChange
           : (e) => handleConverterChange(name, unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
       }
-      InputProps={{
-        inputProps: { min: 0 },
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
         readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'decimal' ? (
@@ -229,6 +238,7 @@ const FormTypes = (props) => {
       {...rest}
       variant="outlined"
       margin="dense"
+      size="small"
       type="number"
       disabled={disabled}
       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
@@ -244,9 +254,11 @@ const FormTypes = (props) => {
             handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
           }
       }
-      InputProps={{
-        inputProps: { min: 0 },
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
         readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : fieldData?.type === 'percent' ? (
@@ -255,6 +267,7 @@ const FormTypes = (props) => {
       type="number"
       variant="outlined"
       margin="dense"
+      size="small"
       autoComplete="off"
       disabled={disabled}
       required={required}
@@ -263,10 +276,12 @@ const FormTypes = (props) => {
       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
       error={Boolean(errors[`${values._id}_${name}`])}
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
-      InputProps={{
-        endAdornment: '%',
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          endAdornment: '%',
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
       onChange={
         onChange
@@ -287,6 +302,7 @@ const FormTypes = (props) => {
       variant="outlined"
       type={'text'}
       margin="dense"
+      size="small"
       autoComplete="off"
       disabled={disabled}
       required={required}
@@ -302,6 +318,7 @@ const FormTypes = (props) => {
       disabled={disabled}
       variant="outlined"
       margin="dense"
+      size="small"
       type={fieldData?.returnType === 'decimal' ? 'number' : 'text'}
       name={name}
       autoComplete="off"
@@ -320,9 +337,11 @@ const FormTypes = (props) => {
             }
           }
       }
-      InputProps={{
-        inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
     />
   ) : null;
@@ -391,6 +410,7 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
             error={Boolean(errors[`${values._id}_${name}`])}
             helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
             margin="dense"
+            size="small"
             variant="outlined"
             onPaste={(e) => {
               const data = handlePaste(e);

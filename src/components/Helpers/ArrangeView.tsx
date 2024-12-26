@@ -231,6 +231,7 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
               name="Order"
               variant="outlined"
               margin="dense"
+              size="small"
               type="number"
               fullWidth
               style={{ margin: 0 }}

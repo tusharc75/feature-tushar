@@ -95,6 +95,7 @@ const CreateProductBuilder = () => {
                       <TextField
                         fullWidth
                         margin="dense"
+                        size="small"
                         type="text"
                         label="Name"
                         name="name"

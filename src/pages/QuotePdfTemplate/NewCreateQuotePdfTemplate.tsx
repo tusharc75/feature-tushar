@@ -717,7 +717,11 @@ export default function NewCreateQuotePdfTemplate() {
                       variant="outlined"
                       margin="none"
                       size="small"
-                      InputProps={{ inputProps: { min: 5, max: 20 } }}
+                      slotProps={{
+                        input: {
+                          inputProps: { min: 5, max: 20 }
+                        }
+                      }}
                       onChange={(e) => {
                         setFieldValue('productColumns', e.target.value);
                       }}

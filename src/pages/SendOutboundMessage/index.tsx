@@ -191,6 +191,7 @@ const SendOutboundMessage = () => {
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     name={'serializedAsset'}
                     label={resources?.serializedAsset?.titleSingular}
                     variant="outlined"

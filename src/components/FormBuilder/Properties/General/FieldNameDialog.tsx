@@ -74,6 +74,7 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
                   name="fieldName"
                   fullWidth
                   margin="dense"
+                  size="small"
                   value={values['fieldName']}
                   error={touched['fieldName'] && Boolean(errors['fieldName'])}
                   helperText={touched['fieldName'] && errors['fieldName']}

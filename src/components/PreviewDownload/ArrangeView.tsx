@@ -216,8 +216,10 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
             onChange={(e) => {
               setWidth(e?.target?.value);
             }}
-            InputProps={{
-              endAdornment: '%'
+            slotProps={{
+              input: {
+                endAdornment: '%'
+              },
             }}
             placeholder="Width"
           />

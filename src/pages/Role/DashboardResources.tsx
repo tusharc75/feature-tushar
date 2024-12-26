@@ -13,7 +13,7 @@ const DashboardResources = ({ dashboardList, dashboardName, setDashboardName, is
           getOptionLabel={(option: any) => option.name}
           value={dashboardName}
           onChange={(_event, newValue) => setDashboardName(newValue)}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Dashboard" placeholder="Dashboard" margin="dense" />}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Dashboard" placeholder="Dashboard" margin="dense" size="small" />}
           disabled={!isEdit}
         />
       </Box>

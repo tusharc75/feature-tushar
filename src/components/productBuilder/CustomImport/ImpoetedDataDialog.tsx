@@ -86,7 +86,7 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                               })
                             );
                           }}
-                          renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" />}
+                          renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" size="small" />}
                         />
                       </td>
                     ) : (

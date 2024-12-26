@@ -186,6 +186,7 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     variant="outlined"
                     label="Form Field"
                     placeholder="Form Field"
@@ -216,19 +217,22 @@ const Card = ({ state, setState, index, addRemove, actionType, error, fields, re
                   <TextField
                     {...params}
                     margin="dense"
+                    size="small"
                     variant="outlined"
                     label="Resource Field"
                     placeholder="Resource Field"
                     name="resourceField"
                     required
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <Fragment>
-                          {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </Fragment>
-                      )
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <Fragment>
+                            {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </Fragment>
+                        )
+                      }
                     }}
                     error={Boolean(error?.find((e) => e?.index === index && e?.actionType === actionType && e?.name === 'resourceField')?.error)}
                     helperText={

@@ -143,14 +143,17 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                     helperText={touched[name] && errors[name]}
                     required={required}
                     style={{ whiteSpace: 'nowrap' }}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      )
+                    size="small"
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }
                     }}
                   />
                 )}
@@ -203,14 +206,16 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                     error={touched[name] && Boolean(errors[name])}
                     helperText={touched[name] && errors[name]}
                     required={required}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      )
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }
                     }}
                   />
                 )}

@@ -25,12 +25,14 @@ const UserRoles = ({ brand }) => {
           type="search"
           placeholder="Search"
           size="small"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search color="disabled" />
-              </InputAdornment>
-            )
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="disabled" />
+                </InputAdornment>
+              )
+            },
           }}
         />
       </Box>

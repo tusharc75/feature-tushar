@@ -175,6 +175,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                 id="standard-basic"
                 variant="outlined"
                 margin="dense"
+                size="small"
                 fullWidth
                 style={{ margin: 0 }}
                 value={values['option'][props2.index] && values['option'][props2.index].optionLabel}
@@ -195,6 +196,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       fullWidth
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
                       onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
                     >
@@ -217,6 +219,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       fullWidth
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
                       onChange={(event) => onChangeValue(props2.index, _row, event.target.value)}
                     >
@@ -235,6 +238,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
                       id="standard-basic"
                       variant="outlined"
                       margin="dense"
+                      size="small"
                       fullWidth
                       style={{ margin: 0 }}
                       value={values['option'][props2.index] && values['option'][props2.index][_row] && values['option'][props2.index][_row]}
@@ -278,6 +282,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
           <TextField
             {...params}
             margin="dense"
+            size="small"
             variant="outlined"
             label="Input Parameters"
             placeholder="Input Parameters"
@@ -347,7 +352,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
       {values['isConverter'] ||
         (values['type'] === 'converter' && (
           <Grid item xs={12} sm={4} md={4}>
-            <FormControl fullWidth margin="dense" variant="outlined">
+            <FormControl fullWidth margin="dense" size="small" variant="outlined">
               <InputLabel id="vlookupOnConverter">Vlookup applied on converter</InputLabel>
               <Select
                 labelId="vlookupOnConverter"

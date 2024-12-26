@@ -58,6 +58,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
               <TextField
                 {...params}
                 margin="dense"
+                size="small"
                 variant="outlined"
                 label="Entites"
                 error={touched && errors && touched['fieldEntity'] && Boolean(errors['fieldEntity'])}

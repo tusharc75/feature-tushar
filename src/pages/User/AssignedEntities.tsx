@@ -170,7 +170,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
         <Box>
           <>
             {isMobile || isTablet ? (
-              <FormControl fullWidth margin="dense" variant="outlined">
+              <FormControl fullWidth margin="dense" size="small" variant="outlined">
                 <InputLabel id="demo-simple-select-outlined-label">Select Entity</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
@@ -185,6 +185,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   }}
                   label="Section Name"
                   name="sectionName"
+                  size="small"
                 >
                   {entities.map((c, i) => (
                     <MenuItem key={i} value={i}>

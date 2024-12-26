@@ -231,7 +231,7 @@ const CurrencyConverter = () => {
                   }
                   onChange={(e, value) => handleChange(convertLabeltoValue(value))}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" variant="outlined" label="Currency in use" placeholder="Currency in use" />
+                    <TextField {...params} margin="dense" size="small" variant="outlined" label="Currency in use" placeholder="Currency in use" />
                   )}
                 // renderOption={(option) => {
                 //   const { currencyCode, symbolNative, currencyName } = getUniqueCurrencies().find(d => d.currencyCode === option);
@@ -280,6 +280,7 @@ const CurrencyConverter = () => {
                                 id="standard-basic"
                                 type="number"
                                 variant="outlined"
+                                size="small"
                                 margin="dense"
                                 fullWidth
                                 style={{ margin: 0 }}

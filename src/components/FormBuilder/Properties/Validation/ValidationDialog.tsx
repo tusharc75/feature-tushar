@@ -119,6 +119,7 @@ const ValidationDialog = ({ onClose, data, fields, fieldsToExclude, fieldValue, 
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Fields"
                           placeholder="Select Field"
@@ -147,6 +148,7 @@ const ValidationDialog = ({ onClose, data, fields, fieldsToExclude, fieldValue, 
                         <TextField
                           {...params}
                           margin="dense"
+                          size="small"
                           variant="outlined"
                           label="Operator"
                           placeholder="Select Operator"

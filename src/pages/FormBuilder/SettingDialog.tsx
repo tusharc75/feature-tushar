@@ -150,7 +150,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                           setSelectedEntities(val);
                         }}
                         renderInput={(params) => (
-                          <TextField {...params} margin="dense" variant="outlined" label="Entities" fullWidth name="entities" />
+                          <TextField {...params} margin="dense" size="small" variant="outlined" label="Entities" fullWidth name="entities" />
                         )}
                       />
                       <FieldArray name="entityResources">
