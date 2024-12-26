@@ -345,6 +345,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       )}
                       <TextField
                         margin="dense"
+                        size="small"
                         type="number"
                         label="Qty"
                         name="qty"
@@ -364,6 +365,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     <Box m={1}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="number"
                         label={`Cost ${curr}`}
                         name="price"
@@ -377,8 +379,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         onChange={(e) => {
                           setFieldValue('price', e.target.value);
                         }}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>
+                        slotProps={{
+                          input: {
+                            startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>,
+                          },
                         }}
                       />
                     </Box>
@@ -403,6 +407,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="storageLocation"
                             label="Storage Location"
                             variant="outlined"
@@ -460,6 +465,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <Box m={1}>
                     <TextField
                       margin="dense"
+                      size="small"
                       type="text"
                       label="Comment"
                       name="comment"
@@ -506,7 +512,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           </Box>
                         )}
                         <Autocomplete
-                          size="small"
                           options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
                           freeSolo={type === 'add'}
                           multiple={true}
@@ -527,6 +532,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           renderInput={(props) => (
                             <TextField
                               {...props}
+                              margin="dense"
+                              size="small"
                               placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
                               variant="outlined"
                               name="serialNumbers"

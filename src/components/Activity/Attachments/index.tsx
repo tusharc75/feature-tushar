@@ -422,7 +422,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       <Menu
         id="folder-edit-menu"
         anchorEl={folderAnchorEl?.anchor}
-        getContentAnchorEl={null}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isFolderOptionsOpen}
@@ -513,7 +512,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
-              getContentAnchorEl={null}
               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               keepMounted

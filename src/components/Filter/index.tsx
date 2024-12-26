@@ -339,15 +339,16 @@ export default Filter;
 export const InNin = ({ filterTerm, setFilterTerm, fieldName }) => {
   return (
     <div className="mr-2">
-      <FormControl fullWidth size="small" variant="outlined" margin="dense">
+      <FormControl fullWidth size="small" variant="outlined" margin="none">
         <Select
           labelId={'filter-term'}
           id={'filter-term'}
+          size="small"
           value={filterTerm[fieldName] || '$in'}
           onChange={(e) => {
             setFilterTerm((prev) => ({ ...prev, [fieldName]: e?.target?.value }));
           }}
-          className="[&_.MuiSelect-root]:p-[7px_32px_7px_10px]"
+          className="[&_.MuiSelect-select]:!p-[5px_32px_5px_10px]"
           margin="none"
         >
           <MenuItem value={'$in'}>Include</MenuItem>

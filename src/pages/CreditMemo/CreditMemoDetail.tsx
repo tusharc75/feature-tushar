@@ -188,10 +188,9 @@ const creditMemoDetail = () => {
           <Box className="control-buttons-v1">
             {creditMemoData ? (
               <>
-                {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && (
+                {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
                   <Button
                     variant={'outlined'}
-                    color="default"
                     size="small"
                     onClick={openActions}
                     className="btn-outline-v1"
@@ -202,18 +201,9 @@ const creditMemoDetail = () => {
                     {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                   </Button>
                 )}
-                {permissions?.creditMemo?.isUpdate &&
-                  allowedToEdit &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
-                    <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                      {'Edit'}
-                    </ThemeButton>
-                  )}
-                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -241,18 +231,26 @@ const creditMemoDetail = () => {
                     })}
                 </Menu>
                 {permissions?.creditMemo?.isUpdate && allowedToEdit && creditMemoData?.status === INVOICE_STATUS.closed && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setShowReOpenConfirmBox(true);
                     }}
                   >
                     Re-Open
-                  </Button>
+                  </ThemeButton>
                 )}
+                {permissions?.creditMemo?.isUpdate &&
+                  allowedToEdit &&
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
+                    <ThemeButton
+                      iconForMobile={<EditIcon />}
+                      variant={'outlined'}
+                      onClick={handleOpenUpdateDialog}
+                      tooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
+                  )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />

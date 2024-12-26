@@ -103,7 +103,7 @@ function ShowFilteredRecordsOnly({ dispatchTable, showOnlyShowFilteredRecordSwit
             }}
             className="show-only-selected-switch"
             control={<CustomSwitch disabled={disableSelectionSwitch} />}
-            style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
+            style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 0px', maxHeight: 34 }}
             label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
             labelPlacement="end"
           />

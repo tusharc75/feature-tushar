@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { Edit, ExpandMore } from '@mui/icons-material';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -9,9 +10,8 @@ import { IoMdDownload } from 'react-icons/io';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -284,20 +284,14 @@ const InvoiceDetails = () => {
                 {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'

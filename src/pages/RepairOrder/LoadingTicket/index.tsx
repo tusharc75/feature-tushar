@@ -317,7 +317,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

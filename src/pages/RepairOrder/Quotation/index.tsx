@@ -372,15 +372,14 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
             ? _subRow.productDetail?.productName
             : _subRow.type === 'service'
               ? _subRow.serviceDetail?.serviceName
               : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -664,7 +663,7 @@ const Quotation = ({
             <Box display={'flex'} gridGap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                   <Button
                     disabled={material
                       .filter((e) => e.parentId === null)
@@ -694,8 +693,8 @@ const Quotation = ({
                     Accept / Reject
                   </Button>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
-                    quotationData?.versions[currentVersion]?.status
-                  ) ? (
+                  quotationData?.versions[currentVersion]?.status
+                ) ? (
                   <Button
                     onClick={() => {
                       cloneVersion();
@@ -711,23 +710,22 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords?.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-              )}
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords?.length === 0}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
-                getContentAnchorEl={null}
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'

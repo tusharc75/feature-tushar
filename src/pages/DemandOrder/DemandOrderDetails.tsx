@@ -1,12 +1,13 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
-import { Edit, ExpandMore } from '@mui/icons-material';
+import { ExpandMore } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -166,23 +167,19 @@ const DemandOrderDetails = () => {
             {demandOrderData?.status !== DEMAND_ORDER_STATUS.converted && (
               <>
                 {demandOrderData?.material?.length > 0 && (
-                  <Button
-                    variant={'contained'}
-                    className="btn-outline-v1"
-                    size="small"
+                  <ThemeButton
+                    endIcon={<ExpandMore fontSize="small" />}
                     onClick={(e) => {
                       setConvertAnchorEl(e.currentTarget);
                     }}
-                    aria-controls="convert-menu"
-                    endIcon={<ExpandMore fontSize="small" />}
+                    tooltip={'Convert'}
                   >
                     {'Convert'}
-                  </Button>
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={convertAnchorEl}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -209,14 +206,9 @@ const DemandOrderDetails = () => {
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button
-                    className="btn-outline-v1"
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                  </Button>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>

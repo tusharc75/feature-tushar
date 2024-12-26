@@ -293,7 +293,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           <Menu
             anchorEl={anchorActionEl}
             keepMounted
-            getContentAnchorEl={null}
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left'

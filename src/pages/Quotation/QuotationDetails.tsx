@@ -477,7 +477,6 @@ const QuotationDetails = () => {
                 <Menu
                   anchorEl={anchorElAction}
                   keepMounted
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
@@ -599,10 +598,10 @@ const QuotationDetails = () => {
             {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-              <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+                <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
+                  <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+                </Box>
+              )}
             <div>
               <Steps
                 isNextStep={false}
@@ -620,10 +619,10 @@ const QuotationDetails = () => {
                 handleNext={
                   stepNames[currentStep] === 'Quote Approval'
                     ? () => {
-                        if (allowedToEdit) {
-                          setCustomerAcceptable(true);
-                        }
+                      if (allowedToEdit) {
+                        setCustomerAcceptable(true);
                       }
+                    }
                     : null
                 }
               />

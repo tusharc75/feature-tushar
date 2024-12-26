@@ -1,9 +1,8 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -41,7 +40,7 @@ import {
   generateLoadingStepReceive,
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -257,14 +256,9 @@ const TransferInventoryDetailPage = () => {
                 </Fragment>
               )}
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <Button
-                className={'btn-outline-v1'}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton

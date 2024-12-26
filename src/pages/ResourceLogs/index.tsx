@@ -43,7 +43,7 @@ const ResourceLogs = () => {
     const data: any = [];
     for (var key in LOG_RESOURCE) {
       if (permissions[key]?.isRead === true) {
-        data.push({ optionLabel: routes[key].title, optionValue: LOG_RESOURCE[key], key: key });
+        data.push({ optionLabel: resources?.[key]?.titleSingular, optionValue: LOG_RESOURCE[key], key: key });
       }
     }
     setResourceOptions(data);

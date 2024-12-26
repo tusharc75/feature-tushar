@@ -315,7 +315,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => {};
+  const handleAssignAssets = (data) => { };
 
   return (
     <Fragment>
@@ -339,7 +339,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 <Menu
                   anchorEl={anchorEl}
                   open={open}
-                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'

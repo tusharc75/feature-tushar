@@ -382,10 +382,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -477,10 +477,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -493,10 +493,10 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -941,7 +941,6 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
       <Menu
         anchorEl={actionAnchor}
         keepMounted
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
