@@ -32,7 +32,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  dateTimeFormat,
   deliveryTicket,
   displayDateTime,
   getObjKeysWithValues,

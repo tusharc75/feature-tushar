@@ -8,7 +8,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import { TextField, Button, Grid } from '@mui/material';
-import { CustomDialogTransition, dateTimeFormat, displayDateTime } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
 import PersonIcon from '@mui/icons-material/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

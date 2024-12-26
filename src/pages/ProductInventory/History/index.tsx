@@ -11,7 +11,7 @@ import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import {
   PRODUCT_SERIAL_NUMBER_STATUS,
-  dateTimeFormat,
+  displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid,
   productInventory,
@@ -197,8 +197,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {row?.original?.date ? (
-            <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
-              {moment(row?.original?.date)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.date)}>
+              {displayDateTime(row?.original?.date)}
             </h5>
           ) : (
             <NoDataCell />
@@ -473,8 +473,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {row?.original?.transactionDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={displayDateTime(row?.original?.transactionDate)}>
+              {displayDateTime(row?.original?.transactionDate)}
             </h5>
           ) : (
             <NoDataCell />

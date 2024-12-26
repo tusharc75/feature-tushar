@@ -2,14 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDateTime, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
-import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -264,9 +263,9 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                       <Box className="line-clamp-1 min-w-0" title={data?.status ? data?.status : ''}>
                         <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
                       </Box>
-                      <Box className="line-clamp-1  min-w-0" title={data?.requestDate ? moment(data?.requestDate).format(dateTimeFormat) : ''}>
+                      <Box className="line-clamp-1  min-w-0" title={data?.requestDate ? displayDateTime(data?.requestDate) : ''}>
                         <Typography variant="subtitle2">
-                          {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
+                          {data?.requestDate && `Request Date : ${displayDateTime(data?.requestDate)} `}
                         </Typography>
                       </Box>
                     </div>
@@ -280,10 +279,10 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           {data?.status === 'Submit' && (
                             <Box
                               className="line-clamp-1  min-w-0"
-                              title={data?.responseDate ? moment(data?.responseDate).format(dateTimeFormat) : ''}
+                              title={data?.responseDate ? displayDateTime(data?.responseDate) : ''}
                             >
                               <Typography variant="subtitle2">
-                                {data?.responseDate && `Response Date : ${moment(data?.responseDate).format(dateTimeFormat)} `}
+                                {data?.responseDate && `Response Date : ${displayDateTime(data?.responseDate)} `}
                               </Typography>
                             </Box>
                           )}

@@ -7,12 +7,11 @@ import TextField from '@mui/material/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { dateTimeFormat, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDateTime, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { GetApp } from '@mui/icons-material';
 import { CustomImport } from './customImport';
-import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -94,7 +93,7 @@ const ImportExport = () => {
         accessor: 'date',
         Header: 'Date & Time',
         Cell: ({ row }) => {
-          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row.original?.date ? <p className="text-truncate">{displayDateTime(row?.original?.date)}</p> : <NoDataCell />;
         }
       },
       {

@@ -10,7 +10,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { CustomDialogTransition, dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
 import { CreditDebitRenderer } from 'src/pages/Reports/tables/StandardReportTable/helperComponents';
 import { useData } from 'src/StateProvider/Provider';
@@ -69,8 +69,8 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.date ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.date)?.format(dateTimeFormat)}`}>
-            {moment(row?.original?.date)?.format(dateTimeFormat)}
+          <h5 className="text-truncate" title={`${displayDateTime(row?.original?.date)}`}>
+            {displayDateTime(row?.original?.date)}
           </h5>
         ) : (
           <NoDataCell />
@@ -155,8 +155,8 @@ const AverageCostHistory = ({ handleClose, product, productName, deepFilters, fi
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.transactionDate ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.transactionDate)?.format(dateTimeFormat)}`}>
-            {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+          <h5 className="text-truncate" title={`${displayDateTime(row?.original?.transactionDate)}`}>
+            {displayDateTime(row?.original?.transactionDate)}
           </h5>
         ) : (
           <NoDataCell />

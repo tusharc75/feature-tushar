@@ -8,12 +8,11 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import moment from 'moment';
 import EditIcon from '@mui/icons-material/Edit';
 import ManageVolumeData from './ManageVolumeData';
 import { camelCase } from 'lodash';
@@ -52,7 +51,7 @@ const VolumeData = ({ assetId }) => {
         Header: 'Date',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => <div>{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
+        Cell: ({ row }) => <div>{displayDateTime(row?.original?.date)}</div>
       },
       {
         accessor: 'TotalVolInBBLs',

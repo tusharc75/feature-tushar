@@ -6,11 +6,10 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import TinyMce from './../../components/TinyMCE';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
 import { Button, Grid } from '@mui/material';
-import { dateTimeFormat } from 'src/constants/helpers';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { displayDateTime } from 'src/constants/helpers';
 
 const Comments = ({ uniqueId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,7 +70,7 @@ const Comments = ({ uniqueId }) => {
                   <div className="mb-4 mt-[9px] flex flex-wrap justify-between gap-[10px] text-[13px] text-[var(--primary-text)] ">
                     <p>
                       <span className="font-semibold">{item?.user?.optionLabel}</span>
-                      <span className="ml-2 text-[#969696] dark:text-gray-400">{moment(item.date).format(dateTimeFormat)}</span>
+                      <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.date)}</span>
                     </p>
                   </div>
                   <div className="flex flex-wrap items-start justify-between gap-4 md:gap-[32px]">

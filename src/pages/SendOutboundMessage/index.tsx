@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -65,7 +65,7 @@ const SendOutboundMessage = () => {
       Header: 'Date',
       disableFilters: true,
       Cell: ({ row }) =>
-        row?.original?.date ? <h5 className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</h5> : <NoDataCell />
+        row?.original?.date ? <h5 className="text-truncate">{displayDateTime(row?.original?.date)}</h5> : <NoDataCell />
     },
     {
       accessor: 'user',

@@ -1,6 +1,5 @@
 import { Box, Dialog, IconButton } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
@@ -13,7 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateTimeFormat, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 
@@ -47,7 +46,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
         width: 150,
         disabled: true,
         Cell: ({ row }) => {
-          return row?.original['date'] ? <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p> : <NoDataCell />;
+          return row?.original['date'] ? <p className="text-truncate">{displayDateTime(row?.original['date'])}</p> : <NoDataCell />;
         }
       },
       {
