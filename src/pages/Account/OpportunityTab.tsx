@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@mui/styles';
-import { Card, CardContent, Grid, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
+import { Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 import { displayDate } from '../../services/util';
@@ -68,32 +69,32 @@ export default function OpportunityTab({ data }) {
       {data && data.length ? (
         <Grid container spacing={1}>
           {data.map((obj, index) => (
-            <Grid item xs={12} sm={12} md={6} key={index}>
+            <Grid size={{ xs: 12, sm: 12, md: 6}} key={index}>
               <Card className="detailCard">
                 <CardContent className="detailListing">
                   <Grid container className="detailCardHeader">
-                    <Grid item xs={7} sm={8}>
+                    <Grid size={{ xs:7, sm:8}}>
                       {
                         <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                           <Typography className="detailName">{obj?.opportunityName}</Typography>
                         </Link>
                       }
                     </Grid>
-                    <Grid item xs={5} sm={4}>
+                    <Grid size={{ xs:5, sm:4}}>
                       <Typography className="amount" title={formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}>
                         {formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
                       </Typography>
                     </Grid>
                   </Grid>
                   <Grid container>
-                    <Grid item xs={12} sm={6} md={6}>
+                    <Grid size={{ xs:12, sm:6, md:6}}>
                       {obj?.stage ? (
                         <DisplayData key={index} label="Stage" value={obj?.stage?.optionLabel ?? ''} icon={<BiCustomize size={15} />} />
                       ) : (
                         ''
                       )}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
+                    <Grid size={{ xs:12, sm:6, md:6}}>
                       {obj.closeDate ? (
                         <DisplayData key={index} label="Closing Date" value={displayDate(obj.closeDate)} icon={<IoCalendarOutline size={15} />} />
                       ) : (

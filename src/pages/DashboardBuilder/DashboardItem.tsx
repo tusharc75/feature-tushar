@@ -2,10 +2,12 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, IconButton, ThemeOptions, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Delete, Edit } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
 import { colSpans } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -85,9 +87,9 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
 
         {!isEditing && (
           <Box display={'flex'} justifyContent="space-between">
-            <IconButton size="small" onClick={() => handleEdit(formData)}>
-              <Edit color="primary" />
-            </IconButton>
+            <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={() => handleEdit(formData)} tooltip={'Edit'}>
+              {'Edit'}
+            </ThemeButton>
             <IconButton size="small" onClick={() => handleRemove(id)}>
               <Delete color="error" />
             </IconButton>

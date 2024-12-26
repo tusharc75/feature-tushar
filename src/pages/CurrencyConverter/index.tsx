@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -214,7 +214,7 @@ const CurrencyConverter = () => {
                 padding: '10px 10px'
               }}
             >
-              <Grid item xs={12} md={8} sm={8}>
+              <Grid size={{ xs: 12, sm: 8, md: 8}}>
                 <Autocomplete
                   fullWidth
                   multiple
@@ -239,7 +239,7 @@ const CurrencyConverter = () => {
                 // }}
                 />
               </Grid>
-              <Grid xs={12} md={4} sm={4} container justify="flex-end">
+              <Grid size={{xs:12, md:4, sm:4}} container justifyContent="flex-end">
                 <FormControlLabel
                   control={<Checkbox name="required" checked={isApiUpdate} onChange={(e) => setIsApiUpdate(e.target.checked)} color="primary" />}
                   label="Auto Update Daily Through API"
@@ -251,7 +251,7 @@ const CurrencyConverter = () => {
             {option && option.length > 0 && (
               <Fragment>
                 <Grid container>
-                  <Grid xs={12} container justify="flex-end">
+                  <Grid size={{xs:12}} container justifyContent="flex-end">
                     <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" onClick={getcurrencyrates} size="small">
                       {' '}
                       Fetch Rates

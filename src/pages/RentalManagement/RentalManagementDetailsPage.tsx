@@ -1,5 +1,4 @@
 import { Box, Button, CircularProgress } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, findIndex } from 'lodash';
 import queryString from 'query-string';
@@ -9,9 +8,7 @@ import { IoMdDownload } from 'react-icons/io';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -202,7 +199,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const checkDeliveryTicketFields = () => {
@@ -220,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -500,13 +497,14 @@ const RentalManagementDetailsPage = () => {
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <ThemeButton
+                          iconForMobile={<EditIcon />}
                           disabled={allowedToEdit ? false : true}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          variant={'outlined'}
                           onClick={handleOpenUpdateDialog}
-                          tooltip={!allowedToEdit ? ownerAndColaborator : 'Edit'}
+                          tooltip={'Edit'}
                           id={'rental-management-edit-button'}
                         >
-                          {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                          {'Edit'}
                         </ThemeButton>
                       </Fragment>
                     )}
@@ -554,11 +552,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    allowedToEdit &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                        setShowCancelConfirmBox({ open: true, isQuote: true });
-                      }
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -582,12 +580,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -606,12 +604,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

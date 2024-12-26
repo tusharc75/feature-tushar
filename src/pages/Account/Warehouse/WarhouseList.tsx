@@ -1,7 +1,7 @@
 import { Box, CircularProgress } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog/Dialog';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -102,8 +102,8 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>
-              <Grid item xs={12} sm={12} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
+              <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }} container justifyContent="flex-end">
+              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
                   <Button
                     size="small"

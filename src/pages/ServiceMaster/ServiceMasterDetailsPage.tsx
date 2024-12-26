@@ -1,11 +1,11 @@
-import { Box, Button, Grid, useMediaQuery } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, useMediaQuery } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -22,6 +22,7 @@ import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import Grid from '@mui/material/Grid2';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -120,29 +121,28 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.product?.isUpdate && !isMobile && (
-                  <Button
-                    variant={isMobile ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
+                {permissions?.serviceMaster?.isUpdate && !isMobile && (
+                  <ThemeButton
+                    variant={'outlined'}
                     onClick={() => {
                       setOpenConfigureFields(true);
                     }}
+                    tooltip={'Configure Fields'}
                   >
-                    Configure Fields
-                  </Button>
+                    {'Configure Fields'}
+                  </ThemeButton>
                 )}
-                {permissions?.product?.isUpdate && (
-                  <Button
-                    variant={isMobile ? 'text' : 'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
+                {permissions?.serviceMaster?.isUpdate && (
+                  <ThemeButton
+                    iconForMobile={<EditIcon />}
+                    variant={'outlined'}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
+                    tooltip={'Edit'}
                   >
-                    {isMobile ? <Edit /> : 'Edit'}
-                  </Button>
+                    {'Edit'}
+                  </ThemeButton>
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
@@ -166,14 +166,14 @@ const ServiceMasterDetailsPage = () => {
           <Box className="form-v1">
             {loading || (!fields.length && serviceMasterDetailData != null) ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6} lg={6}>
+                    <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
                       <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
                     </Grid>
                   </Grid>

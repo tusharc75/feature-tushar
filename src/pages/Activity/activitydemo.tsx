@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Activity from '../../components/Activity';
 import UpcomingActivity from '../../components/Activity/UpcomingActivity';
 
@@ -22,10 +22,10 @@ const Activitydemo = () => {
 
   return (
     <Grid container spacing={3}>
-      <Grid xs={4} item>
+      <Grid size={{xs:4}}>
         <Activity relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} />
       </Grid>
-      <Grid xs={4} item>
+      <Grid size={{xs:4}}>
         {refresh && <UpcomingActivity relatedTo={relatedTo} />}
       </Grid>
     </Grid>

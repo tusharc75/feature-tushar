@@ -248,9 +248,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Step Export',
-              api: `${serviceMaster.api}/steps/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/steps/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -265,9 +264,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Consumable Export',
-              api: `${serviceMaster.api}/product/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/product/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -311,12 +309,11 @@ const ServiceMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.serviceName || ''}`
               : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
