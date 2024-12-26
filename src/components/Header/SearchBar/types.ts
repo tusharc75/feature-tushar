@@ -4,9 +4,14 @@ export type SearchBarProps = {
 };
 export type UseSearchState = {
   items: Item[];
+  optionValue: Partial<Item> | null;
+  inputValue: string;
 };
 
-export type UseSearchActions = { type: 'setItems'; payload: Item[] };
+export type UseSearchActions =
+  | { type: 'setItems'; payload: UseSearchState['items'] }
+  | { type: 'setOptionValue'; payload: UseSearchState['optionValue'] }
+  | { type: 'setInputValue'; payload: UseSearchState['inputValue'] };
 
 export type Section = {
   head: string;
