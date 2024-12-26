@@ -232,7 +232,6 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
             <Menu
               anchorEl={anchorEl}
               keepMounted
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left'
