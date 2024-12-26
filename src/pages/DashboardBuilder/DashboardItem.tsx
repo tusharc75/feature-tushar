@@ -80,7 +80,7 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
           </p>
 
           <Box mt={2} display="flex" flexDirection="column" alignItems="center">
-            <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new_theme_secondary_color)' }} className={classes.chartIcon} />
+            <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new-theme-secondary-color)' }} className={classes.chartIcon} />
             {isEditing && <Typography className={classes.title}>Editing...</Typography>}
           </Box>
         </Box>

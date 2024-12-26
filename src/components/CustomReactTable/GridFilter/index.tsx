@@ -23,6 +23,7 @@ import SaveFilterDialog from './SaveFilterDialog';
 import NumberInput from 'src/components/CustomReactTable/GridFilter/NumberInput';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -397,18 +398,17 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button
+          <ThemeButton
+            borderColor="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
             disabled={isEmpty(formValues) ? true : false}
             size="small"
             color="primary"
-            // variant="outlined"
-            className="yellow-button"
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
-          </Button>
+          </ThemeButton>
           <Button
             disabled={!validate(formValues) ? true : false}
             onClick={handleApplyFilter}
