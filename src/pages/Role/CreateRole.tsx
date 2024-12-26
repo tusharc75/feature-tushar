@@ -259,7 +259,14 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   autoHighlight
                   disableClearable
                   fullWidth
-                  renderOption={(option) => option || ''}
+                  renderOption={(props, option, state, ownerState) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <Box component="li" key={key} {...optionProps}>
+                        {ownerState.getOptionLabel(option)}
+                      </Box>
+                    );
+                  }}
                   onChange={(event: any, newValue: any) => {
                     setValues({ ...values, tier: newValue });
                   }}

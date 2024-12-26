@@ -70,7 +70,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
       .then(({ data: { data } }) => {
         setExcelMappingData(data?.filter((d) => d?.access === 'everyone' || (d?.access === 'private' && d?.user === user?.user?._id)));
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const deleteExcelMappingView = () => {
@@ -135,23 +135,26 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       onChange={(event: any, newValue: any) => {
                         setSelectedView(newValue ? newValue : null);
                       }}
-                      renderOption={(option) => (
-                        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                          <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
-                          <Box>
-                            <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  setConfirmationDelete({ open: true, data: [option] });
-                                }}
-                              >
-                                <RiDeleteBin6Fill />
-                              </IconButton>
-                            </HtmlTooltip>
+                      renderOption={(props, option,state,ownerState) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                            <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                            <Box>
+                              <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    setConfirmationDelete({ open: true, data: [option] });
+                                  }}
+                                >
+                                  <RiDeleteBin6Fill />
+                                </IconButton>
+                              </HtmlTooltip>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
+                        );
+                      }}
                       id="select-view"
                       renderInput={(params) => (
                         <TextField {...params} margin="dense" size={'small'} fullWidth label="Select Excel Mapping" variant="outlined" />

@@ -1965,8 +1965,9 @@ const FormTypes = (props) => {
           )}
           renderOption={(props, option: any) => {
             const { currencyCode, currencyName, symbolNative } = option;
+            const { key, ...optionProps } = props;
             return (
-              <li {...props}>
+              <li key={key} {...optionProps}>
                 {`${currencyCode} - ${currencyName} - (${symbolNative})`}
               </li>
             );
@@ -2272,13 +2273,15 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option: any) => {
+          renderOption={(props, option:any) => {
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
               matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
+            const { key, ...optionProps } = props;
             return (
+              <Box key={key} component="li" {...optionProps}>
               <Grid container alignItems="center">
                 <Grid item>
                   <LocationOnIcon
@@ -2300,6 +2303,7 @@ const FormTypes = (props) => {
                   </Typography>
                 </Grid>
               </Grid>
+            </Box>
             );
           }}
         />
@@ -2355,15 +2359,16 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option: any) => {
+          renderOption={(props, option:any) => {
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
               matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
-
+            const { key, ...optionProps } = props;
             return (
-              <Grid container alignItems="center">
+            <Box key={key} component="li" {...optionProps}>
+              <Grid key={key} container alignItems="center">
                 <Grid item>
                   <LocationOnIcon
                     style={{
@@ -2384,6 +2389,7 @@ const FormTypes = (props) => {
                   </Typography>
                 </Grid>
               </Grid>
+            </Box>
             );
           }}
         />

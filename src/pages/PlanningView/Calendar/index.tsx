@@ -760,12 +760,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 disableCloseOnSelect
                 style={{ width: '300px' }}
                 getOptionLabel={(option) => option?.label}
-                renderOption={(option: any) => (
-                  <React.Fragment>
-                    <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                    {option?.label}
-                  </React.Fragment>
-                )}
+                renderOption={(props, option, state, ownerState) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                  <Box component="li" key={key} {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                    <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                    {ownerState.getOptionLabel(option)}
+                  </Box>
+                )
+              }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                 value={selectedFilters}

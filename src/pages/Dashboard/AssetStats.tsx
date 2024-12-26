@@ -73,7 +73,14 @@ const AssetStats = () => {
           size="small"
           isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
           getOptionLabel={(option) => option.optionLabel}
-          renderOption={(option) => <Typography noWrap>{option.optionLabel}</Typography>}
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                <Typography noWrap>{ownerState.getOptionLabel(option)}</Typography>
+              </Box>
+            );
+          }}
           onInputChange={(_, val) => setSearchVal(val)}
           renderInput={(params) => (
             <TextField
