@@ -16,6 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 export type GridViewRef = {
   refreshGrid: () => void;
@@ -92,7 +93,23 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
         Header: 'Work Order Number',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
+              { row.original['workOrderNumber'] ? (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+                ):(
+                  <NoDataCell/>
+              )}   
+          </div>
+        )
       },
       {
         accessor: 'assignedWorkStations',
