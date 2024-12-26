@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Box, Checkbox, FormControl, IconButton, TextField } from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -88,6 +88,8 @@ export const PreviewFields = ({
     }
   };
 
+  console.log(views);
+
   return (
     <>
       <FormControl fullWidth>
@@ -100,27 +102,42 @@ export const PreviewFields = ({
               handleSelectView(selectedOption);
             }}
             getOptionLabel={(option) => option.name}
-            renderOption={(option) => (
-              <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
-                <Box>
-                  <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
-                    <IconButton size="small" style={{ marginRight: '20px' }} disabled={user?._id !== option?.user}>
-                      <AiFillEdit />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only delete' : 'Delete'}>
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}
-                      disabled={user?._id !== option?.user}
-                    >
-                      <RiDeleteBin6Fill />
-                    </IconButton>
-                  </HtmlTooltip>
+            renderOption={(props, option, state, ownerState) => {
+              const { key, ...optionProps } = props;
+              return (
+                <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                  <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                  <div className="flex items-center">
+                    <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
+                      <IconButton
+                        size="small"
+                        style={{ marginRight: '20px' }}
+                        disabled={user?._id !== option?.user}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <AiFillEdit />
+                      </IconButton>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only delete' : 'Delete'}>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsViewDeleteConfirm({ open: true, id: option._id });
+                        }}
+                        disabled={user?._id !== option?.user}
+                      >
+                        <RiDeleteBin6Fill />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </div>
                 </Box>
-              </Box>
-            )}
+              );
+            }}
             id="controllable-states-demo"
             options={views}
             renderInput={(params) => <TextField {...params} fullWidth label={`Select View ${type}`} variant="outlined" />}
@@ -138,10 +155,10 @@ export const PreviewFields = ({
                 if (
                   val.find((e) => e.fieldName === 'Select All') &&
                   ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !==
-                  val
-                    ?.map((e) => e?.fieldName)
-                    .sort()
-                    .toString()
+                    val
+                      ?.map((e) => e?.fieldName)
+                      .sort()
+                      .toString()
                 ) {
                   setVisibleColumns(allColumn);
                 } else if (
@@ -166,22 +183,25 @@ export const PreviewFields = ({
               getOptionLabel={(option) => option?.fieldLabel}
               isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
               disableCloseOnSelect
-              renderOption={(option, { selected }) => (
-                <React.Fragment>
-                  <Checkbox
-                    icon={icon}
-                    checkedIcon={checkedIcon}
-                    style={{ marginRight: 8 }}
-                    checked={
-                      ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
+              renderOption={(props, option, state, ownerState) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                    <Checkbox
+                      icon={icon}
+                      checkedIcon={checkedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={
+                        ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
                         ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
-                        ? true
-                        : selected
-                    }
-                  />
-                  {option.fieldLabel}
-                </React.Fragment>
-              )}
+                          ? true
+                          : state.selected
+                      }
+                    />
+                    {ownerState.getOptionLabel(option)}
+                  </Box>
+                );
+              }}
               renderInput={(params) => <TextField {...params} variant="outlined" label={`Visible Columns in ${type}`} placeholder="Select" />}
             />
           </Box>

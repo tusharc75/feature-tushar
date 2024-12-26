@@ -14,6 +14,7 @@ import DownloadHistory from './DownloadHistory';
 import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDeep } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const PreviewDialog = ({
   type,
@@ -206,7 +207,9 @@ export const PreviewDialog = ({
               type?.includes('Excel') ? selectedExcelView : selectedPdfView
             ) && (
               <>
-                <CustomButton
+                <ThemeButton
+                  iconForMobile={false}
+                  borderColor="yellow"
                   id={'show-column-dialog-save-update-button'}
                   onClick={() => {
                     const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
@@ -214,37 +217,33 @@ export const PreviewDialog = ({
                     setShowSaveViewDialog({ open: true, data: selectedView });
                   }}
                   disabled={sortBy && !orderBy}
-                  size="small"
-                  className="yellow-button"
                 >
                   Save as New View
-                </CustomButton>
+                </ThemeButton>
               </>
             )}
           {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
               <>
-                <CustomButton
+                <ThemeButton
                   id={'show-column-dialog-save-update-button'}
                   onClick={() => {
                     setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
                   }}
                   disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
-                  size="small"
-                  className="yellow-button"
+                  borderColor="yellow"
                 >
                   {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
-                </CustomButton>
+                </ThemeButton>
               </>
             </HtmlTooltip>
           )}
           {operation === 'Send Email' ? (
-            <CustomButton
-              variant="contained"
-              className="no-shadow"
+            <ThemeButton
+              borderColor="none"
               color="primary"
               size="small"
-              loading={loadingType === 'Regular'}
+              isLoading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
                 handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
@@ -252,38 +251,34 @@ export const PreviewDialog = ({
               id={'show-column-dialog-send-email-button'}
             >
               {operation}
-            </CustomButton>
+            </ThemeButton>
           ) : (
             <>
-              <CustomButton
-                variant="contained"
-                className="no-shadow"
+              <ThemeButton
+                borderColor="none"
                 color="primary"
                 id={'show-column-dialog-export-button'}
-                size="small"
-                loading={loadingType === 'Regular'}
+                isLoading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                 onClick={(e) => {
                   handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                 }}
               >
                 {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
-              </CustomButton>
+              </ThemeButton>
               {hideDetailButton || type === 'Excel' ? null : (
-                <CustomButton
-                  variant="contained"
+                <ThemeButton
+                  borderColor="none"
                   color="primary"
-                  className="no-shadow"
                   id={'show-column-dialog-operation-2-button'}
-                  size="small"
-                  loading={loadingType === 'Detail'}
+                  isLoading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                   onClick={(e) => {
                     handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                   }}
                 >
                   {`${button2Title} ${operation}`}
-                </CustomButton>
+                </ThemeButton>
               )}
             </>
           )}

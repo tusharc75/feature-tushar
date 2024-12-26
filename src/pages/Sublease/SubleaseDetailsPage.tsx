@@ -203,20 +203,18 @@ const SubleaseDetailsPage = () => {
               subleaseData?.canComplete &&
               ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
                 <ButtonWithPulse
-                  variant={'outlined'}
-                  size="small"
                   onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
-                  className={'btn-outline-v1'}
                 >
                   Close
                 </ButtonWithPulse>
               )}
             {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
-              <>
-                <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
-              </>
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                onClick={() => setOpenUpdateDialog(true)}
+                tooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />
           </Box>

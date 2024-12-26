@@ -8,7 +8,6 @@ function CustomButton(props) {
   const { loading, children, disabled, ...rest } = props;
   return (
     <Button {...rest} disabled={disabled} size={'small'} variant={'contained'} endIcon={loading && <CircularProgress size={18} color="inherit" />}>
-      {/*style={isMobile ? {color:"var(--danger-light)"} : {}} {isMobile ? <MdRateReview size={20}/> : children} */}
       {children}
     </Button>
   );

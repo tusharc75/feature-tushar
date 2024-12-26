@@ -171,7 +171,7 @@ function PreviewDownload({
   return (
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
-        <Box display="flex" flexWrap={'wrap'} gridGap={8}>
+        <div className="flex flex-wrap gap-2">
           <ThemeButton
             size="small"
             id={'details-page-preview-button'}
@@ -238,7 +238,7 @@ function PreviewDownload({
               {btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
             </ThemeButton>
           )}
-        </Box>
+        </div>
       </Box>
       {showColumnsDialog.open && (
         <PreviewDialog
