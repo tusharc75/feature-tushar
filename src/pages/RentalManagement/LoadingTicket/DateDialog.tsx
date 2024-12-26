@@ -7,7 +7,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatForInputControl } from 'src/constants/helpers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
   const [minDate, setMinDate] = useState(new Date());
@@ -62,19 +62,15 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <DatePicker
+                  <CustomDatePicker
                     fullWidth
                     size="small"
                     margin="dense"
-                    autoOk
                     required
-                    variant="inline"
-                    inputVariant="outlined"
                     value={values.date}
                     name="date"
                     placeholder={`${type === 'changeStatus' ? status : ''} Date`}
                     label={`${type === 'changeStatus' ? status : ''} Date`}
-                    format={dateFormatForInputControl}
                     minDate={minDate}
                     error={touched['date'] && Boolean(errors['date'])}
                     helperText={touched['date'] && errors['date']}

@@ -1,5 +1,6 @@
-import { Box, Button, Grid, Paper } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Button, Paper } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -7,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -101,14 +102,14 @@ const BlogDetail = () => {
         <Box className="controls-v1">
           <Box className="controls-buttons-v1">
             <>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                variant={'outlined'}
                 onClick={handleOpenUpdateDialog}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                tooltip={'Edit'}
               >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+                {'Edit'}
+              </ThemeButton>
 
               <Box component="span" marginX={1} />
 
@@ -124,7 +125,7 @@ const BlogDetail = () => {
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={contactUsData} fields={fields} />

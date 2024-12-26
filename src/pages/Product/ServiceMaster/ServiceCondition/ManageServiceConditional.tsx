@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const OPERATOR = [
   {
@@ -368,12 +368,9 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                         </Box>
                                         <Box>
                                           {cnd.field === 'recertDate' ? (
-                                            <DatePicker
-                                              autoOk
+                                            <CustomDatePicker
                                               fullWidth
                                               size="small"
-                                              variant="inline"
-                                              inputVariant="outlined"
                                               value={values?.condition[i]?.value ? new Date(values?.condition[i]?.value) : null}
                                               name="value"
                                               label="Value"
@@ -382,10 +379,6 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                                               }}
                                               error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
                                               helperText={touched?.condition && errors[`condition.${i}.value`]}
-                                              format={dateFormat}
-                                              InputLabelProps={{
-                                                shrink: true
-                                              }}
                                               margin="dense"
                                             />
                                           ) : (

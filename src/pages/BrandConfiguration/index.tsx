@@ -5,10 +5,13 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Grid, Paper, Button, Divider, Typography, Box } from '@mui/material';
+import { Paper, Button, Divider, Typography, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import UpdateDetailsDialog from '../../components/Shared/UpdateDetailsDialog';
 import { useData } from '../../StateProvider/Provider';
 import { userType } from '../../constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function BrandConfiguration() {
   const [brandDetails, setBrandDetails] = useState(null);
@@ -87,14 +90,14 @@ export default function BrandConfiguration() {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <Button variant="contained" size="small" className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-              Edit
-            </Button>
+            <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              {'Edit'}
+            </ThemeButton>
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid item xs={12} sm={12} lg={12}>
+        <Grid size={{ xs: 12, sm: 12, lg: 12 }}>
           {user?.user?.userType === userType.brandAdmin ? (
             loading || !brandFields.length || !brandDetails ? (
               <CommonSkeleton lenArray={[...Array(7).keys()]} />

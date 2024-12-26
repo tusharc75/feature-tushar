@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { makeStyles } from '@mui/styles';
 import { camelCase, startCase } from 'lodash';
@@ -286,7 +287,7 @@ const Builder = (props: Props) => {
         </Box>
         <Box mt={2}>
           <Grid container>
-            <Grid item>
+            <Grid >
               <FormGroup row>
                 <FormControlLabel
                   control={
@@ -304,7 +305,7 @@ const Builder = (props: Props) => {
                 />
               </FormGroup>
             </Grid>
-            <Grid item>
+            <Grid >
               <FormGroup row>
                 <FormControlLabel
                   control={

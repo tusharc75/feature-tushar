@@ -1,5 +1,6 @@
 import React from 'react';
-import { Grid, Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@mui/material';
+import { Box, Typography, Paper, TextField, Card, CardContent, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
@@ -100,7 +101,7 @@ const AssetStats = () => {
       <Grid container spacing={2} alignItems={'stretch'}>
         {loadingStats &&
           ['1', '2', '3', '4'].map((d) => (
-            <Grid key={d} item xs={12} sm={4} md={3}>
+            <Grid key={d} size={{xs:12, sm:4, md:3}} >
               <Card>
                 <CardContent>
                   <Skeleton variant="text" height={30} width={200} animation="wave" />
@@ -112,7 +113,7 @@ const AssetStats = () => {
 
         {assetStats && selectedAssets.length > 0 && !loadingStats && (
           <>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -126,7 +127,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -140,7 +141,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -161,7 +162,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -175,7 +176,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
@@ -189,7 +190,7 @@ const AssetStats = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={4}>
+            <Grid size={{xs:12, sm:4, md:4}}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>

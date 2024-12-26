@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid } from '@mui/material';
+import { Box, Button, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Add } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';

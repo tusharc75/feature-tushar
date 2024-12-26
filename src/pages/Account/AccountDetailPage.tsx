@@ -1,6 +1,7 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@mui/material';
 import ListItem from '@mui/material/ListItem/ListItem';
-import { Edit } from '@mui/icons-material';
+import Grid from '@mui/material/Grid2';
+import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { Skeleton } from '@mui/material';
 import { reverse as _reverse } from 'lodash';
@@ -649,9 +650,14 @@ export default function AccountDetailPage(props) {
             )}
 
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
-              <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                variant={'outlined'}
+                onClick={handleOpneUpdateDialog}
+                tooltip={'Edit'}
+              >
+                {'Edit'}
+              </ThemeButton>
             )}
             {permissions && permissions[accountResource] && permissions[accountResource].isDelete && allowedToDelete && (
               <DeleteButton
@@ -676,7 +682,7 @@ export default function AccountDetailPage(props) {
         {loading ? (
           <Grid container spacing={2}>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-              <Grid item sm={6} md={6}>
+                <Grid size={{ sm: 6, md: 6 }}>
                 <Skeleton variant="text" width="100px" height="16px" />
                 <Box marginY={1} />
                 <Skeleton width="100%" height="50px" />
@@ -757,7 +763,7 @@ export default function AccountDetailPage(props) {
                   )}
                 </div>
                 <Box mb={2}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <QuickLinks quickLinks={quickLinks} />
                   </Grid>
                 </Box>
@@ -799,7 +805,7 @@ export default function AccountDetailPage(props) {
                                   {relatedContactsLoading ? (
                                     <CommonSkeleton lenArray={[...Array(4).keys()]} />
                                   ) : (
-                                    <Grid item xs={12} sm={12} md={6} lg={4}>
+                                    <Grid size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
                                       <Card className="detailCard card-v1" variant="outlined">
                                         <CardContent className="card-link">
                                           <Box>
@@ -842,7 +848,7 @@ export default function AccountDetailPage(props) {
                                             </Typography>
                                           </Box>
                                           <Grid container>
-                                            <Grid item xs={12} sm={6}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                               <DisplayData
                                                 label="Title"
                                                 value={accountData?.staticData?.lead?.title || '-'}

@@ -1,9 +1,9 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { dateFormat } from 'src/constants/helpers';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
@@ -111,13 +111,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
           </FormControl>
         </div>
         <div className="mt-5">
-          <DatePicker
-            autoOk
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             name={`from_${fieldData?.fieldName}`}
             label={`From ${fieldData?.fieldLabel}`}
             value={
@@ -131,23 +128,13 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
                 { field: `from_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
               ]);
             }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
-            }}
-          // required={reportConfig?.defaultColumn ? field?.required : false}
-          // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-          // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         <div className="mt-5">
-          <DatePicker
-            autoOk
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
             fullWidth
             size="small"
-            variant="inline"
-            inputVariant="outlined"
             name={`to_${fieldData?.fieldName}`}
             label={`To ${fieldData?.fieldLabel}`}
             value={
@@ -161,13 +148,6 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
                 { field: `to_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
               ]);
             }}
-            format={dateFormat}
-            InputLabelProps={{
-              shrink: true
-            }}
-          // required={reportConfig?.defaultColumn ? field?.required : false}
-          // error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-          // helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
           />
         </div>
         {isDatePresent && (

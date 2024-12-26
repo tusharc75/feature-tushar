@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -31,6 +32,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -176,9 +178,9 @@ const BulkAssetCreationDetailsPage = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !['Completed']?.includes(bulkAssetCreationData?.status) && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
+                <ThemeButton variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                </Button>
+                </ThemeButton>
               )}
               <ActivityButton
                 referenceId={bulkAssetCreationData?._id}
@@ -199,7 +201,7 @@ const BulkAssetCreationDetailsPage = () => {
           <Box>
             {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
@@ -211,7 +213,7 @@ const BulkAssetCreationDetailsPage = () => {
           <TabPanel value={tabValue} index={1}>
             {!bulkAssetCreationData || !bulkAssetCreationFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>

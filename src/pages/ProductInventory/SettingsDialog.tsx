@@ -1,7 +1,6 @@
 import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Form, Formik } from 'formik';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -12,6 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import InfoIcon from '@mui/icons-material/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 function SettingsDialog({ onClose, warehouse }) {
   const toastConfig = useContext(CustomToastContext);
@@ -90,13 +90,9 @@ function SettingsDialog({ onClose, warehouse }) {
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={6}>
                       <Fragment>
-                        <DatePicker
-                          autoOk
-                          variant="inline"
-                          inputVariant="outlined"
+                        <CustomDatePicker
                           label="Lock Date"
                           fullWidth
-                          format={dateFormat}
                           value={values['lockDate']}
                           placeholder="Lock Date"
                           margin="dense"
@@ -104,9 +100,6 @@ function SettingsDialog({ onClose, warehouse }) {
                           maxDate={new Date()}
                           onChange={(value) => {
                             setFieldValue('lockDate', value);
-                          }}
-                          InputLabelProps={{
-                            shrink: true
                           }}
                           error={errors['lockDate'] ? true : false}
                           helperText={errors['lockDate']}

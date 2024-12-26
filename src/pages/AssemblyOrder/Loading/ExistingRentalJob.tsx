@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -105,7 +106,7 @@ const ExistingRentalJob = ({ onClose, referenceData, managedPackageIds, inventor
       <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <Grid item xs={12} sm={12} md={12} container justify={'flex-end'}>
+          <Grid size={{ xs:12, sm:12, md:12}} container justifyContent="flex-end">
             <Button
               size="small"
               color="primary"

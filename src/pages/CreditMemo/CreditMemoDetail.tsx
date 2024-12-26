@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,8 +17,9 @@ import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Material from './Material';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Edit, ExpandMore } from '@mui/icons-material';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import EditIcon from '@mui/icons-material/Edit';
+import { ExpandMore } from '@mui/icons-material';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { Skeleton } from '@mui/material';
 
@@ -203,14 +205,9 @@ const creditMemoDetail = () => {
                 {permissions?.creditMemo?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      className={'btn-outline-v1'}
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
+                    <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Menu
@@ -273,7 +270,7 @@ const creditMemoDetail = () => {
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={creditMemoData} fields={fields} />

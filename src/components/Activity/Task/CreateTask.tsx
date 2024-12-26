@@ -14,7 +14,6 @@ import {
   Typography
 } from '@mui/material';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios, { CancelTokenSource } from 'axios';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -37,6 +36,7 @@ import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import statusList from '../Helpers/statusList';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { SubTask } from './SubTask';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -331,15 +331,11 @@ export const CreateTask = ({
                             <Box pt={1}>
                               <Grid container spacing={1}>
                                 <Grid item xs={12} sm={12} md={12}>
-                                  <DatePicker
+                                  <CustomDatePicker
                                     label="Start Date"
                                     name="startDate"
-                                    autoOk
-                                    variant="inline"
-                                    inputVariant="outlined"
                                     fullWidth
                                     margin="dense"
-                                    format={dateFormatForInputControl}
                                     value={values.startDate}
                                     onChange={(value) => {
                                       setFieldValue('dueDate', value);
@@ -349,12 +345,9 @@ export const CreateTask = ({
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12}>
-                                  <DatePicker
+                                  <CustomDatePicker
                                     label="Due Date"
                                     name="dueDate"
-                                    autoOk
-                                    variant="inline"
-                                    inputVariant="outlined"
                                     fullWidth
                                     margin="dense"
                                     minDate={values.startDate}
@@ -363,7 +356,6 @@ export const CreateTask = ({
                                     onChange={(value) => {
                                       setFieldValue('dueDate', value);
                                     }}
-                                    format={dateFormatForInputControl}
                                   />
                                   {Boolean(errors['dueDate']) && <span className="text-[12px] text-red-500">{errors['dueDate']}</span>}
                                   {initialValues.createdBy && initialValues.createdBy.date && (

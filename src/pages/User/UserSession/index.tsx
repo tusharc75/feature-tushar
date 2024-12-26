@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Line } from 'react-chartjs-2';
 import { dateFormatForInputControl } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -8,6 +7,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -163,12 +163,9 @@ const UserSession = ({ id }) => {
               </FormControl>
             </Grid>
             <Grid item xs={6} sm={4}>
-              <DatePicker
+              <CustomDatePicker
                 disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
                 fullWidth
-                autoOk
                 size="small"
                 openTo="year"
                 format={dateFormatForInputControl}
@@ -182,16 +179,12 @@ const UserSession = ({ id }) => {
               />
             </Grid>
             <Grid item xs={6} sm={4}>
-              <DatePicker
+              <CustomDatePicker
                 disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
                 fullWidth
-                autoOk
                 size="small"
                 minDate={trackingTime.between.from}
                 openTo="year"
-                format={dateFormatForInputControl}
                 label="To"
                 views={['year', 'month', 'date']}
                 value={trackingTime.between.to}

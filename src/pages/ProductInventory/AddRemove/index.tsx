@@ -1,6 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -23,6 +22,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -346,6 +346,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       )}
                       <TextField
                         margin="dense"
+                        size="small"
                         type="number"
                         label="Qty"
                         name="qty"
@@ -365,6 +366,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     <Box m={1}>
                       <TextField
                         margin="dense"
+                        size="small"
                         type="number"
                         label={`Cost ${curr}`}
                         name="price"
@@ -378,8 +380,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         onChange={(e) => {
                           setFieldValue('price', e.target.value);
                         }}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>
+                        slotProps={{
+                          input: {
+                            startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>,
+                          },
                         }}
                       />
                     </Box>
@@ -404,6 +408,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           <TextField
                             {...params}
                             margin="dense"
+                            size="small"
                             name="storageLocation"
                             label="Storage Location"
                             variant="outlined"
@@ -417,20 +422,16 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     </Box>
                   )}
                   <Box m={1}>
-                    <DatePicker
+                    <CustomDatePicker
                       {...(lockDate ? { minDate: lockDate } : {})}
                       fullWidth
                       size="small"
                       margin="dense"
-                      autoOk
                       required
-                      variant="inline"
-                      inputVariant="outlined"
                       value={values.customDate}
                       name="customDate"
                       placeholder={type === 'add' ? 'Receive Date' : 'Remove Date'}
                       label="Custom Date"
-                      format={dateFormatForInputControl}
                       maxDate={new Date()}
                       error={touched['customDate'] && Boolean(errors['customDate'])}
                       helperText={touched['customDate'] && errors['customDate']}
@@ -465,6 +466,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <Box m={1}>
                     <TextField
                       margin="dense"
+                      size="small"
                       type="text"
                       label="Comment"
                       name="comment"
@@ -511,7 +513,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           </Box>
                         )}
                         <Autocomplete
-                          size="small"
                           options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
                           freeSolo={type === 'add'}
                           multiple={true}
@@ -532,6 +533,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           renderInput={(props) => (
                             <TextField
                               {...props}
+                              margin="dense"
+                              size="small"
                               placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
                               variant="outlined"
                               name="serialNumbers"

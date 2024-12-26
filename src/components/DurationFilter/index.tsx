@@ -1,8 +1,8 @@
 import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import moment from 'moment';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 
 const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAll = false }) => {
   const [timeFrame, setTimeFrame] = React.useState<any>(defaultTimeFrame);
@@ -68,20 +68,12 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         {timeFrame !== 'all' && (
-          <DatePicker
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
-            inputVariant="outlined"
-            variant="inline"
             fullWidth
             size="small"
-            format={dateFormatForInputControl}
             maxDate={duration.to}
             label={`From ${label}`}
-            autoOk
-            InputLabelProps={{
-              shrink: true
-            }}
-            views={['year', 'month', 'date']}
             value={duration.from}
             onChange={(date) => {
               setDuration({ ...duration, from: date });
@@ -91,18 +83,11 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         {timeFrame !== 'all' && (
-          <DatePicker
+          <CustomDatePicker
             disabled={timeFrame !== 'custom'}
-            inputVariant="outlined"
-            variant="inline"
             fullWidth
             size="small"
-            autoOk
-            InputLabelProps={{
-              shrink: true
-            }}
             minDate={duration.from}
-            format={dateFormatForInputControl}
             label={`To ${label}`}
             views={['year', 'month', 'date']}
             value={duration.to}

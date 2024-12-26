@@ -1,6 +1,7 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@mui/material';
+import { Paper, Box, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ImportExport, TableChart, Timeline, Maximize } from '@mui/icons-material';
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
@@ -237,12 +238,12 @@ const ChartTypes = ({
   };
 
   return (
-    <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
+    <Grid size={{xs:12, md:12}} >
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
             [...Array(4).keys()].map((_, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index + 1}>
+              <Grid size={{xs:12, sm:6, md:3}} key={index + 1}>
                 <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                   <Skeleton variant="text" width={150} height={30} />
                   <Skeleton variant="text" width={100} height={20} />
