@@ -7,8 +7,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import IconButton from '@mui/material/IconButton';
 import moment from 'moment';
-import { grey } from '@mui/material/colors';
-import { dateFormat } from '../../../../constants/helpers';
+import { displayDate } from 'src/constants/helpers';
+
 let dayname = moment.weekdaysShort();
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -185,7 +185,7 @@ export default function BigCalendar({ type, activity }) {
                       {activity
                         .filter(
                           (data) =>
-                            moment(data.dueDate).format(dateFormat) ===
+                            displayDate(data.dueDate) ===
                             year + '-' + _day.month.toString().padStart(2, '0') + '-' + _day.day.toString().padStart(2, '0')
                         )
                         .map(

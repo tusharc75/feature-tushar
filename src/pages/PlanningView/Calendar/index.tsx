@@ -28,7 +28,7 @@ import CustomCalendar from 'src/components/CustomCalendar';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat, sidebarResource } from 'src/constants/helpers';
+import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import CloseIcon from '@mui/icons-material/Close';
@@ -864,7 +864,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           >
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
               <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${moment(isOpen?.eventData?.start).format(dateFormat)}`}</h5>
+                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${displayDate(isOpen?.eventData?.start)}`}</h5>
                 <HtmlTooltip title="Close">
                   <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
                     <CloseIcon fontSize="small" />

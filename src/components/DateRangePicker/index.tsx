@@ -4,7 +4,7 @@ import moment from 'moment';
 import React from 'react';
 import { DateRange } from 'react-day-picker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn, dateFormat } from 'src/constants/helpers';
+import { cn, displayDate } from 'src/constants/helpers';
 import { Calendar } from './Calendar';
 import { BiChevronDown } from 'react-icons/bi';
 
@@ -107,10 +107,10 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
           {date?.from ? (
             date.to ? (
               <>
-                {moment(date.from).format(dateFormat)} - {moment(date.to).format(dateFormat)}
+                {displayDate(date.from)} - {displayDate(date.to)}
               </>
             ) : (
-              moment(date.from).format(dateFormat)
+              displayDate(date.from)
             )
           ) : (
             <span>Pick a date</span>

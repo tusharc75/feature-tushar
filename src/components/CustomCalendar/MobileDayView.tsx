@@ -2,7 +2,7 @@ import Dialog from '@mui/material/Dialog';
 import { CustomCalendarProps, ViewType } from 'src/components/CustomCalendar';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormat, displayDate } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate } from 'src/constants/helpers';
 
 type MobileDayViewProps = {
   onClose: () => void;
