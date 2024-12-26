@@ -16,11 +16,11 @@ type Item<D> = {
   tooltip?: string;
 } & IconButtonProps;
 
-const IconButtonTabs = <D,>({ items, setValue, value, onItemClick = () => {} }: IconButtonTabProps<D>) => {
+const IconButtonTabs = <D,>({ items, setValue, value, onItemClick = () => { } }: IconButtonTabProps<D>) => {
   return (
     <div className="flex items-center divide-x rounded-[4px] border">
       {items.map((item) => {
-        const { onClick: itemClick = () => {}, disabled, ...rest } = item;
+        const { onClick: itemClick = () => { }, disabled, ...rest } = item;
         return (
           <HtmlTooltip key={JSON.stringify(item.value)} title={item.tooltip || ''}>
             <IconButton
