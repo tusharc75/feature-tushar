@@ -127,10 +127,10 @@ export const ListboxComponent = React.forwardRef<HTMLDivElement, React.HTMLAttri
 export const StyledPopper = styled(Popper)({
   [`& .${autocompleteClasses.listbox}`]: {
     boxSizing: 'border-box',
+    '--Paper-shadow': 'unset',
     '& ul': {
       padding: 0,
-      margin: 0,
-      background: 'var(--dark-primary,white)'
+      margin: 0
     }
   }
 });

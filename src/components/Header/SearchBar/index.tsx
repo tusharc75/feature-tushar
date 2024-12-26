@@ -62,6 +62,10 @@ const SearchBar = () => {
           }}
           noOptionsText="No result found"
           slotProps={{
+            paper: {
+              elevation: 0,
+              className: '![--Paper-shadow:unset] border border-t-0 !bg-[--dark-primary,white]'
+            },
             listbox: {
               component: ListboxComponent
             }
