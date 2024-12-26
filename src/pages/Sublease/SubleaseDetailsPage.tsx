@@ -1,9 +1,8 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
