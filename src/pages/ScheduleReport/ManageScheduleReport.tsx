@@ -547,14 +547,16 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Filters"
                               name="filters"
                               variant="outlined"
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <React.Fragment>
-                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </React.Fragment>
-                                )
+                              slotProps={{
+                                input: {
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <React.Fragment>
+                                      {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </React.Fragment>
+                                  )
+                                }
                               }}
                             />
                           )}
@@ -592,14 +594,16 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Columns"
                               name="columns"
                               variant="outlined"
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <React.Fragment>
-                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </React.Fragment>
-                                )
+                              slotProps={{
+                                input: {
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <React.Fragment>
+                                      {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </React.Fragment>
+                                  )
+                                }
                               }}
                             />
                           )}
