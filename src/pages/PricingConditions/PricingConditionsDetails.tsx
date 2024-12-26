@@ -1,12 +1,11 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -92,14 +91,9 @@ const PricingConditionsDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.pricingCondition?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={'btn-outline-v1'}
-                  size="small"
-                  onClick={() => setOpen(true)}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpen(true)} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>

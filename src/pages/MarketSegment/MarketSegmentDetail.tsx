@@ -1,10 +1,9 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -55,7 +54,7 @@ const MarketSegmentDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes?.marketSegment?.path}/${id}`);
       setMarketSegmentData(data);
-      setCustomizedRoutes([routes.marketSegment, { title: data?.name }]);
+      setCustomizedRoutes([{ ...routes.marketSegment, title: resources?.marketSegment?.titlePlural }, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -101,14 +100,9 @@ const MarketSegmentDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.marketSegment?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpenUpdateDialog}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.marketSegment?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>

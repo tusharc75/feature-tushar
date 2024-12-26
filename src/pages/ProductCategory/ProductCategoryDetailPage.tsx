@@ -1,10 +1,9 @@
-import { Box, Button, Grid } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Box, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -118,14 +117,9 @@ const ProductCategoryDetailPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.productCategory?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  className={'btn-outline-v1'}
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  {'Edit'}
+                </ThemeButton>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
