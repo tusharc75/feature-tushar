@@ -59,8 +59,8 @@ const ViewAllDialog = <D,>({ getTitle, items, onClick, onClose, selectedTitle, t
         </IconButton>
       </div>
 
-      <DialogContent className="!px-[--px] !py-[--py] pt-0">
-        <div className="py-[10px]">
+      <DialogContent className="!px-[--px] !py-[--py] !pt-0">
+        <div className="pb-[10px]">
           <SearchBox fullWidth value={searchedVal} onChange={(e) => setSearchedValue(e.target.value)} autoComplete="off" />
         </div>
         <ul className="max-h-[534px] min-h-[300px] space-y-2 overflow-y-auto">
