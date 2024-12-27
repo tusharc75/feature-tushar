@@ -85,8 +85,8 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-        newColumns = newColumns?.filter((c)=>c?.accessor!=="wellName");
+        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+
         newColumns?.forEach((o) => {
           if (data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'singleLine' && o?.accessor !== 'assetNumber') {
             o.editable = true;
@@ -174,8 +174,6 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       res['isChecked'] = false;
       res['rentalWellName'] = res['wellName'];
       res['rentalWellNameId'] = res['wellNameId'];
-      delete res['wellName'];
-      delete res['wellNameId'];
       return res;
     });
     handleAddWalkmeData(rows);
