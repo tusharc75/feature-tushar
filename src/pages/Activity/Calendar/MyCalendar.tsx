@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import moment from 'moment';
 import { dayjsLocalizer } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomCalendar from 'src/components/CustomCalendar';
@@ -23,7 +22,6 @@ const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
   return (
     <div className="relative">
       <CustomCalendar
-        defaultDate={moment().toDate()}
         events={activities}
         loading={loading}
         localizer={localizer}
