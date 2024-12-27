@@ -5,8 +5,7 @@ import { Box } from '@mui/material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
-import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import { dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 
 let chartOptions: any = {
   theme: {
@@ -37,7 +36,7 @@ let chartOptions: any = {
     type: 'datetime',
     labels: {
       formatter: function (value) {
-        const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+        const formattedDateTime = displayDateTime(value, dateTimeFormat24Hours);
         return formattedDateTime;
       }
     },
@@ -53,7 +52,7 @@ let chartOptions: any = {
         if (isNaN(date.getTime())) {
           return value;
         } else {
-          return moment(value).format(dateTimeFormat24Hours);
+          return displayDateTime(value, dateTimeFormat24Hours);
         }
       }
     }

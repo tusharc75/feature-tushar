@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
-import moment from 'moment';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import axiosInstance from '../../axios/axiosInstance';
@@ -10,6 +9,7 @@ import ActivityModelHandler from '../../components/Activity/ActivityModelHandler
 import routes from '../../components/Helpers/Routes';
 import { DateRange } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
+import dayjs from 'dayjs';
 
 const Reminder = () => {
   const history = useHistory();
@@ -110,7 +110,7 @@ const Reminder = () => {
         style={{ fontSize: 12 }}
       >
         <DateRange className="text-[#000] dark:text-white" style={{ fontSize: 12 }} />
-        {type ? moment(data).format('MMM, DD HH:MM') : moment(data).format('MMM, DD YYYY')}
+        {type ? dayjs(data).tz().format('MMM, DD HH:MM') : dayjs(data).tz().format('MMM, DD YYYY')}
       </Typography>
     </>
   );

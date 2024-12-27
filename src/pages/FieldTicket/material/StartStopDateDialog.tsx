@@ -1,7 +1,6 @@
 import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
-import moment from 'moment';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -20,10 +19,8 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
       });
     } else {
       if (minStartDate) {
-        let date = moment(new Date(minStartDate));
-        const currentTime = moment();
-        date = date.set('hour', currentTime.hour()).set('minute', currentTime.minute());
-        setInitialValues({ startDate: date.toDate(), endDate: date.toDate() });
+        let date = new Date(minStartDate);
+        setInitialValues({ startDate: date, endDate: date });
       }
     }
   }, [data, type]);
@@ -96,7 +93,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                         size="small"
                         margin="none"
                         minDate={values.startDate}
-                        label={`'End' Date`}
+                        label={`End Date`}
                         value={values.endDate}
                         onChange={(date) => {
                           setFieldValue('endDate', date);

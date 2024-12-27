@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, displayDate, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
@@ -81,10 +81,10 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
 
   const handleSubmit = (values) => {
     if (values?.fromDate) {
-      values.fromDate = moment(values?.fromDate).format('MM/DD/YYYY');
+      values.fromDate = displayDate(values?.fromDate);
     }
     if (values?.toDate) {
-      values.toDate = moment(values?.toDate).format('MM/DD/YYYY');
+      values.toDate = displayDate(values?.toDate);
     }
     setLoading(true);
     if (id && isClone === false) {

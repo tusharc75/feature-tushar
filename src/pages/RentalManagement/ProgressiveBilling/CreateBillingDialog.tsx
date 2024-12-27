@@ -561,8 +561,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (e.type === MATERIAL_TYPE.serializedAsset) {
           assetList.push({
             asset: e._id,
-            startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'),
-            endDate: moment(endDate)?.format('MM/DD/YYYY')
+            startDate: displayDate(e.actualStartDate),
+            endDate: displayDate(endDate)
           });
         }
       });
@@ -591,8 +591,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({
           asset: d?._id,
-          fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'),
-          toDate: moment(endDate).format('MM/DD/YYYY')
+          fromDate: displayDate(d?.actualStartDate),
+          toDate: displayDate(endDate)
         }))
       );
     }
