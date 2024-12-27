@@ -105,9 +105,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setUserList(
           data.length
             ? data.map((user: any) => ({
-                id: user._id,
-                name: `${user.firstName} ${user.lastName}`
-              }))
+              id: user._id,
+              name: `${user.firstName} ${user.lastName}`
+            }))
             : []
         );
       })
@@ -123,9 +123,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setRoleList(
           data.length
             ? data.map((role: any) => ({
-                id: role._id,
-                name: role.name
-              }))
+              id: role._id,
+              name: role.name
+            }))
             : []
         );
       });
@@ -181,7 +181,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
           <Grid className="!flex-shrink-0">
             <span className="block min-w-[26px] px-2">{i + 1}.</span>
           </Grid>
-          <Grid size={{xs:4 , md:5 ,lg:5}}>
+          <Grid size={{ xs: 4, md: 5, lg: 5 }}>
             <Autocomplete
               fullWidth
               limitTags={1}
@@ -196,7 +196,14 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                   ['_id']: newValue?.map((d) => d.id)
                 });
               }}
-              renderOption={(option : any) => <>{option?.name}</>}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box key={key} component="li" {...optionProps}>
+                    {option?.name}
+                  </Box>
+                );
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -210,7 +217,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
             />
           </Grid>
           {checkType === DOAType.amount && (
-            <Grid size={{xs:3, md:4, lg:4 }}>
+            <Grid size={{ xs: 3, md: 4, lg: 4 }}>
               <TextField
                 fullWidth
                 slotProps={{
@@ -235,7 +242,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
               />
             </Grid>
           )}
-          <Grid size={{md:2, lg:2}}  className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
+          <Grid size={{ md: 2, lg: 2 }} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
             <Box mt={0.7}>
               <IconButton
                 size="small"
@@ -255,7 +262,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         </Grid>
       ))
     ) : (
-      <Grid size={{md:12, lg:12}} className="d-flex align-items-center justify-content-center">
+      <Grid size={{ md: 12, lg: 12 }} className="d-flex align-items-center justify-content-center">
         <Button
           variant="contained"
           color="primary"
@@ -346,7 +353,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                     <Box padding={2} className={classes.contentBox}>
                       <Box padding={1}>
                         <Grid container spacing={2}>
-                          <Grid size={{md:5, lg:5 , sm:12,xs:12}}>
+                          <Grid size={{ md: 5, lg: 5, sm: 12, xs: 12 }}>
                             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                               <ToggleButtonGroup size="small" value={checkType} exclusive onChange={handleCheckType}>
                                 {Object.keys(DOAType)?.map((k, index) => {
@@ -368,10 +375,10 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                               </ToggleButtonGroup>
                             </Box>
                           </Grid>
-                          <Grid size={{md:7, lg:7 , sm:12,xs:12}}>
+                          <Grid size={{ md: 7, lg: 7, sm: 12, xs: 12 }}>
                             {checkType === DOAType.amount && (
                               <Grid container spacing={2}>
-                                <Grid size={{md:6, lg:6 , sm:6,xs:6}}>
+                                <Grid size={{ md: 6, lg: 6, sm: 6, xs: 6 }}>
                                   <TextField
                                     slotProps={{
                                       input: {
@@ -393,17 +400,17 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     helperText={validation()?.minAmount}
                                   />
                                 </Grid>
-                                <Grid  size={{md:6, lg:6 , sm:6,xs:6}}>
-                                   <CurrencyAutocomplete
-                                      limitTags={2}
-                                      value={currency}
-                                      name = {currency}
-                                      fullWidth={true}
-                                      onChange={(e, val) => {
-                                        setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                                        setCurrencySymbol(val?.symbolNative);
-                                      }}
-                                    />
+                                <Grid size={{ md: 6, lg: 6, sm: 6, xs: 6 }}>
+                                  <CurrencyAutocomplete
+                                    limitTags={2}
+                                    value={currency}
+                                    name={currency}
+                                    fullWidth={true}
+                                    onChange={(e, val) => {
+                                      setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                                      setCurrencySymbol(val?.symbolNative);
+                                    }}
+                                  />
                                 </Grid>
                               </Grid>
                             )}
@@ -414,27 +421,27 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                     <CustomDialogContent className={classes.contentBox}>
                       <Form>
                         <Grid container direction="column">
-                          <Grid  size={{md:12, lg:12 }}>
+                          <Grid size={{ md: 12, lg: 12 }}>
                             {values?.data && values?.data?.length > 0 && (
                               <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
                                 <Grid container spacing={2}>
-                                  <Grid size={{md:1, lg:1 }}>
+                                  <Grid size={{ md: 1, lg: 1 }}>
                                     Index
                                   </Grid>
-                                  <Grid size={{md:5, lg:5 }}>
+                                  <Grid size={{ md: 5, lg: 5 }}>
                                     {approveType}
                                   </Grid>
                                   {checkType === DOAType.amount && (
-                                    <Grid size={{md:4, lg:4 }}>
+                                    <Grid size={{ md: 4, lg: 4 }}>
                                       Amount
                                     </Grid>
                                   )}
-                                  <Grid size={{md:2, lg:2 }}></Grid>
+                                  <Grid size={{ md: 2, lg: 2 }}></Grid>
                                 </Grid>
                               </Box>
                             )}
                           </Grid>
-                          <Grid size={{md:12, lg:12 }}>
+                          <Grid size={{ md: 12, lg: 12 }}>
                             <Box p={1}>
                               {approveType === DoaApproveType.user ? (
                                 <FieldArray

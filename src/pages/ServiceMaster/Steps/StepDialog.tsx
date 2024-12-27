@@ -298,7 +298,7 @@ export default function StepDialog({
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Grid container spacing={2}>
-                      <Grid size={{xs:12 ,md:6, sm:6 }}>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
                           margin="dense"
                           size="small"
@@ -317,7 +317,7 @@ export default function StepDialog({
                           }}
                         />
                       </Grid>
-                      <Grid size={{xs:12 ,md:6, sm:6 }}>
+                      <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                         <TextField
                           margin="dense"
                           size="small"
@@ -336,7 +336,7 @@ export default function StepDialog({
                           }}
                         />
                       </Grid>
-                      <Grid size={{xs:12 ,md:4, sm:4 }}>
+                      <Grid size={{ xs: 12, md: 4, sm: 4 }}>
                         <CurrencyAutocomplete
                           limitTags={2}
                           value={values['currency']}
@@ -408,7 +408,7 @@ export default function StepDialog({
                           }}
                         /> */}
                       </Grid>
-                      <Grid size={{xs:12 ,md:4, sm:4 }}>
+                      <Grid size={{ xs: 12, md: 4, sm: 4 }}>
                         <TextField
                           slotProps={{
                             input: {
@@ -437,7 +437,7 @@ export default function StepDialog({
                     </Grid>
                     <Box pt={2}>
                       <Grid>
-                        <Grid size={{xs:12 ,md:6, sm:6 }}>
+                        <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                           <Autocomplete
                             options={[
                               { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
@@ -495,7 +495,7 @@ export default function StepDialog({
                       <Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid size={{xs:12 ,md:6 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -513,7 +513,7 @@ export default function StepDialog({
                                 label="Add Services on Pass"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isPassAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -544,7 +544,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid size={{xs:12 ,md:6 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -562,7 +562,7 @@ export default function StepDialog({
                                 label="Add Services on Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isFailAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -594,7 +594,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid size={{xs:12 ,md:6 }}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -612,7 +612,7 @@ export default function StepDialog({
                                 label="Skip Services on Pass"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isSkipServiceOnPass'] && (
                                 <Autocomplete
                                   options={[
@@ -653,7 +653,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -671,7 +671,7 @@ export default function StepDialog({
                                 label="Skip Services on Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isSkipServiceOnFail'] && (
                                 <Autocomplete
                                   options={[
@@ -712,7 +712,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -730,7 +730,7 @@ export default function StepDialog({
                                 label="Reperform Services on Pass"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReperformServicesOnPass'] && (
                                 <Autocomplete
                                   options={[
@@ -771,7 +771,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -789,7 +789,7 @@ export default function StepDialog({
                                 label="Reperform Services on Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReperformServicesOnFail'] && (
                                 <Autocomplete
                                   options={[
@@ -830,7 +830,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -850,7 +850,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -870,7 +870,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -888,7 +888,7 @@ export default function StepDialog({
                                 label="Skip Steps on Pass"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isJumpStepPass'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -925,7 +925,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -943,7 +943,7 @@ export default function StepDialog({
                                 label="Skip Steps on Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isJumpStepFail'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -979,7 +979,7 @@ export default function StepDialog({
                         {user?.brandPolicy?.repairOrderQuotation && (
                           <Box pt={2}>
                             <Grid container>
-                            <Grid size={{xs:12 ,md:6}}>
+                              <Grid size={{ xs: 12, md: 6 }}>
                                 <FormControlLabel
                                   control={
                                     <Checkbox
@@ -1000,7 +1000,7 @@ export default function StepDialog({
                         )}
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -1018,7 +1018,7 @@ export default function StepDialog({
                                 label="Return To Step On Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReturnToStepOnFail'] && (
                                 <Autocomplete
                                   options={stepOption}
@@ -1049,7 +1049,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                          <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -1067,7 +1067,7 @@ export default function StepDialog({
                                 label="Return To Service On Fail"
                               />
                             </Grid>
-                            <Grid size={{xs:12 ,md:6}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                               {values['isReturnToServiceOnFail'] && (
                                 <Autocomplete
                                   options={services}
@@ -1076,7 +1076,14 @@ export default function StepDialog({
                                   disabled={notEditable}
                                   value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
                                   getOptionLabel={(option) => option?.optionLabel}
-                                  renderOption={(option : any) => option?.optionLabel}
+                                  renderOption={(props, option, state, ownerState) => {
+                                    const { key, ...optionProps } = props;
+                                    return (
+                                      <Box key={key} component="li" {...optionProps}>
+                                        {ownerState.getOptionLabel(option)}
+                                      </Box>
+                                    );
+                                  }}
                                   // isOptionEqualToValue={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
