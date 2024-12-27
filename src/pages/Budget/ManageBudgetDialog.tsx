@@ -90,7 +90,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
 
   const onSubmit = (values) => {
     setLoading(true);
-    values['year'] = moment(values['year']).format('YYYY');
+    values['year'] = values['year'].format('YYYY');
     if (budgetId && !isClone) {
       values._id = budgetId;
       axiosInstance()

@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { Button, ButtonProps } from '@mui/material';
+import { FC } from 'react';
+import { ButtonProps } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface ButtonWithPulseProps extends ButtonProps {

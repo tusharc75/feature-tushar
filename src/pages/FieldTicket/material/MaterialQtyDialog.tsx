@@ -1,5 +1,6 @@
 import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@mui/material';
+import { Button, Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -432,7 +433,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     size="small"
                                   />
                                 ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -516,7 +517,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -545,7 +546,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     </Box>
                                   </Grid>
                                 ) : ['taxCode'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes
@@ -586,7 +587,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                 ) : field.fieldName === 'numberOfWells' ? (
                                   <>
                                     {values?.byWellNumber && (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
@@ -615,7 +616,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     )}
                                   </>
                                 ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
                                         <FormTypes

@@ -1,7 +1,8 @@
+import dayjs from 'dayjs';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
 import { useCallback, useEffect, useState } from 'react';
-import { momentLocalizer, View } from 'react-big-calendar';
+import { dayjsLocalizer, View } from 'react-big-calendar';
 import { useHistory, useParams } from 'react-router-dom';
 
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,8 +10,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomCalendar from 'src/components/CustomCalendar';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-
-const localizer = momentLocalizer(moment);
 
 type Props = {};
 
@@ -71,6 +70,8 @@ const MyCalendar = (props: Props) => {
     },
     [setView]
   );
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>

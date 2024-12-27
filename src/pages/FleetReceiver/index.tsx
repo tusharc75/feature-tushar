@@ -1,4 +1,5 @@
-import { Box, Grid, Theme, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -103,7 +104,7 @@ const FleetReceiver = () => {
           fleets?.length > 0 ? (
             <Grid container spacing={2}>
               {fleets?.map((data, index) => (
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid size={{xs:12, sm:6, md:4}}>
                   <Box
                     key={index}
                     className={`${classes.fleetBox} p-[15px] md:p-[27px_20px_45px]`}

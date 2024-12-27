@@ -46,7 +46,17 @@ type RedOutlineProps = {
   isVisible?: boolean;
 } & ButtonProps;
 
-export type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton | ThemeOutlinedButtonProps;
+type YellowProps = {
+  borderColor?: 'yellow';
+  iconForMobile?: ReactNode | boolean;
+  mode?: 'dark' | 'light';
+  tooltip?: string;
+  mobileTooltip?: string;
+  isLoading?: boolean;
+  isVisible?: boolean;
+} & ButtonProps;
+
+export type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton | ThemeOutlinedButtonProps | YellowProps;
 
 const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
   (
@@ -70,7 +80,7 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
 
     const getButtonProps = useMemo(() => {
       const buttonProps: Pick<ButtonProps, 'className' | 'variant'> = {
-        className: cn(`${iconForMobile ? 'max-[600px]:[max-width:36px_!important] [height:32px_!important]' : ''} no-shadow h-[32px]`, className),
+        className: cn(`${iconForMobile ? 'max-[600px]:[max-width:36px_!important] [height:32px_!important] no-shadow' : ''} h-[32px]`, className),
         variant: 'contained'
       };
 
@@ -78,21 +88,27 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
         case 'default': {
           const { hasMobileBorder = true } = rest as OutlinedButtonProps;
           buttonProps.variant = isMobile && iconForMobile ? 'text' : 'outlined';
-          buttonProps.className += ` btn-outline-v1 ${hasMobileBorder ? 'with-border' : ''}`;
+          buttonProps.className += ` btn-outline-v1   ${hasMobileBorder ? 'with-border' : ''}`;
+          break;
+        }
+        case 'yellow': {
+          buttonProps.variant = isMobile && iconForMobile ? 'text' : 'outlined';
+          buttonProps.className += ` new-dropdown-v1`;
           break;
         }
         case 'red': {
           const { mode, hasMobileBorder = true } = rest as RedOutlineProps;
           buttonProps.variant = isMobile && iconForMobile ? 'text' : 'outlined';
-          buttonProps.className += ` btn-outline-red-v1 ${mode} ${hasMobileBorder ? 'with-border' : ''}`;
+          buttonProps.className += ` btn-outline-red-v1   ${mode} ${hasMobileBorder ? 'with-border' : ''}`;
           break;
         }
         case 'theme': {
-          buttonProps.className += ` btn-theme-outline-v1 ripple`;
+          buttonProps.className += ` btn-theme-outline-v1  ripple`;
+          buttonProps.variant = isMobile && iconForMobile ? 'text' : 'outlined';
           break;
         }
         case 'none': {
-          buttonProps.className += ` `;
+          buttonProps.className += ``;
           buttonProps.variant = 'contained';
           break;
         }

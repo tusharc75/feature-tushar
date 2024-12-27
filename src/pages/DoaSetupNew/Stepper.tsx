@@ -1,4 +1,5 @@
-import { Box, Grid, Paper, Step, StepConnector, StepLabel, Stepper, Theme } from '@mui/material';
+import { Box, Paper, Step, StepConnector, StepLabel, Stepper, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Check } from '@mui/icons-material';
 import clsx from 'clsx';
 import { DoaApproveType, getUniqueCurrencies } from 'src/constants/helpers';
@@ -68,7 +69,7 @@ const DoaStepper = ({ data }) => {
     <Paper elevation={0}>
       <Box m={2} p={2}>
         <Grid container justifyContent="center" alignItems="center">
-          <Grid item xs={12} md={12} lg={7}>
+          <Grid size={{xs:12, md:12, lg:7}}>
             <Stepper activeStep={-1} connector={<QontoConnector />} alternativeLabel>
               {data?.approveType === DoaApproveType.user
                 ? data?.users?.map((user, i) => {

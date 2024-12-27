@@ -144,7 +144,7 @@ const PadMasterDetail = () => {
         <TabPanel value={currentTabIndex} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={padMasterData} fields={fields} />

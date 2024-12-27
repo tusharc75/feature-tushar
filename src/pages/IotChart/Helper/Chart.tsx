@@ -8,8 +8,7 @@ import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
-import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import { dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 
 const downloadIconHTML = `<div title="Download">
@@ -112,7 +111,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
       shared: dataPoints[0]?.chartType === 'Bar' ? false : true,
       x: {
         formatter: function (value) {
-          const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+          const formattedDateTime = displayDateTime(value, dateTimeFormat24Hours);
           return formattedDateTime;
         }
       },

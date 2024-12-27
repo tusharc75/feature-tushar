@@ -1,11 +1,10 @@
+import dayjs from 'dayjs';
 import { uniq } from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { momentLocalizer } from 'react-big-calendar';
+import { dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
-
-const localizer = momentLocalizer(moment);
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -65,6 +64,8 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
 
     setActivities(newData);
   };
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <div className="relative">

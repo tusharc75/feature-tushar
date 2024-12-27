@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -52,7 +53,7 @@ const DoaSetup = ({ resource, entity }) => {
         </div>
         <Box className="formdata-v1">
           <Grid container style={{ padding: '8px' }} spacing={1}>
-            <Grid item xs={12} sm={12}>
+            <Grid size={{xs:12, sm:12}}>
               <BoxWithBorder
                 style={{
                   padding: '0px'

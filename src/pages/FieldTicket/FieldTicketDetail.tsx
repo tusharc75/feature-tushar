@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isNumber } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -198,12 +199,9 @@ const FieldTicketDetail = () => {
           <Box className="control-buttons-v1">
             {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && !isOffline && (
               <ButtonWithPulse
-                variant={'outlined'}
-                size="small"
                 onClick={() => {
                   setShowClosedConfirmBox(true);
                 }}
-                className={'btn-outline-v1'}
               >
                 Close
               </ButtonWithPulse>
@@ -250,7 +248,7 @@ const FieldTicketDetail = () => {
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={fieldTicketData} fields={fields} />

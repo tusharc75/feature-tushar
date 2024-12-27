@@ -2,7 +2,6 @@ import Box from '@mui/material/Box/Box';
 import Dialog from '@mui/material/Dialog';
 import Grid from '@mui/material/Grid/Grid';
 import { capitalize } from 'lodash';
-import moment from 'moment';
 import { useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

@@ -1,5 +1,6 @@
 import { Skeleton } from '@mui/material';
-import { Box, Button, Grid, Paper, Typography } from '@mui/material';
+import { Box, Button, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -178,14 +179,13 @@ const CustomerSign = () => {
   return (
     <>
       <Grid container className={classes.header}>
-        <Grid item xs={12} md={1} sm={2}>
+        <Grid size={{xs:12, md:1, sm:2}} >
           <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
         </Grid>
-        <Grid item xs={6} md={2} sm={2} className="pull-right"></Grid>
       </Grid>
       <Fragment>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+          <Grid size={{xs:12, sm:12, md:12, lg:12}}  spacing={2}>
             <Paper>
               {!deliveryTicketData ? (
                 <div>
@@ -216,7 +216,7 @@ const CustomerSign = () => {
               <Box>
                 {loading || !deliveryTicketFields.length || !deliveryTicketData ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Grid>
                 ) : (
                   <DetailsPage data={deliveryTicketData} fields={deliveryTicketFields} />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -321,7 +322,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     <Fragment>
       <Grid container spacing={2}>
         {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
+          <Grid size={{xs:12, md:12, sm:12}}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex"></Box>
               <Box display="flex">
@@ -382,7 +383,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             </Box>
           </Grid>
         )}
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

@@ -88,7 +88,6 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
             size="small"
             minDate={duration.from}
             label={`To ${label}`}
-            views={['year', 'month', 'date']}
             value={duration.to}
             onChange={(date) => {
               setDuration({ ...duration, to: date });

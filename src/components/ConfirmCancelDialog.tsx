@@ -47,7 +47,10 @@ export default function ConfirmationCancelDialog({ onClose, onSave, open }: Conf
         }
       }}
     >
-      <DialogTitle id="confirmation-dialog-title" className="flex items-center justify-between bg-[#1c1c31] py-3 text-white dark:bg-[#1a1a26]">
+      <DialogTitle
+        id="confirmation-dialog-title"
+        className="flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]"
+      >
         Confirm
         {onClose ? (
           <IconButton title="Close Confirm Dialog" aria-label="close" className={'text-white [transform:translateX(8px)]'} onClick={onClose}>

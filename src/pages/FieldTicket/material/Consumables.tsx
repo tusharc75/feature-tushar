@@ -2,7 +2,7 @@ import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -702,7 +702,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             </>
           )}
           <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
+            <Grid size={{xs:12, md:12, sm:12}}>
               {columns ? (
                 <CustomReactTable
                   height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

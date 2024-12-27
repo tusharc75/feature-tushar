@@ -1,4 +1,4 @@
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -16,7 +16,6 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   checkIsAllowedToDelete,
   customerAccount,

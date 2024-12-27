@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField';
 import { makeStyles, useTheme } from '@mui/styles';
@@ -140,18 +140,24 @@ export default function IconAutoComplete({ ...rest }) {
             fullWidth
             slotProps={{
               input: {
-                ...params.InputProps, startAdornment: Icon
-              },
+                ...params.InputProps,
+                startAdornment: Icon
+              }
             }}
           />
         );
       }}
-      renderOption={(option) => (
-        <Typography noWrap className="flex gap-2">
-          <span className=" flex-shrink-0">{DynamicIcon(option as string, { size: 18 })}</span>
-          {option}
-        </Typography>
-      )}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props;
+        return (
+          <Box component="li" key={key} {...optionProps}>
+            <Typography noWrap className="flex gap-2">
+              <span className=" flex-shrink-0">{DynamicIcon(option as string, { size: 18 })}</span>
+              {option}
+            </Typography>
+          </Box>
+        );
+      }}
       fullWidth
       multiple={false}
       {...rest}

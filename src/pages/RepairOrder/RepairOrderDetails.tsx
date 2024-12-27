@@ -341,10 +341,7 @@ const RepairOrderDetails = () => {
                 )}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
                   <ButtonWithPulse
-                    variant={'outlined'}
-                    size="small"
                     onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                    className={'btn-outline-v1'}
                     id={'header-button-complete'}
                   >
                     Complete

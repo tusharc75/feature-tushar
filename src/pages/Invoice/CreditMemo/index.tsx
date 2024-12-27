@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { camelCase, set, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';

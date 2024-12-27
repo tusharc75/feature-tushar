@@ -1413,23 +1413,18 @@ export const dateFormatForInputControl = localStorage.getItem('dateFormatForInpu
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
-export const yyyyMMDD = (dateToBeFormatted) => {
-  return dateToBeFormatted ? moment(dateToBeFormatted).format(cardDateFormat) : dateToBeFormatted;
-};
-
 export const displayDate = (date, format = null) => {
   format = format ? format : dateFormat;
   return date ? dayjs.utc(date).tz().format(format) : date;
 };
 
 export const displayDateTime = (date, format = null) => {
-  console.log(dateTimeFormat)
   format = format ? format : dateTimeFormat;
   return date ? dayjs.utc(date).tz().format(format) : date;
 };
 
 export const displayCardDate = (date) => {
-  return date ? moment(date).format(cardDateFormat) : date;
+  return date ? dayjs.utc(date).tz().format(cardDateFormat) : date;
 };
 
 export const convertDateInDateTime = (date) => {
@@ -3841,8 +3836,8 @@ export const workOrderColormap = {
   },
   [WORKORDER_SERVICE_STATUS.inProgressByOther]: {
     color: 'dark:text-white text-[#6D29F6]',
-    background: 'dark:bg-[#0c68e9] bg-[#D6F1FF]',
-    indicator: 'bg-[#6D29F6] dark:bg-[#0c68e9]'
+    background: 'dark:bg-[#6055df] bg-[#D6F1FF]',
+    indicator: 'bg-[#6D29F6] dark:bg-[#6055df]'
   }
 };
 

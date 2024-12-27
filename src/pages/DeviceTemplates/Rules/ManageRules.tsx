@@ -1,8 +1,8 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, IconButton, TextField } from '@mui/material';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, sidebarResource, yupSchema } from 'src/constants/helpers';
-import { FieldArray, Form, Formik, getIn } from 'formik';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

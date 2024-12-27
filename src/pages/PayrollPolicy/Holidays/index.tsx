@@ -16,7 +16,6 @@ import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, sidebarResource
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManageHolidays from './ManageHolidays';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { sidebarItems } from 'src/components/FormBuilder/FieldList';
 
 const Holidays = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(sidebarResource.payrollPolicy)}_holidays`;

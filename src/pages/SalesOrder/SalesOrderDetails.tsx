@@ -186,12 +186,9 @@ const SalesOrderDetails = () => {
                 {permissions?.salesOrder?.isUpdate &&
                   [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
                     <ButtonWithPulse
-                      variant={'outlined'}
-                      size="small"
                       onClick={() => {
                         setShowClosedConfirmBox(true);
                       }}
-                      className={'btn-outline-v1'}
                     >
                       Close
                     </ButtonWithPulse>

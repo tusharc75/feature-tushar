@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Button, Dialog, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
@@ -325,11 +326,11 @@ const EntityDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid size={{xs:12, sm:12, md:8, lg:8}} spacing={2}>
             <Box>
               {loading || !entityFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
@@ -348,7 +349,7 @@ const EntityDetailsPage = () => {
               </Box>
               <Box className="formdata-v1">
                 <Grid container style={{ padding: '8px' }} spacing={1}>
-                  <Grid item xs={12} sm={12}>
+                  <Grid size={{xs:12, sm:12}}>
                     <BoxWithBorder
                       style={{
                         padding: '0px'
@@ -372,7 +373,7 @@ const EntityDetailsPage = () => {
               </Box>
             ))}
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid size={{xs:12, sm:12, md:4, lg:4}} spacing={2}>
             <Box style={{ overflow: 'hidden' }} className="single-form-v1">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({users.length || 0})</Typography>

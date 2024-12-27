@@ -44,8 +44,12 @@ const useSearch = () => {
     if (!inputRef.current) return;
     const input = inputRef.current;
     const otherFocusedElements = document.querySelector(':focus-within');
-    if (otherFocusedElements) return;
     if (input.matches(':focus-within')) return;
+    if (e.ctrlKey && e.key === '/') {
+      e.preventDefault();
+      inputRef.current?.focus();
+    }
+    if (otherFocusedElements) return;
     if (e.key === '/') {
       e.preventDefault();
       inputRef.current?.focus();

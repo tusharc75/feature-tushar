@@ -58,7 +58,10 @@ export default function ConfirmationDialogRaw({
       id="confirmation-dialog"
       keepMounted
     >
-      <DialogTitle id="confirmation-dialog-title" className="bg-[#1c1c31] py-3 text-white dark:bg-[#1a1a26]">
+      <DialogTitle
+        id="confirmation-dialog-title"
+        className="flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]"
+      >
         {title ? title : 'Confirm'}
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>

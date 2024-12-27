@@ -36,7 +36,7 @@ import {
   quoteBuilder,
   sidebarResource,
   termsAndCondition,
-  yyyyMMDD
+  displayCardDate,
 } from '../../../constants/helpers';
 import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
@@ -201,7 +201,7 @@ export default function QuoteDetail() {
     let mainPoint = {};
     if (quoteData) {
       mainPoint['Account Name'] = quoteData?.accountName?.optionLabel || '';
-      mainPoint['Expiry Date'] = yyyyMMDD(quoteData?.closeDate);
+      mainPoint['Expiry Date'] = displayCardDate(quoteData?.closeDate);
       mainPoint['Estimated Amount'] = quoteData?.estimatedAmount
         ? formatAmountWithCurrency(quoteData?.currency, quoteData?.estimatedAmount).fullFormatAmount
         : '';

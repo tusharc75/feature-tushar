@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -135,7 +136,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
               <Skeleton width="100%" height="70px" />
               <Grid container spacing={2}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
+                  <Grid key={i} size={{xs:12, sm:6, md:6}}>
                     <Skeleton width="100%" height="60px" />
                   </Grid>
                 ))}
@@ -158,7 +159,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                   <Form>
                     <Box marginY={2}>
                       <Grid spacing={3} container>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{xs:12, sm:6, md:6}}>
                           <FormControl component="fieldset" required error={Boolean(errors['column'])}>
                             <FormLabel component="legend">Column</FormLabel>
                             <RadioGroup row name={'column'} value={values['column'] || ''} onChange={(e) => setFieldValue('column', e.target.value)}>
@@ -169,7 +170,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                           </FormControl>
                         </Grid>
                         {['menu', 'productCategory', 'productList'].includes(itemData.type) && (
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{xs:12, sm:6, md:6}}>
                             <TextField
                               variant="outlined"
                               type="text"
@@ -187,7 +188,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                         )}
                         {['imageSlider', 'image'].includes(itemData?.type) && (
                           <>
-                            <Grid item xs={12} sm={6} md={6}>
+                            <Grid size={{xs:12, sm:6, md:6}}>
                               <FormTypes
                                 fieldData={imageField}
                                 values={values}
@@ -212,7 +213,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 row={true}
                               />
                             </Grid>
-                            <Grid item xs={12} sm={6} md={6}>
+                            <Grid size={{xs:12, sm:6, md:6}}>
                               <TextField
                                 variant="outlined"
                                 type="text"
@@ -227,7 +228,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 onChange={(e) => setFieldValue('url', e.target.value.trimStart())}
                               />
                             </Grid>
-                            <Grid item xs={12} sm={6} md={6}>
+                            <Grid size={{xs:12, sm:6, md:6}}>
                               <TextField
                                 variant="outlined"
                                 type="text"
@@ -245,7 +246,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                           </>
                         )}
                         {itemData.type === 'productList' && (
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{xs:12, sm:6, md:6}}>
                             <Autocomplete
                               options={kpiValue}
                               freeSolo
@@ -258,7 +259,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                               value={
                                 kpiValue?.filter((v) => v.optionValue === values['kpi']).length
                                   ? kpiValue.filter((data) => data.optionValue === values['kpi'])[0]
-                                  : '' || ''
+                                  : ''
                               }
                               onChange={(e, val) => {
                                 setFieldValue('kpi', val?.optionValue || '');
