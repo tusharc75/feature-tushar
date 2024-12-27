@@ -113,7 +113,7 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
           },
           {
             accessor: 'wellName',
-            Header: 'Well Name',
+            Header: 'Rental Well Name',
             show: true,
             Cell: ({ row }) =>
               row.original?.wellName ? (
