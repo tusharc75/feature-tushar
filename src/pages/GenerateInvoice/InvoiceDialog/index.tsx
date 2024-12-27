@@ -1,4 +1,4 @@
-import { checkIsAllowedToEdit, CustomDialogTransition, RENTAL_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import Invoices from './Invoices';
 import { Dialog } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';

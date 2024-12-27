@@ -5,13 +5,13 @@ import {
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -125,7 +125,7 @@ export default function AssignContactsDialog({
         ) : currentContactsConst.length ? (
           <>
             <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+              <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-1">
                 <FormControl component="fieldset">
                   <FormControlLabel
                     value="top"
@@ -146,7 +146,7 @@ export default function AssignContactsDialog({
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+              <Grid size={{xs:12, md:6, sm:6}} container justifyContent="flex-end">
                 <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>
