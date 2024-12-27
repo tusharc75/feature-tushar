@@ -1,8 +1,8 @@
-import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import type { Activity } from './types';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { Typography, Box, Avatar, IconButton, Collapse, Tooltip, Button } from '@mui/material';
-import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@mui/icons-material';
+import { Typography, IconButton, Collapse, Button } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { displayDate } from 'src/constants/helpers';
 
 interface MobileRoadmapProps {

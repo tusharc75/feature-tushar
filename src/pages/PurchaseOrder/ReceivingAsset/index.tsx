@@ -1,4 +1,5 @@
-import { Button, Grid, IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box/Box';
 import { Cancel } from '@mui/icons-material';
 import HistoryIcon from '@mui/icons-material/History';
@@ -449,7 +450,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
         leftSideContents={<LeftSideContents />}
         hasXpadding={true}
       />
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{xs:12, md:12, sm:12}}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable

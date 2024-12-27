@@ -328,21 +328,21 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                                           ? null
                                           : field.fieldName === 'fullAddress' || field.fieldName === 'searchAddress'
                                             ? (_, val) => {
-                                                if (typeof val !== 'object') return;
-                                                getFullAddress(val);
-                                                if (!val?.place_id) {
-                                                  setAddressDetail(null);
-                                                }
+                                              if (typeof val !== 'object') return;
+                                              getFullAddress(val);
+                                              if (!val?.place_id) {
+                                                setAddressDetail(null);
                                               }
+                                            }
                                             : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                const { name, value } = e.target;
-                                                if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                                                setAddressDetail((prevState: any) => ({
-                                                  ...prevState,
-                                                  [name]: value
-                                                }));
-                                                setLatLngChangedManually(true);
-                                              }
+                                              const { name, value } = e.target;
+                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                              setAddressDetail((prevState: any) => ({
+                                                ...prevState,
+                                                [name]: value
+                                              }));
+                                              setLatLngChangedManually(true);
+                                            }
                                       }
                                     />
                                   ) : (
@@ -427,7 +427,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

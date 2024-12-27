@@ -1,4 +1,5 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -147,7 +148,7 @@ export default function OpportunityAccordianProjectSales({
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                 <IconButton size="small" onClick={(e) => e.preventDefault()}>
                   {expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -157,7 +158,7 @@ export default function OpportunityAccordianProjectSales({
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {(permissions.isUpdate && isTeamMember) || isManager ? (
                   <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
@@ -176,7 +177,6 @@ export default function OpportunityAccordianProjectSales({
                   <Grid container className={styles.opportunity_layout}>
                     {opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                       <Grid
-                        item
                         // xs={12}
                         // sm={12}
                         // md={recordsPerLineInLargeScreen}
@@ -185,9 +185,9 @@ export default function OpportunityAccordianProjectSales({
                       >
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12}>
+                            <Grid size={{xs:12}}>
                               <Grid container className="detailCardHeader">
-                                <Grid item xs={7} sm={8}>
+                                <Grid size={{xs:7, sm:8}}>
                                   {hasAccessToEntity(obj.entity) ? (
                                     obj.entity === selectedEntity ? (
                                       <p className="link text-truncate" onClick={() => window.open(`${routes.opportunityDetail.path}/${obj._id}`)}>
@@ -213,7 +213,7 @@ export default function OpportunityAccordianProjectSales({
                                     </span>
                                   )}
                                 </Grid>
-                                <Grid item xs={5} sm={4}>
+                                <Grid size={{xs:5, sm:4}}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -241,14 +241,14 @@ export default function OpportunityAccordianProjectSales({
                                 </Grid>
                               </Grid>
                               <Grid container className={styles.opportunity_layout_box}>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                   {obj?.stage ? (
                                     <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
+                                <Grid size={{xs:12, sm:6, md:6}} className={styles.opportunity_closed_date}>
                                   {obj.closeDate ? (
                                     <DisplayData
                                       key={index}

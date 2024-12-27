@@ -1,4 +1,5 @@
-import { Button, Grid } from '@mui/material';
+import { Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
@@ -151,26 +152,26 @@ const QuoteApproval = () => {
         <div>
           {replied ? (
             <Grid container className={classes.header}>
-              <Grid item xs={12} md={1} sm={2}>
+              <Grid size={{xs:12, md:1, sm:2}}>
                 <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
               </Grid>
-              <Grid item xs={6} md={9} sm={8} className="d-flex align-items-center justify-content-center">
+              <Grid size={{xs:6, md:9, sm:8}} className="d-flex align-items-center justify-content-center">
                 <h1>Thanks, Response for the Quote has been sent.</h1>
               </Grid>
-              <Grid item xs={6} md={2} sm={2}>
+              <Grid size={{xs:6, md:2, sm:2}}>
                 {logo && <img src={logo} alt="brand" className={classes.brandLogo} />}
               </Grid>
             </Grid>
           ) : (
             <div>
               <Grid container className={classes.header}>
-                <Grid item xs={12} md={1} sm={2}>
+                <Grid size={{xs:12, md:1, sm:2}}>
                   <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
                 </Grid>
-                <Grid item xs={6} md={9} sm={8} className="d-flex align-items-center justify-content-center">
+                <Grid size={{xs:6, md:9, sm:8}} className="d-flex align-items-center justify-content-center">
                   <h1>Approve Quote: {quoteData?.name}</h1>
                 </Grid>
-                <Grid item xs={6} md={2} sm={2} className="pull-right"></Grid>
+                <Grid size={{xs:6, md:2, sm:2}} className="pull-right"></Grid>
               </Grid>
 
               {pdf ? (
@@ -184,13 +185,13 @@ const QuoteApproval = () => {
               <div className={styles.main}>
                 <div className="mt-1">
                   <Grid container alignItems="center">
-                    <Grid item xs={12} md={4} sm={4}>
+                    <Grid size={{xs:12, md:4, sm:4}}>
                       <h2>
                         Total : {sellingPrice.toFixed(2)} {currency}
                       </h2>
                     </Grid>
                     {showUnlockAction && (
-                      <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                      <Grid size={{xs:12, md:8, sm:8}} className="centerItem d-flex" justifyContent="flex-end">
                         <HtmlTooltip title="Click to unlock accept/reject options">
                           <Button
                             variant="outlined"
@@ -209,7 +210,7 @@ const QuoteApproval = () => {
                     )}
 
                     {showAcceptRejectButtons && (
-                      <Grid item xs={12} md={8} sm={8} className="centerItem d-flex" justify="flex-end">
+                      <Grid size={{xs:12, md:8, sm:8}} className="centerItem d-flex" justifyContent="flex-end">
                         <Button
                           variant="contained"
                           className="mr-1"

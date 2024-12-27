@@ -2,7 +2,7 @@ import Box from '@mui/material/Box/Box';
 import { useContext, useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { displayDate, gridLoadingTimeout } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
@@ -143,7 +143,7 @@ const SerialNumber = ({ product, warehouse }) => {
 
   return (
     <>
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{xs:12, md:12, sm:12}}>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}

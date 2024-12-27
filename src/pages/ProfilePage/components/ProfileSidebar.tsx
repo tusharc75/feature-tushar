@@ -1,4 +1,5 @@
-import { Grid, Typography, Icon } from '@mui/material';
+import { Typography, Icon } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { profileMenuItems } from '../../../constants/helpers';
 import ManageProfile from './ManageProfile';
 import styles from '../profilePage.module.scss';
@@ -29,11 +30,11 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
   ];
 
   return (
-    <Grid container justify="center">
-      <Grid item sm={12} lg={12} md={12}>
+    <Grid container justifyContent="center">
+      <Grid size={{sm:12, lg:12, md:12}}>
         <ManageProfile displayUserProfileImage={true} userData={userData} onFetchUserData={onFetchUserData} otherDetails={otherDetails} />
       </Grid>
-      <Grid item sm={12} lg={12} md={12} className="profileBox">
+      <Grid size={{sm:12, lg:12, md:12}} className="profileBox">
         <div className="d-flex flex-column px-4 pb-3 pt-2">
           {userMenu.map((k, index) => {
             return (

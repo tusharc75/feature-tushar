@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
-import { Grid, Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress, Theme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Typography, Button, CircularProgress, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -39,13 +40,13 @@ const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
 );
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid item key={id} sm={12} md={6} lg={4} container>
-    <Grid item sm={3} style={{ marginTop: '7px' }}>
+  <Grid key={id} size={{sm:12, md:6, lg:4}} container>
+    <Grid size={{sm:3}} style={{ marginTop: '7px' }}>
       {icon}
     </Grid>
-    <Grid item sm={7} container>
-      <Grid item xs container direction="column">
-        <Grid item xs>
+    <Grid size={{sm:7}} container>
+      <Grid size={{xs: 12, sm: 7}} container direction="column">
+        <Grid size={{xs: 12, sm: 7}} container>
           <Typography align="left" variant="h6">
             <strong>{heading}</strong>
           </Typography>

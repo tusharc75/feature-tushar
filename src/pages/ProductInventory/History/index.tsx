@@ -1,8 +1,7 @@
 import { IconButton, TextField } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import { camelCase, capitalize } from 'lodash';
-import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -550,7 +549,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       {warehouseOptions ? (
         <div className="md:pr-[82px]">
           <Grid container spacing={2} justifyContent="space-between">
-            <Grid item md={3} sm={6} xs={12}>
+            <Grid size={{md:3, sm:6, xs:12}}>
               <Autocomplete
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
@@ -572,7 +571,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                 )}
               />
             </Grid>
-            <Grid item md={3} sm={6} xs={12}>
+            <Grid size={{md:3, sm:6, xs:12}}>
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
                   options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
@@ -592,7 +591,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                 />
               )}
             </Grid>
-            <Grid item md={6} sm={12} xs={12}>
+            <Grid size={{md:6, sm:12, xs:12}}>
               <Box mt={1}>
                 <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
               </Box>
@@ -602,7 +601,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       ) : (
         <div className="min-h-[50px]" />
       )}
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{xs:12, md:12, sm:12}}>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 300px)'}

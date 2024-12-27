@@ -1,4 +1,5 @@
-import { Box, Button, Grid, TextField, Theme } from '@mui/material';
+import { Box, Button, TextField, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
@@ -135,12 +136,12 @@ const PublicRoutePage = () => {
           <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
             <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
               <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
-                <Grid item xs={12} sm={12} md={12}>
+                <Grid size={{xs:12, sm:12, md:12}}>
                   <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
                     Authentication Required
                   </h1>
                 </Grid>
-                <Grid item xs={10} sm={10} md={10}>
+                <Grid size={{xs:10, sm:10, md:10}}>
                   <TextField
                     id="outlined-full-width"
                     margin="normal"
@@ -157,7 +158,7 @@ const PublicRoutePage = () => {
                     size="small"
                   />
                 </Grid>
-                <Grid item xs={10} sm={10} md={10}>
+                <Grid size={{xs:10, sm:10, md:10}}>
                   <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
                     Submit
                   </Button>

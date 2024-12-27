@@ -926,16 +926,15 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
         <Fragment key={item.id}>{renderComponent(item)}</Fragment>
       ))}
       {menuItems.length > 0 && (
-        <Button
-          variant={'outlined'}
-          size="small"
-          className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+        <ThemeButton
           onClick={openActions}
-          aria-controls="action-menu"
-          endIcon={isMobile ? null : <ExpandMore />}
+          endIcon={<ExpandMore />}
+          mobileTooltip='Actions'
+          borderColor="yellow"
+          iconForMobile={<ExpandMore />}
         >
-          {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
-        </Button>
+          Actions
+        </ThemeButton>
       )}
       <Menu
         anchorEl={actionAnchor}

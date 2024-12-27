@@ -1,4 +1,5 @@
-import { Badge, Box, Button, Grid, IconButton, TextField } from '@mui/material';
+import { Badge, Box, Button, IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import CropFreeIcon from '@mui/icons-material/CropFree';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -170,15 +171,15 @@ const Pos = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.pos, title: resources?.pos?.titlePlural }]} />
         </Grid>
-        <Grid item md={8} sm={11} xs={10}></Grid>
+        <Grid size={{md:8, sm:11, xs:10}}></Grid>
       </Grid>
       <CustomContainer>
         <div className="header-panel">
           <Grid container>
-            <Grid item xs={12} sm={12} md={6} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <Grid size={{xs:12, sm:12, md:6}} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
               <Autocomplete
                 style={{ width: '250px' }}
                 options={plantOptions}
@@ -243,7 +244,7 @@ const Pos = () => {
                 }
               />
             </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
+            <Grid size={{md:6, sm:12, xs:12}} container className={styles2.filter_side}>
               <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
                 <SearchBox
                   onChange={(e) => {

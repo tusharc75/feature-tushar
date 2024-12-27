@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Grid, Paper, Theme } from '@mui/material';
+import { Box, Paper, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar';
@@ -125,14 +126,14 @@ export default function ProfilePage(props) {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
+        <Grid size={{md:12, sm:12, xs:12}}>
           <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         </Grid>
       </Grid>
       <CustomContainer>
         <Box p={{ xs: 0, md: 2 }}>
           <Grid container spacing={3}>
-            <Grid item sm={12} md={4} lg={3}>
+            <Grid size={{sm:12, md:4, lg:3}}>
               <div>
                 <ProfileSidebar
                   onItemClick={handleItemClick}
@@ -143,7 +144,7 @@ export default function ProfilePage(props) {
                 />
               </div>
             </Grid>
-            <Grid item sm={12} md={8} lg={9} className="bgbox">
+            <Grid size={{sm:12, md:8, lg:9}} className="bgbox">
               {activeItem === profileMenuItems.profile ? (
                 <ManageProfile
                   displayUserDetails={true}

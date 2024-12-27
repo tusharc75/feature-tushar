@@ -204,7 +204,6 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
 
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

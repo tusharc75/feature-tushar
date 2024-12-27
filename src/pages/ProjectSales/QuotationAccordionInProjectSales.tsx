@@ -1,4 +1,5 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { MoreVert } from '@mui/icons-material';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -168,7 +169,7 @@ export default function QuotationAccordionInProjectSales({
       <Accordion expanded={expandQuotation} onChange={() => setExpandQuotation(!expandQuotation)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
           <Grid container>
-            <Grid item xs={8} alignItems="center">
+            <Grid size={{xs:8}} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                 <IconButton size="small" onClick={() => setExpandQuotation(!expandQuotation)}>
                   {expandQuotation === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -178,7 +179,7 @@ export default function QuotationAccordionInProjectSales({
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               {(permissions?.isUpdate && isTeamMember) || isManager ? (
                 <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
                   <MoreVert />
@@ -194,12 +195,12 @@ export default function QuotationAccordionInProjectSales({
                 {quotations && quotations?.length ? (
                   <Grid container className={styles.opportunity_layout}>
                     {quotations.slice(0, maxRecordsToShow).map((obj, i) => (
-                      <Grid item className={styles.opportunity_layout_container}>
+                      <Grid className={styles.opportunity_layout_container}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12}>
+                            <Grid size={{xs:12}}>
                               <Grid container className="detailCardHeader">
-                                <Grid item xs={6}>
+                                <Grid size={{xs:6}}>
                                   {!isQuotationPrivate(obj) ? (
                                     quotationNameWithRedirect(obj)
                                   ) : obj?.privateAccess === true ? (
@@ -217,7 +218,7 @@ export default function QuotationAccordionInProjectSales({
                                     quotationNameWithRedirect(obj)
                                   )}
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{xs:6}}>
                                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                                     {obj?.estimatedAmount ? (
                                       <Typography
@@ -242,7 +243,7 @@ export default function QuotationAccordionInProjectSales({
                               </Grid>
 
                               <Grid container>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                   {obj.expiryDate ? (
                                     <DisplayData
                                       key={i}
@@ -254,14 +255,14 @@ export default function QuotationAccordionInProjectSales({
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6} className={styles.opportunity_closed_date}>
+                                <Grid size={{xs:12, sm:6, md:6}} className={styles.opportunity_closed_date}>
                                   {obj.incoTerms ? (
                                     <DisplayData key={i} label="Inco Terms" value={obj.incoTerms} icon={<BusinessOutlinedIcon />} />
                                   ) : (
                                     ''
                                   )}
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                   {obj.probability ? (
                                     <DisplayData key={i} label="Probability" value={`${obj.probability} %`} icon={<TrendingUpOutlinedIcon />} />
                                   ) : (

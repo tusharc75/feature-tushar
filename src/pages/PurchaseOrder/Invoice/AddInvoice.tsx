@@ -5,7 +5,8 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
-import { Button, Grid, TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Formik } from 'formik';
@@ -105,7 +106,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
           <Fragment>
             <CustomDialogContent>
               <Grid container spacing={2}>
-                <Grid xs={12} md={12} sm={12} item>
+                <Grid size={{xs:12, md:12, sm:12}} >
                   <TextField
                     margin="dense"
                     size="small"
@@ -123,7 +124,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                     }}
                   />
                 </Grid>
-                <Grid xs={12} md={12} sm={12} item>
+                <Grid size={{xs:12, md:12, sm:12}} >
                   <CustomDatePicker
                     fullWidth
                     size="small"

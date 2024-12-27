@@ -211,13 +211,12 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                     onClose();
                   }
                 }}
-                title={`${
-                  workOrderId
-                    ? isClone
-                      ? `Clone ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ''}`
-                      : `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ''}`
-                    : `Create Work Order`
-                }`}
+                title={`${workOrderId
+                  ? isClone
+                    ? `Clone ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ''}`
+                    : `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ''}`
+                  : `Create Work Order`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -391,7 +390,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

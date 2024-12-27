@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
+import { Box, IconButton, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
@@ -328,7 +329,7 @@ const ProjectSalesDetails = () => {
       <Box className={`detail-container-v1`}>
         {loading || !projectSalesFields.length || !projectSalesData ? (
           <Grid container spacing={2} style={{ padding: '16px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : (
           <>

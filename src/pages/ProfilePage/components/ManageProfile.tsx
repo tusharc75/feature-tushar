@@ -4,7 +4,6 @@ import {
   Button,
   CircularProgress,
   Divider,
-  Grid,
   IconButton,
   Table,
   TableBody,
@@ -15,6 +14,7 @@ import {
   Theme,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Image } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -425,7 +425,7 @@ export default function ManageProfile(props) {
               <Box mb={2}>
                 {loading || userLoading ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Grid>
                 ) : !userFields.length ? (
                   <Typography>No Data Found</Typography>

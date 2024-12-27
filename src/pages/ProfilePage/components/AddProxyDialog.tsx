@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
-import { Dialog, Grid, Button, TextField, CircularProgress } from '@mui/material';
+import { Dialog, Button, TextField, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -85,7 +86,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                    <Grid item md={12} sm={12} xs={12}>
+                    <Grid size={{md:12, sm:12, xs:12}}>
                       <Autocomplete
                         id="combo-box-demo"
                         size="small"
@@ -110,7 +111,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                       />
                     </Grid>
 
-                    <Grid item md={12} sm={12} xs={12}>
+                    <Grid size={{md:12, sm:12, xs:12}}>
                       <CustomDatePicker
                         size="small"
                         disablePast
@@ -128,7 +129,7 @@ export default function AddProxyDialog({ open, onClose, onSuccess, userId }) {
                       />
                     </Grid>
 
-                    <Grid item md={12} sm={12} xs={12}>
+                    <Grid size={{md:12, sm:12, xs:12}}>
                       <CustomDatePicker
                         size="small"
                         disablePast
