@@ -30,7 +30,6 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
           mobileTooltip="Workspace"
           borderColor="none"
           endIcon={<ArrowForward />}
-          iconForMobile={<ArrowForward />}
           id="collaborator-button"
           onClick={() => setActivityShow(!showActivity)}
           color="primary"
