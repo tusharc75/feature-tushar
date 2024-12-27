@@ -106,26 +106,26 @@ const DashboardBuilder = () => {
     const dataToExport =
       formData?.length > 0
         ? {
-            name: values?.name.trim(),
-            charts: formData
-          }
+          name: values?.name.trim(),
+          charts: formData
+        }
         : {
-            name: '',
-            charts: [
-              {
-                graphyType: '', // Valid types ["Chart", "Map", "Table"]
-                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-                column: 6,
-                chartTitle: '',
-                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-                hasFilters: false,
-                hasTableView: false,
-                hasExport: false,
-                statusOptions: [],
-                filters: []
-              }
-            ]
-          };
+          name: '',
+          charts: [
+            {
+              graphyType: '', // Valid types ["Chart", "Map", "Table"]
+              chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+              column: 6,
+              chartTitle: '',
+              kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+              hasFilters: false,
+              hasTableView: false,
+              hasExport: false,
+              statusOptions: [],
+              filters: []
+            }
+          ]
+        };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `${values?.name || 'Dashboard Fields'}.json`);
   };
@@ -308,10 +308,10 @@ const DashboardBuilder = () => {
           </Box>
           <Box p={1}>
             <Grid container spacing={2}>
-              <Grid size={{xs:12, sm:4}}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Builder setFormData={setFormData} selectedData={selectedData} handleUpdate={handleUpdate} />
               </Grid>
-              <Grid size={{xs:12, sm:8}}>
+              <Grid size={{ xs: 12, sm: 8 }}>
                 <Box className={'container-with-border'} p={2}>
                   {formData.length === 0 && (
                     <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
