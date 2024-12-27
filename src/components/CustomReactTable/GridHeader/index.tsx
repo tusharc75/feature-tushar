@@ -1,4 +1,4 @@
-import { Button, IconButton, useMediaQuery } from '@mui/material';
+import { IconButton, useMediaQuery } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import React, { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
@@ -8,15 +8,15 @@ import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
-import { IndeterminateCheckbox, TempFilter } from '../TableComponents/TableHelperComponents';
+import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-
 import { Table } from '@tanstack/react-table';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type GridHeaderProps = {
   resource: any;
@@ -179,18 +179,15 @@ const GridHeader = ({
         </div>
         <div className="buttons flex flex-wrap gap-[8px] ">
           {showFilters && (
-            <HtmlTooltip title="Apply Filters" placement="top" arrow>
-              <Button
-                startIcon={isMobileView ? null : <BiFilterAlt />}
-                size={'small'}
-                variant={isMobileView ? 'text' : 'outlined'}
-                className={`btn-outline-v1 light with-border`}
-                onClick={handleFilterOpen}
-              >
-                <span className={isMobileView ? 'sr-only' : ''}>Filter</span>
-                {isMobileView ? <BiFilterAlt /> : ''}
-              </Button>
-            </HtmlTooltip>
+            <ThemeButton
+              onClick={handleFilterOpen}
+              startIcon={<BiFilterAlt />}
+              tooltip='Apply Filters'
+              mobileTooltip='Apply Filters'
+              iconForMobile={<BiFilterAlt />}
+            >
+              {'Filters'}
+            </ThemeButton>
           )}
           {!hideExportTable && isClientSideGrid ? (
             <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>

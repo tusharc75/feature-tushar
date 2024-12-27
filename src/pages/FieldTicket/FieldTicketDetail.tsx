@@ -1,9 +1,8 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
-import { camelCase, isNumber } from 'lodash';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -207,19 +206,16 @@ const FieldTicketDetail = () => {
               </ButtonWithPulse>
             )}
             {fieldTicketData?.versions?.length && !isOffline && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={() => {
                   setVersionDialog(true);
                 }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                startIcon={<VscVersions />}
+                mobileTooltip='Versions'
+                iconForMobile={<VscVersions size={20} style={{ color: 'var(--primary-text)' }} />}
               >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
-              </Button>
+                Versions
+              </ThemeButton>
             )}
             {allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status) && (
               <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>

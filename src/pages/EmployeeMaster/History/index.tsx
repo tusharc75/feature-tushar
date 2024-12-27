@@ -31,19 +31,19 @@ const History = ({ id }) => {
       key: 'fieldTicket',
       resource: sidebarResource.fieldTicket,
       path: routes.fieldTicketDetail.path,
-      title: resources?.fieldTicket?.titlePlural
+      title: resources?.fieldTicket?.titleSingular
     },
     {
       key: 'workOrder',
       resource: sidebarResource.workOrder,
       path: routes.workOrderDetail.path,
-      title: resources?.workOrder?.titlePlural
+      title: resources?.workOrder?.titleSingular
     },
     {
       key: 'rentalManagement',
       resource: sidebarResource.rentalManagement,
       path: routes.rentalManagementDetail.path,
-      title: resources?.rentalManagement?.titlePlural
+      title: resources?.rentalManagement?.titleSingular
     }
   ];
 
@@ -161,7 +161,7 @@ const History = ({ id }) => {
     const options: any = [];
     TECHNICIAN_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+        options.push(item);
       }
     });
     setResourceList(options);

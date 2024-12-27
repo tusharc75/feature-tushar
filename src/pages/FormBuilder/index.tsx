@@ -17,6 +17,7 @@ import { AddOutlined } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import SectionMaster from './sectionMaster';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = 'form-builder';
 
@@ -150,24 +151,22 @@ const FormBuilder = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }]} />
         <div className="flex items-center gap-1">
-          <Button
-            variant="outlined"
-            className={'btn-outline-v1'}
+          <ThemeButton
             onClick={() => {
               setArrangeViewOpen(true);
             }}
+            iconForMobile={false}
           >
             Change Resource Order
-          </Button>
-          <Button
-            variant="outlined"
-            className={'btn-outline-v1'}
+          </ThemeButton>
+          <ThemeButton
             onClick={() => {
               setOpenSectionMaster(true);
             }}
+            iconForMobile={false}
           >
             Sections
-          </Button>
+          </ThemeButton>
         </div>
       </div>
       <CustomContainer>

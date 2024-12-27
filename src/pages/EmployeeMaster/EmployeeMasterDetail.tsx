@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
@@ -12,7 +12,6 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
@@ -163,31 +162,24 @@ const EmployeeMasterDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {employeeMasterData?.userId ? (
-                <Button
-                  variant={'outlined'}
-                  size="small"
+                <ThemeButton
                   onClick={() => {
                     window.open(`${routes.userDetail.path}/${employeeMasterData?.userId}`);
                   }}
-                  className={'btn-outline-v1'}
+                  iconForMobile={false}
                 >
                   View User
-                </Button>
+                </ThemeButton>
               ) : (
                 permissions?.employeeMaster?.isUpdate && (
-                  <HtmlTooltip title="Give Portal Access" arrow placement="top">
-                    <Button
-                      size="small"
-                      variant={'outlined'}
-                      disabled={false}
-                      onClick={() => {
-                        setShowAssignEntityDialog(true);
-                      }}
-                      className={'btn-outline-v1'}
-                    >
-                      Give Portal Access
-                    </Button>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    onClick={() => {
+                      setShowAssignEntityDialog(true);
+                    }}
+                    iconForMobile={false}
+                  >
+                    Give Portal Access
+                  </ThemeButton>
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (
