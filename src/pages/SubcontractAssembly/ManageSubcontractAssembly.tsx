@@ -223,7 +223,6 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

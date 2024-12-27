@@ -125,7 +125,7 @@ export default function ManageAssetDialog({
               <Fragment>
                 <CustomDialogHeader
                   title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.assetNumber || ''})`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     onClose();
                   }}
                   isMinimized={!fullScreen}
@@ -277,7 +277,6 @@ export default function ManageAssetDialog({
       </Dialog>
       {showConfirmDialog && (
         <ConfirmCancelDialog
-          close={() => setShowConfirmDialog(false)}
           open={showConfirmDialog}
           onSave={() => {
             setShowConfirmDialog(false);

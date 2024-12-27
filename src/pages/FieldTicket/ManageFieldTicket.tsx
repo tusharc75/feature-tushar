@@ -423,7 +423,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -237,7 +237,6 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

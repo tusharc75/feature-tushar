@@ -216,7 +216,6 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

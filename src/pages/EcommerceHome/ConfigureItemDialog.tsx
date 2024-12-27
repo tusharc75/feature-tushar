@@ -310,7 +310,6 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                   <ConfirmCancelDialog
                     open={showConfirmDialog}
                     onSave={submitForm}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

@@ -185,7 +185,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
         <Fragment>
           <CustomDialogHeader
             title={title}
-            onClose={(e, reason) => {
+            onClose={() => {
               onClose();
               if (!isEqual(ref.current.values, entryValues)) {
                 setShowConfirmDialog(true);
@@ -340,7 +340,6 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog
-              close={() => setShowConfirmDialog(false)}
               open={showConfirmDialog}
               onSave={() => {
                 setShowConfirmDialog(false);

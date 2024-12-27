@@ -224,7 +224,6 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -155,7 +155,7 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
                       ? `Create ${resources?.deviceTemplates?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${initialData?.values['templateName'] ?? ''}`}`
                   }
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
                     } else {
@@ -216,7 +216,6 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

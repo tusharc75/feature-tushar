@@ -238,7 +238,6 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

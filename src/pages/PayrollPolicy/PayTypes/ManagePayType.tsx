@@ -157,7 +157,6 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess, currency, payrollPolic
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -221,7 +221,6 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

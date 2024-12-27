@@ -187,7 +187,6 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

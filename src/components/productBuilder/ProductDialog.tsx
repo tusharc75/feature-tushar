@@ -490,7 +490,6 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

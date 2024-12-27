@@ -180,7 +180,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

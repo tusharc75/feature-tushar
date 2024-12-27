@@ -226,7 +226,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

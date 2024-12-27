@@ -194,7 +194,6 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
