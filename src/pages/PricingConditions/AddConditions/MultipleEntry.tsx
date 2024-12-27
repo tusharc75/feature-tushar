@@ -1,4 +1,5 @@
-import { Grid, Box, Container, Button, ButtonGroup, TextField, IconButton } from '@mui/material';
+import { Box, Container, Button, ButtonGroup, TextField, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Add, Delete } from '@mui/icons-material';
 
 function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, label }) {
@@ -6,29 +7,29 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
     <Box mt={3} p={2} border={1} borderColor="var(--common-border-color)">
       {discount && discount[index] && discount[index]['group'].length ? (
         <Container className="p-0">
-          <Grid container direction="row" justify="space-evenly" alignItems="center">
-            <Grid item md={12}>
+          <Grid container direction="row" justifyContent="space-evenly" alignItems="center">
+            <Grid size={{md:12}}>
               <Box>
-                <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                  <Grid item md={1}>
+                <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center">
+                  <Grid size={{md:1}}>
                     #
                   </Grid>
-                  <Grid item md={5}>
+                  <Grid size={{md:5}}>
                     {fieldLabels[0]}
                   </Grid>
-                  <Grid item md={4}>
+                  <Grid size={{md:4}}>
                     {fieldLabels[1]}
                   </Grid>
-                  <Grid item md={2}></Grid>
+                  <Grid size={{md:2}}></Grid>
                 </Grid>
               </Box>
               <Box className="p-1">
                 {discount[index]['group'].map((data, i) => (
-                  <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={i}>
-                    <Grid item md={1}>
+                  <Grid container spacing={2} direction="row" justifyContent="flex-start" alignItems="center" key={i}>
+                    <Grid size={{md:1}}>
                       {i + 1}
                     </Grid>
-                    <Grid item md={5}>
+                    <Grid size={{md:5}}>
                       <TextField
                         name={'qty_' + i}
                         variant="outlined"
@@ -44,7 +45,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         }}
                       />
                     </Grid>
-                    <Grid item md={4}>
+                    <Grid size={{md:4}}>
                       <TextField
                         name={'rate_' + index}
                         variant="outlined"
@@ -60,7 +61,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
                         }}
                       />
                     </Grid>
-                    <Grid item md={2}>
+                    <Grid size={{md:2}}>
                       <ButtonGroup size="small" aria-label="small outlined button group">
                         <IconButton
                           size="small"
@@ -93,7 +94,7 @@ function MultipleEntry({ discount, index, setDiscount, fieldNames, fieldLabels, 
           </Grid>
         </Container>
       ) : (
-        <Grid item md={12}>
+        <Grid size={{md:12}}>
           <Button
             variant="outlined"
             color="primary"

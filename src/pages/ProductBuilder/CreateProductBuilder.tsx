@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import { useParams, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -69,7 +69,7 @@ const CreateProductBuilder = () => {
   return (
     <Box className="main-container-v1">
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -82,7 +82,7 @@ const CreateProductBuilder = () => {
             ]}
           />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}></Grid>
+        <Grid size={{md:8, sm:1, xs:2}}></Grid>
       </Grid>
       <CustomContainer>
         {initialValues ? (
@@ -91,7 +91,7 @@ const CreateProductBuilder = () => {
               <Form>
                 <Box p={1}>
                   <Grid container spacing={1}>
-                    <Grid item xs={12} sm={3}>
+                    <Grid size={{xs:12, sm:3}}>
                       <TextField
                         fullWidth
                         margin="dense"
@@ -104,7 +104,7 @@ const CreateProductBuilder = () => {
                         value={values['name']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={3}>
+                    <Grid size={{xs:12, sm:3}}>
                       <Box mt={1}>
                         <FormTypes
                           values={values}
@@ -123,7 +123,7 @@ const CreateProductBuilder = () => {
                         />
                       </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6} container justify="flex-end">
+                    <Grid size={{xs:12, sm:6}} container justifyContent="flex-end">
                       <Box ml={1}>
                         <Button
                           size="small"
@@ -152,7 +152,7 @@ const CreateProductBuilder = () => {
                 <TabPanel value={tabIndex} index={0}>
                   <Fragment>
                     <Box p={1}>
-                      <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                      <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
                             <Button
@@ -223,7 +223,7 @@ const CreateProductBuilder = () => {
                 <TabPanel value={tabIndex} index={2}>
                   <Fragment>
                     <Box p={1}>
-                      <Grid item xs={6} className="d-flex align-items-center gap-1">
+                      <Grid size={{xs:6}} className="d-flex align-items-center gap-1">
                         {permissions.isUpdate && (
                           <>
                             <Button

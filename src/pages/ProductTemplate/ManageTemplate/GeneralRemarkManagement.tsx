@@ -1,4 +1,5 @@
-import { Box, Dialog, Grid } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';

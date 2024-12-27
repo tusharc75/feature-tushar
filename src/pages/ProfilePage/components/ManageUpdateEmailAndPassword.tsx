@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -160,7 +160,7 @@ export default function ManageUpdateEmailAndPassword({
                     <Grid spacing={3} container>
                       {isUpdatePassword ? (
                         <>
-                          <Grid style={{ display: 'flex' }} item sm={10}>
+                          <Grid style={{ display: 'flex' }} size={{sm:10}}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -182,7 +182,7 @@ export default function ManageUpdateEmailAndPassword({
                             />
                           </Grid>
 
-                          <Grid item sm={10}>
+                          <Grid size={{sm:10}}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -203,7 +203,7 @@ export default function ManageUpdateEmailAndPassword({
                               helperText={errors['newPassword']}
                             />
                           </Grid>
-                          <Grid item sm={10}>
+                          <Grid size={{sm:10}}>
                             <TextField
                               fullWidth
                               margin="dense"
@@ -229,7 +229,7 @@ export default function ManageUpdateEmailAndPassword({
                         </>
                       ) : null}
                       {isUpdateEmail ? (
-                        <Grid item sm={12}>
+                        <Grid size={{sm:12}}>
                           <TextField
                             style={{ width: '400px' }}
                             fullWidth

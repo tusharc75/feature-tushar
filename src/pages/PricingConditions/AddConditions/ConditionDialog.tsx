@@ -11,7 +11,8 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, MATERIAL_TYPE, PRICING_TYPE, getUniqueCurrencies } from './../../../constants/helpers';
 import { pricingCondition } from '../../../constants/helpers';
-import { Box, Grid, TextField, InputAdornment, Chip, Badge, Select, FormControl, InputLabel, IconButton } from '@mui/material';
+import { Box, TextField, InputAdornment, Chip, Badge, Select, FormControl, InputLabel, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { result, find, startCase, isEqual, camelCase, values } from 'lodash';
@@ -19,7 +20,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import MenuItem from '@mui/material/MenuItem';
 import { Delete } from '@mui/icons-material';
 import MultipleEntry from './MultipleEntry';
-import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash';
 
 const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit }) => {
@@ -318,7 +318,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                     </div>
                     <Box marginTop={1} marginBottom={1}>
                       <Grid spacing={3} container>
-                        <Grid item xs={12} sm={6} md={6}>
+                        <Grid size={{xs:12, sm:6, md:6}}>
                           <Autocomplete
                             multiple
                             id="conditionType"
@@ -351,7 +351,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           />
                         </Grid>
                         {conditionData?.materialType !== 'competency' && (
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{xs:12, sm:6, md:6}}>
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
@@ -398,7 +398,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               (_currency, i) =>
                                 values['unit'] &&
                                 values['unit'].map((_unit, j) => (
-                                  <Grid item xs={12} sm={6} md={6} key={i + j + 1}>
+                                  <Grid size={{xs:12, sm:6, md:6}} key={i + j + 1}>
                                     <TextField
                                       id="mrp"
                                       name="mrp"
@@ -457,7 +457,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                       </div>
                       <Box marginTop={1} marginBottom={1}>
                         <Grid spacing={3} container>
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{xs:12, sm:6, md:6}}>
                             <Autocomplete
                               multiple
                               id="tags-filled"
@@ -689,7 +689,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                   <Select
@@ -712,7 +712,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               </Grid>
                               {(val.type === 'Flat' || val.type === 'Percentage') && (
                                 <Fragment>
-                                  <Grid item xs={12} sm={2} md={2}>
+                                  <Grid size={{xs:12, sm:2, md:2}}>
                                     <TextField
                                       id="amount"
                                       name="amount"
@@ -727,7 +727,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
                                     />
                                   </Grid>
-                                  <Grid item xs={12} sm={2} md={2}>
+                                  <Grid size={{xs:12, sm:2, md:2}}>
                                     <TextField
                                       id="minTransAmount"
                                       name="minTransAmount"
@@ -761,11 +761,11 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               )}
                               <Grid
                                 container
-                                justify="flex-end"
-                                item
-                                xs={12}
-                                sm={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
-                                md={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
+                                justifyContent="flex-end"
+                                size={{
+                                xs:12,
+                                sm:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10,
+                                md:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}}
                               >
                                 <IconButton
                                   size="small"
@@ -782,7 +782,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             </Grid>
                             {(val.type === 'Group Flat' || val.type === 'Group Percentage') && (
                               <Grid container>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                   <MultipleEntry
                                     discount={discount}
                                     index={index}
@@ -830,7 +830,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <TextField
                                   id="label"
                                   name="label"
@@ -844,7 +844,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeChargeValue(index, 'label', e.target.value)}
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                   <Select
@@ -863,7 +863,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <TextField
                                   id="amount"
                                   name="amount"
@@ -878,7 +878,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
                                 />
                               </Grid>
-                              <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                              <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
                                 <IconButton
                                   size="small"
                                   aria-label="delete"
@@ -928,7 +928,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <Badge badgeContent={index + 1} color="primary"></Badge>
                           <Box p={2} border={1} borderColor="var(--common-border-color)">
                             <Grid spacing={3} container>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <TextField
                                   id="taxCode"
                                   name="taxCode"
@@ -942,7 +942,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeTaxValue(index, 'taxCode', e.target.value)}
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <FormControl fullWidth margin="dense" size="small" variant="outlined">
                                   <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                   <Select
@@ -960,7 +960,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              <Grid item xs={12} sm={2} md={2}>
+                              <Grid size={{xs:12, sm:2, md:2}}>
                                 <TextField
                                   id="amount"
                                   name="amount"
@@ -975,7 +975,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
                                 />
                               </Grid>
-                              <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                              <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
                                 <IconButton
                                   size="small"
                                   aria-label="delete"

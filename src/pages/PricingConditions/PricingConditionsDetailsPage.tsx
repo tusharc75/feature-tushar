@@ -1,15 +1,14 @@
 import React, { useRef, useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, Chip, IconButton, Tooltip, InputAdornment } from '@mui/material';
+import { Box, Button, Chip, IconButton, InputAdornment } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import {
   getObjKeys,
   yupSchema,
-  getObjKeysWithValues,
   pricingCondition,
   setFieldsInAscendingOrder,
   getUniqueCurrencies,
-  formFieldNames
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -267,7 +266,7 @@ function PricingConditionsDetailsPage() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -302,12 +301,12 @@ function PricingConditionsDetailsPage() {
             {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Form>
                 <Grid container>
-                  <Grid item md={6} sm={6} xs={6}>
+                  <Grid size={{md:6, sm:6, xs:6}}>
                     <h2 className="form-label-style" style={{ borderBottom: 'none', paddingLeft: '12px' }}>
                       * Required Fields
                     </h2>
                   </Grid>
-                  <Grid container justify="flex-end" item md={6} sm={6} xs={6}>
+                  <Grid container justifyContent="flex-end" size={{md:6, sm:6, xs:6}}>
                     <Box ml={1}>
                       <CustomButton
                         loading={loading}
@@ -355,7 +354,7 @@ function PricingConditionsDetailsPage() {
                             <Grid spacing={3} container>
                               {form.sectionFields.map((field, index2) =>
                                 field.fieldName === 'product' ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={4} md={4}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:4, md:4}}>
                                     <FormTypes
                                       {...field}
                                       multiple
@@ -377,7 +376,7 @@ function PricingConditionsDetailsPage() {
                                     />
                                   </Grid>
                                 ) : (
-                                  <Grid key={index2} item xs={12} sm={4} md={4}>
+                                  <Grid key={index2} size={{xs:12, sm:4, md:4}}>
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -402,7 +401,7 @@ function PricingConditionsDetailsPage() {
                               )}
                               {index === formsData.length - 1 && (
                                 <Fragment>
-                                  <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                  <Grid size={{xs:12, sm:4, md:4}} className="pt-1">
                                     <Autocomplete
                                       multiple
                                       freeSolo
@@ -433,7 +432,7 @@ function PricingConditionsDetailsPage() {
                                       )}
                                     />
                                   </Grid>
-                                  <Grid item xs={12} sm={4} md={4} className="pt-1">
+                                  <Grid size={{xs:12, sm:4, md:4}} className="pt-1">
                                     <Autocomplete
                                       multiple
                                       id="tags-filled"
@@ -485,7 +484,7 @@ function PricingConditionsDetailsPage() {
                                 (_currency, i) =>
                                   values['units'] &&
                                   values['units'].map((_unit, j) => (
-                                    <Grid item xs={12} sm={3} md={3}>
+                                    <Grid size={{xs:12, sm:3, md:3}}>
                                       <TextField
                                         id="mrp"
                                         name="mrp"
@@ -534,7 +533,7 @@ function PricingConditionsDetailsPage() {
                         </div>
                         <Box marginTop={1} marginBottom={1}>
                           <Grid spacing={3} container>
-                            <Grid item xs={12} sm={4} md={4}>
+                            <Grid size={{xs:12, sm:4, md:4}}>
                               <Autocomplete
                                 multiple
                                 id="tags-filled"
@@ -655,7 +654,7 @@ function PricingConditionsDetailsPage() {
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Discount Type</InputLabel>
                                     <Select
@@ -678,7 +677,7 @@ function PricingConditionsDetailsPage() {
                                 </Grid>
                                 {(val.type === 'Flat' || val.type === 'Percentage') && (
                                   <Fragment>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{xs:12, sm:2, md:2}}>
                                       <TextField
                                         id="amount"
                                         name="amount"
@@ -692,7 +691,7 @@ function PricingConditionsDetailsPage() {
                                         onChange={(e) => handleChangeValue(index, 'amount', parseFloat(e.target.value))}
                                       />
                                     </Grid>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{xs:12, sm:2, md:2}}>
                                       <TextField
                                         id="minTransAmount"
                                         name="minTransAmount"
@@ -706,7 +705,7 @@ function PricingConditionsDetailsPage() {
                                         onChange={(e) => handleChangeValue(index, 'minTransAmount', parseFloat(e.target.value))}
                                       />
                                     </Grid>
-                                    <Grid item xs={12} sm={2} md={2}>
+                                    <Grid size={{xs:12, sm:2, md:2}}>
                                       <TextField
                                         id="maxDiscount"
                                         name="maxDiscount"
@@ -724,11 +723,12 @@ function PricingConditionsDetailsPage() {
                                 )}
                                 <Grid
                                   container
-                                  justify="flex-end"
-                                  item
-                                  xs={12}
-                                  sm={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
-                                  md={val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10}
+                                  justifyContent="flex-end"
+                                  size={{
+                                  xs:12,
+                                  sm:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10,
+                                  md:val.type === 'Flat' || val.type === 'Percentage' ? 4 : 10
+                                  }}
                                 >
                                   <IconButton
                                     size="small"
@@ -745,7 +745,7 @@ function PricingConditionsDetailsPage() {
                               </Grid>
                               {(val.type === 'Group Flat' || val.type === 'Group Percentage') && (
                                 <Grid container>
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{xs:12, sm:6, md:6}}>
                                     <MultipleEntry
                                       discount={discount}
                                       index={index}
@@ -793,7 +793,7 @@ function PricingConditionsDetailsPage() {
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <TextField
                                     id="label"
                                     name="label"
@@ -807,7 +807,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeChargeValue(index, 'label', e.target.value)}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Charge Type</InputLabel>
                                     <Select
@@ -826,7 +826,7 @@ function PricingConditionsDetailsPage() {
                                     </Select>
                                   </FormControl>
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <TextField
                                     id="amount"
                                     name="amount"
@@ -840,7 +840,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeChargeValue(index, 'amount', parseFloat(e.target.value))}
                                   />
                                 </Grid>
-                                <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                                <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
                                   <IconButton
                                     size="small"
                                     aria-label="delete"
@@ -890,7 +890,7 @@ function PricingConditionsDetailsPage() {
                             <Badge badgeContent={index + 1} color="primary"></Badge>
                             <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <TextField
                                     id="taxCode"
                                     name="taxCode"
@@ -904,7 +904,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeTaxValue(index, 'taxCode', e.target.value)}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <FormControl fullWidth margin="dense" variant="outlined" size="small">
                                     <InputLabel id="demo-simple-select-outlined-label">Tax Type</InputLabel>
                                     <Select
@@ -923,7 +923,7 @@ function PricingConditionsDetailsPage() {
                                     </Select>
                                   </FormControl>
                                 </Grid>
-                                <Grid item xs={12} sm={2} md={2}>
+                                <Grid size={{xs:12, sm:2, md:2}}>
                                   <TextField
                                     id="amount"
                                     name="amount"
@@ -937,7 +937,7 @@ function PricingConditionsDetailsPage() {
                                     onChange={(e) => handleChangeTaxValue(index, 'amount', parseFloat(e.target.value))}
                                   />
                                 </Grid>
-                                <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+                                <Grid container justifyContent="flex-end" size={{xs:12, sm:6, md:6}}>
                                   <IconButton
                                     size="small"
                                     aria-label="delete"

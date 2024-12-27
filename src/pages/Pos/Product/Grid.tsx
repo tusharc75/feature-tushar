@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
+import { gridLoadingTimeout } from 'src/constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { MdAddShoppingCart } from 'react-icons/md';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';

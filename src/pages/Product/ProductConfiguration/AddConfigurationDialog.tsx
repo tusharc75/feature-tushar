@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dialog, Box, Button, Grid, CircularProgress } from '@mui/material';
-
+import { Dialog, Box, Button, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -95,7 +95,7 @@ const AddConfigurationDialog = (props) => {
         <Box py={2}>
           <Grid container spacing={2}>
             {fields.map((field) => (
-              <Grid item xs={12} sm={6} key={field.fieldName}>
+              <Grid size={{xs:12, sm:6}} key={field.fieldName}>
                 <FormTypes
                   fieldData={field}
                   values={formData.values}
@@ -114,7 +114,7 @@ const AddConfigurationDialog = (props) => {
                 />
               </Grid>
             ))}
-            <Grid item xs={12}>
+            <Grid size={{xs:12}}>
               <FormTypes
                 values={formData}
                 errors={{}}

@@ -19,7 +19,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
 import { customerAccount, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CreateProjectSales from './CreateProjectSales';

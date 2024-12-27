@@ -1,9 +1,9 @@
-import { Box, Button, Dialog, Grid, TextField, Typography } from '@mui/material';
+import { Box, Button, Dialog, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isEqual } from 'lodash';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -74,12 +74,12 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
         <Box marginY={2}>
           <Grid spacing={3} container>
             <>
-              <Grid item xs={6} sm={6} md={6}>
+              <Grid size={{xs:6, sm:6, md:6}}>
                 <Typography className="m-2 text-center" variant="subtitle2">
                   {resources?.warehouse?.titleSingular}
                 </Typography>
               </Grid>
-              <Grid item xs={6} sm={6} md={6}>
+              <Grid size={{xs:6, sm:6, md:6}}>
                 <Typography className="m-2 text-center" variant="subtitle2">
                   Quantity
                 </Typography>
@@ -87,10 +87,10 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
               {inventoryData &&
                 inventoryData.map((_element, index) => (
                   <>
-                    <Grid key={index} item xs={6} sm={6} md={6}>
+                    <Grid key={index} size={{xs:6, sm:6, md:6}}>
                       <Typography className="m-2 text-center">{_element?.warehouse?.name}</Typography>
                     </Grid>
-                    <Grid key={index} item xs={6} sm={6} md={6}>
+                    <Grid key={index} size={{xs:6, sm:6, md:6}}>
                       <TextField
                         key={index}
                         id="outlined-multiline-static"

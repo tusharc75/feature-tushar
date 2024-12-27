@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, TextField } from '@mui/material';
+import { Box, Button, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -8,7 +9,6 @@ import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
 import Autocomplete from '@mui/material/Autocomplete';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
@@ -62,7 +62,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
       <CustomDialogHeader title={`Serial Numbers - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <Grid container spacing={3}>
-          <Grid item xs={6} sm={6}>
+          <Grid size={{xs:6, sm:6}}>
             {warehouseOptions && (
               <Autocomplete
                 options={warehouseOptions}
@@ -86,7 +86,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
               />
             )}
           </Grid>
-          <Grid item xs={6} sm={6}>
+          <Grid size={{xs:6, sm:6}}>
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
               {serialNumberCount ? (
                 <Box>

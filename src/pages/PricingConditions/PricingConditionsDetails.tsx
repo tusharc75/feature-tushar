@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -104,7 +105,7 @@ const PricingConditionsDetails = () => {
       <Box className={`detail-container-v1`}>
         {!fields.length ? (
           <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : (
           <>

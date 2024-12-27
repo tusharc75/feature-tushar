@@ -26,7 +26,7 @@ const SendEmail = ({
     <>
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
-          <Box display="flex" flexWrap={'wrap'} gridGap={8}>
+          <Box display="flex" flexWrap={'wrap'} gap={8}>
             {!hideSummary && (
               <Button
                 onClick={() => {

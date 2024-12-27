@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -134,7 +135,7 @@ const ProductCategoryDetailPage = () => {
           <DetailsPageHeader mainPoints={mainPoints} />
           {loading || !productCategoryFields.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={productCategoryData} fields={productCategoryFields} />

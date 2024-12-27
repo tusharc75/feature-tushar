@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField, Typography } from '@mui/material';
+import { Box, Button, Dialog, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import React, { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -84,7 +85,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                   <Grid container spacing={2}>
                     {selectedSteps[item._id]?.map((step, index) => {
                       return (
-                        <Grid item xs={6} key={index}>
+                        <Grid size={{xs:6}} key={index}>
                           <Box>
                             <TextField
                               margin="dense"

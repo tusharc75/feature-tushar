@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Grid, Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button, Theme } from '@mui/material';
+import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Skeleton } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
@@ -509,13 +510,13 @@ const CustomerAccounts = (props) => {
                         tabIndex={i}
                         label={
                           <Grid container alignItems="center">
-                            <Grid item xs={8}>
+                            <Grid size={{xs:8}}>
                               <Box component={'h4'} fontWeight={'bold'} className="title_container">
                                 <AccountCircleIcon />
                                 <span className="tabs_title">{c.accountName}</span>
                               </Box>
                             </Grid>
-                            <Grid item xs={4} container justify="flex-end">
+                            <Grid size={{xs:4}} container justifyContent="flex-end">
                               <IconButton
                                 title={`Remove Account: ${c?.accountName}`}
                                 aria-haspopup="true"
@@ -543,7 +544,7 @@ const CustomerAccounts = (props) => {
                         <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
                           <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                             <Grid container>
-                              <Grid item xs={8}>
+                              <Grid size={{xs:8}}>
                                 <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                                   <IconButton size="small" onClick={(e) => e.preventDefault()}>
                                     {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -555,7 +556,7 @@ const CustomerAccounts = (props) => {
                                   </Box>
                                 </Box>
                               </Grid>
-                              <Grid item xs={4} container justify="flex-end" alignItems="center">
+                              <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
                                 <Typography variant="subtitle2">
                                   {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                                     <IconButton

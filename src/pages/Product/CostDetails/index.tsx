@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, IconButton, Paper, Typography } from '@mui/material';
+import { useState, useEffect, useContext } from 'react';
+import { Box, IconButton, Typography } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import BoxWithBorder from '../../../components/BoxWithBorder';
 import { Skeleton } from '@mui/material';
@@ -9,7 +9,6 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
