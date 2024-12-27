@@ -1,12 +1,10 @@
 import Box from '@mui/material/Box/Box';
-import { Button } from '@mui/material';
 import { sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import PreviewDownload from 'src/components/PreviewDownload';
-import routes from 'src/components/Helpers/Routes';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SendEmail = ({
   quotationData,
@@ -28,32 +26,28 @@ const SendEmail = ({
         <Box display="flex" alignItems="center">
           <Box display="flex" flexWrap={'wrap'} gap={8}>
             {!hideSummary && (
-              <Button
+              <ThemeButton
                 onClick={() => {
                   setShowQuotationSummaryDialog(true);
                 }}
-                variant="outlined"
-                size="small"
                 startIcon={<GiReceiveMoney />}
-                color="primary"
+                mobileTooltip={`Summary`}
+                iconForMobile={<GiReceiveMoney size={20} />}
               >
                 Summary
-              </Button>
+              </ThemeButton>
             )}
             {!hideVersions && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={() => {
                   setShowAllVersionStatus(true);
                 }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                startIcon={<VscVersions />}
+                mobileTooltip={`Version : ${currentVersion}`}
+                iconForMobile={<VscVersions size={20} />}
               >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-              </Button>
+                {`Version : ${currentVersion}`}
+              </ThemeButton>
             )}
             <PreviewDownload
               fileName={`${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`}
