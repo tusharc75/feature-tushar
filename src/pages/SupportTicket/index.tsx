@@ -35,11 +35,11 @@ const SupportTicket = () => {
 
   const types = [
     {
-      key: `My ${resources?.supportTicket?.titlePlural}`,
+      key: `My Support Tickets`,
       value: 1
     },
     {
-      key: `All ${resources?.supportTicket?.titlePlural}`,
+      key: `All Support Tickets`,
       value: 2
     }
   ];
@@ -243,10 +243,10 @@ const SupportTicket = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resources?.supportTicket?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ title: 'Support Tickets' }]} />
         <ImportExportLinks
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
-          module={resources?.supportTicket?.titlePlural}
+          module={'Support Tickets'}
           api={routes.supportTicket.path}
           afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
@@ -299,9 +299,9 @@ const SupportTicket = () => {
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${
             deleteRecord
-              ? `${resources?.supportTicket?.titleSingular?.toLowerCase()} :
+              ? `support ticket :
             ${deleteRecord?.supportTicketNumber || ''}`
-              : `selected ${resources?.supportTicket?.titlePlural?.toLowerCase()}`
+              : `selected support tickets`
           } ?`}
           onClose={() => {
             setDeleteRecord(null);

@@ -1,9 +1,8 @@
+import dayjs from 'dayjs';
 import moment from 'moment';
-import { momentLocalizer } from 'react-big-calendar';
+import { dayjsLocalizer } from 'react-big-calendar';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomCalendar from 'src/components/CustomCalendar';
-
-const localizer = momentLocalizer(moment);
 
 type Props = {
   activities: any[];
@@ -18,6 +17,8 @@ const formats = {
 
 const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
   const mobileView = isMobile && !isTablet;
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <div className="relative">
