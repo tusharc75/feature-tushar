@@ -107,7 +107,7 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
           break;
         }
         case 'none': {
-          buttonProps.className += ``;
+          buttonProps.className += ` no-shadow`;
           buttonProps.variant = 'contained';
           break;
         }
