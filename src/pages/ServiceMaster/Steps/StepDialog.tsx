@@ -379,14 +379,15 @@ export default function StepDialog({
                       </Grid>
                       <Grid xs={12} md={4} sm={4} item>
                         <TextField
-                         slotProps={{
-                          input: {
-                            startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">{`${
+                                  values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
                                 }`}</InputAdornment>
-                            )
-                          },
-                        }}
+                              )
+                            }
+                          }}
                           margin="dense"
                           size="small"
                           type="number"
@@ -406,14 +407,15 @@ export default function StepDialog({
                       </Grid>
                       <Grid xs={12} md={4} sm={4} item>
                         <TextField
-                         slotProps={{
-                          input: {
-                            startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">{`${
+                                  values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
                                 }`}</InputAdornment>
-                            )
-                          },
-                        }}
+                              )
+                            }
+                          }}
                           margin="dense"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
@@ -1072,7 +1074,14 @@ export default function StepDialog({
                                   disabled={notEditable}
                                   value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
                                   getOptionLabel={(option) => option?.optionLabel}
-                                  renderOption={(option) => option?.optionLabel}
+                                  renderOption={(props, option, state, ownerState) => {
+                                    const { key, ...optionProps } = props;
+                                    return (
+                                      <Box key={key} component="li" {...optionProps}>
+                                        {ownerState.getOptionLabel(option)}
+                                      </Box>
+                                    );
+                                  }}
                                   // isOptionEqualToValue={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                   onChange={(_, newVal: any) => {
                                     setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');

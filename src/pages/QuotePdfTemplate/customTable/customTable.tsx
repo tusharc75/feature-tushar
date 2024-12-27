@@ -70,7 +70,14 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                               return newTable;
                             });
                           }}
-                          renderOption={(option) => option.resourceLabel}
+                          renderOption={(props, option, state, ownerState) => {
+                            const { key, ...optionProps } = props;
+                            return (
+                              <Box component="li" key={key} {...optionProps}>
+                                {ownerState.getOptionLabel(option)}
+                              </Box>
+                            );
+                          }}
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -112,7 +119,14 @@ export default function customTable({ id, classes, entity, table, setTable }) {
                                     return newTable;
                                   });
                                 }}
-                                renderOption={(option) => option.label}
+                                renderOption={(props, option, state, ownerState) => {
+                                  const { key, ...optionProps } = props;
+                                  return (
+                                    <Box component="li" key={key} {...optionProps}>
+                                      {ownerState.getOptionLabel(option)}
+                                    </Box>
+                                  );
+                                }}
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}

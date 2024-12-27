@@ -606,7 +606,14 @@ const RoleDetailsPage = () => {
                       options={Object.values(ROLE_TIER)}
                       autoHighlight
                       disableClearable
-                      renderOption={(option) => option || ''}
+                      renderOption={(props, option, state, ownerState) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                          <Box component="li" key={key} {...optionProps}>
+                            {ownerState.getOptionLabel(option)}
+                          </Box>
+                        );
+                      }}
                       onChange={(event: any, newValue: any) => {
                         setValues({ ...values, tier: newValue });
                       }}

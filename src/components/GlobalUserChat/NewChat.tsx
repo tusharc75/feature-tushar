@@ -30,9 +30,9 @@ const NewChat = (props) => {
           chatTitle: data.group
             ? data.group
             : data.users
-              .filter((d) => d._id !== userId)
-              .map((_d) => `${_d.firstName} ${_d.lastName}`)
-              .join(', ')
+                .filter((d) => d._id !== userId)
+                .map((_d) => `${_d.firstName} ${_d.lastName}`)
+                .join(', ')
         };
         if (setChatOpen) {
           setChatOpen(true);
@@ -56,15 +56,18 @@ const NewChat = (props) => {
           multiple
           size="small"
           getOptionLabel={(option) => option.name}
-          renderOption={(option) => (
-            <Fragment>
-              <Avatar src={option.avatar}>
-                <Image style={{ fontSize: 24 }} />
-              </Avatar>
-              <Box component="span" mr={2} />
-              {option.name}
-            </Fragment>
-          )}
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                <Avatar src={option.avatar}>
+                  <Image style={{ fontSize: 24 }} />
+                </Avatar>
+                <Box component="span" mr={2} />
+                {ownerState.getOptionLabel(option)}
+              </Box>
+            );
+          }}
           value={newUsers}
           onChange={(_, newVal) => setNewUsers(newVal)}
           renderInput={(params) => (

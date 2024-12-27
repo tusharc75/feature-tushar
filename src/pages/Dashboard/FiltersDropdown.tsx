@@ -120,23 +120,26 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             setSelectedKpiFilter(newValue || null);
           }}
           getOptionLabel={(option) => option?.title}
-          renderOption={(option) => (
-            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-              <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
-              <Box>
-                <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton size="small" style={{ marginRight: '20px' }}>
-                    <AiFillEdit />
-                  </IconButton>
-                </HtmlTooltip>
-                <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                    <RiDeleteBin6Fill />
-                  </IconButton>
-                </HtmlTooltip>
+          renderOption={(props, option, state, ownerState) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                <span style={{ width: 'calc(100% - 25px)' }}>{ownerState.getOptionLabel(option)}</span>
+                <Box className='flex gap-1'> 
+                  <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small">
+                      <AiFillEdit />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                      <RiDeleteBin6Fill />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
               </Box>
-            </Box>
-          )}
+            );
+          }}
           id="controllable-states-demo"
           options={kpiFilters}
           renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select a Filter Set" variant="outlined" />}

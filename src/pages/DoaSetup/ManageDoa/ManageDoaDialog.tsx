@@ -114,11 +114,11 @@ const DoaDialog = ({
   const fetchDoa = useCallback(() => {
     doa?.length > 0
       ? setUsers(
-        doa.map((d) => ({
-          ...d,
-          user: doaApproveType === 'User' ? d?.user?.map((e) => e?._id)?.toString() : d?.role?.map((e) => e?._id)?.toString()
-        }))
-      )
+          doa.map((d) => ({
+            ...d,
+            user: doaApproveType === 'User' ? d?.user?.map((e) => e?._id)?.toString() : d?.role?.map((e) => e?._id)?.toString()
+          }))
+        )
       : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0, disable: false }]);
   }, []);
 
@@ -136,9 +136,9 @@ const DoaDialog = ({
       .then(({ data: { data, count } }) => {
         const rows = data.length
           ? data.map((role: any) => ({
-            id: role._id,
-            name: role.name
-          }))
+              id: role._id,
+              name: role.name
+            }))
           : [];
 
         setRoleList(rows);
@@ -236,20 +236,20 @@ const DoaDialog = ({
       if (newFilter === 'Sequence') {
         doa.length > 0
           ? setUsers(
-            doa.map((d) => ({
-              ...d,
-              user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
-            }))
-          )
+              doa.map((d) => ({
+                ...d,
+                user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
+              }))
+            )
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       } else {
         doa.length > 0
           ? setUsers(
-            doa.map((d) => ({
-              ...d,
-              user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
-            }))
-          )
+              doa.map((d) => ({
+                ...d,
+                user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
+              }))
+            )
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       }
       formikRef.current?.resetForm();
@@ -319,7 +319,7 @@ const DoaDialog = ({
 
             <>
               <div className={classes.doaUsersStyle}>
-                <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
+                <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => {}}>
                   {({ values }) => (
                     <>
                       <div style={{ minHeight: fullScreen || isMobile || isTablet ? 'calc(100vh - 110px)' : '' }}>
@@ -352,11 +352,11 @@ const DoaDialog = ({
                                 {selectedType === 2 && (
                                   <>
                                     <TextField
-                                     slotProps={{
-                                      input: {
-                                        startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                      },
-                                    }}
+                                      slotProps={{
+                                        input: {
+                                          startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                        }
+                                      }}
                                       variant="outlined"
                                       type="text"
                                       size="small"
@@ -401,9 +401,14 @@ const DoaDialog = ({
                                       renderInput={(params) => (
                                         <TextField {...params} fullWidth variant="outlined" name={'currency'} label={'Currency'} />
                                       )}
-                                      renderOption={(option) => {
+                                      renderOption={(props, option) => {
                                         const { currencyCode, currencyName, symbolNative } = option;
-                                        return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                                        const { key, ...optionProps } = props;
+                                        return (
+                                          <Box key={key} component="li" {...optionProps}>
+                                            {`${currencyCode} - ${currencyName} - (${symbolNative})`}
+                                          </Box>
+                                        );
                                       }}
                                     />
                                   </div>
@@ -455,18 +460,18 @@ const DoaDialog = ({
                                                   doaApprove == 0
                                                     ? selectedType === 2
                                                       ? userList?.filter(
-                                                        (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                      )
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
                                                       : tempUserList?.filter(
-                                                        (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                      )
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
                                                     : selectedType === 2
                                                       ? roleList?.filter(
-                                                        (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                      )
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
                                                       : roleList?.filter(
-                                                        (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                      )
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
                                                 }
                                                 getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
                                                 onChange={(event, newValue) => {
@@ -481,7 +486,14 @@ const DoaDialog = ({
                                                     ? userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
                                                     : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
                                                 }
-                                                renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
+                                                renderOption={(props, option) => {
+                                                  const { key, ...optionProps } = props;
+                                                  return (
+                                                    <Box key={key} component="li" {...optionProps}>
+                                                      {option?.name}
+                                                    </Box>
+                                                  );
+                                                }}
                                                 renderInput={(params) => (
                                                   <TextField
                                                     {...params}
@@ -504,7 +516,7 @@ const DoaDialog = ({
                                                       startAdornment: (
                                                         <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
                                                       )
-                                                    },
+                                                    }
                                                   }}
                                                   // startAdornment={
                                                   //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
