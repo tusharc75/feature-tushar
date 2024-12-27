@@ -3,19 +3,15 @@ import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from
 import { Line } from 'react-chartjs-2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import DurationFilter from 'src/components/DurationFilter';
 
 const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [timeFrame, setTimeFrame] = useState<any>('1-year');
   const [trackingTime, setTrackingTime] = useState({
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
+      from: new Date(dayjs().subtract(1, 'year').toDate()),
       to: new Date()
-    }
   });
   const [userTrackingData, setUserTrackingData] = useState({
     labels: [],
@@ -27,48 +23,6 @@ const UserSession = ({ id }) => {
     userTimeTracker();
   }, [trackingTime]);
 
-  useEffect(() => {
-    switch (timeFrame) {
-      case '1-month':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'month').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '3-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('3', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '6-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('6', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '1-year':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'year').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }, [timeFrame]);
-
   const convertDate = (str) => {
     let date = new Date(str),
       month = ('0' + (date.getMonth() + 1)).slice(-2),
@@ -78,15 +32,15 @@ const UserSession = ({ id }) => {
 
   const userTimeTracker = async () => {
     setUserTrackingDataLoading(true);
-    const parsedFromTime = convertDate(trackingTime.between.from);
-    const parsedToTime = convertDate(trackingTime.between.to);
-    const { from, to } = trackingTime.between;
-
+    const parsedFromTime = convertDate(trackingTime.from);
+    const parsedToTime = convertDate(trackingTime.to);
+    const { from, to } = trackingTime;
+    
     const hour = 1000 * 60 * 60;
     const day = 1000 * 60 * 60 * 24;
     // const month = 1000 * 60 * 60 * 24 * 30
     // const year = 1000 * 60 * 60 * 24 * 30 * 12
-    const dateDiff = moment(to).diff(from, 'days');
+    const dateDiff = dayjs(to).diff(dayjs(from), 'days');
     const time = dateDiff > 90 ? day : hour;
     axiosInstance()
       .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)
@@ -141,55 +95,7 @@ const UserSession = ({ id }) => {
         </Grid>
       </Box>
       <Box padding="10px">
-        <Grid item xs={12} sm={12} md={12}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth size="small" variant="outlined">
-                <InputLabel id="duration">Select Duration</InputLabel>
-                <Select
-                  labelId="duration"
-                  id="time-duration"
-                  value={timeFrame}
-                  onChange={(e) => setTimeFrame(e.target.value)}
-                  label="Select Duration"
-                  size="small"
-                >
-                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                  <MenuItem value={'custom'}>Custom</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6} sm={4}>
-              <CustomDatePicker
-                disabled={timeFrame !== 'custom'}
-                fullWidth
-                size="small"
-                maxDate={trackingTime.between.to}
-                label="From"
-                value={trackingTime.between.from}
-                onChange={(date) => {
-                  setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                }}
-              />
-            </Grid>
-            <Grid item xs={6} sm={4}>
-              <CustomDatePicker
-                disabled={timeFrame !== 'custom'}
-                fullWidth
-                size="small"
-                minDate={trackingTime.between.from}
-                label="To"
-                value={trackingTime.between.to}
-                onChange={(date) => {
-                  setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                }}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
+        <DurationFilter label={''} defaultTimeFrame="1-year" duration={trackingTime} setDuration={setTrackingTime} showAll={true} />
       </Box>
       <Typography className="subtitle1 m-2">
         {userTrackingDataLoading ? (
