@@ -227,7 +227,6 @@ const ServiceOrderDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -394,7 +393,7 @@ const ServiceOrderDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.customerAccount} ?`}
+          message={`Are you sure you want to delete ${resources?.fieldServiceOrder?.titleSingular?.toLowerCase()} : ${serviceOrderData?.fieldServiceOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
