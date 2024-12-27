@@ -431,7 +431,6 @@ const RentalManagementDetailsPage = () => {
                     </ThemeButton>
                   )}
                   <ThemeButton
-                    className={`btn-outline-v1 ${(isMobile || isTablet) && 'no-hover'}`}
                     id={'rental-management-download-button'}
                     type="button"
                     size="small"

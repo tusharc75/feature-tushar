@@ -312,31 +312,27 @@ const RepairOrderDetails = () => {
                   repairOrderData?.material
                     ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
                     ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
-                    <Button
-                      size="small"
+                    <ThemeButton
                       onClick={() => {
                         setShowTransferAssetDialog(true);
                       }}
-                      variant={'contained'}
-                      className={'btn-outline-v1'}
+                      mobileTooltip={`Create ${resources?.transferAsset?.titleSingular}`}
+                      iconForMobile={false}
                     >
                       {`Create ${resources?.transferAsset?.titleSingular}`}
-                    </Button>
+                    </ThemeButton>
                   )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
                   <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
-                    <span>
-                      <Button
-                        variant={'contained'}
-                        className={'btn-outline-v1'}
-                        onClick={() =>
-                          updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
-                        }
-                        disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
-                      >
-                        {'Re-Open'}
-                      </Button>
-                    </span>
+                    <ThemeButton
+                      onClick={() =>
+                        updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
+                      }
+                      disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
+                      iconForMobile={false}
+                    >
+                      {'Re-Open'}
+                    </ThemeButton>
                   </HtmlTooltip>
                 )}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
@@ -373,7 +369,10 @@ const RepairOrderDetails = () => {
                       quotationVersionData?.status
                     ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
-                    <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                    <ThemeButton
+                      iconForMobile={<EditIcon />}
+                      onClick={() => setOpenUpdateDialog(true)}
+                      mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}
