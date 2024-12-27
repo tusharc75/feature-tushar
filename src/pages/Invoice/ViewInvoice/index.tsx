@@ -171,14 +171,15 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -210,14 +211,15 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+      _subRow.detail = `${
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : _subRow?.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
