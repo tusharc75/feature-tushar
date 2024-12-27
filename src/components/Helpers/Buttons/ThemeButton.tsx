@@ -104,6 +104,7 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
         }
         case 'theme': {
           buttonProps.className += ` btn-theme-outline-v1  ripple`;
+          buttonProps.variant = isMobile && iconForMobile ? 'text' : 'outlined';
           break;
         }
         case 'none': {
