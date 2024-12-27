@@ -11,6 +11,7 @@ import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import {
   PRODUCT_SERIAL_NUMBER_STATUS,
+  displayDate,
   displayDateTime,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -159,8 +160,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: moment(duration?.from).format('MM/DD/YYYY'),
-          to: moment(duration?.to).format('MM/DD/YYYY')
+          from: displayDate(duration?.from),
+          to: displayDate(duration?.to)
         }
       });
     }

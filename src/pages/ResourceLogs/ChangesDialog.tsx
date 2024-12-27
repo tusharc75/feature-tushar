@@ -1,5 +1,4 @@
 import { Dialog } from '@mui/material';
-import moment from 'moment';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
