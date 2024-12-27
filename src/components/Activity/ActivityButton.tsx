@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Grid from '@mui/material/Grid';
 import { Fragment, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
@@ -27,9 +27,8 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
     <Fragment>
       <HideWhenOffline>
         <ThemeButton
-          mobileTooltip="Workspace"
           borderColor="none"
-          endIcon={<ArrowForward />}
+          endIcon={<ArrowForwardIcon />}
           id="collaborator-button"
           onClick={() => setActivityShow(!showActivity)}
           color="primary"
