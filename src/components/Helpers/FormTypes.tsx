@@ -7,7 +7,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-
+import Grid from '@mui/material/Grid2';
 import {
   Avatar,
   Box,
@@ -20,7 +20,6 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  Grid,
   IconButton,
   ImageList,
   ImageListItem,
@@ -105,7 +104,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
   <div className="form-types">
     {isTooltip && info ? (
       <Grid container spacing={1}>
-        <Grid item style={{ flexGrow: 1 }}>
+        <Grid style={{ flexGrow: 1 }}>
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -115,7 +114,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
             </Box>
           )}
         </Grid>
-        <Grid item>
+        <Grid>
           <Box style={{ marginTop: '7px' }}>
             <HtmlTooltip title={<Typography>{info}</Typography>}>
               <InfoIcon color="disabled" />
@@ -136,7 +135,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       </>
     ) : (
       <Grid container spacing={1} alignItems="center">
-        <Grid item xs={12} sm={12} md={12}>
+        <Grid size={{ xs: 12, sm: 12, md: 12 }} >
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -981,12 +980,12 @@ const FormTypes = (props) => {
             input: {
               inputComponent: CustomFormat as any,
               inputProps: {
-              allowNegative: false,
-              onValueChange: (values) => {
-                handleChange(name, values.value);
-              },
-              selectedCurrencyCode: selectedCurrencyCode
-            }
+                allowNegative: false,
+                onValueChange: (values) => {
+                  handleChange(name, values.value);
+                },
+                selectedCurrencyCode: selectedCurrencyCode
+              }
             },
           }}
         />
@@ -1268,7 +1267,7 @@ const FormTypes = (props) => {
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
           <Grid container spacing={1}>
-            <Grid item style={{ flexGrow: 1 }}>
+            <Grid style={{ flexGrow: 1 }}>
               <Autocomplete
                 {...rest}
                 limitTags={2}
@@ -1437,7 +1436,7 @@ const FormTypes = (props) => {
       fieldData?.displayUnits &&
       Array.isArray(fieldData?.displayUnits) &&
       fieldData?.displayUnits.map((_unit, i) => (
-        <Grid key={_unit} item xs={12} sm={6} md={6}>
+        <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }} >
           <Box display="flex">
             <Box flexGrow={1}>
               <InfoLabel
@@ -1568,7 +1567,7 @@ const FormTypes = (props) => {
         fieldData?.displayCurrency?.map((_currency, i) =>
           fieldData?.isConverter && fieldData?.displayUnits?.length ? (
             fieldData?.displayUnits?.map((_unit, j) => (
-              <Grid key={_unit} item xs={12} sm={6} md={6}>
+              <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }}>
                 <Box display="flex">
                   <Box flexGrow={1}>
                     <InfoLabel
@@ -1588,8 +1587,8 @@ const FormTypes = (props) => {
                         value={
                           values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                             ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString(undefined, {
-                                maximumFractionDigits: fieldData?.decimalPlaces
-                              })
+                              maximumFractionDigits: fieldData?.decimalPlaces
+                            })
                             : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         error={
@@ -1655,12 +1654,12 @@ const FormTypes = (props) => {
                       {(fieldData?.leval === 'product-custom' ||
                         fieldData?.leval === 'product-builder-custom' ||
                         fieldData?.leval === 'price-builder-custom') && (
-                        <HtmlTooltip title="Remove">
-                          <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                            <HighlightOffIcon color="error" />
-                          </IconButton>
-                        </HtmlTooltip>
-                      )}
+                          <HtmlTooltip title="Remove">
+                            <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                              <HighlightOffIcon color="error" />
+                            </IconButton>
+                          </HtmlTooltip>
+                        )}
                       {fieldData?.displayUnits?.length !== fieldData?.units?.length && (
                         <HtmlTooltip title="Add Converter" className="formActionButton">
                           <IconButton
@@ -1716,7 +1715,7 @@ const FormTypes = (props) => {
               </Grid>
             ))
           ) : (
-            <Grid key={_currency} item xs={12} sm={6} md={6}>
+            <Grid key={_currency} size={{ xs: 12, sm: 6, md: 6 }}>
               <Box display="flex">
                 <Box flexGrow={1}>
                   <InfoLabel
@@ -1747,14 +1746,14 @@ const FormTypes = (props) => {
                         onChange
                           ? onChange
                           : (e) => {
-                              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                                if (fieldData?.displayCurrency?.length > 1) {
-                                  handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                                } else {
-                                  handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                                }
+                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                              if (fieldData?.displayCurrency?.length > 1) {
+                                handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                              } else {
+                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
                               }
                             }
+                          }
                       }
                       onBlur={(e) => {
                         if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
@@ -1932,16 +1931,16 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-         <CurrencyAutocomplete
+        <CurrencyAutocomplete
           {...rest}
-          required = {true}
-          value={values[name]} 
-          label={getLabel(label)} 
-          name={name} 
-          fullWidth={true} 
+          required={true}
+          value={values[name]}
+          label={getLabel(label)}
+          name={name}
+          fullWidth={true}
           onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
           helperText={touched[name] && errors[name]}
-          error={touched[name] && Boolean(errors[name])} 
+          error={touched[name] && Boolean(errors[name])}
         />
       </InfoLabel>
     ) : type === 'multiSelect' ? (
@@ -1953,7 +1952,9 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Grid container spacing={1}>
-          <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+          <Grid size={{
+            xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12,
+          }}>
             <Autocomplete
               {...rest}
               limitTags={2}
@@ -2103,7 +2104,7 @@ const FormTypes = (props) => {
             />
           </Grid>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid item xs={2}>
+            <Grid size={{xs:2}}>
               <Box style={{ marginTop: '7px' }}>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
@@ -2203,9 +2204,9 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (event, newValue) => {
-                  setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                  setValue(newValue);
-                }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
           }
           onInputChange={(event, newInputValue) => {
             handleChange(name, newInputValue);
@@ -2221,34 +2222,37 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(option: any) => {
+          renderOption={(props, option: any) => {
+
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
               matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
+            const { key, ...optionProps } = props;
             return (
-              <Grid container alignItems="center">
-                <Grid item>
-                  <LocationOnIcon
-                    style={{
-                      color: theme.palette.text.secondary,
-                      marginRight: theme.spacing(2)
-                    }}
-                  />
+              <Box key={key} component="li" {...optionProps}>
+                <Grid container alignItems="center">
+                  <Grid >
+                    <LocationOnIcon
+                      style={{
+                        color: theme.palette.text.secondary,
+                        marginRight: theme.spacing(2)
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{xs : 'auto'}}>
+                    {parts?.map((part, index) => (
+                      <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                        {part.text}
+                      </span>
+                    ))}
+                    <Typography variant="body2" color="textSecondary">
+                      {option.structured_formatting.secondary_text}
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs>
-                  {parts?.map((part, index) => (
-                    <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
-                      {part.text}
-                    </span>
-                  ))}
-
-                  <Typography variant="body2" color="textSecondary">
-                    {option.structured_formatting.secondary_text}
-                  </Typography>
-                </Grid>
-              </Grid>
+              </Box>
             );
           }}
         />
@@ -2313,7 +2317,7 @@ const FormTypes = (props) => {
 
             return (
               <Grid container alignItems="center">
-                <Grid item>
+                <Grid >
                   <LocationOnIcon
                     style={{
                       color: theme.palette.text.secondary,
@@ -2321,7 +2325,7 @@ const FormTypes = (props) => {
                     }}
                   />
                 </Grid>
-                <Grid item xs>
+                <Grid  size={{ xs: 'auto'}}>
                   {parts?.map((part, index) => (
                     <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                       {part.text}
@@ -2425,18 +2429,18 @@ const FormTypes = (props) => {
             <ImageList style={{ transform: 'translateZ(0)', width: '100%' }}>
               {values[name]
                 ? values[name].map((item, i) => (
-                    <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
-                      <img src={item} alt={`demo ${i + 1}`} />
-                      <ImageListItemBar
-                        title={''}
-                        actionIcon={
-                          <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
-                            <DeleteIcon color="error" />
-                          </IconButton>
-                        }
-                      />
-                    </ImageListItem>
-                  ))
+                  <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
+                    <img src={item} alt={`demo ${i + 1}`} />
+                    <ImageListItemBar
+                      title={''}
+                      actionIcon={
+                        <IconButton onClick={() => removeImage(item)} aria-label={`demo ${i + 1}`}>
+                          <DeleteIcon color="error" />
+                        </IconButton>
+                      }
+                    />
+                  </ImageListItem>
+                ))
                 : null}
             </ImageList>
           </Box>
@@ -2559,7 +2563,7 @@ const FormTypes = (props) => {
         </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
-            <Grid item xs={12} sm={12} md={12}>
+            <Grid size={{ xs:12, sm:12, md:12}}>
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2627,7 +2631,7 @@ const FormTypes = (props) => {
                   </>
                 ))}
                 {isFileUploading && (
-                  <Grid item xs={10} sm={10} md={10}>
+                  <Grid size={{ xs:10, sm:10, md:10}}>
                     <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
                       {`Uploading... ${fileUploadProgress}%`}
                     </Typography>
@@ -2720,9 +2724,11 @@ const FormTypes = (props) => {
           onChange={(date) => handleChange(name, date)}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
+          inputFormat={'YYYY'}
         />
       </InfoLabel>
     ) : type === 'colorPicker' ? (
+
       <InfoLabel
         info={tooltipMessage}
         isTooltip={isTooltip}

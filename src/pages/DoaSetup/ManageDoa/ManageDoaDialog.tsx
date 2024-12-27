@@ -460,7 +460,14 @@ const DoaDialog = ({
                                                     ? userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
                                                     : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
                                                 }
-                                                renderOption={(option : any) => <React.Fragment>{option?.name}</React.Fragment>}
+                                                renderOption={(props, option) => {
+                                                  const { key, ...optionProps } = props;
+                                                  return (
+                                                    <Box key={key} component="li" {...optionProps}>
+                                                      {option?.name}
+                                                    </Box>
+                                                  );
+                                                }}
                                                 renderInput={(params) => (
                                                   <TextField
                                                     {...params}

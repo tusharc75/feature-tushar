@@ -196,7 +196,14 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                   ['_id']: newValue?.map((d) => d.id)
                 });
               }}
-              renderOption={(option : any) => <>{option?.name}</>}
+              renderOption={(props, option, state,ownerState ) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box key={key} component="li" {...optionProps}>
+                    {ownerState.getOptionLabel(option)}
+                  </Box>
+                );
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
