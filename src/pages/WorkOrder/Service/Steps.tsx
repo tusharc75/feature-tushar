@@ -18,7 +18,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
+import { Box, IconButton, Grid, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -40,7 +40,6 @@ import DiagramDialog from '../Diagram/DiagramDialog';
 import ServiceFieldValueDialog from './ServiceFieldValueDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import routes from 'src/components/Helpers/Routes';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 
 export interface StepDataInterface {
@@ -955,10 +954,7 @@ const Steps = ({
                 <Info fontSize="inherit" />
               </IconButton>
             ) : (
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
                 disabled={
                   allowedToEdit &&
                     ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
@@ -972,15 +968,15 @@ const Steps = ({
                   setOpenServiceFieldValueDialig(true);
                   setIsEditableServiceFieldValueDialog(true);
                 }}
+                iconForMobile={false}
               >
                 Enter Value
-              </Button>
+              </ThemeButton>
             )}
           </>
         )}
         {serviceDetails?.steps?.length > 0 && resource === sidebarResource.workOrder && (
           <ThemeButton
-            iconForMobile={<LowPriority />}
             disabled={
               allowedToEdit &&
                 ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
@@ -991,8 +987,9 @@ const Steps = ({
             }
             onClick={() => setArrangeView(true)}
             mobileTooltip="Arrange"
+            iconForMobile={<DragIndicator />}
+            startIcon={<DragIndicator fontSize="small" />}
           >
-            <DragIndicator className="mr-1" fontSize="small" />
             Arrange
           </ThemeButton>
         )}
@@ -1843,10 +1840,7 @@ const Steps = ({
           <>
             <Box textAlign="center" p={2}>
               {resource === sidebarResource.workOrder && (
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
                   disabled={
                     allowedToEdit &&
                       ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
@@ -1859,10 +1853,11 @@ const Steps = ({
                     e.stopPropagation();
                     setAddNewStep({ open: true, clone: false, cloneStepData: null });
                   }}
+                  iconForMobile={false}
                   startIcon={<AiOutlinePlus />}
                 >
                   Add Steps
-                </Button>
+                </ThemeButton>
               )}
             </Box>
           </>
