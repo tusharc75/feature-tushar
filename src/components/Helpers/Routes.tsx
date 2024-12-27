@@ -447,7 +447,8 @@ const routes = {
     path: '/contact-us/detail'
   },
   supportTicket: {
-    path: '/support-ticket'
+    path: '/support-ticket',
+    title: 'Support Ticket'
   },
   supportTicketDetail: {
     path: '/support-ticket/detail'

@@ -17,7 +17,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
 import React, { forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, momentLocalizer } from 'react-big-calendar';
+import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -33,8 +33,8 @@ import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import CloseIcon from '@mui/icons-material/Close';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import dayjs from 'dayjs';
 
-const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
@@ -405,7 +405,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
             if (d?.actualEndDate) {
               end = new Date(d?.actualEndDate);
-              end.setHours(23, 59, 59, 999);
+              end = dayjs.tz(end).endOf('day').toDate();
               endDraggable = false;
             }
             if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {
@@ -736,6 +736,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     return data;
   };
+
+  const localizer = dayjsLocalizer(dayjs);
 
   return (
     <>

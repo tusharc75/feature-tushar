@@ -140,7 +140,7 @@ const SupportTicketDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[{ ...routes.supportTicket, title: resources?.supportTicket?.titlePlural }, { title: supportTicketData?.supportTicketNumber }]}
+            routes={[routes.supportTicket , { title: supportTicketData?.supportTicketNumber }]}
           />
         </Box>
         <Box className="controls-v1">
@@ -184,7 +184,7 @@ const SupportTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.supportTicket?.titleSingular?.toLowerCase()} : ${supportTicketData?.supportTicketNumber} ?`}
+          message={`Are you sure you want to delete support ticket : ${supportTicketData?.supportTicketNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
