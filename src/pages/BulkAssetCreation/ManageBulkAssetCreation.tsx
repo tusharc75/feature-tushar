@@ -8,12 +8,10 @@ import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
   bulkAssetCreation,
-  setFieldsInAscendingOrder,
   GenerateResourceLineNumber,
   sidebarResource
 } from '../../constants/helpers';
@@ -21,7 +19,6 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
