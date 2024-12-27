@@ -172,8 +172,6 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       };
       res['index'] = i + 1;
       res['isChecked'] = false;
-      res['rentalWellName'] = res['wellName'] || "";
-      res['rentalWellNameId'] = res['wellNameId'] || "";
       return res;
     });
     handleAddWalkmeData(rows);
