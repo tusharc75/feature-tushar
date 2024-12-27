@@ -450,7 +450,6 @@ const ManageRentalManagementDialog = ({
                     handleScroll(errors);
                     submitForm();
                   }}
-                  close={() => setShowConfirmDialog(false)}
                   onClose={() => {
                     setShowConfirmDialog(false);
                     onClose();
