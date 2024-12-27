@@ -54,7 +54,7 @@ const getButtonStyle = ({
   sx = {}
 }: GetButtonStyle): ButtonProps => {
   const buttonProps: ButtonProps = {
-    sx: { height: '32px', gap: '5px', '& .MuiButton-icon': { margin: 0 }, fontWeight: 500, ...sx }
+    sx: { height: '32px', fontSize: '13px', gap: '5px', '& .MuiButton-icon': { margin: 0 }, fontWeight: 500, ...sx }
   };
 
   switch (backgroundColor) {
@@ -89,6 +89,7 @@ const getButtonStyle = ({
         ...buttonProps.sx,
         background: 'var(--new-theme-secondary-color)',
         color: 'black',
+        '&:disabled': { background: 'var(--new-theme-secondary-color-hover)', opacity: 0.7 },
         '&:hover': { background: 'var(--new-theme-secondary-color-hover)' }
       };
       buttonProps.variant = 'contained';
