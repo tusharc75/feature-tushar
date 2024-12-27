@@ -23,9 +23,9 @@ import HistoryButton from '../../components/Helpers/HistoryButton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { isTablet } from 'react-device-detect';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   tinyMCEContainer: {
@@ -604,18 +604,15 @@ const ProductTemplate = () => {
                           />
                         )}
                       />
-
                       <div className="mt-2 md:mt-0">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          className={'btn-outline-v1'}
+                        <ThemeButton
+                          iconForMobile={false}
                           onClick={() => {
                             setGeneralRemarkOpen(true);
                           }}
-                        >
+                          mobileTooltip={'General Remark'}>
                           General Remark
-                        </Button>
+                        </ThemeButton>
                       </div>
                     </div>
                   </Box>
@@ -644,7 +641,6 @@ const ProductTemplate = () => {
                   )}
                   {showConfirmDialog ? (
                     <ConfirmCancelDialog
-                      close={() => setShowConfirmDialog(false)}
                       open={showConfirmDialog}
                       onSave={() => {
                         setShowConfirmDialog(false);

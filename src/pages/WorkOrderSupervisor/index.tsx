@@ -1,5 +1,4 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -506,26 +505,26 @@ const WorkOrderSupervisor = () => {
         <CustomBreadCrumbs routes={[{ ...routes.workOrderSupervisor, title: resources?.workOrderSupervisor?.titlePlural }]} />
         <div className="flex items-center gap-2">
           {permissions?.workOrder?.isCreate && (
-            <Button
-              variant="outlined"
-              className={'btn-outline-v1'}
+            <ThemeButton
+              iconForMobile={false}
               onClick={() => {
                 setOpenWorkOrderScheduler(true);
               }}
+              mobileTooltip={`Scheduler`}
             >
               Scheduler
-            </Button>
+            </ThemeButton>
           )}
           {permissions?.workOrder?.isCreate && (
-            <Button
-              variant="outlined"
-              className={'btn-outline-v1'}
+            <ThemeButton
+              iconForMobile={false}
               onClick={() => {
                 window.open(`${routes?.workOrder?.path}`);
               }}
+              mobileTooltip={`${resources?.workOrder?.titlePlural}`}
             >
               {`${resources?.workOrder?.titlePlural}`}
-            </Button>
+            </ThemeButton>
           )}
           <ButtonMenu
             showChevron={true}

@@ -29,6 +29,7 @@ import {
 } from '../../../../constants/helpers';
 import DOAReasonDialog from '../../../DOA/DOAReasonDialog';
 import Steps from './Steps';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface StepInterface extends stepIconInterface {
   key: string;
@@ -226,10 +227,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => {});
+            .catch((err) => { });
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [currentVersion]);
 
   useEffect(() => {
@@ -337,7 +338,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -667,36 +668,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-        resource: sidebarResource.quoteBuilder,
-        referenceId: quoteData?._id,
-        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-        columns: columns,
-        hideDetailButton: true,
-        isSendEmail:
-          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+      resource: sidebarResource.quoteBuilder,
+      referenceId: quoteData?._id,
+      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+      columns: columns,
+      hideDetailButton: true,
+      isSendEmail:
+        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-            ? true
-            : false,
-        isExcelDownload: true,
-        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-        versionNumber: currentVersion,
-        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-        defaultColumns: [
-          'productName',
-          'unit',
-          'qty',
-          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-        ],
-        handleRefresh: () => {
-          fetchQuoteData(currentVersion);
-        },
-        toEmails: userEmails?.to,
-        ccEmails: userEmails?.cc ?? []
-      }
+          ? true
+          : false,
+      isExcelDownload: true,
+      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+      versionNumber: currentVersion,
+      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+      defaultColumns: [
+        'productName',
+        'unit',
+        'qty',
+        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+      ],
+      handleRefresh: () => {
+        fetchQuoteData(currentVersion);
+      },
+      toEmails: userEmails?.to,
+      ccEmails: userEmails?.cc ?? []
+    }
     : null;
 
   const leftSideContents = () => {
@@ -704,40 +705,31 @@ export default function QuoteProcess(props) {
       <>
         {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
           <>
-            <HtmlTooltip title="AI Suggestion">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                className="btn-outline-v1"
-                size="small"
-                color="primary"
-                startIcon={<GiVintageRobot />}
-                onClick={() => {
-                  setShowAiDialog(true);
-                }}
-              >
-                {isMobile && !isTablet ? '' : 'AI Suggestion'}
-              </Button>
-            </HtmlTooltip>
+            <ThemeButton
+              onClick={() => {
+                setShowAiDialog(true);
+              }}
+              startIcon={<GiVintageRobot />}
+              mobileTooltip='AI Suggestion'
+              iconForMobile={<GiVintageRobot />}
+            >
+              AI Suggestion
+            </ThemeButton>
             {permissions[qbResource]?.isUpdate &&
               (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                <HtmlTooltip title="Edit Quote PDF Template">
-                  <Button
-                    onClick={() => {
-                      quoteData?.pDFTemplate.optionValue &&
-                        history.push(
-                          `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
-                        );
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    size="small"
-                    className="btn-outline-v1"
-                    startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
-                    color="primary"
-                  >
-                    {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                    {isMobile && !isTablet ? '' : 'Quote Template'}
-                  </Button>
-                </HtmlTooltip>
+                <ThemeButton
+                  onClick={() => {
+                    quoteData?.pDFTemplate.optionValue &&
+                      history.push(
+                        `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                      );
+                  }}
+                  startIcon={<AiFillEdit />}
+                  mobileTooltip='Quote Template'
+                  iconForMobile={<AiFillEdit />}
+                >
+                  'Quote Template
+                </ThemeButton>
               )}
           </>
         )}
