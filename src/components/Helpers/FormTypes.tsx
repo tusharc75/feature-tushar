@@ -2777,6 +2777,7 @@ const FormTypes = (props) => {
           onChange={(date) => handleChange(name, date)}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
+          inputFormat={'YYYY'}
         />
       </InfoLabel>
     ) : type === 'colorPicker' ? (
