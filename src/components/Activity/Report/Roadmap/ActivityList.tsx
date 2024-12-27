@@ -1,41 +1,17 @@
-import { useState } from 'react';
-import { makeStyles } from '@mui/styles';
-import { Typography, Box, Button, Dialog, useMediaQuery, Theme } from '@mui/material';
-import { TreeView, TreeItem } from '@mui/x-tree-view';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Dialog, Typography, useMediaQuery } from '@mui/material';
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { useCallback, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import ActivityModelHandler from '../../ActivityModelHandler';
-import { CreateTask } from '../../Task/CreateTask';
-import { CreateCase } from '../../Case/CreateCase';
 import { useData } from '../../../../StateProvider/Provider';
 import { CustomDialogTransition } from '../../../../constants/helpers';
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    '&:hover > $content': {
-      backgroundColor: theme.palette.action.hover
-    },
-    '&:focus > $content, &$selected > $content': {
-      backgroundColor: `var(--tree-view-bg-color, ${theme.palette.grey[400]})`,
-      color: 'var(--tree-view-color)'
-    },
-    '&:focus > $content $label, &:hover > $content $label, &$selected > $content $label': {
-      backgroundColor: 'transparent'
-    }
-  },
-  label: {
-    paddingLeft: 0
-  },
-  group: {
-    marginLeft: 0
-  }
-}));
+import ActivityModelHandler from '../../ActivityModelHandler';
+import { CreateCase } from '../../Case/CreateCase';
+import { CreateTask } from '../../Task/CreateTask';
 
 export default function ActivityList(props) {
   const isMobileDevices = useMediaQuery('(max-width:768px)');
-  const classes = useStyles();
   const { type, fetchRoadmap, activity, expanded, selected, handleToggle, handleSelect } = props;
   const {
     state: {
@@ -50,49 +26,70 @@ export default function ActivityList(props) {
     setCreate(false);
   };
 
-  const getTreeNodes = (treeList) => {
-    return treeList.map((data, index) => {
-      let children = [];
-      if (data.child && data.child.length > 0) {
-        children = getTreeNodes(data.child);
-        children.push(<div></div>);
-      }
+  const getTreeNodes = useCallback(
+    (treeList) => {
+      return treeList.map((data, index) => {
+        let children = [];
+        if (data.child && data.child.length > 0) {
+          children = getTreeNodes(data.child);
+          children.push(<div></div>);
+        }
 
-      let label = (
-        <Box width={'100%'} height={30} className="d-flex align-items-center">
-          <Box width={'100%'} style={{ position: 'absolute' }}>
-            <Box onClick={() => setActivityData({ id: data._id, type })}>
-              <Typography variant="body2" className="text-truncate">
-                {data.name}
-              </Typography>
+        let label = (
+          <Box width={'100%'} height={30} className="d-flex align-items-center">
+            <Box width={'100%'} style={{ position: 'absolute' }}>
+              <Box onClick={() => setActivityData({ id: data._id, type })}>
+                <Typography variant="body2" className="text-truncate">
+                  {data.name}
+                </Typography>
+              </Box>
             </Box>
           </Box>
-        </Box>
-      );
+        );
 
-      return (
-        <TreeItem
-          key={index}
-          itemId={data._id.toString()}
-          id={data._id.toString()}
-          label={label}
-          children={children}
-          classes={{
-            root: classes.root
-          }}
-        />
-      );
-    });
-  };
+        return (
+          <TreeItem
+            key={index}
+            itemId={data._id.toString()}
+            id={data._id.toString()}
+            label={label}
+            children={children}
+            sx={(theme) => ({
+              '&:hover > $content': {
+                backgroundColor: theme.palette.action.hover
+              },
+              '&:focus > $content, &$selected > $content': {
+                backgroundColor: `var(--tree-view-bg-color, ${theme.palette.grey[400]})`,
+                color: 'var(--tree-view-color)'
+              },
+              '&:focus > $content $label, &:hover > $content $label, &$selected > $content $label': {
+                backgroundColor: 'transparent'
+              }
+            })}
+          />
+        );
+      });
+    },
+    [type]
+  );
 
   let TreeNodes = getTreeNodes(activity);
+
+  console.log({ selected, expanded });
+
   return (
     <>
-      <TreeView expanded={expanded} selected={selected} onNodeToggle={handleToggle} onNodeSelect={handleSelect}>
+      <SimpleTreeView
+        multiSelect={false}
+        expandedItems={expanded}
+        onExpandedItemsChange={handleToggle}
+        selectedItems={selected}
+        onSelectedItemsChange={handleSelect}
+      >
         {TreeNodes.map((node) => {
           return node;
         })}
-      </TreeView>
+      </SimpleTreeView>
       <div className="py-2">
         <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={isMobileDevices ? null : <AddIcon />}>
           Create {type}

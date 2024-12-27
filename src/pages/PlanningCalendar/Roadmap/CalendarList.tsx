@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { TreeItem, TreeView } from '@mui/x-tree-view';
+import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import moment from 'moment';
 import React from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -30,7 +30,7 @@ export default function CalendarList({
 }) {
   return (
     <>
-      <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>
+      <SimpleTreeView multiSelect={false} expandedItems={expanded} selectedItems={selected} onSelectedItemsChange={handleSelect}>
         {rowVirtualizer.getVirtualItems().map((row) => {
           const newActivity = activity[row.index];
           return (
@@ -51,7 +51,7 @@ export default function CalendarList({
             </div>
           );
         })}
-      </TreeView>
+      </SimpleTreeView>
     </>
   );
 }
