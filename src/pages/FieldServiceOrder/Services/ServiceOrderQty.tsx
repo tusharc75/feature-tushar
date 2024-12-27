@@ -10,10 +10,8 @@ import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constan
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-// import { FaDiceOne } from 'react-icons/fa';
-// import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
@@ -374,7 +372,6 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
               )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

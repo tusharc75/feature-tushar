@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, Fragment } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
@@ -121,7 +121,7 @@ export default function NewCreateQuotePdfTemplate() {
     const options = [];
     PDF_RESOURCE_LIST?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value });
+        options.push({ title: resources[item.key] ? resources[item.key]?.titleSingular : item.title, value: item.value });
       }
     });
     for (const [key] of Object.entries(permissions)) {
@@ -320,7 +320,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
+      // hideDuration: null,
       open: true,
       type: 'info',
       message: `Downloading preview file, Please wait...`
@@ -683,7 +683,7 @@ export default function NewCreateQuotePdfTemplate() {
                           value={
                             pdfResourceOption.find((data) => data.value === values['type'])
                               ? pdfResourceOption.find((data) => data.value === values['type'])
-                              : ''
+                              : null
                           }
                           options={pdfResourceOption}
                           onChange={(e, val: any) => {
@@ -892,7 +892,6 @@ export default function NewCreateQuotePdfTemplate() {
               </div>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

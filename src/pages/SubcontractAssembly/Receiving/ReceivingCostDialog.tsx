@@ -193,7 +193,6 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

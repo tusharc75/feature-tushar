@@ -18,7 +18,6 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema
 } from 'src/constants/helpers';
 
@@ -169,7 +168,6 @@ const ManageHolidays = ({ payrollPolicyId, currency, id = null, onSuccess, onClo
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmationCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

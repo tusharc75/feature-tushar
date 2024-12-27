@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import moment from 'moment';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAll = false }) => {
   const [timeFrame, setTimeFrame] = React.useState<any>(defaultTimeFrame);
@@ -10,32 +10,32 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
     switch (timeFrame) {
       case '1-month':
         setDuration({
-          from: new Date(moment().subtract('1', 'month').calendar()),
+          from: new Date(dayjs().subtract(1, 'month').toDate()),
           to: new Date()
         });
         break;
       case '3-months':
         setDuration({
-          from: new Date(moment().subtract('3', 'months').calendar()),
+          from: new Date(dayjs().subtract(3, 'month').toDate()),
           to: new Date()
         });
         break;
       case '6-months':
         setDuration({
-          from: new Date(moment().subtract('6', 'months').calendar()),
+          from: new Date(dayjs().subtract(6, 'month').toDate()),
           to: new Date()
         });
         break;
       case '1-year':
         setDuration({
-          from: new Date(moment().subtract('1', 'year').calendar()),
+          from: new Date(dayjs().subtract(1, 'year').toDate()),
           to: new Date()
         });
         break;
       case 'current-year':
         setDuration({
-          from: new Date(moment().startOf('year').calendar()),
-          to: new Date(moment().endOf('year').calendar())
+          from: new Date(dayjs().startOf('year').toDate()),
+          to: new Date(dayjs().endOf('year').toDate())
         });
         break;
       case 'all':
@@ -54,7 +54,14 @@ const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame, showAl
       <Grid item xs={12} sm={12} md={4}>
         <FormControl style={{ minWidth: '200px' }} fullWidth size="small" variant="outlined">
           <InputLabel id="duration">Select Duration</InputLabel>
-          <Select size="small" labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+          <Select
+            size="small"
+            labelId="duration"
+            id="time-duration"
+            value={timeFrame}
+            onChange={(e) => setTimeFrame(e.target.value)}
+            label="Select Duration"
+          >
             {showAll && <MenuItem value={'all'}>All</MenuItem>}
             <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
             <MenuItem value={'6-months'}>Last 6 Months</MenuItem>

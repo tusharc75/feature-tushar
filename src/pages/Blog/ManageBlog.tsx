@@ -189,7 +189,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

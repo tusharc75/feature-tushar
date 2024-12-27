@@ -4,18 +4,15 @@ import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { Skeleton } from '@mui/material';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
 import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
-import { MdDelete } from 'react-icons/md';
 import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -702,35 +699,27 @@ export default function QuoteDetail() {
                 </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
-                    <HtmlTooltip title={`Accept`}>
-                      <Button
-                        onClick={() => {
-                          QuoteStatusChange('Accepted', '', '');
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<ThumbUpIcon />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : `Accept`}
-                      </Button>
-                    </HtmlTooltip>
-                    <HtmlTooltip title="Reject">
-                      <Button
-                        onClick={() => {
-                          setQuoteStatusChangeData('Rejected');
-                          setShowQuoteStatusChangeDialog(true);
-                        }}
-                        className="mx-1"
-                        startIcon={<ThumbDownIcon />}
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : 'Reject'}
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={<ThumbUpIcon />}
+                      onClick={() => {
+                        QuoteStatusChange('Accepted', '', '');
+                      }}
+                      startIcon={<ThumbUpIcon />}
+                      mobileTooltip={`Accept`}
+                    >
+                      Accept
+                    </ThemeButton>
+                    <ThemeButton
+                      iconForMobile={<ThumbDownIcon />}
+                      onClick={() => {
+                        setQuoteStatusChangeData('Rejected');
+                        setShowQuoteStatusChangeDialog(true);
+                      }}
+                      startIcon={<ThumbDownIcon />}
+                      mobileTooltip={`Reject`}
+                    >
+                      Reject
+                    </ThemeButton>
                   </>
                 )}
               </>

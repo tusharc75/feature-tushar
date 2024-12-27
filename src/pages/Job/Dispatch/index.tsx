@@ -1,26 +1,25 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton } from '@mui/material';
+import { useState, useEffect, Fragment } from 'react';
+import { Box, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { IoMdDownload } from 'react-icons/io';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { FiExternalLink } from 'react-icons/fi';
-import { displayDateTime } from 'src/constants/helpers';
+import { displayDateTime, sidebarResource } from 'src/constants/helpers';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { useData } from 'src/StateProvider/Provider';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
-  const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [pdfLoading, setPdfLoading] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
-  const { generateColumns } = useColumns();
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -146,105 +145,18 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
     return subRows;
   };
 
-  // const handleViewPdf = (type, PDFType) => {
-  //   setPdfLoading(type);
-  //   axiosInstance()
-  //     .get(`/pdf/${jobData._id}?resource=Job`)
-  //     .then(({ data }) => {
-  //       axiosInstance()
-  //         .get(`user/download?fileName=${data.data.fileName}`, {
-  //           responseType: 'blob'
-  //         })
-  //         .then(({ data }) => {
-  //           setPdfLoading(null);
-  //           if (type === 'Download') {
-  //             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-  //             const link = document.createElement('a');
-  //             link.href = url;
-  //             link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
-  //             document.body.appendChild(link);
-  //             link.click();
-  //           } else {
-  //             const file = new Blob([data], { type: 'application/pdf' });
-  //             const fileURL = URL.createObjectURL(file);
-  //             const pdfWindow = window.open();
-  //             pdfWindow.location.href = fileURL;
-  //             toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-  //           }
-  //         })
-  //         .catch((err) => {
-  //           setPdfLoading(null);
-  //           toastConfig.setToastConfig(err);
-  //         });
-  //     })
-  //     .catch((err) => {
-  //       setPdfLoading(null);
-  //       toastConfig.setToastConfig(err);
-  //     });
-  // };
-
-  const handleViewPdf = (type, PDFType) => {
-    setPdfLoading(type);
-    const Column = JSON.stringify(columns.map((col) => ({ name: col.accessor })));
-    axiosInstance()
-      .get(`/pdf/${jobData._id}?resource=Job&columns=${encodeURIComponent(Column)}`, { responseType: 'blob' })
-      .then(({ data }) => {
-        setPdfLoading(null);
-        if (type === 'download') {
-          const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `Quotation-${jobData.jobNumber}.pdf`);
-          document.body.appendChild(link);
-          link.click();
-        } else {
-          const file = new Blob([data], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
-          toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-        }
-      })
-      .catch((err) => {
-        setPdfLoading(null);
-        toastConfig.setToastConfig(err);
-      });
+  const previewDownloadProps = {
+    fileName: `${resources?.job?.titleSingular}-${jobData?.invoiceNumber}`,
+    resource: sidebarResource.job,
+    referenceId: jobData?._id,
+    columns: columns,
+    isSendEmail: false,
+    defaultColumns: []
   };
 
   return (
     <Fragment>
-      <Box display="flex" m={1} sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: 'flex-end' }} style={{ gap: '8px' }}>
-        <Button
-          variant="outlined"
-          className="btn-outline-v1"
-          color="primary"
-          type="button"
-          size="small"
-          startIcon={isMobile && !isTablet ? '' : <VisibilityIcon />}
-          disabled={pdfLoading}
-          onClick={(e) => {
-            handleViewPdf('view', 'PDF');
-          }}
-        >
-          {isMobile && !isTablet ? <VisibilityIcon /> : pdfLoading === 'view' ? 'Please wait...' : 'Preview'}
-        </Button>
-        <>
-          <Button
-            className="btn-outline-v1"
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-            disabled={pdfLoading}
-            onClick={(e) => {
-              handleViewPdf('download', 'PDF');
-            }}
-          >
-            {isMobile && !isTablet ? <IoMdDownload size={20} /> : pdfLoading === 'download' ? 'Please wait...' : 'Download'}
-          </Button>
-        </>
-      </Box>
+      <PreviewDownload {...previewDownloadProps} />
       <Box mt={1}>
         {columns ? (
           <Box zIndex={5}>

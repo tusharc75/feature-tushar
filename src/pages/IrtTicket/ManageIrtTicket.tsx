@@ -237,7 +237,6 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

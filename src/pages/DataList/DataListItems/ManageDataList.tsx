@@ -216,7 +216,6 @@ const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null, dataLis
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

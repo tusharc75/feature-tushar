@@ -18,7 +18,6 @@ import {
   getObjKeys,
   serializedAssetsCertification,
   setFieldsInAscendingOrder,
-  sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
@@ -167,7 +166,6 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

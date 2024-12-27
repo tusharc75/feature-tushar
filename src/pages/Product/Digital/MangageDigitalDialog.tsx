@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CustomDialogTransition, getObjKeysWithValues, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -320,7 +320,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

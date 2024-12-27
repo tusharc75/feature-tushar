@@ -431,7 +431,7 @@ export default function ManageQuoteDialog({
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
+      // hideDuration: null,
       open: true,
       type: 'info',
       message: `Downloading preview file, Please wait...`
@@ -952,7 +952,6 @@ export default function ManageQuoteDialog({
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

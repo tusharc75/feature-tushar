@@ -205,7 +205,7 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                       ? `Create ${resources?.fieldServiceOrder?.titleSingular}`
                       : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceDetails?.fieldServiceOrderNumber}`}`
                   }
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
                     } else {
@@ -297,7 +297,6 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                       handleScroll(errors);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

@@ -177,7 +177,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
             <Fragment>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
@@ -237,7 +237,6 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

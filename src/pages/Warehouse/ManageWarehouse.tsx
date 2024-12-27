@@ -188,7 +188,6 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

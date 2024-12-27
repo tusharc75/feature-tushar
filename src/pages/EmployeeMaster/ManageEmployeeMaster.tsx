@@ -10,11 +10,10 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { FaDiceOne } from 'react-icons/fa';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
@@ -141,13 +140,12 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                     onClose();
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
-                    : `Create Employee Master`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.employeeNumber ? `(${initialData.values?.employeeNumber})` : ''}`
+                  : `Create Employee Master`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -194,7 +192,6 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
