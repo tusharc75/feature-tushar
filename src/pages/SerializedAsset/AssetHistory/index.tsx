@@ -66,7 +66,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     {
       key: INVENTORY_HISTORY_TYPE.transferAssets,
       resource: sidebarResource.transferAsset,
-      title: resources?.transferAsset.titlePlural
+      title: resources?.transferAsset?.titlePlural
     },
     // {
     //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
