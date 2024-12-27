@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { displayDate } from 'src/constants/helpers';
+import dayjs from 'dayjs';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
@@ -13,16 +14,16 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
       let fromDate: any = '';
       let toDate: any = '';
       if (timeFrame === '1-month') {
-        fromDate = new Date(moment().subtract('1', 'month').calendar());
+        fromDate = new Date(dayjs().subtract(1, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '3-months') {
-        fromDate = new Date(moment().subtract('3', 'months').calendar());
+        fromDate = new Date(dayjs().subtract(3, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '6-months') {
-        fromDate = new Date(moment().subtract('6', 'months').calendar());
+        fromDate = new Date(dayjs().subtract(6, 'month').toDate());
         toDate = new Date();
       } else if (timeFrame === '1-year') {
-        fromDate = new Date(moment().subtract('1', 'year').calendar());
+        fromDate = new Date(dayjs().subtract(1, 'year').toDate());
         toDate = new Date();
       }
       setDeepFilters([

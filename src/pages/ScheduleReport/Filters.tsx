@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid2';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const Filters = ({
   selectedResources,
@@ -49,12 +50,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
 
@@ -64,12 +65,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(3, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(3, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
@@ -79,12 +80,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(6, 'month').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(6, 'month').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
@@ -94,12 +95,12 @@ const Filters = ({
         isStatus
           ? setStatusPeriodDate((prevState) => ({
             ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`from_statusPeriod`]: new Date(dayjs().subtract(1, 'year').toDate()),
             [`to_statusPeriod`]: new Date()
           }))
           : setBetweenDate((prevState) => ({
             ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`from_${field.fieldName}`]: new Date(dayjs().subtract(1, 'year').toDate()),
             [`to_${field.fieldName}`]: new Date()
           }));
         break;
