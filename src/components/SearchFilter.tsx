@@ -193,31 +193,25 @@ export const SearchFilter = ({
           />
         )}
         value={value}
-        renderOption={(props, option) => {
-          const index = options.findIndex((o) => o.type === option.type);
-          const { size, className, ...rest } = chip;
+        renderOption={(props, option, state, ownerState) => {
           const { key, ...optionProps } = props;
+          const { size, className, ...rest } = chip;
           return (
-            <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-              <Grid container alignItems="center" spacing={3}>
-                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
-                  <Chip
-                    size={size || 'medium'}
-                    {...rest}
-                    className={`${classes.chipStyle} ${className}`}
-                    label={
-                      option.isAll
-                        ? option.type === 'my'
-                          ? activityName
-                            ? 'My' + ' ' + startCase(activityName)
-                            : 'My activities'
-                          : option.name + ' ' + option.label
-                        : option.label
-                    }
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>{!option.isAll && <Typography variant="body2">{option.name}</Typography>}</Grid>
-              </Grid>
+            <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Chip
+                size={size || 'small'}
+                {...rest}
+                className={`${classes.chipStyle} ${className}`}
+                label={
+                  option.isAll
+                    ? option.type === 'my'
+                      ? activityName
+                        ? `My ${startCase(activityName)}`
+                        : 'My activities'
+                      : `${option.name} ${option.label}`
+                    : option.label
+                }
+              />
             </Box>
           );
         }}
