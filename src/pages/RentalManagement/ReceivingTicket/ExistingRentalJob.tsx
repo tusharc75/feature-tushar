@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import { Button, CircularProgress, Dialog } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, gridLoadingTimeout, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
@@ -174,7 +174,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       <CustomDialogHeader title={`Select ${resources?.rentalManagement?.titleSingular}`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <Grid item xs={12} sm={12} md={12} container justify={'flex-end'}>
+          <Grid size={{xs:12, sm:12, md:12}} container justifyContent={'flex-end'}>
             <Button
               size="small"
               color="primary"

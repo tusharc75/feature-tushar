@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect, Fragment, useRef } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
+import { Box, Button, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -170,7 +171,7 @@ export default function ManageAssetDialog({
                                       size="small"
                                     />
                                   ) : ['expectedCompletionDate'].includes(field.fieldName) ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -196,7 +197,7 @@ export default function ManageAssetDialog({
                                       </Box>
                                     </Grid>
                                   ) : (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes

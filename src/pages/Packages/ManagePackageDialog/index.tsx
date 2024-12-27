@@ -13,7 +13,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   packages,
-  setFieldsInAscendingOrder,
   sidebarResource,
   yupSchema
 } from '../../../constants/helpers';
@@ -22,7 +21,6 @@ import Dialog from '@mui/material/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';

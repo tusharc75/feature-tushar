@@ -1,4 +1,5 @@
-import { Button, Dialog, Grid, MenuItem, Typography } from '@mui/material';
+import { Button, Dialog, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
@@ -6,7 +7,6 @@ import { BiMailSend } from 'react-icons/bi';
 import { GiVintageRobot } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../../StateProvider/Provider';
@@ -780,7 +780,7 @@ export default function QuoteProcess(props) {
       <div className={`subDetailModule pt-[12px] `}>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <Grid container className="position-relative">
-            <Grid item xs={12} sm={12} md={12} className="mt-1">
+            <Grid size={{xs:12, sm:12, md:12}} className="mt-1">
               <Steps
                 steps={DOAneeded ? DOASteps : OtherSteps}
                 currentStep={

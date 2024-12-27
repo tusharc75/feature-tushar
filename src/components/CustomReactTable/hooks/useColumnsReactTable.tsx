@@ -30,6 +30,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import DataListCell from '../Cells/DataListCell';
 import { headerName } from 'src/components/CustomReactTable/hooks/hookUtils';
+import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -440,7 +441,19 @@ export function useColumns() {
               return <NumberCell rowData={row.original} field={field} />;
             }
           });
-        } else if (field.type === 'percent') {
+        } else if (field.type === 'richTextEditor') {
+          column.push({
+            ...commonFieldData,
+            disableFilters: true,
+            disableSortBy: true,
+            cell: ({ row }) => (
+              <div>
+                <RichTextEditorCell original={row?.original} field={field} />
+              </div>
+            )
+          });
+        }
+        else if (field.type === 'percent') {
           column.push({
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),

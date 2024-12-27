@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -158,7 +159,7 @@ const Dispatch = ({ search }) => {
                   <CustomTab key={'technician'} label={resources?.employeeMaster?.titlePlural} value={3} />
                 </CustomTabs>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                     <TabPanel value={tabValue} index={1}>
                       {tabValue === 1 && <Assets rentalManagementData={rentalManagementData} onSuccess={() => fetchData()} />}
                     </TabPanel>

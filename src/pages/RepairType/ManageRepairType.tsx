@@ -13,7 +13,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, repairType } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid, Typography, IconButton, TextField } from '@mui/material';
+import { Box, Typography, IconButton, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
@@ -218,7 +219,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                     <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Repair Steps</h2>
                   </div>
                   <Grid container>
-                    <Grid item xs={12} sm={6} md={6} lg={6}>
+                    <Grid size={{xs:12, sm:6, md:6, lg:6}}>
                       <Box
                         style={{ maxHeight: '350px', overflow: 'auto' }}
                         border={1}
@@ -229,13 +230,13 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                       >
                         <Box p={1}>
                           <Grid container alignItems="center">
-                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                            <Grid size={{xs:2, sm:2, md:2, lg:2}}>
                               <Typography variant="body2">Sr.</Typography>
                             </Grid>
-                            <Grid item xs={8} sm={8} md={8} lg={8}>
+                            <Grid size={{xs:8, sm:8, md:8, lg:8}}>
                               <Typography variant="body2">Step Name</Typography>
                             </Grid>
-                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                            <Grid size={{xs:2, sm:2, md:2, lg:2}}>
                               <Grid container justifyContent="flex-end">
                                 <IconButton size="small" aria-label="setting" onClick={() => handleAddRepairSteps()}>
                                   <AddCircleOutlineIcon fontSize="small" />
@@ -247,10 +248,10 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                         {repairSteps?.map((steps, index) => (
                           <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                             <Grid container alignItems="center">
-                              <Grid item xs={2} sm={2} md={2} lg={2}>
+                              <Grid size={{xs:2, sm:2, md:2, lg:2}}>
                                 <Typography variant="body2">{steps.order}</Typography>
                               </Grid>
-                              <Grid item xs={8} sm={8} md={8} lg={8}>
+                              <Grid size={{xs:8, sm:8, md:8, lg:8}}>
                                 <TextField
                                   id="standard-basic"
                                   variant="outlined"
@@ -262,7 +263,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                                   onChange={(event) => handleonChangeValue(index, event.target.value)}
                                 />
                               </Grid>
-                              <Grid item xs={2} sm={2} md={2} lg={2}>
+                              <Grid size={{xs:2, sm:2, md:2, lg:2}}>
                                 <Grid container justifyContent="flex-end">
                                   <IconButton size="small" aria-label="setting" onClick={() => handleRemoveRepairSteps(index)}>
                                     <RemoveCircleOutlineIcon fontSize="small" />

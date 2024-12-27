@@ -18,7 +18,6 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema
 } from 'src/constants/helpers';
 

@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -244,7 +245,7 @@ const RepairJobDetails = () => {
               <DetailsPage data={repairJobData} fields={repairJobFields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>
@@ -293,7 +294,7 @@ const RepairJobDetails = () => {
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
             {repairJobData && <Tickets repairJobData={repairJobData} renderedFrom={`${renderedFrom}_grid-3`} />}
           </Grid>
         </TabPanel>

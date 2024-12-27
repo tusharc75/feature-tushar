@@ -97,7 +97,7 @@ const ManagedPackages = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon color="error" fontSize='small' />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -235,6 +235,7 @@ const ManagedPackages = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });

@@ -25,7 +25,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { Grid } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 
 export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData }) {
@@ -144,7 +144,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                   />
                 </Form>
                 <Grid spacing={3} container>
-                  <Grid item xs={12} sm={6} md={6}>
+                  <Grid size={{xs:12, sm:6, md:6}}>
                     <CustomDatePicker
                       label="Received Date"
                       required
