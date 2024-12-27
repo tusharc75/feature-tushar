@@ -1,6 +1,5 @@
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -8,7 +7,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat24Hours, gridLoadingTimeout } from 'src/constants/helpers';
+import { dateTimeFormat24Hours, displayDateTime, gridLoadingTimeout } from 'src/constants/helpers';
 
 const renderedFrom = 'iotChart_Alarms';
 
@@ -69,7 +68,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => <div>{moment(row?.original.time).format(dateTimeFormat24Hours)}</div>
+      Cell: ({ row }) => <div>{displayDateTime(row?.original.time, dateTimeFormat24Hours)}</div>
     },
     {
       accessor: 'alertNumber',

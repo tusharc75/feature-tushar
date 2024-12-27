@@ -1,5 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -14,7 +13,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
@@ -35,7 +33,6 @@ const FrequentlyAskedQuestion = () => {
   const { generateColumns } = useColumns();
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);

@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
+import { Box, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';

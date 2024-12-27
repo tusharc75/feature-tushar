@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import moment from 'moment';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -78,7 +79,7 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] 
         <Grid>
           <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
         </Grid>
-        <Grid item>
+        <Grid >
           <SearchBox
             onChange={(e) => {
               setSearchValue(e.target.value);

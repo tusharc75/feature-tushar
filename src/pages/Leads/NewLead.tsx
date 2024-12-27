@@ -1,6 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { makeStyles, useTheme } from '@mui/styles';
-import { Box, Typography, Grid, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar, Theme } from '@mui/material';
+import { Box, Typography, Select, InputLabel, MenuItem, FormControl, TextField, Switch, Avatar, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import './style.scss';
 import Container from '../../components/CustomContainer';
 import BoxWithBorder from '../../components/BoxWithBorder';
@@ -94,7 +95,7 @@ const NewLead = () => {
           </Box>
           <Grid container className={classes.informationText}>
             {/* Left Side Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12, md:6}}>
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Lead Owner</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -221,7 +222,7 @@ const NewLead = () => {
             </Grid>
 
             {/* Right Side Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12, md:6}}>
               {/* Company */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Company</Typography>
@@ -347,7 +348,7 @@ const NewLead = () => {
           </Box>
           <Grid container className={classes.informationText}>
             {/* Left Side Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12, md:6}}>
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Street</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -369,7 +370,7 @@ const NewLead = () => {
             </Grid>
 
             {/* Right Side Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12, md:6}}>
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>City</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -391,7 +392,7 @@ const NewLead = () => {
           </Box>
           <Grid container className={classes.informationText}>
             {/* Left Side Form */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{xs:12, md:6}}>
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Description</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -401,7 +402,7 @@ const NewLead = () => {
             </Grid>
 
             {/* Right Side Form */}
-            <Grid item xs={12} md={6}></Grid>
+            <Grid size={{xs:12, md:6}}></Grid>
           </Grid>
         </BoxWithBorder>
       </Container>
