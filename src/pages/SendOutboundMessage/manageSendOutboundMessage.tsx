@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -136,7 +137,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{md:12, lg:12, sm:12}}>
                       <Autocomplete
                         disabled={assetId ? true : false}
                         options={serializedAssetOptions}
@@ -166,7 +167,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         )}
                       />
                     </Grid>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{md:12, lg:12, sm:12}}>
                       <Autocomplete
                         options={outBoundMessageTypeOptions}
                         getOptionLabel={(option: any) => option || ''}
@@ -198,7 +199,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         )}
                       />
                     </Grid>
-                    <Grid item md={12} lg={12} sm={12}>
+                    <Grid size={{md:12, lg:12, sm:12}}>
                       <Autocomplete
                         options={
                           values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
@@ -233,7 +234,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                       />
                     </Grid>
                     {values['messageType'] === 'Set Parameter' && (
-                      <Grid item md={12} lg={12} sm={12}>
+                      <Grid size={{md:12, lg:12, sm:12}}>
                         <TextField
                           margin="dense"
                           size="small"

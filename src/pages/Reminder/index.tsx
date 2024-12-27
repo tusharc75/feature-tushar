@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import axiosInstance from '../../axios/axiosInstance';

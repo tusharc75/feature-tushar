@@ -1,5 +1,7 @@
 import React, { Fragment } from 'react';
-import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@mui/material';
+import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
@@ -140,7 +142,7 @@ const Filters = ({
         selectedResources.map((field: any) => (
           <React.Fragment key={field._id}>
             {field.fieldName === 'all' ? null : ['dropDown', 'multiSelect']?.includes(field.type) ? (
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid size={{xs:12, sm:6, md:6}}>
                 <FormTypes
                   values={formValues}
                   errors={{}}
@@ -159,7 +161,7 @@ const Filters = ({
               </Grid>
             ) : field.type === 'date' ? (
               <Fragment>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12, sm:6}}>
                   <FormControl fullWidth size="small" variant="outlined">
                     <InputLabel id={field.fieldName}>Select Duration</InputLabel>
                     <Select
@@ -181,7 +183,7 @@ const Filters = ({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12, sm:6}}>
                   <CustomDatePicker
                     disabled={statusTimeFrame !== 'custom'}
                     fullWidth
@@ -194,7 +196,7 @@ const Filters = ({
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12, sm:6}}>
                   <CustomDatePicker
                     fullWidth
                     disabled={statusTimeFrame !== 'custom'}
@@ -210,7 +212,7 @@ const Filters = ({
                 </Grid>
               </Fragment>
             ) : (
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs:12, sm:6}}>
                 <FormTypes
                   values={formValues}
                   errors={{}}
@@ -232,7 +234,7 @@ const Filters = ({
         ))}
       {isStatusPeriod && (
         <Fragment>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <FormControlLabel
               control={<Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />}
               label="Status Period"
@@ -240,7 +242,7 @@ const Filters = ({
           </Grid>
           {statusPeriod && (
             <Fragment>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs:12, sm:6}}>
                 <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="statusPeriod">Select Duration</InputLabel>
                   <Select
@@ -261,7 +263,7 @@ const Filters = ({
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs:12, sm:6}}>
                 <CustomDatePicker
                   fullWidth
                   disabled={statusTimeFrame !== 'custom'}
@@ -274,7 +276,7 @@ const Filters = ({
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs:12, sm:6}}>
                 <CustomDatePicker
                   fullWidth
                   size="small"

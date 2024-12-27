@@ -1,11 +1,10 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import {
   CustomDialogTransition,
   getObjKeysWithValues,
-  yupSchema,
   sidebarResource,
   serializedAsset,
   getObjKeys,
@@ -392,7 +391,7 @@ export default function AssetDetailsChangeDialog({
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
                                     <FormTypes
                                       {...field}
                                       fieldData={{
