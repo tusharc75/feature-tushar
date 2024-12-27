@@ -434,8 +434,8 @@ const CreateFormBuilder = () => {
                     />
                   </Grid>
                   <Grid size={{ xs: 3 }} container justifyContent="flex-end">
-                    <Box>
-                      {permissions?.formBuilder?.isUpdate && (
+                    {permissions?.formBuilder?.isUpdate && (
+                      <Box>
                         <Button
                           disabled={isUpdating}
                           color="primary"
@@ -447,40 +447,33 @@ const CreateFormBuilder = () => {
                           {isMobile && !isTablet ? <RiSaveFill size={24} /> : 'Save'}
                           {isUpdating && <CircularProgress size={24} />}
                         </Button>
-                      )}
-                    </Box>
-                    <Box ml={1}>
-                      <Button
-                        color="primary"
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
+                      </Box>
+                    )}
+                    <ThemeButton
+                      onClick={() => {
+                        if (!isEqual(orisection, section) && permissions?.formBuilder?.isUpdate) {
+                          setShowConfirmDialog(true);
+                        } else {
+                          history.push({ pathname: routes.formBuilder.path });
+                        }
+                      }}
+                      mobileTooltip='Close'
+                      iconForMobile={<RiCloseCircleFill size={24} />}
+                    >
+                      {'Close'}
+                    </ThemeButton>
+                    <HtmlTooltip title="Settings">
+                      <IconButton
+                        aria-label="setting"
                         onClick={() => {
-                          if (!isEqual(orisection, section) && permissions?.formBuilder?.isUpdate) {
-                            setShowConfirmDialog(true);
-                          } else {
-                            history.push({ pathname: routes.formBuilder.path });
-                          }
+                          setSettingDialog(true);
                         }}
+                        color="primary"
+                        size="small"
                       >
-                        {' '}
-                        {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
-                      </Button>
-                    </Box>
-                    <Box ml={2} mt={0.5}>
-                      <HtmlTooltip title="Settings">
-                        <IconButton
-                          aria-label="setting"
-                          onClick={() => {
-                            setSettingDialog(true);
-                          }}
-                          color="primary"
-                          size="small"
-                        >
-                          <Settings fontSize="small" />
-                        </IconButton>
-                      </HtmlTooltip>
-                    </Box>
+                        <Settings fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Grid>
                 </Grid>
               </Box>
@@ -512,7 +505,6 @@ const CreateFormBuilder = () => {
               </Box>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
