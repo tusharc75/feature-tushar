@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -433,8 +433,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           <Fragment>
             {progressiveBilling && (
               <Grid container className={styles.rental_header_layout}>
-                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                <Grid size={{xs:12, md:6, sm:12}} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                <Grid size={{xs:12, md:6, sm:12}} className={styles.filter_side}>
                   <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                     <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
                       <CustomDatePicker

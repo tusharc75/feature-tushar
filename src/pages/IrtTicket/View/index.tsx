@@ -1,5 +1,5 @@
 import { Box, Button, Paper, Typography } from '@mui/material';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { useHistory } from 'react-router-dom';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';

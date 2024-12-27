@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
-import { AddOutlined, Delete, ExpandMore } from '@mui/icons-material';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -16,7 +16,6 @@ import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';

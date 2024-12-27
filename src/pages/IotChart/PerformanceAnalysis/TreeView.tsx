@@ -1,6 +1,7 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Checkbox, FormControlLabel, Grid, IconButton, Theme, Typography } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
@@ -86,7 +87,7 @@ export default function CustomAccordian({ expandedAccordition, setExpandedAccord
                 ?.filter((d) => d?.category?.optionValue === category?._id)
                 ?.map((data) => {
                   return (
-                    <Grid item xs={12} sm={12} lg={12} md={12}>
+                    <Grid size={{xs:12, sm:12, lg:12, md:12}}>
                       <FormControlLabel
                         key={data?.fieldName}
                         title={data?.fieldLabel}

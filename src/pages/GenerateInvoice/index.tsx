@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, MenuItem, TextField } from '@mui/material';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -397,7 +398,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   return selectedResource ? (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs
             routes={[
               {
@@ -410,7 +411,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             ]}
           />
         </Grid>
-        <Grid item md={8} sm={1} xs={2} />
+        <Grid size={{md:8, sm:1, xs:2}} />
       </Grid>
       <div className="main-container">
         <ListingPageHeader

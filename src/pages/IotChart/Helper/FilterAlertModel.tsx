@@ -1,4 +1,5 @@
-import { Box, Checkbox, FormControlLabel, Grid, TextField } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 
 export default function FilterAlertModel({
@@ -14,7 +15,7 @@ export default function FilterAlertModel({
   return (
     <Box mt={2} mb={1}>
       <Grid container spacing={1}>
-        <Grid item md={4} lg={4} sm={6}>
+        <Grid size={{md:4, lg:4, sm:6}}>
           <Autocomplete
             options={[{ optionLabel: 'All', optionValue: 'All' }, ...alarmOptions]}
             getOptionLabel={(option) => (option && option?.optionLabel) || ''}
@@ -26,7 +27,7 @@ export default function FilterAlertModel({
             renderInput={(params) => <TextField {...params} label="Select Alarm" size="small" variant="outlined" />}
           />
         </Grid>
-        <Grid item md={4} lg={4} sm={6}>
+        <Grid size={{md:4, lg:4, sm:6}}>
           <Autocomplete
             options={alertOptions}
             getOptionLabel={(option: any) => option || ''}
@@ -38,7 +39,7 @@ export default function FilterAlertModel({
             renderInput={(params) => <TextField {...params} label="Select Alert" size="small" variant="outlined" />}
           />
         </Grid>
-        <Grid item md={4} lg={4} sm={6}>
+        <Grid size={{md:4, lg:4, sm:6}}>
           <Box ml={2}>
             <FormControlLabel
               control={

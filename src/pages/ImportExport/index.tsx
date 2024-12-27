@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Grid, Button, CircularProgress, Typography, IconButton } from '@mui/material';
+import { Box, Button, CircularProgress, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import axiosInstance from '../../axios/axiosInstance';
@@ -342,7 +343,7 @@ const ImportExport = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.importExport, title: resources?.importExport?.titlePlural }]} />
         </Grid>
       </Grid>
@@ -360,9 +361,9 @@ const ImportExport = () => {
           />
         </Box>
 
-        <Grid container xs={12} lg={12} md={12} style={{ maxWidth: '100%', justifyContent: 'space-between' }}>
-          <Grid container spacing={2} xs={8} lg={8} md={8}>
-            <Grid item>
+        <Grid container size={{xs:12, lg:12, md:12}} style={{ maxWidth: '100%', justifyContent: 'space-between' }}>
+          <Grid container spacing={2} size={{xs:8, lg:8, md:8}}>
+            <Grid >
               <input
                 id={`file`}
                 name={`file`}
@@ -387,7 +388,7 @@ const ImportExport = () => {
                 </>
               )}
             </Grid>
-            <Grid item>
+            <Grid >
               <Button
                 size="small"
                 variant="outlined"
@@ -401,7 +402,7 @@ const ImportExport = () => {
                 Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
               </Button>
             </Grid>
-            <Grid item>
+            <Grid >
               <Button
                 type="button"
                 size="small"
@@ -415,7 +416,7 @@ const ImportExport = () => {
               </Button>
             </Grid>
           </Grid>
-          <Grid container xs={4} lg={4} md={4} justify="flex-end">
+          <Grid container size={{xs:4, lg:4, md:4}} justifyContent="flex-end">
             <Button
               size="small"
               variant="outlined"
