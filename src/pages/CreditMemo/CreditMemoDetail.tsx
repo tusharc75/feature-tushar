@@ -22,7 +22,7 @@ import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { Skeleton } from '@mui/material';
 
-const creditMemoDetail = () => {
+const CreditMemoDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -187,17 +187,20 @@ const creditMemoDetail = () => {
           <Box className="control-buttons-v1">
             {creditMemoData ? (
               <>
-                {permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
-                  <ThemeButton
-                    iconForMobile={<RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} />}
-                    variant={'outlined'}
-                    onClick={openActions}
-                    disabled={updateLoading}
-                    endIcon={<ExpandMore />}
-                    mobileTooltip={'Change Status'}>
-                    Change Status
-                  </ThemeButton>
-                )}
+                {permissions?.creditMemo?.isUpdate &&
+                  allowedToEdit &&
+                  statusOptions?.length > 0 &&
+                  ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
+                    <ThemeButton
+                      iconForMobile={<RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} />}
+                      onClick={openActions}
+                      disabled={updateLoading}
+                      endIcon={<ExpandMore />}
+                      mobileTooltip={'Change Status'}
+                    >
+                      Change Status
+                    </ThemeButton>
+                  )}
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -239,10 +242,7 @@ const creditMemoDetail = () => {
                 {permissions?.creditMemo?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
-                    <ThemeButton
-                      iconForMobile={<EditIcon />}
-                      onClick={handleOpenUpdateDialog}
-                      mobileTooltip={'Edit'}>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}
@@ -330,4 +330,4 @@ const creditMemoDetail = () => {
   );
 };
 
-export default creditMemoDetail;
+export default CreditMemoDetail;

@@ -208,7 +208,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -274,10 +274,9 @@ const WorkOrderTechnician = () => {
     setFilterQuery(queryString);
   };
 
-
   useEffect(() => {
     localStorage.setItem(`${renderedFrom}_view`, viewType);
-  }, [viewType])
+  }, [viewType]);
 
   return (
     <Box className="main-container-v1">
@@ -351,7 +350,6 @@ const WorkOrderTechnician = () => {
                     onClick={() => {
                       setShowFilter(true);
                     }}
-                    variant="outlined"
                   >
                     Show Filters
                   </ThemeButton>
@@ -401,7 +399,6 @@ const WorkOrderTechnician = () => {
                         onClick={() => {
                           setShowFilter(true);
                         }}
-                        variant="outlined"
                       >
                         Show Filters
                       </ThemeButton>

@@ -1,7 +1,7 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ButtonProps } from '@mui/material';
 import React from 'react';
-import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type DeleteButtonProps = {
   text: string | React.ReactNode;
@@ -18,6 +18,7 @@ function DeleteButton({ text, onClick, children, mode = 'dark', isVisible = true
       className={` ${mode}`}
       tooltip={tooltip}
       borderColor="red"
+      textColor="red"
       mobileTooltip={mobileTooltip}
       onClick={onClick}
       {...rest}

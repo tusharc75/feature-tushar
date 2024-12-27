@@ -37,6 +37,7 @@
   --aliceblue: aliceblue;
   --productRed: #fe6168;
   --logoColor: #288c8c;
+  --primary-button-text: rgb(66, 66, 66);
 
   --warning: #fd7e14;
   --white: #fff;
@@ -132,6 +133,7 @@
   --dark-mode-border-color: #3d3d5c;
   --common-border-color: #3d3d5c;
   --accordion-details-border: #3d3d5c;
+  --primary-button-text: white;
 
   --dark-primary: #0e0e23;
   --dark-primary-rgb: 14, 14, 35;
@@ -2897,41 +2899,6 @@ svg.MuiSvgIcon-root {
   }
 }
 
-// .MuiTextField-root {
-//   .MuiFormLabel-root {
-//     color: #424242 !important;
-//   }
-// }
-.MuiButton-outlined,
-.MuiButton-outlinedPrimary {
-  color: #424242 !important;
-  border: 1px solid #dedede !important;
-  font-weight: 400 !important;
-  background-color: white !important;
-  box-shadow: unset !important;
-
-  &:disabled,
-  &.Mui-disabled {
-    background: #e5e5e5 !important;
-    opacity: 1 !important;
-    color: #5b5b5b !important;
-  }
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-  }
-
-  [data-mode='dark'] & {
-    background-color: #282845 !important;
-    color: white !important;
-    border: 1px solid var(--common-border-color) !important;
-
-    &:disabled {
-      opacity: 0.6 !important;
-    }
-  }
-}
-
 .azure-login {
   font-weight: 500 !important;
   color: #2a3547 !important;
@@ -2995,12 +2962,6 @@ svg.MuiSvgIcon-root {
       background: white;
       box-shadow: rgba(0, 0, 0, 0.06) 0px 5.44444px 27.2222px;
       border: 1px solid rgb(226, 226, 226);
-    }
-
-    [data-mode='dark'] & {
-      btn-outline-v1 {
-        background: var(--dark-primary) !important;
-      }
     }
   }
 
@@ -3285,86 +3246,6 @@ body {
 
     &:hover {
       background-color: rgba(0, 0, 0, 0.04) !important;
-    }
-  }
-
-  .btn-outline-v1 {
-    background: #ffffff !important;
-    border: 1px solid #dedede !important;
-    box-shadow: unset !important;
-    border-radius: 3px !important;
-    padding: var(--button-v1-padding);
-    font-weight: 400 !important;
-    font-size: 14.7483px !important;
-    line-height: 17px !important;
-    color: #424242;
-
-    &.MuiButton-text {
-      color: var(--primary-text) !important;
-      padding: 6px !important;
-      height: 32px;
-      border: none !important;
-      width: 34px;
-    }
-
-    &.with-border {
-      border: 1px solid var(--common-border-color) !important;
-    }
-
-    &.round {
-      border-radius: 9999px !important;
-    }
-
-    & > span {
-      line-height: 16px;
-      padding: 0;
-
-      svg {
-        height: 16px;
-      }
-    }
-
-    font-weight: 500;
-
-    &:disabled {
-      opacity: 0.5;
-    }
-
-    &:not(:focus):hover {
-      background-color: rgba(0, 0, 0, 0.04) !important;
-    }
-    &.no-hover:hover {
-      background: #ffffff !important;
-    }
-
-    &.light {
-      color: #737373;
-      font-weight: 400;
-    }
-
-    [data-mode='dark'] & {
-      background-color: #282845 !important;
-      color: white !important;
-      border: 1px solid #282845 !important;
-      &.no-hover:hover {
-        background-color: #282845 !important;
-      }
-      &:disabled {
-        opacity: 0.6 !important;
-      }
-    }
-  }
-
-  & .headerbox-v1 {
-    [data-mode='dark'] & {
-      .btn-outline-v1 {
-        background-color: var(--dark-primary) !important;
-        color: white !important;
-
-        &.MuiButton-text {
-          border: none !important;
-        }
-      }
     }
   }
 
@@ -4752,36 +4633,4 @@ td.google-visualization-orgchart-node {
 }
 .rbc-agenda-empty {
   display: none;
-}
-
-.btn-theme-outline-v1 {
-  position: relative;
-  overflow: hidden;
-  background: transparent;
-  border: 1px solid var(--new_theme_color);
-  color: var(--new_theme_color);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 22px;
-  padding: 3px 10px;
-  border-radius: 4px;
-  transition:
-    background 0.3s,
-    color 0.3s;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  outline-color: var(--new_theme_color);
-  &:hover {
-    background: var(--new_theme_color);
-    color: white;
-  }
-  &:disabled {
-    background: transparent;
-    color: var(--new_theme_color);
-    opacity: 0.6;
-    cursor: auto;
-    pointer-events: none;
-  }
 }

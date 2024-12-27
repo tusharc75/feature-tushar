@@ -227,9 +227,9 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                     return (
                       <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                         <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
-                        <Box className='flex gap-2'>
+                        <Box className="flex gap-2">
                           <HtmlTooltip title={'Edit'}>
-                            <IconButton size="small" >
+                            <IconButton size="small">
                               <AiFillEdit />
                             </IconButton>
                           </HtmlTooltip>
@@ -403,12 +403,12 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         <CustomDialogFooter>
           <ThemeButton
             borderColor="yellow"
+            backgroundColor="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
             disabled={isEmpty(formValues) ? true : false}
             size="small"
-            color="primary"
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </ThemeButton>

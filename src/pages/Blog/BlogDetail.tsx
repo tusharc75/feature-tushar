@@ -1,20 +1,19 @@
-import { Box, Button } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageBlog from './ManageBlog';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -105,7 +104,7 @@ const BlogDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.blog?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

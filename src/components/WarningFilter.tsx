@@ -32,15 +32,7 @@ const WarningFilter = ({ warnings, checkedFilter, setCheckedFilter }: WarningFil
           <span className="absolute -left-[3px] -top-[3px] inline-flex h-3 w-3 animate-ping rounded-full bg-sky-400 opacity-75"></span>
           <span className="inline-flex h-full  w-full rounded-full bg-sky-500"></span>
         </span>
-        <ThemeButton
-          size="small"
-          tooltip="Filter data by warnings"
-          mobileTooltip="Filter data by warnings"
-          variant="outlined"
-          iconForMobile={<BiFilterAlt />}
-          startIcon={<BiFilterAlt />}
-          onClick={handleClick}
-        >
+        <ThemeButton tooltip="Filter data by warnings" iconForMobile={<BiFilterAlt />} startIcon={<BiFilterAlt />} onClick={handleClick}>
           Warnings
         </ThemeButton>
       </span>

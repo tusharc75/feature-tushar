@@ -336,10 +336,7 @@ const RepairOrderDetails = () => {
                   </HtmlTooltip>
                 )}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
-                  <ButtonWithPulse
-                    onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                    id={'header-button-complete'}
-                  >
+                  <ButtonWithPulse onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)} id={'header-button-complete'}>
                     Complete
                   </ButtonWithPulse>
                 )}
@@ -369,10 +366,7 @@ const RepairOrderDetails = () => {
                       quotationVersionData?.status
                     ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
-                    <ThemeButton
-                      iconForMobile={<EditIcon />}
-                      onClick={() => setOpenUpdateDialog(true)}
-                      mobileTooltip={'Edit'}>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}
@@ -422,13 +416,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status
-                  )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                   ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                      setShowQuotationConfirmBox(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {
@@ -466,8 +460,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }

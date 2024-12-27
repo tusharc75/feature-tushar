@@ -926,7 +926,14 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
         <Fragment key={item.id}>{renderComponent(item)}</Fragment>
       ))}
       {menuItems.length > 0 && (
-        <ThemeButton onClick={openActions} endIcon={<ExpandMore />} mobileTooltip="Actions" borderColor="red" iconForMobile={<ExpandMore />}>
+        <ThemeButton
+          onClick={openActions}
+          endIcon={<ExpandMore />}
+          mobileTooltip="Actions"
+          borderColor="yellow"
+          backgroundColor="yellow"
+          iconForMobile={<ExpandMore />}
+        >
           Actions
         </ThemeButton>
       )}

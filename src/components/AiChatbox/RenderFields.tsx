@@ -102,7 +102,8 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
                 iconForMobile={false}
                 id="dialog-save-button"
                 fullWidth={!fullScreen}
-                color="primary"
+                textColor="white"
+                backgroundColor="theme"
                 style={{ padding: '6px 25px' }}
                 onClick={(e) => {
                   e.preventDefault();

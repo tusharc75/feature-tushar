@@ -1,9 +1,8 @@
-import { Button, Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@mui/material';
-import { Add, ArrowDropDown, ArrowDropUp, Delete, MoreHoriz } from '@mui/icons-material';
+import { Add, ArrowDropDown, ArrowDropUp, Delete } from '@mui/icons-material';
+import { Button, Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -63,7 +62,8 @@ const Sidebar = ({
         <div className="flex items-center justify-between gap-2">
           <ThemeButton
             borderColor="none"
-            color="primary"
+            backgroundColor="theme"
+            textColor="white"
             onClick={() => setCreateChannelDialog(true)}
             iconForMobile={<Add />}
             mobileTooltip="New Channel"

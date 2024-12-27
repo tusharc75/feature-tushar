@@ -69,8 +69,9 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   return (
     <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
-          }`}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
+          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+        }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>

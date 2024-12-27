@@ -26,7 +26,7 @@ const Section = <T,>({
   selectedTitle,
   isFilled = () => false,
   onButtonClick = (data) => {
-    () => { };
+    () => {};
   }
 }: SectionProps<T>) => {
   const [open, setOpen] = React.useState(true);

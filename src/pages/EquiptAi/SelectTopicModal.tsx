@@ -89,7 +89,14 @@ const SelectTopicModal = ({ handleClose, topics, setSelectedTopics, selectedTopi
           >
             Cancel
           </ThemeButton>
-          <ThemeButton disabled={selectedTopics.length === 0} color="primary" borderColor="none" iconForMobile={false} onClick={handleClose}>
+          <ThemeButton
+            disabled={selectedTopics.length === 0}
+            borderColor="none"
+            backgroundColor="theme"
+            textColor="white"
+            iconForMobile={false}
+            onClick={handleClose}
+          >
             Apply
           </ThemeButton>
         </>

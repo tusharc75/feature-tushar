@@ -204,12 +204,12 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
               iconForMobile={<LowPriority />}
               disabled={
                 allowedToEdit &&
-                  selectedService &&
-                  steps?.length > 0 &&
-                  resource === sidebarResource.workOrder &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )
+                selectedService &&
+                steps?.length > 0 &&
+                resource === sidebarResource.workOrder &&
+                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )
                   ? false
                   : true
               }

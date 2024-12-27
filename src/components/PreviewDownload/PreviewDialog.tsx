@@ -232,6 +232,7 @@ export const PreviewDialog = ({
                   }}
                   disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
                   borderColor="yellow"
+                  backgroundColor="yellow"
                 >
                   {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
                 </ThemeButton>
@@ -241,8 +242,8 @@ export const PreviewDialog = ({
           {operation === 'Send Email' ? (
             <ThemeButton
               borderColor="none"
-              color="primary"
-              size="small"
+              backgroundColor="theme"
+              textColor="white"
               isLoading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
@@ -256,7 +257,8 @@ export const PreviewDialog = ({
             <>
               <ThemeButton
                 borderColor="none"
-                color="primary"
+                backgroundColor="theme"
+                textColor="white"
                 id={'show-column-dialog-export-button'}
                 isLoading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
@@ -269,7 +271,8 @@ export const PreviewDialog = ({
               {hideDetailButton || type === 'Excel' ? null : (
                 <ThemeButton
                   borderColor="none"
-                  color="primary"
+                  backgroundColor="theme"
+                  textColor="white"
                   id={'show-column-dialog-operation-2-button'}
                   isLoading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}

@@ -193,8 +193,9 @@ const EquiptAi = () => {
                   <ThemeButton
                     mobileTooltip="New Chat"
                     iconForMobile={<Chat fontSize={'small'} />}
-                    color="primary"
                     borderColor="none"
+                    backgroundColor="theme"
+                    textColor="white"
                     startIcon={<Chat fontSize={'small'} />}
                     size="small"
                     onClick={() => hadleNewChat()}

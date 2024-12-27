@@ -147,11 +147,7 @@ const DriverMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.driverMaster?.isUpdate && (
-              <ThemeButton
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-                iconForMobile={false}
-              >
+              <ThemeButton onClick={handleClick} endIcon={<ArrowDropDownIcon />} iconForMobile={false}>
                 {'Change Status'}
               </ThemeButton>
             )}

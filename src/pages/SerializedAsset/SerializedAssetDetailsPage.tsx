@@ -282,7 +282,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -460,7 +460,7 @@ const SerializedAssetDetailsPage = () => {
                         <ThemeButton
                           onClick={openActions}
                           endIcon={<ExpandMore />}
-                          mobileTooltip='Change Status'
+                          mobileTooltip="Change Status"
                           disabled={updateLoading}
                           iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
                         >
@@ -468,11 +468,7 @@ const SerializedAssetDetailsPage = () => {
                         </ThemeButton>
                       )
                     ) : null}
-                    <ThemeButton
-                      iconForMobile={<EditIcon />}
-                      onClick={handleOpenUpdateDialog}
-                      mobileTooltip='Edit'
-                    >
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip="Edit">
                       Edit
                     </ThemeButton>
                     <Menu

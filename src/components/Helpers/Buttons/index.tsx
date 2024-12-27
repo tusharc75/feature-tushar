@@ -1,6 +1,5 @@
 import DeleteButton from './DeleteButton';
-import ThemeButton, { ButtonType } from './ThemeButton';
-import ThemeButton1, { ThemeButtonProps } from './ThemeButton1';
+import ThemeButton, { ThemeButtonProps } from './ThemeButton';
 
-export { DeleteButton, ThemeButton, ThemeButton1 };
-export type { ButtonType, ThemeButtonProps };
+export { DeleteButton, ThemeButton };
+export type { ThemeButtonProps };

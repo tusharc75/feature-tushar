@@ -174,8 +174,8 @@ const TransferInventoryDetailPage = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setAllowedToDelete(
           permissions?.transferInventory?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
-          data?.canEdit
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+            data?.canEdit
         );
         setTransferInventoryData(data);
       })
@@ -242,10 +242,7 @@ const TransferInventoryDetailPage = () => {
             {allowedToEdit &&
               ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
               transferInventoryData?.canComplete && (
-                <ButtonWithPulse
-                  id={`transfer-inventory-complete-button`}
-                  onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
-                >
+                <ButtonWithPulse id={`transfer-inventory-complete-button`} onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}>
                   Complete
                 </ButtonWithPulse>
               )}
