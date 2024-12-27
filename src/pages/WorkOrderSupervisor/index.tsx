@@ -100,7 +100,7 @@ const WorkOrderSupervisor = () => {
     {
       key: 'user',
       fieldName: 'user',
-      fieldLabel: resources?.employeeMaster.titlePlural,
+      fieldLabel: resources?.employeeMaster?.titlePlural,
       resource: sidebarResource.employeeMaster,
       type: 'dropDown'
     },

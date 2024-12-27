@@ -122,7 +122,7 @@ export default function NewCreateQuotePdfTemplate() {
     const options = [];
     PDF_RESOURCE_LIST?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value });
+        options.push({ title: resources[item.key] ? resources[item.key]?.titleSingular : item.title, value: item.value });
       }
     });
     for (const [key] of Object.entries(permissions)) {
