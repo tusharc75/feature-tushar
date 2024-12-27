@@ -166,7 +166,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

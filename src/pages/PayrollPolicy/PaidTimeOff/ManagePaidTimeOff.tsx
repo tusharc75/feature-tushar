@@ -162,7 +162,6 @@ const ManagePaidTimeOff = ({ payrollPolicyId, currency, id = null, onSuccess, on
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmationCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);

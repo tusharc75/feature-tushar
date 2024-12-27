@@ -192,7 +192,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
               <Fragment>
                 <CustomDialogHeader
                   title={id ? (isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}`) : 'Create Rule'}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialValue, values)) {
                       onClose();
                     } else {
@@ -442,7 +442,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

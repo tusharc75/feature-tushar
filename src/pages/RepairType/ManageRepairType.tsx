@@ -309,7 +309,6 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

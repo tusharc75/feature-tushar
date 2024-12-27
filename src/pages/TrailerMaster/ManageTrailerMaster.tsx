@@ -217,7 +217,6 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

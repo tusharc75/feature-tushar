@@ -320,7 +320,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                       setShowConfirmDialog(false);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

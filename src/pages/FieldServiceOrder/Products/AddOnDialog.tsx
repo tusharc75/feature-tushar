@@ -148,7 +148,6 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

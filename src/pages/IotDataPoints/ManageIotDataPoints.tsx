@@ -399,7 +399,6 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

@@ -142,7 +142,6 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

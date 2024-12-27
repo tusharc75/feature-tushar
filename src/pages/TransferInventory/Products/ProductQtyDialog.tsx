@@ -127,7 +127,6 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

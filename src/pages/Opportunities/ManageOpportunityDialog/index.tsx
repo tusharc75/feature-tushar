@@ -174,7 +174,7 @@ export default function ManageOpportunityDialog({
               <Fragment>
                 <CustomDialogHeader
                   title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
                     } else {

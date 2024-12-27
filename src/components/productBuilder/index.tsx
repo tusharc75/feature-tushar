@@ -829,7 +829,6 @@ const ProductBuilder = (props) => {
       {showConfirmDialog ? (
         <ConfirmCancelDialog
           open={showConfirmDialog}
-          close={() => setShowConfirmDialog(false)}
           onSave={() => {
             setShowConfirmDialog(false);
             // e.preventDefault();

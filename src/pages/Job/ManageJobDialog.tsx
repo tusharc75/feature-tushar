@@ -252,7 +252,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                       handleScroll(errors);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();

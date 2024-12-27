@@ -156,7 +156,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
             <Fragment>
               <CustomDialogHeader
                 title={title}
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
@@ -216,7 +216,6 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);

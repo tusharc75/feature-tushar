@@ -169,7 +169,6 @@ const ManageHolidays = ({ payrollPolicyId, currency, id = null, onSuccess, onClo
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmationCancelDialog
-                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);
