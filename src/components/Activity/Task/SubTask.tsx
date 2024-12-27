@@ -1,14 +1,13 @@
-import React, { useContext, useState } from 'react';
+import { Avatar, Chip, Grid, IconButton, TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { makeStyles } from '@mui/styles';
-import { Typography, Button, Grid, Chip, IconButton, TextField, CircularProgress, Avatar } from '@mui/material';
-import { DeleteOutline } from '@mui/icons-material';
+import { useContext, useState } from 'react';
 
+import { MdDelete } from 'react-icons/md';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { BsDot } from 'react-icons/bs';
-import { MdDelete } from 'react-icons/md';
 import { SubCaseColors } from '../Helpers/utils';
 
 const useStyles = makeStyles(() => ({
@@ -174,15 +173,14 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               error={isError && taskName.length < 3}
               helperText={isError && taskName.length < 3 && 'Task name must be at least 3 letters'}
             />
-            <Box mt={1}>
-              <Button color="primary" size="small" variant="contained" disabled={!taskName || isSubmitting} onClick={handleSave}>
-                {isSubmitting ? <CircularProgress size={18} /> : 'Create'}
-              </Button>
-              <Button variant="contained" size="small" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
-                {' '}
+            <div className="mt-2 flex gap-2">
+              <ThemeButton color="primary" borderColor="none" disabled={!taskName || isSubmitting} onClick={handleSave} isLoading={isSubmitting}>
+                Create
+              </ThemeButton>
+              <ThemeButton color="primary" borderColor="none" disableElevation onClick={() => setOpenAddSub(false)}>
                 Cancel
-              </Button>
-            </Box>
+              </ThemeButton>
+            </div>
           </Box>
         )}
       </Box>

@@ -60,10 +60,10 @@ const ViewAllDialog = <D,>({ getTitle, items, onClick, onClose, selectedTitle, t
       </div>
 
       <DialogContent className="!px-[--px] !py-[--py] !pt-0">
-        <div className="pb-[10px]">
+        <div className="pb-[10px] pt-1">
           <SearchBox fullWidth value={searchedVal} onChange={(e) => setSearchedValue(e.target.value)} autoComplete="off" />
         </div>
-        <ul className="max-h-[534px] min-h-[300px] space-y-2 overflow-y-auto">
+        <ul className="max-h-[300px] min-h-[300px] space-y-2 overflow-y-auto">
           {filteredItems?.map((item) => {
             return (
               <li

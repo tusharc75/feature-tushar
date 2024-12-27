@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, TreeView } from '@mui/x-tree-view';
+import { SimpleTreeView, TreeItem, TreeView } from '@mui/x-tree-view';
 import { Virtualizer } from '@tanstack/react-virtual';
 import React from 'react';
 
@@ -23,16 +23,16 @@ const types = [
 export default function ActivityList({ activity, expanded, selected, handleToggle, handleSelect, rowVirtualizer }: ActivityListProps) {
   return (
     <>
-      <TreeView
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpandIcon={<ChevronRightIcon />}
-        expanded={expanded}
-        selected={selected}
-        onNodeToggle={handleToggle}
+      <SimpleTreeView
         style={{
           height: rowVirtualizer.getTotalSize(),
           position: 'relative'
         }}
+        multiSelect={false}
+        expandedItems={expanded}
+        onExpandedItemsChange={handleToggle}
+        selectedItems={selected}
+        onSelectedItemsChange={handleSelect}
         // onNodeSelect={handleSelect}
       >
         {rowVirtualizer.getVirtualItems().map((row) => {
@@ -56,7 +56,7 @@ export default function ActivityList({ activity, expanded, selected, handleToggl
             </div>
           );
         })}
-      </TreeView>
+      </SimpleTreeView>
     </>
   );
 }
