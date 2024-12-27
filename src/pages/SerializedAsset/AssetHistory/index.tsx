@@ -65,7 +65,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     {
       key: INVENTORY_HISTORY_TYPE.transferAssets,
       resource: sidebarResource.transferAsset,
-      title: resources?.transferAsset.titlePlural
+      title: resources?.transferAsset?.titlePlural
     }
     // {
     //   key: INVENTORY_HISTORY_TYPE.purchaseOrder,
@@ -152,9 +152,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -526,8 +526,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

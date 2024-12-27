@@ -1,5 +1,4 @@
 import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
-import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 
 export const generateAddExistingProduct = (waitForStepInsertion = false): WalkmeData => ({

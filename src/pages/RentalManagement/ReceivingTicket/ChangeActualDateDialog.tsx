@@ -1,5 +1,6 @@
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@mui/material';
+import { Button, CircularProgress, Dialog, Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -117,7 +118,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                 <Box p={2}>
                   <Grid container spacing={2}>
                     {data?.isAllowedStartDate && (
-                      <Grid item xs={12} sm={12}>
+                      <Grid size={{xs:12, sm:12}}>
                         <FormTypes
                           size="small"
                           fullWidth
@@ -136,7 +137,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                       </Grid>
                     )}
                     {data?.isAllowedEndDate && (
-                      <Grid item xs={12} sm={12}>
+                      <Grid size={{xs:12, sm:12}}>
                         <FormTypes
                           size="small"
                           fullWidth

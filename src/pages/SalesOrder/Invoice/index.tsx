@@ -1,6 +1,6 @@
 import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -208,7 +208,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     <Fragment>
       <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
 
-      <Grid item xs={12} md={12} sm={12}>
+      <Grid size={{xs:12, md:12, sm:12}}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable

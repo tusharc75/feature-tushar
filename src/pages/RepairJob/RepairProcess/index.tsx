@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
+import { Box, Button, Dialog, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval, FcCancel } from 'react-icons/fc';
@@ -105,16 +106,16 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                 </Box>
                 <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
-                    <Grid item xs={1} sm={1} md={1} lg={1}>
+                    <Grid size={{xs:1, sm:1, md:1, lg:1}}>
                       <Typography variant="body2">Sr.</Typography>
                     </Grid>
-                    <Grid item xs={5} sm={5} md={5} lg={5}>
+                    <Grid size={{xs:5, sm:5, md:5, lg:5}}>
                       <Typography variant="body2">Repair Step</Typography>
                     </Grid>
-                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Grid size={{xs:3, sm:3, md:3, lg:3}}>
                       <Typography variant="body2">Action</Typography>
                     </Grid>
-                    <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Grid size={{xs:3, sm:3, md:3, lg:3}}>
                       <Typography variant="body2">Duration</Typography>
                     </Grid>
                   </Grid>
@@ -122,13 +123,13 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                 {process?.steps?.map((step, index) => (
                   <Box key={index} p={2} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
-                      <Grid item xs={1} sm={1} md={1} lg={1}>
+                      <Grid size={{xs:1, sm:1, md:1, lg:1}}>
                         <Typography variant="body2">{step.order}</Typography>
                       </Grid>
-                      <Grid item xs={5} sm={5} md={5} lg={5}>
+                      <Grid size={{xs:5, sm:5, md:5, lg:5}}>
                         <Typography variant="body2">{step.name}</Typography>
                       </Grid>
-                      <Grid item xs={3} sm={3} md={3} lg={3}>
+                      <Grid size={{xs:3, sm:3, md:3, lg:3}}>
                         {activeStep === index ? (
                           step.status === REPAIR_PROCESS_STATUS.start ? (
                             <Fragment>
@@ -176,7 +177,7 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                           </HtmlTooltip>
                         )}
                       </Grid>
-                      <Grid item xs={3} sm={3} md={3} lg={3}>
+                      <Grid size={{xs:3, sm:3, md:3, lg:3}}>
                         {step.startDate && <Typography variant="body2">Start Date - {displayDateTime(step.startDate)}</Typography>}
                         {step.endDate && <Typography variant="body2">End Date - {displayDateTime(step.endDate)}</Typography>}
                       </Grid>

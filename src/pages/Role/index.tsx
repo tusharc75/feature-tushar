@@ -17,12 +17,10 @@ import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/As
 import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import { PERMISSION } from '../../constants/Roles';
 import {
   ROLE_TIER,
   gridLoadingTimeout,
-  isObjectEmpty,
   localStorageKeys,
   prepareDataForGrid,
   roleTypes,

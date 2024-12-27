@@ -1,7 +1,7 @@
 import { makeStyles } from '@mui/styles';
-import { Grid, Typography, IconButton, Theme } from '@mui/material';
+import { Typography, IconButton, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
 import BoxWithBorder from '../../components/BoxWithBorder';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -49,7 +49,7 @@ export default function AssignedEntities({ data, unassignEntity, permissions, se
       {data && data.length ? (
         <Grid container spacing={1}>
           {data.map((obj, index) => (
-            <Grid item md={6} xs={12} sm={12} key={index}>
+            <Grid size={{md:6, xs:12, sm:12}} key={index}>
               <BoxWithBorder>
                 <span
                   className={classes.actionsItems}

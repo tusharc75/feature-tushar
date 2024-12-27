@@ -2,7 +2,7 @@ import React from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition, ASSET_STATUS } from '../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -36,7 +36,7 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
         <Box>
           <Box pt={3} pb={3}>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={12} md={12}>
+              <Grid size={{xs:12, sm:12, md:12}}>
                 <TextField
                   id="outlined-multiline-static"
                   label={status === ASSET_STATUS.scrap ? 'Scrapping Reason' : status === ASSET_STATUS.lost ? 'Lost Reason' : 'Comment'}

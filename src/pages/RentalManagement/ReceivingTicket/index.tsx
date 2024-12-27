@@ -1,6 +1,6 @@
 import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { ExpandMore } from '@mui/icons-material';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
@@ -2211,7 +2211,7 @@ const ReceivingTicket = ({
           rightSideContents={rightSideContents()}
           hasXpadding
         />
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}

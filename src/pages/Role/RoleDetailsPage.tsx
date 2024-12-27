@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, CircularProgress, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
 import { Autocomplete, Skeleton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
@@ -572,10 +573,10 @@ const RoleDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Grid size={{xs:12, sm:12, md:8, lg:8}}>
               <div className="mb-4">
                 <Grid container spacing={1}>
-                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <Grid size={{lg:5, md:5, sm:12, xs:12}}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -587,7 +588,7 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <Grid size={{lg:5, md:5, sm:12, xs:12}}>
                     <TextField
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                       required
@@ -599,7 +600,7 @@ const RoleDetailsPage = () => {
                       onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
                     />
                   </Grid>
-                  <Grid item lg={2} md={2} sm={12} xs={12}>
+                  <Grid size={{lg:2, md:2, sm:12, xs:12}}>
                     <Autocomplete
                       id={`roleTier`}
                       disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
@@ -727,7 +728,7 @@ const RoleDetailsPage = () => {
               </div>
               <Box marginY={2} />
             </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
+            <Grid size={{xs:12, sm:12, md:4, lg:4}}>
               <Box className="single-form-v1 ">
                 <Box className="form-head-v1">
                   <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>

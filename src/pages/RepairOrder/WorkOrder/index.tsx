@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, MenuItem, TextField } from '@mui/material';
+import { Box, IconButton, MenuItem, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -1338,7 +1339,7 @@ const WorkOrder = ({
       />
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5} width={'100%'}>
               <CustomReactTable

@@ -1,6 +1,6 @@
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -298,7 +298,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center" gridGap={8}>
+        <Box display="flex" alignItems="center" gap={8}>
           {allowedToEdit && (
             <Fragment>
               <Button
@@ -351,7 +351,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}

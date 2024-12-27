@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import AddIcon from '@mui/icons-material/AddCircle';
@@ -288,9 +289,9 @@ const ManageSerializedAsset = ({
                           <Box marginY={2}>
                             <Grid spacing={3} container>
                               {form.sectionFields.map((field, index2) => (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                   {field.fieldName === 'product' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -367,7 +368,7 @@ const ManageSerializedAsset = ({
                                       </Box>
                                     </Grid>
                                   ) : field.fieldName === 'productCategory' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes

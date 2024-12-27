@@ -660,7 +660,7 @@ const Quotation = ({
             </Box>
           )}
           {allowedToEdit && (
-            <Box display={'flex'} gridGap={8}>
+            <Box display={'flex'} gap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
                   quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (

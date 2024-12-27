@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import HistoryIcon from '@mui/icons-material/History';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -227,7 +227,7 @@ const SerializedAssetsCertification = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+        <Grid size={{md:4, sm:11, xs:10}}>
           <CustomBreadCrumbs routes={[{ ...routes.serializedAssetsCertification, title: resources?.serializedAssetsCertification?.titlePlural }]} />
         </Grid>
       </Grid>

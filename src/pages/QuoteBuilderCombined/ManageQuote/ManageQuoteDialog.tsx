@@ -1,4 +1,5 @@
-import { Box, Button, Grid, IconButton, InputAdornment } from '@mui/material';
+import { Box, Button, IconButton, InputAdornment } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import AddIcon from '@mui/icons-material/AddCircle';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -521,7 +522,7 @@ export default function ManageQuoteDialog({
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
-                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                    <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                       {field.fieldName === 'quoteName' ? (
                                         <FormTypes
                                           {...field}
@@ -551,10 +552,10 @@ export default function ManageQuoteDialog({
                                       ) : field.fieldName === 'opportunity' ? (
                                         <Grid container spacing={1}>
                                           <Grid
-                                            item
-                                            xs={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
-                                            sm={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
-                                            md={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
+                                            size={{
+                                            xs:permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11,
+                                            sm:permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11,
+                                            md:permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}}
                                           >
                                             <FormTypes
                                               {...field}
@@ -580,7 +581,7 @@ export default function ManageQuoteDialog({
                                             />
                                           </Grid>
                                           {permissions.opportunity?.isCreate && !isRenderedFromOpportunity && (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{xs:1, sm:1, md:1}}>
                                               <HtmlTooltip title="Create Opportunity" className="mt-1">
                                                 <IconButton
                                                   onClick={() => {
@@ -603,7 +604,7 @@ export default function ManageQuoteDialog({
                                             </Grid>
                                           )}
                                           {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{xs:1, sm:1, md:1}}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
@@ -612,7 +613,7 @@ export default function ManageQuoteDialog({
                                         </Grid>
                                       ) : field.fieldName === 'pDFTemplate' ? (
                                         <Grid container spacing={1}>
-                                          <Grid item xs={11} sm={11} md={11}>
+                                          <Grid size={{xs:11, sm:11, md:11}}>
                                             <FormTypes
                                               {...field}
                                               isNew={isNew}
@@ -635,7 +636,7 @@ export default function ManageQuoteDialog({
                                               size="small"
                                             />
                                           </Grid>
-                                          <Grid item xs={1} sm={1} md={1}>
+                                          <Grid size={{xs:1, sm:1, md:1}}>
                                             <HtmlTooltip title="Preview PDF Template" className="mt-1">
                                               <IconButton
                                                 disabled={!values.pDFTemplate}
@@ -649,7 +650,7 @@ export default function ManageQuoteDialog({
                                             </HtmlTooltip>
                                           </Grid>
                                           {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{xs:1, sm:1, md:1}}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
@@ -828,10 +829,10 @@ export default function ManageQuoteDialog({
                                       ) : field.fieldName == 'projectSales' ? (
                                         <Grid container spacing={1}>
                                           <Grid
-                                            item
-                                            xs={permissions?.projectSales?.isCreate ? 10 : 11}
-                                            sm={permissions?.projectSales?.isCreate ? 10 : 11}
-                                            md={permissions?.projectSales?.isCreate ? 10 : 11}
+                                            size={{
+                                            xs:permissions?.projectSales?.isCreate ? 10 : 11,
+                                            sm:permissions?.projectSales?.isCreate ? 10 : 11,
+                                            md:permissions?.projectSales?.isCreate ? 10 : 11}}
                                           >
                                             <FormTypes
                                               {...field}
@@ -857,7 +858,7 @@ export default function ManageQuoteDialog({
                                             />
                                           </Grid>
                                           {permissions?.projectSales?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{xs:1, sm:1, md:1}}>
                                               <HtmlTooltip title="Add Project List" className="mt-1">
                                                 <IconButton
                                                   onClick={() => {
@@ -872,7 +873,7 @@ export default function ManageQuoteDialog({
                                             </Grid>
                                           )}
                                           {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
+                                            <Grid size={{xs:1, sm:1, md:1}}>
                                               <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
                                               </HtmlTooltip>
