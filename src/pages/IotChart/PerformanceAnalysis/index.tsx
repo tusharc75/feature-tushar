@@ -1,4 +1,5 @@
-import { Box, FormGroup, Grid, IconButton, useMediaQuery } from '@mui/material';
+import { Box, FormGroup, IconButton, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -66,7 +67,7 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
         <Grid>
           <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
         </Grid>
-        <Grid item>
+        <Grid >
           <SearchBox
             onChange={(e) => {
               setSearchValue(e.target.value);

@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Typography, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -338,7 +339,7 @@ const MaterialHandling = () => {
         {workOrder ? (
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4} lg={3}>
+              <Grid size={{xs:12, md:4, lg:3}}>
                 <Box className="container-with-border" p={2}>
                   <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
                     {workOrder?.map((data, index) => {
@@ -432,7 +433,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Box>
               </Grid>
-              <Grid item xs={12} md={8} lg={filterByIds?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}>
+              <Grid size={{xs:12, md:8, lg:filterByIds?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}}>
                 {selectedWorkOrder && (
                   <>
                     {isMobile ? (

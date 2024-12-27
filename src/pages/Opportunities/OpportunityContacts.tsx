@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { Card, IconButton, CardContent, Grid, Menu, MenuItem } from '@mui/material';
+import { Card, IconButton, CardContent, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -44,12 +45,12 @@ export default function OpportunityContacts({
           <Grid container spacing={2}>
             {[...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
               return (
-                <Grid key={index} item xs={12} sm={6} md={4}>
+                <Grid key={index} size={{xs:12, sm:6, md:4}}>
                   <Card className="detailCard   card-v1">
                     <CardContent className="card-link">
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Grid container className="detailCardHeader">
-                          <Grid item xs={12} sm={12}>
+                          <Grid size={{xs:12, sm:12}}>
                             {
                               <Link className="link" target="_blank" rel="noopener noreferrer" to={`/${contactApi}/detail/${obj._id}`}>
                                 <Typography className="detailName">
@@ -62,11 +63,11 @@ export default function OpportunityContacts({
                           </Grid>
                         </Grid>
                         <Grid container>
-                          <Grid item xs={12} md={6}>
+                          <Grid size={{xs:12, md:6}}>
                             {<DisplayData key="2" label="Email" showCopyToText={true} icon={<AiOutlineMail size={15} />} value={obj.email || ''} />}
                           </Grid>
                           {supplierContact.contactApi === contactApi && (
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{xs:12, md:6}}>
                               {
                                 <Link
                                   target="_blank"
@@ -84,7 +85,7 @@ export default function OpportunityContacts({
                               }
                             </Grid>
                           )}
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid size={{xs:12, sm:6, md:6}}>
                             {<DisplayData key="3" label="Phone" showCopyToText={true} icon={<BiPhone size={15} />} value={obj.phone || ''} />}
                           </Grid>
                         </Grid>
@@ -105,7 +106,7 @@ export default function OpportunityContacts({
     <Accordion expanded={isExpanded} className="omsAccordian" onChange={onSetExpanded}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
         <Grid container className="pos_rel">
-          <Grid item xs={8}>
+          <Grid size={{xs:8}}>
             <Box display="flex">
               <Box>
                 <IconButton size="small">{isExpanded === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -117,7 +118,7 @@ export default function OpportunityContacts({
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={4} container justify="flex-end">
+          <Grid size={{xs:4}} container justifyContent="flex-end">
             {allowedToEdit && (
               <>
                 <IconButton

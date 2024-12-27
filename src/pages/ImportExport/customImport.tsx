@@ -2,7 +2,6 @@ import { useContext, useState } from 'react';
 import {
   Dialog,
   Button,
-  Grid,
   TextField,
   TableBody,
   TableCell,
@@ -15,6 +14,7 @@ import {
   CircularProgress,
   Paper
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -85,8 +85,8 @@ export const CustomImport = ({
       <Dialog open={open} onClose={() => handleClose()} TransitionComponent={CustomDialogTransition} fullScreen={true} fullWidth maxWidth="md">
         <CustomDialogHeader title="Custom File Import" onClose={() => handleClose()} />
         <CustomDialogContent>
-          <Grid container xs={12} lg={12} md={12} spacing={1} style={{ marginTop: '10px' }}>
-            <Grid item>
+          <Grid container size={{xs:12, lg:12, md:12}} spacing={1} style={{ marginTop: '10px' }}>
+            <Grid >
               <input
                 id={`customImportFile`}
                 name={`customImportFile`}
@@ -102,13 +102,13 @@ export const CustomImport = ({
                 </Button>
               </label>
             </Grid>
-            <Grid item style={{ display: 'flex' }}>
+            <Grid  style={{ display: 'flex' }}>
               {isImgUploading && (
                 <Grid container spacing={1}>
-                  <Grid item>
+                  <Grid >
                     <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
                   </Grid>
-                  <Grid item>
+                  <Grid >
                     <Box>
                       <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
                     </Box>

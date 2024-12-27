@@ -1,4 +1,5 @@
-import { Box, Button, Chip, CircularProgress, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, Dialog, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -339,7 +340,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         />
                       </Box>
                       <Grid container>
-                        <Grid item xs={6}>
+                        <Grid size={{xs:6}}>
                           {formulaError && (
                             <Typography variant="caption" display="block">
                               {formulaError}{' '}

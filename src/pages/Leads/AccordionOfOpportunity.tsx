@@ -1,4 +1,5 @@
-import { Box, Card, CardContent, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Card, CardContent, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -47,7 +48,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
       <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -66,7 +67,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                 {opportunity ? (
                   <Grid container spacing={1}>
                     {
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
+                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={1}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <div className="mb-2">

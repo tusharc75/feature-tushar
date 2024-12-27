@@ -1,4 +1,5 @@
-import { Box, Button, Chip, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
 import moment from 'moment';
@@ -50,7 +51,7 @@ const Approver = ({ irtTicketData }) => {
   return (
     <Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={5} md={4} lg={3}>
+        <Grid size={{xs:12, sm:5, md:4, lg:3}}>
           <Grid
             container
             spacing={2}
@@ -72,7 +73,7 @@ const Approver = ({ irtTicketData }) => {
             </Box>
             {approver ? (
               approver?.map((item, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid size={{xs:12}} key={index}>
                   <Box
                     style={{
                       borderWidth: '1px',
@@ -101,19 +102,19 @@ const Approver = ({ irtTicketData }) => {
                     }}
                   >
                     <Grid container alignItems={'center'} spacing={1}>
-                      <Grid item>
+                      <Grid>
                         <PersonIcon />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Typography>{item?.user?.optionLabel}</Typography>
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip color="primary" label={item?.type} />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         <Chip color="primary" label={item?.status} />
                       </Grid>
-                      <Grid item>
+                      <Grid>
                         {item?.status === 'Send' && (
                           <HtmlTooltip title="Delete">
                             <IconButton
@@ -139,7 +140,7 @@ const Approver = ({ irtTicketData }) => {
             )}
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={7} md={8} lg={9}>
+        <Grid size={{xs:12, sm:7, md:8, lg:9}}>
           {selected && (
             <Box
               p={2}

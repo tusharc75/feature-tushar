@@ -1,6 +1,6 @@
-import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { startCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -80,7 +80,7 @@ export default function Current({ deviceTemplate, assetId }) {
     <>
       <Box pb={2}>
         <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
-          <Grid item>
+          <Grid >
             <SearchBox
               onChange={(e) => {
                 setSearchValue(e.target.value);
@@ -88,7 +88,7 @@ export default function Current({ deviceTemplate, assetId }) {
               value={searchValue}
             />
           </Grid>
-          <Grid item>
+          <Grid >
             <HtmlTooltip title="Refresh">
               <IconButton
                 size="small"
@@ -104,7 +104,7 @@ export default function Current({ deviceTemplate, assetId }) {
         </Grid>
       </Box>
       <Grid container spacing={2}>
-        <Grid item lg={8} md={8} sm={12} xs={12}>
+        <Grid size={{lg:8, md:8, sm:12, xs:12}}>
           {categories && currentData ? (
             currentData?.length ? (
               <div className="grid gap-3 md:gap-4">
@@ -134,7 +134,7 @@ export default function Current({ deviceTemplate, assetId }) {
             </Box>
           )}
         </Grid>
-        <Grid item lg={4} md={4} sm={12} xs={12}>
+        <Grid size={{lg:4, md:4, sm:12, xs:12}}>
           {errorData ? (
             <div className="rounded-lg border shadow-lg">
               <div className="head pb-2 pt-4 md:p-6 md:pb-3">

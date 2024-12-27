@@ -1,8 +1,9 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -196,7 +197,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
 
   return (
     <Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
