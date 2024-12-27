@@ -2104,7 +2104,7 @@ const FormTypes = (props) => {
             />
           </Grid>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid size={{xs:2}}>
+            <Grid size={{ xs: 2 }}>
               <Box style={{ marginTop: '7px' }}>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
@@ -2241,7 +2241,7 @@ const FormTypes = (props) => {
                       }}
                     />
                   </Grid>
-                  <Grid size={{xs : 'auto'}}>
+                  <Grid size={{ xs: 'auto' }}>
                     {parts?.map((part, index) => (
                       <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                         {part.text}
@@ -2325,7 +2325,7 @@ const FormTypes = (props) => {
                     }}
                   />
                 </Grid>
-                <Grid  size={{ xs: 'auto'}}>
+                <Grid size={{ xs: 'auto' }}>
                   {parts?.map((part, index) => (
                     <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                       {part.text}
@@ -2563,7 +2563,7 @@ const FormTypes = (props) => {
         </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
-            <Grid size={{ xs:12, sm:12, md:12}}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2631,7 +2631,7 @@ const FormTypes = (props) => {
                   </>
                 ))}
                 {isFileUploading && (
-                  <Grid size={{ xs:10, sm:10, md:10}}>
+                  <Grid size={{ xs: 10, sm: 10, md: 10 }}>
                     <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
                       {`Uploading... ${fileUploadProgress}%`}
                     </Typography>
