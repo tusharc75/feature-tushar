@@ -1,6 +1,5 @@
 import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@mui/material';
 import React, { ReactNode, useMemo } from 'react';
-import { FaMobileButton } from 'react-icons/fa6';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 
@@ -62,7 +61,7 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ButtonType>(
   (
     {
       borderColor = 'default',
-      iconForMobile = <FaMobileButton size={18} />,
+      iconForMobile = false,
       children,
       tooltip = '',
       isLoading,

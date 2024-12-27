@@ -1,11 +1,10 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import { ArrowForward } from '@mui/icons-material';
 import Grid from '@mui/material/Grid';
-import { Button, IconButton } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import HideWhenOffline from '../HideWhenOffline';
-import Activity from '.';
+import { Fragment, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Activity from '.';
+import HideWhenOffline from '../HideWhenOffline';
 
 const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelatedTo = null, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
@@ -28,8 +27,10 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
     <Fragment>
       <HideWhenOffline>
         <ThemeButton
+          mobileTooltip="Workspace"
           borderColor="none"
-          endIcon={<ArrowForwardIcon />}
+          endIcon={<ArrowForward />}
+          iconForMobile={<ArrowForward />}
           id="collaborator-button"
           onClick={() => setActivityShow(!showActivity)}
           color="primary"
