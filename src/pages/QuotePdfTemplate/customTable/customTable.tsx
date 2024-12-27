@@ -1,12 +1,11 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Add, Cancel, Delete } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
-import { makeStyles } from '@mui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 
 export default function customTable({ id, classes, entity, table, setTable }) {
@@ -31,7 +30,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
   }
   return (
     <>
-      <Grid item xs={12} className="mt-4">
+      <Grid size={{xs:12}} className="mt-4">
         <Box className={classes.tinyMCEContainer}>
           <Typography className={classes.headingLabel} variant="h5" component="h5">
             Tables

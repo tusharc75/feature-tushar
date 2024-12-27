@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@mui/material';
+import { Box, Button, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -224,7 +225,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       size="small"
                                     />
                                   ) : rateChangeFields.includes(field.fieldName) && !bulkEdit ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -304,7 +305,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       </Box>
                                     </Grid>
                                   ) : field.fieldName === 'competence' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -362,7 +363,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                       </Box>
                                     </Grid>
                                   ) : (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes

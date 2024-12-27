@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme } from '@mui/material';
+import { Dialog, Button, CircularProgress, Box, TextField, Paper, useTheme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
@@ -214,7 +215,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} item xs={12} sm={6} md={6}>
+                <Grid key={i} size={{xs:12, sm:6, md:6}}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}

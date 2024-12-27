@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@mui/material';
+import { Dialog, Box, Button, TextField, CircularProgress } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
 import { CustomDialogTransition, REPORT_LIST } from 'src/constants/helpers';
@@ -351,7 +352,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs:12, sm:6}}>
                         <TextField
                           value={values.customReportName}
                           required
@@ -365,7 +366,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                           helperText={touched['customReportName'] && errors['customReportName']}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs:12, sm:6}}>
                         <Autocomplete
                           options={resourceOption}
                           fullWidth
@@ -403,7 +404,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                   </div>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs:12, sm:6}}>
                         <Autocomplete
                           options={filterOptions}
                           fullWidth
@@ -441,7 +442,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                         setStatusPeriodDate={setStatusPeriodDate}
                         setStatusTimeFrame={setStatusTimeFrame}
                       />
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs:12, sm:6}}>
                         <Autocomplete
                           options={resourceColumns.map((item) => item.fieldData)}
                           fullWidth

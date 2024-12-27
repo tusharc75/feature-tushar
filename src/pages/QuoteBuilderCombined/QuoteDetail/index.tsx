@@ -9,7 +9,6 @@ import ReactDOM from 'react-dom';
 import { BiLayerPlus } from 'react-icons/bi';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
-import { IoArrowDownCircleSharp } from 'react-icons/io5';
 import { MdDelete } from 'react-icons/md';
 import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
 import { useHistory, useLocation, useParams } from 'react-router-dom';

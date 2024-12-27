@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect, Fragment } from 'react';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import { makeStyles } from '@mui/styles';
 import axiosInstance from '../../axios/axiosInstance';
@@ -552,7 +551,7 @@ export default function NewCreateQuotePdfTemplate() {
               <div className={`main-container ${classes.mainContainer}`}>
                 <Box className={classes.paper}>
                   <Grid container>
-                    <Grid item xs={12} md={6}></Grid>
+                    <Grid size={{xs:12, md:6}}></Grid>
                   </Grid>
 
                   <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
@@ -769,7 +768,7 @@ export default function NewCreateQuotePdfTemplate() {
                     />
                   </div>
 
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{xs:12}} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Header
@@ -794,7 +793,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{xs:12}} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Above Table
@@ -817,7 +816,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{xs:12}} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Below Table
@@ -840,7 +839,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{xs:12}} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Footer
@@ -864,7 +863,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid item xs={12} className="mt-4">
+                  <Grid size={{xs:12}} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Tabel Summary Left Side

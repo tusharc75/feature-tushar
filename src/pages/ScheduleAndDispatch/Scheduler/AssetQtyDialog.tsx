@@ -1,4 +1,5 @@
-import { Button, Dialog, Grid, TextField } from '@mui/material';
+import { Button, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -66,7 +67,7 @@ const AssetQtyDialog = ({ warehouse, product, handleClose, handleSuccess }) => {
             <Fragment>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid xs={12} md={12} sm={12} item>
+                  <Grid size={{xs:12, md:12, sm:12}}>
                     <TextField
                       margin="dense"
                       size="small"

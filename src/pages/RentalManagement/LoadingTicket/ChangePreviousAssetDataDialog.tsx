@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { FieldArray, Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -289,7 +290,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
                                     <FormTypes
                                       {...field}
                                       fieldData={field}

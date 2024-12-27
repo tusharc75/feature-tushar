@@ -1,4 +1,5 @@
-import { Box, Button, Grid, IconButton } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
@@ -228,7 +229,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
               </Box>
             </Box>
           )}
-          <Grid item xs={12} md={12} sm={12} className="mt-3">
+          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 250px)'}
