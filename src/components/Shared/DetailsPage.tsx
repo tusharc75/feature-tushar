@@ -35,6 +35,7 @@ import GoogleMaps from 'src/components/GoogleMap';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
+import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fieldText: {
@@ -102,12 +103,12 @@ interface DetailProps {
 }
 
 const Details = (props: DetailProps) => {
+
   const classes = useStyles();
   const {
     state: { permissions, user }
   }: any = useData();
   const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null } = props;
-
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [formDataWithFollowUps, setFormDataWithFollowUps] = useState([]);
@@ -452,6 +453,11 @@ const Details = (props: DetailProps) => {
           </>
         );
       }
+
+      if (fieldData.type === 'richTextEditor') {
+        return <RichTextEditorCell field={fieldData} original={val} enableDilaog={false} />;
+      }
+
       if (fieldData.type === 'freeStyleMultiSelect') {
         return (
           <div className={cn(classes.fieldText, ' flex !w-full items-center')}>
