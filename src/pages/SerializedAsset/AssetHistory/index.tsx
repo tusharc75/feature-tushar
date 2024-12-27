@@ -6,7 +6,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
+import { displayDate, displayDateTime, INVENTORY_HISTORY_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -468,8 +468,8 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
       deepFilters.push({
         field: 'date',
         term: {
-          from: moment(duration?.from).format('MM/DD/YYYY'),
-          to: moment(duration?.to).format('MM/DD/YYYY')
+          from: displayDate(duration?.from),
+          to: displayDate(duration?.to)
         }
       });
     }

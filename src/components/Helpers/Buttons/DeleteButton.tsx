@@ -1,21 +1,30 @@
-import React from 'react';
-import { Button, ButtonProps, useMediaQuery } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { ButtonProps } from '@mui/material';
+import React from 'react';
+import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
 
 export type DeleteButtonProps = {
   text: string | React.ReactNode;
   mode?: 'dark' | 'light';
   isVisible?: boolean;
+  tooltip?: string;
+  mobileTooltip?: string;
 } & ButtonProps;
 
-function DeleteButton({ text, onClick, children, mode = 'dark', isVisible = true, ...rest }: DeleteButtonProps) {
-  const isMobile = useMediaQuery('(max-width:600px)');
-
+function DeleteButton({ text, onClick, children, mode = 'dark', isVisible = true, tooltip = '', mobileTooltip = '', ...rest }: DeleteButtonProps) {
   if (!isVisible) return null;
   return (
-    <Button className={`btn-outline-red-v1 ${mode}`} variant={isMobile ? 'text' : 'contained'} size="small" onClick={onClick} {...rest}>
-      {children ? children : isMobile ? <DeleteIcon style={{ fontSize: 18 }} /> : text}
-    </Button>
+    <ThemeButton
+      className={` ${mode}`}
+      tooltip={tooltip}
+      borderColor="red"
+      mobileTooltip={mobileTooltip}
+      onClick={onClick}
+      {...rest}
+      iconForMobile={<DeleteIcon style={{ fontSize: 18 }} />}
+    >
+      {children || text}
+    </ThemeButton>
   );
 }
 

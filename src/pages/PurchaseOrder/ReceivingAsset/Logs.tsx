@@ -7,7 +7,6 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { capitalize } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
-import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const renderedFrom = `purchaseOrder_logs`;
