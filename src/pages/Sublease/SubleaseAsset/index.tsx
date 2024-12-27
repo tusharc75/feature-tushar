@@ -85,7 +85,8 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        newColumns = newColumns?.filter((c)=>c?.accessor!=="wellName");
         newColumns?.forEach((o) => {
           if (data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'singleLine' && o?.accessor !== 'assetNumber') {
             o.editable = true;
