@@ -8,7 +8,6 @@ import {
   yupSchema,
   getObjKeysWithValues,
   opportunity,
-  setFieldsInAscendingOrder,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -23,7 +22,6 @@ import PropTypes from 'prop-types';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 export default function ManageOpportunityDialog({

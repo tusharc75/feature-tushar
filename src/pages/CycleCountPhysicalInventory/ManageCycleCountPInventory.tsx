@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box, TextField } from '@mui/material';
+import { Dialog, Button, useTheme, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, Skeleton } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
@@ -9,16 +9,11 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
 import {
-  getObjKeys,
-  yupSchema,
-  setFieldsInAscendingOrder,
-  getObjKeysWithValues,
   cycleCountPhysicalInventory,
   CustomDialogTransition
 } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
 
@@ -105,7 +100,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
               {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <Grid key={i} size={{xs:12, sm:6, md:6}}>
+                <Grid key={i} size={{ xs: 12, sm: 6, md: 6 }}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>
               ))}
@@ -126,7 +121,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             <>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Inventory Cycle']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -148,7 +143,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['User']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -170,7 +165,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Product Category']}
                       getOptionLabel={(option) => option.optionLabel}
@@ -192,7 +187,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                       )}
                     />
                   </Grid>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <Autocomplete
                       options={optionsArray['Warehouse']}
                       getOptionLabel={(option) => option.optionLabel}
