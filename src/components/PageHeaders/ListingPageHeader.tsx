@@ -223,19 +223,19 @@ const ListingPageHeader = ({
                       backgroundColor="theme"
                       textColor="white"
                       id={showSearchInMobile ? 'dialog-add-button' : 'add-button'}
-                      disabled={addButtonLoading || addButtonDisabled}
+                      disabled={addButtonDisabled}
                       {...restOfAddButtonProps}
                       onClick={(e) => {
                         addButtonOnclick && addButtonOnclick(e);
                       }}
-                      className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
+                      isLoading={addButtonLoading}
                       startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
+                      iconForMobile={<AddOutlined />}
                     >
                       {renderButtonText({
                         text: textAddShow ? 'Add' : `Create`,
                         loading: addButtonLoading,
-                        iconText: addButtonText,
-                        mobileIcon: <AddOutlined />
+                        iconText: addButtonText
                       })}
                     </ThemeButton>
                   </HtmlTooltip>
@@ -248,23 +248,17 @@ const ListingPageHeader = ({
                         tooltip={actionButtonTooltip ?? ''}
                         size="small"
                         id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
-                        disabled={actionButtonLoading || actionButtonDisabled}
+                        disabled={actionButtonDisabled}
                         {...restOfActionButtonProps}
                         onClick={openActions}
                         aria-controls="action-menu"
                         borderColor="yellow"
                         backgroundColor="yellow"
                         endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
+                        iconForMobile={<FaCircleChevronDown size={16} />}
+                        isLoading={actionButtonLoading}
                       >
-                        {renderButtonText({
-                          text: 'Actions',
-                          loading: actionButtonLoading,
-                          mobileIcon: (
-                            <span className="h-[16px] w-[20px]">
-                              <FaCircleChevronDown size={16} />
-                            </span>
-                          )
-                        })}
+                        Actions
                       </ThemeButton>
                       <Menu
                         anchorEl={anchorEl}
