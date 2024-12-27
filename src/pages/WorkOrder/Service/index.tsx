@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { isArray, reverse } from 'lodash';
@@ -534,12 +535,12 @@ const Service = ({
           <Grid container spacing={2}>
             {!mobScreen && (
               <Grid
-                item
-                xs={12}
-                sm={5}
-                md={5}
-                lg={4}
-                xl={3}
+                size={{
+                xs:12,
+                sm:5,
+                md:5,
+                lg:4,
+                xl:3}}
                 style={{
                   maxWidth: isColapsed ? 'calc(76px + 40px)' : mobScreen ? '100%' : '',
                   flexBasis: isColapsed ? 'calc(76px + 40px)' : mobScreen ? '100%' : '',
@@ -572,12 +573,12 @@ const Service = ({
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
             <Grid
-              item
-              xs={12}
-              sm={7}
-              md={7}
-              lg={8}
-              xl={9}
+              size={{
+              xs:12,
+              sm:7,
+              md:7,
+              lg:8,
+              xl:9}}
               style={{
                 maxWidth: isColapsed ? 'calc(100% - calc(76px + 40px))' : mobScreen ? '100%' : '',
                 flexBasis: isColapsed ? 'calc(100% - calc(76px + 40px))' : mobScreen ? '100%' : '',

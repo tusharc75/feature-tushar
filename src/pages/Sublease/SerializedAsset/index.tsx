@@ -1,4 +1,5 @@
-import { Box, Button, Grid, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -444,7 +445,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         </>
       )}
       <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

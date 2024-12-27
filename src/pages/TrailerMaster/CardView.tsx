@@ -1,6 +1,7 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { Box, Grid, IconButton, Theme, Typography } from '@mui/material';
+import { Box, IconButton, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -87,7 +88,7 @@ const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowD
       <Grid container spacing={2}>
         {data.map((trailerMaster, index) => {
           return (
-            <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
+            <Grid size={{lg:4, md:4, sm:6, xs:12}} key={index}>
               <Box
                 className={`${classes.cardBox}`}
                 onClick={(e) => {

@@ -4,7 +4,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 
 const renderedFrom = `${sidebarResource?.workOrder}_Service_StepData`;

@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog } from '@mui/material';
-import { camelCase, map, uniq } from 'lodash';
+import { map, uniq } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';

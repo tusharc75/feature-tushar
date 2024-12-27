@@ -1,8 +1,9 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -273,7 +274,7 @@ const TransferInventoryDetailPage = () => {
           <Box>
             {loading || !transferInventoryData ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={transferInventoryData} fields={transferInventoryFields} />

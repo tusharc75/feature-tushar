@@ -1,4 +1,5 @@
-import { Button, Grid, IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -188,7 +189,7 @@ const Users = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
+          <Grid size={{xs:3, md:3, sm:3}}>
             <Button
               size="small"
               variant="contained"
@@ -200,7 +201,7 @@ const Users = ({ warehouse }) => {
               Assign Users
             </Button>
           </Grid>
-          <Grid item xs={9} md={9} sm={9}>
+          <Grid size={{xs:9, md:9, sm:9}}>
             <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
               <Button
                 variant="outlined"

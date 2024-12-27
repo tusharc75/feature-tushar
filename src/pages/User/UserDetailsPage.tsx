@@ -1,6 +1,7 @@
 import { ControlPoint, Edit } from '@mui/icons-material';
 import { Skeleton, Theme } from '@mui/material';
-import { Box, Dialog, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, Dialog, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -443,7 +444,7 @@ const UserDetailsPage = () => {
             <Box style={{ padding: '8px', minHeight: '450px' }}>
               {loading || !userFields.length || !userData ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <>
@@ -523,7 +524,7 @@ const UserDetailsPage = () => {
                   </TabPanel>
                   <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={12} md={12} lg={12}>
+                      <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                         <Box
                           width="100%"
                           padding={1}

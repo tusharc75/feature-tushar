@@ -1,8 +1,5 @@
 import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import AddIcon from '@mui/icons-material/AddCircle';
-import InfoIcon from '@mui/icons-material/Info';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,7 +8,6 @@ import Dialog from '@mui/material/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -22,7 +18,8 @@ import {
 } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -347,7 +344,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 values?.transferType.includes('Internal') && (
                                   <Fragment key={index2}>
                                     {field.fieldName === 'transfertoPlant' && (
-                                      <Grid item xs={12} sm={6} md={6}>
+                                      <Grid size={{xs:12, sm:6, md:6}}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -374,7 +371,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       </Grid>
                                     )}
                                     {field.fieldName === 'plantShipTo' && (
-                                      <Grid key={index2} item xs={12} sm={6} md={6}>
+                                      <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                         <FormTypes
                                           {...field}
                                           disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -408,7 +405,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoSupplier' || field.fieldName === 'supplierShipTo' ? (
                                 values?.transferType.includes('Supplier') && (
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{xs:12, sm:6, md:6}}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -434,7 +431,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 )
                               ) : field.fieldName === 'transfertoCustomer' || field.fieldName === 'customerShipTo' ? (
                                 values?.transferType.includes('Customer') && (
-                                  <Grid item xs={12} sm={6} md={6}>
+                                  <Grid size={{xs:12, sm:6, md:6}}>
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -459,7 +456,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   </Grid>
                                 )
                               ) : field.fieldName === 'transferType' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -501,7 +498,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'transferFromPlant' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(transferAssetId) && field.disableOnEdit}
@@ -530,7 +527,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : field.fieldName === 'createDate' ? (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                   <FormTypes
                                     {...field}
                                     fieldData={field}
@@ -555,7 +552,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   />
                                 </Grid>
                               ) : (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <Grid key={index2} size={{xs:12, sm:6, md:6}}>
                                   <FormTypes
                                     {...field}
                                     disabled={

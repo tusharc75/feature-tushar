@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 
 const ServiceStepsData = ({ servicesData, stepsData }) => {

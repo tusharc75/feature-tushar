@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { Box, Button, useMediaQuery } from '@mui/material';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -72,8 +72,8 @@ const CreateWorkFlow = () => {
             <Fragment>
               <Box mb={2} width={'100%'}>
                 <Grid container alignItems="center">
-                  <Grid item container xs={9} spacing={1}>
-                    <Grid item xs={6} md={4}>
+                  <Grid size={{xs:9}} container spacing={1}>
+                    <Grid size={{xs:6, md:4}}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -89,7 +89,7 @@ const CreateWorkFlow = () => {
                         // }}
                       />
                     </Grid>
-                    <Grid item xs={6} md={4}>
+                    <Grid size={{xs:6, md:4}}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -103,7 +103,7 @@ const CreateWorkFlow = () => {
                       />
                     </Grid>
                   </Grid>
-                  <Grid item xs={3} container justifyContent="flex-end">
+                  <Grid size={{xs:3}} container justifyContent="flex-end">
                     {permissions?.workflow?.isUpdate && (
                       <Box className="gap-1">
                         <Button

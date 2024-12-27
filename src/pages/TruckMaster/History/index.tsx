@@ -1,8 +1,8 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useEffect, useContext, Fragment } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@mui/material';
 import { camelCase } from 'lodash';

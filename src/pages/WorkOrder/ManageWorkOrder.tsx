@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
-import { Box, Dialog, Button, Grid, Tooltip, IconButton } from '@mui/material';
+import { Box, Dialog, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -237,7 +238,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <Grid key={index2} side={{xs:12, sm:6, md:6}}>
                                     {field.fieldName === 'warehouse' ? (
                                       <FormTypes
                                         {...field}

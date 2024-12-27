@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
+import { Box, Button, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
@@ -230,7 +231,7 @@ const TruckMasterDetail = () => {
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={truckMasterData} fields={fields} />

@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, MenuItem } from '@mui/material';
-import { groupBy, map, uniq } from 'lodash';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import { map, uniq } from 'lodash';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';

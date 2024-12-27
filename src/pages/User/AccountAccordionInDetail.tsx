@@ -1,7 +1,8 @@
 import { MoreVert } from '@mui/icons-material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useEffect, useState } from 'react';
 import { AiOutlinePhone } from 'react-icons/ai';
 import { FaArrowAltCircleDown, FaIndustry } from 'react-icons/fa';
@@ -62,7 +63,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
       <Accordion expanded={expandAccount} className="accordAccount" onChange={() => setExpandAccount(!expandAccount)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandAccount === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -75,7 +76,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {isAllowedToEdit && (
                   <>
@@ -109,11 +110,11 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 {accounts && accounts?.length ? (
                   <Grid container spacing={1}>
                     {accounts.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
-                              <Grid item xs={12} sm={12}>
+                              <Grid size={{xs:12, sm:12}}>
                                 <Link
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -130,10 +131,10 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                             </Grid>
                             <Grid container>
                               <Grid container>
-                                <Grid item xs={12} sm={5} md={5}>
+                                <Grid size={{xs:12, sm:5, md:5}}>
                                   {<DisplayData icon={<FaIndustry size={15} />} label="Industry" value={obj?.industry ?? ''} />}
                                 </Grid>
-                                <Grid item xs={12} sm={7} md={7}>
+                                <Grid size={{xs:12, sm:7, md:7}}>
                                   {<DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label="Phone" value={obj?.phone ?? ''} />}
                                 </Grid>
                               </Grid>

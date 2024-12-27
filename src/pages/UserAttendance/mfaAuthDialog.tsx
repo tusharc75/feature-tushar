@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
+import { Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -58,7 +59,7 @@ function MfaAuthDialog({ onClose }) {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid size={{xs:12}}>
                     <TextField
                       label="Employee Number"
                       name="employeeNumber"
@@ -73,7 +74,7 @@ function MfaAuthDialog({ onClose }) {
                       helperText={touched.employeeNumber && errors.employeeNumber}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{xs:12}}>
                     <TextField
                       label="OTP"
                       name="otp"

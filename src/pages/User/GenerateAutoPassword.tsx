@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, FormControlLabel, Grid, TextField } from '@mui/material';
+import { Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -66,7 +67,7 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
       <CustomDialogContent>
         <div className="mb-5 mt-5">
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={{xs:12}}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -80,7 +81,7 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid size={{xs:12}}>
               <TextField
                 id="password"
                 fullWidth
