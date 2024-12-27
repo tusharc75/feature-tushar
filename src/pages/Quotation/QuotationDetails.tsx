@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@mui/material';
+import { Box, Button, CircularProgress, Menu, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CachedIcon from '@mui/icons-material/Cached';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Skeleton } from '@mui/material';
@@ -572,7 +573,7 @@ const QuotationDetails = () => {
           <Box>
             {loading || !quotationFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <>

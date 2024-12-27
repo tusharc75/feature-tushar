@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
+import { Box, Button, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -8,7 +8,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize, isEmpty } from 'lodash';
+import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   convertDateInDateTime,

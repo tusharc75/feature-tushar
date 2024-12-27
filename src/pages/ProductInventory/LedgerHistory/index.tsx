@@ -2,7 +2,7 @@ import Box from '@mui/material/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -249,7 +249,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
-          <Grid item xs={12} md={12} sm={12} className="mt-3">
+          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 150px)'}

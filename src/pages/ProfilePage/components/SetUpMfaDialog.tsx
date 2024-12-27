@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, Typography } from '@mui/material';
+import { Box, Button, Dialog, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -86,7 +87,7 @@ function SetUpMfaDialog({ onClose }) {
             <Box mt={3} />
             <Box m={2}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid size={{xs:12}}>
                   <div className="mx-auto max-w-[400px] text-center">
                     <Typography variant="body2" className="mb-2">
                       Enter Code

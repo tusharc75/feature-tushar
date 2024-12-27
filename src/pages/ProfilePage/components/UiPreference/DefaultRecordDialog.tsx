@@ -25,7 +25,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isArray } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 
 const recordOptions: string[] = ['All', 'My'];
 

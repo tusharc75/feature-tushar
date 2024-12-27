@@ -1,11 +1,10 @@
 import { makeStyles } from '@mui/styles';
-import { Typography, Box, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Chip, Grid, Theme } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
-
 import BoxWithBorder from '../../components/BoxWithBorder';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -41,7 +40,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
         <Grid container>
           {data && data.length
             ? data.map((obj) => (
-                <Grid item xs={isMobile ? 12 : 6} key={obj._id}>
+                <Grid size={{xs:isMobile ? 12 : 6}} key={obj._id}>
                   <BoxWithBorder key={obj._id} style={{ margin: '8px' }}>
                     <ListItem disableGutters className={classes.list}>
                       <ListItemText

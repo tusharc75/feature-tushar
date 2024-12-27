@@ -1,10 +1,8 @@
-import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { GoArrowDown } from 'react-icons/go';
-import { useContext, useEffect, useState } from 'react';
-import emailStyles from '../../Activity/Email/email.module.scss';
+import { useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -135,7 +133,7 @@ const AskSupplierPriceDialog = (props) => {
         <CustomDialogContent>
           <Box padding={1}>
             <Grid container spacing={1}>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -163,7 +161,7 @@ const AskSupplierPriceDialog = (props) => {
                   />
                 )}
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 <Box>
                   {otherAttachments && otherAttachments.length > 0 && (
                     <AttachmentThumbnail attachments={otherAttachments} canEdit={true} handleDeleteAttachment={handleDeleteAttachment} />
@@ -209,7 +207,7 @@ const AskSupplierPriceDialog = (props) => {
                 </Box>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={{xs:12}}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple

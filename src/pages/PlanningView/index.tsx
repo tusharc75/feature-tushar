@@ -1,6 +1,4 @@
 import { Box, IconButton } from '@mui/material';
-import { FormatListNumbered } from '@mui/icons-material';
-import DateRangeIcon from '@mui/icons-material/DateRange';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';

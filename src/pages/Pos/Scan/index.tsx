@@ -1,9 +1,8 @@
-import React, { useEffect, useContext, useState, Fragment } from 'react';
-import { Box, Button, capitalize, Chip, Dialog, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import React, { useContext, useState, Fragment } from 'react';
+import { Button, Dialog, List, ListItem, ListItemText } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import ImageIcon from '@mui/icons-material/Image';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

@@ -8,7 +8,6 @@ import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import routes from '../../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../../constants/helpers';
 import InputField from '../../../components/Helpers/InputField';

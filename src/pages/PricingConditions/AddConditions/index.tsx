@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { MenuItem, Grid, Box, Button, IconButton, Menu } from '@mui/material';
+import { MenuItem, Box, Button, IconButton, Menu } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Add from '@mui/icons-material/Add';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -313,7 +314,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1} mt={2}>
-        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+        <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
           <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Add' : addDisable}>
             <span>
               <Button
@@ -499,7 +500,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Box>
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
         {columns && condition ? (
           <CustomReactTable
             height={'calc(100vh - 393px)'}

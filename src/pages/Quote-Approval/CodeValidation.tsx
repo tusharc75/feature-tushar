@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
-import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -80,10 +81,10 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
         <CustomDialogContent>
           <Box marginY={2}>
             <Grid spacing={3} container>
-              <Grid key={1} item xs={12} sm={8} md={10}>
+              <Grid key={1} size={{xs:12, sm:8, md:10}}>
                 <TextField variant="outlined" label="Email" name="email" type="email" value={copyOfEmail} disabled={true} fullWidth size="small" />
               </Grid>
-              <Grid key={1} item xs={12} sm={4} md={2}>
+              <Grid key={1} size={{xs:12, sm:4, md:2}}>
                 <Button className="ml-1" color="primary" variant="outlined" disabled={disableResendCode} onClick={handleSendCodeToEmail} fullWidth>
                   {buttonLabel}
                 </Button>
@@ -91,7 +92,7 @@ const CodeValidation = ({ open, title, close, email, quoteId, versionNumber, han
             </Grid>
             {showPasswordField && (
               <Grid spacing={3} container>
-                <Grid key={1} item xs={12} sm={12} md={12}>
+                <Grid key={1} size={{xs:12, sm:12, md:12}}>
                   <TextField
                     id="outlined-full-width"
                     margin="normal"

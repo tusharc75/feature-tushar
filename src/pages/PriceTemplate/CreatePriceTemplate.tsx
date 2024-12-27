@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
-import { Box, Grid, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { useParams, useHistory } from 'react-router-dom';
 import { FormBuilder } from '../../components/FormBuilder';
@@ -400,7 +401,7 @@ const PriceTemplate = () => {
                 <Form>
                   <Box py={1} pb={'16px'}>
                     <Grid container spacing={1}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{xs:12, sm:4}}>
                         <TextField
                           disabled={!hasPermissionToUpdate}
                           variant="outlined"
@@ -417,7 +418,7 @@ const PriceTemplate = () => {
                           onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{xs:12, sm:4}}>
                         <Autocomplete
                           disabled={!hasPermissionToUpdate}
                           options={productTemplate}
@@ -451,7 +452,7 @@ const PriceTemplate = () => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={4} container justify="flex-end">
+                      <Grid size={{xs:12, sm:4}} container justifyContent="flex-end">
                         <div className="button flex items-center">
                           <HistoryButton onClick={() => setShowHistory(true)} />
                           <Box>
@@ -494,7 +495,7 @@ const PriceTemplate = () => {
                       </Grid>
                     </Grid>
                     <Grid container spacing={1}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{xs:12, sm:4}}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -530,7 +531,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{xs:12, sm:4}}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}
@@ -570,7 +571,7 @@ const PriceTemplate = () => {
                           />
                         }
                       </Grid>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{xs:12, sm:4}}>
                         {
                           <Autocomplete
                             disabled={!hasPermissionToUpdate}

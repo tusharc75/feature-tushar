@@ -1,7 +1,5 @@
 import { camelCase, startCase } from 'lodash';
 import { WalkmeData } from 'src/components/CustomIntro';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
 
 export const createPurchaseOrderFlow = (resource:any): WalkmeData => {
 

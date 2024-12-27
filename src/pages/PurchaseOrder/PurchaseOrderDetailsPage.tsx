@@ -1,4 +1,5 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -267,7 +268,7 @@ const PurchaseOrderDetailsPage = () => {
           <Box>
             {loadingPurchaseOrder || !purchaseOrderFields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
@@ -276,13 +277,13 @@ const PurchaseOrderDetailsPage = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
               {!purchaseOrderData || !purchaseOrderFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}

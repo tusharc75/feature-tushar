@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
@@ -238,7 +239,7 @@ const PurchaseRequisitionDetail = () => {
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             ) : (
               <DetailsPage data={purchaseRequisitionData} fields={fields} />
@@ -247,10 +248,10 @@ const PurchaseRequisitionDetail = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
               {!purchaseRequisitionData ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
                 <>
@@ -265,7 +266,7 @@ const PurchaseRequisitionDetail = () => {
                       <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
                     </Box>
                   )}
-                  <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                     <Steps
                       isNextStep={false}
                       nextStep={nextStep}

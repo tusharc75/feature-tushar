@@ -1,4 +1,5 @@
-import { Box, Button, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -88,7 +89,7 @@ function SettingsDialog({ onClose, warehouse }) {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                       <Fragment>
                         <CustomDatePicker
                           label="Lock Date"
@@ -107,7 +108,7 @@ function SettingsDialog({ onClose, warehouse }) {
                         />
                       </Fragment>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                       <Box mt={2}>
                         <HtmlTooltip title="The transactions recorded prior to this date cannot be modified or deleted.">
                           <InfoIcon />

@@ -1,4 +1,5 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Skeleton } from '@mui/material';
 import { orderBy, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -322,7 +323,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       {!isSubmited && (
         <Box display="flex" pt={1} mx={2}>
           <Grid container justifyContent="space-between" style={{ marginBottom: 0, paddingBottom: 1 }}>
-            <Grid item className="d-flex align-items-center">
+            <Grid className="d-flex align-items-center">
               {loading ? (
                 <Skeleton width={100} />
               ) : (
@@ -342,7 +343,6 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             </Grid>
             <Grid
               id="detailHeaderPageActions"
-              item
               className={
                 isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center justify-flex-end gap-2'
               }

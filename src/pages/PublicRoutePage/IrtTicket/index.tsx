@@ -1,4 +1,5 @@
-import { Box, Button, Container, FormControl, FormControlLabel, Grid, Paper, Radio, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, FormControl, FormControlLabel, Paper, Radio, TextField, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import RadioGroup from '@mui/material/RadioGroup';
 import { useContext, useEffect, useState } from 'react';
@@ -106,7 +107,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
               <DetailsPage data={irtTicketData} fields={fields} />
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid size={{xs:6}}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">
@@ -181,7 +182,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                       </Box>
                     </Paper>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{xs:6}}>
                     <Paper>
                       <Box p={3}>
                         <Typography variant="h6" color="primary">

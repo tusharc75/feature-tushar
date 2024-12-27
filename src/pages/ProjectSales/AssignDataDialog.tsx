@@ -5,13 +5,13 @@ import {
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase, kebabCase, lowerCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 
@@ -221,7 +221,7 @@ const AssignDataDialog = (props) => {
         ) : dataConst.length ? (
           <>
             <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
+              <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-2">
                 <FormControl component="fieldset">
                   <FormControlLabel
                     value="top"
@@ -242,7 +242,7 @@ const AssignDataDialog = (props) => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+              <Grid size={{xs:12, md:6, sm:6}} container justifyContent="flex-end">
                 <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>

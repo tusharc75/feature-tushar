@@ -1,18 +1,11 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import {
   Avatar,
-  Button,
-  Checkbox,
-  CircularProgress,
   Dialog,
-  FormControl,
-  FormControlLabel,
-  Grid,
   IconButton,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemIcon,
   ListItemText,
   Typography,
   Box
@@ -22,7 +15,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { MdAdd, MdOutlineHorizontalRule } from 'react-icons/md';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
