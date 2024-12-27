@@ -330,7 +330,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                               onClick={() => {
                                 handleAccept(data?._id);
                               }}
-                              tooltip="Accept"
+                              mobileTooltip="Accept"
                             >
                               Accept
                             </ThemeButton>
@@ -341,7 +341,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                               onClick={() => {
                                 setResponse({ open: true, type: 'Reject', id: data?._id });
                               }}
-                              tooltip="Reject"
+                              mobileTooltip="Reject"
                             >
                               Reject
                             </ThemeButton>

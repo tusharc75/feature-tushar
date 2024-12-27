@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Menu, MenuItem } from '@mui/material';
+import { Box, CircularProgress, Menu, MenuItem } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CachedIcon from '@mui/icons-material/Cached';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -16,7 +16,6 @@ import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ShowDoaData from 'src/components/ShowDoaData';
 import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -48,6 +47,7 @@ import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import Versions from './Versions';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -402,77 +402,57 @@ const QuotationDetails = () => {
               <>
                 {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && (
                   <>
-                    <HtmlTooltip title="Renewal">
-                      <Button
-                        onClick={() => {
-                          setRenewal(true);
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<MdAutorenew />}
-                        color="primary"
-                      >
-                        Renewal
-                      </Button>
-                    </HtmlTooltip>
-                    <HtmlTooltip title="Release">
-                      <Button
-                        onClick={() => {
-                          setReleaseConfirm(true);
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="btn-outline-v1 mx-1"
-                        startIcon={<SiSemanticrelease />}
-                        color="primary"
-                      >
-                        Release
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={<MdAutorenew />}
+                      onClick={() => {
+                        setRenewal(true);
+                      }}
+                      startIcon={<MdAutorenew />}
+                      mobileTooltip={`Renewal`}
+                    >
+                      Renewal
+                    </ThemeButton>
+                    <ThemeButton
+                      iconForMobile={<SiSemanticrelease />}
+                      onClick={() => {
+                        setReleaseConfirm(true);
+                      }}
+                      startIcon={<SiSemanticrelease />}
+                      mobileTooltip={`Release`}
+                    >
+                      Release
+                    </ThemeButton>
                   </>
                 )}
-                <HtmlTooltip title={`${resources?.quotation?.titleSingular} Summary`}>
-                  <Button
-                    onClick={() => {
-                      setShowQuotationSummaryDialog(true);
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="btn-outline-v1 mx-1"
-                    startIcon={<GiReceiveMoney />}
-                    color="primary"
-                  >
-                    Summary
-                  </Button>
-                </HtmlTooltip>
-                <HtmlTooltip title={`Version : ${currentVersion}`}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={` btn-outline-v1`}
-                    onClick={() => {
-                      setShowAllVersionStatus(true);
-                    }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
-                  >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-                  </Button>
-                </HtmlTooltip>
-
+                <ThemeButton
+                  mobileTooltip={`${resources?.quotation?.titleSingular} Summary`}
+                  onClick={() => {
+                    setShowQuotationSummaryDialog(true);
+                  }}
+                  startIcon={<GiReceiveMoney />}
+                  iconForMobile={<GiReceiveMoney size={20} />}
+                >
+                  Summary
+                </ThemeButton>
+                <ThemeButton
+                  iconForMobile={<VscVersions size={20} />}
+                  onClick={() => {
+                    setShowAllVersionStatus(true);
+                  }}
+                  startIcon={<VscVersions />}
+                  mobileTooltip={`Version : ${currentVersion}`}
+                >
+                  {`Version : ${currentVersion}`}
+                </ThemeButton>
                 {allowedToEdit && (
-                  <Button
-                    className="btn-outline-v1"
-                    variant="outlined"
-                    size="small"
+                  <ThemeButton
+                    iconForMobile={<ExpandMore />}
                     onClick={openActionsAction}
-                    aria-controls="action"
                     endIcon={<ExpandMore />}
+                    mobileTooltip={`Actions`}
                   >
-                    Action
-                  </Button>
+                    Actions
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={anchorElAction}

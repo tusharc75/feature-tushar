@@ -120,9 +120,8 @@ const PadMasterDetail = () => {
             {permissions?.padMaster?.isUpdate && (
               <ThemeButton
                 iconForMobile={<EditIcon />}
-                variant={'outlined'}
                 onClick={handleOpenUpdateDialog}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Edit'}
               </ThemeButton>

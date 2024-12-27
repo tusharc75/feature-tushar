@@ -48,6 +48,7 @@ import Step from 'src/pages/DynamicForm/Step';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DOASteps = [
   {
@@ -585,46 +586,35 @@ export default function QuoteDetail() {
             {quoteData ? (
               <>
                 {processStatus !== 'New' && (
-                  <HtmlTooltip title="Quote Summary">
-                    <Button
-                      onClick={() => {
-                        setShowTotalSalesDialog(true);
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className="btn-outline-v1"
-                      size="small"
-                      startIcon={<GiReceiveMoney />}
-                      color="primary"
-                    >
-                      {isMobile && !isTablet ? '' : 'Quote Summary'}
-                    </Button>
-                  </HtmlTooltip>
-                )}
-                <HtmlTooltip title={`Version : ${currentVersion}`}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={`btn-outline-v1`}
+                  <ThemeButton
                     onClick={() => {
-                      setShowAllVersionStatus(true);
+                      setShowTotalSalesDialog(true);
                     }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                    startIcon={<GiReceiveMoney />}
+                    mobileTooltip='Quote Summary'
+                    iconForMobile={<GiReceiveMoney />}
                   >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-                  </Button>
-                </HtmlTooltip>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  size="small"
-                  className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
-                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                  onClick={openActions}
-                  aria-controls="action-menu"
+                    Quote Summary
+                  </ThemeButton>
+                )}
+                <ThemeButton
+                  iconForMobile={<VscVersions size={20} />}
+                  onClick={() => {
+                    setShowAllVersionStatus(true);
+                  }}
+                  startIcon={<VscVersions />}
+                  mobileTooltip={`Version : ${currentVersion}`}
                 >
-                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
-                </Button>
+                  {`Version : ${currentVersion}`}
+                </ThemeButton>
+                <ThemeButton
+                  iconForMobile={<ExpandMore />}
+                  onClick={openActions}
+                  endIcon={<ExpandMore />}
+                  mobileTooltip={`Actions`}
+                >
+                  Actions
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted

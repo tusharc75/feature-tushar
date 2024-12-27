@@ -214,17 +214,13 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
                   : true
               }
               onClick={() => setArrangeView(true)}
-              tooltip="Arrange"
+              mobileTooltip="Arrange"
             >
               <DragIndicator className="-ml-2" fontSize="small" />
               Arrange
             </ThemeButton>
             <ThemeButton
               iconForMobile={<Add />}
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              aria-controls="add-menu"
               disabled={!selectedService}
               onClick={() => {
                 setManageStep({ open: true, clone: false, data: null });

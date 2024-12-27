@@ -7,7 +7,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-
+import Grid from '@mui/material/Grid2';
 import {
   Avatar,
   Box,
@@ -20,7 +20,6 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
-  Grid,
   IconButton,
   ImageList,
   ImageListItem,
@@ -67,6 +66,7 @@ import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import CurrencyAutocomplete from './CurrencyAutocomplete';
 
 type MultiFileType = {
   fileName: string;
@@ -104,7 +104,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
   <div className="form-types">
     {isTooltip && info ? (
       <Grid container spacing={1}>
-        <Grid item style={{ flexGrow: 1 }}>
+        <Grid style={{ flexGrow: 1 }}>
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -114,7 +114,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
             </Box>
           )}
         </Grid>
-        <Grid item>
+        <Grid>
           <Box style={{ marginTop: '7px' }}>
             <HtmlTooltip title={<Typography>{info}</Typography>}>
               <InfoIcon color="disabled" />
@@ -135,7 +135,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
       </>
     ) : (
       <Grid container spacing={1} alignItems="center">
-        <Grid item xs={12} sm={12} md={12}>
+        <Grid size={{ xs: 12, sm: 12, md: 12 }} >
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -364,7 +364,6 @@ const FormTypes = (props) => {
   const [option, setOptionsList] = React.useState([]);
   const [optionSaveDialog, setOptionSaveDialog] = React.useState(false);
   const [value, setValue] = React.useState(null);
-  const [currencyData, setCurrencyData] = React.useState([]);
   const [isImgUploading, setImgUploading] = React.useState(false);
   const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
@@ -400,13 +399,6 @@ const FormTypes = (props) => {
       }, 200),
     []
   );
-
-  React.useEffect(() => {
-    const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
-    );
-    setCurrencyData(sortedArr);
-  }, []);
 
   React.useEffect(() => {
     let active = true;
@@ -1275,7 +1267,7 @@ const FormTypes = (props) => {
           doNotShowInfoTooltip={doNotShowInfoTooltip}
         >
           <Grid container spacing={1}>
-            <Grid item style={{ flexGrow: 1 }}>
+            <Grid style={{ flexGrow: 1 }}>
               <Autocomplete
                 {...rest}
                 limitTags={2}
@@ -1444,7 +1436,7 @@ const FormTypes = (props) => {
       fieldData?.displayUnits &&
       Array.isArray(fieldData?.displayUnits) &&
       fieldData?.displayUnits.map((_unit, i) => (
-        <Grid key={_unit} item xs={12} sm={6} md={6}>
+        <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }} >
           <Box display="flex">
             <Box flexGrow={1}>
               <InfoLabel
@@ -1575,7 +1567,7 @@ const FormTypes = (props) => {
         fieldData?.displayCurrency?.map((_currency, i) =>
           fieldData?.isConverter && fieldData?.displayUnits?.length ? (
             fieldData?.displayUnits?.map((_unit, j) => (
-              <Grid key={_unit} item xs={12} sm={6} md={6}>
+              <Grid key={_unit} size={{ xs: 12, sm: 6, md: 6 }}>
                 <Box display="flex">
                   <Box flexGrow={1}>
                     <InfoLabel
@@ -1723,7 +1715,7 @@ const FormTypes = (props) => {
               </Grid>
             ))
           ) : (
-            <Grid key={_currency} item xs={12} sm={6} md={6}>
+            <Grid key={_currency} size={{ xs: 12, sm: 6, md: 6 }}>
               <Box display="flex">
                 <Box flexGrow={1}>
                   <InfoLabel
@@ -1939,61 +1931,16 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <Autocomplete
+        <CurrencyAutocomplete
           {...rest}
-          limitTags={2}
-          fullWidth
-          value={
-            currencyData.filter((data) => data.currencyCode === values[name]).length
-              ? currencyData.filter((data) => data.currencyCode === values[name])[0]
-              : ''
-          }
-          options={currencyData}
-          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-          isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
+          required={true}
+          value={values[name]}
+          label={getLabel(label)}
+          name={name}
+          fullWidth={true}
           onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              name={name}
-              label={getLabel(label)}
-              error={touched[name] && Boolean(errors[name])}
-              helperText={touched[name] && errors[name]}
-              required={required}
-            />
-          )}
-          renderOption={(props, option: any) => {
-            const { currencyCode, currencyName, symbolNative } = option;
-            const { key, ...optionProps } = props;
-            return (
-              <li key={key} {...optionProps}>
-                {`${currencyCode} - ${currencyName} - (${symbolNative})`}
-              </li>
-            );
-          }}
-        // renderOption={(option) => {
-        //   const { currencyCode, name, countryCode, symbolNative } = option;
-        //   return (
-        //     <Grid container alignItems="center">
-        //       <Grid item>
-        //         <Avatar
-        //           variant="rounded"
-        //           src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-        //           style={{ marginRight: 20, width: "40px", height: "30px" }}
-        //         />
-        //       </Grid>
-        //       <Grid item xs>
-        //         <Typography>
-        //           {currencyCode} ({symbolNative})
-        //         </Typography>
-        //         <Typography variant="body2" color="textSecondary">
-        //           {name}
-        //         </Typography>
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }}
+          helperText={touched[name] && errors[name]}
+          error={touched[name] && Boolean(errors[name])}
         />
       </InfoLabel>
     ) : type === 'multiSelect' ? (
@@ -2005,7 +1952,9 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Grid container spacing={1}>
-          <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+          <Grid size={{
+            xs: !lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12,
+          }}>
             <Autocomplete
               {...rest}
               limitTags={2}
@@ -2155,7 +2104,7 @@ const FormTypes = (props) => {
             />
           </Grid>
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <Grid item xs={2}>
+            <Grid size={{ xs: 2 }}>
               <Box style={{ marginTop: '7px' }}>
                 <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                   <AddCircleIcon />
@@ -2274,6 +2223,7 @@ const FormTypes = (props) => {
             />
           )}
           renderOption={(props, option: any) => {
+
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
@@ -2283,7 +2233,7 @@ const FormTypes = (props) => {
             return (
               <Box key={key} component="li" {...optionProps}>
                 <Grid container alignItems="center">
-                  <Grid item>
+                  <Grid >
                     <LocationOnIcon
                       style={{
                         color: theme.palette.text.secondary,
@@ -2291,13 +2241,12 @@ const FormTypes = (props) => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs>
+                  <Grid size={{ xs: 'auto' }}>
                     {parts?.map((part, index) => (
                       <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
                         {part.text}
                       </span>
                     ))}
-
                     <Typography variant="body2" color="textSecondary">
                       {option.structured_formatting.secondary_text}
                     </Typography>
@@ -2359,37 +2308,35 @@ const FormTypes = (props) => {
               required={required}
             />
           )}
-          renderOption={(props, option: any) => {
+          renderOption={(option: any) => {
             const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
               option?.structured_formatting.main_text,
               matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
-            const { key, ...optionProps } = props;
-            return (
-              <Box key={key} component="li" {...optionProps}>
-                <Grid key={key} container alignItems="center">
-                  <Grid item>
-                    <LocationOnIcon
-                      style={{
-                        color: theme.palette.text.secondary,
-                        marginRight: theme.spacing(2)
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs>
-                    {parts?.map((part, index) => (
-                      <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
-                        {part.text}
-                      </span>
-                    ))}
 
-                    <Typography variant="body2" color="textSecondary">
-                      {option.structured_formatting.secondary_text}
-                    </Typography>
-                  </Grid>
+            return (
+              <Grid container alignItems="center">
+                <Grid >
+                  <LocationOnIcon
+                    style={{
+                      color: theme.palette.text.secondary,
+                      marginRight: theme.spacing(2)
+                    }}
+                  />
                 </Grid>
-              </Box>
+                <Grid size={{ xs: 'auto' }}>
+                  {parts?.map((part, index) => (
+                    <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                      {part.text}
+                    </span>
+                  ))}
+
+                  <Typography variant="body2" color="textSecondary">
+                    {option.structured_formatting.secondary_text}
+                  </Typography>
+                </Grid>
+              </Grid>
             );
           }}
         />
@@ -2616,7 +2563,7 @@ const FormTypes = (props) => {
         </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
-            <Grid item xs={12} sm={12} md={12}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2684,7 +2631,7 @@ const FormTypes = (props) => {
                   </>
                 ))}
                 {isFileUploading && (
-                  <Grid item xs={10} sm={10} md={10}>
+                  <Grid size={{ xs: 10, sm: 10, md: 10 }}>
                     <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
                       {`Uploading... ${fileUploadProgress}%`}
                     </Typography>
@@ -2781,6 +2728,7 @@ const FormTypes = (props) => {
         />
       </InfoLabel>
     ) : type === 'colorPicker' ? (
+
       <InfoLabel
         info={tooltipMessage}
         isTooltip={isTooltip}

@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
@@ -14,6 +14,7 @@ import MobileRoadmap from './MobileRoadmap';
 import { Activity } from './types';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const stateDateFormat = 'YYYY-MM-DD';
 
@@ -222,9 +223,12 @@ const RoadMap = () => {
         </div>
         <Box display="flex">
           <Box pt={1}>
-            <Button variant="contained" size="small" className={'btn-outline-v1'} onClick={handleExport}>
+            <ThemeButton
+              onClick={handleExport}
+              iconForMobile={false}
+            >
               Export to Excel
-            </Button>
+            </ThemeButton>
           </Box>
         </Box>
       </div>

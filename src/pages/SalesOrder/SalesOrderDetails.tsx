@@ -195,9 +195,7 @@ const SalesOrderDetails = () => {
                   )}
                 {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <ThemeButton
-                    variant="contained"
                     iconForMobile={false}
-                    size="small"
                     onClick={() => {
                       if (salesOrderData?.invoice) {
                         updateJobStatus(SALES_ORDER_STATUS.invoiced);
@@ -210,11 +208,10 @@ const SalesOrderDetails = () => {
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
-
                 {permissions?.salesOrder?.isDelete && salesOrderData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}

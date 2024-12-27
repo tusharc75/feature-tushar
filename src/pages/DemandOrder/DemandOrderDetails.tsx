@@ -172,7 +172,7 @@ const DemandOrderDetails = () => {
                     onClick={(e) => {
                       setConvertAnchorEl(e.currentTarget);
                     }}
-                    tooltip={'Convert'}
+                    mobileTooltip={'Convert'}
                   >
                     {'Convert'}
                   </ThemeButton>
@@ -206,7 +206,7 @@ const DemandOrderDetails = () => {
                   </MenuItem>
                 </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}

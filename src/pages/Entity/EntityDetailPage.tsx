@@ -291,9 +291,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -310,7 +310,7 @@ const EntityDetailsPage = () => {
             {entityData ? (
               <>
                 {permissions?.entity?.isUpdate && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
@@ -326,7 +326,7 @@ const EntityDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={3}>
-          <Grid size={{xs:12, sm:12, md:8, lg:8}} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 8, lg: 8 }} spacing={2}>
             <Box>
               {loading || !entityFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -349,7 +349,7 @@ const EntityDetailsPage = () => {
               </Box>
               <Box className="formdata-v1">
                 <Grid container style={{ padding: '8px' }} spacing={1}>
-                  <Grid size={{xs:12, sm:12}}>
+                  <Grid size={{ xs: 12, sm: 12 }}>
                     <BoxWithBorder
                       style={{
                         padding: '0px'
@@ -373,7 +373,7 @@ const EntityDetailsPage = () => {
               </Box>
             ))}
           </Grid>
-          <Grid size={{xs:12, sm:12, md:4, lg:4}} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4 }} spacing={2}>
             <Box style={{ overflow: 'hidden' }} className="single-form-v1">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({users.length || 0})</Typography>

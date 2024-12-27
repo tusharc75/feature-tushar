@@ -266,17 +266,15 @@ const TransferAssetDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="small"
-                className={'btn-outline-v1'}
+              <ThemeButton
                 onClick={(e) => {
                   setShowReopenCloseConfirmation({ open: true, type: 'reopen' });
                 }}
+                mobileTooltip='Re-Open'
+                iconForMobile={false}
               >
                 Re-Open
-              </Button>
+              </ThemeButton>
             )}
             {permissions?.transferAsset?.isUpdate &&
               allowedToEdit &&
@@ -291,7 +289,10 @@ const TransferAssetDetailPage = () => {
                 </ButtonWithPulse>
               )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                onClick={handleOpenUpdateDialog}
+                mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

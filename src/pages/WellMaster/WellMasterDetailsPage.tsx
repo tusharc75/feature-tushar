@@ -97,7 +97,7 @@ const WellMasterDetailsPage = () => {
                 onClick={() => {
                   setShowManageDialog({ open: true, isClone: false, idToClone: wellMasterData._id });
                 }}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Edit'}
               </ThemeButton>

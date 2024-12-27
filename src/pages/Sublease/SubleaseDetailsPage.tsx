@@ -212,7 +212,7 @@ const SubleaseDetailsPage = () => {
               <ThemeButton
                 iconForMobile={<EditIcon />}
                 onClick={() => setOpenUpdateDialog(true)}
-                tooltip={'Edit'}>
+                mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

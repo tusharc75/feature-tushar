@@ -1,11 +1,10 @@
-import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@mui/material';
 import { Map } from '@mui/icons-material';
+import { Box, Button, ButtonGroup, Typography, useMediaQuery } from '@mui/material';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { memo, useEffect, useState } from 'react';
 
 import axios, { CancelTokenSource } from 'axios';
-import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from '../../../../components/Loader';
 import ActivityList from './ActivityList';
@@ -44,7 +43,7 @@ function Roadmap({ type, filter }) {
         setTreeList(data.treeList);
         if (shouldScroll) executeScroll();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   let height = window.innerHeight - 250;
@@ -82,7 +81,6 @@ function Roadmap({ type, filter }) {
   const handleSelect = (event, nodeIds) => {
     setSelected(nodeIds);
   };
-
 
   return activity ? (
     <Box>

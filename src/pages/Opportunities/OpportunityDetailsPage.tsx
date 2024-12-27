@@ -567,7 +567,7 @@ function OpportunityDetailsPage() {
                       onClick={() => {
                         setOpenUpdateDialog(true);
                       }}
-                      tooltip={'Edit'}
+                      mobileTooltip={'Edit'}
                     >
                       {'Edit'}
                     </ThemeButton>

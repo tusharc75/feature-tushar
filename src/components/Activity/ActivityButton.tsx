@@ -1,11 +1,10 @@
-import React, { useState, useEffect, Fragment } from 'react';
-import Grid from '@mui/material/Grid';
-import { Button, IconButton } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import HideWhenOffline from '../HideWhenOffline';
-import Activity from '.';
+import Grid from '@mui/material/Grid';
+import { Fragment, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Activity from '.';
+import HideWhenOffline from '../HideWhenOffline';
 
 const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelatedTo = null, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);

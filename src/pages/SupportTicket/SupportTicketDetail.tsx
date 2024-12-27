@@ -140,18 +140,25 @@ const SupportTicketDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[routes.supportTicket , { title: supportTicketData?.supportTicketNumber }]}
+            routes={[routes.supportTicket, { title: supportTicketData?.supportTicketNumber }]}
           />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {supportTicketData?.status === SUPPORT_TICKET_STATUS.completed && (
-              <Button disabled={loading} variant={'outlined'} size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
+              <ThemeButton
+                iconForMobile={false}
+                onClick={handleReopenStatus}
+                disabled={loading}
+                mobileTooltip={'Re-Open'}>
                 {'Re-Open'}
-              </Button>
+              </ThemeButton>
             )}
             {allowedToEdit && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton
+                iconForMobile={<EditIcon />}
+                onClick={handleOpenUpdateDialog}
+                mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

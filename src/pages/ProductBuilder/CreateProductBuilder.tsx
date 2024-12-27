@@ -73,7 +73,7 @@ const CreateProductBuilder = () => {
           <CustomBreadCrumbs
             routes={[
               {
-                title: resources?.productBuilde?.titlePlural,
+                title: resources?.productBuilder?.titlePlural,
                 path: routes.productBuilder.path
               },
               {

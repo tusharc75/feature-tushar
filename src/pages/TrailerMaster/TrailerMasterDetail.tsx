@@ -1,6 +1,5 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@mui/material';
+import { Box, Grid, Menu, MenuItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,6 +17,8 @@ import History from './History';
 import ManageTrailerMaster from './ManageTrailerMaster';
 import Step from '../DynamicForm/Step';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { ExpandMore } from '@mui/icons-material';
+import { RiExchange2Line } from 'react-icons/ri';
 
 const TrailerMasterDetail = () => {
   const { id } = useParams();
@@ -168,18 +169,14 @@ const TrailerMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.trailerMaster?.isUpdate && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                className="btn-outline-v1"
-                size="small"
+              <ThemeButton
                 onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
+                endIcon={<ExpandMore />}
+                mobileTooltip='Change Status'
+                iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
               >
                 {'Change Status'}
-              </Button>
+              </ThemeButton>
             )}
             <Menu
               id="simple-menu"
@@ -213,7 +210,7 @@ const TrailerMasterDetail = () => {
                 })}
             </Menu>
             {permissions?.trailerMaster?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

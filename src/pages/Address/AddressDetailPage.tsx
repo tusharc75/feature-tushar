@@ -213,7 +213,7 @@ const AddressDetailPage = () => {
             <Box className="control-buttons-v1">
               <>
                 {permissions?.address?.isUpdate && (
-                  <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}

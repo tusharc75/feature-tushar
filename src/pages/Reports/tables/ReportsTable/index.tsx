@@ -398,10 +398,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           <>
             <ThemeButton
               iconForMobile={<MdFilterList />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              disableElevation
               onClick={() => {
                 setShowGrid(false);
                 dispatch({ type: 'onlyFilter', filters: {} });

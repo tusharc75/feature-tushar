@@ -506,7 +506,7 @@ export default function DeliveryTicketDetail(props) {
                   <ThemeButton
                     iconForMobile={<EditIcon />}
                     onClick={handleOpenUpdateDialog}
-                    tooltip={'Edit'}>
+                    mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
@@ -514,7 +514,7 @@ export default function DeliveryTicketDetail(props) {
                 <ThemeButton
                   iconForMobile={<FaSignature size={20} />}
                   onClick={() => setOpenSigns(true)}
-                  tooltip={'View Signatures'}>
+                  mobileTooltip={'View Signatures'}>
                   {'View Signatures'}
                 </ThemeButton>
               ) : null}
@@ -593,7 +593,7 @@ export default function DeliveryTicketDetail(props) {
           {permissions?.serializedAsset?.isRead && (
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={1} className="p-2">
-                <Grid size={{xs:12}} className="d-flex mt-2 gap-2">
+                <Grid size={{ xs: 12 }} className="d-flex mt-2 gap-2">
                   {deliveryTicketData?.status === 'New' && (
                     <IconButton
                       onClick={() => {
@@ -624,7 +624,7 @@ export default function DeliveryTicketDetail(props) {
                   )}
                   <Box mx={1} />
                 </Grid>
-                <Grid size={{xs:12}}>
+                <Grid size={{ xs: 12 }}>
                   {serializedAssetColumns ? (
                     <CustomReactTable
                       height={'calc(100vh - 150px)'}

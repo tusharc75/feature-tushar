@@ -159,13 +159,13 @@ const PlanningDetail = () => {
                   onClick={() => {
                     setShowConverConfirmBox(true);
                   }}
-                  tooltip={'Convert'}
+                  mobileTooltip={'Convert'}
                 >
                   {'Convert'}
                 </ThemeButton>
               )}
               {permissions?.planning?.isUpdate && allowedToEdit && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

@@ -248,7 +248,7 @@ const ProductDetailsPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.product?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

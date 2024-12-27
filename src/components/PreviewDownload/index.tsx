@@ -175,7 +175,7 @@ function PreviewDownload({
           <ThemeButton
             size="small"
             id={'details-page-preview-button'}
-            tooltip="Preview"
+            mobileTooltip="Preview"
             iconForMobile={<VisibilityIcon />}
             startIcon={<VisibilityIcon />}
             disabled={btnLoading === 'Preview'}
@@ -192,7 +192,7 @@ function PreviewDownload({
           <ThemeButton
             iconForMobile={<DownloadIcon />}
             id={'details-page-download-button'}
-            tooltip="Download"
+            mobileTooltip="Download"
             startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download'}
             onClick={(e) => {
@@ -205,12 +205,11 @@ function PreviewDownload({
           >
             {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </ThemeButton>
-
           {isExcelDownload && (
             <ThemeButton
               id={'details-page-export-to-excel-button'}
               iconForMobile={<ExportIcon />}
-              tooltip="Export To Excel"
+              mobileTooltip="Export To Excel"
               startIcon={<ExportIcon />}
               disabled={btnLoading === 'Download'}
               onClick={(e) => {
@@ -226,7 +225,7 @@ function PreviewDownload({
               id={'details-page-send-email-button'}
               disabled={btnLoading === 'Send Email'}
               startIcon={<MdEmail />}
-              tooltip="Send Email"
+              mobileTooltip="Send Email"
               onClick={() => {
                 if (isAsyncDownload) {
                   setSendEmail(true);

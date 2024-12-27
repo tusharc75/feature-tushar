@@ -100,7 +100,7 @@ const FrequencyAskedQuestionDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.frequentlyAskedQuestion?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

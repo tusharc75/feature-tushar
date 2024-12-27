@@ -139,8 +139,8 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data));
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setAssemblyOrderData({ ...data });
       })
@@ -183,7 +183,7 @@ const AssemblyOrderDetail = () => {
             {assemblyOrderData ? (
               <>
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
-                  <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
@@ -231,10 +231,10 @@ const AssemblyOrderDetail = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handleNext={
                 assemblyOrderProcessStepsNames[currentStep] === 'Work Order' &&
-                !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
+                  !assemblyOrderData?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.parentId)?.every((m) => m?.managedPackage)
                   ? () => {
-                      setOpenManagedPackageDialog(true);
-                    }
+                    setOpenManagedPackageDialog(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {

@@ -227,7 +227,7 @@ const PurchaseOrderDetailsPage = () => {
                     iconForMobile={<EditIcon />}
                     onClick={handleOpenUpdateDialog}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
-                    tooltip={'Edit'}
+                    mobileTooltip={'Edit'}
                   >
                     {'Edit'}
                   </ThemeButton>
@@ -242,7 +242,7 @@ const PurchaseOrderDetailsPage = () => {
                 }
               >
                 <span>
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)} tooltip={'Re-Open'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)} mobileTooltip={'Re-Open'}>
                     {'Re-Open'}
                   </ThemeButton>
                 </span>

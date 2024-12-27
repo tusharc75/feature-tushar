@@ -280,7 +280,7 @@ const Steps = ({ serviceId }) => {
     return (
       <>
         {dataRows?.length ? (
-          <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} tooltip="Arrange" borderColor="default">
+          <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} mobileTooltip="Arrange" borderColor="default">
             <DragIndicatorIcon fontSize="small" className="mr-1 text-[var(--primary)] dark:text-white" /> Arrange
           </ThemeButton>
         ) : null}

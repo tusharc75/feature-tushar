@@ -99,7 +99,7 @@ const InventoryCycleDetailPage = () => {
             {inventoryCycleData ? (
               <>
                 {permissions?.inventoryCycle?.isUpdate && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
@@ -113,7 +113,7 @@ const InventoryCycleDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
-          <Grid size={{xs:12, sm:12, md:12, lg:12}} spacing={2}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} spacing={2}>
             <Box>
               {loading || !formsData.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>

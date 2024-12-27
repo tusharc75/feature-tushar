@@ -79,7 +79,7 @@ const WellNumberDetail = () => {
                 onClick={() => {
                   setOpenUpdateDialog(true);
                 }}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Edit'}
               </ThemeButton>

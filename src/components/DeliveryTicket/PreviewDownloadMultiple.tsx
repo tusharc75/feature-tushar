@@ -102,23 +102,20 @@ function PreviewDownloadMultiple({ referenceIds }) {
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
         <div className="flex flex-wrap gap-2">
-          {
-            <ThemeButton
-              size="small"
-              tooltip="Preview"
-              iconForMobile={<VisibilityIcon />}
-              startIcon={<VisibilityIcon />}
-              disabled={btnLoading === 'Preview' || referenceIds?.length === 0 || columns?.length === 0}
-              onClick={(e) => {
-                setShowColumnsDialog({ open: true, operation: 'Preview' });
-              }}
-            >
-              {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-            </ThemeButton>
-          }
+          <ThemeButton
+            mobileTooltip="Preview"
+            iconForMobile={<VisibilityIcon />}
+            startIcon={<VisibilityIcon />}
+            disabled={btnLoading === 'Preview' || referenceIds?.length === 0 || columns?.length === 0}
+            onClick={(e) => {
+              setShowColumnsDialog({ open: true, operation: 'Preview' });
+            }}
+          >
+            {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+          </ThemeButton>
           <ThemeButton
             iconForMobile={<DownloadIcon />}
-            tooltip="Download"
+            mobileTooltip="Download"
             startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download' || referenceIds?.length === 0 || columns?.length === 0}
             onClick={(e) => {
