@@ -112,18 +112,18 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
               )
           },
           {
-            accessor: 'wellName',
+            accessor: 'rentalWellName',
             Header: 'Rental Well Name',
             show: true,
             Cell: ({ row }) =>
-              row.original?.wellName ? (
+              row.original?.rentalWellName ? (
                 <Link
                   className="link text-truncate"
                   target="_blank"
-                  title={row.original?.wellName}
-                  to={`${routes.wellMasterDetail.path}/${row.original?.wellNameId}`}
+                  title={row.original?.rentalWellName}
+                  to={`${routes.wellMasterDetail.path}/${row.original?.rentalWellNameId}`}
                 >
-                  {row.original?.wellName}
+                  {row.original?.rentalWellName}
                 </Link>
               ) : (
                 <NoDataCell />
@@ -172,6 +172,10 @@ const SerializedAsset = ({ subleaseData, fetchData, currentStep, renderedFrom, a
       };
       res['index'] = i + 1;
       res['isChecked'] = false;
+      res['rentalWellName'] = res['wellName'];
+      res['rentalWellNameId'] = res['wellNameId'];
+      delete res['wellName'];
+      delete res['wellNameId'];
       return res;
     });
     handleAddWalkmeData(rows);
