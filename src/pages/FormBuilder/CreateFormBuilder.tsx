@@ -220,7 +220,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -331,7 +331,7 @@ const CreateFormBuilder = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenHistoryDialog} tooltip={'History'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenHistoryDialog} mobileTooltip={'History'}>
                 {'History'}
               </ThemeButton>
               <div className={classes.linksContainer} style={{ display: 'none' }}>
@@ -388,7 +388,7 @@ const CreateFormBuilder = () => {
             <Fragment>
               <Box mb={2}>
                 <Grid container spacing={1}>
-                  <Grid size={{xs:3}}>
+                  <Grid size={{ xs: 3 }}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -404,7 +404,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid size={{xs:3}}>
+                  <Grid size={{ xs: 3 }}>
                     <TextField
                       variant="outlined"
                       type="text"
@@ -419,7 +419,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid size={{xs:3}}>
+                  <Grid size={{ xs: 3 }}>
                     <Autocomplete
                       id="section-name"
                       freeSolo
@@ -433,7 +433,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid size={{xs:3}} container justifyContent="flex-end">
+                  <Grid size={{ xs: 3 }} container justifyContent="flex-end">
                     <Box>
                       {permissions?.formBuilder?.isUpdate && (
                         <Button

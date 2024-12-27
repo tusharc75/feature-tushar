@@ -117,7 +117,7 @@ const ProductCategoryDetailPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.productCategory?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}
@@ -160,12 +160,11 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${
-            selectedRecords?.length
-              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${selectedRecords?.length
+            ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
             ${headingLbl}`
-              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

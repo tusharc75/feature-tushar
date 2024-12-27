@@ -168,7 +168,7 @@ const DynamicFormDetail = () => {
               <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
             )}
             {permissions[renderedFrom]?.isUpdate && allowedToEdit && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

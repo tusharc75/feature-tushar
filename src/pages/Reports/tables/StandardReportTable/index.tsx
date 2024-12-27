@@ -593,10 +593,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           <>
             <ThemeButton
               iconForMobile={<MdFilterList />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              disableElevation
               onClick={() => {
                 setShowGrid(false);
                 dispatch({ type: 'onlyFilter', filters: {} });
@@ -627,8 +623,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   {reportConfig?.isExportPdf && (
                     <ThemeButton
                       iconForMobile={false}
-                      variant="outlined"
-                      size="small"
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
                       startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
@@ -638,8 +632,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                   )}
                   <ThemeButton
                     iconForMobile={false}
-                    variant="outlined"
-                    size="small"
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
                     startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}

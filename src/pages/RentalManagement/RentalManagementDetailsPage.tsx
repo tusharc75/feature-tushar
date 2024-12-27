@@ -420,9 +420,6 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.iotChart?.isRead && (
                     <ThemeButton
                       id={'rental-management-view-iot-chart-button'}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
                       onClick={() => {
                         history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
                       }}
@@ -497,7 +494,7 @@ const RentalManagementDetailsPage = () => {
                           disabled={allowedToEdit ? false : true}
                           variant={'outlined'}
                           onClick={handleOpenUpdateDialog}
-                          tooltip={'Edit'}
+                          mobileTooltip={'Edit'}
                           id={'rental-management-edit-button'}
                         >
                           {'Edit'}

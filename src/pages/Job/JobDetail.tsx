@@ -143,9 +143,9 @@ const JobDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.job?.isUpdate && allowedToEdit && (
-                                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                                {'Edit'}
-                              </ThemeButton>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} resourceLabel={jobData?.jobNumber} />

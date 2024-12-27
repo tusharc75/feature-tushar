@@ -648,13 +648,11 @@ export default function AccountDetailPage(props) {
                 {accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
               </ThemeButton>
             )}
-
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
               <ThemeButton
                 iconForMobile={<EditIcon />}
-                variant={'outlined'}
                 onClick={handleOpneUpdateDialog}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Edit'}
               </ThemeButton>
@@ -682,7 +680,7 @@ export default function AccountDetailPage(props) {
         {loading ? (
           <Grid container spacing={2}>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                <Grid size={{ sm: 6, md: 6 }}>
+              <Grid size={{ sm: 6, md: 6 }}>
                 <Skeleton variant="text" width="100px" height="16px" />
                 <Box marginY={1} />
                 <Skeleton width="100%" height="50px" />
@@ -996,7 +994,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 

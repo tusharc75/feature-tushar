@@ -129,14 +129,12 @@ const CompetencyMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.competencyType?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
-              )}
-              {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
-            </>
+            {permissions?.competencyType?.isUpdate && (
+              <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
             <ActivityButton
               referenceId={competencyMasterData?._id}
               resource={ACTIVITY_RESOURCE.competencyType}

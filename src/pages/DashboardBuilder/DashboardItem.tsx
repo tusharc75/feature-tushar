@@ -69,9 +69,8 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   return (
     <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
-          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
-        }`}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+          }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>
@@ -87,7 +86,7 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
 
         {!isEditing && (
           <Box display={'flex'} justifyContent="space-between">
-            <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={() => handleEdit(formData)} tooltip={'Edit'}>
+            <ThemeButton iconForMobile={<EditIcon />} onClick={() => handleEdit(formData)} mobileTooltip={'Edit'}>
               {'Edit'}
             </ThemeButton>
             <IconButton size="small" onClick={() => handleRemove(id)}>

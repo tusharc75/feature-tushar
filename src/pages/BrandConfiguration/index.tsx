@@ -90,7 +90,7 @@ export default function BrandConfiguration() {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+            <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
               {'Edit'}
             </ThemeButton>
           </Box>

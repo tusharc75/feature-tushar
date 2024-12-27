@@ -31,7 +31,7 @@ const EcommercePolicy = () => {
       .then(({ data: { data } }) => {
         setDetails(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const getFields = () => {
@@ -55,7 +55,7 @@ const EcommercePolicy = () => {
           onClick={() => {
             setOpen(true);
           }}
-          tooltip={'Edit'}
+          mobileTooltip={'Edit'}
         >
           {'Edit'}
         </ThemeButton>

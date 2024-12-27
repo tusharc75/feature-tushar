@@ -118,7 +118,7 @@ const ZoneDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.zone?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

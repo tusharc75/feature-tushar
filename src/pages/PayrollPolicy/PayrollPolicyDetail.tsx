@@ -111,7 +111,7 @@ const PayrollPolicyDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.payrollPolicy?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

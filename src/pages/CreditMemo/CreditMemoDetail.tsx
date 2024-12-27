@@ -194,7 +194,7 @@ const creditMemoDetail = () => {
                     onClick={openActions}
                     disabled={updateLoading}
                     endIcon={<ExpandMore />}
-                    tooltip={'Change Status'}>
+                    mobileTooltip={'Change Status'}>
                     Change Status
                   </ThemeButton>
                 )}
@@ -241,9 +241,8 @@ const creditMemoDetail = () => {
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
                     <ThemeButton
                       iconForMobile={<EditIcon />}
-                      variant={'outlined'}
                       onClick={handleOpenUpdateDialog}
-                      tooltip={'Edit'}>
+                      mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}

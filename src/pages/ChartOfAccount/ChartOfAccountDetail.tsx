@@ -132,7 +132,7 @@ const ChartOfAccountDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.chartOfAccount?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

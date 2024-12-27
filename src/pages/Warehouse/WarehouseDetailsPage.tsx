@@ -123,7 +123,7 @@ const WarehouseDetailsPage = () => {
             {warehouseData ? (
               <>
                 {permissions?.warehouse?.isUpdate && !warehouseData?.deleted && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}

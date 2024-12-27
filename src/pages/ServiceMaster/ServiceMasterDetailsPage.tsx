@@ -127,7 +127,7 @@ const ServiceMasterDetailsPage = () => {
                     onClick={() => {
                       setOpenConfigureFields(true);
                     }}
-                    tooltip={'Configure Fields'}
+                    mobileTooltip={'Configure Fields'}
                   >
                     {'Configure Fields'}
                   </ThemeButton>
@@ -139,7 +139,7 @@ const ServiceMasterDetailsPage = () => {
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
-                    tooltip={'Edit'}
+                    mobileTooltip={'Edit'}
                   >
                     {'Edit'}
                   </ThemeButton>
