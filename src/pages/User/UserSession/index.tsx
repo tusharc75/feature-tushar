@@ -2,11 +2,11 @@ import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import DateFnsUtils from '@date-io/date-fns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const UserSession = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -102,7 +102,7 @@ const UserSession = ({ id }) => {
         });
 
         data.forEach((obj) => {
-          labels.push(moment(obj?.date).format('DD/MMM'));
+          labels.push(dayjs(obj?.date).tz().format('DD/MMM'));
           dataSets.push(obj?.totalDuration / time);
         });
         setUserTrackingData({
@@ -167,10 +167,8 @@ const UserSession = ({ id }) => {
                 disabled={timeFrame !== 'custom'}
                 fullWidth
                 size="small"
-                openTo="year"
                 maxDate={trackingTime.between.to}
                 label="From"
-                views={['year', 'month', 'date']}
                 value={trackingTime.between.from}
                 onChange={(date) => {
                   setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
@@ -183,9 +181,7 @@ const UserSession = ({ id }) => {
                 fullWidth
                 size="small"
                 minDate={trackingTime.between.from}
-                openTo="year"
                 label="To"
-                views={['year', 'month', 'date']}
                 value={trackingTime.between.to}
                 onChange={(date) => {
                   setTrackingTime({ between: { to: date, from: trackingTime.between.from } });

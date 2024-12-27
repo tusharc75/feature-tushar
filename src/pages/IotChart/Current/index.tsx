@@ -1,14 +1,13 @@
 import { Box, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { cn, dateTimeFormat24Hours } from 'src/constants/helpers';
+import { cn, dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import TreeView from './TreeView';
 
 export default function Current({ deviceTemplate, assetId }) {
@@ -146,7 +145,7 @@ export default function Current({ deviceTemplate, assetId }) {
                     <div className="py-[15px]">
                       <p className="text-[0.875rem] font-semibold leading-[1.5714]">{data?.message}</p>
                       <p className="text-[0.75rem] font-normal leading-[1.5] text-gray-500 dark:text-gray-400">
-                        {moment(data?.time).format(dateTimeFormat24Hours)}
+                        {displayDateTime(data?.time, dateTimeFormat24Hours)}
                       </p>
                     </div>
                   </li>
