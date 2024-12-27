@@ -75,7 +75,6 @@ export default function ActivityList(props) {
 
   let TreeNodes = getTreeNodes(activity);
 
-  console.log({ selected, expanded });
 
   return (
     <>

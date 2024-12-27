@@ -1,10 +1,9 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -12,15 +11,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import routes from '../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
   CustomDialogTransition,
   getObjKeys,
   serializedAssetsCertification,
   setFieldsInAscendingOrder,
-  sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';

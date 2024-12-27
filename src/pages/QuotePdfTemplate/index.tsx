@@ -127,12 +127,10 @@ const QuotePdfTemplate = () => {
 
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
-      hideDuration: null,
       open: true,
       type: 'info',
       message: `Downloading preview file, Please wait...`
     });
-
     axiosInstance()
       .get(`${qbApi}/getdummy/${templateId}`, {
         responseType: 'blob'
@@ -268,22 +266,14 @@ const QuotePdfTemplate = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.quotePdfTemplate?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => CreateNew('0', false)}
           isAddButtonVisible={permissions?.quotePdfTemplate?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
