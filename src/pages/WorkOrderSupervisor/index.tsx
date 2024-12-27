@@ -622,7 +622,7 @@ const WorkOrderSupervisor = () => {
               leftSideContents={
                 <div className="flex items-center gap-2">
                   <ThemeButton
-                    tooltip="Apply Filters"
+                    mobileTooltip="Apply Filters"
                     startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
                     iconForMobile={<BiFilterAlt />}
                     onClick={() => {
@@ -692,7 +692,7 @@ const WorkOrderSupervisor = () => {
                   leftSideContents={
                     <div className="flex items-center gap-2">
                       <ThemeButton
-                        tooltip="Apply Filters"
+                        mobileTooltip="Apply Filters"
                         startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
                         iconForMobile={<BiFilterAlt />}
                         onClick={() => {

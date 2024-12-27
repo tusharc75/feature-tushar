@@ -386,7 +386,7 @@ const UserDetailsPage = () => {
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
                 <span className="max-[768px]:hidden">
-                  <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                  <ThemeButton iconForMobile={<RiSettingsFill />} mobileTooltip="Assign Entity/Role" onClick={entityDialogOpen}>
                     Assign Entity/Role
                   </ThemeButton>
                 </span>
@@ -397,13 +397,13 @@ const UserDetailsPage = () => {
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}
-                  tooltip="Generate Password"
+                  mobileTooltip="Generate Password"
                 >
                   Generate Password
                 </ThemeButton>
               )}
               {permissions?.user?.isUpdate && (
-                <ThemeButton tooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
+                <ThemeButton mobileTooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
                   Reset Password
                 </ThemeButton>
               )}
@@ -418,6 +418,7 @@ const UserDetailsPage = () => {
                         : true
                       : false
                   }
+                  mobileTooltip={'Edit'}
                 >
                   Edit
                 </ThemeButton>

@@ -86,7 +86,7 @@ const StorageLocationDetailsPage = () => {
                 onClick={() => {
                   setOpenUpdateDialog(true);
                 }}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Edit'}
               </ThemeButton>

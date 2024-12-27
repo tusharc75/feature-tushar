@@ -91,7 +91,7 @@ const PricingConditionsDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.pricingCondition?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpen(true)} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpen(true)} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

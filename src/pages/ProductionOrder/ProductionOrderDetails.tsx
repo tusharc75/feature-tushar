@@ -220,7 +220,7 @@ const ProductionOrderDetails = () => {
                     </ButtonWithPulse>
                   )}
                 {permissions?.productionOrder?.isUpdate && allowedToEdit && productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}

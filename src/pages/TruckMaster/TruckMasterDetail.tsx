@@ -212,7 +212,7 @@ const TruckMasterDetail = () => {
                 })}
             </Menu>
             {permissions?.truckMaster?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

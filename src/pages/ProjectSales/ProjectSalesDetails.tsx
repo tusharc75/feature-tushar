@@ -303,7 +303,7 @@ const ProjectSalesDetails = () => {
             ) : (
               <>
                 {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 ) : null}

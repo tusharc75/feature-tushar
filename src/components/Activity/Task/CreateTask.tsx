@@ -235,7 +235,7 @@ export const CreateTask = ({
                         {id && (
                           <Box pt={1}>
                             <ThemeButton
-                              tooltip="Add a child Task"
+                              mobileTooltip="Add a child Task"
                               iconForMobile={<TableChartIcon />}
                               onClick={() => setOpenAddSub(true)}
                               startIcon={<TableChartIcon />}

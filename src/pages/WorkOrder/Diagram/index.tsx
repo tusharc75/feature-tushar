@@ -139,7 +139,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                 setAttachemntDialog({ open: true, id: null, isClone: false });
               }}
               iconForMobile={<Add />}
-              tooltip="Add"
+              mobileTooltip="Add"
             >
               <Add /> Add
             </ThemeButton>
@@ -153,11 +153,10 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,

@@ -208,13 +208,12 @@ const PurchaseRequisitionDetail = () => {
                     setOrderDialog({ open: true });
                   }}
                   disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
-                  tooltip={'Edit'}
                 >
                   {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                 </ThemeButton>
               )}
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

@@ -302,11 +302,8 @@ const CustomReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: Tab
           ) : (
             <ThemeButton
               iconForMobile={false}
-              variant="outlined"
-              size="small"
               disabled={isExporting}
               onClick={exportData}
-              className={`btn-outline-v-1`}
             >
               Export All
             </ThemeButton>

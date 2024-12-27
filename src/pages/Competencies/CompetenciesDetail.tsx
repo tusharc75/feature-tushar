@@ -98,14 +98,12 @@ const CompetenciesDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <>
-              {permissions?.competencies?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
-              )}
-              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
-            </>
+            {permissions?.competencies?.isUpdate && (
+              <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>

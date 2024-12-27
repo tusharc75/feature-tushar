@@ -250,7 +250,7 @@ const TransferInventoryDetailPage = () => {
                 </ButtonWithPulse>
               )}
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

@@ -99,7 +99,7 @@ const TaxMasterDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.taxMaster?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

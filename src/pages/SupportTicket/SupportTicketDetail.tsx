@@ -150,7 +150,7 @@ const SupportTicketDetail = () => {
                 iconForMobile={false}
                 onClick={handleReopenStatus}
                 disabled={loading}
-                tooltip={'Re-Open'}>
+                mobileTooltip={'Re-Open'}>
                 {'Re-Open'}
               </ThemeButton>
             )}
@@ -158,7 +158,7 @@ const SupportTicketDetail = () => {
               <ThemeButton
                 iconForMobile={<EditIcon />}
                 onClick={handleOpenUpdateDialog}
-                tooltip={'Edit'}>
+                mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

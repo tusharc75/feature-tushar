@@ -101,7 +101,7 @@ const MarketSegmentDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.marketSegment?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

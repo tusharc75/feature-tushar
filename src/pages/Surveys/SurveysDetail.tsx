@@ -118,13 +118,13 @@ const SurveysDetail = () => {
                 onClick={(e) => {
                   setStepFieldsDialog(true);
                 }}
-                tooltip={'Edit'}
+                mobileTooltip={'Edit'}
               >
                 {'Fields'}
               </ThemeButton>
             )}
             {permissions?.surveys?.isUpdate && allowedToEdit && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

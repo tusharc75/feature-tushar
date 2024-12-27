@@ -114,7 +114,7 @@ const IrtTicketDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.irtTicket?.isUpdate && allowedToEdit && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

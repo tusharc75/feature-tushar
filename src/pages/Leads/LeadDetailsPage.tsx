@@ -103,10 +103,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -356,7 +356,7 @@ const LeadDetailsPage = () => {
               </>
             )}
             {leadsPermissions.isUpdate && allowedToEdit && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

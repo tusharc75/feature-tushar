@@ -319,13 +319,12 @@ const MaterialHandling = () => {
           />
           <div className="flex gap-2">
             <ThemeButton
-              tooltip="Apply Filters"
+              mobileTooltip="Apply Filters"
               startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
               iconForMobile={<BiFilterAlt />}
               onClick={() => {
                 setShowFilter(true);
               }}
-              variant="outlined"
             >
               Show Filters
             </ThemeButton>
@@ -339,7 +338,7 @@ const MaterialHandling = () => {
         {workOrder ? (
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
-              <Grid size={{xs:12, md:4, lg:3}}>
+              <Grid size={{ xs: 12, md: 4, lg: 3 }}>
                 <Box className="container-with-border" p={2}>
                   <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
                     {workOrder?.map((data, index) => {
@@ -433,7 +432,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Box>
               </Grid>
-              <Grid size={{xs:12, md:8, lg:filterByIds?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}}>
+              <Grid size={{ xs: 12, md: 8, lg: filterByIds?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12 }}>
                 {selectedWorkOrder && (
                   <>
                     {isMobile ? (

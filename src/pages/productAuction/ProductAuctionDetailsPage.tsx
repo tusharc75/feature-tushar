@@ -95,7 +95,7 @@ const ProductAuctionDetailsPage = () => {
                   onClick={() => {
                     setOpenUpdateDialog(true);
                   }}
-                  tooltip={'Edit'}
+                  mobileTooltip={'Edit'}
                 >
                   {'Edit'}
                 </ThemeButton>

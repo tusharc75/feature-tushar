@@ -145,7 +145,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -193,7 +193,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -220,7 +220,7 @@ const RepairJobDetails = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

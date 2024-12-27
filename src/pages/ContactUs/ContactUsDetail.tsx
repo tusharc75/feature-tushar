@@ -101,22 +101,14 @@ const BlogDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="controls-buttons-v1">
-            <>
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                variant={'outlined'}
-                onClick={handleOpenUpdateDialog}
-                tooltip={'Edit'}
-              >
-                {'Edit'}
-              </ThemeButton>
-
-              <Box component="span" marginX={1} />
-
-              <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
-              </span>
-            </>
+            <ThemeButton
+              iconForMobile={<EditIcon />}
+              onClick={handleOpenUpdateDialog}
+              mobileTooltip={'Edit'}
+            >
+              {'Edit'}
+            </ThemeButton>
+            <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
           </Box>
         </Box>
       </Box>

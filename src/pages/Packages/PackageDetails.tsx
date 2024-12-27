@@ -111,7 +111,7 @@ const PackageDetails = () => {
             {packageData ? (
               <>
                 {permissions?.packages?.isUpdate && (
-                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
@@ -132,12 +132,12 @@ const PackageDetails = () => {
           <CustomTab value={3}>Sub Packages</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
-          <Grid size={{xs:12, sm:12, md:12}}>
+          <Grid size={{ xs: 12, sm: 12, md: 12 }}>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={packageData} fields={packageFields} />
               <Box mb={2} mt={2}>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:12, sm:6, md:6}}>
+                  <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                     <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
                   </Grid>
                 </Grid>

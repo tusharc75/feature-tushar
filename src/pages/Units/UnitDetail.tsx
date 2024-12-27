@@ -106,7 +106,7 @@ const UnitDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.units?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpen} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpen} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

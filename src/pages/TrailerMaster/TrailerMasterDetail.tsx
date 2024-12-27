@@ -210,7 +210,7 @@ const TrailerMasterDetail = () => {
                 })}
             </Menu>
             {permissions?.trailerMaster?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

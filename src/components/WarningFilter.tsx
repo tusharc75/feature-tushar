@@ -35,6 +35,7 @@ const WarningFilter = ({ warnings, checkedFilter, setCheckedFilter }: WarningFil
         <ThemeButton
           size="small"
           tooltip="Filter data by warnings"
+          mobileTooltip="Filter data by warnings"
           variant="outlined"
           iconForMobile={<BiFilterAlt />}
           startIcon={<BiFilterAlt />}

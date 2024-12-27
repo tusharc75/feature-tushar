@@ -211,7 +211,7 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
-                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} tooltip={'Edit'}>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}
