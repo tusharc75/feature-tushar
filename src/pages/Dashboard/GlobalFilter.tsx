@@ -2,9 +2,9 @@ import React from 'react';
 import { FormControl, InputLabel, Select, MenuItem, AppBar, Box, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
-import moment from 'moment';
 import FormTypes from '../../components/Helpers/FormTypes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -53,7 +53,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('1', 'month').calendar()),
+            from: new Date(dayjs().subtract(1, 'month').toDate()),
             to: new Date()
           }
         });
@@ -63,7 +63,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('3', 'months').calendar()),
+            from: new Date(dayjs().subtract(3, 'month').toDate()),
             to: new Date()
           }
         });
@@ -73,7 +73,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('6', 'months').calendar()),
+            from: new Date(dayjs().subtract(6, 'month').toDate()),
             to: new Date()
           }
         });
@@ -83,7 +83,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().subtract('1', 'year').calendar()),
+            from: new Date(dayjs().subtract(1, 'year').toDate()),
             to: new Date()
           }
         });
@@ -92,8 +92,8 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         setGlobalFilters({
           ...globalFilters,
           between: {
-            from: new Date(moment().startOf('year').calendar()),
-            to: new Date(moment().endOf('year').calendar())
+            from: new Date(dayjs().startOf('year').toDate()),
+            to: new Date(dayjs().endOf('year').toDate())
           }
         });
         break;
