@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, Paper, Typography } from '@mui/material';
+import { Box, IconButton, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Delete, DragIndicator, Edit } from '@mui/icons-material';
 import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -8,7 +9,7 @@ const ItemView = ({ itemData, label, handleRemove, id, dragHandleProps, setFormD
   const [editDialog, setEditDialog] = useState(false);
 
   return (
-    <Grid item xs={6} sm={itemData?.column} md={itemData?.column}>
+    <Grid size={{xs:6, sm:itemData?.column, md:itemData?.column}}>
       <Paper>
         <Box p={2}>
           <div className="flex items-center gap-2">

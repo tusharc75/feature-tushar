@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Steps from 'src/components/Steps';
@@ -143,7 +144,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
                   >
                     <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                       <Grid container className="pos_rel">
-                        <Grid item xs={8}>
+                        <Grid size={{xs:8}}>
                           <Box display="flex" alignItems="center">
                             <Box>
                               <IconButton size="small">{expended[`${step?._id}`] === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>

@@ -1,4 +1,5 @@
-import { Chip, ChipProps, CircularProgress, Grid, TextField, Theme, Typography } from '@mui/material';
+import { Box, Chip, ChipProps, CircularProgress, TextField, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios from 'axios';
@@ -181,42 +182,43 @@ export const SearchFilter = ({
             slotProps={{
               input: {
                 ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              )
-              },
+                endAdornment: (
+                  <React.Fragment>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                )
+              }
             }}
           />
         )}
         value={value}
-        renderOption={(option) => {
+        renderOption={(props, option) => {
           const index = options.findIndex((o) => o.type === option.type);
           const { size, className, ...rest } = chip;
+          const { key, ...optionProps } = props;
           return (
-            <Grid container alignItems="center" spacing={3}>
-              <Grid item>
-                <Chip
-                  size={size || 'medium'}
-                  {...rest}
-                  className={`${classes.chipStyle} ${className}`}
-                  label={
-                    option.isAll
-                      ? option.type === 'my'
-                        ? activityName
-                          ? 'My' + ' ' + startCase(activityName)
-                          : 'My activities'
-                        : option.name + ' ' + option.label
-                      : option.label
-                  }
-                />
+            <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              <Grid container alignItems="center" spacing={3}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                  <Chip
+                    size={size || 'medium'}
+                    {...rest}
+                    className={`${classes.chipStyle} ${className}`}
+                    label={
+                      option.isAll
+                        ? option.type === 'my'
+                          ? activityName
+                            ? 'My' + ' ' + startCase(activityName)
+                            : 'My activities'
+                          : option.name + ' ' + option.label
+                        : option.label
+                    }
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>{!option.isAll && <Typography variant="body2">{option.name}</Typography>}</Grid>
               </Grid>
-              <Grid item xs>
-                {!option.isAll && <Typography variant="body2">{option.name}</Typography>}
-              </Grid>
-            </Grid>
+            </Box>
           );
         }}
       />

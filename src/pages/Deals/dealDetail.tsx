@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -83,7 +84,7 @@ const DealDetail = () => {
               <DetailsPage data={dealData} fields={fields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>

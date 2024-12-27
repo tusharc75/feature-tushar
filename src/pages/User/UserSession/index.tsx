@@ -167,10 +167,8 @@ const UserSession = ({ id }) => {
                 disabled={timeFrame !== 'custom'}
                 fullWidth
                 size="small"
-                openTo="year"
                 maxDate={trackingTime.between.to}
                 label="From"
-                views={['year', 'month', 'date']}
                 value={trackingTime.between.from}
                 onChange={(date) => {
                   setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
@@ -183,9 +181,7 @@ const UserSession = ({ id }) => {
                 fullWidth
                 size="small"
                 minDate={trackingTime.between.from}
-                openTo="year"
                 label="To"
-                views={['year', 'month', 'date']}
                 value={trackingTime.between.to}
                 onChange={(date) => {
                   setTrackingTime({ between: { to: date, from: trackingTime.between.from } });

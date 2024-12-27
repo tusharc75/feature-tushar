@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -69,7 +70,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
               <Box p={2}>
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <CustomDatePicker
                         fullWidth
                         size="small"
@@ -86,7 +87,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                     </Grid>
                   )}
                   {(type === 'startStop' || type === 'stop') && (
-                    <Grid item xs={12} sm={12}>
+                    <Grid size={{xs:12, sm:12}}>
                       <CustomDatePicker
                         fullWidth
                         size="small"

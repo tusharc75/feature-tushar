@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -159,7 +160,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                             <Box marginY={2}>
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
                                     <FormTypes
                                       {...field}
                                       fieldData={field}

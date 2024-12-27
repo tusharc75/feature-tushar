@@ -104,7 +104,10 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
           autoHighlight
           getOptionLabel={(option: any) => option?.optionLabel}
           getOptionDisabled={(option) => option?.disabled || false}
-          renderOption={(option) => option?.optionLabel}
+          renderOption={(props, option, state, ownerState) => {
+
+            return <Box>{ownerState.getOptionLabel(option)}</Box>
+          }}
           onChange={(event, value) => {
             setDateFilters({
               ...dateFilters,

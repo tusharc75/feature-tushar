@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState, Fragment } from 'react';
 import { makeStyles } from '@mui/styles';
-import { Box, Grid, Checkbox, Button, Dialog, Theme } from '@mui/material';
+import { Box, Checkbox, Button, Dialog, Theme } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Link } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
 import Container from '../../components/CustomContainer';

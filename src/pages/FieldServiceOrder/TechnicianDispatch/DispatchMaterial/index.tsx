@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Button, Dialog, Grid, Box, IconButton } from '@mui/material';
+import { Button, Dialog, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';

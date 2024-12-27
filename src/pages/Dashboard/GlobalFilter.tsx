@@ -182,10 +182,8 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     disabled={timeFrame !== 'custom' || disabled}
                     fullWidth
                     size="small"
-                    openTo="year"
                     maxDate={globalFilters.between.to}
                     label="From"
-                    views={['year', 'month', 'date']}
                     value={globalFilters.between.from}
                     onChange={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, from: date } });
@@ -198,9 +196,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     fullWidth
                     size="small"
                     minDate={globalFilters.between.from}
-                    openTo="year"
                     label="To"
-                    views={['year', 'month', 'date']}
                     value={globalFilters.between.to}
                     onChange={(date) => {
                       setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, to: date } });

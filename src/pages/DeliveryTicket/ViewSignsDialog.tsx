@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Dialog, Button, Box, Grid, Typography } from '@mui/material';
+import { Dialog, Button, Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { startCase } from 'lodash';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -34,7 +35,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
       <CustomDialogContent>
         <Grid container spacing={2}>
           {signs.map((sign) => (
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs:12, sm:6}}>
               <Box textAlign="center">
                 <Typography variant="body1">
                   "{sign.status === 'Start Delivery' ? 'Sign-off - Dispatched' : 'Sign-off - Delivered'}"&nbsp;
@@ -44,7 +45,7 @@ const ViewSignsDialog = ({ close, signatures }) => {
               <Box mt={4}>
                 <Grid container spacing={2} justifyContent="center">
                   {sign.signs.map((s) => (
-                    <Grid item>
+                    <Grid >
                       <Box textAlign="center" maxWidth={160}>
                         <Typography variant="body2">{startCase(s.type)} Sign</Typography>
                         <Box my={2} />
