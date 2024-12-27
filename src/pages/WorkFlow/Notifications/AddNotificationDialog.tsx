@@ -246,7 +246,6 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
 
             {showConfirmDialog ? (
               <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);

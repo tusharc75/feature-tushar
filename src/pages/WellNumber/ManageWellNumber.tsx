@@ -253,7 +253,6 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
-                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
