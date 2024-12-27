@@ -37,8 +37,9 @@ const CustomDatePicker = (props) => {
       {...(openTo ? { openTo: openTo } : {})}
       disablePast={disablePast}
       required={required}
-      value={dayjs.tz(value) || null}
+      value={dayjs.tz(value || null) || null}
       name={name}
+      emptyLabel={label}
       label={label}
       {...(maxDate ? { maxDate: dayjs.tz(new Date(maxDate)) } : {})}
       {...(minDate ? { minDate: dayjs.tz(new Date(minDate)) } : {})}
