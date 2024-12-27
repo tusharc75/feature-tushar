@@ -2,7 +2,6 @@ import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonIcon from '@mui/icons-material/Person';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,7 +9,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { displayDateTime, IRT_APPROVER_STATUS } from 'src/constants/helpers';
 import AssignUserDialog from './AssignUserDialog';
 
 const Approver = ({ irtTicketData }) => {
@@ -165,7 +164,7 @@ const Approver = ({ irtTicketData }) => {
                     {item?.detail}
                   </Typography>
                   <Typography variant="body2" style={{ fontSize: '12px', marginBottom: '6px', color: 'var(--dark-secondary-text, gray)' }}>
-                    {moment(item?.date).format('MMM DD YYYY hh:mm A')}
+                    {displayDateTime(item?.date)}
                   </Typography>
                   {item?.reason && (
                     <Typography variant="body2" style={{ color: 'var(--dark-secondary-text, #3e3e3e)' }}>

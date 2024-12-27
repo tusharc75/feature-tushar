@@ -11,7 +11,7 @@ import moment from 'moment';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { cn, CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateTimeFormat24Hours, displayDateTime } from 'src/constants/helpers';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 
@@ -106,7 +106,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               {expandedAccordition[category?._id] && currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
                 <h6 className="line-clamp-1 text-right text-sm font-normal leading-[1.5] text-gray-500 dark:text-gray-300 max-sm:text-xs">
                   <span className="max-md:sr-only">Last Updated -</span>
-                  <span>{moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}</span>
+                  <span>{displayDateTime(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time, dateTimeFormat24Hours)}</span>
                 </h6>
               ) : null}
             </div>

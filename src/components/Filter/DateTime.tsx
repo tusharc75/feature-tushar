@@ -3,6 +3,7 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { displayDate } from 'src/constants/helpers';
 
 const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required = false, sidebarIcon = null }) => {
   const [timeFrame, setTimeFrame] = useState<any>('custom');
@@ -27,8 +28,8 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
       setDeepFilters([
         ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}` && d?.field !== `to_${fieldData?.fieldName}`),
         ...[
-          { field: `from_${fieldData?.fieldName}`, term: moment(fromDate).format('MM/DD/YYYY') },
-          { field: `to_${fieldData?.fieldName}`, term: moment(toDate).format('MM/DD/YYYY') }
+          { field: `from_${fieldData?.fieldName}`, term: displayDate(fromDate) },
+          { field: `to_${fieldData?.fieldName}`, term: displayDate(toDate) }
         ]
       ]);
     },
@@ -125,7 +126,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `from_${fieldData?.fieldName}`),
-                { field: `from_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
+                { field: `from_${fieldData?.fieldName}`, term: displayDate(date) }
               ]);
             }}
           />
@@ -145,7 +146,7 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, resource, required =
             onChange={(date: any) => {
               setDeepFilters([
                 ...deepFilters?.filter((d) => d?.field !== `to_${fieldData?.fieldName}`),
-                { field: `to_${fieldData?.fieldName}`, term: moment(date).format('MM/DD/YYYY') }
+                { field: `to_${fieldData?.fieldName}`, term: displayDate(date) }
               ]);
             }}
           />

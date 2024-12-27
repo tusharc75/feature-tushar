@@ -1413,10 +1413,6 @@ export const dateFormatForInputControl = localStorage.getItem('dateFormatForInpu
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
-export const yyyyMMDD = (dateToBeFormatted) => {
-  return dateToBeFormatted ? moment(dateToBeFormatted).format(cardDateFormat) : dateToBeFormatted;
-};
-
 export const displayDate = (date, format = null) => {
   format = format ? format : dateFormat;
   return date ? dayjs.utc(date).tz().format(format) : date;
@@ -1428,7 +1424,7 @@ export const displayDateTime = (date, format = null) => {
 };
 
 export const displayCardDate = (date) => {
-  return date ? moment(date).format(cardDateFormat) : date;
+  return date ? dayjs.utc(date).tz().format(cardDateFormat) : date;
 };
 
 export const convertDateInDateTime = (date) => {

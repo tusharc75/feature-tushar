@@ -88,7 +88,6 @@ export const PreviewFields = ({
     }
   };
 
-  console.log(views);
 
   return (
     <>
@@ -155,10 +154,10 @@ export const PreviewFields = ({
                 if (
                   val.find((e) => e.fieldName === 'Select All') &&
                   ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !==
-                    val
-                      ?.map((e) => e?.fieldName)
-                      .sort()
-                      .toString()
+                  val
+                    ?.map((e) => e?.fieldName)
+                    .sort()
+                    .toString()
                 ) {
                   setVisibleColumns(allColumn);
                 } else if (
@@ -193,7 +192,7 @@ export const PreviewFields = ({
                       style={{ marginRight: 8 }}
                       checked={
                         ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
-                        ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
+                          ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
                           ? true
                           : state.selected
                       }

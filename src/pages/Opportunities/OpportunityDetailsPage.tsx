@@ -27,8 +27,7 @@ import {
   processFieldName,
   sidebarResource,
   stepsToIgnoreManualCompleteForOpportunity,
-  supplierContact,
-  yyyyMMDD
+  supplierContact
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';

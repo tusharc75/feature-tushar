@@ -12,7 +12,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
-import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -191,7 +190,7 @@ export default function ManageAssetDialog({
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
                                             size="small"
-                                            minDate={repairJobData['startDate'] ? moment(repairJobData['startDate']) : undefined}
+                                            minDate={repairJobData['startDate'] ? new Date(repairJobData['startDate']) : undefined}
                                           />
                                         </Box>
                                       </Box>
