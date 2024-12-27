@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { startCase } from 'lodash';
@@ -402,7 +403,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             />
           </>
         )}
-        <Grid item xs={12} md={12} sm={12}>
+        <Grid size={{xs:12, md:12, sm:12}}>
           {columns ? (
             <Box zIndex={5}>
               <CustomReactTable

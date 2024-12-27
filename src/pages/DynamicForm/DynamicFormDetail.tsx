@@ -1,8 +1,8 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -191,7 +191,7 @@ const DynamicFormDetail = () => {
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Grid>
           ) : (
             <DetailsPage

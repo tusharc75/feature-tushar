@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, TextField } from '@mui/material';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -158,7 +159,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                           selectedEntities?.map((entity, index) => (
                             <Box pt={2}>
                               <Grid container spacing={1}>
-                                <Grid item xs={4}>
+                                <Grid size={{xs:4}}>
                                   <TextField
                                     disabled
                                     variant="outlined"
@@ -168,7 +169,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     fullWidth
                                   />
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid size={{xs:4}}>
                                   <Field
                                     as={TextField}
                                     variant="outlined"
@@ -182,7 +183,7 @@ const SettingDialog = ({ entities, resource, handleClose }) => {
                                     }}
                                   />
                                 </Grid>
-                                <Grid item xs={4}>
+                                <Grid size={{xs:4}}>
                                   <Field
                                     as={TextField}
                                     value={values['entityResources'][entity._id]?.homePageLabel || ''}

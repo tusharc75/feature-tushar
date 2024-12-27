@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Divider, Grid, TextField } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import React, { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -79,16 +80,16 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={job?.jobNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField variant="outlined" type="text" label="PRS" fullWidth margin="dense" size="small" value={job?.asset?.assetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField variant="outlined" type="text" label="Fleet Number" fullWidth margin="dense" size="small" value={fleet?.fleetNumber} />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={job?.shippingAddress?.optionLabel} />
             </Grid>
           </Grid>
@@ -99,7 +100,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
         </div>
         <Box marginY={2}>
           <Grid spacing={2} container>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -123,7 +124,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <FormTypes
                 fieldData={null}
                 values={dispatchData}
@@ -147,7 +148,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                 imageOrFileUploadCompletePercentage={null}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid size={{xs:12, sm:6, md:6}}>
               <TextField
                 variant="outlined"
                 type="text"

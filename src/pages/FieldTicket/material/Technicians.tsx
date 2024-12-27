@@ -1,6 +1,6 @@
 import { IconButton, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid/Grid';
+import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -383,7 +383,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           </>
         )}
         <Grid container spacing={2}>
-          <Grid item xs={12} md={12} sm={12}>
+          <Grid size={{xs:12, md:12, sm:12}}>
             {columns ? (
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}

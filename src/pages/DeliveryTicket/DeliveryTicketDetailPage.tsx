@@ -1,4 +1,5 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
@@ -585,14 +586,14 @@ export default function DeliveryTicketDetail(props) {
               />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </TabPanel>
           {permissions?.serializedAsset?.isRead && (
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={1} className="p-2">
-                <Grid item xs={12} className="d-flex mt-2 gap-2">
+                <Grid size={{xs:12}} className="d-flex mt-2 gap-2">
                   {deliveryTicketData?.status === 'New' && (
                     <IconButton
                       onClick={() => {
@@ -623,7 +624,7 @@ export default function DeliveryTicketDetail(props) {
                   )}
                   <Box mx={1} />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{xs:12}}>
                   {serializedAssetColumns ? (
                     <CustomReactTable
                       height={'calc(100vh - 150px)'}
