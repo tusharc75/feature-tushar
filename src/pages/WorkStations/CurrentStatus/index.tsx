@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -183,7 +184,7 @@ const CurrentStatus = ({ id }) => {
         />
       ) : (
         <Grid container spacing={2} style={{ padding: '8px' }}>
-          <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Grid>
       )}
     </Box>

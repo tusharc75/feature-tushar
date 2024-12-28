@@ -8,7 +8,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Info } from '@mui/icons-material';
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
 import TechnicianDialog from '../TechnicianDialog';
 import { IconButton } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';

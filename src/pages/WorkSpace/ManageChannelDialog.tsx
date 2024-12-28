@@ -1,4 +1,5 @@
-import { Box, Button, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@mui/material';
+import { Box, Button, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useState } from 'react';
@@ -129,7 +130,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
                   <Grid container spacing={1}>
-                    <Grid item xs={12}>
+                    <Grid size={{xs:12}}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -147,7 +148,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{xs:12}}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -164,7 +165,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sm={6}>
+                    <Grid size={{xs:12, md:6, sm:6}}>
                       <FormLabel component="legend" required={true}>
                         Access
                       </FormLabel>
