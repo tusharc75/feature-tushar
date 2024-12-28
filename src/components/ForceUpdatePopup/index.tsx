@@ -32,8 +32,9 @@ const ForceUpdatePopup = ({ onClose, data }: ForceUpdatePopupProps) => {
             <ThemeButton
               onClick={onClose}
               iconForMobile={false}
-              color="primary"
               borderColor="none"
+              backgroundColor="theme"
+              textColor="white"
               fullWidth
               style={{ padding: '9px 10px', borderRadius: '10px', maxWidth: '204px', fontSize: '20px', fontWeight: '600' }}
             >

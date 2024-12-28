@@ -140,26 +140,17 @@ const SupportTicketDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[routes.supportTicket, { title: supportTicketData?.supportTicketNumber }]}
-          />
+          <CustomBreadCrumbs routes={[routes.supportTicket, { title: supportTicketData?.supportTicketNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {supportTicketData?.status === SUPPORT_TICKET_STATUS.completed && (
-              <ThemeButton
-                iconForMobile={false}
-                onClick={handleReopenStatus}
-                disabled={loading}
-                mobileTooltip={'Re-Open'}>
+              <ThemeButton iconForMobile={false} onClick={handleReopenStatus} disabled={loading} mobileTooltip={'Re-Open'}>
                 {'Re-Open'}
               </ThemeButton>
             )}
             {allowedToEdit && (
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                onClick={handleOpenUpdateDialog}
-                mobileTooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

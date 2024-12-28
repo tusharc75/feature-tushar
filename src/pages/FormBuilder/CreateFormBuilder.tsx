@@ -220,7 +220,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -426,7 +426,9 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" size="small" fullWidth />}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Section Name" variant="outlined" margin="dense" size="small" fullWidth />
+                      )}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);
@@ -457,7 +459,7 @@ const CreateFormBuilder = () => {
                           history.push({ pathname: routes.formBuilder.path });
                         }
                       }}
-                      mobileTooltip='Close'
+                      mobileTooltip="Close"
                       iconForMobile={<RiCloseCircleFill size={24} />}
                     >
                       {'Close'}

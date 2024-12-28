@@ -417,7 +417,8 @@ const ArrangeViewDialog = ({
               onClick={submitForm}
               iconForMobile={false}
               borderColor="none"
-              color="primary"
+              backgroundColor="theme"
+              textColor="white"
               disabled={loading ? true : resized ? false : !dirty}
             >
               Save <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />

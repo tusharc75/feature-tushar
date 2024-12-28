@@ -99,7 +99,7 @@ const CompetenciesDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.competencies?.isUpdate && (
-              <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

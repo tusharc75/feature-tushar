@@ -503,18 +503,12 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
-                  <ThemeButton
-                    iconForMobile={<EditIcon />}
-                    onClick={handleOpenUpdateDialog}
-                    mobileTooltip={'Edit'}>
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                     {'Edit'}
                   </ThemeButton>
                 )}
               {deliveryTicketData?.signatures?.length > 0 ? (
-                <ThemeButton
-                  iconForMobile={<FaSignature size={20} />}
-                  onClick={() => setOpenSigns(true)}
-                  mobileTooltip={'View Signatures'}>
+                <ThemeButton iconForMobile={<FaSignature size={20} />} onClick={() => setOpenSigns(true)} mobileTooltip={'View Signatures'}>
                   {'View Signatures'}
                 </ThemeButton>
               ) : null}

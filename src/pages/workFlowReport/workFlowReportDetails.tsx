@@ -104,7 +104,9 @@ const WorkFlowReportDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }, { title: workFlowData?.workflowName }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -113,7 +115,7 @@ const WorkFlowReportDetail = () => {
                 onClick={() => {
                   setShowCloseConfirmation(true);
                 }}
-                mobileTooltip='Close'
+                mobileTooltip="Close"
                 iconForMobile={false}
               >
                 Close

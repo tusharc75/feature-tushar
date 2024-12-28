@@ -125,7 +125,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             return (
               <Box key={key} component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
                 <span style={{ width: 'calc(100% - 25px)' }}>{ownerState.getOptionLabel(option)}</span>
-                <Box className='flex gap-1'> 
+                <Box className="flex gap-1">
                   <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
                     <IconButton size="small">
                       <AiFillEdit />
@@ -211,6 +211,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         <div className="mt-4 pt-2 text-right [border-top:1px_solid_var(--common-border-color)]">
           <ThemeButton
             borderColor="yellow"
+            backgroundColor="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedKpiFilter });
             }}

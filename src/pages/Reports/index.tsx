@@ -35,21 +35,13 @@ const ReportsCenter = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Link to="/custom-report">
-              <ThemeButton
-                iconForMobile={<PhotoFilterIcon />}
-                startIcon={<PhotoFilterIcon />}
-                mobileTooltip={`Custom Report`}
-              >
+              <ThemeButton iconForMobile={<PhotoFilterIcon />} startIcon={<PhotoFilterIcon />} mobileTooltip={`Custom Report`}>
                 Custom Report
               </ThemeButton>
             </Link>
             {permissions?.scheduleReport?.isRead && (
               <Link to={`/schedule-report`}>
-                <ThemeButton
-                  iconForMobile={<DateRangeIcon />}
-                  startIcon={<DateRangeIcon />}
-                  mobileTooltip={`Schedule Report`}
-                >
+                <ThemeButton iconForMobile={<DateRangeIcon />} startIcon={<DateRangeIcon />} mobileTooltip={`Schedule Report`}>
                   Custom Report
                 </ThemeButton>
               </Link>

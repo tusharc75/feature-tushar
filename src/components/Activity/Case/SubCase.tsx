@@ -154,10 +154,24 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
           />
 
           <div className="mt-2 flex gap-2">
-            <ThemeButton color="primary" borderColor="none" disabled={!caseName || isSubmitting} isLoading={isSubmitting} onClick={handleSave}>
+            <ThemeButton
+              textColor="white"
+              borderColor="none"
+              backgroundColor="theme"
+              disabled={!caseName || isSubmitting}
+              isLoading={isSubmitting}
+              onClick={handleSave}
+            >
               Create
             </ThemeButton>
-            <ThemeButton color="primary" borderColor="none" className={classes.marginLeft} disableElevation onClick={() => setOpenAddSub(false)}>
+            <ThemeButton
+              textColor="white"
+              borderColor="none"
+              backgroundColor="theme"
+              className={classes.marginLeft}
+              disableElevation
+              onClick={() => setOpenAddSub(false)}
+            >
               Cancel
             </ThemeButton>
           </div>

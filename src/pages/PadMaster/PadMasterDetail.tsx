@@ -118,11 +118,7 @@ const PadMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.padMaster?.isUpdate && (
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                onClick={handleOpenUpdateDialog}
-                mobileTooltip={'Edit'}
-              >
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

@@ -103,10 +103,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            allowedToEdit &&
-            leadData[processFieldName] &&
-            currentStepToShow + 1 >= steps.length
+              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+              allowedToEdit &&
+              leadData[processFieldName] &&
+              currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);

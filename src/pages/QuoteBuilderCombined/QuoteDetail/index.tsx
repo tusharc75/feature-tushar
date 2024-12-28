@@ -32,7 +32,7 @@ import {
   quoteBuilder,
   sidebarResource,
   termsAndCondition,
-  displayCardDate,
+  displayCardDate
 } from '../../../constants/helpers';
 import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
@@ -45,6 +45,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { MdDelete } from 'react-icons/md';
 
 const DOASteps = [
   {
@@ -492,7 +493,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => { })
+      .then(() => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -587,7 +588,7 @@ export default function QuoteDetail() {
                       setShowTotalSalesDialog(true);
                     }}
                     startIcon={<GiReceiveMoney />}
-                    mobileTooltip='Quote Summary'
+                    mobileTooltip="Quote Summary"
                     iconForMobile={<GiReceiveMoney />}
                   >
                     Quote Summary
@@ -603,12 +604,7 @@ export default function QuoteDetail() {
                 >
                   {`Version : ${currentVersion}`}
                 </ThemeButton>
-                <ThemeButton
-                  iconForMobile={<ExpandMore />}
-                  onClick={openActions}
-                  endIcon={<ExpandMore />}
-                  mobileTooltip={`Actions`}
-                >
+                <ThemeButton iconForMobile={<ExpandMore />} onClick={openActions} endIcon={<ExpandMore />} mobileTooltip={`Actions`}>
                   Actions
                 </ThemeButton>
                 <Menu
@@ -667,8 +663,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }

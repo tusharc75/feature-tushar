@@ -285,10 +285,10 @@ const ProductDetailsPage = () => {
               <div className="pb-3">
                 <DetailsPage data={productData} fields={productFields} fullHeight={false} />
                 <Box mt={3}>
-                  <Grid size={{xs:12, sm:12, md:12, lg:12}} className={'form-v1'}>
+                  <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} className={'form-v1'}>
                     <Grid container spacing={2}>
                       {permissions?.productInventory?.isRead && !user?.user?.brandPolicy?.hideInventoryCount && (
-                        <Grid size={{xs:12, sm:6, md:4, xl:3}}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
                           <div style={{ overflow: 'hidden' }} className="single-form-v1">
                             <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                               <Box display="flex" alignItems="center">
@@ -360,7 +360,7 @@ const ProductDetailsPage = () => {
                         </Grid>
                       )}
                       {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
-                        <Grid size={{xs:12, sm:6, md:4, xl:3}}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
                           <Box className="single-form-v1">
                             <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
                               <Typography variant="subtitle2">{resources?.serializedAsset?.titlePlural}</Typography>
@@ -409,7 +409,7 @@ const ProductDetailsPage = () => {
                                       borderBottom="1px solid var(--dark-mode-border-color, #efe7e7)"
                                     >
                                       <Grid>
-                                        <Grid size={{xs:8}}>
+                                        <Grid size={{ xs: 8 }}>
                                           <Box display="flex" alignItems="center">
                                             <Box>
                                               <IconButton
@@ -533,11 +533,11 @@ const ProductDetailsPage = () => {
                         </Grid>
                       ) : null}
                       {permissions?.productInventory?.isRead && (
-                        <Grid size={{xs:12, sm:6, md:4, xl:3}}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
                           <CostDetails product={id} productData={productData} minHeight={minHeight} />
                         </Grid>
                       )}
-                      <Grid size={{xs:12, sm:6, md:4, xl:3}}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
                         <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
                       </Grid>
                     </Grid>

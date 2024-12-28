@@ -182,8 +182,8 @@ const GridHeader = ({
             <ThemeButton
               onClick={handleFilterOpen}
               startIcon={<BiFilterAlt />}
-              tooltip='Apply Filters'
-              mobileTooltip='Apply Filters'
+              tooltip="Apply Filters"
+              mobileTooltip="Apply Filters"
               iconForMobile={<BiFilterAlt />}
             >
               {'Filters'}

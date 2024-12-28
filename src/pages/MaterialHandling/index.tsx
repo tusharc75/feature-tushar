@@ -401,9 +401,7 @@ const MaterialHandling = () => {
                                 </Typography>
                                 <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                   Asset :{' '}
-                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
-                                    {data?.serializedAsset?.optionLabel}
-                                  </span>
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
                                 </Typography>
                               </>
                             )}
@@ -411,9 +409,7 @@ const MaterialHandling = () => {
                               <>
                                 <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                   Customer :{' '}
-                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
-                                    {data?.customerAccount?.optionLabel}
-                                  </span>
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.customerAccount?.optionLabel}</span>
                                 </Typography>
                                 <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                   Well Name :{' '}
@@ -448,11 +444,7 @@ const MaterialHandling = () => {
                       </>
                     ) : (
                       <Box className="container-with-border " p={3}>
-                        <Request
-                          referenceId={selectedWorkOrder?._id}
-                          fetchDataMaster={fetchData}
-                          referenceType={selectedWorkOrder?.referenceType}
-                        />
+                        <Request referenceId={selectedWorkOrder?._id} fetchDataMaster={fetchData} referenceType={selectedWorkOrder?.referenceType} />
                       </Box>
                     )}
                   </>

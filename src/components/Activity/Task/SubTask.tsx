@@ -174,10 +174,17 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               helperText={isError && taskName.length < 3 && 'Task name must be at least 3 letters'}
             />
             <div className="mt-2 flex gap-2">
-              <ThemeButton color="primary" borderColor="none" disabled={!taskName || isSubmitting} onClick={handleSave} isLoading={isSubmitting}>
+              <ThemeButton
+                textColor="white"
+                borderColor="none"
+                backgroundColor="theme"
+                disabled={!taskName || isSubmitting}
+                onClick={handleSave}
+                isLoading={isSubmitting}
+              >
                 Create
               </ThemeButton>
-              <ThemeButton color="primary" borderColor="none" disableElevation onClick={() => setOpenAddSub(false)}>
+              <ThemeButton textColor="white" borderColor="none" backgroundColor="theme" disableElevation onClick={() => setOpenAddSub(false)}>
                 Cancel
               </ThemeButton>
             </div>

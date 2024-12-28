@@ -93,7 +93,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -203,17 +203,10 @@ const SubleaseDetailsPage = () => {
               allowedToEdit &&
               subleaseData?.canComplete &&
               ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
-                <ButtonWithPulse
-                  onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
-                >
-                  Close
-                </ButtonWithPulse>
+                <ButtonWithPulse onClick={() => updateStatus(SUBLEASE_STATUS.closed)}>Close</ButtonWithPulse>
               )}
             {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                onClick={() => setOpenUpdateDialog(true)}
-                mobileTooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}

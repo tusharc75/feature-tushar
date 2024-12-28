@@ -211,7 +211,7 @@ const FieldTicketDetail = () => {
                   setVersionDialog(true);
                 }}
                 startIcon={<VscVersions />}
-                mobileTooltip='Versions'
+                mobileTooltip="Versions"
                 iconForMobile={<VscVersions size={20} style={{ color: 'var(--primary-text)' }} />}
               >
                 Versions

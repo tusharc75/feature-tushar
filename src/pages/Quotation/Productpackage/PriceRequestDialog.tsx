@@ -264,9 +264,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                         <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
                       </Box>
                       <Box className="line-clamp-1  min-w-0" title={data?.requestDate ? displayDateTime(data?.requestDate) : ''}>
-                        <Typography variant="subtitle2">
-                          {data?.requestDate && `Request Date : ${displayDateTime(data?.requestDate)} `}
-                        </Typography>
+                        <Typography variant="subtitle2">{data?.requestDate && `Request Date : ${displayDateTime(data?.requestDate)} `}</Typography>
                       </Box>
                     </div>
                   </div>
@@ -277,10 +275,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           {data?.status === 'Submit' && (
-                            <Box
-                              className="line-clamp-1  min-w-0"
-                              title={data?.responseDate ? displayDateTime(data?.responseDate) : ''}
-                            >
+                            <Box className="line-clamp-1  min-w-0" title={data?.responseDate ? displayDateTime(data?.responseDate) : ''}>
                               <Typography variant="subtitle2">
                                 {data?.responseDate && `Response Date : ${displayDateTime(data?.responseDate)} `}
                               </Typography>
@@ -325,7 +320,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                         {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
                           <div className="flex gap-2">
                             <ThemeButton
-                              borderColor="default"
                               iconForMobile={<FaThumbsUp />}
                               onClick={() => {
                                 handleAccept(data?._id);
@@ -336,7 +330,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                             </ThemeButton>
                             <ThemeButton
                               borderColor="red"
-                              hasMobileBorder
+                              textColor="red"
                               iconForMobile={<FaThumbsDown />}
                               onClick={() => {
                                 setResponse({ open: true, type: 'Reject', id: data?._id });

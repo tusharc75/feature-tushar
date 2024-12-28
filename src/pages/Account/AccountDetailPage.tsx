@@ -641,19 +641,16 @@ export default function AccountDetailPage(props) {
                 onClick={() => {
                   setShowApproveDisapproveConfirmBox(true);
                 }}
-                borderColor={accountData.staticData?.approved ? 'red' : 'none'}
                 iconForMobile={accountData.staticData?.approved ? <FcDisapprove size={21} /> : <FcApproval size={21} />}
-                color={accountData.staticData?.approved ? 'secondary' : 'primary'}
+                borderColor={accountData.staticData?.approved ? 'red' : 'none'}
+                textColor={accountData.staticData?.approved ? 'red' : 'white'}
+                backgroundColor={accountData.staticData?.approved ? 'none' : 'theme'}
               >
                 {accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
               </ThemeButton>
             )}
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                onClick={handleOpneUpdateDialog}
-                mobileTooltip={'Edit'}
-              >
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpneUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}
@@ -994,7 +991,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => { }}
+          handleAddressDataSource={() => {}}
         />
       ) : null}
 

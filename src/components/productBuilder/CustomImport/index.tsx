@@ -39,6 +39,7 @@ import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
 import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
 import { AddAllColumnDialog } from 'src/components/productBuilder/CustomImport/AddAllColumnDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -479,22 +480,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   disabled={!(values?.productTemplate && values?.priceTemplate)}
                 />
                 <label htmlFor={`customImportFile`}>
-                  <HtmlTooltip title={'Import File'}>
-                    <span>
-                      <Button
-                        variant={isMobile ? 'text' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                        component="span"
-                        // disabled={_.some(_.values(values), (v) => v === '')}
-                        disabled={!(values?.productTemplate && values?.priceTemplate)}
-                        startIcon={isMobile ? null : <AiOutlineImport />}
-                      >
-                        {isMobile ? <AiOutlineImport /> : 'Import File'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    tooltip={'Import File'}
+                    component="span"
+                    // disabled={_.some(_.values(values), (v) => v === '')}
+                    disabled={!(values?.productTemplate && values?.priceTemplate)}
+                    startIcon={isMobile ? null : <AiOutlineImport />}
+                    iconForMobile={<AiOutlineImport />}
+                  >
+                    Import File
+                  </ThemeButton>
                 </label>
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -502,25 +497,19 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   <Box mr={2}>
                     <ShowMissedOrExtraColumn view={selectedView} file={files} />
                   </Box>
-                  <HtmlTooltip title={'Add Column'}>
-                    <span>
-                      <Button
-                        id={'custom-import-dialog-add-menu-button'}
-                        variant={isMobile ? 'text' : 'outlined'}
-                        color="primary"
-                        size="small"
-                        disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
-                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                        startIcon={isMobile ? null : <Add />}
-                        onClick={(e) => {
-                          setAddAnchorEl(e.currentTarget);
-                        }}
-                        aria-controls="add-menu"
-                      >
-                        {isMobile ? <Add /> : 'Add Column'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    id={'custom-import-dialog-add-menu-button'}
+                    disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
+                    startIcon={isMobile ? null : <Add />}
+                    iconForMobile={<Add />}
+                    tooltip="Add Column"
+                    onClick={(e) => {
+                      setAddAnchorEl(e.currentTarget);
+                    }}
+                    aria-controls="add-menu"
+                  >
+                    Add Column
+                  </ThemeButton>
                   <Menu
                     anchorEl={addAnchorEl}
                     keepMounted
@@ -641,15 +630,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                // error={
-                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                // }
-                                // helperText={
-                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                //   'Required field'
-                                // }
+                                  // error={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                  // }
+                                  // helperText={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                  //   'Required field'
+                                  // }
                                 />
                               )}
                             />
