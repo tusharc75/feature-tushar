@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Grid,
   Box,
   IconButton,
   Typography,
@@ -15,6 +14,7 @@ import {
   Menu,
   Button
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import routes from './../../components/Helpers/Routes';
@@ -79,7 +79,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
       <Accordion expanded={expandContact} className="accordContact" onChange={() => setExpandContact(!expandContact)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -92,7 +92,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {isAllowedToEdit && (
                   <>
@@ -126,11 +126,11 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 {contacts && contacts?.length ? (
                   <Grid container spacing={1}>
                     {contacts.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid container>
-                              <Grid item xs={12} sm={12}>
+                              <Grid size={{xs:12, sm:12}}>
                                 <List>
                                   <ListItem>
                                     <ListItemAvatar>

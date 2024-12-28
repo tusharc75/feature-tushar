@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Line } from 'react-chartjs-2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -85,7 +86,7 @@ const UserSession = ({ id }) => {
         justifyContent="space-between"
       >
         <Grid container>
-          <Grid item xs={8}>
+          <Grid size={{xs:8}}>
             <Box display="flex">
               <Box padding="5px">
                 <Typography variant="subtitle2">User Time Track</Typography>
@@ -100,7 +101,7 @@ const UserSession = ({ id }) => {
       <Typography className="subtitle1 m-2">
         {userTrackingDataLoading ? (
           <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Grid>
         ) : userTrackingData.labels.length === 0 ? (
           <h3>No activity found in the selected date range</h3>

@@ -2,8 +2,9 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { asyncForEach, b64toBlob, convertBlobToBase64 } from 'src/constants/helpers';
-import { Box, Button, FormControl, Grid, Typography } from '@mui/material';
+import { asyncForEach, convertBlobToBase64 } from 'src/constants/helpers';
+import { Box, Button, FormControl, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
@@ -500,7 +501,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         </div>
       </div>
       <Grid container spacing={2}>
-        <Grid item xs={12} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+        <Grid size={{xs:12}} style={{ height: 'calc(100vh - 140px)', overflow: 'auto' }}>
           {loading ? (
             <Box pt={2}>
               <Typography>Pdf Pages Loading...</Typography>

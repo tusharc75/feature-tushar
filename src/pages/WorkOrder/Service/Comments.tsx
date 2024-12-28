@@ -1,15 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Chip, Dialog, IconButton, Typography } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import styles from './logs.module.scss';
-import { TextField, Button, Grid } from '@mui/material';
+import { TextField, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
-import PersonIcon from '@mui/icons-material/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import EditIcon from '@mui/icons-material/Edit';
@@ -181,7 +180,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
           </Box>
         )}
         <Grid container justifyContent="center" alignItems="center" spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <TextField
               fullWidth
               value={comment}
@@ -193,7 +192,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
               rows={2}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{xs:12}}>
             <Button disabled={comment === ''} variant="contained" color="primary" size="small" onClick={handleSubmit}>
               Add
             </Button>

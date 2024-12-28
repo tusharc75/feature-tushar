@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import { Dialog, Box, Grid, Button, Typography, IconButton } from '@mui/material';
+import { Dialog, Box, Button, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { Theme, createStyles } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import { Form, Formik } from 'formik';
@@ -343,12 +344,12 @@ const StepFieldsDialog = ({
                                     {form?.sectionFields?.map((field, index2) => (
                                       <Grid
                                         key={index2}
-                                        item
-                                        xs={12}
-                                        sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
-                                        xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                                        size={{
+                                        xs:12,
+                                        sm:field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                        md:field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                        lg:field?.columnSize ? field?.columnSize : gridSize(field.type),
+                                        xl:field?.columnSize ? field?.columnSize : gridSize(field.type)}}
                                       >
                                         <FormTypes
                                           {...field}

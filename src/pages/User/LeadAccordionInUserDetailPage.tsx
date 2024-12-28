@@ -1,4 +1,5 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { MoreVert } from '@mui/icons-material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -78,7 +79,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
       <Accordion expanded={expandLead} className=" accordLead" onChange={(event) => setExpandLead(!expandLead)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandLead === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -88,7 +89,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {isAllowedToEdit && (
                   <>
@@ -122,10 +123,10 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                 {leads && leads?.length ? (
                   <Grid container spacing={1}>
                     {leads.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid item xs={12} sm={8}>
+                            <Grid size={{xs:12, sm:8}}>
                               {hasAccessToEntity(obj.entity) ? (
                                 obj.entity === selectedEntity ? (
                                   <Link className="link" target="_blank" rel="noopener noreferrer" to={`${routes.leadDetail.path}/${obj._id}`}>
@@ -161,7 +162,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                             </Grid>
 
                             <Grid container>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{xs:12, sm:12, md:12}}>
                                 {obj.firstName ? (
                                   <DisplayData
                                     label="Name"
@@ -172,13 +173,13 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                   ''
                                 )}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{xs:12, sm:12, md:12}}>
                                 {obj.status ? <DisplayData label="Status" icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{xs:12, sm:12, md:12}}>
                                 {obj.company ? <DisplayData label="Company" icon={<BsBuilding size={15} />} value={obj.company ?? ''} /> : ''}
                               </Grid>
-                              <Grid item xs={12} sm={12} md={12}>
+                              <Grid size={{xs:12, sm:12, md:12}}>
                                 {obj.phone ? <DisplayData label="phone" icon={<BiPhone size={15} />} value={obj.phone ?? ''} /> : ''}
                               </Grid>
                             </Grid>

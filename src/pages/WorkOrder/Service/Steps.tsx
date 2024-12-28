@@ -18,7 +18,8 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
+import { Box, IconButton, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -1585,7 +1586,7 @@ const Steps = ({
               )}
               {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
                 <Box m={2}>
-                  <Grid container justify="flex-end">
+                  <Grid container justifyContent="flex-end">
                     <Button
                       variant="contained"
                       color="primary"

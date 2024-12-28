@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
@@ -20,7 +19,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
-import { sortBy } from 'lodash';
 import Autocomplete from '@mui/material/Autocomplete';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
 

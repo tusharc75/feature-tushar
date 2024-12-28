@@ -1,4 +1,5 @@
-import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, Menu, MenuItem, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { MoreVert } from '@mui/icons-material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -80,7 +81,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
       <Accordion expanded={expandOpportunity} className="accordOpportunity" onChange={(event) => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <Grid item xs={8}>
+            <Grid size={{xs:8}}>
               <Box display="flex" alignItems="center">
                 <Box>
                   <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
@@ -90,7 +91,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={4} container justify="flex-end" alignItems="center">
+            <Grid size={{xs:4}} container justifyContent="flex-end" alignItems="center">
               <Typography variant="subtitle2">
                 {isAllowedToEdit && (
                   <>
@@ -133,11 +134,11 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                 {opportunities && opportunities?.length ? (
                   <Grid container spacing={1}>
                     {opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
-                      <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
+                      <Grid size={{xs:12, sm:12, md:recordsPerLineInLargeScreen}} key={index}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
-                              <Grid item xs={7} sm={8}>
+                              <Grid size={{xs:7, sm:8}}>
                                 {hasAccessToEntity(obj.entity) ? (
                                   obj.entity === selectedEntity ? (
                                     <Link
@@ -170,7 +171,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                                   </span>
                                 )}
                               </Grid>
-                              <Grid item xs={5} sm={4}>
+                              <Grid size={{xs:5, sm:4}}>
                                 <Typography
                                   className="amount"
                                   title={formatAmountWithCurrency(obj['currency'], obj?.estimatedAmount).fullFormatAmount}
@@ -180,14 +181,14 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                               </Grid>
                             </Grid>
                             <Grid container>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid size={{xs:12, sm:6, md:6}}>
                                 {obj?.stage ? (
                                   <DisplayData key={index} label="Stage" value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} />
                                 ) : (
                                   ''
                                 )}
                               </Grid>
-                              <Grid item xs={12} sm={6} md={6}>
+                              <Grid size={{xs:12, sm:6, md:6}}>
                                 {obj.closeDate ? (
                                   <DisplayData
                                     key={index}

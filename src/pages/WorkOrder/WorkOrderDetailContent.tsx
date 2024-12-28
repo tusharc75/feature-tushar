@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@mui/material';
+import { Box, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import { Skeleton } from '@mui/material';
 import queryString from 'query-string';
@@ -594,7 +595,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
               <DetailsPage data={workOrderData} fields={workOrderFields} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
             {workOrderCostFields?.length && workOrderData?.workOrderCost ? (
@@ -609,7 +610,7 @@ const WorkOrderDetailContent = ({ id, tab, resource }) => {
             ) : (
               <Box pt={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={6} xl={6}>
+                  <Grid size={{xs:12, sm:6, md:6, xl:6}}>
                     <div style={{ overflow: 'hidden' }} className="single-form-v1">
                       <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                         <Box display="flex" alignItems="center">

@@ -1,4 +1,5 @@
-import { Button, Grid, IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -187,7 +188,7 @@ const StorageLocation = ({ warehouse }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
+          <Grid size={{xs:3, md:3, sm:3}}>
             {permissions?.storageLocation?.isCreate && (
               <Button
                 size="small"
@@ -202,7 +203,7 @@ const StorageLocation = ({ warehouse }) => {
               </Button>
             )}
           </Grid>
-          <Grid item xs={9} md={9} sm={9}>
+          <Grid size={{xs:9, md:9, sm:9}}>
             {permissions?.storageLocation?.isDelete && (
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
                 <Button

@@ -6,7 +6,8 @@ import {
   sidebarResource,
   workOrder
 } from '../../constants/helpers';
-import { Dialog, TextField, Box, Grid, Button } from '@mui/material';
+import { Dialog, TextField, Box, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -139,7 +140,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                 <CustomDialogContent style={{ flex: 1, overflowY: 'auto' }}>
                   <div className="flex flex-col p-3">
                     <Grid container spacing={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Autocomplete
                           size="small"
                           options={productOptions}
@@ -161,7 +162,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Autocomplete
                           size="small"
                           options={assetOptions}
@@ -181,7 +182,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Autocomplete
                           multiple
                           size="small"
@@ -206,7 +207,7 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <CustomDatePicker
                           fullWidth
                           size="small"

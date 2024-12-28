@@ -11,7 +11,6 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
   CustomDialogTransition,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   productInventory,
   sidebarResource

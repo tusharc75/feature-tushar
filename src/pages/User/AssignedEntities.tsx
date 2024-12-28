@@ -1,4 +1,5 @@
-import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@mui/material';
+import { Dialog, FormControl, IconButton, InputLabel, MenuItem, Select } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { ControlPoint, Delete } from '@mui/icons-material';
@@ -224,17 +225,17 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             <Box style={{ padding: '0px', minHeight: '300px' }}>
               <Box display="flex" padding={1} bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))">
                 <Grid container>
-                  <Grid item xs={10}>
+                  <Grid size={{xs:10}}>
                     <Box display="flex">
                       <Grid container>
-                        <Grid item xs={4}>
+                        <Grid size={{xs:4}}>
                           <Typography variant="subtitle2">Assigned Roles ({currentEntity?.role?.length || '0'})</Typography>
                         </Grid>
-                        <Grid item xs={8} justify="flex-start"></Grid>
+                        <Grid size={{xs:8}} justifyContent="flex-start"></Grid>
                       </Grid>
                     </Box>
                   </Grid>
-                  <Grid item xs={2} container justify="flex-end">
+                  <Grid size={{xs:2}} container justifyContent="flex-end">
                     {permissions?.user?.isUpdate && (
                       <IconButton color="primary" size="small" onClick={handleAssignRole}>
                         <ControlPoint />
@@ -244,7 +245,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                 </Grid>
               </Box>
               <Grid container spacing={1}>
-                <Grid item xs={12} sm={12} md={4}>
+                <Grid size={{xs:12, sm:12, md:4}}>
                   <BoxWithBorder
                     style={{
                       padding: '0px',
@@ -271,7 +272,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                     }
                   </BoxWithBorder>
                 </Grid>
-                <Grid item xs={12} sm={12} md={8} lg={8}>
+                <Grid size={{xs:12, sm:12, md:8, lg:8}}>
                   <BoxWithBorder
                     style={{
                       padding: '0px',

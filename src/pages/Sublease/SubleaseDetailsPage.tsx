@@ -1,4 +1,5 @@
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -234,7 +235,7 @@ const SubleaseDetailsPage = () => {
               />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Box>
@@ -242,9 +243,9 @@ const SubleaseDetailsPage = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid item xs={12} sm={12} md={12} lg={12}>
+            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
               {subleaseData ? (
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid size={{xs:12, sm:12, md:12, lg:12}}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
@@ -337,7 +338,7 @@ const SubleaseDetailsPage = () => {
                 </Grid>
               ) : (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               )}
             </Grid>
@@ -345,23 +346,23 @@ const SubleaseDetailsPage = () => {
         </ContentFullScreen>
 
         <TabPanel value={tabValue} index={2}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
             {subleaseData ? (
               <Tickets subleaseId={id} renderedFrom={`${renderedFrom}_grid-3`} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Grid>
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
+          <Grid size={{xs:12, sm:12, md:12, lg:12}}>
             {subleaseData ? (
               <Invoices resourceId={id} resource={sidebarResource.sublease} invoiceFieldName="sublease" />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Grid>
             )}
           </Grid>
