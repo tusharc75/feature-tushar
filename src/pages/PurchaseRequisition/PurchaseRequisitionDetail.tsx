@@ -247,7 +247,7 @@ const PurchaseRequisitionDetail = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseRequisitionData ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -265,7 +265,7 @@ const PurchaseRequisitionDetail = () => {
                       <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
                     </Box>
                   )}
-                  <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                  <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                     <Steps
                       isNextStep={false}
                       nextStep={nextStep}

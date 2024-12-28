@@ -207,11 +207,7 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <ButtonWithPulse
-                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
-                  >
-                    Close
-                  </ButtonWithPulse>
+                  <ButtonWithPulse onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>Close</ButtonWithPulse>
                 </Fragment>
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
@@ -277,13 +273,13 @@ const PurchaseOrderDetailsPage = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {!purchaseOrderData || !purchaseOrderFields.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Grid>
               ) : (
-                <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}

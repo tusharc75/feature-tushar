@@ -101,11 +101,7 @@ const BlogDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="controls-buttons-v1">
-            <ThemeButton
-              iconForMobile={<EditIcon />}
-              onClick={handleOpenUpdateDialog}
-              mobileTooltip={'Edit'}
-            >
+            <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
               {'Edit'}
             </ThemeButton>
             <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />

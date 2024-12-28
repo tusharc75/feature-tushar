@@ -123,7 +123,6 @@ const ServiceMasterDetailsPage = () => {
               <>
                 {permissions?.serviceMaster?.isUpdate && !isMobile && (
                   <ThemeButton
-                    variant={'outlined'}
                     onClick={() => {
                       setOpenConfigureFields(true);
                     }}
@@ -135,7 +134,6 @@ const ServiceMasterDetailsPage = () => {
                 {permissions?.serviceMaster?.isUpdate && (
                   <ThemeButton
                     iconForMobile={<EditIcon />}
-                    variant={'outlined'}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}

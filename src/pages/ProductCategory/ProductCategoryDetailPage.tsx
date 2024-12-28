@@ -161,11 +161,12 @@ const ProductCategoryDetailPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length
-            ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            selectedRecords?.length
+              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
             ${headingLbl}`
-            : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

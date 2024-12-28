@@ -7,6 +7,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MdImportExport } from 'react-icons/md';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImportExportDialog from './ImportExportDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AsynImportExportMenu = ({
   ids = [],
@@ -95,26 +96,23 @@ const AsynImportExportMenu = ({
       <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
         <span>
           {onlyExport ? (
-            <Button
-              variant="outlined"
+            <ThemeButton
               size="small"
               onClick={() => {
                 setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
               }}
-              className={`btn-outline-v-1`}
             >
               Export All
-            </Button>
+            </ThemeButton>
           ) : (
-            <Button
+            <ThemeButton
               onClick={(e) => handleClick(e)}
               endIcon={<ArrowDropDownIcon />}
-              variant={'outlined'}
-              color="primary"
+              borderColor="none"
+              backgroundColor="theme"
+              textColor="white"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              className="min-h-[32px]"
-              size="small"
             >
               {isMobile ? (
                 <>
@@ -124,7 +122,7 @@ const AsynImportExportMenu = ({
               ) : (
                 <>Import/Export {title}</>
               )}
-            </Button>
+            </ThemeButton>
           )}
         </span>
       </HtmlTooltip>

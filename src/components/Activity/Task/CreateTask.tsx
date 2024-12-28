@@ -96,7 +96,7 @@ export const CreateTask = ({
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: defaultName,

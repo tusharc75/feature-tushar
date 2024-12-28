@@ -231,7 +231,6 @@ const CustomIntro = () => {
               <div className="footer flex justify-between gap-2 ">
                 {!isFirstStep ? (
                   <ThemeButton
-                    color="secondary"
                     disabled={isWaiting || currentStepData.isPreviousButtonDisabled}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
@@ -245,7 +244,8 @@ const CustomIntro = () => {
                 {!isLastStep || isWaiting || currentStepData.waitForStepInsertion ? (
                   <ThemeButton
                     borderColor="none"
-                    color="primary"
+                    backgroundColor="theme"
+                    textColor="white"
                     iconForMobile={false}
                     onClick={() => {
                       handleNext();
@@ -258,7 +258,8 @@ const CustomIntro = () => {
                 ) : (
                   <ThemeButton
                     borderColor="none"
-                    color="primary"
+                    backgroundColor="theme"
+                    textColor="white"
                     iconForMobile={false}
                     disabled={isWaiting}
                     onClick={() => {

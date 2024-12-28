@@ -105,7 +105,7 @@ const BudgetDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.budget?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} variant={'outlined'} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}

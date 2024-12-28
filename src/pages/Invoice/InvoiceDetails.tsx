@@ -40,7 +40,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import Step from '../DynamicForm/Step';
-import { RiExchange2Line } from "react-icons/ri";
+import { RiExchange2Line } from 'react-icons/ri';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -266,7 +266,7 @@ const InvoiceDetails = () => {
                   <ThemeButton
                     onClick={openActions}
                     endIcon={<ExpandMore />}
-                    mobileTooltip='Change Status'
+                    mobileTooltip="Change Status"
                     disabled={updateLoading}
                     iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
                   >
@@ -307,7 +307,7 @@ const InvoiceDetails = () => {
                     onClick={() => {
                       setShowReOpenConfirmBox(true);
                     }}
-                    mobileTooltip='Re-Open'
+                    mobileTooltip="Re-Open"
                     iconForMobile={false}
                   >
                     {'Re-Open'}
@@ -316,10 +316,7 @@ const InvoiceDetails = () => {
                 {permissions?.invoice?.isUpdate &&
                   allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
-                    <ThemeButton
-                      iconForMobile={<EditIcon />}
-                      onClick={handleOpenUpdateDialog}
-                      mobileTooltip={'Edit'}>
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                       {'Edit'}
                     </ThemeButton>
                   )}
@@ -355,9 +352,9 @@ const InvoiceDetails = () => {
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={1}>
-            <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {invoiceData ? (
-                <Grid size={{xs:12, sm:12, md:12, lg:12}}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}

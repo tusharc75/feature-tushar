@@ -179,7 +179,9 @@ const RoadMap = () => {
             onChange={(e, val) => {
               setSelectedProduct(val && val.optionValue ? val.optionValue : '');
             }}
-            renderInput={(params) => <TextField {...params} margin="dense" size="small" name="product" label="Product" variant="outlined" fullWidth />}
+            renderInput={(params) => (
+              <TextField {...params} margin="dense" size="small" name="product" label="Product" variant="outlined" fullWidth />
+            )}
           />
           <Autocomplete
             fullWidth
@@ -195,7 +197,15 @@ const RoadMap = () => {
               setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
             }}
             renderInput={(params) => (
-              <TextField {...params} margin="dense" name="plant" size="small" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
+              <TextField
+                {...params}
+                margin="dense"
+                name="plant"
+                size="small"
+                label={resources?.warehouse?.titleSingular}
+                variant="outlined"
+                fullWidth
+              />
             )}
           />
           <CustomDatePicker
@@ -223,10 +233,7 @@ const RoadMap = () => {
         </div>
         <Box display="flex">
           <Box pt={1}>
-            <ThemeButton
-              onClick={handleExport}
-              iconForMobile={false}
-            >
+            <ThemeButton onClick={handleExport} iconForMobile={false}>
               Export to Excel
             </ThemeButton>
           </Box>

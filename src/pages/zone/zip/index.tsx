@@ -4,7 +4,7 @@ import React from 'react';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { read, utils, writeFile } from 'xlsx';
@@ -203,26 +203,26 @@ const Zipcode = (props: ConfigProps) => {
   const rightSideContents = () => {
     return (
       <>
-        <Button size="small" variant={isMobile ? 'text' : 'contained'} className="btn-outline-v1 with-border ">
-          <label className=" cursor-pointer">
-            {isMobile ? <MobileImportIcon /> : 'Import from Excel'}
-            <input
-              onClick={(e: any) => (e.target.value = null)}
-              id="importField"
-              name="importField"
-              onChange={handleImportFields}
-              style={{
-                opacity: '0',
-                position: 'absolute',
-                zIndex: -1
-              }}
-              type="file"
-            />
-          </label>
-        </Button>
-        <Button size="small" variant={isMobile ? 'text' : 'contained'} className="btn-outline-v1 with-border" onClick={handleExportFields}>
-          {isMobile ? <MobileExportIcon /> : 'Export to Excel'}
-        </Button>
+        <label className="cursor-pointer">
+          <input
+            onClick={(e: any) => (e.target.value = null)}
+            id="importField"
+            name="importField"
+            onChange={handleImportFields}
+            style={{
+              opacity: '0',
+              position: 'absolute',
+              zIndex: -1
+            }}
+            type="file"
+          />
+          <ThemeButton iconForMobile={<MobileImportIcon />} mobileTooltip="Import from Excel">
+            {isMobile ? '' : 'Import from Excel'}
+          </ThemeButton>
+        </label>
+        <ThemeButton onClick={handleExportFields} mobileTooltip="Export to Excel" iconForMobile={<MobileExportIcon />}>
+          Export to Excel
+        </ThemeButton>
         <DeleteButton
           mode="light"
           onClick={() => {

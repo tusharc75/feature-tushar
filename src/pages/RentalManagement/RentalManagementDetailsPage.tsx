@@ -199,7 +199,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const checkDeliveryTicketFields = () => {
@@ -217,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -430,7 +430,6 @@ const RentalManagementDetailsPage = () => {
                   <ThemeButton
                     id={'rental-management-download-button'}
                     type="button"
-                    size="small"
                     disabled={isDownloading ? true : false}
                     iconForMobile={<IoMdDownload />}
                     startIcon={isMobile ? '' : <IoMdDownload />}
@@ -445,8 +444,9 @@ const RentalManagementDetailsPage = () => {
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
                       <ThemeButton
                         id={'rental-management-create-new-version-button'}
-                        variant="contained"
-                        size="small"
+                        borderColor="none"
+                        backgroundColor="theme"
+                        textColor="white"
                         onClick={() => {
                           setVersionNotClonned(false);
                           cloneVersion();
@@ -461,21 +461,18 @@ const RentalManagementDetailsPage = () => {
                     allowedToEdit &&
                     rentalSteps?.length - 1 === currentStep && (
                       <Fragment>
-                        <ButtonWithPulse
-                          id={'rental-management-close-button'}
-                          onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
-                        >
+                        <ButtonWithPulse id={'rental-management-close-button'} onClick={() => updateJobStatus(RENTAL_STATUS.closed)}>
                           Close
                         </ButtonWithPulse>
                       </Fragment>
                     )}
+
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
-                    <Button
-                      className="buttonStyleBigScreen"
+                    <ThemeButton
                       id={'rental-management-re-open-button'}
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                      borderColor="none"
+                      backgroundColor="theme"
+                      textColor="white"
                       endIcon={reOpening ? <CircularProgress size={20} /> : null}
                       disabled={reOpening}
                       onClick={() => {
@@ -483,7 +480,7 @@ const RentalManagementDetailsPage = () => {
                       }}
                     >
                       Re-Open
-                    </Button>
+                    </ThemeButton>
                   )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
@@ -492,7 +489,6 @@ const RentalManagementDetailsPage = () => {
                         <ThemeButton
                           iconForMobile={<EditIcon />}
                           disabled={allowedToEdit ? false : true}
-                          variant={'outlined'}
                           onClick={handleOpenUpdateDialog}
                           mobileTooltip={'Edit'}
                           id={'rental-management-edit-button'}
@@ -545,11 +541,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                    allowedToEdit &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                      setShowCancelConfirmBox({ open: true, isQuote: true });
-                    }
+                        setShowCancelConfirmBox({ open: true, isQuote: true });
+                      }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -573,12 +569,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -597,12 +593,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

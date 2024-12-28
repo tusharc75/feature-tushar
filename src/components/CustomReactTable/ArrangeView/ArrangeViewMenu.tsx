@@ -297,7 +297,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               >
                 Reset
               </ThemeButton>
-              <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
+              <ThemeButton borderColor="none" backgroundColor="theme" textColor="white" iconForMobile={false} onClick={openCreateEditModal}>
                 Create view
               </ThemeButton>
             </div>

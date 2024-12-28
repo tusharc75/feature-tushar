@@ -172,7 +172,7 @@ const TrailerMasterDetail = () => {
               <ThemeButton
                 onClick={handleClick}
                 endIcon={<ExpandMore />}
-                mobileTooltip='Change Status'
+                mobileTooltip="Change Status"
                 iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
               >
                 {'Change Status'}

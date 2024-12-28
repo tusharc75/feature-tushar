@@ -227,10 +227,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => { });
+            .catch((err) => {});
         }
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [currentVersion]);
 
   useEffect(() => {
@@ -338,7 +338,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -668,36 +668,36 @@ export default function QuoteProcess(props) {
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-      resource: sidebarResource.quoteBuilder,
-      referenceId: quoteData?._id,
-      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-      columns: columns,
-      hideDetailButton: true,
-      isSendEmail:
-        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+        resource: sidebarResource.quoteBuilder,
+        referenceId: quoteData?._id,
+        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+        columns: columns,
+        hideDetailButton: true,
+        isSendEmail:
+          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-          ? true
-          : false,
-      isExcelDownload: true,
-      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-      versionNumber: currentVersion,
-      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-      defaultColumns: [
-        'productName',
-        'unit',
-        'qty',
-        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-      ],
-      handleRefresh: () => {
-        fetchQuoteData(currentVersion);
-      },
-      toEmails: userEmails?.to,
-      ccEmails: userEmails?.cc ?? []
-    }
+            ? true
+            : false,
+        isExcelDownload: true,
+        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+        versionNumber: currentVersion,
+        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+        defaultColumns: [
+          'productName',
+          'unit',
+          'qty',
+          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+        ],
+        handleRefresh: () => {
+          fetchQuoteData(currentVersion);
+        },
+        toEmails: userEmails?.to,
+        ccEmails: userEmails?.cc ?? []
+      }
     : null;
 
   const leftSideContents = () => {
@@ -710,7 +710,7 @@ export default function QuoteProcess(props) {
                 setShowAiDialog(true);
               }}
               startIcon={<GiVintageRobot />}
-              mobileTooltip='AI Suggestion'
+              mobileTooltip="AI Suggestion"
               iconForMobile={<GiVintageRobot />}
             >
               AI Suggestion
@@ -725,7 +725,7 @@ export default function QuoteProcess(props) {
                       );
                   }}
                   startIcon={<AiFillEdit />}
-                  mobileTooltip='Quote Template'
+                  mobileTooltip="Quote Template"
                   iconForMobile={<AiFillEdit />}
                 >
                   'Quote Template
@@ -741,33 +741,33 @@ export default function QuoteProcess(props) {
     return (
       <>
         {processStatus === QUOTE_PROCESS_STATUS.doaProcess && versionStatus === 'Building Quote' && DOAneeded ? (
-          <Button
+          <ThemeButton
             onClick={() => {
               handleSendForDOA();
             }}
             disabled={!allowedToEdit || sendToLoading}
             startIcon={<BiMailSend />}
-            variant="contained"
-            size="small"
-            color="primary"
+            borderColor="none"
+            backgroundColor="theme"
+            textColor="white"
           >
             {isMobile && !isTablet ? '' : `Send for DOA`}
-          </Button>
+          </ThemeButton>
         ) : null}
         {processStatus === QUOTE_PROCESS_STATUS.sendToCustomer && versionStatus !== 'Send To Customer' && !ifQuoteApproved.approved ? (
           <>
             {!quoteData?.versions[currentVersion]?.offered && (
-              <Button
+              <ThemeButton
                 onClick={() => {
                   handleOfferToCustomer();
                 }}
                 disabled={!allowedToEdit || sendToLoading}
-                variant="contained"
-                size="small"
-                color="primary"
+                borderColor="none"
+                backgroundColor="theme"
+                textColor="white"
               >
                 {isMobile && !isTablet ? '' : `Process Quote`}
-              </Button>
+              </ThemeButton>
             )}
           </>
         ) : null}

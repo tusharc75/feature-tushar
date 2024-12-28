@@ -270,7 +270,7 @@ const TransferAssetDetailPage = () => {
                 onClick={(e) => {
                   setShowReopenCloseConfirmation({ open: true, type: 'reopen' });
                 }}
-                mobileTooltip='Re-Open'
+                mobileTooltip="Re-Open"
                 iconForMobile={false}
               >
                 Re-Open
@@ -289,10 +289,7 @@ const TransferAssetDetailPage = () => {
                 </ButtonWithPulse>
               )}
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <ThemeButton
-                iconForMobile={<EditIcon />}
-                onClick={handleOpenUpdateDialog}
-                mobileTooltip={'Edit'}>
+              <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}
