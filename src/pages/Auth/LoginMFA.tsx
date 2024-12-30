@@ -231,6 +231,7 @@ const LoginMFA = () => {
                     </div>
                   )}
                   <ThemeButton
+                    disableElevation
                     buttonType="theme"
                     type="submit"
                     fullWidth

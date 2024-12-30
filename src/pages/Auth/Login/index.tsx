@@ -216,7 +216,6 @@ const Login = () => {
                         onClick={submitForm}
                         disabled={isSubmitting}
                         isLoading={isSubmitting}
-                        buttonType='theme'
                       >
                         Sign In
                       </ThemeButton>

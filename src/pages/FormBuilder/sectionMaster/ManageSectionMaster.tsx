@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -14,6 +14,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import IconAutoComplete from './IconAutoComplete';
 import { defaultIcons } from 'src/assets/IconGenerator';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -135,29 +136,23 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
