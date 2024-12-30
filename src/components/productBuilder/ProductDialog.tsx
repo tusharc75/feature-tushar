@@ -1,6 +1,5 @@
 import { Collapse } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -25,7 +24,7 @@ import { autoCalculateSpecificFields } from '../../constants/formulaUtility';
 import { getObjKeys, yupSchema } from '../../constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
 
@@ -459,9 +458,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -471,12 +469,10 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -486,7 +482,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

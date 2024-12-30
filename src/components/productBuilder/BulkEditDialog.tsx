@@ -1,6 +1,5 @@
 import { Collapse } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -25,7 +24,7 @@ import { autoCalculateSpecificFields } from '../../constants/formulaUtility';
 import { getObjKeys, yupSchema } from '../../constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
-import CustomButton from '../Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
 
@@ -416,13 +415,13 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                 </Box>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button size="small" color="primary" onClick={handleClose}>
+                <ThemeButton buttonType="transparent" onClick={handleClose}>
                   Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
             </Fragment>
           )}

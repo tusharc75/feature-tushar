@@ -1,4 +1,4 @@
-import { Box, Button, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -20,7 +20,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 
@@ -220,11 +220,8 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
@@ -234,11 +231,10 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType="theme"
                   disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
@@ -247,7 +243,7 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

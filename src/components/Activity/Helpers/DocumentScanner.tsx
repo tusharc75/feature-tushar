@@ -1,11 +1,10 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { Button } from '@mui/material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import Webcam from 'react-webcam';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -123,24 +122,23 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" color="primary" size="small" onClick={onClose}>
+          <ThemeButton buttonType="transparent" onClick={onClose}>
             Cancel
-          </Button>
+          </ThemeButton>
           <HtmlTooltip title="Switch Camera">
             <IconButton size="small" onClick={switchCamera} disabled={cameraCount < 2}>
               <SwitchCameraIcon color="primary" />
             </IconButton>
           </HtmlTooltip>
-          <CustomButton
-            variant="contained"
-            color="primary"
+          <ThemeButton
+            buttonType="theme"
             onClick={handleCapture}
             size="small"
             disabled={isScanning}
             startIcon={isScanning && <CircularProgress size={15} />}
           >
             {isScanning ? 'Scanning...' : 'Capture'}
-          </CustomButton>
+          </ThemeButton>
         </CustomDialogFooter>
       </Dialog>
     </>

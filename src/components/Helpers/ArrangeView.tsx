@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { changeItemIndex, CustomDialogTransition } from 'src/constants/helpers';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
@@ -164,13 +164,12 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
         </DndContext>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" color="primary" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Cancel
-        </Button>
-        <CustomButton
-          loading={loading}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          isLoading={loading}
+          buttonType="theme"
           type="submit"
           onClick={(e) => {
             e.preventDefault();
@@ -179,7 +178,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
           disabled={loading || !valid}
         >
           {buttonText}
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

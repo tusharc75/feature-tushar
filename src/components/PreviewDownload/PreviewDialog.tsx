@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Dialog, Grid } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomButton from '../Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
@@ -155,8 +155,8 @@ export const PreviewDialog = ({
           showRequiredLabel={false}
         />
         <CustomDialogContent>
-          <Grid container justify="space-between" alignItems="center">
-            <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
+          <Grid container justifyContent="space-between" alignItems="center">
+            <Grid style={{ padding: 5, marginTop: 10 }} size={{xs:12, md:12, sm:12}}>
               {type?.includes('PDF') && (
                 <PreviewFields
                   views={views}
