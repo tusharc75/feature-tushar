@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField, Typography } from '@mui/material';
+import { Box, Dialog, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isEqual } from 'lodash';
 import { useContext, useState } from 'react';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, productInventory, serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -74,12 +74,12 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
         <Box marginY={2}>
           <Grid spacing={3} container>
             <>
-              <Grid size={{xs:6, sm:6, md:6}}>
+              <Grid size={{ xs: 6, sm: 6, md: 6 }}>
                 <Typography className="m-2 text-center" variant="subtitle2">
                   {resources?.warehouse?.titleSingular}
                 </Typography>
               </Grid>
-              <Grid size={{xs:6, sm:6, md:6}}>
+              <Grid size={{ xs: 6, sm: 6, md: 6 }}>
                 <Typography className="m-2 text-center" variant="subtitle2">
                   Quantity
                 </Typography>
@@ -87,10 +87,10 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
               {inventoryData &&
                 inventoryData.map((_element, index) => (
                   <>
-                    <Grid key={index} size={{xs:6, sm:6, md:6}}>
+                    <Grid key={index} size={{ xs: 6, sm: 6, md: 6 }}>
                       <Typography className="m-2 text-center">{_element?.warehouse?.name}</Typography>
                     </Grid>
-                    <Grid key={index} size={{xs:6, sm:6, md:6}}>
+                    <Grid key={index} size={{ xs: 6, sm: 6, md: 6 }}>
                       <TextField
                         key={index}
                         id="outlined-multiline-static"
@@ -111,19 +111,17 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+        <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
           Cancel
-        </Button>
-        <CustomButton
+        </ThemeButton>
+        <ThemeButton
           disabled={isSubmitting || isEqual(productInventoryData, inventoryData)}
-          loading={isSubmitting}
-          variant="contained"
-          color="primary"
-          type="submit"
+          isLoading={isSubmitting}
+          buttonType="theme"
           onClick={() => handleSubmit()}
         >
           Save
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

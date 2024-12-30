@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -7,7 +6,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -26,6 +24,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import moment from 'moment';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface Props {
   isClone?: boolean;
@@ -587,9 +586,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent" 
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -597,11 +595,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton loading={isSubmitting} disabled={isSubmitting} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                </ThemeButton>
+                <ThemeButton isLoading={isSubmitting} disabled={isSubmitting}   buttonType="theme" onClick={submitForm}>
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

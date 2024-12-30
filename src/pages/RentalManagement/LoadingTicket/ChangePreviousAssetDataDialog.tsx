@@ -1,4 +1,5 @@
 import { Box, Dialog, Typography } from '@mui/material';
+import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { FieldArray, Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
@@ -9,6 +10,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -291,7 +293,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
@@ -341,6 +343,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                   isLoading={loading}
                 >
                   Save
+                </ThemeButton>
                 </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (

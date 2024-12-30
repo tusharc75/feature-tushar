@@ -1,5 +1,5 @@
-import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField, Switch } from '@mui/material';
+import { Fragment, useContext, useEffect } from 'react';
+import { Box, Dialog, FormControlLabel, InputAdornment, TextField, Switch } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
 import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
@@ -10,7 +10,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { serviceMaster } from 'src/constants/helpers';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import Checkbox from '@mui/material/Checkbox';
 import Autocomplete from '@mui/material/Autocomplete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -18,6 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import FieldDialog from './FieldDialog';
 import Grid from '@mui/material/Grid2';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StepDialog({
   handleClose, // function to close the dialog
@@ -1108,33 +1108,31 @@ export default function StepDialog({
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   {reference === 'workOrder' && (
-                    <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
+                    <ThemeButton buttonType="theme" onClick={() => setOpenFieldDialog(true)}>
                       Configure Fields
-                    </Button>
+                    </ThemeButton>
                   )}
                   <div style={{ flex: '1 0 0' }} />
-                  <Button
-                    size="small"
-                    color="primary"
+                  <ThemeButton
+                    buttonType="transparent" 
                     onClick={() => {
                       handleClose();
                     }}
                   >
                     Cancel
-                  </Button>
+                  </ThemeButton>
                   {reference === 'workOrder' && notEditable ? null : (
-                    <CustomButton
-                      loading={loading}
+                    <ThemeButton
+                      isLoading={loading}
                       disabled={loading || isSubmitting}
                       onClick={(e) => {
                         e.preventDefault();
                         submitForm();
                       }}
-                      variant="contained"
-                      color="primary"
+                      buttonType="theme"
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   )}
                 </CustomDialogFooter>
               </Fragment>

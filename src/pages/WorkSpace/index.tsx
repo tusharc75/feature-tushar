@@ -74,11 +74,6 @@ const Workspace = () => {
         channels.forEach((channel) => {
           socket.emit('leaveChannel', channel?._id);
         });
-        socket.off('fetchNewMessage');
-        socket.off('fetchMessages');
-        socket.off('addReaction');
-        socket.off('removeReaction');
-        socket.off('notification');
       }
     };
   }, [socket, channels]);

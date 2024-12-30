@@ -15,6 +15,7 @@ import DoaStepUsers from './DOAStepUsers';
 import Steps1 from 'src/components/Steps';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   rejected: {
@@ -156,7 +157,7 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);

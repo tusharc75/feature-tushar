@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -7,7 +6,6 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -29,6 +27,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import moment from 'moment';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageSublease = ({
   isClone = false,
@@ -426,9 +425,8 @@ const ManageSublease = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
@@ -439,13 +437,11 @@ const ManageSublease = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={loading}
                   id="dialog-save-button"
-                  color="primary"
-                  type="submit"
+                   buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -455,7 +451,7 @@ const ManageSublease = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

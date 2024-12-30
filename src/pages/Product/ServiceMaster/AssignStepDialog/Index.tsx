@@ -1,11 +1,11 @@
-import { Box, Button, Dialog, TextField, Typography } from '@mui/material';
+import { Box, Dialog, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import React, { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
@@ -85,7 +85,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
                   <Grid container spacing={2}>
                     {selectedSteps[item._id]?.map((step, index) => {
                       return (
-                        <Grid size={{xs:6}} key={index}>
+                        <Grid size={{ xs: 6 }} key={index}>
                           <Box>
                             <TextField
                               margin="dense"
@@ -124,13 +124,12 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
           })}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button type="button" variant="outlined" color="primary" size="small" onClick={handleCloseDialog}>
+        <ThemeButton buttonType="transparent" onClick={handleCloseDialog}>
           Cancel
-        </Button>
-        <CustomButton
-          loading={loading}
-          variant="contained"
-          color="primary"
+        </ThemeButton>
+        <ThemeButton
+          isLoading={loading}
+          buttonType="theme"
           //disabled={Object.keys(selectedSteps).length !== consumables?.length}
           onClick={(e) => {
             e.preventDefault();
@@ -138,7 +137,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
           }}
         >
           Save
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
