@@ -1,4 +1,4 @@
-import { Button, Dialog, Typography, Box } from '@mui/material';
+import { Dialog, Typography, Box } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -22,15 +22,15 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         warehouse: ele?.warehouse,
         ...(type === 'fieldTicket'
           ? {
-              fieldTicket: ele?.resourceId,
-              startDate: ele?.service?.estimateStartDate,
-              endDate: ele?.service?.estimateEndDate
-            }
+            fieldTicket: ele?.resourceId,
+            startDate: ele?.service?.estimateStartDate,
+            endDate: ele?.service?.estimateEndDate
+          }
           : {
-              rentalJob: ele?.resourceId,
-              startDate: ele?.estimateStartDate,
-              endDate: ele?.estimateEndDate
-            }),
+            rentalJob: ele?.resourceId,
+            startDate: ele?.estimateStartDate,
+            endDate: ele?.estimateEndDate
+          }),
         status: 'Assigned'
       };
     });
@@ -61,7 +61,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent"  onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Close
         </ThemeButton>
         <ThemeButton isLoading={isSubmitting} buttonType="theme" onClick={handleAssign} disabled={isSubmitting}>

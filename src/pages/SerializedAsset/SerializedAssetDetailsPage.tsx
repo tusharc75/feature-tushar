@@ -9,7 +9,7 @@ import { round, startCase } from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
-import { RiExchange2Line, RiExchangeBoxFill } from 'react-icons/ri';
+import { RiExchange2Line } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -283,7 +283,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -409,16 +409,13 @@ const SerializedAssetDetailsPage = () => {
                     Send Outbound Message
                   </ThemeButton>
                 )}
-                {/* <Button
+                {/* <ThemeButton
                   onClick={() => {
                     setOpenDataSimulationDialog(!openDataSimulationDialog);
                   }}
-                  variant="outlined"
-                  color="primary"
-                  size="small"
                 >
                   Data Simulation
-                </Button> */}
+                </ThemeButton> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&

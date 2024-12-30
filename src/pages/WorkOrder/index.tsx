@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -338,12 +338,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
                 : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
