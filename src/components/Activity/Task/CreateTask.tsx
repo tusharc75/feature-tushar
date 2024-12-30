@@ -342,7 +342,6 @@ export const CreateTask = ({
                                     size="small"
                                     value={values.startDate}
                                     onChange={(value) => {
-                                      setFieldValue('dueDate', value);
                                       setFieldValue('startDate', value);
                                     }}
                                     maxDate={initialValues.parentData && initialValues.parentData.dueDate}
