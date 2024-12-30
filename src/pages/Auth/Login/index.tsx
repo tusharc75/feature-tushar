@@ -210,9 +210,7 @@ const Login = () => {
 
                     <Box>
                       <ThemeButton
-                        fullWidth
                         buttonType="theme"
-                        type="submit"
                         onClick={submitForm}
                       >
                         Sign In
