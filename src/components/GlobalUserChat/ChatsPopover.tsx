@@ -1,8 +1,8 @@
+import { ArrowBack, Group } from '@mui/icons-material';
 import { Avatar, Box, Divider, IconButton, List, TextField, Typography, useMediaQuery } from '@mui/material';
-import { Theme, createStyles, useTheme } from '@mui/material/styles';
-import { ArrowBack, Create, Group } from '@mui/icons-material';
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { Theme, useTheme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { useData } from '../../StateProvider/Provider';
@@ -12,17 +12,15 @@ import ChatBox from './ChatBox';
 import ChatListITem from './ChatListITem';
 import NewChat from './NewChat';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    listRoot: {
-      width: '100%',
-      backgroundColor: theme.palette.background.paper
-    },
-    inline: {
-      display: 'inline'
-    }
-  })
-);
+const useStyles = makeStyles((theme: Theme) => ({
+  listRoot: {
+    width: '100%',
+    backgroundColor: theme.palette.background.paper
+  },
+  inline: {
+    display: 'inline'
+  }
+}));
 
 const ChatsPopover = (props) => {
   const classes = useStyles();

@@ -1,9 +1,22 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Theme, createStyles } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
-import { AiOutlinePlus } from 'react-icons/ai';
+import { AccessTime, DeleteOutline, DragIndicator, FileCopyOutlined, Info, MoreHoriz, People } from '@mui/icons-material';
+import { Box, Checkbox, Chip, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import Button from '@mui/material/Button';
-import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@mui/icons-material';
+import Grid from '@mui/material/Grid2';
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
+import { isArray, isEmpty, isEqual } from 'lodash';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { AiOutlinePlus } from 'react-icons/ai';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import { WorkStations } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
   cn,
   convertMsToTime,
@@ -19,30 +32,17 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isArray, isEmpty, isEqual } from 'lodash';
-import StepFieldsDialog from './StepFieldsDialog';
-import CompleteDialog from './CompleteDialog';
-import { useData } from 'src/StateProvider/Provider';
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import ArrangeView from 'src/components/Helpers/ArrangeView';
-import AttachmentDialog from './AttachmentDialog';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
-import Comments from './Comments';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DiagramDialog from '../Diagram/DiagramDialog';
 import AssignUserDialog from './AssignUserDialog';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import { WorkStations } from 'src/assets/svg/svgIcons';
-import DiagramDialog from '../Diagram/DiagramDialog';
+import AttachmentDialog from './AttachmentDialog';
+import Comments from './Comments';
+import CompleteDialog from './CompleteDialog';
 import ServiceFieldValueDialog from './ServiceFieldValueDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
+import StepFieldsDialog from './StepFieldsDialog';
 
 export interface StepDataInterface {
   _id: string;
@@ -132,12 +132,6 @@ const useStyles = makeStyles((theme: Theme) => ({
       alignItems: 'center',
       justifyContent: 'space-between'
     }
-    // '&:first-of-type': {
-    //   borderRadius: '8px 8px 0 0'
-    // }
-    // '&:last-of-type': {
-    //   borderRadius: '0 0 8px 8px'
-    // }
   },
   badge: {
     backgroundColor: 'var(--primary)',

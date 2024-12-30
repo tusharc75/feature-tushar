@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useState } from 'react';
-import { createStyles, Theme, FormControlLabel, Switch, Typography, SwitchClassKey, SwitchProps } from '@mui/material';
+import { FormControlLabel, Switch, SwitchClassKey, SwitchProps, Theme, Typography } from '@mui/material';
 import { withStyles } from '@mui/styles';
+import { Fragment, useEffect, useState } from 'react';
 
 interface Styles extends Partial<Record<SwitchClassKey, string>> {
   focusVisible?: string;
@@ -9,48 +9,46 @@ interface Props extends SwitchProps {
   classes: Styles;
 }
 
-const CustomSwitch = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: 37,
-      height: 20,
-      padding: 0,
-      margin: `0 ${theme.spacing(1)}px 0 0`
-    },
-    switchBase: {
-      padding: '2px',
-      '&$checked': {
-        transform: 'translateX(16px)',
-        color: theme.palette.common.white,
-        '& + $track': {
-          backgroundColor: '#B7B7B7',
-          opacity: 1,
-          border: 'none'
-        }
-      },
-      '&$focusVisible $thumb': {
-        color: '#52d869',
-        border: '6px solid #fff'
-      },
-      '&.Mui-disabled': {
-        color: `${theme.palette.grey[100]} !important`
+const CustomSwitch = withStyles((theme: Theme) => ({
+  root: {
+    width: 37,
+    height: 20,
+    padding: 0,
+    margin: `0 ${theme.spacing(1)}px 0 0`
+  },
+  switchBase: {
+    padding: '2px',
+    '&$checked': {
+      transform: 'translateX(16px)',
+      color: theme.palette.common.white,
+      '& + $track': {
+        backgroundColor: '#B7B7B7',
+        opacity: 1,
+        border: 'none'
       }
     },
-    thumb: {
-      width: 16,
-      height: 16
+    '&$focusVisible $thumb': {
+      color: '#52d869',
+      border: '6px solid #fff'
     },
-    track: {
-      borderRadius: 26 / 2,
-      border: `1px solid ${theme.palette.grey[400]}`,
-      backgroundColor: '#B7B7B7',
-      opacity: 1,
-      transition: theme.transitions.create(['background-color', 'border'])
-    },
-    checked: {},
-    focusVisible: {}
-  })
-)(({ classes, ...props }: Props) => {
+    '&.Mui-disabled': {
+      color: `${theme.palette.grey[100]} !important`
+    }
+  },
+  thumb: {
+    width: 16,
+    height: 16
+  },
+  track: {
+    borderRadius: 26 / 2,
+    border: `1px solid ${theme.palette.grey[400]}`,
+    backgroundColor: '#B7B7B7',
+    opacity: 1,
+    transition: theme.transitions.create(['background-color', 'border'])
+  },
+  checked: {},
+  focusVisible: {}
+}))(({ classes, ...props }: Props) => {
   return (
     <Switch
       focusVisibleClassName={classes.focusVisible}
