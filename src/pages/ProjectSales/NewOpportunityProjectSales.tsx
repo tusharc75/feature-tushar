@@ -16,7 +16,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { formFieldNames, getObjKeys, initializeDropdownById, opportunity, setFieldsInAscendingOrder, yupSchema } from '../../constants/helpers';
 import ManageMarketSegmentDialog from '../MarketSegment/ManageMarketSegmentDialog';
@@ -492,13 +492,12 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                 </CustomDialogContent>
 
                 <CustomDialogFooter>
-                  <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+                  <ThemeButton buttonType="transparent" onClick={onClose}>
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+buttonType="theme"
                     onClick={(e) => {
                       e.preventDefault();
                       const err = Object.keys(errors);
@@ -521,7 +520,7 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
               </>
             )}

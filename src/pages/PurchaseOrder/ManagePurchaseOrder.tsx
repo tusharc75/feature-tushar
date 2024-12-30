@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -7,7 +6,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder, PURCHASE_ORDER_STATUS, GenerateResourceLineNumber, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -273,21 +272,19 @@ const ManagePurchaseOrder = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   id="dialog-save-button"
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
+                  isLoading={loading}
+                  buttonType="theme"
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -297,7 +294,7 @@ const ManagePurchaseOrder = ({
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

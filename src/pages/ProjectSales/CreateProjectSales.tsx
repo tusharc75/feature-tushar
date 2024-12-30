@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Box } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -21,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InputField from 'src/components/Helpers/InputField';
 interface InitialData {
   fields: any[];
@@ -260,10 +260,8 @@ const CreateProjectSales = ({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                <ThemeButton
+buttonType="transparent"
                   disabled={isSubmitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
@@ -274,11 +272,10 @@ const CreateProjectSales = ({
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={isSubmitting}
-                  variant="contained"
-                  color="primary"
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={isSubmitting}
+buttonType="theme"
                   disabled={isSubmitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -287,7 +284,7 @@ const CreateProjectSales = ({
                   }}
                 >
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

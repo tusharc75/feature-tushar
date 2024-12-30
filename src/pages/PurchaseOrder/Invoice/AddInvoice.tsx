@@ -5,9 +5,9 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, purchaseOrder } from '../../../constants/helpers';
-import { Button, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Formik } from 'formik';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -142,18 +142,17 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
               </Grid>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
+              <ThemeButton
+buttonType="transparent"
                 onClick={() => {
                   handleClose();
                 }}
               >
                 Cancel
-              </Button>
-              <CustomButton loading={loading} disabled={loading} variant="contained" type="button" onClick={submitForm} color="primary">
+              </ThemeButton>
+              <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                 Save
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Fragment>
         )}

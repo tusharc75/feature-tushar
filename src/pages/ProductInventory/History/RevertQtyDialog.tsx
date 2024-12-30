@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik } from 'formik';
 import React from 'react';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition, productInventory, sidebarResource } from 'src/constants/helpers';
 
 function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId, serialNumber = [] }) {
@@ -145,20 +145,17 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
               />
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                type="button"
-                variant="outlined"
-                color="primary"
-                size="small"
+              <ThemeButton
+buttonType="transparent"
                 onClick={() => {
                   onClose();
                 }}
               >
                 Cancel
-              </Button>
-              <CustomButton loading={loading} variant="contained" color="primary" disabled={loading} type="submit">
+              </ThemeButton>
+              <ThemeButton isLoading={loading} buttonType="theme" disabled={loading}>
                 Revert
-              </CustomButton>
+              </ThemeButton>
             </CustomDialogFooter>
           </Form>
         )}
