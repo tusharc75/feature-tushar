@@ -1005,9 +1005,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             }
           }}
           tooltip={!allowedToEdit ? ownerAndColaborator : ``}
-          borderColor="none"
-          backgroundColor="theme"
-          textColor="white"
+          buttonType='theme'
         >
           {`Assign ${resources?.serializedAsset?.titleSingular}`}
         </ThemeButton>

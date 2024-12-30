@@ -173,7 +173,6 @@ function PreviewDownload({
       <Box display="flex" alignItems="center">
         <div className="flex flex-wrap gap-2">
           <ThemeButton
-            size="small"
             id={'details-page-preview-button'}
             mobileTooltip="Preview"
             iconForMobile={<VisibilityIcon />}
