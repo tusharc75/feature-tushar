@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const renderedFrom = camelCase(sidebarResource.wellNumber);
 
@@ -190,33 +191,32 @@ const WellNumber = ({ wellName }) => {
         <Grid container>
           <Grid size={{xs:3, md:3, sm:3}}>
             {permissions?.wellNumber?.isCreate && (
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
+              <ThemeButton
+              mobileTooltip="Add"
+              iconForMobile={<AddOutlined />}
                 onClick={() => {
                   setOpenDialog({ open: true, id: null });
                 }}
                 startIcon={<AddOutlined />}
               >
                 Add
-              </Button>
+              </ThemeButton>
             )}
           </Grid>
           <Grid size={{xs:9, md:9, sm:9}}>
             {permissions?.wellNumber?.isDelete && (
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Button
-                  variant="outlined"
-                  size="small"
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  iconForMobile={<ExpandMore />}
                   onClick={openActions}
-                  aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted

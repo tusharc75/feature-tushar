@@ -17,6 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CustomReport = () => {
   const renderedFrom = 'custom-report';
@@ -188,29 +189,27 @@ const CustomReport = () => {
             <div className={'align-items-center flex w-full justify-between gap-1'}></div>
             <div className="flex flex-wrap justify-end gap-[8px]">
               <div className="flex flex-wrap items-center gap-[8px]">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
+                <ThemeButton
+                 mobileTooltip="Add"
+                 iconForMobile={<AddOutlined />}
                   onClick={() => {
                     setShowManageDialog({ open: true, id: null });
                   }}
                   startIcon={<AddOutlined />}
                 >
                   Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
+                  iconForMobile={<ExpandMore />}
                   onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
                   endIcon={<ExpandMore />}
                   disabled={selectedRecords?.length ? false : true}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted

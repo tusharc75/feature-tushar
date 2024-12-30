@@ -13,6 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@mui/icons-material/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -266,17 +267,17 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
           )}
         </Box>
         <Box>
-          <Button
-            variant={'outlined'}
-            className="new-dropdown-v1"
-            size="small"
-            aria-controls="action-menu"
+          <ThemeButton
+            mobileTooltip="Actions"
+            borderColor="yellow"
+            backgroundColor="yellow"
+            iconForMobile={<ExpandMore />}
             onClick={openActions}
             disabled={selectedRecords?.length ? false : true}
             endIcon={<ExpandMore />}
           >
             {'Actions'}
-          </Button>
+          </ThemeButton>
           <Menu
             anchorEl={anchorEl}
             keepMounted

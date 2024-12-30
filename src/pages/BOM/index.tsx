@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { product, prepareDataForGrid, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,6 +18,7 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const BOMTable = () => {
   const { id } = useParams();
@@ -246,29 +247,27 @@ const BOMTable = () => {
             </div>
             <div className="flex flex-wrap justify-end gap-[8px]">
               <div className="flex flex-wrap items-center gap-[8px]">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
+                <ThemeButton
                   className={`no-shadow`}
                   onClick={() => {
                     setOpenAssignProductDialog(true);
                   }}
+                  mobileTooltip="Add"
                   startIcon={<AddOutlined />}
-                >
+                  iconForMobile={<AddOutlined />}>
                   Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
+                  mobileTooltip="Actions"
+                  borderColor="yellow"
+                  backgroundColor="yellow"
                   endIcon={<ExpandMore />}
+                  iconForMobile={<ExpandMore />}
                   disabled={selectedRecords?.length ? false : true}
                 >
                   Actions
-                </Button>
+                </ThemeButton>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted

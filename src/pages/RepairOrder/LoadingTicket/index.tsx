@@ -25,6 +25,7 @@ import {
   repairOrder
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -301,18 +302,18 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         <Box display="flex" alignItems="center" gap={8}>
           {allowedToEdit && (
             <Fragment>
-              <Button
-                variant="outlined"
-                size="small"
+              <ThemeButton
+                mobileTooltip="Actions"
+                borderColor="yellow"
+                backgroundColor="yellow"
+                iconForMobile={<ExpandMore />}
                 onClick={openActions}
-                aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
                 id={'details-page-action-button'}
               >
                 Actions
-              </Button>
+              </ThemeButton>
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
