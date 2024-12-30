@@ -1,5 +1,5 @@
 import { Add, ArrowDropDown, ArrowDropUp, Delete } from '@mui/icons-material';
-import { Button, Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import { Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -78,19 +78,15 @@ const Sidebar = ({
         </div>
         <SearchBox value={searchValue} onChange={handleFilter} />
         <div>
-          <ThemeButton>
-
-          </ThemeButton>
-          <Button
-            size={'small'}
-            className="group"
+          <ThemeButton
+            buttonType='transparent'
             onClick={() => {
               setIsExpanded((prev) => !prev);
             }}
             endIcon={isExpanded ? <ArrowDropDown fontSize="large" /> : <ArrowDropUp fontSize="large" />}
           >
-            <span className="text-[15px]">Channels</span>
-          </Button>
+            Channels
+          </ThemeButton>
           {filteredChannels ? (
             <Collapse in={isExpanded}>
               <List dense>
