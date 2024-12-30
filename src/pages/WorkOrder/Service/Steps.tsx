@@ -900,27 +900,21 @@ const Steps = ({
           workOrderData?.status !== WORK_ORDER_STATUS.completed &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           (workOrderData?.currentRepairJob ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={(e) => {
                 setRepairJobReceiveConfirmation(true);
               }}
             >
               Receive Asset From Supplier
-            </Button>
+            </ThemeButton>
           ) : (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={(e) => {
                 setShowManageRepairJobDialog(true);
               }}
             >
               {`Create ${resources?.repairJob?.titleSingular}`}
-            </Button>
+            </ThemeButton>
           ))}
         {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
           <ThemeButton
@@ -1353,10 +1347,7 @@ const Steps = ({
                                 WORKORDER_SERVICE_STEP_STATUS.skipped
                               ]?.includes(stepData?.passFailStatus) ? (
                                 <>
-                                  <Button
-                                    variant="outlined"
-                                    color="inherit"
-                                    size="small"
+                                  <ThemeButton
                                     disabled={!allowedToEdit}
                                     className={classes.stepButtons}
                                     onClick={(e) => {
@@ -1371,14 +1362,11 @@ const Steps = ({
                                     }}
                                   >
                                     Re-Open/Test
-                                  </Button>
+                                  </ThemeButton>
                                 </>
                               ) : step?.fields?.length ? (
                                 <>
-                                  <Button
-                                    variant="outlined"
-                                    color="inherit"
-                                    size="small"
+                                  <ThemeButton
                                     className={classes.stepButtons}
                                     disabled={!allowedToEdit}
                                     onClick={(e) => {
@@ -1390,7 +1378,7 @@ const Steps = ({
                                     }}
                                   >
                                     Enter Value
-                                  </Button>
+                                  </ThemeButton>
                                 </>
                               ) : null
                             ) : null}
@@ -1580,17 +1568,15 @@ const Steps = ({
               {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
                 <Box m={2}>
                   <Grid container justifyContent="flex-end">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      buttonType="theme"
                       onClick={(e) => {
                         e.stopPropagation();
                         setOpenCompleteDialog(true);
                       }}
                     >
                       Complete
-                    </Button>
+                    </ThemeButton>
                   </Grid>
                 </Box>
               )}
