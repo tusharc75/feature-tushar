@@ -1,5 +1,5 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
+import { Box, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
@@ -18,6 +18,7 @@ import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type BrandData = {
   companyName: string;
@@ -208,33 +209,25 @@ const Login = () => {
                     </Box>
 
                     <Box>
-                      <Button
-                        disabled={isSubmitting}
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        className={styles.submitButton}
+                      <ThemeButton
                         onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                        disabled={isSubmitting}
+                        isLoading={isSubmitting}
+                        buttonType='theme'
                       >
                         Sign In
-                      </Button>
+                      </ThemeButton>
 
                       <AuthenticatedTemplate>
                         {invalidAzureLogin ? (
                           <span>Not authorized loging out in {counter}</span>
                         ) : (
-                          <Button
-                            className="logo-bg-color"
-                            variant="contained"
-                            fullWidth
-                            startIcon={<TbBrandOffice />}
-                            disabled={isSubmitting}
+                          <ThemeButton
                             onClick={() => instance.logoutPopup()}
+                            buttonType='theme'
                           >
                             Office 365 Log Out
-                          </Button>
+                          </ThemeButton>
                         )}
                       </AuthenticatedTemplate>
                     </Box>

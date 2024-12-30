@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
+import { Box, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
@@ -182,9 +183,12 @@ const LoginMFA = () => {
               </FormControl>
               {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
+                  <ThemeButton
+                    onClick={handleResendCode}
+                    buttonType='theme'
+                  >
                     Send Code
-                  </Button>
+                  </ThemeButton>
                 </Box>
               ) : (
                 <form
@@ -226,19 +230,14 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
-                  <Button
-                    disableElevation
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    fullWidth
-                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                  <ThemeButton
                     disabled={otp.length < 6 || isSubmitting}
                     onClick={handleSubmit}
-                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                    isLoading={isSubmitting}
+                    buttonType='theme'
                   >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </form>
               )}
             </div>

@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, getObjKeys } from 'src/constants/helpers';
-import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Box, Dialog, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,6 +13,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import MaUTable from '@mui/material/Table';
 import { Add, Delete } from '@mui/icons-material';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
@@ -308,12 +309,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              disabled={submitting}
-              type="button"
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={() => {
                 if (!isEmpty(entryValues)) {
                   setShowConfirmDialog(true);
@@ -321,22 +317,21 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
                   onClose();
                 }
               }}
+              buttonType='transparent'
             >
               Cancel
-            </Button>
-            <CustomButton
-              loading={loading}
-              variant="contained"
-              color="primary"
-              startIcon={submitting && <CircularProgress size={20} color="inherit" />}
-              disabled={submitting || isEmpty(entryValues)}
+            </ThemeButton>
+            <ThemeButton
               onClick={(e) => {
                 e.preventDefault();
                 handleSubmit(entryValues);
               }}
+              disabled={submitting || isEmpty(entryValues)}
+              isLoading={submitting}
+              buttonType='theme'
             >
               Save
-            </CustomButton>
+            </ThemeButton>
           </CustomDialogFooter>
           {showConfirmDialog ? (
             <ConfirmCancelDialog

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -25,6 +25,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -182,32 +183,25 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  id={'dialog-save-button'}
-                  disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={() => {
                     submitForm();
                   }}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

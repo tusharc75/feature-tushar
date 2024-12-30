@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Box, Button, CssBaseline, Link as MuiLink, CircularProgress, TextField, Typography } from '@mui/material';
+import { Box, CssBaseline, Link as MuiLink, TextField, Typography } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { object, string } from 'yup';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { BsArrowLeft } from 'react-icons/bs';
 
 import styles from './index.module.scss';
 import { ForgetPasswordImage, Logo } from 'src/assets/authenticationAssets';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const emailValidationSchema = object().shape({
   email: string().email().required()
@@ -76,18 +77,14 @@ const ForgetPassword = () => {
                       </div>
                     </div>
 
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
+                    <ThemeButton
                       disabled={isSubmitting}
-                      className={styles.submitButton}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
-                      fullWidth
+                      isLoading={isSubmitting}
+                      buttonType='theme'
                     >
                       Submit
-                    </Button>
+                    </ThemeButton>
 
                     <Box className={styles.formBottomTextleft}>
                       <MuiLink component={Link} to="/login">

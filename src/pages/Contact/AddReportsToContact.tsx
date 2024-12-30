@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, TextField, CircularProgress } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Formik, Form } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,6 +9,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ReportsToContact = object().shape({
   addContact: object().required('Please select add contact ').nullable(),
@@ -105,12 +106,20 @@ export default function AddReportsToContact({ open, isSubmitting, onClose, conta
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={isSubmitting} color="primary" size="small" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button disabled={isSubmitting} type="button" color="primary" variant="contained" size="small" onClick={() => submitForm()}>
-                {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-              </Button>
+              <ThemeButton
+                  onClick={onClose}
+                  buttonType='transparent'
+                >
+                  Cancel
+                </ThemeButton>
+                <ThemeButton
+                  onClick={() => submitForm()}
+                  disabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  buttonType='theme'
+                >
+                  Save
+                </ThemeButton>
             </CustomDialogFooter>
           </>
         )}

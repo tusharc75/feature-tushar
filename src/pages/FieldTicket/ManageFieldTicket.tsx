@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog, TextField } from '@mui/material';
+import { Box, Chip, Dialog, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -32,6 +32,7 @@ import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components
 import InputField from 'src/components/Helpers/InputField';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import dayjs from 'dayjs';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -390,24 +391,16 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                 )}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  id="dialog-save-button"
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={() => {
                     if (id && isClone) {
                       setShowConfirmCloneDetailsDialog(true);
@@ -415,11 +408,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                       submitForm();
                     }
                   }}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

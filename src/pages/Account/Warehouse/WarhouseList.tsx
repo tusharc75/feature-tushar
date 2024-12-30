@@ -1,5 +1,4 @@
-import { Box, CircularProgress } from '@mui/material';
-import Button from '@mui/material/Button';
+import { Box } from '@mui/material';
 import Dialog from '@mui/material/Dialog/Dialog';
 import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
@@ -14,6 +13,7 @@ import routes from '../../../components/Helpers/Routes';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
   const renderedFrom = camelCase(sidebarResource?.warehouse);
@@ -105,18 +105,16 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
               <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }} container justifyContent="flex-end">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
-                  <Button
-                    size="small"
-                    color="primary"
+                  <ThemeButton
                     onClick={() => {
                       addWarehouse(selectedRecords);
                     }}
-                    variant="contained"
                     disabled={!selectedRecords?.length || isAddingWarehouse}
-                    endIcon={isAddingWarehouse && <CircularProgress size={20} color="primary" />}
+                    isLoading={isAddingWarehouse}
+                    buttonType='theme'
                   >
                     Assign {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                  </Button>
+                  </ThemeButton>
                 </Box>
               </Grid>
             </Grid>

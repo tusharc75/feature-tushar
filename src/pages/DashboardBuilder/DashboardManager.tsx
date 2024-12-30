@@ -1,5 +1,5 @@
 import { DndContext, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
@@ -19,6 +19,7 @@ import DashboardItem from './DashboardItem';
 import DashboardView from './DashboardView';
 import { IFormDataType, baseURL } from './builderHelpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -289,17 +290,14 @@ const DashboardBuilder = () => {
                   </Box>
                   {permissions?.dashboardMaster?.isUpdate && (
                     <Box py={'6px'}>
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        size="small"
-                        disableRipple
+                      <ThemeButton
                         disabled={!Boolean(values.name) || formData.length === 0 || isSubmitting}
                         onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                        isLoading={isSubmitting}
+                        buttonType='theme'
                       >
                         Save
-                      </Button>
+                      </ThemeButton>
                     </Box>
                   )}
                 </Fragment>
