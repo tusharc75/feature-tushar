@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box } from '@mui/material';
+import { Dialog, useTheme, useMediaQuery, Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -14,6 +14,7 @@ import { isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { isEqual } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function ManageUserDialog({
   open,
@@ -187,30 +188,29 @@ export default function ManageUserDialog({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  disabled={isSubmitting || loading}
+
+
+
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(values, initialData.values)) close();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                   onClick={() => {
                     handleScroll(errors);
                     submitForm();
                   }}
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
+                  isLoading={isSubmitting}
                 >
-                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
-                </Button>
+                  Save
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
