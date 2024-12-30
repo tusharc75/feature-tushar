@@ -28,7 +28,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   stepTags: {
     minHeight: '26px',
     paddingInline: '5px',
