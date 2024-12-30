@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
@@ -259,11 +259,8 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
@@ -273,12 +270,11 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
+                  </ThemeButton>
+                  <ThemeButton
                     id="dialog-save-button"
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                    isLoading={loading}
+                    buttonType="theme"
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -287,7 +283,7 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
                     }}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog

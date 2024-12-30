@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { Autocomplete, Skeleton } from '@mui/material';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -285,26 +285,22 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+buttonType="transparent"
                     onClick={() => {
                       onClose();
                     }}
                   >
                     Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
+                  </ThemeButton>
+                  <ThemeButton
+                    isLoading={loading}
+buttonType="theme"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={submitForm}
                   >
                     Save
-                  </CustomButton>
+                  </ThemeButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
