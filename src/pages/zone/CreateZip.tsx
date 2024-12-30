@@ -1,5 +1,4 @@
 import { useState, useContext, useEffect } from 'react';
-import Button from '@mui/material/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -109,7 +108,7 @@ const CreateZip = (props) => {
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                 buttonType="transparent"
+                  buttonType="transparent"
                   onClick={() => {
                     onClose();
                   }}
@@ -117,8 +116,7 @@ const CreateZip = (props) => {
                   {isUpdateDisabled ? 'Close' : 'Cancel'}
                 </ThemeButton>
                 {!isUpdateDisabled && (
-                  <ThemeButton isLoading={loading}  buttonType="theme" disabled={saveClick} onClick={submitForm}>
-                    {' '}
+                  <ThemeButton isLoading={loading} buttonType="theme" disabled={saveClick} onClick={submitForm}>
                     Save
                   </ThemeButton>
                 )}
