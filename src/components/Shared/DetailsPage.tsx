@@ -87,7 +87,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   withMultichild: {
     display: 'flex',
     flexWrap: 'wrap',
-    borderLeft: '1px solid var(--dark-mode-border-color, #e2e2e2)',
     marginLeft: '-1px'
   }
 }));
@@ -103,7 +102,6 @@ interface DetailProps {
 }
 
 const Details = (props: DetailProps) => {
-
   const classes = useStyles();
   const {
     state: { permissions, user }
@@ -546,6 +544,7 @@ const Details = (props: DetailProps) => {
       <div className="form-v1">
         {formDataWithFollowUps?.map((form) => {
           if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
+          const isEven = 2 % form.sectionFields.length === 0;
           return (
             form.name && (
               <React.Fragment key={form.name}>
@@ -573,80 +572,83 @@ const Details = (props: DetailProps) => {
                       </HtmlTooltip>
                     )}
                   </div>
-                  <div className="formdata-v1 grid grid-cols-12">
-                    {form.sectionFields.map((field, i) => {
-                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
-                      return (
-                        <div
-                          className={cn(
-                            `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                            'col-span-12'
-                          )}
-                          key={i}
-                        >
+                  <div className="formdata-v1">
+                    <div className="grid  grid-cols-12 border ">
+                      {form.sectionFields.map((field, i) => {
+                        if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
+                        return (
                           <div
                             className={cn(
-                              isTypeFile(field.fieldData.type) && 'flex-wrap',
-                              'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                              '[&:nth-child(odd)]:md:border-r',
+                              isEven ? i < form.sectionFields.length - 2 && 'border-b' : i < form.sectionFields.length - 1 && 'border-b',
+                              '[&:not(:last-child)]:max-md:border-b',
+                              `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                              'col-span-12'
                             )}
+                            key={i}
                           >
-                            <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                              <div
-                                className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
-                              >
-                                <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
-                                  {field.fieldData.fieldLabel}
-                                </h4>
-                                {field.fieldData.isTooltip && (
-                                  <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
-                                    <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
-                                  </HtmlTooltip>
+                            <div className={cn(isTypeFile(field.fieldData.type) && 'flex-wrap', 'flex  ')}>
+                              <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                                <div
+                                  className={cn(
+                                    'd-flex formdata-title-v1 min-h-full items-center',
+                                    isTypeFile(field.fieldData.type) && '!border-r-0'
+                                  )}
+                                >
+                                  <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
+                                    {field.fieldData.fieldLabel}
+                                  </h4>
+                                  {field.fieldData.isTooltip && (
+                                    <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
+                                      <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
+                                    </HtmlTooltip>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
+                                {field.fieldData.type === 'imageUpload' ? (
+                                  <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
+                                    <span
+                                      className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                      onClick={() => {
+                                        if (initialVals[field.fieldData.fieldName]) {
+                                          setDialogData({
+                                            index: 0,
+                                            title: field.fieldData.fieldLabel,
+                                            open: true,
+                                            images: [initialVals[field.fieldData.fieldName]]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                        <Image style={{ fontSize: 30 }} />
+                                      </Avatar>
+                                    </span>
+                                  </Box>
+                                ) : (
+                                  <Box display="flex" alignItems="center" className="formdata-text-v1">
+                                    {renderData(initialVals, field.fieldData) === '-' ? (
+                                      <span>{renderData(initialVals, field.fieldData)}</span>
+                                    ) : (
+                                      renderData(initialVals, field.fieldData)
+                                    )}
+                                  </Box>
+                                )}
+                                {field.followUpData?.length > 0 && (
+                                  <RenderFollowUP
+                                    data={field.followUpData}
+                                    columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                                    setOpenTask={setOpenTask}
+                                  />
                                 )}
                               </div>
                             </div>
-
-                            <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
-                              {field.fieldData.type === 'imageUpload' ? (
-                                <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                                  <span
-                                    className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
-                                    onClick={() => {
-                                      if (initialVals[field.fieldData.fieldName]) {
-                                        setDialogData({
-                                          index: 0,
-                                          title: field.fieldData.fieldLabel,
-                                          open: true,
-                                          images: [initialVals[field.fieldData.fieldName]]
-                                        });
-                                      }
-                                    }}
-                                  >
-                                    <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                      <Image style={{ fontSize: 30 }} />
-                                    </Avatar>
-                                  </span>
-                                </Box>
-                              ) : (
-                                <Box display="flex" alignItems="center" className="formdata-text-v1">
-                                  {renderData(initialVals, field.fieldData) === '-' ? (
-                                    <span>{renderData(initialVals, field.fieldData)}</span>
-                                  ) : (
-                                    renderData(initialVals, field.fieldData)
-                                  )}
-                                </Box>
-                              )}
-                              {field.followUpData?.length > 0 && (
-                                <RenderFollowUP
-                                  data={field.followUpData}
-                                  columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
-                                  setOpenTask={setOpenTask}
-                                />
-                              )}
-                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </React.Fragment>
