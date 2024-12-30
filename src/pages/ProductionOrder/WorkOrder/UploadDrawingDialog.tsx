@@ -3,11 +3,11 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CircularProgress, Dialog } from '@mui/material';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, productionOrder } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,15 +54,13 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
             style={{ display: 'none' }}
           />
           <label htmlFor="zip-upload">
-            <Button
-              variant="contained"
-              color="primary"
-              component="span"
+            <ThemeButton
               disabled={isUploading}
-              startIcon={isUploading ? <CircularProgress size={24} /> : null}
+              isLoading={isUploading}
+              buttonType='theme'
             >
               {isUploading ? 'Uploading...' : 'Select File *'}
-            </Button>
+            </ThemeButton>
           </label>
         </Box>
       </CustomDialogContent>

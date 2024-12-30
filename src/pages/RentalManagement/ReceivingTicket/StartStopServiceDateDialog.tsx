@@ -78,7 +78,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
               <Box p={2}>
                 <Grid container spacing={2}>
                   {type !== 'stop' && (
-                    <Grid size={{xs:12, sm:12}}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <FormTypes
                         size="small"
                         fullWidth
@@ -97,7 +97,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                     </Grid>
                   )}
                   {(type === 'startStop' || type === 'stop') && (
-                    <Grid size={{xs:12, sm:12}}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <FormTypes
                         size="small"
                         fullWidth

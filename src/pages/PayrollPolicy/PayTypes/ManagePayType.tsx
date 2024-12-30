@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,6 +14,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManagePayType = ({ payTypeData, onClose, onSuccess, currency, payrollPolicyId, isClone = false }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -132,28 +133,23 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess, currency, payrollPolic
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
