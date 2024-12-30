@@ -23,7 +23,12 @@ function renderRow(props: ListChildComponentProps) {
 
   if (dataSet.hasOwnProperty('group')) {
     return (
-      <ListSubheader key={dataSet.key} className="text-[14px] font-medium text-[#828282] dark:text-[#9c9b9e]" component="div" style={inlineStyle}>
+      <ListSubheader
+        key={dataSet.key}
+        className="text-[14px] font-medium text-[#828282] dark:text-[#9c9b9e] [&:not(:first-child)]:border-t"
+        component="div"
+        style={inlineStyle}
+      >
         {dataSet.group}
       </ListSubheader>
     );
