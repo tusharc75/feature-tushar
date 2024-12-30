@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -220,7 +220,6 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                 <ThemeButton
                   isLoading={loading}
                   buttonType="theme"
-                  // startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
                     e.preventDefault();

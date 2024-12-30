@@ -104,7 +104,6 @@ const MapView = ({ handleClose, lat, lng }) => {
     }
   }, [pathCoordinates, map]);
 
-  //   const polylineCoordinates = [];
 
   return (
     <Dialog
@@ -118,7 +117,7 @@ const MapView = ({ handleClose, lat, lng }) => {
     >
       <CustomDialogHeader
         title={'Truck Map'}
-        onClose={(e, reason) => {
+        onClose={() => {
           handleClose();
         }}
         showRequiredLabel={false}
