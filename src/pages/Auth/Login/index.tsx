@@ -18,6 +18,7 @@ import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type BrandData = {
   companyName: string;
@@ -196,7 +197,7 @@ const Login = () => {
                                   </IconButton>
                                 </InputAdornment>
                               )
-                            },
+                            }
                           }}
                         />
                       </div>
@@ -208,18 +209,17 @@ const Login = () => {
                     </Box>
 
                     <Box>
-                      <Button
+                      <ThemeButton
                         disabled={isSubmitting}
                         fullWidth
-                        variant="contained"
-                        color="primary"
+                        buttonType="theme"
                         type="submit"
                         className={styles.submitButton}
                         onClick={submitForm}
                         startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                       >
                         Sign In
-                      </Button>
+                      </ThemeButton>
 
                       <AuthenticatedTemplate>
                         {invalidAzureLogin ? (

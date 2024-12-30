@@ -73,7 +73,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column
+  column,
+  background,
+  color
 }) => {
   const { data, count, loading, page, filterQuery, rowDef, selectedRecords, refreshDataCount } = state;
 
@@ -109,6 +111,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
+        background={background}
+        color={color}
       />
     );
 

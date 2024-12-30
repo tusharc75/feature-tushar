@@ -5,6 +5,7 @@ import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@mui/material/Button';
 import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@mui/icons-material';
 import {
+  cn,
   convertMsToTime,
   getChipColor,
   getObjKeys,
@@ -81,7 +82,7 @@ const TimerComponent = ({ stepData, updateTime = true }) => {
 
   return (
     <Box
-      style={{
+      sx={{
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
@@ -96,95 +97,93 @@ const TimerComponent = ({ stepData, updateTime = true }) => {
   );
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    backButton: {
-      marginRight: theme.spacing(1)
+const useStyles = makeStyles((theme: Theme) => ({
+  backButton: {
+    marginRight: theme.spacing(1)
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(16)
+  },
+  accordion: {
+    border: '1px solid var(--common-border-color)',
+    '&::before': {
+      content: 'unset !important',
+      display: 'none'
     },
-    heading: {
-      fontSize: theme.typography.pxToRem(16)
+    '&.Mui-expanded': {
+      margin: '15px 0'
     },
-    accordion: {
-      border: '1px solid var(--common-border-color)',
-      '&::before': {
-        content: 'unset !important',
-        display: 'none'
-      },
-      '&.Mui-expanded': {
-        margin: '15px 0'
-      },
-      marginBottom: '15px',
-      '&:last-child': {
-        marginBottom: '1px'
-      },
-      boxShadow: 'none !important'
+    marginBottom: '15px',
+    '&:last-child': {
+      marginBottom: '1px'
     },
-    accordionHeading: {
-      padding: '16px 16px 16px 16px',
-      ['@media (min-width:768px)']: {
-        padding: '16px 20px 16px 16px'
-      },
-      ['@media (min-width:1024px)']: {
-        padding: '16px 40px 16px 16px'
-      },
+    boxShadow: 'none !important'
+  },
+  accordionHeading: {
+    padding: '16px 16px 16px 16px',
+    "['@media (min-width:768px)']": {
+      padding: '16px 20px 16px 16px'
+    },
+    "['@media (min-width:1024px)']": {
+      padding: '16px 40px 16px 16px'
+    },
 
-      '& > div': {
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }
-      // '&:first-of-type': {
-      //   borderRadius: '8px 8px 0 0'
-      // }
-      // '&:last-of-type': {
-      //   borderRadius: '0 0 8px 8px'
-      // }
-    },
-    badge: {
-      backgroundColor: 'var(--primary)',
-      color: 'white',
-      width: '20px',
-      height: '20px',
-      borderRadius: '50%',
-      lineHeight: '20px',
-      textAlign: 'center',
-      display: 'flex',
+    '& > div': {
       alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '10px'
-    },
-    green: {
-      backgroundColor: 'rgba(0,255,0,.1)'
-    },
-    red: {
-      backgroundColor: 'rgba(255,0,0,.1)'
-    },
-    white: {
-      backgroundColor: 'var(--dark-secondary, white)'
-    },
-    checkbox: {
-      padding: '0',
-      color: '#000000',
-      '&.Mui-checked': {
-        color: '#000000'
-      }
-    },
-    stepButtons: {
-      borderRadius: '14px !important',
-      padding: '2px 14px'
-    },
-    passButton: {
-      border: '1px solid #4bae4f !important'
-    },
-    failButton: {
-      border: '1px solid #FF8F87 !important'
-    },
-    stepTags: {
-      minHeight: '26px',
-      paddingInline: '5px',
-      fontWeight: 500
+      justifyContent: 'space-between'
     }
-  })
-);
+    // '&:first-of-type': {
+    //   borderRadius: '8px 8px 0 0'
+    // }
+    // '&:last-of-type': {
+    //   borderRadius: '0 0 8px 8px'
+    // }
+  },
+  badge: {
+    backgroundColor: 'var(--primary)',
+    color: 'white',
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    lineHeight: '20px',
+    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '10px'
+  },
+  green: {
+    backgroundColor: 'rgba(0,255,0,.1)'
+  },
+  red: {
+    backgroundColor: 'rgba(255,0,0,.1)'
+  },
+  white: {
+    backgroundColor: 'var(--dark-secondary, white)'
+  },
+  checkbox: {
+    padding: '0',
+    color: '#000000',
+    '&.Mui-checked': {
+      color: '#000000'
+    }
+  },
+  stepButtons: {
+    borderRadius: '14px !important',
+    padding: '2px 14px'
+  },
+  passButton: {
+    border: '1px solid #4bae4f !important'
+  },
+  failButton: {
+    border: '1px solid #FF8F87 !important'
+  },
+  stepTags: {
+    minHeight: '26px',
+    paddingInline: '5px',
+    fontWeight: 500
+  }
+}));
 
 const Steps = ({
   workOrderData,
@@ -901,27 +900,21 @@ const Steps = ({
           workOrderData?.status !== WORK_ORDER_STATUS.completed &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           (workOrderData?.currentRepairJob ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={(e) => {
                 setRepairJobReceiveConfirmation(true);
               }}
             >
               Receive Asset From Supplier
-            </Button>
+            </ThemeButton>
           ) : (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+            <ThemeButton
               onClick={(e) => {
                 setShowManageRepairJobDialog(true);
               }}
             >
               {`Create ${resources?.repairJob?.titleSingular}`}
-            </Button>
+            </ThemeButton>
           ))}
         {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
           <ThemeButton
@@ -1105,7 +1098,7 @@ const Steps = ({
                       !stepData?.status ? '' : 'cursor-pointer'
                     } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
-                    <Box sx={{ display: 'flex' }} gridGap={'8px'}>
+                    <div className="flex gap-2">
                       {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                         <Checkbox
                           name={`checkbox_${step._id}`}
@@ -1125,9 +1118,8 @@ const Steps = ({
                       <span className="rounded-full bg-[var(--primary)] px-[12px] py-[1px] text-[13px] text-white dark:bg-[var(--dark-primary)]">
                         {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       </span>
-                      <Box
+                      <div
                         className={`mr-auto flex basis-[calc(100%-56px)] flex-wrap items-center justify-between gap-[8px] sm:basis-[calc(100%-155px)]`}
-                        gridGap={'8px'}
                       >
                         <Box className="flex flex-grow items-center gap-2 text-[var(--primary-text)]">
                           <div className="flex w-full items-start gap-2">
@@ -1228,16 +1220,13 @@ const Steps = ({
                             </HtmlTooltip>
                           )}
                         </Box>
-                        <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
-                          <Box
-                            sx={{
-                              justifyContent: mobScreen ? 'flex-start' : 'flex-end',
-                              marginLeft: mobScreen ? '0' : 'auto',
-                              display: 'flex',
-                              alignItems: 'center',
-                              flexWrap: 'wrap'
-                            }}
-                            gridGap={'8px'}
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
+                          <div
+                            className={cn(
+                              'flex flex-wrap items-center gap-2',
+                              mobScreen ? 'justify-start' : 'justify-end',
+                              mobScreen ? 'ml-0' : 'ml-auto'
+                            )}
                           >
                             {stepData?.startDate && user?.brandPolicy?.workOrderTimer && (
                               <TimerComponent
@@ -1358,10 +1347,7 @@ const Steps = ({
                                 WORKORDER_SERVICE_STEP_STATUS.skipped
                               ]?.includes(stepData?.passFailStatus) ? (
                                 <>
-                                  <Button
-                                    variant="outlined"
-                                    color="inherit"
-                                    size="small"
+                                  <ThemeButton
                                     disabled={!allowedToEdit}
                                     className={classes.stepButtons}
                                     onClick={(e) => {
@@ -1376,14 +1362,11 @@ const Steps = ({
                                     }}
                                   >
                                     Re-Open/Test
-                                  </Button>
+                                  </ThemeButton>
                                 </>
                               ) : step?.fields?.length ? (
                                 <>
-                                  <Button
-                                    variant="outlined"
-                                    color="inherit"
-                                    size="small"
+                                  <ThemeButton
                                     className={classes.stepButtons}
                                     disabled={!allowedToEdit}
                                     onClick={(e) => {
@@ -1395,13 +1378,13 @@ const Steps = ({
                                     }}
                                   >
                                     Enter Value
-                                  </Button>
+                                  </ThemeButton>
                                 </>
                               ) : null
                             ) : null}
-                          </Box>
+                          </div>
                         </Box>
-                      </Box>
+                      </div>
                       {!mobScreen && (
                         <div className="flex  items-center md:gap-1">
                           {stepData?.status && (
@@ -1472,7 +1455,7 @@ const Steps = ({
                           </HtmlTooltip>
                         </div>
                       )}
-                    </Box>
+                    </div>
                   </Box>
                 );
               })}
@@ -1585,17 +1568,15 @@ const Steps = ({
               {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
                 <Box m={2}>
                   <Grid container justifyContent="flex-end">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
+                    <ThemeButton
+                      buttonType="theme"
                       onClick={(e) => {
                         e.stopPropagation();
                         setOpenCompleteDialog(true);
                       }}
                     >
                       Complete
-                    </Button>
+                    </ThemeButton>
                   </Grid>
                 </Box>
               )}

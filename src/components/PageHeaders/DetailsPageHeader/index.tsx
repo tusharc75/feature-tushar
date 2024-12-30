@@ -101,6 +101,7 @@ const DetailsPageHeader = ({
               onClick={AddClick}
               {...restOfAddButtonProps}
               aria-controls="add-menu"
+              mode="light"
               iconForMobile={<Add />}
               endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
             >
@@ -136,6 +137,7 @@ const DetailsPageHeader = ({
               onClick={AddClick}
               {...restOfAddButtonProps}
               aria-controls="add-menu"
+              mode="light"
               iconForMobile={<Add />}
               endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
             >

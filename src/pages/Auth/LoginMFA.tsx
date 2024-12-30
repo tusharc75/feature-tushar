@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
@@ -226,19 +227,18 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
-                  <Button
+                  <ThemeButton
                     disableElevation
-                    variant="contained"
-                    color="primary"
+                    buttonType="theme"
                     type="submit"
                     fullWidth
-                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                    sx={{ paddingBlock: 10, height: 40 }}
                     disabled={otp.length < 6 || isSubmitting}
                     onClick={handleSubmit}
                     startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
-                  </Button>
+                  </ThemeButton>
                 </form>
               )}
             </div>
