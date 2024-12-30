@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty = 0, loading }) => {
@@ -83,9 +83,9 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
             </CustomDialogContent>
             <CustomDialogFooter>
               {product?.availableInventory && (
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                <ThemeButton isLoading={loading} disabled={loading} buttonType="theme" onClick={submitForm}>
                   Add to cart
-                </CustomButton>
+                </ThemeButton>
               )}
             </CustomDialogFooter>
           </Form>
