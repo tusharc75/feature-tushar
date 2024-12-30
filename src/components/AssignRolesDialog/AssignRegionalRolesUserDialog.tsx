@@ -56,10 +56,12 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   const classes = useStyles();
 
   const handleNext = () => {
+    handleSearch("");
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
+    handleSearch("");
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
@@ -92,7 +94,7 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   }, []);
 
   const handleSearch = (e) => {
-    let value = e.target.value;
+    let value = e?.target?.value || "";
     setSearch(value);
     let resultUser = [];
     let resultEntity = [];
