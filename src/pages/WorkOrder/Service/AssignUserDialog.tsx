@@ -1,8 +1,6 @@
-import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import Button from '@mui/material/Button';
+import { useContext, useEffect, useState } from 'react';
 import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import { Box, Dialog, TextField, Typography } from '@mui/material';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,6 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import Autocomplete from '@mui/material/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isArray } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -107,13 +106,11 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
+        <ThemeButton buttonType="transparent" onClick={handleClose}>
           Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          color="primary"
-          type="submit"
+        </ThemeButton>
+        <ThemeButton
+          buttonType="theme"
           onClick={(e) => {
             e.preventDefault();
             handleAssignUser();
@@ -121,7 +118,7 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
         >
           {' '}
           Save
-        </CustomButton>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

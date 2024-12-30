@@ -32,7 +32,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -466,11 +466,10 @@ const StepFieldsDialog = ({
                           Cancel
                         </Button>
                         <Box ml={1} />
-                        <CustomButton
+                        <ThemeButton
                           disabled={isSubmitting}
-                          loading={isSubmitting}
-                          variant="contained"
-                          color="primary"
+                          isLoading={isSubmitting}
+                         buttonType="theme"
                           onClick={() => {
                             setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
                             submitForm();
@@ -478,15 +477,14 @@ const StepFieldsDialog = ({
                         >
                           {' '}
                           Save
-                        </CustomButton>
+                        </ThemeButton>
                         {!step?.isPassFail && (
                           <>
                             <Box ml={1} />
-                            <CustomButton
+                            <ThemeButton
                               disabled={isSubmitting}
-                              loading={isSubmitting}
-                              variant="contained"
-                              color="primary"
+                              isLoading={isSubmitting}
+                              buttonType="theme"
                               onClick={() => {
                                 setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
                                 submitForm();
@@ -494,15 +492,14 @@ const StepFieldsDialog = ({
                             >
                               {' '}
                               Complete
-                            </CustomButton>
+                            </ThemeButton>
                             {nextStep && (
                               <>
                                 <Box ml={1} />
-                                <CustomButton
+                                <ThemeButton
                                   disabled={isSubmitting}
-                                  loading={isSubmitting}
-                                  variant="contained"
-                                  color="primary"
+                                  isLoading={isSubmitting}
+                                  buttonType="theme"
                                   onClick={() => {
                                     setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
                                     submitForm();
@@ -510,7 +507,7 @@ const StepFieldsDialog = ({
                                 >
                                   {' '}
                                   Complete & Next
-                                </CustomButton>
+                                </ThemeButton>
                               </>
                             )}
                           </>

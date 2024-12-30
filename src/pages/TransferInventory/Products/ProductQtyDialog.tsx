@@ -8,10 +8,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -101,9 +101,8 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -113,17 +112,15 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
                   }}
                 >
                   {'Close'}
-                </Button>
-                <CustomButton
+                </ThemeButton>
+                <ThemeButton
                   disabled={isEqual(ref?.current?.values, initialData.values)}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="theme"
                   onClick={submitForm}
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

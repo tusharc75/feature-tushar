@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import { object, string } from 'yup';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from '../../../components/Helpers/CustomButton';
 import TextField from '@mui/material/TextField';
 import { Dialog } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -21,6 +19,7 @@ import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constant
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import Autocomplete from '@mui/material/Autocomplete';
 import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -225,37 +224,34 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                             }}
                           />
                         </div>
-                        <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                        <ThemeButton buttonType="theme" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
                           Scan Document
-                        </CustomButton>
+                        </ThemeButton>
                       </div>
                       <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
                     </Box>
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button
-                    color="primary"
-                    size="small"
+                  <ThemeButton
+                    buttonType="transparent"
                     onClick={() => {
                       handleClose();
                     }}
                   >
                     Cancel
-                  </Button>
+                  </ThemeButton>
                   {canEdit && (
-                    <CustomButton
-                      type="button"
-                      color="primary"
+                    <ThemeButton
+                      isLoading={loading}
+                      buttonType="theme"
                       disabled={
                         loading || isEdit ? uploadingImageOrFileProgress > 0 : uploadingImageOrFileProgress > 0 || otherAttachments.length === 0
                       }
-                      loading={loading}
-                      variant="contained"
                       onClick={submitForm}
                     >
                       Save
-                    </CustomButton>
+                    </ThemeButton>
                   )}
                 </CustomDialogFooter>
                 {showConfirmDialog ? (

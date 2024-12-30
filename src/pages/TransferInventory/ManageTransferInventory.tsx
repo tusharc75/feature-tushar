@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment, useContext, FC } from 'react';
-import Button from '@mui/material/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -7,7 +6,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
@@ -23,6 +21,7 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface Props {
   isClone?: boolean;
@@ -244,9 +243,8 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType="transparent" 
                   id="dialog-cancel-button"
                   disabled={isSubmitting}
                   onClick={() => {
@@ -255,19 +253,17 @@ const ManageTransferInventory: FC<Props> = (props) => {
                   }}
                 >
                   Cancel
-                </Button>
-                <CustomButton
-                  loading={isSubmitting}
+                </ThemeButton>
+                <ThemeButton
+                  isLoading={isSubmitting}
                   disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
+                  buttonType="transparent" 
                   id="dialog-save-button"
                   onClick={submitForm}
                 >
                   {' '}
                   Save
-                </CustomButton>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog && (
                 <ConfirmCancelDialog
