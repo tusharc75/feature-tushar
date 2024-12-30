@@ -1,7 +1,5 @@
 import {
-  Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -22,6 +20,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import SearchBox from '../../components/Helpers/SearchBox';
 import Loader from '../../components/Loader';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function AssignContactsDialog({
   opportunityId,
@@ -183,12 +182,19 @@ export default function AssignContactsDialog({
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        <ThemeButton
+          onClick={handleCloseDialog}
+          buttonType='transparent'
+        >
           Cancel
-        </Button>
-        <Button onClick={handleAssignContacts} color="primary" variant="contained" size="small">
-          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
-        </Button>
+        </ThemeButton>
+        <ThemeButton
+          onClick={handleAssignContacts}
+          isLoading={isAssigning}
+          buttonType='theme'
+        >
+          Save
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );

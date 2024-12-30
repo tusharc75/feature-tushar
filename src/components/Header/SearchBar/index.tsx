@@ -3,7 +3,7 @@ import { IconButton } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import * as React from 'react';
-import { ListboxComponent, StyledPopper } from 'src/components/Header/SearchBar/AutoCompleteComponents';
+import { ListboxComponent, NoResultFound, StyledPopper } from 'src/components/Header/SearchBar/AutoCompleteComponents';
 import { Item } from 'src/components/Header/SearchBar/types';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
 
@@ -57,14 +57,14 @@ const SearchBar = () => {
           slots={{
             popper: StyledPopper
           }}
-          noOptionsText="No result found"
+          noOptionsText={<NoResultFound />}
           slotProps={{
             paper: {
               elevation: 0,
-              className: '![--Paper-shadow:unset] border border-t-0 !bg-[--dark-primary,white]'
+              className: inputValue ? '[--Paper-shadow:unset] border border-t-0 !bg-[--dark-primary,white]' : 'border-0 [--Paper-shadow:unset]'
             },
             listbox: {
-              component: ListboxComponent
+              component: inputValue ? ListboxComponent : () => <></>
             }
           }}
         />

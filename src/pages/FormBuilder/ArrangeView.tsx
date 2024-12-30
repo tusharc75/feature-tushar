@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Box, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { DragHandle, DragIndicator, ExpandMore } from '@mui/icons-material';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
@@ -14,6 +14,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ArrangeView = (props) => {
   const { open, close, resourceData: gridData } = props;
@@ -249,21 +250,23 @@ const ArrangeView = (props) => {
         </div>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" color="primary" onClick={close}>
-          Close
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          disabled={!hasChanged ? true : hasChanged && loading ? true : false}
+        <ThemeButton
+          onClick={close}
+          buttonType='transparent'
+        >
+          Cancel
+        </ThemeButton>
+        <ThemeButton
           onClick={() => {
             handleSaveChanges();
           }}
+          disableElevation
+          disabled={!hasChanged ? true : hasChanged && loading ? true : false}
+          isLoading={loading}
+          buttonType='theme'
         >
-          {loading && <CircularProgress size={25} />}
           {!loading && 'Save changes'}
-        </Button>
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
