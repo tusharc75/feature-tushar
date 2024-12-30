@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import { CustomDialogTransition, getObjKeysWithValues, sidebarResource, yupSchema } from '../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -8,10 +7,10 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress } from '@mui/material';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPolicy, fields, serializedAssetData, productInventoryId }) {
   const [submitting, setSubmitting] = useState(false);
@@ -98,29 +97,25 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
+
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

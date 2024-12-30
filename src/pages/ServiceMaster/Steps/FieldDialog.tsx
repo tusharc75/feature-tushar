@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Button, Box, CircularProgress } from '@mui/material';
+import { Dialog, Box } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,6 +11,7 @@ import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, reference = '', fields = null, notEditable = false }) => {
   const {
@@ -189,20 +190,21 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-          Close
-        </Button>
+
+        <ThemeButton
+          buttonType='transparent'
+          onClick={handleClose}>
+          Cancel
+        </ThemeButton>
         {reference === 'workOrder' && notEditable ? null : (
-          <Button
-            variant="contained"
-            size="small"
-            color="primary"
+          <ThemeButton
+            buttonType='theme'
             disabled={isSubmitting}
             onClick={handleSave}
-            endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+            isLoading={isSubmitting}
           >
             Save
-          </Button>
+          </ThemeButton>
         )}
       </CustomDialogFooter>
     </Dialog>
