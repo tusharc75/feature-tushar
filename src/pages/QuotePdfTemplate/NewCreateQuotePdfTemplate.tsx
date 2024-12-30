@@ -14,7 +14,6 @@ import routes from '../../components/Helpers/Routes';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
-import CircularProgress from '@mui/material/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
@@ -26,6 +25,7 @@ import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, startCase } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const defaultProductColumns = 7;
 
@@ -509,31 +509,31 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
+
+                  <ThemeButton
+                    buttonType='theme'
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
-                    size="small"
-                    color="primary"
                     onClick={submitForm}
-                    variant="contained"
-                    endIcon={isUpdating && <CircularProgress color="inherit" size={18} />}
+                    isLoading={isUpdating}
                   >
                     Save
-                  </Button>
+                  </ThemeButton>
 
                   {!quoteData && (
-                    <Button
+
+                    <ThemeButton
+                      buttonType='theme'
                       disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
-                      size="small"
-                      color="primary"
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
                       }}
-                      variant="contained"
-                      endIcon={isUpdatingAndPreview && <CircularProgress color="inherit" size={18} />}
+                      isLoading={isUpdating}
                     >
                       Save & Preview
-                    </Button>
+                    </ThemeButton>
+
+
                   )}
 
                   <Button
@@ -551,7 +551,7 @@ export default function NewCreateQuotePdfTemplate() {
               <div className={`main-container ${classes.mainContainer}`}>
                 <Box className={classes.paper}>
                   <Grid container>
-                    <Grid size={{xs:12, md:6}}></Grid>
+                    <Grid size={{ xs: 12, md: 6 }}></Grid>
                   </Grid>
 
                   <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
@@ -768,7 +768,7 @@ export default function NewCreateQuotePdfTemplate() {
                     />
                   </div>
 
-                  <Grid size={{xs:12}} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Header
@@ -793,7 +793,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid size={{xs:12}} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Above Table
@@ -816,7 +816,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid size={{xs:12}} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Below Table
@@ -839,7 +839,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid size={{xs:12}} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Footer
@@ -863,7 +863,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                   </Grid>
-                  <Grid size={{xs:12}} className="mt-4">
+                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">
                         Tabel Summary Left Side

@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import Button from '@mui/material/Button';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, CircularProgress, Theme } from '@mui/material';
+import { Dialog, ListItemText, ListItem, List, ListItemIcon, Checkbox, TextField, Box, Theme } from '@mui/material';
 import { FcCancel } from 'react-icons/fc';
 import { AiOutlineClockCircle } from 'react-icons/ai';
 import { FcApproval } from 'react-icons/fc';
@@ -15,6 +14,7 @@ import DoaStepUsers from './DOAStepUsers';
 
 import Steps1 from 'src/components/Steps';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) => ({
   rejected: {
@@ -156,7 +156,7 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -262,19 +262,22 @@ const Steps = (props) => {
             </>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
+
+            <ThemeButton
+              buttonType='transparent'
+              onClick={closeManualDiaog}
+            >
               Cancel
-            </Button>
-            <Button
+            </ThemeButton>
+            <ThemeButton
+              buttonType='theme'
               disabled={!Boolean(selectedOption) || submitting}
               onClick={manualSendToCustomer}
-              color="primary"
-              size="small"
-              variant="contained"
-              endIcon={submitting && <CircularProgress size={20} />}
+              isLoading={submitting}
             >
               Save
-            </Button>
+            </ThemeButton>
+
           </CustomDialogFooter>
         </Dialog>
       )}
