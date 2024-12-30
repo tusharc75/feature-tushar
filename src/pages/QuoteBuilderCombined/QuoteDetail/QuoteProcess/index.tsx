@@ -747,9 +747,7 @@ export default function QuoteProcess(props) {
             }}
             disabled={!allowedToEdit || sendToLoading}
             startIcon={<BiMailSend />}
-            borderColor="none"
-            backgroundColor="theme"
-            textColor="white"
+            buttonType="theme"
           >
             {isMobile && !isTablet ? '' : `Send for DOA`}
           </ThemeButton>
@@ -762,9 +760,7 @@ export default function QuoteProcess(props) {
                   handleOfferToCustomer();
                 }}
                 disabled={!allowedToEdit || sendToLoading}
-                borderColor="none"
-                backgroundColor="theme"
-                textColor="white"
+                buttonType="theme"
               >
                 {isMobile && !isTablet ? '' : `Process Quote`}
               </ThemeButton>
@@ -780,7 +776,7 @@ export default function QuoteProcess(props) {
       <div className={`subDetailModule pt-[12px] `}>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <Grid container className="position-relative">
-            <Grid size={{xs:12, sm:12, md:12}} className="mt-1">
+            <Grid size={{ xs: 12, sm: 12, md: 12 }} className="mt-1">
               <Steps
                 steps={DOAneeded ? DOASteps : OtherSteps}
                 currentStep={

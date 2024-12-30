@@ -1,6 +1,14 @@
-import { Button, IconButton } from '@mui/material';
-import { isMobile } from 'react-device-detect';
+import { AddOutlined, ExpandMore } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import axios, { CancelTokenSource } from 'axios';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -8,16 +16,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
-import { AddOutlined, ExpandMore } from '@mui/icons-material';
-import { Menu, MenuItem, Box } from '@mui/material';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import axios, { CancelTokenSource } from 'axios';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const CustomReport = () => {
   const renderedFrom = 'custom-report';
@@ -190,8 +189,8 @@ const CustomReport = () => {
             <div className="flex flex-wrap justify-end gap-[8px]">
               <div className="flex flex-wrap items-center gap-[8px]">
                 <ThemeButton
-                 mobileTooltip="Add"
-                 iconForMobile={<AddOutlined />}
+                  mobileTooltip="Add"
+                  iconForMobile={<AddOutlined />}
                   onClick={() => {
                     setShowManageDialog({ open: true, id: null });
                   }}
@@ -201,8 +200,7 @@ const CustomReport = () => {
                 </ThemeButton>
                 <ThemeButton
                   mobileTooltip="Actions"
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                   iconForMobile={<ExpandMore />}
                   onClick={openActions}
                   endIcon={<ExpandMore />}

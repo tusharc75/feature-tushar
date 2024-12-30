@@ -4,7 +4,7 @@ import '../sidebar.scss';
 function CustomButton(props) {
   const { loading, children, disabled, ...rest } = props;
   return (
-    <ThemeButton {...rest} disabled={disabled} borderColor="none" backgroundColor="theme" textColor="white" isLoading={loading}>
+    <ThemeButton {...rest} disabled={disabled} buttonType="theme" isLoading={loading}>
       {children}
     </ThemeButton>
   );

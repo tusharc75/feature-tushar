@@ -189,11 +189,11 @@ const WellNumber = ({ wellName }) => {
     <Fragment>
       <Box p={1} pb={2}>
         <Grid container>
-          <Grid size={{xs:3, md:3, sm:3}}>
+          <Grid size={{ xs: 3, md: 3, sm: 3 }}>
             {permissions?.wellNumber?.isCreate && (
               <ThemeButton
-              mobileTooltip="Add"
-              iconForMobile={<AddOutlined />}
+                mobileTooltip="Add"
+                iconForMobile={<AddOutlined />}
                 onClick={() => {
                   setOpenDialog({ open: true, id: null });
                 }}
@@ -203,13 +203,12 @@ const WellNumber = ({ wellName }) => {
               </ThemeButton>
             )}
           </Grid>
-          <Grid size={{xs:9, md:9, sm:9}}>
+          <Grid size={{ xs: 9, md: 9, sm: 9 }}>
             {permissions?.wellNumber?.isDelete && (
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
                 <ThemeButton
                   mobileTooltip="Actions"
-                  borderColor="yellow"
-                  backgroundColor="yellow"
+                  buttonType="yellow"
                   iconForMobile={<ExpandMore />}
                   onClick={openActions}
                   disabled={selectedRecords.length === 0}

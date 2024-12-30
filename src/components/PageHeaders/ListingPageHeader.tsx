@@ -219,9 +219,7 @@ const ListingPageHeader = ({
                 {isAddButtonVisible ? (
                   <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
                     <ThemeButton
-                      borderColor="none"
-                      backgroundColor="theme"
-                      textColor="white"
+                      buttonType="theme"
                       id={showSearchInMobile ? 'dialog-add-button' : 'add-button'}
                       disabled={addButtonDisabled}
                       {...restOfAddButtonProps}
@@ -252,8 +250,7 @@ const ListingPageHeader = ({
                         {...restOfActionButtonProps}
                         onClick={openActions}
                         aria-controls="action-menu"
-                        borderColor="yellow"
-                        backgroundColor="yellow"
+                        buttonType="yellow"
                         endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
                         iconForMobile={<FaCircleChevronDown size={16} />}
                         isLoading={actionButtonLoading}

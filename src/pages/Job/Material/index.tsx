@@ -271,7 +271,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
             iconForMobile={<AddIcon />}
             onClick={() => setAddDialog({ open: true, type: 'serializedAsset' })}
             startIcon={<AddIcon />}
-            >
+          >
             Add
           </ThemeButton>
         </Box>
@@ -283,8 +283,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
               >
                 Actions
               </ThemeButton>

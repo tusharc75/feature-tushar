@@ -108,9 +108,7 @@ const AsynImportExportMenu = ({
             <ThemeButton
               onClick={(e) => handleClick(e)}
               endIcon={<ArrowDropDownIcon />}
-              borderColor="none"
-              backgroundColor="theme"
-              textColor="white"
+              buttonType="theme"
               aria-controls="simple-menu"
               aria-haspopup="true"
             >

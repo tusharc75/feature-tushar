@@ -582,9 +582,7 @@ const AddSerializedAsset = ({
 
                     <ThemeButton
                       iconForMobile={<Add />}
-                      borderColor="none"
-                      backgroundColor="theme"
-                      textColor="white"
+                      buttonType="theme"
                       tooltip={
                         selectedRecords?.length !== 0 && !checkUniqWarehouse()
                           ? 'Direct transfer to customer location'

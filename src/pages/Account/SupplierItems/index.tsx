@@ -220,8 +220,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               mobileTooltip="Actions"
               disabled={selectedRecords.length === 0}
               endIcon={<ExpandMore />}
-              borderColor="yellow"
-              backgroundColor="yellow"
+              buttonType="yellow"
             >
               Actions
             </ThemeButton>

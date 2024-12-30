@@ -288,7 +288,12 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
         {allowedToEdit && permissions?.creditMemo?.isCreate && (
-          <ThemeButton startIcon={<Add />} iconForMobile={<Add />} mobileTooltip='Create' onClick={() => setCreditMemoDialog({ open: true, id: null })}>
+          <ThemeButton
+            startIcon={<Add />}
+            iconForMobile={<Add />}
+            mobileTooltip="Create"
+            onClick={() => setCreditMemoDialog({ open: true, id: null })}
+          >
             Create
           </ThemeButton>
         )}
@@ -300,9 +305,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
               mobileTooltip="Actions"
-              borderColor="yellow"
-              backgroundColor="yellow"
-              iconForMobile={<ArrowDropDownIcon />}            >
+              buttonType="yellow"
+              iconForMobile={<ArrowDropDownIcon />}
+            >
               {'Actions'}
             </ThemeButton>
           )}

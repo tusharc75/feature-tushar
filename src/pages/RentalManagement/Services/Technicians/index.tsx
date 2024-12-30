@@ -372,8 +372,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
             <Box display="flex" ml={1}>
               <ThemeButton
                 mobileTooltip="Actions"
-                borderColor="yellow"
-                backgroundColor="yellow"
+                buttonType="yellow"
                 iconForMobile={<BiChevronDown />}
                 id="demo-positioned-button"
                 onClick={handleClick}
@@ -418,7 +417,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           </Box>
         )}
         <Grid container spacing={2}>
-          <Grid size={{xs:12, md:12, sm:12}}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             {columns && dataRows ? (
               <CustomReactTable
                 height={'300px'}

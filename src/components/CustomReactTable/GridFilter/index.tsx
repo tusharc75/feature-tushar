@@ -402,8 +402,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         </CustomDialogContent>
         <CustomDialogFooter>
           <ThemeButton
-            borderColor="yellow"
-            backgroundColor="yellow"
+            buttonType="yellow"
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}

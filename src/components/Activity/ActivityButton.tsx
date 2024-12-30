@@ -26,14 +26,7 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
   return (
     <Fragment>
       <HideWhenOffline>
-        <ThemeButton
-          borderColor="none"
-          endIcon={<ArrowForwardIcon />}
-          id="collaborator-button"
-          onClick={() => setActivityShow(!showActivity)}
-          backgroundColor="theme"
-          textColor="white"
-        >
+        <ThemeButton endIcon={<ArrowForwardIcon />} id="collaborator-button" onClick={() => setActivityShow(!showActivity)} buttonType="theme">
           Workspace
         </ThemeButton>
       </HideWhenOffline>
