@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Chip, Dialog, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -19,6 +19,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { checkFormula } from 'src/constants/formulaUtility';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -346,9 +347,12 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                               {formulaError}{' '}
                             </Typography>
                           )}
-                          <Button size="small" onClick={() => handleCheckSyntax(values)} color="primary">
+                          <ThemeButton
+                            onClick={() => handleCheckSyntax(values)}
+                            buttonType='theme'
+                          >
                             Check Syntax
-                          </Button>
+                          </ThemeButton>
                         </Grid>
                       </Grid>
                       <Box>
@@ -373,29 +377,23 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={submitting}
+                <ThemeButton
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
+                  buttonType='transparent'
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={loading || submitting}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
+                </ThemeButton>
+                <ThemeButton
                   onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  disabled={loading || submitting}
+                  isLoading={submitting}
+                  buttonType='theme'
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

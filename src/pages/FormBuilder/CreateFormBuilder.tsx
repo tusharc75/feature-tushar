@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@mui/material/Grid2';
-import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
+import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -438,17 +438,14 @@ const CreateFormBuilder = () => {
                   <Grid size={{ xs: 3 }} container justifyContent="flex-end">
                     {permissions?.formBuilder?.isUpdate && (
                       <Box>
-                        <Button
-                          disabled={isUpdating}
-                          color="primary"
-                          size="small"
+                        <ThemeButton
                           onClick={handleSave}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
+                          disabled={isUpdating}
+                          isLoading={isUpdating}
+                          buttonType='theme'
                         >
-                          {isMobile && !isTablet ? <RiSaveFill size={24} /> : 'Save'}
-                          {isUpdating && <CircularProgress size={24} />}
-                        </Button>
+                          Save
+                        </ThemeButton>
                       </Box>
                     )}
                     <ThemeButton
