@@ -6,7 +6,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import DashboardModal from 'src/components/DashboardModal';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
