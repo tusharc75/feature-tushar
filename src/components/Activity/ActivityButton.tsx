@@ -27,7 +27,7 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
     <Fragment>
       <HideWhenOffline>
         <ThemeButton
-          borderColor="theme"
+          borderColor="none"
           endIcon={<ArrowForwardIcon />}
           id="collaborator-button"
           onClick={() => setActivityShow(!showActivity)}

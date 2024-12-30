@@ -1,5 +1,4 @@
-import { MenuProps } from '@aws-amplify/ui-react';
-import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps } from '@mui/material';
+import { ButtonProps, IconButtonProps, Menu, MenuItem, MenuItemProps, MenuProps } from '@mui/material';
 import React from 'react';
 import { BiChevronDown } from 'react-icons/bi';
 import { ThemeButtonProps, ThemeButton } from 'src/components/Helpers/Buttons';

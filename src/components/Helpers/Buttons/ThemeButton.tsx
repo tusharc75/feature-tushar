@@ -54,7 +54,16 @@ const getButtonStyle = ({
   sx = {}
 }: GetButtonStyle): ButtonProps => {
   const buttonProps: ButtonProps = {
-    sx: { height: '32px', fontSize: '13px', gap: '5px', '& .MuiButton-icon': { margin: 0 }, fontWeight: 500, ...sx }
+    sx: {
+      height: '32px',
+      fontSize: '13px',
+      gap: '5px',
+      '& .MuiButton-icon': { margin: 0 },
+      '& .MuiButton-endIcon': { marginRight: '-5px' },
+      '& .MuiButton-startIcon': { marginLeft: '-5px' },
+      fontWeight: 500,
+      ...sx
+    }
   };
 
   switch (backgroundColor) {
@@ -62,6 +71,8 @@ const getButtonStyle = ({
       buttonProps.variant = 'outlined';
       buttonProps.sx = {
         ...buttonProps.sx,
+        fontSize: '14.7px',
+        lineHeight: '17px',
         ...(mode === 'dark' ? { background: 'var(--dark-primary, white)' } : { background: 'var(--dark-secondary, white)' })
       };
       break;
@@ -79,7 +90,16 @@ const getButtonStyle = ({
       break;
     }
     case 'theme': {
-      buttonProps.sx = { ...buttonProps.sx, background: 'var(--new-theme-color)' };
+      buttonProps.sx = {
+        ...buttonProps.sx,
+        background: 'var(--new-theme-color)',
+        '&:hover': {
+          backgroundColor: 'var(--new-theme-color-hover)'
+        },
+        '&:disabled': {
+          backgroundColor: 'var(--new-theme-color-hover)'
+        }
+      };
       buttonProps.variant = 'contained';
       buttonProps.sx = { ...buttonProps.sx, padding: '4px 10px' };
       break;
@@ -131,7 +151,7 @@ const getButtonStyle = ({
       break;
     }
     case 'white': {
-      buttonProps.sx = { ...buttonProps.sx, color: 'white' };
+      buttonProps.sx = { ...buttonProps.sx, color: 'white', '&:disabled': { color: 'white' } };
       break;
     }
     case 'theme': {
