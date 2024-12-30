@@ -15,7 +15,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, isEmpty, startCase } from 'lodash';
+import { camelCase, isEmpty, isObject, startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -420,7 +420,11 @@ const ChartTypes = ({
                                   label += ': ';
                                 }
                                 if (chart?.percentage) {
-                                  label += `${context.parsed}%`;
+                                  if (isObject(context?.parsed)) {
+                                    label += `${context?.formattedValue}%`;
+                                  } else {
+                                    label += `${context.parsed}%`;
+                                  }
                                 } else {
                                   let parseValue = context?.parsed?.y;
                                   if (chart?.kpi?.horizontalBar) {
