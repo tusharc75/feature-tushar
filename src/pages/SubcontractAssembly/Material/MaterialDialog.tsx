@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -115,30 +116,23 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={loading}
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={loading}
-                  id={'edit-subcontract-material-button'}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
                   onClick={submitForm}
-                  endIcon={loading && <CircularProgress color="inherit" size={18} />}
+                  isLoading={loading}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
