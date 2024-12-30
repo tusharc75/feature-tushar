@@ -19,7 +19,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export type BrandData = {
   companyName: string;

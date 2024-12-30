@@ -11,7 +11,6 @@ import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
