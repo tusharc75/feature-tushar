@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { isArray, isEqual } from 'lodash';
 import moment from 'moment';
@@ -23,6 +23,7 @@ import {
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -140,29 +141,23 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  disabled={loading}
+                <ThemeButton
+                  buttonType='transparent'
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
+                </ThemeButton>
+                <ThemeButton
+                  buttonType='theme'
                   disabled={loading}
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  size="small"
                   onClick={submitForm}
-                  endIcon={loading && <CircularProgress color="inherit" size={18} />}
+                  isLoading={loading}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

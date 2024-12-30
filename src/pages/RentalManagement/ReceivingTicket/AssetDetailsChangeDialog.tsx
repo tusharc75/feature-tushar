@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+
 import Grid from '@mui/material/Grid2';
 import {
   CustomDialogTransition,
@@ -17,13 +17,14 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from 'src/axios/axiosInstance';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isArray, isEqual, isString } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 import { useData } from 'src/StateProvider/Provider';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export default function AssetDetailsChangeDialog({
   onClose,
@@ -391,19 +392,19 @@ export default function AssetDetailsChangeDialog({
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
-                                  <Grid key={field.fieldName} size={{xs:12, sm:12, md:12}}>
+                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 12, md: 12 }}>
                                     <FormTypes
                                       {...field}
                                       fieldData={{
                                         ...field,
                                         isWarningTooltip:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? true
                                             : field?.isWarningTooltip,
                                         warningTooltipMessage:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? `Auto Increment (Previous Value ${autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0})`
                                             : field?.warningTooltipMessage
                                       }}
@@ -437,31 +438,26 @@ export default function AssetDetailsChangeDialog({
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
+                <ThemeButton
+                  buttonType='transparent'
                   id={'asset-details-change-dialog-cancel-button'}
-                  disabled={submitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
-                  disabled={submitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  type="submit"
-                  onClick={submitForm}
+                </ThemeButton>
+                <ThemeButton
                   id={'asset-details-change-dialog-save-button'}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  buttonType='theme'
+                  disabled={submitting}
+                  onClick={submitForm}
+                  isLoading={submitting}
                 >
-                  {' '}
                   Save
-                </Button>
+                </ThemeButton>
+
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog
